@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
+import { useNavigate } from "react-router-dom";
 
 const Navigation = () => {
+  const navigate = useNavigate();
+  
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-morphism border-b border-ocean-border">
       <div className="container mx-auto px-6 py-4">
@@ -29,8 +32,8 @@ const Navigation = () => {
           </div>
           
           <div className="flex items-center space-x-4">
-            <Button variant="ghost">Sign In</Button>
-            <Button variant="hero" size="lg">Get Started</Button>
+            <Button variant="ghost" onClick={() => navigate("/auth")}>Sign In</Button>
+            <Button variant="hero" size="lg" onClick={() => navigate("/auth")}>Get Started</Button>
           </div>
         </div>
       </div>
