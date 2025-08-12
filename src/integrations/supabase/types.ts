@@ -14,7 +14,236 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          created_at: string
+          data_room_url: string | null
+          description: string | null
+          founded_year: number | null
+          funding_amount: number | null
+          id: string
+          industry: string | null
+          location: string | null
+          logo_url: string | null
+          looking_for: string[] | null
+          name: string
+          pitch_deck_url: string | null
+          stage: string | null
+          tags: string[] | null
+          team_size: number | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          data_room_url?: string | null
+          description?: string | null
+          founded_year?: number | null
+          funding_amount?: number | null
+          id?: string
+          industry?: string | null
+          location?: string | null
+          logo_url?: string | null
+          looking_for?: string[] | null
+          name: string
+          pitch_deck_url?: string | null
+          stage?: string | null
+          tags?: string[] | null
+          team_size?: number | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          data_room_url?: string | null
+          description?: string | null
+          founded_year?: number | null
+          funding_amount?: number | null
+          id?: string
+          industry?: string | null
+          location?: string | null
+          logo_url?: string | null
+          looking_for?: string[] | null
+          name?: string
+          pitch_deck_url?: string | null
+          stage?: string | null
+          tags?: string[] | null
+          team_size?: number | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
+      feed_posts: {
+        Row: {
+          comments_count: number | null
+          company_id: string | null
+          content: string
+          created_at: string
+          id: string
+          likes_count: number | null
+          media_urls: string[] | null
+          post_type: string | null
+          tags: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          comments_count?: number | null
+          company_id?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          likes_count?: number | null
+          media_urls?: string[] | null
+          post_type?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          comments_count?: number | null
+          company_id?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          likes_count?: number | null
+          media_urls?: string[] | null
+          post_type?: string | null
+          tags?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_posts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      follows: {
+        Row: {
+          created_at: string
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      partners: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          logo_url: string
+          name: string
+          order_index: number | null
+          tier: string | null
+          website: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          logo_url: string
+          name: string
+          order_index?: number | null
+          tier?: string | null
+          website?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          logo_url?: string
+          name?: string
+          order_index?: number | null
+          tier?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          company_name: string | null
+          created_at: string
+          email: string
+          focus_areas: string[] | null
+          full_name: string | null
+          id: string
+          investment_thesis: string | null
+          linkedin_url: string | null
+          location: string | null
+          portfolio_companies: string[] | null
+          position: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          twitter_url: string | null
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          company_name?: string | null
+          created_at?: string
+          email: string
+          focus_areas?: string[] | null
+          full_name?: string | null
+          id?: string
+          investment_thesis?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          portfolio_companies?: string[] | null
+          position?: string | null
+          role: Database["public"]["Enums"]["user_role"]
+          twitter_url?: string | null
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          company_name?: string | null
+          created_at?: string
+          email?: string
+          focus_areas?: string[] | null
+          full_name?: string | null
+          id?: string
+          investment_thesis?: string | null
+          linkedin_url?: string | null
+          location?: string | null
+          portfolio_companies?: string[] | null
+          position?: string | null
+          role?: Database["public"]["Enums"]["user_role"]
+          twitter_url?: string | null
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +252,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: "startup" | "advisor" | "investor" | "student"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +379,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      user_role: ["startup", "advisor", "investor", "student"],
+    },
   },
 } as const
