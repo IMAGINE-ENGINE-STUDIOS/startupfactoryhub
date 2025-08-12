@@ -1,209 +1,251 @@
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Rocket, Mail, Lock, User, Building, GraduationCap, Users, DollarSign } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
+import { Rocket, Mail, Lock, User, UserCheck } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
-const Auth = () => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [userRole, setUserRole] = useState("");
+export default function Auth() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [role, setRole] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const { signIn, signUp } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
-  const handleSignup = async (e: React.FormEvent) => {
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    // TODO: Implement Supabase signup
-    setTimeout(() => {
-      setIsLoading(false);
-      if (userRole === "startup") {
-        navigate("/profile-setup");
-      } else {
-        navigate("/mentor-setup");
-      }
-    }, 1000);
-  };
+    setLoading(true);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    // TODO: Implement Supabase login and check user role
-    setTimeout(() => {
-      setIsLoading(false);
-      // For demo purposes, navigate based on userRole or default to startup dashboard
-      navigate("/dashboard");
-    }, 1000);
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case "startup": return <Rocket className="w-5 h-5" />;
-      case "mentor": return <Users className="w-5 h-5" />;
-      case "investor": return <DollarSign className="w-5 h-5" />;
-      case "student": return <GraduationCap className="w-5 h-5" />;
-      default: return <User className="w-5 h-5" />;
+    const { error } = await signIn(email, password);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Welcome back!",
+        description: "You have been signed in successfully.",
+      });
+      navigate('/dashboard');
     }
+    
+    setLoading(false);
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    if (!role) {
+      toast({
+        title: "Error",
+        description: "Please select your role",
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
+
+    const { error } = await signUp(email, password, fullName, role);
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Account created!",
+        description: "Please check your email to verify your account.",
+      });
+    }
+    
+    setLoading(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero flex items-center justify-center p-6">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <div className="w-12 h-12 bg-gradient-primary rounded-xl flex items-center justify-center">
-              <Rocket className="w-6 h-6 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Animated background */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+      </div>
+      
+      {/* Theme toggle */}
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      
+      {/* Back to home */}
+      <Link to="/" className="absolute top-4 left-4">
+        <Button variant="ghost" className="neon-glow">
+          <Rocket className="h-4 w-4 mr-2" />
+          Back to Home
+        </Button>
+      </Link>
+
+      <div className="w-full max-w-md relative z-10">
+        <Card className="tech-card border-0">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <div className="p-3 rounded-full bg-gradient-primary">
+                <Rocket className="h-8 w-8 text-primary-foreground" />
+              </div>
             </div>
-          </div>
-          <h1 className="text-3xl font-bold text-foreground">Join Startup Factory</h1>
-          <p className="text-muted-foreground mt-2">Connect with mentors, investors, and fellow founders</p>
-        </div>
-
-        <Card className="glass-morphism border-ocean-border">
-          <Tabs defaultValue="signup" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
-              <TabsTrigger value="login">Login</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="signup">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Create Account</CardTitle>
-                <CardDescription>Start your startup journey today</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div>
-                    <Label htmlFor="userRole">I am a...</Label>
-                    <Select value={userRole} onValueChange={setUserRole}>
-                      <SelectTrigger className="mt-2">
-                        <SelectValue placeholder="Select your role" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="startup">
-                          <div className="flex items-center space-x-2">
-                            <Rocket className="w-4 h-4" />
-                            <span>Startup Founder</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="mentor">
-                          <div className="flex items-center space-x-2">
-                            <Users className="w-4 h-4" />
-                            <span>Mentor/Advisor</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="investor">
-                          <div className="flex items-center space-x-2">
-                            <DollarSign className="w-4 h-4" />
-                            <span>Investor</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="student">
-                          <div className="flex items-center space-x-2">
-                            <GraduationCap className="w-4 h-4" />
-                            <span>Student/Intern</span>
-                          </div>
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <Label htmlFor="firstName">First Name</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input id="firstName" placeholder="John" className="pl-10" required />
-                      </div>
-                    </div>
-                    <div>
-                      <Label htmlFor="lastName">Last Name</Label>
-                      <div className="relative">
-                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input id="lastName" placeholder="Doe" className="pl-10" required />
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="email">Email</Label>
+            <CardTitle className="text-2xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Startup Factory Hub
+            </CardTitle>
+            <CardDescription>
+              Join the future of startup acceleration
+            </CardDescription>
+          </CardHeader>
+          
+          <CardContent>
+            <Tabs defaultValue="signin" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="signin">Sign In</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="signin">
+                <form onSubmit={handleSignIn} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-email">Email</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input id="email" type="email" placeholder="john@example.com" className="pl-10" required />
+                      <Input
+                        id="signin-email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
                     </div>
                   </div>
                   
-                  {userRole === "startup" && (
-                    <div>
-                      <Label htmlFor="company">Company Name</Label>
-                      <div className="relative">
-                        <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input id="company" placeholder="Your Startup" className="pl-10" required />
-                      </div>
-                    </div>
-                  )}
-                  
-                  {userRole === "mentor" && (
-                    <div>
-                      <Label htmlFor="currentCompany">Current Company</Label>
-                      <div className="relative">
-                        <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                        <Input id="currentCompany" placeholder="Ex-Google, Current Advisor" className="pl-10" />
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div>
-                    <Label htmlFor="password">Password</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="signin-password">Password</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input id="password" type="password" placeholder="••••••••" className="pl-10" required />
+                      <Input
+                        id="signin-password"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
                     </div>
                   </div>
                   
-                  <Button type="submit" className="w-full" variant="hero" disabled={isLoading || !userRole}>
-                    {isLoading ? "Creating Account..." : "Create Account"}
+                  <Button 
+                    type="submit" 
+                    className="w-full pulse-primary"
+                    disabled={loading}
+                  >
+                    {loading ? 'Signing In...' : 'Sign In'}
                   </Button>
                 </form>
-              </CardContent>
-            </TabsContent>
-
-            <TabsContent value="login">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Welcome Back</CardTitle>
-                <CardDescription>Sign in to your account</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div>
-                    <Label htmlFor="loginEmail">Email</Label>
+              </TabsContent>
+              
+              <TabsContent value="signup">
+                <form onSubmit={handleSignUp} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-name">Full Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="signup-name"
+                        type="text"
+                        placeholder="Enter your full name"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-email">Email</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input id="loginEmail" type="email" placeholder="john@example.com" className="pl-10" required />
+                      <Input
+                        id="signup-email"
+                        type="email"
+                        placeholder="Enter your email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
                     </div>
                   </div>
                   
-                  <div>
-                    <Label htmlFor="loginPassword">Password</Label>
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-password">Password</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input id="loginPassword" type="password" placeholder="••••••••" className="pl-10" required />
+                      <Input
+                        id="signup-password"
+                        type="password"
+                        placeholder="Enter your password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        className="pl-10"
+                        required
+                      />
                     </div>
                   </div>
                   
-                  <Button type="submit" className="w-full" variant="hero" disabled={isLoading}>
-                    {isLoading ? "Signing In..." : "Sign In"}
+                  <div className="space-y-2">
+                    <Label htmlFor="signup-role">Role</Label>
+                    <div className="relative">
+                      <UserCheck className="absolute left-3 top-3 h-4 w-4 text-muted-foreground z-10" />
+                      <Select value={role} onValueChange={setRole} required>
+                        <SelectTrigger className="pl-10">
+                          <SelectValue placeholder="Select your role" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="startup">Startup Founder</SelectItem>
+                          <SelectItem value="advisor">Advisor/Mentor</SelectItem>
+                          <SelectItem value="investor">Investor</SelectItem>
+                          <SelectItem value="student">Student</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  
+                  <Button 
+                    type="submit" 
+                    className="w-full pulse-primary"
+                    disabled={loading}
+                  >
+                    {loading ? 'Creating Account...' : 'Create Account'}
                   </Button>
                 </form>
-              </CardContent>
-            </TabsContent>
-          </Tabs>
+              </TabsContent>
+            </Tabs>
+          </CardContent>
         </Card>
       </div>
     </div>
   );
-};
-
-export default Auth;
+}
