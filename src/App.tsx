@@ -8,7 +8,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ProfileSetup from "./pages/ProfileSetup";
-import Dashboard from "./pages/Dashboard";
+import DashboardRouter from "./components/DashboardRouter";
 import MentorDashboard from "./pages/MentorDashboard";
 import StartupProfile from "./pages/StartupProfile";
 import FeedDashboard from "./pages/FeedDashboard";
@@ -32,7 +32,7 @@ const App = () => (
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile-setup" element={<ProfileSetup />} />
               <Route path="/mentor-setup" element={<ProfileSetup />} />
-              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/dashboard" element={<DashboardRouter />} />
               <Route path="/mentor-dashboard" element={<MentorDashboard />} />
               <Route path="/feed" element={<FeedDashboard />} />
               <Route path="/advisor-dashboard" element={<AdvisorDashboard />} />

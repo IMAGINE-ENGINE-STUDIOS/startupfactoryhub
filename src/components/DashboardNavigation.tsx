@@ -9,6 +9,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Rocket, 
   Home, 
@@ -24,6 +26,25 @@ import {
 
 const DashboardNavigation = () => {
   const navigate = useNavigate();
+  const { user, signOut } = useAuth();
+  const { toast } = useToast();
+
+  const handleLogout = async () => {
+    const { error } = await signOut();
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed out",
+        description: "You have been signed out successfully.",
+      });
+      navigate("/");
+    }
+  };
 
   return (
     <nav className="bg-background/80 backdrop-blur-sm border-b border-ocean-border sticky top-0 z-50">
@@ -39,11 +60,19 @@ const DashboardNavigation = () => {
 
           {/* Navigation Links */}
           <div className="hidden md:flex items-center space-x-6">
-            <Button variant="ghost" className="flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              className="flex items-center space-x-2"
+              onClick={() => navigate("/dashboard")}
+            >
               <Home className="w-4 h-4" />
               <span>Dashboard</span>
             </Button>
-            <Button variant="ghost" className="flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              className="flex items-center space-x-2"
+              onClick={() => navigate("/feed")}
+            >
               <Users className="w-4 h-4" />
               <span>Community</span>
             </Button>
@@ -87,9 +116,11 @@ const DashboardNavigation = () => {
               <DropdownMenuContent className="w-56" align="end" forceMount>
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">John Doe</p>
+                    <p className="text-sm font-medium leading-none">
+                      {user?.user_metadata?.full_name || user?.email || "User"}
+                    </p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      john@example.com
+                      {user?.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
@@ -103,7 +134,7 @@ const DashboardNavigation = () => {
                   <span>Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate("/")}>
+                <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
                 </DropdownMenuItem>

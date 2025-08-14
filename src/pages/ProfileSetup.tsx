@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,13 +8,39 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Building, MapPin, Users, DollarSign, Target, Plus, X } from "lucide-react";
 
 const ProfileSetup = () => {
   const [step, setStep] = useState(1);
   const [skills, setSkills] = useState<string[]>([]);
   const [currentSkill, setCurrentSkill] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    company_name: "",
+    bio: "",
+    industry: "",
+    location: "",
+    website: "",
+    stage: "",
+    team_size: "",
+    funding_status: "",
+    trl_level: "",
+    goals: [] as string[],
+    looking_for: ""
+  });
+  
+  const { user } = useAuth();
+  const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/auth");
+    }
+  }, [user, navigate]);
 
   const addSkill = () => {
     if (currentSkill.trim() && !skills.includes(currentSkill.trim())) {
@@ -27,11 +53,101 @@ const ProfileSetup = () => {
     setSkills(skills.filter(s => s !== skill));
   };
 
+  const updateFormData = (field: string, value: any) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const toggleGoal = (goal: string) => {
+    setFormData(prev => ({
+      ...prev,
+      goals: prev.goals.includes(goal) 
+        ? prev.goals.filter(g => g !== goal)
+        : [...prev.goals, goal]
+    }));
+  };
+
+  const saveProfile = async () => {
+    if (!user) return;
+    
+    setLoading(true);
+    try {
+      // Check if profile exists
+      const { data: existingProfile } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      const profileData = {
+        user_id: user.id,
+        email: user.email || '',
+        full_name: user.user_metadata?.full_name || '',
+        role: user.user_metadata?.role || 'startup',
+        company_name: formData.company_name,
+        bio: formData.bio,
+        location: formData.location,
+        website: formData.website,
+      };
+
+      if (existingProfile) {
+        const { error } = await supabase
+          .from('profiles')
+          .update(profileData)
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('profiles')
+          .insert([profileData]);
+
+        if (error) throw error;
+      }
+
+      // Create or update company profile if startup
+      if (user.user_metadata?.role === 'startup') {
+        const companyData = {
+          user_id: user.id,
+          name: formData.company_name,
+          description: formData.bio,
+          industry: formData.industry,
+          stage: formData.stage,
+          location: formData.location,
+          website: formData.website,
+          team_size: parseInt(formData.team_size) || null,
+          tags: skills,
+          looking_for: formData.goals
+        };
+
+        const { error: companyError } = await supabase
+          .from('companies')
+          .upsert([companyData]);
+
+        if (companyError) throw companyError;
+      }
+
+      toast({
+        title: "Profile saved!",
+        description: "Your profile has been updated successfully.",
+      });
+
+      navigate("/dashboard");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleNext = () => {
     if (step < 3) {
       setStep(step + 1);
     } else {
-      navigate("/dashboard");
+      saveProfile();
     }
   };
 
@@ -60,10 +176,23 @@ const ProfileSetup = () => {
             {step === 1 && (
               <>
                 <div>
+                  <Label htmlFor="companyName">Company Name</Label>
+                  <Input 
+                    id="companyName" 
+                    placeholder="Your company name"
+                    value={formData.company_name}
+                    onChange={(e) => updateFormData('company_name', e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
+                
+                <div>
                   <Label htmlFor="companyDescription">Company Description</Label>
                   <Textarea 
                     id="companyDescription" 
                     placeholder="Describe what your startup does..."
+                    value={formData.bio}
+                    onChange={(e) => updateFormData('bio', e.target.value)}
                     className="mt-2"
                     rows={4}
                   />
@@ -72,7 +201,7 @@ const ProfileSetup = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <Label htmlFor="industry">Industry</Label>
-                    <Select>
+                    <Select value={formData.industry} onValueChange={(value) => updateFormData('industry', value)}>
                       <SelectTrigger className="mt-2">
                         <SelectValue placeholder="Select industry" />
                       </SelectTrigger>
@@ -93,14 +222,26 @@ const ProfileSetup = () => {
                     <Label htmlFor="location">Location</Label>
                     <div className="relative mt-2">
                       <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Input id="location" placeholder="City, Country" className="pl-10" />
+                      <Input 
+                        id="location" 
+                        placeholder="City, Country" 
+                        value={formData.location}
+                        onChange={(e) => updateFormData('location', e.target.value)}
+                        className="pl-10" 
+                      />
                     </div>
                   </div>
                 </div>
 
                 <div>
                   <Label htmlFor="website">Website/Demo URL</Label>
-                  <Input id="website" placeholder="https://yourcompany.com" className="mt-2" />
+                  <Input 
+                    id="website" 
+                    placeholder="https://yourcompany.com" 
+                    value={formData.website}
+                    onChange={(e) => updateFormData('website', e.target.value)}
+                    className="mt-2" 
+                  />
                 </div>
               </>
             )}
@@ -109,7 +250,7 @@ const ProfileSetup = () => {
               <>
                 <div>
                   <Label>Startup Stage</Label>
-                  <Select>
+                  <Select value={formData.stage} onValueChange={(value) => updateFormData('stage', value)}>
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="Select your current stage" />
                     </SelectTrigger>
@@ -128,7 +269,7 @@ const ProfileSetup = () => {
                     <Label htmlFor="teamSize">Team Size</Label>
                     <div className="relative mt-2">
                       <Users className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Select>
+                      <Select value={formData.team_size} onValueChange={(value) => updateFormData('team_size', value)}>
                         <SelectTrigger className="pl-10">
                           <SelectValue placeholder="Select size" />
                         </SelectTrigger>
@@ -147,7 +288,7 @@ const ProfileSetup = () => {
                     <Label htmlFor="funding">Funding Status</Label>
                     <div className="relative mt-2">
                       <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                      <Select>
+                      <Select value={formData.funding_status} onValueChange={(value) => updateFormData('funding_status', value)}>
                         <SelectTrigger className="pl-10">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
@@ -193,52 +334,59 @@ const ProfileSetup = () => {
                       "Network with other founders",
                       "Get customer feedback",
                       "Learn and develop skills"
-                    ].map((goal) => (
-                      <label key={goal} className="flex items-center space-x-2 cursor-pointer">
-                        <input type="checkbox" className="rounded border-ocean-border" />
-                        <span className="text-sm">{goal}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
+                     ].map((goal) => (
+                       <label key={goal} className="flex items-center space-x-2 cursor-pointer">
+                         <input 
+                           type="checkbox" 
+                           className="rounded border-ocean-border"
+                           checked={formData.goals.includes(goal)}
+                           onChange={() => toggleGoal(goal)}
+                         />
+                         <span className="text-sm">{goal}</span>
+                       </label>
+                     ))}
+                   </div>
+                 </div>
 
-                <div>
-                  <Label htmlFor="skills">Skills & Expertise</Label>
-                  <div className="mt-2 space-y-3">
-                    <div className="flex space-x-2">
-                      <Input
-                        placeholder="Add a skill..."
-                        value={currentSkill}
-                        onChange={(e) => setCurrentSkill(e.target.value)}
-                        onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
-                      />
-                      <Button onClick={addSkill} variant="outline" size="sm">
-                        <Plus className="w-4 h-4" />
-                      </Button>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {skills.map((skill) => (
-                        <Badge key={skill} variant="secondary" className="flex items-center gap-1">
-                          {skill}
-                          <X 
-                            className="w-3 h-3 cursor-pointer" 
-                            onClick={() => removeSkill(skill)}
-                          />
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                 <div>
+                   <Label htmlFor="skills">Skills & Expertise</Label>
+                   <div className="mt-2 space-y-3">
+                     <div className="flex space-x-2">
+                       <Input
+                         placeholder="Add a skill..."
+                         value={currentSkill}
+                         onChange={(e) => setCurrentSkill(e.target.value)}
+                         onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addSkill())}
+                       />
+                       <Button onClick={addSkill} variant="outline" size="sm">
+                         <Plus className="w-4 h-4" />
+                       </Button>
+                     </div>
+                     <div className="flex flex-wrap gap-2">
+                       {skills.map((skill) => (
+                         <Badge key={skill} variant="secondary" className="flex items-center gap-1">
+                           {skill}
+                           <X 
+                             className="w-3 h-3 cursor-pointer" 
+                             onClick={() => removeSkill(skill)}
+                           />
+                         </Badge>
+                       ))}
+                     </div>
+                   </div>
+                 </div>
 
-                <div>
-                  <Label htmlFor="lookingFor">What are you looking for most?</Label>
-                  <Textarea 
-                    id="lookingFor" 
-                    placeholder="Describe what you need help with right now..."
-                    className="mt-2"
-                    rows={3}
-                  />
-                </div>
+                 <div>
+                   <Label htmlFor="lookingFor">What are you looking for most?</Label>
+                   <Textarea 
+                     id="lookingFor" 
+                     placeholder="Describe what you need help with right now..."
+                     value={formData.looking_for}
+                     onChange={(e) => updateFormData('looking_for', e.target.value)}
+                     className="mt-2"
+                     rows={3}
+                   />
+                 </div>
               </>
             )}
 
@@ -253,8 +401,9 @@ const ProfileSetup = () => {
               <Button 
                 variant="hero" 
                 onClick={handleNext}
+                disabled={loading}
               >
-                {step === 3 ? "Complete Profile" : "Next"}
+                {loading ? "Saving..." : step === 3 ? "Complete Profile" : "Next"}
               </Button>
             </div>
           </CardContent>
