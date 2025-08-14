@@ -16,10 +16,7 @@ interface Investment {
   stage: string;
   industry: string;
   funding_amount: number;
-  profiles?: {
-    full_name: string;
-    avatar_url: string;
-  } | null;
+  user_id: string;
 }
 
 export default function InvestorDashboard() {
@@ -39,11 +36,13 @@ export default function InvestorDashboard() {
     const { data, error } = await supabase
       .from('companies')
       .select(`
-        *,
-        profiles (
-          full_name,
-          avatar_url
-        )
+        id,
+        name,
+        description,
+        stage,
+        industry,
+        funding_amount,
+        user_id
       `)
       .not('funding_amount', 'is', null)
       .limit(6);
@@ -57,11 +56,13 @@ export default function InvestorDashboard() {
     const { data, error } = await supabase
       .from('companies')
       .select(`
-        *,
-        profiles (
-          full_name,
-          avatar_url
-        )
+        id,
+        name,
+        description,
+        stage,
+        industry,
+        funding_amount,
+        user_id
       `)
       .limit(8);
 
@@ -152,14 +153,13 @@ export default function InvestorDashboard() {
                       <CardContent className="p-4">
                         <div className="flex items-start space-x-3 mb-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={investment.profiles?.avatar_url} />
                             <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                              {investment.profiles?.full_name?.charAt(0) || investment.name.charAt(0)}
+                              {investment.name.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-foreground truncate">{investment.name}</h3>
-                            <p className="text-xs text-muted-foreground">{investment.profiles?.full_name}</p>
+                            <p className="text-xs text-muted-foreground">Startup Founder</p>
                           </div>
                         </div>
                         
@@ -203,9 +203,8 @@ export default function InvestorDashboard() {
                     <div key={opportunity.id} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
                       <div className="flex items-center space-x-4">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={opportunity.profiles?.avatar_url} />
                           <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                            {opportunity.profiles?.full_name?.charAt(0) || opportunity.name.charAt(0)}
+                            {opportunity.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                         <div>

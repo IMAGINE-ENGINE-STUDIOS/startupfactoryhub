@@ -25,10 +25,7 @@ interface Startup {
   description: string;
   stage: string;
   industry: string;
-  profiles?: {
-    full_name: string;
-    avatar_url: string;
-  } | null;
+  user_id: string;
 }
 
 export default function StudentDashboard() {
@@ -45,11 +42,12 @@ export default function StudentDashboard() {
     const { data, error } = await supabase
       .from('companies')
       .select(`
-        *,
-        profiles (
-          full_name,
-          avatar_url
-        )
+        id,
+        name,
+        description,
+        stage,
+        industry,
+        user_id
       `)
       .limit(6);
 
@@ -254,14 +252,13 @@ export default function StudentDashboard() {
                       <CardContent className="p-4">
                         <div className="flex items-start space-x-3 mb-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={startup.profiles?.avatar_url} />
                             <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                              {startup.profiles?.full_name?.charAt(0) || startup.name.charAt(0)}
+                              {startup.name.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-foreground truncate">{startup.name}</h3>
-                            <p className="text-xs text-muted-foreground">{startup.profiles?.full_name}</p>
+                            <p className="text-xs text-muted-foreground">Startup Founder</p>
                           </div>
                         </div>
                         

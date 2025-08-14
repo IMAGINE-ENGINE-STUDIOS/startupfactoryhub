@@ -15,10 +15,7 @@ interface Startup {
   description: string;
   stage: string;
   industry: string;
-  profiles?: {
-    full_name: string;
-    avatar_url: string;
-  } | null;
+  user_id: string;
 }
 
 export default function AdvisorDashboard() {
@@ -54,11 +51,12 @@ export default function AdvisorDashboard() {
     const { data, error } = await supabase
       .from('companies')
       .select(`
-        *,
-        profiles (
-          full_name,
-          avatar_url
-        )
+        id,
+        name,
+        description,
+        stage,
+        industry,
+        user_id
       `)
       .limit(10);
 
@@ -143,14 +141,13 @@ export default function AdvisorDashboard() {
                       <CardContent className="p-4">
                         <div className="flex items-start space-x-3">
                           <Avatar className="h-10 w-10">
-                            <AvatarImage src={startup.profiles?.avatar_url} />
                             <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                              {startup.profiles?.full_name?.charAt(0) || startup.name.charAt(0)}
+                              {startup.name.charAt(0)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-sm text-foreground truncate">{startup.name}</h3>
-                            <p className="text-xs text-muted-foreground">{startup.profiles?.full_name}</p>
+                            <p className="text-xs text-muted-foreground">Startup Founder</p>
                             <div className="flex space-x-1 mt-2">
                               <Badge variant="secondary" className="text-xs">{startup.stage}</Badge>
                               <Badge variant="outline" className="text-xs">{startup.industry}</Badge>
@@ -245,9 +242,8 @@ export default function AdvisorDashboard() {
                     <div key={startup.id} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
                       <div className="flex items-center space-x-4">
                         <Avatar className="h-12 w-12">
-                          <AvatarImage src={startup.profiles?.avatar_url} />
                           <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                            {startup.profiles?.full_name?.charAt(0) || startup.name.charAt(0)}
+                            {startup.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>
                         <div>

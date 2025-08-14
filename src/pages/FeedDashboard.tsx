@@ -19,12 +19,6 @@ interface FeedPost {
   comments_count: number;
   post_type: string;
   tags: string[];
-  profiles?: {
-    full_name: string;
-    avatar_url: string;
-    role: string;
-    company_name: string;
-  } | null;
 }
 
 export default function FeedDashboard() {
@@ -41,15 +35,7 @@ export default function FeedDashboard() {
   const fetchPosts = async () => {
     const { data, error } = await supabase
       .from('feed_posts')
-      .select(`
-        *,
-        profiles (
-          full_name,
-          avatar_url,
-          role,
-          company_name
-        )
-      `)
+      .select('*')
       .order('created_at', { ascending: false })
       .limit(20);
 
@@ -170,9 +156,8 @@ export default function FeedDashboard() {
               <CardContent className="p-6">
                 <div className="flex space-x-4">
                   <Avatar className="h-12 w-12">
-                    <AvatarImage src={post.profiles?.avatar_url} />
                     <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                      {post.profiles?.full_name?.charAt(0) || 'U'}
+                      U
                     </AvatarFallback>
                   </Avatar>
                   
@@ -180,15 +165,12 @@ export default function FeedDashboard() {
                     <div className="flex items-center justify-between">
                       <div>
                         <h3 className="font-semibold text-foreground">
-                          {post.profiles?.full_name || 'Anonymous'}
+                          Anonymous User
                         </h3>
                         <div className="flex items-center space-x-2 text-sm text-muted-foreground">
                           <Badge variant="outline" className="text-xs">
-                            {post.profiles?.role || 'Member'}
+                            Member
                           </Badge>
-                          {post.profiles?.company_name && (
-                            <span>at {post.profiles.company_name}</span>
-                          )}
                           <span>•</span>
                           <span>{formatDate(post.created_at)}</span>
                         </div>
