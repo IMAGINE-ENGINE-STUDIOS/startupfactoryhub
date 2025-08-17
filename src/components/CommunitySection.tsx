@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Rocket, GraduationCap, DollarSign, Lightbulb } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const userTypes = [
   {
@@ -33,6 +34,7 @@ const userTypes = [
 ];
 
 const CommunitySection = () => {
+  const navigate = useNavigate();
   return (
     <section id="community" className="py-20 relative">
       <div className="container mx-auto px-6">
@@ -79,7 +81,11 @@ const CommunitySection = () => {
                     ))}
                   </ul>
                   
-                  <Button variant="glass" className="w-full">
+                  <Button 
+                    variant="glass" 
+                    className="w-full"
+                    onClick={() => navigate("/auth")}
+                  >
                     Join as {type.title}
                   </Button>
                 </div>

@@ -1,7 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Zap } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   return (
     <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Hexagonal background pattern */}
@@ -43,13 +47,22 @@ const HeroSection = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
-            <Button variant="hero" size="xl" className="group">
-              Start Your Journey
+            <Button 
+              variant="hero" 
+              size="xl" 
+              className="group"
+              onClick={() => navigate(user ? "/dashboard" : "/auth")}
+            >
+              {user ? "Go to Dashboard" : "Start Your Journey"}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
-            <Button variant="glass" size="xl">
+            <Button 
+              variant="glass" 
+              size="xl"
+              onClick={() => navigate("/feed")}
+            >
               <Zap className="w-5 h-5 mr-2" />
-              AI Demo
+              Explore Feed
             </Button>
           </div>
           
