@@ -11,6 +11,7 @@ import ProfileSetup from "./pages/ProfileSetup";
 import DashboardRouter from "./components/DashboardRouter";
 import StartupProfile from "./pages/StartupProfile";
 import SocialFeed from "./pages/SocialFeed";
+import GuestModeSelector from "./components/GuestModeSelector";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route path="/auth" element={<Auth />} />
               <Route path="/profile-setup" element={<ProfileSetup />} />
+              <Route path="/guest-mode" element={<GuestModeSelector />} />
               <Route path="/dashboard" element={<DashboardRouter />} />
               <Route path="/feed" element={<SocialFeed />} />
               <Route path="/profile" element={<StartupProfile />} />

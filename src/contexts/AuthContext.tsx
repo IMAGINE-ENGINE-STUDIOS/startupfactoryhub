@@ -9,6 +9,10 @@ interface AuthContextType {
   signUp: (email: string, password: string, fullName: string, role: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
   loading: boolean;
+  isGuest: boolean;
+  guestRole: string | null;
+  setGuestMode: (role: string) => void;
+  exitGuestMode: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -25,6 +29,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isGuest, setIsGuest] = useState(false);
+  const [guestRole, setGuestRole] = useState<string | null>(null);
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -73,7 +79,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     const { error } = await supabase.auth.signOut();
+    setIsGuest(false);
+    setGuestRole(null);
     return { error };
+  };
+
+  const setGuestMode = (role: string) => {
+    setIsGuest(true);
+    setGuestRole(role);
+  };
+
+  const exitGuestMode = () => {
+    setIsGuest(false);
+    setGuestRole(null);
   };
 
   const value = {
@@ -83,6 +101,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signUp,
     signOut,
     loading,
+    isGuest,
+    guestRole,
+    setGuestMode,
+    exitGuestMode,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

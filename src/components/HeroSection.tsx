@@ -59,10 +59,10 @@ const HeroSection = () => {
             <Button 
               variant="glass" 
               size="xl"
-              onClick={() => navigate("/feed")}
+              onClick={() => navigate("/guest-mode")}
             >
               <Zap className="w-5 h-5 mr-2" />
-              Explore Feed
+              Try as Guest
             </Button>
           </div>
           
