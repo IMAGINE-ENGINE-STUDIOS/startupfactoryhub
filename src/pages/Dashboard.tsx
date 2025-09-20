@@ -15,8 +15,10 @@ import NotificationCenter from '@/components/dashboard/NotificationCenter';
 import AchievementsBadges from '@/components/dashboard/AchievementsBadges';
 import StartupRoadmap from '@/components/StartupRoadmap';
 import CompanyProfileManager from '@/components/CompanyProfileManager';
-import MatchingSystem from '@/components/MatchingSystem';
+import RoleBasedMatching from '@/components/RoleBasedMatching';
 import EducationalResources from '@/components/EducationalResources';
+import InternshipBoard from '@/components/InternshipBoard';
+import ProfessionalBackground from '@/components/ProfessionalBackground';
 import { 
   Rocket, 
   TrendingUp, 
@@ -37,13 +39,31 @@ import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
+  const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!loading && !user) {
       navigate("/auth");
     }
+    if (user) {
+      fetchProfile();
+    }
   }, [user, loading, navigate]);
+
+  const fetchProfile = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!error && data) {
+      setProfile(data);
+    }
+  };
 
   if (loading) {
     return (
@@ -134,9 +154,9 @@ const Dashboard = () => {
         <Tabs defaultValue="overview" className="space-y-6">
           <TabsList className="grid w-full grid-cols-6 max-w-2xl">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="roadmap">Roadmap</TabsTrigger>
-            <TabsTrigger value="company">Company</TabsTrigger>
-            <TabsTrigger value="matching">Matching</TabsTrigger>
+            <TabsTrigger value="roadmap">Journey</TabsTrigger>
+            <TabsTrigger value="company">Profile</TabsTrigger>
+            <TabsTrigger value="matching">Connect</TabsTrigger>
             <TabsTrigger value="resources">Learn</TabsTrigger>
             <TabsTrigger value="network">Network</TabsTrigger>
           </TabsList>
@@ -163,11 +183,11 @@ const Dashboard = () => {
                   <CardContent className="space-y-3">
                     <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/dashboard?tab=matching')}>
                       <Users className="w-4 h-4 mr-2" />
-                      Find Mentors
+                      Find {profile?.role === 'startup' ? 'Investors & Mentors' : profile?.role === 'student' ? 'Internships' : 'Startups'}
                     </Button>
                     <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/dashboard?tab=resources')}>
                       <Target className="w-4 h-4 mr-2" />
-                      Browse Resources
+                      {profile?.role === 'student' ? 'Educational Resources' : 'Browse Resources'}
                     </Button>
                     <Button variant="outline" className="w-full justify-start">
                       <Calendar className="w-4 h-4 mr-2" />
@@ -223,15 +243,17 @@ const Dashboard = () => {
           </TabsContent>
 
           <TabsContent value="matching" className="space-y-6">
-            <MatchingSystem />
+            <RoleBasedMatching />
           </TabsContent>
 
           <TabsContent value="resources" className="space-y-6">
             <EducationalResources />
+            <InternshipBoard />
           </TabsContent>
 
           <TabsContent value="network" className="space-y-6">
             <ConnectionsWidget />
+            <ProfessionalBackground />
           </TabsContent>
         </Tabs>
       </div>
