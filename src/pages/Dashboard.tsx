@@ -43,9 +43,9 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
   
-  // Get current tab from URL params or default to overview
+  // Get current tab from URL params or default to roadmap (journey)
   const urlParams = new URLSearchParams(window.location.search);
-  const currentTab = urlParams.get('tab') || 'overview';
+  const currentTab = urlParams.get('tab') || 'roadmap';
 
   useEffect(() => {
     if (!loading && !user) {
@@ -165,87 +165,13 @@ const Dashboard = () => {
 
         {/* Tabbed Dashboard Content */}
         <Tabs value={currentTab} onValueChange={switchTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 max-w-2xl">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-5 max-w-2xl">
             <TabsTrigger value="roadmap">Journey</TabsTrigger>
             <TabsTrigger value="company">Profile</TabsTrigger>
             <TabsTrigger value="matching">Connect</TabsTrigger>
             <TabsTrigger value="resources">Learn</TabsTrigger>
             <TabsTrigger value="network">Network</TabsTrigger>
           </TabsList>
-
-          <TabsContent value="overview" className="space-y-6">
-            {/* Main Dashboard Content */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left Column - Main Content */}
-              <div className="lg:col-span-2 space-y-8">
-                {/* AI Roadmap */}
-                <AIRoadmapWidget />
-
-                {/* Community Feed */}
-                <UnifiedCommunityFeed showCreatePost={false} maxHeight="500px" limit={5} />
-              </div>
-
-              {/* Right Column - Widgets */}
-              <div className="space-y-6">
-                {/* Quick Actions */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start" onClick={() => switchTab('matching')}>
-                      <Users className="w-4 h-4 mr-2" />
-                      Find {profile?.role === 'startup' ? 'Investors & Mentors' : profile?.role === 'student' ? 'Internships' : 'Startups'}
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => switchTab('resources')}>
-                      <Target className="w-4 h-4 mr-2" />
-                      {profile?.role === 'student' ? 'Educational Resources' : 'Browse Resources'}
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/feed')}>
-                      <Calendar className="w-4 h-4 mr-2" />
-                      Join Events
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/feed')}>
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      Community Feed
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Recommended Connections */}
-                <ConnectionsWidget />
-
-                {/* Suggested Resources */}
-                <ResourcesWidget />
-
-                {/* Upcoming Events */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg flex items-center">
-                      <Calendar className="w-5 h-5 mr-2 text-ocean-primary" />
-                      Upcoming Events
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="border-l-4 border-ocean-primary pl-4 py-2">
-                      <h4 className="font-medium">FinTech Founder Meetup</h4>
-                      <p className="text-sm text-muted-foreground">Tomorrow, 6:00 PM</p>
-                      <Badge variant="secondary" className="mt-1">Virtual</Badge>
-                    </div>
-                    <div className="border-l-4 border-accent pl-4 py-2">
-                      <h4 className="font-medium">Investor Pitch Workshop</h4>
-                      <p className="text-sm text-muted-foreground">Friday, 2:00 PM</p>
-                      <Badge variant="secondary" className="mt-1">NYC</Badge>
-                    </div>
-                    <Button variant="outline" size="sm" className="w-full" onClick={() => navigate('/feed')}>
-                      View All Events
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </TabsContent>
 
           <TabsContent value="roadmap" className="space-y-6">
             <StartupRoadmap />

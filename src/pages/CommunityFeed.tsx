@@ -15,7 +15,11 @@ import {
   Send, 
   Search,
   Plus,
-  Bookmark
+  Bookmark,
+  Building2,
+  TrendingUp,
+  Users,
+  GraduationCap
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
