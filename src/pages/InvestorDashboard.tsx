@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Filter, Search } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
+import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 
 interface Investment {
   id: string;
@@ -132,9 +133,10 @@ export default function InvestorDashboard() {
         </div>
 
         <Tabs defaultValue="portfolio" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsList className="grid w-full grid-cols-4 max-w-2xl">
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+            <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
 
@@ -234,6 +236,10 @@ export default function InvestorDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="community" className="space-y-4">
+            <UnifiedCommunityFeed />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">

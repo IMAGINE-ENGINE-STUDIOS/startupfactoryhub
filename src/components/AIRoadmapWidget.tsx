@@ -53,6 +53,51 @@ const AIRoadmapWidget = () => {
         return "outline";
     }
   };
-  return;
+  
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2">
+          <Bot className="h-5 w-5 text-primary" />
+          <span>AI-Powered Roadmap</span>
+        </CardTitle>
+        <CardDescription>Your personalized startup journey milestones</CardDescription>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {milestones.map((milestone) => (
+          <div key={milestone.id} className="flex items-start space-x-4 p-4 rounded-lg border border-border/50">
+            <div className="flex-shrink-0">
+              {milestone.status === "completed" ? (
+                <CheckCircle className="h-6 w-6 text-green-500" />
+              ) : milestone.status === "in-progress" ? (
+                <Clock className="h-6 w-6 text-primary" />
+              ) : (
+                <Target className="h-6 w-6 text-muted-foreground" />
+              )}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-medium text-foreground">{milestone.title}</h3>
+                <Badge variant={getPriorityVariant(milestone.priority)}>
+                  {milestone.priority}
+                </Badge>
+              </div>
+              <p className="text-sm text-muted-foreground mb-3">{milestone.description}</p>
+              <div className="flex items-center justify-between">
+                <Progress value={milestone.progress} className="flex-1 mr-4" />
+                <span className="text-sm font-medium text-foreground">{milestone.progress}%</span>
+              </div>
+              <div className="flex items-center justify-between mt-2">
+                <span className="text-xs text-muted-foreground">{milestone.dueDate}</span>
+                <Button size="sm" variant="outline">
+                  <ArrowRight className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        ))}
+      </CardContent>
+    </Card>
+  );
 };
 export default AIRoadmapWidget;

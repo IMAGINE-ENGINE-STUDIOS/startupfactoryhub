@@ -8,7 +8,7 @@ import DashboardNavigation from "@/components/DashboardNavigation";
 import MentorRoadmapWidget from "@/components/MentorRoadmapWidget";
 import StartupRecommendationsWidget from "@/components/StartupRecommendationsWidget";
 import MentorCalendarWidget from "@/components/MentorCalendarWidget";
-import MentorFeed from "@/components/MentorFeed";
+import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
 import { 
   Users, 
   TrendingUp, 
@@ -98,8 +98,8 @@ const MentorDashboard = () => {
             {/* Mentee Progress Overview */}
             <MentorRoadmapWidget />
 
-            {/* Mentor Feed */}
-            <MentorFeed />
+            {/* Community Feed */}
+            <UnifiedCommunityFeed showCreatePost={false} maxHeight="500px" limit={5} />
           </div>
 
           {/* Right Column - Widgets */}

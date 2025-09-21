@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { BookOpen, Users, Trophy, Target, Play, CheckCircle, Clock, Star } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
+import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 
 interface Course {
   id: string;
@@ -143,11 +144,12 @@ export default function StudentDashboard() {
         </div>
 
         <Tabs defaultValue="courses" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-lg">
+          <TabsList className="grid w-full grid-cols-5 max-w-2xl">
             <TabsTrigger value="courses">Courses</TabsTrigger>
             <TabsTrigger value="assignments">Assignments</TabsTrigger>
             <TabsTrigger value="startups">Startups</TabsTrigger>
             <TabsTrigger value="community">Community</TabsTrigger>
+            <TabsTrigger value="network">Network</TabsTrigger>
           </TabsList>
 
           <TabsContent value="courses" className="space-y-4">
@@ -281,6 +283,10 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="community" className="space-y-4">
+            <UnifiedCommunityFeed />
+          </TabsContent>
+
+          <TabsContent value="network" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <Card className="tech-card border-0">
                 <CardHeader>

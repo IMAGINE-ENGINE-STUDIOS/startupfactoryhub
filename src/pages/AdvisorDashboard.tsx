@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { Calendar, Users, MessageSquare, TrendingUp, Star, Clock, Award } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
+import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 
 interface Startup {
   id: string;
@@ -120,9 +121,10 @@ export default function AdvisorDashboard() {
         </div>
 
         <Tabs defaultValue="mentees" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsList className="grid w-full grid-cols-4 max-w-lg">
             <TabsTrigger value="mentees">My Mentees</TabsTrigger>
             <TabsTrigger value="schedule">Schedule</TabsTrigger>
+            <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
           </TabsList>
 
@@ -226,6 +228,10 @@ export default function AdvisorDashboard() {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          <TabsContent value="community" className="space-y-4">
+            <UnifiedCommunityFeed />
           </TabsContent>
 
           <TabsContent value="opportunities" className="space-y-4">

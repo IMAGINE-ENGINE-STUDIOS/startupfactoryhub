@@ -11,6 +11,7 @@ import AIRoadmapWidget from '@/components/AIRoadmapWidget';
 import ConnectionsWidget from '@/components/ConnectionsWidget';
 import ResourcesWidget from '@/components/ResourcesWidget';
 import ProgressFeed from '@/components/ProgressFeed';
+import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import NotificationCenter from '@/components/dashboard/NotificationCenter';
 import AchievementsBadges from '@/components/dashboard/AchievementsBadges';
 import StartupRoadmap from '@/components/StartupRoadmap';
@@ -192,8 +193,8 @@ const Dashboard = () => {
                 {/* AI Roadmap */}
                 <AIRoadmapWidget />
 
-                {/* Progress Feed */}
-                <ProgressFeed />
+                {/* Community Feed */}
+                <UnifiedCommunityFeed showCreatePost={false} maxHeight="500px" limit={5} />
               </div>
 
               {/* Right Column - Widgets */}
