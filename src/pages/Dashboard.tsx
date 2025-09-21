@@ -165,11 +165,12 @@ const Dashboard = () => {
 
         {/* Tabbed Dashboard Content */}
         <Tabs value={currentTab} onValueChange={switchTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 max-w-2xl">
+          <TabsList className="grid w-full grid-cols-6 max-w-2xl">
             <TabsTrigger value="roadmap">Journey</TabsTrigger>
             <TabsTrigger value="company">Profile</TabsTrigger>
             <TabsTrigger value="matching">Connect</TabsTrigger>
             <TabsTrigger value="resources">Learn</TabsTrigger>
+            <TabsTrigger value="internships">Internships</TabsTrigger>
             <TabsTrigger value="network">Network</TabsTrigger>
           </TabsList>
 
@@ -187,6 +188,9 @@ const Dashboard = () => {
 
           <TabsContent value="resources" className="space-y-6">
             <EducationalResources />
+          </TabsContent>
+
+          <TabsContent value="internships" className="space-y-6">
             <InternshipBoard />
           </TabsContent>
 
