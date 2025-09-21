@@ -14,24 +14,21 @@ interface Profile {
 }
 
 const DashboardRouter = () => {
-  const { user, loading, isGuest, guestRole } = useAuth();
+  const { user, loading } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user && !isGuest) {
-      navigate("/guest-mode");
+    if (!loading && !user) {
+      navigate("/auth");
       return;
     }
 
     if (user) {
       fetchProfile();
-    } else if (isGuest && guestRole) {
-      setProfile({ role: guestRole as Profile['role'] });
-      setProfileLoading(false);
     }
-  }, [user, loading, isGuest, guestRole, navigate]);
+  }, [user, loading, navigate]);
 
   const fetchProfile = async () => {
     try {
@@ -68,7 +65,7 @@ const DashboardRouter = () => {
     );
   }
 
-  if ((!user && !isGuest) || !profile) {
+  if (!user || !profile) {
     return null;
   }
 

@@ -26,32 +26,23 @@ import {
 
 const DashboardNavigation = () => {
   const navigate = useNavigate();
-  const { user, signOut, isGuest, guestRole, exitGuestMode } = useAuth();
+  const { user, signOut } = useAuth();
   const { toast } = useToast();
 
   const handleLogout = async () => {
-    if (isGuest) {
-      exitGuestMode();
+    const { error } = await signOut();
+    if (error) {
       toast({
-        title: "Guest mode ended",
-        description: "You have exited guest mode.",
+        title: "Error signing out",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Signed out successfully",
+        description: "You have been signed out.",
       });
       navigate("/");
-    } else {
-      const { error } = await signOut();
-      if (error) {
-        toast({
-          title: "Error",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Signed out",
-          description: "You have been signed out successfully.",
-        });
-        navigate("/");
-      }
     }
   };
 
@@ -126,42 +117,26 @@ const DashboardNavigation = () => {
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
                     <p className="text-sm font-medium leading-none">
-                      {isGuest 
-                        ? `Guest - ${guestRole?.charAt(0).toUpperCase()}${guestRole?.slice(1)}` 
-                        : user?.user_metadata?.full_name || user?.email || "User"
-                      }
+                      {user?.user_metadata?.full_name || user?.email || "User"}
                     </p>
                     <p className="text-xs leading-none text-muted-foreground">
-                      {isGuest ? "Guest Mode" : user?.email}
+                      {user?.email}
                     </p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                {!isGuest && (
-                  <>
-                    <DropdownMenuItem>
-                      <Users className="mr-2 h-4 w-4" />
-                      <span>View Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Settings className="mr-2 h-4 w-4" />
-                      <span>Settings</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
-                {isGuest && (
-                  <>
-                    <DropdownMenuItem onClick={() => navigate("/auth")}>
-                      <Users className="mr-2 h-4 w-4" />
-                      <span>Sign Up for Full Access</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                  </>
-                )}
+                <DropdownMenuItem>
+                  <Users className="mr-2 h-4 w-4" />
+                  <span>View Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
-                  <span>{isGuest ? "Exit Guest Mode" : "Log out"}</span>
+                  <span>Log out</span>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

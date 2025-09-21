@@ -39,7 +39,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { user, loading, isGuest } = useAuth();
+  const { user, loading } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
   
@@ -48,14 +48,14 @@ const Dashboard = () => {
   const currentTab = urlParams.get('tab') || 'overview';
 
   useEffect(() => {
-    if (!loading && !user && !isGuest) {
-      navigate("/guest-mode");
+    if (!loading && !user) {
+      navigate("/auth");
       return;
     }
     if (user) {
       fetchProfile();
     }
-  }, [user, loading, isGuest, navigate]);
+  }, [user, loading, navigate]);
 
   const switchTab = (tab: string) => {
     const newUrl = `${window.location.pathname}?tab=${tab}`;
@@ -65,18 +65,7 @@ const Dashboard = () => {
   };
 
   const fetchProfile = async () => {
-    if (!user && !isGuest) return;
-
-    // For guest mode, use sample data
-    if (isGuest) {
-      setProfile({
-        full_name: 'Guest User',
-        role: 'startup',
-        company_name: 'Sample Startup',
-        position: 'Founder'
-      });
-      return;
-    }
+    if (!user) return;
 
     const { data, error } = await supabase
       .from('profiles')
@@ -100,7 +89,7 @@ const Dashboard = () => {
     );
   }
 
-  if (!user && !isGuest) {
+  if (!user) {
     return null;
   }
 

@@ -31,23 +31,20 @@ export default function CompanyProfileManager() {
     portfolio_size: '',
     firm_experience: ''
   });
-  const { user, isGuest } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user || isGuest) {
+    if (user) {
       fetchUserProfile();
       if (user) {
         fetchCompany();
       }
     }
-  }, [user, isGuest]);
+  }, [user]);
 
   const fetchUserProfile = async () => {
-    if (isGuest) {
-      setUserProfile({ role: 'startup' }); // Default for guest
-      return;
-    }
+    if (!user) return;
     
     if (!user) return;
 

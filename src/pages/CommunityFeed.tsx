@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -15,13 +15,7 @@ import {
   Send, 
   Search,
   Plus,
-  Bookmark,
-  MoreHorizontal,
-  Building2,
-  TrendingUp,
-  Users,
-  GraduationCap,
-  Briefcase
+  Bookmark
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -59,380 +53,110 @@ interface PostComment {
 }
 
 const CommunityFeed = () => {
-  const { user, isGuest } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [newPost, setNewPost] = useState("");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showComments, setShowComments] = useState<string | null>(null);
-  const [comments, setComments] = useState<{ [key: string]: PostComment[] }>({});
+  const [comments, setComments] = useState<Record<string, PostComment[]>>({});
   const [newComment, setNewComment] = useState("");
+  const [activeCommentPost, setActiveCommentPost] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
 
-  // Sample data for guest mode and demonstration
-  const samplePosts: FeedPost[] = [
-    {
-      id: "sample-1",
-      content: "Just secured $2M in Series A funding! 🎉 Excited to scale our AI healthcare platform. Looking for senior engineers to join our team. #startup #funding #healthcare #hiring",
-      created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
-      user_id: "sample-user-1",
-      likes_count: 24,
-      comments_count: 8,
-      post_type: "announcement",
-      tags: ["startup", "funding", "healthcare", "hiring"],
-      profiles: {
-        full_name: "Sarah Chen",
-        role: "startup",
-        company_name: "HealthAI Solutions",
-        position: "CEO & Founder"
-      }
-    },
-    {
-      id: "sample-2",
-      content: "Had an amazing mentoring session today with 5 promising fintech startups. The innovation in digital payments is incredible! Always happy to help founders navigate regulatory challenges. DM me if you need guidance! #mentorship #fintech #payments",
-      created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
-      user_id: "sample-user-2",
-      likes_count: 18,
-      comments_count: 5,
-      post_type: "update",
-      tags: ["mentorship", "fintech", "payments"],
-      profiles: {
-        full_name: "Michael Rodriguez",
-        role: "mentor",
-        company_name: "FinTech Advisors",
-        position: "Senior Partner"
-      }
-    },
-    {
-      id: "sample-3",
-      content: "Looking for B2B SaaS startups with $500K-$3M ARR for our next investment round. Focus areas: enterprise software, cybersecurity, and workforce solutions. Strong unit economics and proven market fit required. #investing #b2bsaas #enterprise",
-      created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
-      user_id: "sample-user-3",
-      likes_count: 45,
-      comments_count: 12,
-      post_type: "announcement",
-      tags: ["investing", "b2bsaas", "enterprise"],
-      profiles: {
-        full_name: "Jessica Liu",
-        role: "investor",
-        company_name: "Venture Growth Capital",
-        position: "Principal"
-      }
-    },
-    {
-      id: "sample-4",
-      content: "Completed my software engineering internship at a Y Combinator startup! Learned so much about building scalable systems. Now looking for full-time product engineer opportunities. Passionate about AI and developer tools. #internship #career #ai #devtools",
-      created_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
-      user_id: "sample-user-4",
-      likes_count: 12,
-      comments_count: 3,
-      post_type: "achievement",
-      tags: ["internship", "career", "ai", "devtools"],
-      profiles: {
-        full_name: "Alex Thompson",
-        role: "student",
-        position: "Computer Science Graduate"
-      }
-    },
-    {
-      id: "sample-5",
-      content: "We're offering remote internship opportunities for talented students! Join our team and work on cutting-edge blockchain technology. Looking for developers, designers, and marketing interns. Apply on our careers page! #internships #blockchain #remote #students",
-      created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
-      user_id: "sample-user-5",
-      likes_count: 32,
-      comments_count: 15,
-      post_type: "announcement",
-      tags: ["internships", "blockchain", "remote", "students"],
-      profiles: {
-        full_name: "David Park",
-        role: "startup",
-        company_name: "BlockTech Solutions",
-        position: "Head of Talent"
-      }
-    }
-  ];
-
   useEffect(() => {
-    if (isGuest) {
-      setPosts(samplePosts);
-      setLoading(false);
-    } else if (user) {
-      fetchPosts();
-      fetchUserLikes();
-    } else {
-      setPosts(samplePosts);
-      setLoading(false);
+    // Use sample data since feed tables don't exist yet
+    if (user) {
+      setPosts([]);
     }
-  }, [user, isGuest, searchQuery]);
+  }, [user, searchQuery]);
 
   const fetchPosts = async () => {
-    try {
-      let query = supabase
-        .from('feed_posts')
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            avatar_url,
-            role,
-            company_name,
-            position
-          )
-        `)
-        .order('created_at', { ascending: false })
-        .limit(50);
-
-      if (searchQuery) {
-        query = query.ilike('content', `%${searchQuery}%`);
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
-      setPosts((data as any) || []);
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: "Failed to fetch posts",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
+    // Placeholder - will be implemented when feed tables are created
+    setPosts([]);
   };
 
   const fetchUserLikes = async () => {
-    if (!user) return;
-    
-    try {
-      const { data } = await supabase
-        .from('post_likes')
-        .select('post_id')
-        .eq('user_id', user.id);
-      
-      setLikedPosts(new Set(data?.map(like => like.post_id) || []));
-    } catch (error) {
-      console.error('Error fetching user likes:', error);
-    }
+    // Placeholder - will be implemented when feed tables are created
+    setLikedPosts(new Set());
   };
 
   const fetchComments = async (postId: string) => {
-    if (isGuest) {
-      // Sample comments for guest mode
-      setComments(prev => ({
-        ...prev,
-        [postId]: [
-          {
-            id: "comment-1",
-            content: "Congratulations! This is amazing news! 🎉",
-            created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
-            user_id: "comment-user-1",
-            profiles: {
-              full_name: "John Smith",
-              role: "mentor"
-            }
-          },
-          {
-            id: "comment-2",
-            content: "Great to see more innovation in this space. Would love to connect!",
-            created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
-            user_id: "comment-user-2",
-            profiles: {
-              full_name: "Emily Chen",
-              role: "investor"
-            }
-          }
-        ]
-      }));
-      return;
-    }
-
-    try {
-      const { data } = await supabase
-        .from('post_comments')
-        .select(`
-          *,
-          profiles:user_id (
-            full_name,
-            avatar_url,
-            role
-          )
-        `)
-        .eq('post_id', postId)
-        .order('created_at', { ascending: true });
-
-      setComments(prev => ({
-        ...prev,
-        [postId]: (data as any) || []
-      }));
-    } catch (error) {
-      console.error('Error fetching comments:', error);
-    }
+    // Placeholder - will be implemented when feed tables are created
+    setComments(prev => ({ ...prev, [postId]: [] }));
   };
 
   const createPost = async () => {
-    if (!newPost.trim()) return;
-    
-    if (isGuest) {
-      toast({
-        title: "Sign up required",
-        description: "Please create an account to post content",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('feed_posts')
-        .insert({
-          content: newPost,
-          user_id: user.id,
-          tags: selectedTags,
-          post_type: 'update'
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Post created successfully!",
-      });
-
-      setNewPost("");
-      setSelectedTags([]);
-      await fetchPosts();
-    } catch (error: any) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
+    toast({
+      title: "Feature coming soon",
+      description: "Post creation will be available once feed tables are set up.",
+    });
   };
 
   const toggleLike = async (postId: string) => {
-    if (isGuest) {
-      toast({
-        title: "Sign up required",
-        description: "Please create an account to like posts",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!user) return;
-
-    try {
-      const isLiked = likedPosts.has(postId);
-      
-      if (isLiked) {
-        await supabase
-          .from('post_likes')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('post_id', postId);
-        
-        setLikedPosts(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(postId);
-          return newSet;
-        });
-      } else {
-        await supabase
-          .from('post_likes')
-          .insert({
-            user_id: user.id,
-            post_id: postId
-          });
-        
-        setLikedPosts(prev => new Set([...prev, postId]));
-      }
-
-      setPosts(prev => prev.map(post => 
-        post.id === postId 
-          ? { ...post, likes_count: post.likes_count + (isLiked ? -1 : 1) }
-          : post
-      ));
-    } catch (error) {
-      console.error('Error toggling like:', error);
-    }
+    toast({
+      title: "Feature coming soon", 
+      description: "Like functionality will be available once feed tables are set up.",
+    });
   };
 
   const addComment = async (postId: string) => {
-    if (!newComment.trim()) return;
-    
-    if (isGuest) {
-      toast({
-        title: "Sign up required",
-        description: "Please create an account to comment",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!user) return;
-
-    try {
-      const { error } = await supabase
-        .from('post_comments')
-        .insert({
-          content: newComment,
-          user_id: user.id,
-          post_id: postId
-        });
-
-      if (error) throw error;
-
-      setNewComment("");
-      await fetchComments(postId);
-      
-      setPosts(prev => prev.map(post => 
-        post.id === postId 
-          ? { ...post, comments_count: post.comments_count + 1 }
-          : post
-      ));
-    } catch (error) {
-      console.error('Error adding comment:', error);
-    }
+    toast({
+      title: "Feature coming soon",
+      description: "Comments will be available once feed tables are set up.",
+    });
   };
 
-  const availableTags = ["startup", "funding", "tech", "ai", "growth", "hiring", "product", "marketing", "internships", "mentorship", "investing", "healthcare", "fintech", "blockchain"];
+  const toggleComments = (postId: string) => {
+    if (activeCommentPost === postId) {
+      setActiveCommentPost(null);
+    } else {
+      setActiveCommentPost(postId);
+      if (!comments[postId]) {
+        fetchComments(postId);
+      }
+    }
+  };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
       case 'startup': return <Building2 className="w-4 h-4" />;
       case 'investor': return <TrendingUp className="w-4 h-4" />;
-      case 'mentor': 
-      case 'advisor': return <Users className="w-4 h-4" />;
+      case 'mentor': return <Users className="w-4 h-4" />;
       case 'student': return <GraduationCap className="w-4 h-4" />;
-      default: return <Users className="w-4 h-4" />;
+      default: return null;
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'startup': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-      case 'investor': return 'bg-green-500/10 text-green-500 border-green-500/20';
-      case 'mentor': 
-      case 'advisor': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
-      case 'student': return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
-      default: return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
+      case 'startup': return 'bg-blue-100 text-blue-800';
+      case 'investor': return 'bg-green-100 text-green-800';
+      case 'mentor': return 'bg-purple-100 text-purple-800';
+      case 'student': return 'bg-yellow-100 text-yellow-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  if (loading) {
+  if (!user) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading community feed...</p>
+      <div className="min-h-screen bg-background">
+        <DashboardNavigation />
+        <div className="container mx-auto px-4 py-8">
+          <Card>
+            <CardContent className="p-8 text-center">
+              <h2 className="text-2xl font-bold mb-4">Sign in to view the community feed</h2>
+              <p className="text-muted-foreground mb-6">
+                Join our community to connect with startups, mentors, investors, and students.
+              </p>
+              <Button onClick={() => navigate("/auth")}>
+                Sign In
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );
@@ -442,37 +166,31 @@ const CommunityFeed = () => {
     <div className="min-h-screen bg-background">
       <DashboardNavigation />
       
-      {/* Header */}
-      <div className="bg-background/80 backdrop-blur-lg border-b">
-        <div className="container mx-auto px-4 py-6 max-w-2xl">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                Community
-              </h1>
-              <p className="text-muted-foreground mt-1">
-                Connect with startups, mentors, investors, and students
-              </p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Search posts..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-48"
-                />
-              </div>
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto">
+          {/* Header */}
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold mb-2">Community Feed</h1>
+            <p className="text-muted-foreground">
+              Connect, share, and learn from the startup community
+            </p>
+          </div>
+
+          {/* Search */}
+          <div className="mb-6">
+            <div className="relative">
+              <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search posts..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="container mx-auto px-4 py-6 max-w-2xl">
-        <div className="space-y-6">
-          {/* Create Post */}
-          {!isGuest && (
+          <div className="space-y-6">
+            {/* Create Post */}
             <Card>
               <CardContent className="pt-6">
                 <div className="space-y-4">
@@ -482,168 +200,114 @@ const CommunityFeed = () => {
                     onChange={(e) => setNewPost(e.target.value)}
                     className="min-h-[100px]"
                   />
-                  
-                  <div className="flex flex-wrap gap-2">
-                    {availableTags.map((tag) => (
-                      <Badge
-                        key={tag}
-                        variant={selectedTags.includes(tag) ? "default" : "outline"}
-                        className="cursor-pointer"
-                        onClick={() => {
-                          setSelectedTags(prev => 
-                            prev.includes(tag) 
-                              ? prev.filter(t => t !== tag)
-                              : [...prev, tag]
-                          );
-                        }}
-                      >
-                        #{tag}
-                      </Badge>
-                    ))}
-                  </div>
-                  
                   <div className="flex justify-between items-center">
-                    <div className="flex gap-2">
+                    <div className="flex items-center gap-2">
                       <Button variant="ghost" size="sm">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Media
+                        <Plus className="h-4 w-4 mr-1" />
+                        Add Tags
                       </Button>
                     </div>
-                    <Button onClick={createPost} disabled={!newPost.trim()}>
-                      <Send className="h-4 w-4 mr-2" />
-                      Post
+                    <Button onClick={createPost} disabled={loading || !newPost.trim()}>
+                      {loading ? 'Posting...' : 'Post'}
                     </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          )}
 
-          {/* Guest Mode Notice */}
-          {isGuest && (
-            <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <h3 className="font-semibold mb-2">Exploring as Guest</h3>
-                  <p className="text-muted-foreground mb-4">
-                    You're viewing sample content. Sign up to post, like, and comment!
-                  </p>
-                  <Button onClick={() => navigate("/auth")} className="mr-2">
-                    Sign Up
-                  </Button>
-                  <Button variant="outline" onClick={() => navigate("/auth")}>
-                    Sign In
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Posts */}
-          {posts.map((post) => (
-            <Card key={post.id} className="hover:shadow-lg transition-shadow">
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  {/* Post Header */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <Avatar>
-                        <AvatarImage src={post.profiles?.avatar_url} />
-                        <AvatarFallback>
-                          {post.profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h4 className="font-semibold">{post.profiles?.full_name || 'Anonymous'}</h4>
-                          {post.profiles?.role && (
-                            <Badge variant="outline" className={`text-xs ${getRoleColor(post.profiles.role)}`}>
-                              {getRoleIcon(post.profiles.role)}
-                              <span className="ml-1">{post.profiles.role}</span>
+            {/* Posts */}
+            {posts.map((post) => (
+              <Card key={post.id} className="hover:shadow-lg transition-shadow">
+                <CardContent className="pt-6">
+                  <div className="space-y-4">
+                    {/* Post Header */}
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-3">
+                        <Avatar>
+                          <AvatarImage src={post.profiles?.avatar_url} />
+                          <AvatarFallback>
+                            {post.profiles?.full_name?.charAt(0) || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{post.profiles?.full_name}</h3>
+                            <Badge variant="secondary" className={`text-xs ${getRoleColor(post.profiles?.role || '')}`}>
+                              {getRoleIcon(post.profiles?.role || '')}
+                              <span className="ml-1 capitalize">{post.profiles?.role}</span>
                             </Badge>
+                          </div>
+                          {post.profiles?.company_name && (
+                            <p className="text-sm text-muted-foreground">
+                              {post.profiles.position} at {post.profiles.company_name}
+                            </p>
                           )}
+                          <p className="text-xs text-muted-foreground">
+                            {formatDistanceToNow(new Date(post.created_at))} ago
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {post.profiles?.position && post.profiles?.company_name 
-                            ? `${post.profiles.position} at ${post.profiles.company_name}`
-                            : post.profiles?.role
-                          } • {formatDistanceToNow(new Date(post.created_at))} ago
-                        </p>
                       </div>
-                    </div>
-                    <Button variant="ghost" size="sm">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </div>
-
-                  {/* Post Content */}
-                  <div>
-                    <p className="text-foreground leading-relaxed">{post.content}</p>
-                    
-                    {post.tags && post.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-2 mt-3">
-                        {post.tags.map((tag, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
-                            #{tag}
-                          </Badge>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Post Actions */}
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center gap-6">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleLike(post.id)}
-                        className={likedPosts.has(post.id) ? "text-red-500" : ""}
-                      >
-                        <Heart className={`h-4 w-4 mr-2 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
-                        {post.likes_count}
-                      </Button>
-                      
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => {
-                          const postId = post.id;
-                          setShowComments(showComments === postId ? null : postId);
-                          if (showComments !== postId) {
-                            fetchComments(postId);
-                          }
-                        }}
-                      >
-                        <MessageCircle className="h-4 w-4 mr-2" />
-                        {post.comments_count}
-                      </Button>
-                      
                       <Button variant="ghost" size="sm">
-                        <Share2 className="h-4 w-4 mr-2" />
-                        Share
+                        <Bookmark className="h-4 w-4" />
                       </Button>
                     </div>
-                    
-                    <Button variant="ghost" size="sm">
-                      <Bookmark className="h-4 w-4" />
-                    </Button>
-                  </div>
 
-                  {/* Comments Section */}
-                  {showComments === post.id && (
-                    <div className="border-t pt-4 space-y-4">
-                      {/* Add Comment */}
-                      {!isGuest && (
+                    {/* Post Content */}
+                    <div className="space-y-3">
+                      <p className="text-foreground leading-relaxed">{post.content}</p>
+                      
+                      {post.tags && post.tags.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {post.tags.map((tag, index) => (
+                            <Badge key={index} variant="outline" className="text-xs">
+                              #{tag}
+                            </Badge>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Post Actions */}
+                    <div className="flex items-center justify-between pt-4 border-t">
+                      <div className="flex items-center gap-4">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleLike(post.id)}
+                          className={likedPosts.has(post.id) ? "text-red-500" : ""}
+                        >
+                          <Heart className={`h-4 w-4 mr-1 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
+                          {post.likes_count}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleComments(post.id)}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-1" />
+                          {post.comments_count}
+                        </Button>
+                        <Button variant="ghost" size="sm">
+                          <Share2 className="h-4 w-4 mr-1" />
+                          Share
+                        </Button>
+                      </div>
+                    </div>
+
+                    {/* Comments Section */}
+                    {activeCommentPost === post.id && (
+                      <div className="border-t pt-4 space-y-4">
+                        {/* Add Comment */}
                         <div className="flex gap-3">
                           <Avatar className="w-8 h-8">
-                            <AvatarFallback className="text-xs">
-                              {user?.email?.charAt(0).toUpperCase()}
+                            <AvatarImage src={user?.user_metadata?.avatar_url} />
+                            <AvatarFallback>
+                              {user?.user_metadata?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1 flex gap-2">
                             <Input
-                              placeholder="Write a comment..."
+                              placeholder="Add a comment..."
                               value={newComment}
                               onChange={(e) => setNewComment(e.target.value)}
                               onKeyPress={(e) => {
@@ -652,59 +316,56 @@ const CommunityFeed = () => {
                                 }
                               }}
                             />
-                            <Button size="sm" onClick={() => addComment(post.id)}>
+                            <Button 
+                              size="sm" 
+                              onClick={() => addComment(post.id)}
+                              disabled={!newComment.trim()}
+                            >
                               <Send className="h-4 w-4" />
                             </Button>
                           </div>
                         </div>
-                      )}
 
-                      {/* Comments List */}
-                      <div className="space-y-3">
-                        {comments[post.id]?.map((comment) => (
-                          <div key={comment.id} className="flex gap-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={comment.profiles?.avatar_url} />
-                              <AvatarFallback className="text-xs">
-                                {comment.profiles?.full_name?.charAt(0) || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <div className="bg-muted rounded-lg p-3">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <span className="font-medium text-sm">
-                                    {comment.profiles?.full_name || 'Anonymous'}
-                                  </span>
-                                  <span className="text-xs text-muted-foreground">
-                                    {formatDistanceToNow(new Date(comment.created_at))} ago
-                                  </span>
+                        {/* Comments List */}
+                        <div className="space-y-3">
+                          {comments[post.id]?.map((comment) => (
+                            <div key={comment.id} className="flex gap-3">
+                              <Avatar className="w-8 h-8">
+                                <AvatarImage src={comment.profiles?.avatar_url} />
+                                <AvatarFallback>
+                                  {comment.profiles?.full_name?.charAt(0) || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <div className="bg-muted rounded-lg p-3">
+                                  <p className="font-semibold text-sm">{comment.profiles?.full_name}</p>
+                                  <p className="text-sm">{comment.content}</p>
                                 </div>
-                                <p className="text-sm">{comment.content}</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  {formatDistanceToNow(new Date(comment.created_at))} ago
+                                </p>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
 
-          {posts.length === 0 && (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center py-8">
-                  <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No posts found</h3>
+            {posts.length === 0 && (
+              <Card>
+                <CardContent className="p-8 text-center">
+                  <h3 className="font-semibold mb-2">No posts yet</h3>
                   <p className="text-muted-foreground">
                     Be the first to share something with the community!
                   </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </div>
     </div>

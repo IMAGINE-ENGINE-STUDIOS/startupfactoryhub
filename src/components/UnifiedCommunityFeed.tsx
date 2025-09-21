@@ -48,7 +48,7 @@ export default function UnifiedCommunityFeed({
   const [newPost, setNewPost] = useState('');
   const [loading, setLoading] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
-  const { user, isGuest } = useAuth();
+  const { user } = useAuth();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -275,21 +275,7 @@ export default function UnifiedCommunityFeed({
         </Card>
       )}
 
-      {/* Guest Mode Prompt */}
-      {showCreatePost && isGuest && (
-        <Card className="tech-card border-0 bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20">
-          <CardContent className="p-6 text-center">
-            <Zap className="h-12 w-12 text-primary mx-auto mb-4" />
-            <h3 className="text-lg font-semibold mb-2">Join the conversation!</h3>
-            <p className="text-muted-foreground mb-4">Create an account to share updates, connect with others, and grow your network.</p>
-            <Button className="pulse-primary">
-              Sign Up to Post
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Feed Posts */}
+      {/* Posts Grid */}
       <div className="space-y-4" style={{ maxHeight, overflowY: 'auto' }}>
         {posts.map((post) => (
           <Card key={post.id} className="tech-card border-0 hover:scale-[1.01] transition-all">
