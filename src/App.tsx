@@ -10,7 +10,7 @@ import Auth from "./pages/Auth";
 import ProfileSetup from "./pages/ProfileSetup";
 import DashboardRouter from "./components/DashboardRouter";
 import StartupProfile from "./pages/StartupProfile";
-import SocialFeed from "./pages/SocialFeed";
+import CommunityFeed from "./pages/CommunityFeed";
 import GuestModeSelector from "./components/GuestModeSelector";
 import NotFound from "./pages/NotFound";
 
@@ -30,7 +30,7 @@ const App = () => (
               <Route path="/profile-setup" element={<ProfileSetup />} />
               <Route path="/guest-mode" element={<GuestModeSelector />} />
               <Route path="/dashboard" element={<DashboardRouter />} />
-              <Route path="/feed" element={<SocialFeed />} />
+              <Route path="/feed" element={<CommunityFeed />} />
               <Route path="/profile" element={<StartupProfile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

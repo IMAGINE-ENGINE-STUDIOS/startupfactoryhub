@@ -38,21 +38,44 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { user, loading } = useAuth();
+  const { user, loading, isGuest } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
+  
+  // Get current tab from URL params or default to overview
+  const urlParams = new URLSearchParams(window.location.search);
+  const currentTab = urlParams.get('tab') || 'overview';
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate("/auth");
+    if (!loading && !user && !isGuest) {
+      navigate("/guest-mode");
+      return;
     }
     if (user) {
       fetchProfile();
     }
-  }, [user, loading, navigate]);
+  }, [user, loading, isGuest, navigate]);
+
+  const switchTab = (tab: string) => {
+    const newUrl = `${window.location.pathname}?tab=${tab}`;
+    window.history.pushState({}, '', newUrl);
+    // Trigger a re-render by updating a state or use navigate
+    navigate(`/dashboard?tab=${tab}`, { replace: true });
+  };
 
   const fetchProfile = async () => {
-    if (!user) return;
+    if (!user && !isGuest) return;
+
+    // For guest mode, use sample data
+    if (isGuest) {
+      setProfile({
+        full_name: 'Guest User',
+        role: 'startup',
+        company_name: 'Sample Startup',
+        position: 'Founder'
+      });
+      return;
+    }
 
     const { data, error } = await supabase
       .from('profiles')
@@ -76,7 +99,7 @@ const Dashboard = () => {
     );
   }
 
-  if (!user) {
+  if (!user && !isGuest) {
     return null;
   }
 
@@ -151,7 +174,7 @@ const Dashboard = () => {
         </div>
 
         {/* Tabbed Dashboard Content */}
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs value={currentTab} onValueChange={switchTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-6 max-w-2xl">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="roadmap">Journey</TabsTrigger>
@@ -181,15 +204,15 @@ const Dashboard = () => {
                     <CardTitle className="text-lg">Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/dashboard?tab=matching')}>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => switchTab('matching')}>
                       <Users className="w-4 h-4 mr-2" />
                       Find {profile?.role === 'startup' ? 'Investors & Mentors' : profile?.role === 'student' ? 'Internships' : 'Startups'}
                     </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/dashboard?tab=resources')}>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => switchTab('resources')}>
                       <Target className="w-4 h-4 mr-2" />
                       {profile?.role === 'student' ? 'Educational Resources' : 'Browse Resources'}
                     </Button>
-                    <Button variant="outline" className="w-full justify-start">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => navigate('/feed')}>
                       <Calendar className="w-4 h-4 mr-2" />
                       Join Events
                     </Button>
@@ -225,7 +248,7 @@ const Dashboard = () => {
                       <p className="text-sm text-muted-foreground">Friday, 2:00 PM</p>
                       <Badge variant="secondary" className="mt-1">NYC</Badge>
                     </div>
-                    <Button variant="outline" size="sm" className="w-full">
+                    <Button variant="outline" size="sm" className="w-full" onClick={() => navigate('/feed')}>
                       View All Events
                     </Button>
                   </CardContent>

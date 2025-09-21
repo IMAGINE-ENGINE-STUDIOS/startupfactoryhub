@@ -22,9 +22,12 @@ const Navigation = () => {
             <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
               Features
             </a>
-            <a href="#community" className="text-muted-foreground hover:text-foreground transition-colors">
+            <button 
+              onClick={() => navigate("/feed")}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
               Community
-            </a>
+            </button>
             <a href="#resources" className="text-muted-foreground hover:text-foreground transition-colors">
               Resources
             </a>

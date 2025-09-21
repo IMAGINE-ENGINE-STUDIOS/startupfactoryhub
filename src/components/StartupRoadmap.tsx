@@ -219,13 +219,19 @@ export default function StartupRoadmap() {
                       </div>
                       
                       <div className="flex space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          disabled={step.locked}
-                        >
-                          View Resources
-                        </Button>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        disabled={step.locked}
+                        onClick={() => {
+                          toast({
+                            title: "Resource Access",
+                            description: `Opening resources for ${step.title}`,
+                          });
+                        }}
+                      >
+                        View Resources
+                      </Button>
                         {!step.completed && !step.locked && (
                           <Button 
                             size="sm" 
