@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Navigation = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass-morphism border-b border-ocean-border">
@@ -38,7 +38,13 @@ const Navigation = () => {
           
           <div className="flex items-center space-x-4">
             {user ? (
-              <Button variant="hero" size="lg" onClick={() => navigate("/dashboard")}>Dashboard</Button>
+              <>
+                <Button variant="ghost" onClick={() => navigate("/dashboard")}>Dashboard</Button>
+                <Button variant="hero" size="lg" onClick={async () => {
+                  await signOut();
+                  navigate("/");
+                }}>Sign Out</Button>
+              </>
             ) : (
               <>
                 <Button variant="ghost" onClick={() => navigate("/guest-mode")}>Try as Guest</Button>

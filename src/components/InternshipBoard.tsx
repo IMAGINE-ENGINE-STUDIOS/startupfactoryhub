@@ -123,12 +123,20 @@ export default function InternshipBoard() {
     const internshipPost = {
       content: `🚀 Internship Opportunity at ${userProfile.company_name || 'Our Company'}!\n\n${newInternship.title}\n\nLocation: ${newInternship.location}\nDuration: ${newInternship.duration}\nCompensation: ${newInternship.compensation}\n\n${newInternship.description}\n\nRequirements: ${newInternship.requirements}\n\n#internship #opportunity #startup`,
       user_id: user.id,
-      post_type: 'internship'
+      post_type: 'internship' as 'internship',
+      internship_data: {
+        title: newInternship.title,
+        location: newInternship.location,
+        duration: newInternship.duration,
+        compensation: newInternship.compensation,
+        description: newInternship.description,
+        requirements: newInternship.requirements
+      }
     };
 
     const { error } = await supabase
       .from('feed_posts')
-      .insert([internshipPost]);
+      .insert(internshipPost);
 
     if (error) {
       toast({

@@ -101,7 +101,7 @@ const SocialFeed = () => {
         .limit(50);
 
       if (filter !== "all") {
-        query = query.eq('post_type', filter);
+        query = query.eq('post_type', filter as 'update' | 'milestone' | 'internship' | 'resource' | 'announcement');
       }
 
       if (searchQuery) {

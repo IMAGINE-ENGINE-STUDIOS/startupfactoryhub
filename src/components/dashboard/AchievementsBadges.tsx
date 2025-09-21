@@ -26,17 +26,45 @@ const AchievementsBadges = () => {
 
   const fetchAchievements = async () => {
     if (!user) return;
-
+    
     try {
-      const { data } = await supabase
-        .from('achievements')
+      // Since achievements table doesn't exist, create mock achievements based on user activity
+      const { data: connections } = await supabase
+        .from('connections')
         .select('*')
-        .eq('user_id', user.id)
-        .order('earned_at', { ascending: false });
+        .eq('requester_id', user.id)
+        .eq('status', 'accepted');
+      
+      const { data: posts } = await supabase
+        .from('feed_posts')
+        .select('*')
+        .eq('user_id', user.id);
 
-      if (data) {
-        setAchievements(data);
+      const mockAchievements = [];
+      
+      if (connections && connections.length > 0) {
+        mockAchievements.push({
+          id: '1',
+          type: 'networking',
+          title: 'Networker',
+          description: 'Made your first connection',
+          icon: '🤝',
+          earned_at: new Date().toISOString()
+        });
       }
+      
+      if (posts && posts.length > 0) {
+        mockAchievements.push({
+          id: '2', 
+          type: 'content',
+          title: 'Content Creator',
+          description: 'Shared your first post',
+          icon: '📝',
+          earned_at: new Date().toISOString()
+        });
+      }
+
+      setAchievements(mockAchievements);
     } catch (error) {
       console.error('Error fetching achievements:', error);
     }

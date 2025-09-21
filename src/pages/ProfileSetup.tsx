@@ -111,17 +111,16 @@ const ProfileSetup = () => {
           name: formData.company_name,
           description: formData.bio,
           industry: formData.industry,
-          stage: formData.stage,
+          stage: formData.stage as 'idea' | 'prototype' | 'mvp' | 'growth' | 'scale',
           location: formData.location,
           website: formData.website,
-          team_size: parseInt(formData.team_size) || null,
-          tags: skills,
-          looking_for: formData.goals
+          team_size: parseInt(formData.team_size) || 1,
+          looking_for: Array.isArray(formData.goals) ? formData.goals : []
         };
 
         const { error: companyError } = await supabase
           .from('companies')
-          .upsert([companyData]);
+          .upsert(companyData);
 
         if (companyError) throw companyError;
       }

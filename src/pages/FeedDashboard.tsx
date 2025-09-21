@@ -44,7 +44,14 @@ export default function FeedDashboard() {
       return;
     }
 
-    setPosts(data || []);
+    const formattedPosts = (data || []).map(post => ({
+      ...post,
+      likes_count: 0, // Default value since we don't have likes count yet
+      comments_count: 0, // Default value since we don't have comments count yet  
+      tags: [] // Default empty array for tags
+    }));
+    
+    setPosts(formattedPosts);
   };
 
   const createPost = async () => {

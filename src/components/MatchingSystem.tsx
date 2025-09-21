@@ -69,8 +69,8 @@ export default function MatchingSystem() {
         name: mentor.full_name || 'Anonymous Mentor',
         role: 'Mentor',
         description: mentor.bio || 'Experienced mentor ready to guide your startup journey',
-        industry: mentor.focus_areas?.[0] || 'General',
-        expertise: mentor.focus_areas || [],
+        industry: mentor.bio?.split(' ')[0] || 'General',
+        expertise: mentor.bio ? [mentor.bio] : [],
         compatibility_score: Math.floor(Math.random() * 40) + 60, // 60-100% compatibility
       }));
       setMentorMatches(mentorMatches);
@@ -89,8 +89,8 @@ export default function MatchingSystem() {
         name: investor.full_name || 'Anonymous Investor',
         role: 'Investor',
         description: investor.bio || 'Looking for promising startups to invest in',
-        industry: investor.focus_areas?.[0] || 'General',
-        expertise: investor.focus_areas || [],
+        industry: investor.bio?.split(' ')[0] || 'General',
+        expertise: investor.bio ? [investor.bio] : [],
         compatibility_score: Math.floor(Math.random() * 30) + 70, // 70-100% compatibility
       }));
       setInvestorMatches(investorMatches);

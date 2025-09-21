@@ -104,7 +104,7 @@ export default function CompanyProfileManager() {
       name: formData.name,
       description: formData.description,
       industry: formData.industry,
-      stage: formData.stage,
+      stage: formData.stage as 'idea' | 'prototype' | 'mvp' | 'growth' | 'scale',
       website: formData.website,
       location: formData.location,
       team_size: isInvestor 

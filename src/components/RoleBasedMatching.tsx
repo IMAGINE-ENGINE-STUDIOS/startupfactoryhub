@@ -112,8 +112,8 @@ export default function RoleBasedMatching() {
       name: profile.full_name || 'Anonymous User',
       role: profile.role === 'advisor' ? 'Advisor' : profile.role.charAt(0).toUpperCase() + profile.role.slice(1),
       description: profile.bio || `Experienced ${profile.role} ready to help startups`,
-      industry: profile.focus_areas?.[0] || 'General',
-      skills: profile.focus_areas || [],
+      industry: profile.bio?.split(' ')[0] || 'General',
+      skills: profile.bio ? [profile.bio] : [],
       experience: 'Senior', // Default value
       compatibility_score: Math.floor(Math.random() * 40) + 60,
     }));
@@ -132,7 +132,7 @@ export default function RoleBasedMatching() {
       query = query.ilike('industry', `%${criteria.industry}%`);
     }
     if (criteria.stage) {
-      query = query.eq('stage', criteria.stage);
+      query = query.eq('stage', criteria.stage as 'idea' | 'prototype' | 'mvp' | 'growth' | 'scale');
     }
     if (criteria.location) {
       query = query.ilike('location', `%${criteria.location}%`);
@@ -220,8 +220,8 @@ export default function RoleBasedMatching() {
         name: advisor.full_name || 'Anonymous Advisor',
         role: 'Advisor',
         description: advisor.bio || 'Experienced professional ready to guide students',
-        industry: advisor.focus_areas?.[0] || 'General',
-        skills: advisor.focus_areas || [],
+        industry: advisor.bio?.split(' ')[0] || 'General',
+        skills: advisor.bio ? [advisor.bio] : [],
         compatibility_score: Math.floor(Math.random() * 40) + 60,
       }));
       matches = [...matches, ...advisorMatches];

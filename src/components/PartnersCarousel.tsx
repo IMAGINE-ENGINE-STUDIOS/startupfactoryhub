@@ -31,18 +31,26 @@ export default function PartnersCarousel() {
   }, [partners.length]);
 
   const fetchPartners = async () => {
+    // Use companies table as partners since partners table doesn't exist
     const { data, error } = await supabase
-      .from('partners')
+      .from('companies')
       .select('*')
-      .eq('is_active', true)
-      .order('order_index');
+      .limit(8);
     
     if (error) {
       console.error('Error fetching partners:', error);
       return;
     }
     
-    setPartners(data || []);
+    const formattedPartners = (data || []).map(company => ({
+      id: company.id,
+      name: company.name,
+      logo_url: company.logo_url || '/placeholder.svg',
+      website: company.website,
+      tier: 'gold'
+    }));
+    
+    setPartners(formattedPartners);
   };
 
   if (partners.length === 0) {
