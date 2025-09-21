@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { 
   Heart, 
@@ -18,11 +17,11 @@ import {
   Plus,
   Bookmark,
   MoreHorizontal,
-  UserPlus,
   Building2,
   TrendingUp,
   Users,
-  GraduationCap
+  GraduationCap,
+  Briefcase
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
@@ -69,76 +68,90 @@ const CommunityFeed = () => {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filter, setFilter] = useState("all");
-  const [roleFilter, setRoleFilter] = useState("all");
   const [showComments, setShowComments] = useState<string | null>(null);
   const [comments, setComments] = useState<{ [key: string]: PostComment[] }>({});
   const [newComment, setNewComment] = useState("");
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
 
-  // Sample data for guest mode
+  // Sample data for guest mode and demonstration
   const samplePosts: FeedPost[] = [
     {
       id: "sample-1",
-      content: "Just closed our Series A! 🎉 Looking forward to scaling our AI platform and hiring amazing talent. #startup #funding #ai",
+      content: "Just secured $2M in Series A funding! 🎉 Excited to scale our AI healthcare platform. Looking for senior engineers to join our team. #startup #funding #healthcare #hiring",
       created_at: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
       user_id: "sample-user-1",
       likes_count: 24,
       comments_count: 8,
       post_type: "announcement",
-      tags: ["startup", "funding", "ai"],
+      tags: ["startup", "funding", "healthcare", "hiring"],
       profiles: {
         full_name: "Sarah Chen",
         role: "startup",
-        company_name: "TechFlow AI",
+        company_name: "HealthAI Solutions",
         position: "CEO & Founder"
       }
     },
     {
       id: "sample-2",
-      content: "Mentoring session with 3 promising startups today. The innovation in climate tech is absolutely incredible! Always happy to help founders navigate early challenges. #mentorship #climatetech",
+      content: "Had an amazing mentoring session today with 5 promising fintech startups. The innovation in digital payments is incredible! Always happy to help founders navigate regulatory challenges. DM me if you need guidance! #mentorship #fintech #payments",
       created_at: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
       user_id: "sample-user-2",
       likes_count: 18,
       comments_count: 5,
       post_type: "update",
-      tags: ["mentorship", "climatetech"],
+      tags: ["mentorship", "fintech", "payments"],
       profiles: {
         full_name: "Michael Rodriguez",
         role: "mentor",
-        company_name: "GreenVentures",
-        position: "Senior Advisor"
+        company_name: "FinTech Advisors",
+        position: "Senior Partner"
       }
     },
     {
       id: "sample-3",
-      content: "We're actively looking for B2B SaaS startups in the $1M-$5M revenue range. Focus areas: enterprise software, cybersecurity, and fintech. Drop me a DM! #investing #b2bsaas",
+      content: "Looking for B2B SaaS startups with $500K-$3M ARR for our next investment round. Focus areas: enterprise software, cybersecurity, and workforce solutions. Strong unit economics and proven market fit required. #investing #b2bsaas #enterprise",
       created_at: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
       user_id: "sample-user-3",
       likes_count: 45,
       comments_count: 12,
       post_type: "announcement",
-      tags: ["investing", "b2bsaas"],
+      tags: ["investing", "b2bsaas", "enterprise"],
       profiles: {
         full_name: "Jessica Liu",
         role: "investor",
-        company_name: "NextGen Capital",
-        position: "Partner"
+        company_name: "Venture Growth Capital",
+        position: "Principal"
       }
     },
     {
       id: "sample-4",
-      content: "Just finished an amazing internship at a Y Combinator startup! The learning experience was incredible. Now looking for full-time opportunities in product management. #internship #career",
+      content: "Completed my software engineering internship at a Y Combinator startup! Learned so much about building scalable systems. Now looking for full-time product engineer opportunities. Passionate about AI and developer tools. #internship #career #ai #devtools",
       created_at: new Date(Date.now() - 8 * 60 * 60 * 1000).toISOString(),
       user_id: "sample-user-4",
       likes_count: 12,
       comments_count: 3,
       post_type: "achievement",
-      tags: ["internship", "career"],
+      tags: ["internship", "career", "ai", "devtools"],
       profiles: {
         full_name: "Alex Thompson",
         role: "student",
-        position: "Computer Science Student"
+        position: "Computer Science Graduate"
+      }
+    },
+    {
+      id: "sample-5",
+      content: "We're offering remote internship opportunities for talented students! Join our team and work on cutting-edge blockchain technology. Looking for developers, designers, and marketing interns. Apply on our careers page! #internships #blockchain #remote #students",
+      created_at: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+      user_id: "sample-user-5",
+      likes_count: 32,
+      comments_count: 15,
+      post_type: "announcement",
+      tags: ["internships", "blockchain", "remote", "students"],
+      profiles: {
+        full_name: "David Park",
+        role: "startup",
+        company_name: "BlockTech Solutions",
+        position: "Head of Talent"
       }
     }
   ];
@@ -154,7 +167,7 @@ const CommunityFeed = () => {
       setPosts(samplePosts);
       setLoading(false);
     }
-  }, [user, isGuest, filter, roleFilter, searchQuery]);
+  }, [user, isGuest, searchQuery]);
 
   const fetchPosts = async () => {
     try {
@@ -173,10 +186,6 @@ const CommunityFeed = () => {
         .order('created_at', { ascending: false })
         .limit(50);
 
-      if (filter !== "all") {
-        query = query.eq('post_type', filter);
-      }
-
       if (searchQuery) {
         query = query.ilike('content', `%${searchQuery}%`);
       }
@@ -184,16 +193,7 @@ const CommunityFeed = () => {
       const { data, error } = await query;
 
       if (error) throw error;
-      
-      let filteredPosts = (data as any) || [];
-      
-      if (roleFilter !== "all") {
-        filteredPosts = filteredPosts.filter((post: any) => 
-          post.profiles?.role === roleFilter
-        );
-      }
-
-      setPosts(filteredPosts);
+      setPosts((data as any) || []);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -228,12 +228,22 @@ const CommunityFeed = () => {
         [postId]: [
           {
             id: "comment-1",
-            content: "Congratulations! This is amazing news!",
+            content: "Congratulations! This is amazing news! 🎉",
             created_at: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
             user_id: "comment-user-1",
             profiles: {
-              full_name: "John Doe",
+              full_name: "John Smith",
               role: "mentor"
+            }
+          },
+          {
+            id: "comment-2",
+            content: "Great to see more innovation in this space. Would love to connect!",
+            created_at: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
+            user_id: "comment-user-2",
+            profiles: {
+              full_name: "Emily Chen",
+              role: "investor"
             }
           }
         ]
@@ -393,7 +403,7 @@ const CommunityFeed = () => {
     }
   };
 
-  const availableTags = ["startup", "funding", "tech", "ai", "growth", "hiring", "product", "marketing"];
+  const availableTags = ["startup", "funding", "tech", "ai", "growth", "hiring", "product", "marketing", "internships", "mentorship", "investing", "healthcare", "fintech", "blockchain"];
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -434,13 +444,13 @@ const CommunityFeed = () => {
       
       {/* Header */}
       <div className="bg-background/80 backdrop-blur-lg border-b">
-        <div className="container mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 py-6 max-w-2xl">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                Community Feed
+                Community
               </h1>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-muted-foreground mt-1">
                 Connect with startups, mentors, investors, and students
               </p>
             </div>
@@ -451,7 +461,7 @@ const CommunityFeed = () => {
                   placeholder="Search posts..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-64"
+                  className="pl-10 w-48"
                 />
               </div>
             </div>
@@ -459,348 +469,242 @@ const CommunityFeed = () => {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Sidebar */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-24">
-              <CardHeader>
-                <h3 className="font-semibold">Filters</h3>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h4 className="text-sm font-medium mb-2">User Type</h4>
-                  <div className="space-y-2">
-                    {[
-                      { id: "all", label: "All Users", icon: Users },
-                      { id: "startup", label: "Startups", icon: Building2 },
-                      { id: "investor", label: "Investors", icon: TrendingUp },
-                      { id: "mentor", label: "Mentors", icon: Users },
-                      { id: "student", label: "Students", icon: GraduationCap }
-                    ].map((type) => {
-                      const Icon = type.icon;
-                      return (
-                        <Button
-                          key={type.id}
-                          variant={roleFilter === type.id ? "default" : "ghost"}
-                          size="sm"
-                          className="w-full justify-start"
-                          onClick={() => setRoleFilter(type.id)}
-                        >
-                          <Icon className="w-4 h-4 mr-2" />
-                          {type.label}
-                        </Button>
-                      );
-                    })}
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Post Type</h4>
-                  <div className="space-y-2">
-                    {["all", "update", "announcement", "question", "achievement"].map((type) => (
-                      <Button
-                        key={type}
-                        variant={filter === type ? "default" : "ghost"}
-                        size="sm"
-                        className="w-full justify-start"
-                        onClick={() => setFilter(type)}
-                      >
-                        {type.charAt(0).toUpperCase() + type.slice(1)}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-                
-                <Separator />
-                
-                <div>
-                  <h4 className="text-sm font-medium mb-2">Trending Topics</h4>
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+        <div className="space-y-6">
+          {/* Create Post */}
+          {!isGuest && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <Textarea
+                    placeholder="What's happening in your startup journey?"
+                    value={newPost}
+                    onChange={(e) => setNewPost(e.target.value)}
+                    className="min-h-[100px]"
+                  />
+                  
                   <div className="flex flex-wrap gap-2">
-                    {availableTags.slice(0, 6).map((tag) => (
+                    {availableTags.map((tag) => (
                       <Badge
                         key={tag}
-                        variant="secondary"
-                        className="cursor-pointer text-xs"
-                        onClick={() => setSearchQuery(`#${tag}`)}
+                        variant={selectedTags.includes(tag) ? "default" : "outline"}
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setSelectedTags(prev => 
+                            prev.includes(tag) 
+                              ? prev.filter(t => t !== tag)
+                              : [...prev, tag]
+                          );
+                        }}
                       >
                         #{tag}
                       </Badge>
                     ))}
                   </div>
+                  
+                  <div className="flex justify-between items-center">
+                    <div className="flex gap-2">
+                      <Button variant="ghost" size="sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Media
+                      </Button>
+                    </div>
+                    <Button onClick={createPost} disabled={!newPost.trim()}>
+                      <Send className="h-4 w-4 mr-2" />
+                      Post
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
-          </div>
+          )}
 
-          {/* Main Feed */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Create Post */}
-            {!isGuest && (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="space-y-4">
-                    <Textarea
-                      placeholder="What's happening in your startup journey?"
-                      value={newPost}
-                      onChange={(e) => setNewPost(e.target.value)}
-                      className="min-h-[100px]"
-                    />
-                    
-                    <div className="flex flex-wrap gap-2">
-                      {availableTags.map((tag) => (
-                        <Badge
-                          key={tag}
-                          variant={selectedTags.includes(tag) ? "default" : "outline"}
-                          className="cursor-pointer"
-                          onClick={() => {
-                            setSelectedTags(prev => 
-                              prev.includes(tag) 
-                                ? prev.filter(t => t !== tag)
-                                : [...prev, tag]
-                            );
-                          }}
-                        >
-                          #{tag}
-                        </Badge>
-                      ))}
-                    </div>
-                    
-                    <div className="flex justify-between items-center">
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">
-                          <Plus className="h-4 w-4 mr-2" />
-                          Media
-                        </Button>
-                      </div>
-                      <Button onClick={createPost} disabled={!newPost.trim()}>
-                        <Send className="h-4 w-4 mr-2" />
-                        Post
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+          {/* Guest Mode Notice */}
+          {isGuest && (
+            <Card className="border-primary/20 bg-primary/5">
+              <CardContent className="pt-6">
+                <div className="text-center">
+                  <h3 className="font-semibold mb-2">Exploring as Guest</h3>
+                  <p className="text-muted-foreground mb-4">
+                    You're viewing sample content. Sign up to post, like, and comment!
+                  </p>
+                  <Button onClick={() => navigate("/auth")} className="mr-2">
+                    Sign Up
+                  </Button>
+                  <Button variant="outline" onClick={() => navigate("/auth")}>
+                    Sign In
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Guest Mode Notice */}
-            {isGuest && (
-              <Card className="border-primary/20 bg-primary/5">
-                <CardContent className="pt-6">
-                  <div className="text-center">
-                    <h3 className="font-semibold mb-2">Exploring as Guest</h3>
-                    <p className="text-muted-foreground mb-4">
-                      You're viewing sample content. Sign up to post, like, and comment!
-                    </p>
-                    <Button onClick={() => navigate("/auth")} className="mr-2">
-                      Sign Up
-                    </Button>
-                    <Button variant="outline" onClick={() => navigate("/auth")}>
-                      Sign In
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Posts */}
-            {posts.map((post) => (
-              <Card key={post.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="pt-6">
-                  <div className="space-y-4">
-                    {/* Post Header */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center gap-3">
-                        <Avatar>
-                          <AvatarImage src={post.profiles?.avatar_url} />
-                          <AvatarFallback>
-                            {post.profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-semibold">{post.profiles?.full_name || 'Anonymous'}</h4>
-                            {post.profiles?.role && (
-                              <Badge variant="outline" className={`text-xs ${getRoleColor(post.profiles.role)}`}>
-                                {getRoleIcon(post.profiles.role)}
-                                <span className="ml-1">{post.profiles.role}</span>
-                              </Badge>
-                            )}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {post.profiles?.position && post.profiles?.company_name 
-                              ? `${post.profiles.position} at ${post.profiles.company_name}`
-                              : post.profiles?.role
-                            } • {formatDistanceToNow(new Date(post.created_at))} ago
-                          </p>
-                        </div>
-                      </div>
-                      <Button variant="ghost" size="sm">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    {/* Post Content */}
-                    <div>
-                      <p className="text-foreground leading-relaxed">{post.content}</p>
-                      
-                      {post.tags && post.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-2 mt-3">
-                          {post.tags.map((tag, idx) => (
-                            <Badge key={idx} variant="secondary" className="text-xs">
-                              #{tag}
+          {/* Posts */}
+          {posts.map((post) => (
+            <Card key={post.id} className="hover:shadow-lg transition-shadow">
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  {/* Post Header */}
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarImage src={post.profiles?.avatar_url} />
+                        <AvatarFallback>
+                          {post.profiles?.full_name?.split(' ').map(n => n[0]).join('') || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-semibold">{post.profiles?.full_name || 'Anonymous'}</h4>
+                          {post.profiles?.role && (
+                            <Badge variant="outline" className={`text-xs ${getRoleColor(post.profiles.role)}`}>
+                              {getRoleIcon(post.profiles.role)}
+                              <span className="ml-1">{post.profiles.role}</span>
                             </Badge>
-                          ))}
+                          )}
                         </div>
-                      )}
-                    </div>
-
-                    {/* Post Actions */}
-                    <div className="flex items-center justify-between pt-2">
-                      <div className="flex items-center gap-6">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => toggleLike(post.id)}
-                          className={likedPosts.has(post.id) ? "text-red-500" : ""}
-                        >
-                          <Heart className={`h-4 w-4 mr-2 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
-                          {post.likes_count}
-                        </Button>
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            const postId = post.id;
-                            setShowComments(showComments === postId ? null : postId);
-                            if (showComments !== postId) {
-                              fetchComments(postId);
-                            }
-                          }}
-                        >
-                          <MessageCircle className="h-4 w-4 mr-2" />
-                          {post.comments_count}
-                        </Button>
-                        
-                        <Button variant="ghost" size="sm">
-                          <Share2 className="h-4 w-4 mr-2" />
-                          Share
-                        </Button>
+                        <p className="text-sm text-muted-foreground">
+                          {post.profiles?.position && post.profiles?.company_name 
+                            ? `${post.profiles.position} at ${post.profiles.company_name}`
+                            : post.profiles?.role
+                          } • {formatDistanceToNow(new Date(post.created_at))} ago
+                        </p>
                       </div>
-                      
-                      <Button variant="ghost" size="sm">
-                        <Bookmark className="h-4 w-4" />
-                      </Button>
                     </div>
+                    <Button variant="ghost" size="sm">
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </div>
 
-                    {/* Comments Section */}
-                    {showComments === post.id && (
-                      <div className="border-t pt-4 space-y-4">
-                        {/* Add Comment */}
-                        {!isGuest && (
-                          <div className="flex gap-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarFallback className="text-xs">
-                                {user?.email?.charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 flex gap-2">
-                              <Input
-                                placeholder="Write a comment..."
-                                value={newComment}
-                                onChange={(e) => setNewComment(e.target.value)}
-                                onKeyPress={(e) => {
-                                  if (e.key === 'Enter') {
-                                    addComment(post.id);
-                                  }
-                                }}
-                              />
-                              <Button size="sm" onClick={() => addComment(post.id)}>
-                                <Send className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        )}
-
-                        {/* Comments List */}
-                        <div className="space-y-3">
-                          {comments[post.id]?.map((comment) => (
-                            <div key={comment.id} className="flex gap-3">
-                              <Avatar className="w-8 h-8">
-                                <AvatarImage src={comment.profiles?.avatar_url} />
-                                <AvatarFallback className="text-xs">
-                                  {comment.profiles?.full_name?.charAt(0) || 'U'}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <div className="bg-muted rounded-lg p-3">
-                                  <div className="flex items-center gap-2 mb-1">
-                                    <span className="font-medium text-sm">
-                                      {comment.profiles?.full_name || 'Anonymous'}
-                                    </span>
-                                    <span className="text-xs text-muted-foreground">
-                                      {formatDistanceToNow(new Date(comment.created_at))} ago
-                                    </span>
-                                  </div>
-                                  <p className="text-sm">{comment.content}</p>
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                  {/* Post Content */}
+                  <div>
+                    <p className="text-foreground leading-relaxed">{post.content}</p>
+                    
+                    {post.tags && post.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mt-3">
+                        {post.tags.map((tag, idx) => (
+                          <Badge key={idx} variant="secondary" className="text-xs">
+                            #{tag}
+                          </Badge>
+                        ))}
                       </div>
                     )}
                   </div>
-                </CardContent>
-              </Card>
-            ))}
 
-            {posts.length === 0 && (
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center py-8">
-                    <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No posts found</h3>
-                    <p className="text-muted-foreground">
-                      Be the first to share something with the community!
-                    </p>
+                  {/* Post Actions */}
+                  <div className="flex items-center justify-between pt-2">
+                    <div className="flex items-center gap-6">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => toggleLike(post.id)}
+                        className={likedPosts.has(post.id) ? "text-red-500" : ""}
+                      >
+                        <Heart className={`h-4 w-4 mr-2 ${likedPosts.has(post.id) ? 'fill-current' : ''}`} />
+                        {post.likes_count}
+                      </Button>
+                      
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          const postId = post.id;
+                          setShowComments(showComments === postId ? null : postId);
+                          if (showComments !== postId) {
+                            fetchComments(postId);
+                          }
+                        }}
+                      >
+                        <MessageCircle className="h-4 w-4 mr-2" />
+                        {post.comments_count}
+                      </Button>
+                      
+                      <Button variant="ghost" size="sm">
+                        <Share2 className="h-4 w-4 mr-2" />
+                        Share
+                      </Button>
+                    </div>
+                    
+                    <Button variant="ghost" size="sm">
+                      <Bookmark className="h-4 w-4" />
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
 
-          {/* Right Sidebar */}
-          <div className="lg:col-span-1">
-            <Card className="sticky top-24">
-              <CardHeader>
-                <h3 className="font-semibold">Community Stats</h3>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">150+</div>
-                    <div className="text-xs text-muted-foreground">Startups</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">80+</div>
-                    <div className="text-xs text-muted-foreground">Mentors</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">45+</div>
-                    <div className="text-xs text-muted-foreground">Investors</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-primary">200+</div>
-                    <div className="text-xs text-muted-foreground">Students</div>
-                  </div>
+                  {/* Comments Section */}
+                  {showComments === post.id && (
+                    <div className="border-t pt-4 space-y-4">
+                      {/* Add Comment */}
+                      {!isGuest && (
+                        <div className="flex gap-3">
+                          <Avatar className="w-8 h-8">
+                            <AvatarFallback className="text-xs">
+                              {user?.email?.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 flex gap-2">
+                            <Input
+                              placeholder="Write a comment..."
+                              value={newComment}
+                              onChange={(e) => setNewComment(e.target.value)}
+                              onKeyPress={(e) => {
+                                if (e.key === 'Enter') {
+                                  addComment(post.id);
+                                }
+                              }}
+                            />
+                            <Button size="sm" onClick={() => addComment(post.id)}>
+                              <Send className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Comments List */}
+                      <div className="space-y-3">
+                        {comments[post.id]?.map((comment) => (
+                          <div key={comment.id} className="flex gap-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={comment.profiles?.avatar_url} />
+                              <AvatarFallback className="text-xs">
+                                {comment.profiles?.full_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <div className="bg-muted rounded-lg p-3">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium text-sm">
+                                    {comment.profiles?.full_name || 'Anonymous'}
+                                  </span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {formatDistanceToNow(new Date(comment.created_at))} ago
+                                  </span>
+                                </div>
+                                <p className="text-sm">{comment.content}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
-          </div>
+          ))}
+
+          {posts.length === 0 && (
+            <Card>
+              <CardContent className="pt-6">
+                <div className="text-center py-8">
+                  <Users className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No posts found</h3>
+                  <p className="text-muted-foreground">
+                    Be the first to share something with the community!
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
