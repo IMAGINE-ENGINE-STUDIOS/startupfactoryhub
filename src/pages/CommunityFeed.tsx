@@ -24,6 +24,8 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
 import DashboardNavigation from "@/components/DashboardNavigation";
+import ShortsCarousel from "@/components/ShortsCarousel";
+import ShortsCreator from "@/components/ShortsCreator";
 
 interface FeedPost {
   id: string;
@@ -70,6 +72,7 @@ const CommunityFeed = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [isCreatorOpen, setIsCreatorOpen] = useState(false);
 
   useEffect(() => {
     // Use sample data since feed tables don't exist yet
@@ -112,6 +115,19 @@ const CommunityFeed = () => {
       title: "Feature coming soon",
       description: "Comments will be available once feed tables are set up.",
     });
+  };
+
+  const handleCreateShort = () => {
+    setIsCreatorOpen(true);
+  };
+
+  const handleSaveShort = (shortData: any) => {
+    toast({
+      title: "Short created!",
+      description: "Your short has been created successfully.",
+    });
+    // Here you would typically save to the database
+    console.log("Short data:", shortData);
   };
 
   const toggleComments = (postId: string) => {
@@ -179,6 +195,9 @@ const CommunityFeed = () => {
               Connect, share, and learn from the startup community
             </p>
           </div>
+
+          {/* Shorts Carousel */}
+          <ShortsCarousel onCreateShort={handleCreateShort} />
 
           {/* Search */}
           <div className="mb-6">
@@ -372,6 +391,13 @@ const CommunityFeed = () => {
           </div>
         </div>
       </div>
+
+      {/* Shorts Creator Modal */}
+      <ShortsCreator
+        isOpen={isCreatorOpen}
+        onClose={() => setIsCreatorOpen(false)}
+        onSave={handleSaveShort}
+      />
     </div>
   );
 };
