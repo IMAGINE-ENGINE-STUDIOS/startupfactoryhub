@@ -355,6 +355,121 @@ export type Database = {
         }
         Relationships: []
       }
+      event_attendees: {
+        Row: {
+          created_at: string | null
+          event_id: string
+          id: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          event_id: string
+          id?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_attendees_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_invites: {
+        Row: {
+          created_at: string | null
+          event_id: string
+          id: string
+          invitee_id: string
+          inviter_id: string
+          status: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_id: string
+          id?: string
+          invitee_id: string
+          inviter_id: string
+          status?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string
+          id?: string
+          invitee_id?: string
+          inviter_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_invites_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          banner_url: string | null
+          created_at: string | null
+          description: string | null
+          end_date: string
+          id: string
+          is_public: boolean | null
+          location: string | null
+          max_attendees: number | null
+          organizer_id: string
+          start_date: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          banner_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date: string
+          id?: string
+          is_public?: boolean | null
+          location?: string | null
+          max_attendees?: number | null
+          organizer_id: string
+          start_date: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          banner_url?: string | null
+          created_at?: string | null
+          description?: string | null
+          end_date?: string
+          id?: string
+          is_public?: boolean | null
+          location?: string | null
+          max_attendees?: number | null
+          organizer_id?: string
+          start_date?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       feed_posts: {
         Row: {
           bookmarks_count: number | null

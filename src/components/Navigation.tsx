@@ -28,6 +28,12 @@ const Navigation = () => {
             >
               Community
             </button>
+            <button 
+              onClick={() => navigate("/events")}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Events
+            </button>
             <a href="#resources" className="text-muted-foreground hover:text-foreground transition-colors">
               Resources
             </a>

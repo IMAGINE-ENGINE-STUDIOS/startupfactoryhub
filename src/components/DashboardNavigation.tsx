@@ -80,7 +80,11 @@ const DashboardNavigation = () => {
               <Building className="w-4 h-4" />
               <span>Resources</span>
             </Button>
-            <Button variant="ghost" className="flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              className="flex items-center space-x-2"
+              onClick={() => navigate("/events")}
+            >
               <Calendar className="w-4 h-4" />
               <span>Events</span>
             </Button>
