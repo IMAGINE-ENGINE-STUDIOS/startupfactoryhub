@@ -265,6 +265,88 @@ const youtubeCourses: Course[] = [
     duration: '1 hour',
     playlist_url: 'https://www.youtube.com/embed/OVf_ASEGuns',
     provider: 'Illumina'
+  },
+  // Cybersecurity
+  {
+    id: 'cyber-1',
+    title: 'Cybersecurity Fundamentals',
+    description: 'Complete introduction to cybersecurity concepts and practices',
+    category: 'Cybersecurity',
+    level: 'Beginner',
+    duration: '15+ hours',
+    playlist_url: 'https://www.youtube.com/embed/videoseries?list=PL_RcVnBPGmSLAGyNa6wiAf8bbVwxYYzCi',
+    provider: 'Simply Cyber'
+  },
+  {
+    id: 'cyber-2',
+    title: 'Ethical Hacking Complete Course',
+    description: 'Learn ethical hacking, penetration testing, and security assessment',
+    category: 'Cybersecurity',
+    level: 'Intermediate',
+    duration: '18+ hours',
+    playlist_url: 'https://www.youtube.com/embed/videoseries?list=PL9ooVrP1hQOGPQVeapGsJCktzIO4DtI4_',
+    provider: 'Edureka'
+  },
+  {
+    id: 'cyber-3',
+    title: 'Network Security & Cryptography',
+    description: 'Deep dive into network security protocols and cryptographic systems',
+    category: 'Cybersecurity',
+    level: 'Advanced',
+    duration: '4+ hours',
+    playlist_url: 'https://www.youtube.com/embed/kUovJpWqEMk',
+    provider: 'Professor Messer'
+  },
+  {
+    id: 'cyber-4',
+    title: 'Web Application Security',
+    description: 'Learn to identify and prevent web application vulnerabilities',
+    category: 'Cybersecurity',
+    level: 'Advanced',
+    duration: '3+ hours',
+    playlist_url: 'https://www.youtube.com/embed/X3DVaMnl5n8',
+    provider: 'OWASP'
+  },
+  {
+    id: 'cyber-5',
+    title: 'Advanced Penetration Testing',
+    description: 'Master advanced penetration testing techniques and methodologies',
+    category: 'Cybersecurity',
+    level: 'Advanced',
+    duration: '20+ hours',
+    playlist_url: 'https://www.youtube.com/embed/videoseries?list=PL_pbwdIyffslM_o92NwkaUzD7C6Fekx26',
+    provider: 'HackerSploit'
+  },
+  // Defense & Intelligence
+  {
+    id: 'def-1',
+    title: 'Defense Technology & Systems',
+    description: 'Overview of modern defense technologies and military systems',
+    category: 'Defense & Intelligence',
+    level: 'Intermediate',
+    duration: '2+ hours',
+    playlist_url: 'https://www.youtube.com/embed/atxKIvSQJ-0',
+    provider: 'Defense Tech'
+  },
+  {
+    id: 'def-2',
+    title: 'Intelligence Analysis and Operations',
+    description: 'Understanding intelligence gathering and analysis methodologies',
+    category: 'Defense & Intelligence',
+    level: 'Advanced',
+    duration: '1.5+ hours',
+    playlist_url: 'https://www.youtube.com/embed/WJlGOhIIPuE',
+    provider: 'Intelligence Studies'
+  },
+  {
+    id: 'def-3',
+    title: 'Strategic Defense Systems',
+    description: 'Learn about strategic defense planning and national security',
+    category: 'Defense & Intelligence',
+    level: 'Advanced',
+    duration: '2+ hours',
+    playlist_url: 'https://www.youtube.com/embed/8LmY6Lq4Rvs',
+    provider: 'Military Analysis'
   }
 ];
 
