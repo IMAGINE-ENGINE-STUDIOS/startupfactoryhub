@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import FloatingChat from "./components/FloatingChat";
+import RecommendationPopup from "./components/RecommendationPopup";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ProfileSetup from "./pages/ProfileSetup";
@@ -39,6 +40,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
             <FloatingChat />
+            <RecommendationPopup />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
