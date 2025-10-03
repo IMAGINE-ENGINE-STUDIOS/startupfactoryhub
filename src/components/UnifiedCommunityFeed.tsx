@@ -7,8 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, Bookmark, Repeat2, Send } from 'lucide-react';
+import { Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, Bookmark, Repeat2, Send, Calendar, MapPin, Clock } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { useNavigate } from 'react-router-dom';
 
 interface FeedPost {
   id: string;
@@ -16,6 +17,8 @@ interface FeedPost {
   created_at: string;
   user_id: string;
   post_type: string;
+  internship_data?: any;
+  media_urls?: string[] | null;
   profiles?: {
     full_name: string;
     role: string;
@@ -55,6 +58,7 @@ export default function UnifiedCommunityFeed({
   const [newComment, setNewComment] = useState<Record<string, string>>({});
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchPosts();
@@ -438,6 +442,52 @@ export default function UnifiedCommunityFeed({
                   </div>
                   
                   <p className="text-foreground leading-relaxed whitespace-pre-wrap">{post.content}</p>
+                  
+                  {/* Media */}
+                  {post.media_urls && post.media_urls.length > 0 && (
+                    <div className="grid grid-cols-2 gap-2 mt-3">
+                      {post.media_urls.map((url, idx) => (
+                        <img 
+                          key={idx}
+                          src={url} 
+                          alt={`Post media ${idx + 1}`}
+                          className="rounded-lg w-full h-48 object-cover"
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Event Attend Button */}
+                  {post.post_type === 'event' && post.internship_data?.event_id && (
+                    <Button 
+                      onClick={async () => {
+                        if (!user) {
+                          toast({ title: 'Please sign in to attend events', variant: 'destructive' });
+                          return;
+                        }
+                        
+                        const { error } = await supabase
+                          .from('event_attendees')
+                          .upsert({
+                            event_id: post.internship_data?.event_id,
+                            user_id: user.id,
+                            status: 'going'
+                          });
+
+                        if (error) {
+                          toast({ title: 'Failed to RSVP', variant: 'destructive' });
+                        } else {
+                          toast({ title: 'Successfully RSVPed to event!' });
+                          navigate('/events');
+                        }
+                      }}
+                      className="mt-3 w-full gap-2"
+                      variant="default"
+                    >
+                      <Calendar className="h-4 w-4" />
+                      Attend Event
+                    </Button>
+                  )}
                   
                   <div className="flex items-center space-x-6 pt-3 border-t border-border">
                     <Button 

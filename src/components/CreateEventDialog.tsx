@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, Loader2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { format } from 'date-fns';
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -27,7 +29,8 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
     end_date: '',
     end_time: '',
     max_attendees: '',
-    banner_url: ''
+    banner_url: '',
+    post_to_feed: true
   });
   const { user } = useAuth();
   const { toast } = useToast();
@@ -70,7 +73,7 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
       const startDateTime = new Date(`${formData.start_date}T${formData.start_time}`);
       const endDateTime = new Date(`${formData.end_date}T${formData.end_time}`);
 
-      const { error } = await supabase.from('events').insert({
+      const { data: eventData, error } = await supabase.from('events').insert({
         title: formData.title,
         description: formData.description,
         location: formData.location || null,
@@ -79,9 +82,21 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
         banner_url: formData.banner_url || null,
         organizer_id: user.id
-      });
+      }).select().single();
 
       if (error) throw error;
+
+      // Post to feed if option is selected
+      if (formData.post_to_feed && eventData) {
+        const feedContent = `📅 ${formData.title}\n\n${formData.description || ''}\n\n📍 ${formData.location || 'TBD'}\n⏰ ${format(startDateTime, 'PPP p')}`;
+        
+        await supabase.from('feed_posts').insert({
+          content: feedContent,
+          post_type: 'event',
+          media_urls: formData.banner_url ? [formData.banner_url] : null,
+          internship_data: { event_id: eventData.id }
+        } as any);
+      }
 
       toast({ title: 'Event created successfully!' });
       onEventCreated();
@@ -95,7 +110,8 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         end_date: '',
         end_time: '',
         max_attendees: '',
-        banner_url: ''
+        banner_url: '',
+        post_to_feed: true
       });
     } catch (error) {
       console.error('Error creating event:', error);
@@ -243,6 +259,20 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
               onChange={e => setFormData(prev => ({ ...prev, max_attendees: e.target.value }))}
               placeholder="Leave empty for unlimited"
             />
+          </div>
+
+          {/* Post to Feed Option */}
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="post_to_feed"
+              checked={formData.post_to_feed}
+              onCheckedChange={(checked) => 
+                setFormData(prev => ({ ...prev, post_to_feed: checked as boolean }))
+              }
+            />
+            <Label htmlFor="post_to_feed" className="cursor-pointer">
+              Post event announcement to community feed
+            </Label>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
