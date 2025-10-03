@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Filter, Search } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
+import AIFeaturesHub from '@/components/AIFeaturesHub';
+import AIQuickActions from '@/components/AIQuickActions';
 
 interface Investment {
   id: string;
@@ -221,6 +223,7 @@ export default function InvestorDashboard() {
           </div>
           
           <div className="flex space-x-2">
+            <AIQuickActions />
             <Button variant="outline">
               <Filter className="h-4 w-4 mr-2" />
               Filter
@@ -231,6 +234,9 @@ export default function InvestorDashboard() {
             </Button>
           </div>
         </div>
+
+        {/* AI Features Hub */}
+        <AIFeaturesHub />
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">

@@ -2,3 +2,18 @@ project_id = "zqiihhmdsdgwdcwmryym"
 
 [functions.generate-recommendations]
 verify_jwt = true
+
+[functions.ai-chatbot]
+verify_jwt = true
+
+[functions.ai-text-summarizer]
+verify_jwt = true
+
+[functions.ai-sentiment-analyzer]
+verify_jwt = true
+
+[functions.ai-translator]
+verify_jwt = true
+
+[functions.ai-vision-analyzer]
+verify_jwt = true

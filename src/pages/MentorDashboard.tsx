@@ -9,6 +9,8 @@ import MentorRoadmapWidget from "@/components/MentorRoadmapWidget";
 import StartupRecommendationsWidget from "@/components/StartupRecommendationsWidget";
 import MentorCalendarWidget from "@/components/MentorCalendarWidget";
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
+import AIFeaturesHub from "@/components/AIFeaturesHub";
+import AIQuickActions from "@/components/AIQuickActions";
 import { 
   Users, 
   TrendingUp, 
@@ -36,6 +38,7 @@ const MentorDashboard = () => {
               <p className="text-muted-foreground mt-1">Ready to guide the next generation of entrepreneurs?</p>
             </div>
             <div className="flex items-center space-x-3">
+              <AIQuickActions />
               <Button variant="outline" size="sm">
                 <Bell className="w-4 h-4 mr-2" />
                 Notifications
@@ -47,6 +50,9 @@ const MentorDashboard = () => {
             </div>
           </div>
         </div>
+
+        {/* AI Features Hub */}
+        <AIFeaturesHub />
 
         {/* Key Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">

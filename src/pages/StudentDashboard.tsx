@@ -11,6 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { BookOpen, Users, Trophy, Target, Play, CheckCircle, Clock, Star } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
+import AIFeaturesHub from '@/components/AIFeaturesHub';
+import AIQuickActions from '@/components/AIQuickActions';
 
 interface Course {
   id: string;
@@ -217,10 +219,13 @@ export default function StudentDashboard() {
             </div>
           </div>
           
-          <Button className="pulse-primary">
-            <Play className="h-4 w-4 mr-2" />
-            Continue Learning
-          </Button>
+          <div className="flex gap-2">
+            <AIQuickActions />
+            <Button className="pulse-primary">
+              <Play className="h-4 w-4 mr-2" />
+              Continue Learning
+            </Button>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -239,6 +244,9 @@ export default function StudentDashboard() {
             </Card>
           ))}
         </div>
+
+        {/* AI Features Hub */}
+        <AIFeaturesHub />
 
         <Tabs defaultValue="courses" className="space-y-6">
           <TabsList className="grid w-full grid-cols-5 max-w-2xl">
