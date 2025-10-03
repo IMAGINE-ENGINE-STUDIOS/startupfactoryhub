@@ -6,9 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { Calendar, Users, MessageSquare, TrendingUp, Star, Clock, Award } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
+import MentorshipRequests from '@/components/MentorshipRequests';
 
 interface Startup {
   id: string;
@@ -22,14 +24,110 @@ interface Startup {
 export default function AdvisorDashboard() {
   const [startups, setStartups] = useState<Startup[]>([]);
   const [profile, setProfile] = useState<any>(null);
+  const [mentorProfile, setMentorProfile] = useState<any>(null);
+  const [activeMentorships, setActiveMentorships] = useState<any[]>([]);
+  const [upcomingSessions, setUpcomingSessions] = useState<any[]>([]);
   const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
       fetchProfile();
+      fetchMentorProfile();
       fetchStartups();
+      fetchActiveMentorships();
+      fetchUpcomingSessions();
     }
   }, [user]);
+
+  const fetchMentorProfile = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('mentor_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!error && data) {
+      setMentorProfile(data);
+    }
+  };
+
+  const fetchActiveMentorships = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('mentorship_relationships')
+      .select(`
+        *,
+        mentee:mentee_id (
+          full_name,
+          avatar_url
+        ),
+        companies:mentee_id (
+          name,
+          description,
+          stage,
+          industry
+        )
+      `)
+      .eq('mentor_id', user.id)
+      .eq('status', 'active');
+
+    if (!error && data) {
+      setActiveMentorships(data);
+    }
+  };
+
+  const fetchUpcomingSessions = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('mentoring_sessions')
+      .select(`
+        *,
+        mentee:mentee_id (
+          full_name
+        ),
+        companies:mentee_id (
+          name
+        )
+      `)
+      .eq('mentor_id', user.id)
+      .eq('status', 'scheduled')
+      .gte('scheduled_at', new Date().toISOString())
+      .order('scheduled_at', { ascending: true })
+      .limit(5);
+
+    if (!error && data) {
+      setUpcomingSessions(data);
+    }
+  };
+
+  const acceptMentorshipRequest = async (relationshipId: string) => {
+    const { error } = await supabase
+      .from('mentorship_relationships')
+      .update({ status: 'active', start_date: new Date().toISOString() })
+      .eq('id', relationshipId);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to accept mentorship request",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Mentorship Accepted!",
+      description: "You can now schedule sessions with your new mentee.",
+    });
+
+    fetchActiveMentorships();
+    fetchStartups();
+  };
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -70,17 +168,39 @@ export default function AdvisorDashboard() {
   };
 
   const stats = [
-    { title: 'Active Mentees', value: '12', icon: Users, color: 'text-primary' },
-    { title: 'Sessions This Month', value: '24', icon: Calendar, color: 'text-accent' },
-    { title: 'Success Rate', value: '94%', icon: TrendingUp, color: 'text-green-500' },
-    { title: 'Rating', value: '4.9', icon: Star, color: 'text-yellow-500' },
+    { 
+      title: 'Active Mentees', 
+      value: activeMentorships.length.toString(), 
+      icon: Users, 
+      color: 'text-primary' 
+    },
+    { 
+      title: 'Sessions This Month', 
+      value: mentorProfile?.total_sessions?.toString() || '0', 
+      icon: Calendar, 
+      color: 'text-accent' 
+    },
+    { 
+      title: 'Total Sessions', 
+      value: mentorProfile?.total_sessions?.toString() || '0', 
+      icon: TrendingUp, 
+      color: 'text-green-500' 
+    },
+    { 
+      title: 'Rating', 
+      value: mentorProfile?.average_rating?.toFixed(1) || '0.0', 
+      icon: Star, 
+      color: 'text-yellow-500' 
+    },
   ];
 
-  const upcomingSessions = [
-    { company: 'TechStart AI', time: '2:00 PM', topic: 'Product Strategy', founder: 'Sarah Chen' },
-    { company: 'GreenTech Solutions', time: '4:30 PM', topic: 'Funding Round', founder: 'Mike Johnson' },
-    { company: 'DataFlow Pro', time: '6:00 PM', topic: 'Team Building', founder: 'Alex Rivera' },
-  ];
+  const formatTime = (dateString: string) => {
+    return new Date(dateString).toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  };
 
   return (
     <div className="min-h-screen bg-gradient-hero p-4">
@@ -120,13 +240,66 @@ export default function AdvisorDashboard() {
           ))}
         </div>
 
-        <Tabs defaultValue="mentees" className="space-y-6">
+        <Tabs defaultValue="requests" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 max-w-lg">
+            <TabsTrigger value="requests">Requests</TabsTrigger>
             <TabsTrigger value="mentees">My Mentees</TabsTrigger>
             <TabsTrigger value="schedule">Schedule</TabsTrigger>
             <TabsTrigger value="community">Community</TabsTrigger>
-            <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="requests" className="space-y-4">
+            <MentorshipRequests />
+            
+            <Card className="tech-card border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <TrendingUp className="h-5 w-5 text-primary" />
+                  <span>New Mentorship Opportunities</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {startups.slice(0, 6).map((startup) => (
+                    <div key={startup.id} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
+                      <div className="flex items-center space-x-4">
+                        <Avatar className="h-12 w-12">
+                          <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                            {startup.name.charAt(0)}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h3 className="font-semibold text-foreground">{startup.name}</h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2">{startup.description}</p>
+                          <div className="flex space-x-2 mt-2">
+                            <Badge variant="secondary" className="text-xs">{startup.stage}</Badge>
+                            <Badge variant="outline" className="text-xs">{startup.industry}</Badge>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm">
+                          View Details
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          className="pulse-primary"
+                          onClick={() => {
+                            toast({
+                              title: "Feature Coming Soon",
+                              description: "The mentorship application process is being finalized.",
+                            });
+                          }}
+                        >
+                          Offer Mentorship
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           <TabsContent value="mentees" className="space-y-4">
             <Card className="tech-card border-0">
@@ -138,30 +311,45 @@ export default function AdvisorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {startups.slice(0, 6).map((startup) => (
-                    <Card key={startup.id} className="border border-border/50 hover:border-primary/50 transition-colors">
-                      <CardContent className="p-4">
-                        <div className="flex items-start space-x-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                              {startup.name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-sm text-foreground truncate">{startup.name}</h3>
-                            <p className="text-xs text-muted-foreground">Startup Founder</p>
-                            <div className="flex space-x-1 mt-2">
-                              <Badge variant="secondary" className="text-xs">{startup.stage}</Badge>
-                              <Badge variant="outline" className="text-xs">{startup.industry}</Badge>
+                  {activeMentorships.length > 0 ? (
+                    activeMentorships.map((mentorship: any) => (
+                      <Card key={mentorship.id} className="border border-border/50 hover:border-primary/50 transition-colors">
+                        <CardContent className="p-4">
+                          <div className="flex items-start space-x-3">
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={mentorship.mentee?.avatar_url} />
+                              <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                                {mentorship.mentee?.full_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-semibold text-sm text-foreground truncate">
+                                {mentorship.mentee?.full_name || 'Anonymous'}
+                              </h3>
+                              <p className="text-xs text-muted-foreground">
+                                {mentorship.companies?.name || 'Startup Founder'}
+                              </p>
+                              {mentorship.companies && (
+                                <div className="flex space-x-1 mt-2">
+                                  <Badge variant="secondary" className="text-xs">{mentorship.companies.stage}</Badge>
+                                  <Badge variant="outline" className="text-xs">{mentorship.companies.industry}</Badge>
+                                </div>
+                              )}
                             </div>
                           </div>
-                        </div>
-                        <Button size="sm" variant="outline" className="w-full mt-3">
-                          View Progress
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
+                          <Button size="sm" variant="outline" className="w-full mt-3">
+                            View Progress
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    ))
+                  ) : (
+                    <div className="col-span-3 text-center py-12">
+                      <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold mb-2">No active mentees yet</h3>
+                      <p className="text-muted-foreground">Check the Opportunities tab to find startups seeking mentorship</p>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -177,20 +365,31 @@ export default function AdvisorDashboard() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {upcomingSessions.map((session, index) => (
-                    <div key={index} className="flex items-center justify-between p-3 rounded-lg bg-card border border-border/50">
-                      <div>
-                        <h4 className="font-medium text-foreground">{session.company}</h4>
-                        <p className="text-sm text-muted-foreground">{session.topic} • {session.founder}</p>
+                  {upcomingSessions.length > 0 ? (
+                    upcomingSessions.map((session: any) => (
+                      <div key={session.id} className="flex items-center justify-between p-3 rounded-lg bg-card border border-border/50">
+                        <div>
+                          <h4 className="font-medium text-foreground">
+                            {session.companies?.name || session.mentee?.full_name || 'Session'}
+                          </h4>
+                          <p className="text-sm text-muted-foreground">
+                            {session.topic || 'Mentoring Session'} • {session.mentee?.full_name || 'Mentee'}
+                          </p>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium text-primary">{formatTime(session.scheduled_at)}</p>
+                          <Button size="sm" variant="outline" className="mt-1">
+                            Join
+                          </Button>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <p className="font-medium text-primary">{session.time}</p>
-                        <Button size="sm" variant="outline" className="mt-1">
-                          Join
-                        </Button>
-                      </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-8">
+                      <Clock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No upcoming sessions</p>
                     </div>
-                  ))}
+                  )}
                 </CardContent>
               </Card>
 
@@ -232,48 +431,6 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="community" className="space-y-4">
             <UnifiedCommunityFeed />
-          </TabsContent>
-
-          <TabsContent value="opportunities" className="space-y-4">
-            <Card className="tech-card border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <TrendingUp className="h-5 w-5 text-primary" />
-                  <span>New Mentorship Opportunities</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {startups.slice(6, 12).map((startup) => (
-                    <div key={startup.id} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
-                      <div className="flex items-center space-x-4">
-                        <Avatar className="h-12 w-12">
-                          <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                            {startup.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h3 className="font-semibold text-foreground">{startup.name}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2">{startup.description}</p>
-                          <div className="flex space-x-2 mt-2">
-                            <Badge variant="secondary" className="text-xs">{startup.stage}</Badge>
-                            <Badge variant="outline" className="text-xs">{startup.industry}</Badge>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
-                          View Details
-                        </Button>
-                        <Button size="sm" className="pulse-primary">
-                          Apply to Mentor
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
           </TabsContent>
         </Tabs>
       </div>

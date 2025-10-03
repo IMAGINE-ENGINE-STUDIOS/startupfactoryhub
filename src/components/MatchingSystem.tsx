@@ -136,27 +136,68 @@ export default function MatchingSystem() {
   const sendConnectionRequest = async (targetId: string, targetName: string) => {
     if (!user) return;
 
-    const { error } = await supabase
-      .from('connections')
-      .insert([{
-        requester_id: user.id,
-        addressee_id: targetId,
-        status: 'pending'
-      }]);
+    // Check if this is a mentorship request (connecting with a mentor/advisor)
+    const { data: targetProfile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('user_id', targetId)
+      .single();
 
-    if (error) {
+    if (targetProfile?.role === 'advisor' || targetProfile?.role === 'mentor') {
+      // Send mentorship request
+      const { error } = await supabase
+        .from('mentorship_relationships')
+        .insert({
+          mentor_id: targetId,
+          mentee_id: user.id,
+          status: 'pending'
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast({
+            title: "Request Already Sent",
+            description: "You've already requested mentorship from this person.",
+            variant: "destructive",
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to send mentorship request",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+
       toast({
-        title: "Error",
-        description: "Failed to send connection request",
-        variant: "destructive",
+        title: "Mentorship Request Sent!",
+        description: `Your mentorship request has been sent to ${targetName}`,
       });
-      return;
-    }
+    } else {
+      // Send regular connection request
+      const { error } = await supabase
+        .from('connections')
+        .insert({
+          requester_id: user.id,
+          addressee_id: targetId,
+          status: 'pending'
+        });
 
-    toast({
-      title: "Connection Request Sent!",
-      description: `Your connection request has been sent to ${targetName}`,
-    });
+      if (error) {
+        toast({
+          title: "Error",
+          description: "Failed to send connection request",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Connection Request Sent!",
+        description: `Your connection request has been sent to ${targetName}`,
+      });
+    }
   };
 
   const getCompatibilityColor = (score: number) => {
