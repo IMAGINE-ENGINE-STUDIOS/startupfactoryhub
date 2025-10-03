@@ -7,7 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users } from 'lucide-react';
+import { Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, Bookmark, Repeat2, Send } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 
 interface FeedPost {
   id: string;
@@ -48,6 +49,10 @@ export default function UnifiedCommunityFeed({
   const [newPost, setNewPost] = useState('');
   const [loading, setLoading] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<string>>(new Set());
+  const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
+  const [comments, setComments] = useState<Record<string, any[]>>({});
+  const [newComment, setNewComment] = useState<Record<string, string>>({});
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -55,6 +60,7 @@ export default function UnifiedCommunityFeed({
     fetchPosts();
     if (user) {
       fetchUserLikes();
+      fetchUserBookmarks();
     }
     
     // Set up real-time subscription
@@ -71,6 +77,10 @@ export default function UnifiedCommunityFeed({
       .on('postgres_changes', 
         { event: 'DELETE', schema: 'public', table: 'post_likes' },
         () => { fetchPosts(); if (user) fetchUserLikes(); }
+      )
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'post_comments' },
+        () => fetchPosts()
       )
       .subscribe();
 
@@ -145,6 +155,31 @@ export default function UnifiedCommunityFeed({
     }
   };
 
+  const fetchUserBookmarks = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from('post_bookmarks')
+      .select('post_id')
+      .eq('user_id', user.id);
+    
+    if (data) {
+      setBookmarkedPosts(new Set(data.map(bookmark => bookmark.post_id)));
+    }
+  };
+
+  const fetchComments = async (postId: string) => {
+    const { data, error } = await supabase
+      .from('post_comments')
+      .select('*, profiles:user_id(full_name, role, avatar_url)')
+      .eq('post_id', postId)
+      .order('created_at', { ascending: true });
+
+    if (!error && data) {
+      setComments(prev => ({ ...prev, [postId]: data }));
+    }
+  };
+
   const createPost = async () => {
     if (!newPost.trim() || !user) return;
 
@@ -174,7 +209,10 @@ export default function UnifiedCommunityFeed({
   };
 
   const toggleLike = async (postId: string) => {
-    if (!user) return;
+    if (!user) {
+      toast({ title: "Please sign in to like posts", variant: "destructive" });
+      return;
+    }
 
     const isLiked = likedPosts.has(postId);
     
@@ -200,6 +238,100 @@ export default function UnifiedCommunityFeed({
       if (!error) {
         setLikedPosts(prev => new Set([...prev, postId]));
       }
+    }
+  };
+
+  const toggleBookmark = async (postId: string) => {
+    if (!user) {
+      toast({ title: "Please sign in to bookmark posts", variant: "destructive" });
+      return;
+    }
+
+    const isBookmarked = bookmarkedPosts.has(postId);
+    
+    if (isBookmarked) {
+      const { error } = await supabase
+        .from('post_bookmarks')
+        .delete()
+        .eq('post_id', postId)
+        .eq('user_id', user.id);
+      
+      if (!error) {
+        setBookmarkedPosts(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(postId);
+          return newSet;
+        });
+        toast({ title: "Bookmark removed" });
+      }
+    } else {
+      const { error } = await supabase
+        .from('post_bookmarks')
+        .insert({ post_id: postId, user_id: user.id });
+      
+      if (!error) {
+        setBookmarkedPosts(prev => new Set([...prev, postId]));
+        toast({ title: "Post bookmarked!" });
+      }
+    }
+  };
+
+  const sharePost = async (postId: string) => {
+    if (!user) {
+      toast({ title: "Please sign in to share posts", variant: "destructive" });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('feed_posts')
+      .insert({
+        user_id: user.id,
+        content: '',
+        shared_post_id: postId,
+        post_type: 'update'
+      });
+
+    if (!error) {
+      toast({ title: "Post shared!" });
+      fetchPosts();
+    }
+  };
+
+  const toggleComments = (postId: string) => {
+    setExpandedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+        fetchComments(postId);
+      }
+      return newSet;
+    });
+  };
+
+  const addComment = async (postId: string) => {
+    if (!user) {
+      toast({ title: "Please sign in to comment", variant: "destructive" });
+      return;
+    }
+
+    const commentContent = newComment[postId]?.trim();
+    if (!commentContent) return;
+
+    const { error } = await supabase
+      .from('post_comments')
+      .insert({
+        post_id: postId,
+        user_id: user.id,
+        content: commentContent
+      });
+
+    if (!error) {
+      setNewComment(prev => ({ ...prev, [postId]: '' }));
+      toast({ title: "Comment added!" });
+      fetchComments(postId);
+      fetchPosts();
     }
   };
 
@@ -314,23 +446,88 @@ export default function UnifiedCommunityFeed({
                       className={`text-muted-foreground hover:text-primary ${
                         user && likedPosts.has(post.id) ? 'text-red-500' : ''
                       }`}
-                      onClick={() => user && toggleLike(post.id)}
-                      disabled={!user}
+                      onClick={() => toggleLike(post.id)}
                     >
                       <Heart className={`h-4 w-4 mr-2 ${
                         user && likedPosts.has(post.id) ? 'fill-current' : ''
                       }`} />
                       {post._count?.post_likes || 0}
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-muted-foreground hover:text-primary"
+                      onClick={() => toggleComments(post.id)}
+                    >
                       <MessageCircle className="h-4 w-4 mr-2" />
                       {post._count?.post_comments || 0}
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-primary">
-                      <Share className="h-4 w-4 mr-2" />
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-muted-foreground hover:text-primary"
+                      onClick={() => sharePost(post.id)}
+                    >
+                      <Repeat2 className="h-4 w-4 mr-2" />
                       Share
                     </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className={`text-muted-foreground hover:text-primary ${
+                        user && bookmarkedPosts.has(post.id) ? 'text-primary' : ''
+                      }`}
+                      onClick={() => toggleBookmark(post.id)}
+                    >
+                      <Bookmark className={`h-4 w-4 ${
+                        user && bookmarkedPosts.has(post.id) ? 'fill-current' : ''
+                      }`} />
+                    </Button>
                   </div>
+
+                  {/* Comments Section */}
+                  {expandedComments.has(post.id) && (
+                    <div className="space-y-4 pt-4 border-t border-border mt-4">
+                      <div className="space-y-3">
+                        {comments[post.id]?.map((comment) => (
+                          <div key={comment.id} className="flex gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">
+                                {comment.profiles?.full_name?.charAt(0) || 'U'}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 space-y-1">
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-semibold">{comment.profiles?.full_name || 'Anonymous'}</p>
+                                <span className="text-lg">{getRoleIcon(comment.profiles?.role || '')}</span>
+                                <span className="text-xs text-muted-foreground">{formatDate(comment.created_at)}</span>
+                              </div>
+                              <p className="text-sm">{comment.content}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      
+                      {user && (
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Write a comment..."
+                            value={newComment[post.id] || ''}
+                            onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                addComment(post.id);
+                              }
+                            }}
+                            className="flex-1"
+                          />
+                          <Button onClick={() => addComment(post.id)} size="sm">
+                            <Send className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </CardContent>

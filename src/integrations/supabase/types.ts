@@ -357,36 +357,59 @@ export type Database = {
       }
       feed_posts: {
         Row: {
+          bookmarks_count: number | null
+          comments_count: number | null
           content: string
           created_at: string
           id: string
           internship_data: Json | null
+          likes_count: number | null
           media_urls: string[] | null
           post_type: Database["public"]["Enums"]["post_type"]
+          shared_post_id: string | null
+          shares_count: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          bookmarks_count?: number | null
+          comments_count?: number | null
           content: string
           created_at?: string
           id?: string
           internship_data?: Json | null
+          likes_count?: number | null
           media_urls?: string[] | null
           post_type?: Database["public"]["Enums"]["post_type"]
+          shared_post_id?: string | null
+          shares_count?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          bookmarks_count?: number | null
+          comments_count?: number | null
           content?: string
           created_at?: string
           id?: string
           internship_data?: Json | null
+          likes_count?: number | null
           media_urls?: string[] | null
           post_type?: Database["public"]["Enums"]["post_type"]
+          shared_post_id?: string | null
+          shares_count?: number | null
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "feed_posts_shared_post_id_fkey"
+            columns: ["shared_post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       internship_applications: {
         Row: {
@@ -871,6 +894,35 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      post_bookmarks: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_bookmarks_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       post_comments: {
         Row: {
