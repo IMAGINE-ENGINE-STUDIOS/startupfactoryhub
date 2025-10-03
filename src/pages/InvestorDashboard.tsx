@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Filter, Search } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
@@ -23,37 +24,140 @@ interface Investment {
 export default function InvestorDashboard() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [opportunities, setOpportunities] = useState<Investment[]>([]);
+  const [investorProfile, setInvestorProfile] = useState<any>(null);
   const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
+      fetchInvestorProfile();
       fetchInvestments();
       fetchOpportunities();
     }
   }, [user]);
 
-  const fetchInvestments = async () => {
-    // For demo purposes, we'll use companies table as investments
+  const fetchInvestorProfile = async () => {
+    if (!user) return;
+
     const { data, error } = await supabase
-      .from('companies')
-      .select(`
-        id,
-        name,
-        description,
-        stage,
-        industry,
-        funding_amount,
-        user_id
-      `)
-      .not('funding_amount', 'is', null)
-      .limit(6);
+      .from('investor_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
 
     if (!error && data) {
-      setInvestments(data);
+      setInvestorProfile(data);
+    }
+  };
+
+  const expressInterest = async (companyId: string, companyName: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('investment_interests')
+      .insert({
+        investor_id: user.id,
+        company_id: companyId,
+        status: 'interested'
+      });
+
+    if (error) {
+      if (error.code === '23505') {
+        toast({
+          title: "Already Interested",
+          description: "You've already expressed interest in this startup.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to express interest. Please try again.",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    toast({
+      title: "Interest Registered!",
+      description: `Your interest in ${companyName} has been recorded.`,
+    });
+
+    fetchOpportunities();
+  };
+
+  const startDueDiligence = async (companyId: string, companyName: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('investment_interests')
+      .upsert({
+        investor_id: user.id,
+        company_id: companyId,
+        status: 'due_diligence'
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start due diligence process.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    toast({
+      title: "Due Diligence Started",
+      description: `Due diligence process initiated for ${companyName}.`,
+    });
+  };
+
+  const fetchInvestments = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('investments')
+      .select(`
+        *,
+        companies:company_id (
+          id,
+          name,
+          description,
+          stage,
+          industry,
+          user_id
+        )
+      `)
+      .eq('investor_id', user.id)
+      .eq('status', 'active');
+
+    if (!error && data) {
+      const formattedInvestments = data.map((inv: any) => ({
+        id: inv.companies?.id || inv.company_id,
+        name: inv.companies?.name || 'Unknown Company',
+        description: inv.companies?.description || '',
+        stage: inv.companies?.stage || 'Unknown',
+        industry: inv.companies?.industry || 'General',
+        funding_amount: inv.amount,
+        user_id: inv.companies?.user_id || '',
+        investment_date: inv.investment_date,
+        equity_percentage: inv.equity_percentage
+      }));
+      setInvestments(formattedInvestments);
     }
   };
 
   const fetchOpportunities = async () => {
+    if (!user) return;
+
+    // Get companies that the investor hasn't invested in yet
+    const { data: existingInvestments } = await supabase
+      .from('investments')
+      .select('company_id')
+      .eq('investor_id', user.id);
+
+    const investedCompanyIds = existingInvestments?.map(i => i.company_id) || [];
+
     const { data, error } = await supabase
       .from('companies')
       .select(`
@@ -63,21 +167,17 @@ export default function InvestorDashboard() {
         stage,
         industry,
         funding_amount,
-        user_id
+        user_id,
+        looking_for
       `)
+      .not('id', 'in', `(${investedCompanyIds.join(',') || 'null'})`)
+      .order('created_at', { ascending: false })
       .limit(8);
 
     if (!error && data) {
       setOpportunities(data);
     }
   };
-
-  const stats = [
-    { title: 'Portfolio Value', value: '$12.4M', icon: DollarSign, color: 'text-green-500' },
-    { title: 'Active Investments', value: '23', icon: Building, color: 'text-primary' },
-    { title: 'ROI', value: '24.7%', icon: TrendingUp, color: 'text-accent' },
-    { title: 'Due Diligence', value: '8', icon: Target, color: 'text-yellow-500' },
-  ];
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -87,6 +187,23 @@ export default function InvestorDashboard() {
       maximumFractionDigits: 0,
     }).format(amount);
   };
+
+  const stats = [
+    { 
+      title: 'Total Invested', 
+      value: investorProfile ? formatCurrency(investorProfile.total_invested || 0) : '$0', 
+      icon: DollarSign, 
+      color: 'text-green-500' 
+    },
+    { 
+      title: 'Active Investments', 
+      value: investorProfile?.portfolio_size?.toString() || '0', 
+      icon: Building, 
+      color: 'text-primary' 
+    },
+    { title: 'ROI', value: '24.7%', icon: TrendingUp, color: 'text-accent' },
+    { title: 'Opportunities', value: opportunities.length.toString(), icon: Target, color: 'text-yellow-500' },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-hero p-4">
@@ -224,11 +341,19 @@ export default function InvestorDashboard() {
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => startDueDiligence(opportunity.id, opportunity.name)}
+                        >
                           Due Diligence
                         </Button>
-                        <Button size="sm" className="pulse-primary">
-                          Invest
+                        <Button 
+                          size="sm" 
+                          className="pulse-primary"
+                          onClick={() => expressInterest(opportunity.id, opportunity.name)}
+                        >
+                          Express Interest
                         </Button>
                       </div>
                     </div>

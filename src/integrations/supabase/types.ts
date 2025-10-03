@@ -255,6 +255,133 @@ export type Database = {
           },
         ]
       }
+      investment_interests: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          id: string
+          interest_type: string | null
+          investor_id: string
+          notes: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          id?: string
+          interest_type?: string | null
+          investor_id: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          id?: string
+          interest_type?: string | null
+          investor_id?: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_interests_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investments: {
+        Row: {
+          amount: number
+          company_id: string
+          created_at: string | null
+          equity_percentage: number | null
+          id: string
+          investment_date: string | null
+          investor_id: string
+          notes: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount: number
+          company_id: string
+          created_at?: string | null
+          equity_percentage?: number | null
+          id?: string
+          investment_date?: string | null
+          investor_id: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number
+          company_id?: string
+          created_at?: string | null
+          equity_percentage?: number | null
+          id?: string
+          investment_date?: string | null
+          investor_id?: string
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investments_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investor_profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          investment_range_max: number | null
+          investment_range_min: number | null
+          portfolio_size: number | null
+          preferred_industries: string[] | null
+          preferred_stages: string[] | null
+          total_invested: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          investment_range_max?: number | null
+          investment_range_min?: number | null
+          portfolio_size?: number | null
+          preferred_industries?: string[] | null
+          preferred_stages?: string[] | null
+          total_invested?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          investment_range_max?: number | null
+          investment_range_min?: number | null
+          portfolio_size?: number | null
+          preferred_industries?: string[] | null
+          preferred_stages?: string[] | null
+          total_invested?: number | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           created_at: string
