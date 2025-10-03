@@ -88,7 +88,11 @@ const DashboardNavigation = () => {
               <Calendar className="w-4 h-4" />
               <span>Events</span>
             </Button>
-            <Button variant="ghost" className="flex items-center space-x-2">
+            <Button 
+              variant="ghost" 
+              className="flex items-center space-x-2"
+              onClick={() => navigate("/messages")}
+            >
               <MessageSquare className="w-4 h-4" />
               <span>Messages</span>
             </Button>

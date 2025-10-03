@@ -144,23 +144,25 @@ export default function CommunityCalendar() {
           <CardHeader>
             <CardTitle>Calendar View</CardTitle>
           </CardHeader>
-          <CardContent className="flex justify-center">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={setSelectedDate}
-              className="rounded-md border pointer-events-auto"
-              modifiers={{
-                hasEvent: getDatesWithEvents()
-              }}
-              modifiersStyles={{
-                hasEvent: {
-                  fontWeight: 'bold',
-                  textDecoration: 'underline',
-                  color: 'hsl(var(--primary))'
-                }
-              }}
-            />
+          <CardContent className="flex justify-center p-6">
+            <div className="w-full max-w-4xl">
+              <Calendar
+                mode="single"
+                selected={selectedDate}
+                onSelect={setSelectedDate}
+                className="rounded-md border pointer-events-auto scale-125 sm:scale-150 lg:scale-[1.75] origin-center py-8"
+                modifiers={{
+                  hasEvent: getDatesWithEvents()
+                }}
+                modifiersStyles={{
+                  hasEvent: {
+                    fontWeight: 'bold',
+                    textDecoration: 'underline',
+                    color: 'hsl(var(--primary))'
+                  }
+                }}
+              />
+            </div>
           </CardContent>
         </Card>
 

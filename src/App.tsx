@@ -12,6 +12,7 @@ import DashboardRouter from "./components/DashboardRouter";
 import StartupProfile from "./pages/StartupProfile";
 import CommunityFeed from "./pages/CommunityFeed";
 import Events from "./pages/Events";
+import Messages from "./pages/Messages";
 
 import NotFound from "./pages/NotFound";
 
@@ -32,6 +33,7 @@ const App = () => (
               <Route path="/dashboard" element={<DashboardRouter />} />
               <Route path="/feed" element={<CommunityFeed />} />
               <Route path="/events" element={<Events />} />
+              <Route path="/messages" element={<Messages />} />
               <Route path="/profile" element={<StartupProfile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
