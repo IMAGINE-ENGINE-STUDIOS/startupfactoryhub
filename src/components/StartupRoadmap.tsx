@@ -96,15 +96,29 @@ export default function StartupRoadmap() {
   }, [user]);
 
   const loadUserProgress = async () => {
-    // In a real app, this would fetch from the database
-    // For now, we'll simulate some progress
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('roadmap_progress')
+      .select('*')
+      .eq('user_id', user.id);
+
+    if (error) {
+      console.error('Error loading progress:', error);
+      return;
+    }
+
+    const progressMap = new Map(data?.map(p => [p.step_id, p.completed]) || []);
+    
     const updatedSteps = steps.map((step, index) => {
-      if (index === 0) {
-        return { ...step, completed: true, locked: false };
-      } else if (index === 1) {
-        return { ...step, locked: false };
-      }
-      return step;
+      const completed = progressMap.get(step.id) || false;
+      const prevCompleted = index === 0 || progressMap.get(steps[index - 1].id) || false;
+      
+      return {
+        ...step,
+        completed,
+        locked: index === 0 ? false : !prevCompleted
+      };
     });
     
     setSteps(updatedSteps);
@@ -118,6 +132,26 @@ export default function StartupRoadmap() {
   };
 
   const completeStep = async (stepId: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('roadmap_progress')
+      .upsert({
+        user_id: user.id,
+        step_id: stepId,
+        completed: true,
+        completed_at: new Date().toISOString()
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save progress. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const updatedSteps = steps.map(step => {
       if (step.id === stepId) {
         return { ...step, completed: true };

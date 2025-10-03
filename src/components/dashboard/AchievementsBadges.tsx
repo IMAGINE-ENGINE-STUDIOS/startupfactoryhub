@@ -28,45 +28,72 @@ const AchievementsBadges = () => {
     if (!user) return;
     
     try {
-      // Since achievements table doesn't exist, create mock achievements based on user activity
-      const { data: connections } = await supabase
-        .from('connections')
+      const { data, error } = await supabase
+        .from('achievements')
         .select('*')
-        .eq('requester_id', user.id)
-        .eq('status', 'accepted');
-      
-      const { data: posts } = await supabase
-        .from('feed_posts')
-        .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .order('earned_at', { ascending: false });
 
-      const mockAchievements = [];
-      
-      if (connections && connections.length > 0) {
-        mockAchievements.push({
-          id: '1',
-          type: 'networking',
-          title: 'Networker',
-          description: 'Made your first connection',
-          icon: '🤝',
-          earned_at: new Date().toISOString()
-        });
+      if (!error && data) {
+        const mappedData = data.map(a => ({
+          id: a.id,
+          type: a.achievement_type,
+          title: a.title,
+          description: a.description || '',
+          icon: a.icon || 'trophy',
+          earned_at: a.earned_at || new Date().toISOString()
+        }));
+        setAchievements(mappedData);
+      } else {
+        // If no achievements found, check for potential new ones to auto-award
+        await checkAndAwardAchievements();
       }
-      
-      if (posts && posts.length > 0) {
-        mockAchievements.push({
-          id: '2', 
-          type: 'content',
-          title: 'Content Creator',
-          description: 'Shared your first post',
-          icon: '📝',
-          earned_at: new Date().toISOString()
-        });
-      }
-
-      setAchievements(mockAchievements);
     } catch (error) {
       console.error('Error fetching achievements:', error);
+    }
+  };
+
+  const checkAndAwardAchievements = async () => {
+    if (!user) return;
+
+    // Check for connections achievement
+    const { data: connections } = await supabase
+      .from('connections')
+      .select('*')
+      .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+      .eq('status', 'accepted');
+
+    // Check for posts achievement
+    const { data: posts } = await supabase
+      .from('feed_posts')
+      .select('*')
+      .eq('user_id', user.id);
+
+    const newAchievements: any[] = [];
+
+    if (connections && connections.length >= 5) {
+      newAchievements.push({
+        user_id: user.id,
+        achievement_type: 'connection',
+        title: 'Networker',
+        description: 'Made 5+ connections',
+        icon: 'trophy'
+      });
+    }
+
+    if (posts && posts.length >= 3) {
+      newAchievements.push({
+        user_id: user.id,
+        achievement_type: 'post',
+        title: 'Content Creator',
+        description: 'Published 3+ posts',
+        icon: 'star'
+      });
+    }
+
+    if (newAchievements.length > 0) {
+      await supabase.from('achievements').insert(newAchievements);
+      fetchAchievements(); // Refresh after inserting
     }
   };
 

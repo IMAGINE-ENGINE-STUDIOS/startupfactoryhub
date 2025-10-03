@@ -63,31 +63,34 @@ export default function InternshipBoard() {
   };
 
   const fetchInternships = async () => {
-    // First try to get internships from a dedicated table if it exists
-    // Otherwise create mock data based on companies
-    const { data: companies, error } = await supabase
-      .from('companies')
-      .select('*')
-      .gte('team_size', 3) // Companies with 3+ team members likely offer internships
-      .limit(12);
+    const { data, error } = await supabase
+      .from('internships')
+      .select(`
+        *,
+        companies:company_id (
+          name,
+          location
+        )
+      `)
+      .eq('status', 'active')
+      .order('created_at', { ascending: false });
 
-    if (!error && companies) {
-      // Generate internship opportunities from companies
-      const mockInternships: Internship[] = companies.map((company, index) => ({
-        id: `intern-${company.id}-${index}`,
-        title: getInternshipTitle(company.industry),
-        description: `Join ${company.name} as an intern and gain hands-on experience in ${company.industry}. Work alongside experienced professionals and contribute to real projects that impact our customers.`,
-        company_name: company.name,
-        location: company.location || 'Remote',
-        duration: ['3 months', '6 months', '12 months'][index % 3],
-        compensation: ['Unpaid', '$1,000/month', '$2,000/month'][index % 3],
-        requirements: getInternshipRequirements(company.industry),
-        company_id: company.id,
-        created_at: new Date().toISOString(),
-        applications_count: Math.floor(Math.random() * 20),
+    if (!error && data) {
+      const formattedInternships: Internship[] = data.map((internship: any) => ({
+        id: internship.id,
+        title: internship.title,
+        description: internship.description,
+        company_name: internship.companies?.name || 'Unknown Company',
+        location: internship.location || internship.companies?.location || 'Remote',
+        duration: internship.duration,
+        compensation: internship.compensation,
+        requirements: internship.requirements || [],
+        company_id: internship.company_id,
+        created_at: internship.created_at,
+        applications_count: internship.applications_count || 0,
       }));
 
-      setInternships(mockInternships);
+      setInternships(formattedInternships);
     }
   };
 
@@ -118,25 +121,36 @@ export default function InternshipBoard() {
   const createInternship = async () => {
     if (!user || !userProfile) return;
 
-    // In a real app, this would insert into an internships table
-    // For now, we'll create a feed post about the internship
-    const internshipPost = {
-      content: `🚀 Internship Opportunity at ${userProfile.company_name || 'Our Company'}!\n\n${newInternship.title}\n\nLocation: ${newInternship.location}\nDuration: ${newInternship.duration}\nCompensation: ${newInternship.compensation}\n\n${newInternship.description}\n\nRequirements: ${newInternship.requirements}\n\n#internship #opportunity #startup`,
-      user_id: user.id,
-      post_type: 'internship' as 'internship',
-      internship_data: {
-        title: newInternship.title,
-        location: newInternship.location,
-        duration: newInternship.duration,
-        compensation: newInternship.compensation,
-        description: newInternship.description,
-        requirements: newInternship.requirements
-      }
+    // Get user's company
+    const { data: company, error: companyError } = await supabase
+      .from('companies')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (companyError || !company) {
+      toast({
+        title: "Error",
+        description: "Please create a company profile first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const internshipData = {
+      company_id: company.id,
+      title: newInternship.title,
+      description: newInternship.description,
+      location: newInternship.location,
+      duration: newInternship.duration,
+      compensation: newInternship.compensation,
+      requirements: newInternship.requirements.split(',').map(r => r.trim()).filter(r => r),
+      status: 'active'
     };
 
     const { error } = await supabase
-      .from('feed_posts')
-      .insert(internshipPost);
+      .from('internships')
+      .insert(internshipData);
 
     if (error) {
       toast({
@@ -146,6 +160,14 @@ export default function InternshipBoard() {
       });
       return;
     }
+
+    // Also create a feed post about it
+    await supabase.from('feed_posts').insert({
+      content: `🚀 New Internship Opportunity: ${newInternship.title}\n\n${newInternship.description}\n\n#internship #opportunity #hiring`,
+      user_id: user.id,
+      post_type: 'internship' as 'internship',
+      internship_data: internshipData
+    });
 
     toast({
       title: "Success!",
@@ -161,17 +183,44 @@ export default function InternshipBoard() {
       compensation: '',
       requirements: '',
     });
+    
+    fetchInternships();
   };
 
   const applyToInternship = async (internshipId: string, companyName: string) => {
     if (!user) return;
 
-    // In a real app, this would handle the application process
-    // For now, we'll show a success message
+    const { error } = await supabase
+      .from('internship_applications')
+      .insert({
+        internship_id: internshipId,
+        user_id: user.id,
+        status: 'pending'
+      });
+
+    if (error) {
+      if (error.code === '23505') {
+        toast({
+          title: "Already Applied",
+          description: "You've already applied to this internship.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to submit application. Please try again.",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
     toast({
       title: "Application Submitted!",
       description: `Your application to ${companyName} has been submitted successfully.`,
     });
+    
+    fetchInternships();
   };
 
   const canCreateInternships = userProfile?.role === 'startup';
