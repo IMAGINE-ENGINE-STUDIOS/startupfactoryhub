@@ -13,6 +13,7 @@ import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import AIQuickActions from '@/components/AIQuickActions';
 import StartupRecommendationsWidget from '@/components/StartupRecommendationsWidget';
+import StartupBrowser from '@/components/StartupBrowser';
 
 interface Investment {
   id: string;
@@ -257,9 +258,10 @@ export default function InvestorDashboard() {
         </div>
 
         <Tabs defaultValue="portfolio" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+          <TabsList className="grid w-full grid-cols-5 max-w-3xl">
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
+            <TabsTrigger value="browse">Browse Startups</TabsTrigger>
             <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
           </TabsList>
@@ -368,6 +370,10 @@ export default function InvestorDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="browse" className="space-y-4">
+            <StartupBrowser />
           </TabsContent>
 
           <TabsContent value="community" className="space-y-4">

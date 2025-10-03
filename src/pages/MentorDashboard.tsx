@@ -6,11 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DashboardNavigation from "@/components/DashboardNavigation";
 import MentorRoadmapWidget from "@/components/MentorRoadmapWidget";
-import StartupRecommendationsWidget from "@/components/StartupRecommendationsWidget";
 import MentorCalendarWidget from "@/components/MentorCalendarWidget";
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
 import AIFeaturesHub from "@/components/AIFeaturesHub";
 import AIQuickActions from "@/components/AIQuickActions";
+import MentorFeed from "@/components/MentorFeed";
+import MentorshipRequests from "@/components/MentorshipRequests";
+import ConnectionsWidget from "@/components/ConnectionsWidget";
+import ResourcesWidget from "@/components/ResourcesWidget";
 import { 
   Users, 
   TrendingUp, 
@@ -135,11 +138,14 @@ const MentorDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Startup Recommendations */}
-            <StartupRecommendationsWidget />
-
             {/* Calendar Widget */}
             <MentorCalendarWidget />
+            
+            {/* Connections */}
+            <ConnectionsWidget />
+            
+            {/* Resources */}
+            <ResourcesWidget />
 
             {/* Recent Endorsements */}
             <Card>
