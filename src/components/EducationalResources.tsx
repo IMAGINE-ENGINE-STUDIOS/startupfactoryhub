@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { BookOpen, Video, Search, Clock, Play } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { BookOpen, Video, Search, Clock, Play, GraduationCap } from 'lucide-react';
 import { CourseVideoDialog } from './CourseVideoDialog';
 
 interface Course {
@@ -405,169 +406,171 @@ export default function EducationalResources() {
   const categories = [...new Set(youtubeCourses.map(c => c.category))];
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <Card className="border-0 bg-gradient-to-br from-primary/5 to-primary/10">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-2xl">
-            <BookOpen className="h-7 w-7 text-primary" />
-            <span>Educational Resources</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground mb-6">
+    <section className="min-h-screen py-12 px-4">
+      <div className="container mx-auto max-w-7xl space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-3 mb-2">
+            <GraduationCap className="h-10 w-10 text-primary" />
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-primary bg-clip-text text-transparent">
+              Educational Resources
+            </h1>
+          </div>
+          <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
             Access curated video courses from top universities and tech companies. Learn cutting-edge technologies at your own pace.
           </p>
+        </div>
 
-          {/* Search and Filters */}
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search courses..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-background"
-              />
-            </div>
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="px-3 py-2 bg-background border border-input rounded-md text-sm min-w-[200px]"
-            >
-              <option value="all">All Categories</option>
-              {categories.map(category => (
-                <option key={category} value={category}>{category}</option>
-              ))}
-            </select>
-            <select
-              value={selectedLevel}
-              onChange={(e) => setSelectedLevel(e.target.value)}
-              className="px-3 py-2 bg-background border border-input rounded-md text-sm min-w-[150px]"
-            >
-              <option value="all">All Levels</option>
-              <option value="beginner">Beginner</option>
-              <option value="intermediate">Intermediate</option>
-              <option value="advanced">Advanced</option>
-            </select>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-0 bg-gradient-to-br from-blue-500/10 to-blue-500/5">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold">{youtubeCourses.length}</p>
-                <p className="text-sm text-muted-foreground">Total Courses</p>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <Card className="bg-gradient-card border-border/50">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex flex-col items-center text-center gap-2">
+                <Video className="h-8 w-8 text-primary" />
+                <p className="text-2xl md:text-3xl font-bold">{youtubeCourses.length}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Courses</p>
               </div>
-              <Video className="h-8 w-8 text-blue-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-0 bg-gradient-to-br from-purple-500/10 to-purple-500/5">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold">{categories.length}</p>
-                <p className="text-sm text-muted-foreground">Categories</p>
-              </div>
-              <BookOpen className="h-8 w-8 text-purple-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-0 bg-gradient-to-br from-green-500/10 to-green-500/5">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold">200+</p>
-                <p className="text-sm text-muted-foreground">Hours Content</p>
-              </div>
-              <Clock className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-0 bg-gradient-to-br from-orange-500/10 to-orange-500/5">
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-2xl font-bold">Free</p>
-                <p className="text-sm text-muted-foreground">All Access</p>
-              </div>
-              <Play className="h-8 w-8 text-orange-500" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Courses Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCourses.map((course) => (
-          <Card 
-            key={course.id} 
-            className="border-0 hover:shadow-lg hover:scale-[1.02] transition-all cursor-pointer group"
-            onClick={() => handleCourseClick(course)}
-          >
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Video className="h-5 w-5 text-primary" />
-                  <Badge variant="outline" className="text-xs">
-                    Video Course
-                  </Badge>
-                </div>
-                <Badge className={getLevelColor(course.level)} variant="outline">
-                  {course.level}
-                </Badge>
-              </div>
-
-              <h3 className="text-lg font-semibold mb-2 line-clamp-2 group-hover:text-primary transition-colors">
-                {course.title}
-              </h3>
-              
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
-                {course.description}
-              </p>
-
-              <div className="flex items-center justify-between text-xs text-muted-foreground mb-4">
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  <span>{course.duration}</span>
-                </div>
-                <Badge variant="secondary" className="text-xs">
-                  {course.provider}
-                </Badge>
-              </div>
-
-              <Badge variant="secondary" className="w-full justify-center">
-                {course.category}
-              </Badge>
-
-              <Button className="w-full mt-4 group-hover:bg-primary group-hover:text-primary-foreground transition-colors" variant="outline">
-                <Play className="h-4 w-4 mr-2" />
-                Watch Now
-              </Button>
             </CardContent>
           </Card>
-        ))}
-      </div>
+          <Card className="bg-gradient-card border-border/50">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex flex-col items-center text-center gap-2">
+                <BookOpen className="h-8 w-8 text-primary" />
+                <p className="text-2xl md:text-3xl font-bold">{categories.length}</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Categories</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-card border-border/50">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex flex-col items-center text-center gap-2">
+                <Clock className="h-8 w-8 text-primary" />
+                <p className="text-2xl md:text-3xl font-bold">200+</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Hours</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-card border-border/50">
+            <CardContent className="p-4 md:p-6">
+              <div className="flex flex-col items-center text-center gap-2">
+                <Play className="h-8 w-8 text-primary" />
+                <p className="text-2xl md:text-3xl font-bold">Free</p>
+                <p className="text-xs md:text-sm text-muted-foreground">Access</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {filteredCourses.length === 0 && (
-        <Card className="border-0 text-center p-12">
-          <Search className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-20" />
-          <h3 className="text-xl font-semibold mb-2">No courses found</h3>
-          <p className="text-muted-foreground">Try adjusting your search criteria or filters</p>
+        {/* Search and Filters */}
+        <Card className="bg-card/50 backdrop-blur border-border/50">
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search courses by title, category, or provider..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="flex flex-col sm:flex-row gap-4 sm:w-auto w-full">
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="sm:w-56 w-full">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover z-50 max-h-[300px]">
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category} value={category}>
+                        {category}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={selectedLevel} onValueChange={setSelectedLevel}>
+                  <SelectTrigger className="sm:w-48 w-full">
+                    <SelectValue placeholder="All Levels" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover z-50">
+                    <SelectItem value="all">All Levels</SelectItem>
+                    <SelectItem value="beginner">Beginner</SelectItem>
+                    <SelectItem value="intermediate">Intermediate</SelectItem>
+                    <SelectItem value="advanced">Advanced</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </CardContent>
         </Card>
-      )}
 
-      {/* Course Video Dialog */}
-      <CourseVideoDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        course={selectedCourse}
-      />
-    </div>
+        {/* Courses Grid */}
+        {filteredCourses.length === 0 ? (
+          <Card className="bg-card/50 backdrop-blur border-border/50 text-center py-16">
+            <CardContent>
+              <Search className="h-20 w-20 text-muted-foreground/20 mx-auto mb-4" />
+              <h3 className="text-2xl font-semibold mb-2">No courses found</h3>
+              <p className="text-muted-foreground">Try adjusting your search criteria or filters</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredCourses.map((course) => (
+              <Card 
+                key={course.id} 
+                className="group cursor-pointer bg-card/80 backdrop-blur border-border/50 hover:border-primary/50 hover:shadow-glow transition-all duration-300 hover:-translate-y-1"
+                onClick={() => handleCourseClick(course)}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-start justify-between gap-2 mb-3">
+                    <Badge variant="secondary" className="shrink-0 text-xs">
+                      {course.category}
+                    </Badge>
+                    <Badge 
+                      variant="outline" 
+                      className={`shrink-0 text-xs ${getLevelColor(course.level)}`}
+                    >
+                      {course.level}
+                    </Badge>
+                  </div>
+                  <CardTitle className="text-xl line-clamp-2 group-hover:text-primary transition-colors">
+                    {course.title}
+                  </CardTitle>
+                  <CardDescription className="line-clamp-2 text-sm mt-2">
+                    {course.description}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Clock className="h-4 w-4 shrink-0" />
+                      <span>{course.duration}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-muted-foreground">
+                      <Video className="h-4 w-4 shrink-0" />
+                      <span className="text-xs truncate max-w-[100px]">{course.provider}</span>
+                    </div>
+                  </div>
+                  <Button 
+                    className="w-full group-hover:shadow-lg transition-all" 
+                    size="sm"
+                  >
+                    <Play className="h-4 w-4 mr-2" />
+                    Watch Course
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Course Video Dialog */}
+        <CourseVideoDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          course={selectedCourse}
+        />
+      </div>
+    </section>
   );
 }
