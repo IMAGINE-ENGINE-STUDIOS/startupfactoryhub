@@ -145,24 +145,32 @@ export default function CommunityCalendar() {
             <CardTitle>Calendar View</CardTitle>
           </CardHeader>
           <CardContent className="flex justify-center p-6">
-            <div className="w-full max-w-4xl">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                className="rounded-md border pointer-events-auto scale-125 sm:scale-150 lg:scale-[1.75] origin-center py-8"
-                modifiers={{
-                  hasEvent: getDatesWithEvents()
-                }}
-                modifiersStyles={{
-                  hasEvent: {
-                    fontWeight: 'bold',
-                    textDecoration: 'underline',
-                    color: 'hsl(var(--primary))'
-                  }
-                }}
-              />
-            </div>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={setSelectedDate}
+              className="rounded-md border pointer-events-auto w-full"
+              classNames={{
+                months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 w-full",
+                month: "space-y-4 w-full",
+                table: "w-full border-collapse",
+                head_row: "flex w-full",
+                head_cell: "text-muted-foreground rounded-md flex-1 font-medium text-sm",
+                row: "flex w-full mt-2",
+                cell: "flex-1 text-center text-sm p-0 relative h-12 sm:h-14 md:h-16",
+                day: "h-12 w-full sm:h-14 md:h-16 p-0 font-normal aria-selected:opacity-100 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors",
+                day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground font-bold",
+                day_today: "bg-accent text-accent-foreground font-semibold ring-2 ring-primary ring-offset-2",
+                caption_label: "text-base font-semibold",
+                nav_button: "h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 hover:bg-accent transition-all",
+              }}
+              modifiers={{
+                hasEvent: getDatesWithEvents()
+              }}
+              modifiersClassNames={{
+                hasEvent: "relative font-bold text-primary after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:rounded-full after:bg-primary"
+              }}
+            />
           </CardContent>
         </Card>
 
