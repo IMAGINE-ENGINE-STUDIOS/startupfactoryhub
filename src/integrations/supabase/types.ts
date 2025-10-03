@@ -320,6 +320,8 @@ export type Database = {
       }
       companies: {
         Row: {
+          ai_analysis: Json | null
+          ai_summary_id: string | null
           created_at: string
           description: string | null
           founded_year: number | null
@@ -337,6 +339,8 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          ai_analysis?: Json | null
+          ai_summary_id?: string | null
           created_at?: string
           description?: string | null
           founded_year?: number | null
@@ -354,6 +358,8 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          ai_analysis?: Json | null
+          ai_summary_id?: string | null
           created_at?: string
           description?: string | null
           founded_year?: number | null
@@ -370,7 +376,15 @@ export type Database = {
           user_id?: string
           website?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "companies_ai_summary_id_fkey"
+            columns: ["ai_summary_id"]
+            isOneToOne: false
+            referencedRelation: "ai_summaries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       connections: {
         Row: {
@@ -732,6 +746,7 @@ export type Database = {
       }
       feed_posts: {
         Row: {
+          ai_summary_id: string | null
           bookmarks_count: number | null
           comments_count: number | null
           content: string
@@ -741,12 +756,15 @@ export type Database = {
           likes_count: number | null
           media_urls: string[] | null
           post_type: Database["public"]["Enums"]["post_type"]
+          sentiment_label: string | null
+          sentiment_score: number | null
           shared_post_id: string | null
           shares_count: number | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          ai_summary_id?: string | null
           bookmarks_count?: number | null
           comments_count?: number | null
           content: string
@@ -756,12 +774,15 @@ export type Database = {
           likes_count?: number | null
           media_urls?: string[] | null
           post_type?: Database["public"]["Enums"]["post_type"]
+          sentiment_label?: string | null
+          sentiment_score?: number | null
           shared_post_id?: string | null
           shares_count?: number | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          ai_summary_id?: string | null
           bookmarks_count?: number | null
           comments_count?: number | null
           content?: string
@@ -771,12 +792,21 @@ export type Database = {
           likes_count?: number | null
           media_urls?: string[] | null
           post_type?: Database["public"]["Enums"]["post_type"]
+          sentiment_label?: string | null
+          sentiment_score?: number | null
           shared_post_id?: string | null
           shares_count?: number | null
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "feed_posts_ai_summary_id_fkey"
+            columns: ["ai_summary_id"]
+            isOneToOne: false
+            referencedRelation: "ai_summaries"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "feed_posts_shared_post_id_fkey"
             columns: ["shared_post_id"]
@@ -1188,27 +1218,36 @@ export type Database = {
           content: string
           created_at: string | null
           id: string
+          original_language: string | null
           read: boolean | null
           receiver_id: string
           sender_id: string
+          sentiment_score: number | null
+          translated: boolean | null
           updated_at: string | null
         }
         Insert: {
           content: string
           created_at?: string | null
           id?: string
+          original_language?: string | null
           read?: boolean | null
           receiver_id: string
           sender_id: string
+          sentiment_score?: number | null
+          translated?: boolean | null
           updated_at?: string | null
         }
         Update: {
           content?: string
           created_at?: string | null
           id?: string
+          original_language?: string | null
           read?: boolean | null
           receiver_id?: string
           sender_id?: string
+          sentiment_score?: number | null
+          translated?: boolean | null
           updated_at?: string | null
         }
         Relationships: []
@@ -1599,12 +1638,46 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_role: {
+        Args: { _user_id: string }
+        Returns: Database["public"]["Enums"]["app_role"]
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "startup" | "investor" | "mentor" | "advisor" | "student"

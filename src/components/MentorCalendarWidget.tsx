@@ -1,99 +1,75 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Video, Users } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Calendar, Clock, Video } from "lucide-react";
 
-const MentorCalendarWidget = () => {
+export default function MentorCalendarWidget() {
   const upcomingSessions = [
     {
-      id: 1,
-      startup: "FinPay Solutions",
-      founder: "John Doe",
-      time: "Tomorrow 2:00 PM",
-      duration: "1 hour",
-      type: "Strategy Session",
-      mode: "video"
+      mentee: "Alex Thompson",
+      topic: "Pitch Deck Review",
+      time: "Today, 2:00 PM",
+      duration: "60 min",
+      type: "scheduled"
     },
     {
-      id: 2,
-      startup: "GreenTech",
-      founder: "Emma Wilson",
-      time: "Friday 10:00 AM",
-      duration: "45 mins",
-      type: "Product Review",
-      mode: "in-person"
+      mentee: "Sarah Chen",
+      topic: "Growth Strategy",
+      time: "Tomorrow, 10:00 AM",
+      duration: "45 min",
+      type: "scheduled"
     },
     {
-      id: 3,
-      startup: "AI Healthcare",
-      founder: "Mike Chen",
-      time: "Next Mon 3:00 PM",
-      duration: "30 mins",
-      type: "Quick Check-in",
-      mode: "video"
+      mentee: "Mike Roberts",
+      topic: "Fundraising Advice",
+      time: "Thu, 3:00 PM",
+      duration: "30 min",
+      type: "scheduled"
     }
   ];
 
-  const getTypeColor = (type: string) => {
-    switch (type) {
-      case "Strategy Session": return "bg-ocean-primary/10 text-ocean-primary";
-      case "Product Review": return "bg-accent/10 text-accent";
-      case "Quick Check-in": return "bg-green-500/10 text-green-600";
-      default: return "bg-muted/10 text-muted-foreground";
-    }
-  };
-
   return (
-    <Card>
+    <Card className="tech-card">
       <CardHeader>
-        <CardTitle className="text-lg flex items-center">
-          <Calendar className="w-5 h-5 mr-2 text-ocean-primary" />
+        <CardTitle className="flex items-center gap-2">
+          <Calendar className="h-5 w-5 text-primary" />
           Upcoming Sessions
         </CardTitle>
+        <CardDescription>
+          Your mentoring schedule this week
+        </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
-        {upcomingSessions.map((session) => (
-          <div 
-            key={session.id}
-            className="p-3 rounded-lg border border-ocean-border/50 hover:bg-ocean-surface/10 transition-colors"
-          >
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-medium text-sm">{session.startup}</h4>
-              <Badge className={`text-xs ${getTypeColor(session.type)}`}>
-                {session.type}
-              </Badge>
-            </div>
-            
-            <p className="text-xs text-muted-foreground mb-2">with {session.founder}</p>
-            
-            <div className="flex items-center space-x-4 text-xs text-muted-foreground mb-3">
-              <div className="flex items-center">
-                <Clock className="w-3 h-3 mr-1" />
-                {session.time}
+      <CardContent className="space-y-3">
+        {upcomingSessions.map((session, idx) => (
+          <div key={idx} className="flex items-start gap-3 p-3 rounded-lg border border-border hover:border-primary transition-colors">
+            <div className="flex-1 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <h4 className="font-medium text-sm">{session.mentee}</h4>
+                  <p className="text-xs text-muted-foreground">{session.topic}</p>
+                </div>
+                <Badge variant="outline" className="text-xs">
+                  {session.type}
+                </Badge>
               </div>
-              <div className="flex items-center">
-                {session.mode === "video" ? (
-                  <Video className="w-3 h-3 mr-1" />
-                ) : (
-                  <Users className="w-3 h-3 mr-1" />
-                )}
-                {session.duration}
+              <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                <span className="flex items-center gap-1">
+                  <Clock className="h-3 w-3" />
+                  {session.time}
+                </span>
+                <span>{session.duration}</span>
               </div>
+              <Button variant="outline" size="sm" className="w-full gap-2">
+                <Video className="h-3 w-3" />
+                Join Session
+              </Button>
             </div>
-            
-            <Button variant="outline" size="sm" className="w-full">
-              {session.mode === "video" ? "Join Video Call" : "View Details"}
-            </Button>
           </div>
         ))}
-        
-        <Button variant="outline" className="w-full mt-4">
-          <Calendar className="w-4 h-4 mr-2" />
+        <Button variant="outline" className="w-full mt-2">
           View Full Calendar
         </Button>
       </CardContent>
     </Card>
   );
-};
-
-export default MentorCalendarWidget;
+}

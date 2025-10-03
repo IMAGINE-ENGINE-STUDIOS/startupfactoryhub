@@ -12,6 +12,7 @@ import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import AIQuickActions from '@/components/AIQuickActions';
+import StartupRecommendationsWidget from '@/components/StartupRecommendationsWidget';
 
 interface Investment {
   id: string;

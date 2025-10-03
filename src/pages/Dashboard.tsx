@@ -20,6 +20,8 @@ import RoleBasedMatching from '@/components/RoleBasedMatching';
 import EducationalResources from '@/components/EducationalResources';
 import InternshipBoard from '@/components/InternshipBoard';
 import ProfessionalBackground from '@/components/ProfessionalBackground';
+import AIFeaturesHub from '@/components/AIFeaturesHub';
+import AIAssistantPreview from '@/components/AIAssistantPreview';
 import { 
   Rocket, 
   TrendingUp, 
@@ -175,7 +177,15 @@ const Dashboard = () => {
           </TabsList>
 
           <TabsContent value="roadmap" className="space-y-6">
-            <StartupRoadmap />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2">
+                <StartupRoadmap />
+              </div>
+              <div className="space-y-6">
+                <AIRoadmapWidget />
+                <AIAssistantPreview />
+              </div>
+            </div>
           </TabsContent>
 
           <TabsContent value="company" className="space-y-6">
