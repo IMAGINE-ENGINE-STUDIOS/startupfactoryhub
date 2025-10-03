@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
+import FloatingChat from "./components/FloatingChat";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ProfileSetup from "./pages/ProfileSetup";
@@ -37,6 +38,7 @@ const App = () => (
               <Route path="/profile" element={<StartupProfile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
+            <FloatingChat />
           </BrowserRouter>
         </TooltipProvider>
       </AuthProvider>
