@@ -163,6 +163,108 @@ const youtubeCourses: Course[] = [
     duration: '18+ hours',
     playlist_url: 'https://www.youtube.com/embed/videoseries?list=PL2uR0HYhP-vkEzG3d8V9IPeZWZrs3u7je',
     provider: 'MIT'
+  },
+  // Cloud & Networking
+  {
+    id: 'cloud-1',
+    title: 'Cloud Computing Fundamentals',
+    description: 'Complete guide to cloud computing, AWS, Azure, and cloud architecture',
+    category: 'Cloud & Networking',
+    level: 'Beginner',
+    duration: '12+ hours',
+    playlist_url: 'https://www.youtube.com/embed/videoseries?list=PLxCzCOWd7aiHRHVUtR-O52MsrdUSrzuy4',
+    provider: 'Gate Smashers'
+  },
+  {
+    id: 'cloud-2',
+    title: 'Computer Networking Complete Course',
+    description: 'In-depth networking concepts, protocols, and network security',
+    category: 'Cloud & Networking',
+    level: 'Intermediate',
+    duration: '15+ hours',
+    playlist_url: 'https://www.youtube.com/embed/videoseries?list=PL9ooVrP1hQOFtZ5oAAeOgi_nH-txMcDMu',
+    provider: 'Edureka'
+  },
+  {
+    id: 'cloud-3',
+    title: 'AWS Certified Solutions Architect',
+    description: 'Prepare for AWS certification with hands-on cloud architecture',
+    category: 'Cloud & Networking',
+    level: 'Advanced',
+    duration: '10+ hours',
+    playlist_url: 'https://www.youtube.com/embed/lvZk_sc8u5I',
+    provider: 'freeCodeCamp'
+  },
+  {
+    id: 'cloud-4',
+    title: 'DevOps and Cloud Engineering',
+    description: 'Master DevOps practices and cloud infrastructure deployment',
+    category: 'Cloud & Networking',
+    level: 'Advanced',
+    duration: '8+ hours',
+    playlist_url: 'https://www.youtube.com/embed/ksDAQX6MbeE',
+    provider: 'TechWorld with Nana'
+  },
+  // Biotech & Genetics
+  {
+    id: 'bio-1',
+    title: 'Introduction to Biotechnology',
+    description: 'Fundamentals of biotechnology, genetic engineering, and applications',
+    category: 'Biotech & Genetics',
+    level: 'Beginner',
+    duration: '10+ hours',
+    playlist_url: 'https://www.youtube.com/embed/videoseries?list=PL5rTEahBdxV6prB_iWNU8N2-L5XAktld8',
+    provider: 'BiologyWala'
+  },
+  {
+    id: 'bio-2',
+    title: 'Genetics and Molecular Biology',
+    description: 'Deep dive into genetics, DNA, and molecular biology concepts',
+    category: 'Biotech & Genetics',
+    level: 'Intermediate',
+    duration: '12+ hours',
+    playlist_url: 'https://www.youtube.com/embed/videoseries?list=PL9fwcf7k-_bGhAQWZ7GNu7ijMKn6Sfk4a',
+    provider: 'Shomu\'s Biology'
+  },
+  {
+    id: 'bio-3',
+    title: 'CRISPR Gene Editing Explained',
+    description: 'Understanding CRISPR technology and gene editing applications',
+    category: 'Biotech & Genetics',
+    level: 'Intermediate',
+    duration: '1 hour',
+    playlist_url: 'https://www.youtube.com/embed/rZjwF5z-Xfw',
+    provider: 'Nature Video'
+  },
+  {
+    id: 'bio-4',
+    title: 'Synthetic Biology and Bioengineering',
+    description: 'Learn about synthetic biology and designing biological systems',
+    category: 'Biotech & Genetics',
+    level: 'Advanced',
+    duration: '1.5 hours',
+    playlist_url: 'https://www.youtube.com/embed/vnm99DUxWd0',
+    provider: 'MIT'
+  },
+  {
+    id: 'bio-5',
+    title: 'Bioinformatics and Computational Biology',
+    description: 'Computational approaches to analyzing biological data',
+    category: 'Biotech & Genetics',
+    level: 'Advanced',
+    duration: '14+ hours',
+    playlist_url: 'https://www.youtube.com/embed/videoseries?list=PLyjWMictIvv213sE09nfco42c_sKiDK5h',
+    provider: 'FreeCodeCamp'
+  },
+  {
+    id: 'bio-6',
+    title: 'DNA Sequencing and Genomics',
+    description: 'Understanding DNA sequencing technologies and genomic analysis',
+    category: 'Biotech & Genetics',
+    level: 'Intermediate',
+    duration: '1 hour',
+    playlist_url: 'https://www.youtube.com/embed/OVf_ASEGuns',
+    provider: 'Illumina'
   }
 ];
 
