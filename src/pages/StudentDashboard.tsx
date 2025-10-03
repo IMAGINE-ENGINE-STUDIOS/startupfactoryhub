@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 import { BookOpen, Users, Trophy, Target, Play, CheckCircle, Clock, Star } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
@@ -31,13 +32,87 @@ interface Startup {
 
 export default function StudentDashboard() {
   const [startups, setStartups] = useState<Startup[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [enrollments, setEnrollments] = useState<any[]>([]);
+  const [studentProfile, setStudentProfile] = useState<any>(null);
+  const [certificates, setCertificates] = useState<any[]>([]);
   const { user } = useAuth();
+  const { toast } = useToast();
 
   useEffect(() => {
     if (user) {
+      fetchStudentProfile();
       fetchStartups();
+      fetchEnrollments();
+      fetchCertificates();
     }
   }, [user]);
+
+  const fetchStudentProfile = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('student_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!error && data) {
+      setStudentProfile(data);
+    }
+  };
+
+  const fetchEnrollments = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('course_enrollments')
+      .select(`
+        *,
+        course:course_id (
+          id,
+          title,
+          description,
+          instructor_name,
+          difficulty,
+          category,
+          duration_hours
+        )
+      `)
+      .eq('student_id', user.id)
+      .order('last_accessed_at', { ascending: false });
+
+    if (!error && data) {
+      setEnrollments(data);
+      const coursesData = data.map((enrollment: any) => ({
+        id: enrollment.course?.id || '',
+        title: enrollment.course?.title || '',
+        description: enrollment.course?.description || '',
+        progress: enrollment.progress_percentage || 0,
+        instructor: enrollment.course?.instructor_name || '',
+        difficulty: enrollment.course?.difficulty || 'Beginner'
+      }));
+      setCourses(coursesData);
+    }
+  };
+
+  const fetchCertificates = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('certificates')
+      .select(`
+        *,
+        course:course_id (
+          title
+        )
+      `)
+      .eq('student_id', user.id);
+
+    if (!error && data) {
+      setCertificates(data);
+    }
+  };
 
   const fetchStartups = async () => {
     const { data, error } = await supabase
@@ -58,45 +133,32 @@ export default function StudentDashboard() {
   };
 
   const stats = [
-    { title: 'Courses Completed', value: '12', icon: BookOpen, color: 'text-primary' },
-    { title: 'Learning Streak', value: '28 days', icon: Target, color: 'text-accent' },
-    { title: 'Certificates', value: '5', icon: Trophy, color: 'text-yellow-500' },
-    { title: 'Community Rank', value: '#247', icon: Star, color: 'text-purple-500' },
-  ];
-
-  const courses = [
-    {
-      id: '1',
-      title: 'Startup Fundamentals',
-      description: 'Learn the basics of starting and scaling a business',
-      progress: 85,
-      instructor: 'Sarah Chen',
-      difficulty: 'Beginner'
+    { 
+      title: 'Courses Enrolled', 
+      value: enrollments.length.toString(), 
+      icon: BookOpen, 
+      color: 'text-primary' 
     },
-    {
-      id: '2',
-      title: 'Product Management',
-      description: 'Master the art of building products users love',
-      progress: 60,
-      instructor: 'Mike Johnson',
-      difficulty: 'Intermediate'
+    { 
+      title: 'Learning Streak', 
+      value: `${studentProfile?.learning_streak_days || 0} days`, 
+      icon: Target, 
+      color: 'text-accent' 
     },
-    {
-      id: '3',
-      title: 'Fundraising & VC',
-      description: 'Navigate the world of venture capital and fundraising',
-      progress: 30,
-      instructor: 'Alex Rivera',
-      difficulty: 'Advanced'
+    { 
+      title: 'Certificates', 
+      value: certificates.length.toString(), 
+      icon: Trophy, 
+      color: 'text-yellow-500' 
     },
-    {
-      id: '4',
-      title: 'Marketing & Growth',
-      description: 'Scale your startup with proven marketing strategies',
-      progress: 0,
-      instructor: 'Emma Davis',
-      difficulty: 'Intermediate'
-    }
+    { 
+      title: 'Avg Progress', 
+      value: enrollments.length > 0 
+        ? `${Math.round(enrollments.reduce((acc, e) => acc + e.progress_percentage, 0) / enrollments.length)}%`
+        : '0%', 
+      icon: Star, 
+      color: 'text-purple-500' 
+    },
   ];
 
   const assignments = [
@@ -104,6 +166,41 @@ export default function StudentDashboard() {
     { title: 'Market Research Report', dueDate: 'In 3 days', status: 'in-progress' },
     { title: 'Pitch Deck Review', dueDate: 'Next week', status: 'completed' },
   ];
+
+  const enrollInCourse = async (courseId: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('course_enrollments')
+      .insert({
+        student_id: user.id,
+        course_id: courseId
+      });
+
+    if (error) {
+      if (error.code === '23505') {
+        toast({
+          title: "Already Enrolled",
+          description: "You're already enrolled in this course.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to enroll in course. Please try again.",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    toast({
+      title: "Enrolled Successfully!",
+      description: "You can now start learning.",
+    });
+
+    fetchEnrollments();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-hero p-4">
@@ -157,47 +254,58 @@ export default function StudentDashboard() {
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <BookOpen className="h-5 w-5 text-primary" />
-                  <span>Current Courses</span>
+                  <span>My Courses</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {courses.map((course) => (
-                    <Card key={course.id} className="border border-border/50 hover:border-primary/50 transition-colors">
-                      <CardContent className="p-4">
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-start">
-                            <h3 className="font-semibold text-foreground">{course.title}</h3>
-                            <Badge 
-                              variant={course.difficulty === 'Beginner' ? 'secondary' : 
-                                     course.difficulty === 'Intermediate' ? 'default' : 'destructive'}
-                              className="text-xs"
-                            >
-                              {course.difficulty}
-                            </Badge>
-                          </div>
-                          
-                          <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
-                          
-                          <div className="space-y-2">
-                            <div className="flex justify-between text-sm">
-                              <span className="text-muted-foreground">Progress</span>
-                              <span className="font-medium">{course.progress}%</span>
+                {courses.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {courses.map((course) => (
+                      <Card key={course.id} className="border border-border/50 hover:border-primary/50 transition-colors">
+                        <CardContent className="p-4">
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-start">
+                              <h3 className="font-semibold text-foreground">{course.title}</h3>
+                              <Badge 
+                                variant={course.difficulty === 'Beginner' ? 'secondary' : 
+                                       course.difficulty === 'Intermediate' ? 'default' : 'destructive'}
+                                className="text-xs"
+                              >
+                                {course.difficulty}
+                              </Badge>
                             </div>
-                            <Progress value={course.progress} className="h-2" />
+                            
+                            <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+                            
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Progress</span>
+                                <span className="font-medium">{course.progress}%</span>
+                              </div>
+                              <Progress value={course.progress} className="h-2" />
+                            </div>
+                            
+                            <div className="flex justify-between items-center pt-2">
+                              <span className="text-xs text-muted-foreground">by {course.instructor}</span>
+                              <Button size="sm" variant={course.progress > 0 ? "default" : "outline"}>
+                                {course.progress > 0 ? 'Continue' : 'Start'}
+                              </Button>
+                            </div>
                           </div>
-                          
-                          <div className="flex justify-between items-center pt-2">
-                            <span className="text-xs text-muted-foreground">by {course.instructor}</span>
-                            <Button size="sm" variant={course.progress > 0 ? "default" : "outline"}>
-                              {course.progress > 0 ? 'Continue' : 'Start'}
-                            </Button>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No courses yet</h3>
+                    <p className="text-muted-foreground mb-4">Start your learning journey by enrolling in a course</p>
+                    <Button className="pulse-primary">
+                      Browse Courses
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>

@@ -47,6 +47,44 @@ export type Database = {
         }
         Relationships: []
       }
+      certificates: {
+        Row: {
+          certificate_url: string | null
+          course_id: string
+          created_at: string | null
+          id: string
+          issued_at: string | null
+          student_id: string
+          verification_code: string | null
+        }
+        Insert: {
+          certificate_url?: string | null
+          course_id: string
+          created_at?: string | null
+          id?: string
+          issued_at?: string | null
+          student_id: string
+          verification_code?: string | null
+        }
+        Update: {
+          certificate_url?: string | null
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          issued_at?: string | null
+          student_id?: string
+          verification_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "certificates_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       companies: {
         Row: {
           created_at: string
@@ -125,6 +163,195 @@ export type Database = {
           requester_id?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      course_enrollments: {
+        Row: {
+          certificate_issued: boolean | null
+          completed_at: string | null
+          course_id: string
+          created_at: string | null
+          enrolled_at: string | null
+          id: string
+          last_accessed_at: string | null
+          progress_percentage: number | null
+          student_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          certificate_issued?: boolean | null
+          completed_at?: string | null
+          course_id: string
+          created_at?: string | null
+          enrolled_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          progress_percentage?: number | null
+          student_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          certificate_issued?: boolean | null
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string | null
+          enrolled_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          progress_percentage?: number | null
+          student_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_enrollments_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_modules: {
+        Row: {
+          content: string | null
+          course_id: string
+          created_at: string | null
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          order_index: number
+          resources: Json | null
+          title: string
+          updated_at: string | null
+          video_url: string | null
+        }
+        Insert: {
+          content?: string | null
+          course_id: string
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          order_index: number
+          resources?: Json | null
+          title: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Update: {
+          content?: string | null
+          course_id?: string
+          created_at?: string | null
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          order_index?: number
+          resources?: Json | null
+          title?: string
+          updated_at?: string | null
+          video_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_modules_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      course_reviews: {
+        Row: {
+          course_id: string
+          created_at: string | null
+          id: string
+          rating: number | null
+          review_text: string | null
+          student_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          course_id: string
+          created_at?: string | null
+          id?: string
+          rating?: number | null
+          review_text?: string | null
+          student_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          rating?: number | null
+          review_text?: string | null
+          student_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "course_reviews_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      courses: {
+        Row: {
+          category: string
+          created_at: string | null
+          description: string
+          difficulty: string | null
+          duration_hours: number | null
+          id: string
+          instructor_id: string | null
+          instructor_name: string | null
+          is_published: boolean | null
+          price: number | null
+          rating: number | null
+          thumbnail_url: string | null
+          title: string
+          total_students: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description: string
+          difficulty?: string | null
+          duration_hours?: number | null
+          id?: string
+          instructor_id?: string | null
+          instructor_name?: string | null
+          is_published?: boolean | null
+          price?: number | null
+          rating?: number | null
+          thumbnail_url?: string | null
+          title: string
+          total_students?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description?: string
+          difficulty?: string | null
+          duration_hours?: number | null
+          id?: string
+          instructor_id?: string | null
+          instructor_name?: string | null
+          is_published?: boolean | null
+          price?: number | null
+          rating?: number | null
+          thumbnail_url?: string | null
+          title?: string
+          total_students?: number | null
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -558,6 +785,60 @@ export type Database = {
         }
         Relationships: []
       }
+      module_progress: {
+        Row: {
+          completed: boolean | null
+          completed_at: string | null
+          course_id: string
+          created_at: string | null
+          id: string
+          module_id: string
+          notes: string | null
+          student_id: string
+          time_spent_minutes: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          completed?: boolean | null
+          completed_at?: string | null
+          course_id: string
+          created_at?: string | null
+          id?: string
+          module_id: string
+          notes?: string | null
+          student_id: string
+          time_spent_minutes?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          completed?: boolean | null
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          module_id?: string
+          notes?: string | null
+          student_id?: string
+          time_spent_minutes?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "module_progress_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "module_progress_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "course_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           created_at: string
@@ -812,6 +1093,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      student_profiles: {
+        Row: {
+          created_at: string | null
+          graduation_year: number | null
+          id: string
+          interests: string[] | null
+          last_activity_date: string | null
+          learning_streak_days: number | null
+          major: string | null
+          skills: string[] | null
+          total_certificates: number | null
+          total_courses_completed: number | null
+          university: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          graduation_year?: number | null
+          id?: string
+          interests?: string[] | null
+          last_activity_date?: string | null
+          learning_streak_days?: number | null
+          major?: string | null
+          skills?: string[] | null
+          total_certificates?: number | null
+          total_courses_completed?: number | null
+          university?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          graduation_year?: number | null
+          id?: string
+          interests?: string[] | null
+          last_activity_date?: string | null
+          learning_streak_days?: number | null
+          major?: string | null
+          skills?: string[] | null
+          total_certificates?: number | null
+          total_courses_completed?: number | null
+          university?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
     }
     Views: {

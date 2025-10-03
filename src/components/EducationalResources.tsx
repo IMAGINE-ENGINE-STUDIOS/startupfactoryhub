@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { BookOpen, Video, FileText, Search, Clock, Users, Star, Play, Download } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface Resource {
   id: string;
@@ -104,19 +106,90 @@ const sampleResources: Resource[] = [
 ];
 
 export default function EducationalResources() {
-  const [resources, setResources] = useState<Resource[]>(sampleResources);
-  const [filteredResources, setFilteredResources] = useState<Resource[]>(sampleResources);
+  const [courses, setCourses] = useState<Resource[]>([]);
+  const [filteredResources, setFilteredResources] = useState<Resource[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
   const { user } = useAuth();
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchCourses();
+  }, []);
 
   useEffect(() => {
     filterResources();
-  }, [searchQuery, selectedCategory, selectedLevel, resources]);
+  }, [searchQuery, selectedCategory, selectedLevel, courses]);
+
+  const fetchCourses = async () => {
+    const { data, error } = await supabase
+      .from('courses')
+      .select('*')
+      .eq('is_published', true)
+      .order('created_at', { ascending: false });
+
+    if (!error && data) {
+      const formattedCourses = data.map(course => ({
+        id: course.id,
+        title: course.title,
+        description: course.description,
+        type: 'course' as const,
+        category: course.category,
+        level: course.difficulty as 'Beginner' | 'Intermediate' | 'Advanced',
+        duration: `${course.duration_hours || 0} hours`,
+        rating: course.rating || 0,
+        downloads: course.total_students || 0,
+        tags: [course.category, course.difficulty],
+        thumbnail: course.thumbnail_url
+      }));
+      setCourses(formattedCourses);
+      setFilteredResources(formattedCourses);
+    }
+  };
+
+  const enrollInCourse = async (courseId: string, courseTitle: string) => {
+    if (!user) {
+      toast({
+        title: "Login Required",
+        description: "Please login to enroll in courses.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { error } = await supabase
+      .from('course_enrollments')
+      .insert({
+        student_id: user.id,
+        course_id: courseId
+      });
+
+    if (error) {
+      if (error.code === '23505') {
+        toast({
+          title: "Already Enrolled",
+          description: "You're already enrolled in this course.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to enroll in course. Please try again.",
+          variant: "destructive",
+        });
+      }
+      return;
+    }
+
+    toast({
+      title: "Enrolled Successfully!",
+      description: `You've been enrolled in ${courseTitle}`,
+    });
+  };
 
   const filterResources = () => {
-    let filtered = resources;
+    let filtered = courses;
 
     if (searchQuery) {
       filtered = filtered.filter(resource =>
@@ -142,25 +215,11 @@ export default function EducationalResources() {
   };
 
   const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'video': return Video;
-      case 'article': return FileText;
-      case 'template': return Download;
-      case 'course': return BookOpen;
-      case 'webinar': return Users;
-      default: return FileText;
-    }
+    return BookOpen;
   };
 
   const getTypeColor = (type: string) => {
-    switch (type) {
-      case 'video': return 'text-red-500';
-      case 'article': return 'text-blue-500';
-      case 'template': return 'text-green-500';
-      case 'course': return 'text-purple-500';
-      case 'webinar': return 'text-orange-500';
-      default: return 'text-gray-500';
-    }
+    return 'text-purple-500';
   };
 
   const getLevelColor = (level: string) => {
@@ -172,7 +231,7 @@ export default function EducationalResources() {
     }
   };
 
-  const categories = [...new Set(resources.map(r => r.category))];
+  const categories = [...new Set(courses.map(r => r.category))];
 
   return (
     <div className="space-y-6">
@@ -274,23 +333,9 @@ export default function EducationalResources() {
                   ))}
                 </div>
 
-                <Button className="w-full pulse-primary" size="sm">
-                  {resource.type === 'video' || resource.type === 'webinar' ? (
-                    <>
-                      <Play className="h-4 w-4 mr-2" />
-                      Watch Now
-                    </>
-                  ) : resource.type === 'template' ? (
-                    <>
-                      <Download className="h-4 w-4 mr-2" />
-                      Download
-                    </>
-                  ) : (
-                    <>
-                      <BookOpen className="h-4 w-4 mr-2" />
-                      Start Learning
-                    </>
-                  )}
+                <Button className="w-full pulse-primary" size="sm" onClick={() => enrollInCourse(resource.id, resource.title)}>
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Enroll Now
                 </Button>
               </CardContent>
             </Card>
