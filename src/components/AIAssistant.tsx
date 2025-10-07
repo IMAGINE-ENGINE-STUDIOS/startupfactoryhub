@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserRole } from "@/hooks/useUserRole";
 import { Bot, Send, Loader2, X, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -24,6 +25,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const { user } = useAuth();
+  const { role } = useUserRole();
   const { toast } = useToast();
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -42,18 +44,11 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
     setIsLoading(true);
 
     try {
-      // Get user profile to determine role
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', user.id)
-        .single();
-
       const { data, error } = await supabase.functions.invoke('ai-chatbot', {
         body: { 
           message: userMessage,
           conversationId,
-          userRole: profile?.role || 'startup'
+          userRole: role || 'startup'
         }
       });
 

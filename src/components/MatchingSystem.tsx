@@ -137,13 +137,14 @@ export default function MatchingSystem() {
     if (!user) return;
 
     // Check if this is a mentorship request (connecting with a mentor/advisor)
-    const { data: targetProfile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('user_id', targetId)
-      .single();
+    // Check if target user is an advisor or mentor using secure function
+    const { data: isAdvisor } = await supabase
+      .rpc('has_role', { _user_id: targetId, _role: 'advisor' });
+    
+    const { data: isMentor } = await supabase
+      .rpc('has_role', { _user_id: targetId, _role: 'mentor' });
 
-    if (targetProfile?.role === 'advisor' || targetProfile?.role === 'mentor') {
+    if (isAdvisor || isMentor) {
       // Send mentorship request
       const { error } = await supabase
         .from('mentorship_relationships')

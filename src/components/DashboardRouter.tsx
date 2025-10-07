@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useUserRole } from "@/hooks/useUserRole";
 import Dashboard from "@/pages/Dashboard";
 import MentorDashboard from "@/pages/MentorDashboard";
 import AdvisorDashboard from "@/pages/AdvisorDashboard";
@@ -9,52 +9,24 @@ import StudentDashboard from "@/pages/StudentDashboard";
 import FeedDashboard from "@/pages/FeedDashboard";
 import { useNavigate } from "react-router-dom";
 
-interface Profile {
-  role: 'startup' | 'advisor' | 'investor' | 'student' | 'mentor';
-}
-
 const DashboardRouter = () => {
-  const { user, loading } = useAuth();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [profileLoading, setProfileLoading] = useState(true);
+  const { user, loading: authLoading } = useAuth();
+  const { role, loading: roleLoading, error } = useUserRole();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
       navigate("/auth");
       return;
     }
 
-    if (user) {
-      fetchProfile();
-    }
-  }, [user, loading, navigate]);
-
-  const fetchProfile = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('user_id', user?.id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching profile:', error);
-        // If no profile exists, redirect to profile setup
-        navigate("/profile-setup");
-        return;
-      }
-
-      setProfile(data);
-    } catch (error) {
-      console.error('Error:', error);
+    // If there's an error fetching the role or no role exists, redirect to profile setup
+    if (!roleLoading && user && (!role || error)) {
       navigate("/profile-setup");
-    } finally {
-      setProfileLoading(false);
     }
-  };
+  }, [user, authLoading, role, roleLoading, error, navigate]);
 
-  if (loading || profileLoading) {
+  if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -65,12 +37,12 @@ const DashboardRouter = () => {
     );
   }
 
-  if (!user || !profile) {
+  if (!user || !role) {
     return null;
   }
 
-  // Route to appropriate dashboard based on user role
-  switch (profile.role) {
+  // Route to appropriate dashboard based on user role (secured via user_roles table)
+  switch (role) {
     case 'advisor':
       return <AdvisorDashboard />;
     case 'investor':

@@ -70,7 +70,7 @@ export default function CommunityCalendar() {
     // Fetch organizer profiles
     const { data: profilesData } = await supabase
       .from('profiles')
-      .select('user_id, full_name, role')
+      .select('user_id, full_name')
       .in('user_id', organizerIds);
 
     const profilesMap = (profilesData || []).reduce((acc, profile) => {

@@ -1442,7 +1442,6 @@ export type Database = {
           id: string
           linkedin_url: string | null
           location: string | null
-          role: Database["public"]["Enums"]["app_role"]
           updated_at: string
           user_id: string
           website: string | null
@@ -1456,7 +1455,6 @@ export type Database = {
           id?: string
           linkedin_url?: string | null
           location?: string | null
-          role: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           user_id: string
           website?: string | null
@@ -1470,7 +1468,6 @@ export type Database = {
           id?: string
           linkedin_url?: string | null
           location?: string | null
-          role?: Database["public"]["Enums"]["app_role"]
           updated_at?: string
           user_id?: string
           website?: string | null

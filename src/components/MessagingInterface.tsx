@@ -30,7 +30,6 @@ interface Conversation {
     user_id: string;
     full_name: string;
     avatar_url?: string;
-    role: string;
   };
   unread_count?: number;
 }
@@ -39,7 +38,6 @@ interface Profile {
   user_id: string;
   full_name: string;
   avatar_url?: string;
-  role: string;
 }
 
 export default function MessagingInterface() {
@@ -88,7 +86,7 @@ export default function MessagingInterface() {
   const fetchAllUsers = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('user_id, full_name, avatar_url, role')
+      .select('user_id, full_name, avatar_url')
       .neq('user_id', user?.id);
     
     if (data) {
@@ -114,7 +112,7 @@ export default function MessagingInterface() {
       // Fetch profiles
       const { data: profilesData } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, role')
+        .select('user_id, full_name, avatar_url')
         .in('user_id', otherUserIds);
 
       // Get unread counts
@@ -247,14 +245,13 @@ export default function MessagingInterface() {
                     onClick={() => startNewConversation(user.user_id)}
                   >
                     <Avatar className="h-10 w-10">
-                      {user.avatar_url && <AvatarImage src={user.avatar_url} />}
-                      <AvatarFallback>{user.full_name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium truncate">{user.full_name}</p>
-                      <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
-                    </div>
+                    {user.avatar_url && <AvatarImage src={user.avatar_url} />}
+                    <AvatarFallback>{user.full_name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium truncate">{user.full_name}</p>
                   </div>
+                </div>
                 ))}
               </ScrollArea>
             </div>
@@ -322,14 +319,13 @@ export default function MessagingInterface() {
             <CardHeader className="pb-3 border-b">
               <div className="flex items-center gap-3">
                 <Avatar>
-                  {selectedUser.avatar_url && <AvatarImage src={selectedUser.avatar_url} />}
-                  <AvatarFallback>{selectedUser.full_name?.charAt(0) || 'U'}</AvatarFallback>
-                </Avatar>
-                <div>
-                  <CardTitle className="text-lg">{selectedUser.full_name}</CardTitle>
-                  <p className="text-sm text-muted-foreground capitalize">{selectedUser.role}</p>
-                </div>
+                {selectedUser.avatar_url && <AvatarImage src={selectedUser.avatar_url} />}
+                <AvatarFallback>{selectedUser.full_name?.charAt(0) || 'U'}</AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle className="text-lg">{selectedUser.full_name}</CardTitle>
               </div>
+            </div>
             </CardHeader>
             
             <ScrollArea className="flex-1 p-4">

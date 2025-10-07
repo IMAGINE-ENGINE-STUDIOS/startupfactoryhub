@@ -29,7 +29,6 @@ interface Conversation {
     user_id: string;
     full_name: string;
     avatar_url?: string;
-    role: string;
   };
   unread_count?: number;
 }
@@ -38,7 +37,6 @@ interface Profile {
   user_id: string;
   full_name: string;
   avatar_url?: string;
-  role: string;
 }
 
 export default function FloatingChat() {
@@ -89,7 +87,7 @@ export default function FloatingChat() {
   const fetchAllUsers = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('user_id, full_name, avatar_url, role')
+      .select('user_id, full_name, avatar_url')
       .neq('user_id', user?.id);
     
     if (data) {
@@ -113,7 +111,7 @@ export default function FloatingChat() {
 
       const { data: profilesData } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, role')
+        .select('user_id, full_name, avatar_url')
         .in('user_id', otherUserIds);
 
       const { data: unreadData } = await supabase
@@ -309,14 +307,13 @@ export default function FloatingChat() {
                             onClick={() => startNewConversation(user.user_id)}
                           >
                             <Avatar className="h-8 w-8">
-                              {user.avatar_url && <AvatarImage src={user.avatar_url} />}
-                              <AvatarFallback className="text-xs">{user.full_name.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{user.full_name}</p>
-                              <p className="text-xs text-muted-foreground capitalize">{user.role}</p>
-                            </div>
+                            {user.avatar_url && <AvatarImage src={user.avatar_url} />}
+                            <AvatarFallback className="text-xs">{user.full_name.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{user.full_name}</p>
                           </div>
+                        </div>
                         ))}
                       </ScrollArea>
                     </div>

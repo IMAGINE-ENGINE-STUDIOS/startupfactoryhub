@@ -61,22 +61,38 @@ export default function AdvisorDashboard() {
       .from('mentorship_relationships')
       .select(`
         *,
-        mentee:mentee_id (
+        mentee:profiles!mentorship_relationships_mentee_id_fkey (
           full_name,
-          avatar_url
-        ),
-        companies:mentee_id (
-          name,
-          description,
-          stage,
-          industry
+          avatar_url,
+          user_id
         )
       `)
       .eq('mentor_id', user.id)
       .eq('status', 'active');
 
-    if (!error && data) {
-      setActiveMentorships(data);
+    if (error) {
+      console.error('Error fetching active mentorships:', error);
+      return;
+    }
+
+    // Fetch company info separately for each mentee
+    if (data) {
+      const mentorshipsWithCompanies = await Promise.all(
+        data.map(async (mentorship: any) => {
+          const { data: companyData } = await supabase
+            .from('companies')
+            .select('name, description, stage, industry')
+            .eq('user_id', mentorship.mentee?.user_id)
+            .single();
+          
+          return {
+            ...mentorship,
+            companies: companyData || null
+          };
+        })
+      );
+
+      setActiveMentorships(mentorshipsWithCompanies);
     }
   };
 
@@ -87,11 +103,9 @@ export default function AdvisorDashboard() {
       .from('mentoring_sessions')
       .select(`
         *,
-        mentee:mentee_id (
-          full_name
-        ),
-        companies:mentee_id (
-          name
+        mentee:profiles!mentoring_sessions_mentee_id_fkey (
+          full_name,
+          user_id
         )
       `)
       .eq('mentor_id', user.id)
@@ -100,8 +114,29 @@ export default function AdvisorDashboard() {
       .order('scheduled_at', { ascending: true })
       .limit(5);
 
-    if (!error && data) {
-      setUpcomingSessions(data);
+    if (error) {
+      console.error('Error fetching upcoming sessions:', error);
+      return;
+    }
+
+    // Fetch company info separately for each mentee
+    if (data) {
+      const sessionsWithCompanies = await Promise.all(
+        data.map(async (session: any) => {
+          const { data: companyData } = await supabase
+            .from('companies')
+            .select('name')
+            .eq('user_id', session.mentee?.user_id)
+            .single();
+          
+          return {
+            ...session,
+            companies: companyData || null
+          };
+        })
+      );
+
+      setUpcomingSessions(sessionsWithCompanies);
     }
   };
 

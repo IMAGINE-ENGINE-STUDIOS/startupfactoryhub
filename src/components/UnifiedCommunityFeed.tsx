@@ -121,7 +121,7 @@ export default function UnifiedCommunityFeed({
     // Fetch profiles for those users
     const { data: profilesData, error: profilesError } = await supabase
       .from('profiles')
-      .select('user_id, full_name, role, avatar_url')
+      .select('user_id, full_name, avatar_url')
       .in('user_id', userIds);
 
     if (profilesError) {

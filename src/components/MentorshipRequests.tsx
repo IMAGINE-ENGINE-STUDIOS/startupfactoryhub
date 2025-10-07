@@ -45,24 +45,40 @@ export default function MentorshipRequests() {
       .from('mentorship_relationships')
       .select(`
         *,
-        mentee:mentee_id (
+        mentee:profiles!mentorship_relationships_mentee_id_fkey (
           full_name,
           avatar_url,
-          bio
-        ),
-        company:mentee_id (
-          name,
-          stage,
-          industry,
-          description
+          bio,
+          user_id
         )
       `)
       .eq('mentor_id', user.id)
       .eq('status', 'pending')
       .order('created_at', { ascending: false });
 
-    if (!error && data) {
-      setRequests(data as any);
+    if (error) {
+      console.error('Error fetching mentorship requests:', error);
+      return;
+    }
+
+    // Fetch company info separately for each mentee
+    if (data) {
+      const requestsWithCompanies = await Promise.all(
+        data.map(async (request: any) => {
+          const { data: companyData } = await supabase
+            .from('companies')
+            .select('name, stage, industry, description')
+            .eq('user_id', request.mentee?.user_id)
+            .single();
+          
+          return {
+            ...request,
+            company: companyData || null
+          };
+        })
+      );
+
+      setRequests(requestsWithCompanies as any);
     }
   };
 

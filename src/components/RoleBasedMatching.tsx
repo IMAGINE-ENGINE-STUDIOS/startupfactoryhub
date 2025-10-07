@@ -99,24 +99,40 @@ export default function RoleBasedMatching() {
   };
 
   const fetchInvestorsAndAdvisors = async (): Promise<Match[]> => {
-    const { data: profiles, error } = await supabase
+    // Get all profiles first
+    const { data: profiles, error: profilesError } = await supabase
       .from('profiles')
       .select('*')
-      .in('role', ['investor', 'advisor', 'student'])
-      .limit(10);
+      .limit(50);
 
-    if (error || !profiles) return [];
+    if (profilesError || !profiles) return [];
 
-    return profiles.map(profile => ({
-      id: profile.user_id,
-      name: profile.full_name || 'Anonymous User',
-      role: profile.role === 'advisor' ? 'Advisor' : profile.role.charAt(0).toUpperCase() + profile.role.slice(1),
-      description: profile.bio || `Experienced ${profile.role} ready to help startups`,
-      industry: profile.bio?.split(' ')[0] || 'General',
-      skills: profile.bio ? [profile.bio] : [],
-      experience: 'Senior', // Default value
-      compatibility_score: Math.floor(Math.random() * 40) + 60,
-    }));
+    // Get user roles for all these profiles
+    const { data: userRoles, error: rolesError } = await supabase
+      .from('user_roles')
+      .select('user_id, role')
+      .in('user_id', profiles.map(p => p.user_id))
+      .in('role', ['investor', 'advisor', 'student']);
+
+    if (rolesError) return [];
+
+    // Filter profiles that have matching roles
+    const rolesMap = new Map(userRoles?.map(ur => [ur.user_id, ur.role]) || []);
+    const filteredProfiles = profiles.filter(p => rolesMap.has(p.user_id)).slice(0, 10);
+
+    return filteredProfiles.map(profile => {
+      const userRole = rolesMap.get(profile.user_id) || 'startup';
+      return {
+        id: profile.user_id,
+        name: profile.full_name || 'Anonymous User',
+        role: userRole === 'advisor' ? 'Advisor' : userRole.charAt(0).toUpperCase() + userRole.slice(1),
+        description: profile.bio || `Experienced ${userRole} ready to help startups`,
+        industry: profile.bio?.split(' ')[0] || 'General',
+        skills: profile.bio ? [profile.bio] : [],
+        experience: 'Senior',
+        compatibility_score: Math.floor(Math.random() * 40) + 60,
+      };
+    });
   };
 
   const fetchStartupsForInvestor = async (): Promise<Match[]> => {
@@ -190,11 +206,19 @@ export default function RoleBasedMatching() {
       .gte('team_size', 5) // Startups with team size 5+ likely offer internships
       .limit(8);
 
+    // Get advisors using user_roles table
+    const { data: advisorRoles } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', 'advisor')
+      .limit(6);
+
+    const advisorIds = advisorRoles?.map(r => r.user_id) || [];
+    
     const { data: advisors, error: advisorError } = await supabase
       .from('profiles')
       .select('*')
-      .eq('role', 'advisor')
-      .limit(6);
+      .in('user_id', advisorIds);
 
     let matches: Match[] = [];
 
