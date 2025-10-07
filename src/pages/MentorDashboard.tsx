@@ -14,6 +14,8 @@ import MentorFeed from "@/components/MentorFeed";
 import MentorshipRequests from "@/components/MentorshipRequests";
 import ConnectionsWidget from "@/components/ConnectionsWidget";
 import ResourcesWidget from "@/components/ResourcesWidget";
+import MentorEndorsements from "@/components/MentorEndorsements";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   Users, 
   TrendingUp, 
@@ -28,6 +30,8 @@ import {
 } from "lucide-react";
 
 const MentorDashboard = () => {
+  const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-background">
       <DashboardNavigation />
@@ -147,52 +151,8 @@ const MentorDashboard = () => {
             {/* Resources */}
             <ResourcesWidget />
 
-            {/* Recent Endorsements */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center">
-                  <Award className="w-5 h-5 mr-2 text-ocean-primary" />
-                  Recent Endorsements
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-start space-x-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg" alt="John" />
-                    <AvatarFallback>JD</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm">
-                      <span className="font-medium">John Doe</span> from FinPay Solutions
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      "Sarah's guidance was instrumental in our Series A success!"
-                    </p>
-                    <p className="text-xs text-muted-foreground">2 days ago</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start space-x-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src="/placeholder.svg" alt="Emma" />
-                    <AvatarFallback>ET</AvatarFallback>
-                  </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm">
-                      <span className="font-medium">Emma Thompson</span> from GreenTech
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      "Amazing mentor with deep industry knowledge and connections."
-                    </p>
-                    <p className="text-xs text-muted-foreground">1 week ago</p>
-                  </div>
-                </div>
-                
-                <Button variant="outline" size="sm" className="w-full">
-                  View All Endorsements
-                </Button>
-              </CardContent>
-            </Card>
+            {/* Endorsements */}
+            {user && <MentorEndorsements mentorId={user.id} isOwnProfile={true} />}
           </div>
         </div>
       </div>

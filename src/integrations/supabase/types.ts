@@ -629,6 +629,33 @@ export type Database = {
         }
         Relationships: []
       }
+      endorsements: {
+        Row: {
+          comment: string | null
+          created_at: string
+          endorser_id: string
+          id: string
+          mentor_id: string
+          skill: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          endorser_id: string
+          id?: string
+          mentor_id: string
+          skill: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          endorser_id?: string
+          id?: string
+          mentor_id?: string
+          skill?: string
+        }
+        Relationships: []
+      }
       event_attendees: {
         Row: {
           created_at: string | null
@@ -1033,6 +1060,39 @@ export type Database = {
           preferred_stages?: string[] | null
           total_invested?: number | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      leaderboard_entries: {
+        Row: {
+          achievements_count: number | null
+          courses_completed: number | null
+          created_at: string
+          id: string
+          points: number
+          rank: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          achievements_count?: number | null
+          courses_completed?: number | null
+          created_at?: string
+          id?: string
+          points?: number
+          rank?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          achievements_count?: number | null
+          courses_completed?: number | null
+          created_at?: string
+          id?: string
+          points?: number
+          rank?: number | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -1474,6 +1534,35 @@ export type Database = {
         }
         Relationships: []
       }
+      resource_bookmarks: {
+        Row: {
+          created_at: string
+          id: string
+          resource_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          resource_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          resource_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resource_bookmarks_resource_id_fkey"
+            columns: ["resource_id"]
+            isOneToOne: false
+            referencedRelation: "resources"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       resources: {
         Row: {
           author_id: string | null
@@ -1632,6 +1721,74 @@ export type Database = {
           university?: string | null
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      study_group_members: {
+        Row: {
+          group_id: string
+          id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "study_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      study_groups: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_public: boolean | null
+          max_members: number | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          max_members?: number | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_public?: boolean | null
+          max_members?: number | null
+          name?: string
+          updated_at?: string
         }
         Relationships: []
       }

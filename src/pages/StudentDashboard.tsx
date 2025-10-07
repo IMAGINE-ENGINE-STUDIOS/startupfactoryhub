@@ -13,6 +13,8 @@ import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import AIQuickActions from '@/components/AIQuickActions';
+import Leaderboard from '@/components/Leaderboard';
+import StudyGroups from '@/components/StudyGroups';
 
 interface Course {
   id: string;
@@ -249,13 +251,23 @@ export default function StudentDashboard() {
         <AIFeaturesHub />
 
         <Tabs defaultValue="courses" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5 max-w-2xl">
+          <TabsList className="grid w-full grid-cols-7 max-w-4xl">
             <TabsTrigger value="courses">Courses</TabsTrigger>
+            <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
+            <TabsTrigger value="groups">Study Groups</TabsTrigger>
             <TabsTrigger value="assignments">Assignments</TabsTrigger>
             <TabsTrigger value="startups">Startups</TabsTrigger>
             <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="network">Network</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="leaderboard">
+            <Leaderboard />
+          </TabsContent>
+
+          <TabsContent value="groups">
+            <StudyGroups />
+          </TabsContent>
 
           <TabsContent value="courses" className="space-y-4">
             <Card className="tech-card border-0">
