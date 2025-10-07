@@ -56,11 +56,20 @@ export default function MatchingSystem() {
   };
 
   const fetchMatches = async () => {
+    // Fetch advisor/mentor role IDs
+    const { data: advisorRoles } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', 'advisor')
+      .limit(10);
+
+    const advisorIds = advisorRoles?.map(r => r.user_id) || [];
+
     // Fetch mentor matches (for startups)
     const { data: mentors, error: mentorError } = await supabase
       .from('profiles')
       .select('*')
-      .in('role', ['advisor'])
+      .in('user_id', advisorIds)
       .limit(5);
 
     if (!mentorError && mentors) {
@@ -71,16 +80,25 @@ export default function MatchingSystem() {
         description: mentor.bio || 'Experienced mentor ready to guide your startup journey',
         industry: mentor.bio?.split(' ')[0] || 'General',
         expertise: mentor.bio ? [mentor.bio] : [],
-        compatibility_score: Math.floor(Math.random() * 40) + 60, // 60-100% compatibility
+        compatibility_score: Math.floor(Math.random() * 40) + 60,
       }));
       setMentorMatches(mentorMatches);
     }
+
+    // Fetch investor role IDs
+    const { data: investorRoles } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', 'investor')
+      .limit(10);
+
+    const investorIds = investorRoles?.map(r => r.user_id) || [];
 
     // Fetch investor matches (for startups)
     const { data: investors, error: investorError } = await supabase
       .from('profiles')
       .select('*')
-      .eq('role', 'investor')
+      .in('user_id', investorIds)
       .limit(5);
 
     if (!investorError && investors) {
@@ -91,7 +109,7 @@ export default function MatchingSystem() {
         description: investor.bio || 'Looking for promising startups to invest in',
         industry: investor.bio?.split(' ')[0] || 'General',
         expertise: investor.bio ? [investor.bio] : [],
-        compatibility_score: Math.floor(Math.random() * 30) + 70, // 70-100% compatibility
+        compatibility_score: Math.floor(Math.random() * 30) + 70,
       }));
       setInvestorMatches(investorMatches);
     }

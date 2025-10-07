@@ -10,6 +10,7 @@ import { Heart, X, Users, Building, GraduationCap, TrendingUp, MapPin, Filter } 
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 
 interface MatchingCriteria {
   industry?: string;
@@ -38,36 +39,16 @@ interface Match {
 export default function RoleBasedMatching() {
   const [matches, setMatches] = useState<Match[]>([]);
   const [criteria, setCriteria] = useState<MatchingCriteria>({});
-  const [userProfile, setUserProfile] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  const { profile: userProfile } = useProfileWithRole();
   const { toast } = useToast();
-
-  useEffect(() => {
-    if (user) {
-      fetchUserProfile();
-    }
-  }, [user]);
 
   useEffect(() => {
     if (userProfile) {
       fetchMatches();
     }
   }, [userProfile, criteria]);
-
-  const fetchUserProfile = async () => {
-    if (!user) return;
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (!error && data) {
-      setUserProfile(data);
-    }
-  };
 
   const fetchMatches = async () => {
     if (!userProfile) return;

@@ -11,6 +11,7 @@ import { User, Briefcase, GraduationCap, Award, Plus, Edit, Save, X, MapPin, Cal
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface Experience {
   id: string;
@@ -49,6 +50,7 @@ export default function ProfessionalBackground() {
   const [isEditing, setIsEditing] = useState(false);
   const [editingProfile, setEditingProfile] = useState<any>({});
   const { user } = useAuth();
+  const { role } = useUserRole();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -250,7 +252,7 @@ export default function ProfessionalBackground() {
                   <>
                     <h1 className="text-3xl font-bold text-foreground mb-2">{profile.full_name}</h1>
                     <p className="text-lg text-muted-foreground mb-2">
-                      {profile.role?.charAt(0).toUpperCase() + profile.role?.slice(1)} • {getExperienceYears()}+ years experience
+                      {role ? role.charAt(0).toUpperCase() + role.slice(1) : 'Professional'} • {getExperienceYears()}+ years experience
                     </p>
                     {profile.location && (
                       <div className="flex items-center text-muted-foreground mb-2">
