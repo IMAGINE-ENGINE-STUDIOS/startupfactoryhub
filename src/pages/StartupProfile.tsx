@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import DashboardNavigation from "@/components/DashboardNavigation";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Building, 
   MapPin, 
@@ -25,59 +28,113 @@ import {
 
 const StartupProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
+  const [company, setCompany] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(null);
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
+  const { toast } = useToast();
 
-  const profileData = {
-    name: "FinPay Solutions",
-    tagline: "Democratizing financial services through AI-powered payment solutions",
-    location: "San Francisco, CA",
-    founded: "2023",
-    teamSize: "8 people",
-    stage: "Seed Stage",
-    industry: "FinTech",
-    website: "finpaysolutions.com",
-    followers: 1234,
-    following: 89,
-    posts: 47
+  useEffect(() => {
+    if (user) {
+      fetchCompanyData();
+      fetchPosts();
+    }
+  }, [user]);
+
+  const fetchCompanyData = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    
+    // Fetch company profile
+    const { data: companyData, error: companyError } = await supabase
+      .from('companies')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (companyError && companyError.code !== 'PGRST116') {
+      console.error('Error fetching company:', companyError);
+    }
+
+    // Fetch user profile
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (profileError) {
+      console.error('Error fetching profile:', profileError);
+    }
+
+    setCompany(companyData);
+    setProfile(profileData);
+    setLoading(false);
   };
 
-  const updates = [
-    {
-      id: 1,
-      type: "milestone",
-      content: "🎉 Major milestone achieved! We've successfully processed our first $1M in transactions through our AI-powered payment platform. The system is performing beautifully with 99.9% uptime and zero fraud incidents.",
-      timestamp: "2 hours ago",
-      media: ["/placeholder.svg"],
-      tags: ["#milestone", "#payments", "#AI"],
-      metrics: { likes: 42, comments: 8, shares: 12 },
-      liked: true
-    },
-    {
-      id: 2,
-      type: "team",
-      content: "Excited to welcome Sarah Chen as our new Head of Product! 🚀 Sarah brings 8 years of experience from Stripe and will be leading our user experience initiatives. Looking forward to building amazing products together!",
-      timestamp: "1 day ago",
-      media: [],
-      tags: ["#team", "#hiring", "#product"],
-      metrics: { likes: 67, comments: 15, shares: 8 },
-      liked: false
-    },
-    {
-      id: 3,
-      type: "funding",
-      content: "Thrilled to announce our $2.5M seed round led by @TechVentures with participation from @AngelGroup! 💰 This funding will accelerate our AI development and expand our team. Special thanks to our amazing investors who believe in our vision.",
-      timestamp: "3 days ago",
-      media: [],
-      tags: ["#funding", "#seedround", "#investors"],
-      metrics: { likes: 156, comments: 34, shares: 28 },
-      liked: true
+  const fetchPosts = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('feed_posts')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (!error && data) {
+      setPosts(data);
     }
-  ];
+  };
+
+  const profileData = {
+    name: company?.name || "Your Startup",
+    tagline: company?.description || "Building the future",
+    location: company?.location || "Not specified",
+    founded: company?.founded_year?.toString() || "2024",
+    teamSize: company?.team_size ? `${company.team_size} people` : "Not specified",
+    stage: company?.stage || "Early Stage",
+    industry: company?.industry || "Technology",
+    website: company?.website || "",
+    followers: 0,
+    following: 0,
+    posts: posts.length
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays === 1) return '1 day ago';
+    return `${diffDays} days ago`;
+  };
+
+  const updates = posts.map((post) => ({
+    id: post.id,
+    type: post.post_type || "update",
+    content: post.content,
+    timestamp: formatTimestamp(post.created_at),
+    media: post.media_urls || [],
+    tags: [],
+    metrics: { 
+      likes: post.likes_count || 0, 
+      comments: post.comments_count || 0, 
+      shares: post.shares_count || 0 
+    },
+    liked: false
+  }));
 
   const milestones = [
-    { title: "First $1M in transactions", date: "Today", completed: true },
-    { title: "Regulatory compliance certification", date: "This week", completed: false },
-    { title: "Series A fundraising", date: "Q2 2024", completed: false },
-    { title: "International expansion", date: "Q3 2024", completed: false }
+    { title: `Reach ${company?.funding_amount ? '$' + (company.funding_amount / 1000000) + 'M' : '$1M'} funding`, date: "Q1 2024", completed: company?.funding_amount ? true : false },
+    { title: "Launch MVP", date: "Q2 2024", completed: company?.stage === 'mvp' || company?.stage === 'growth' },
+    { title: "First 100 customers", date: "Q3 2024", completed: false },
+    { title: "Team expansion", date: "Q4 2024", completed: (company?.team_size || 0) > 10 }
   ];
 
   const getTypeIcon = (type: string) => {
@@ -88,6 +145,33 @@ const StartupProfile = () => {
       default: return <Award className="w-4 h-4 text-muted-foreground" />;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardNavigation />
+        <div className="container mx-auto px-6 py-12 text-center">
+          <p className="text-muted-foreground">Loading profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!company) {
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardNavigation />
+        <div className="container mx-auto px-6 py-12 text-center">
+          <Building className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+          <h2 className="text-2xl font-bold mb-2">No Company Profile</h2>
+          <p className="text-muted-foreground mb-6">Create your company profile to get started</p>
+          <Button onClick={() => window.location.href = '/dashboard'}>
+            Go to Dashboard
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
