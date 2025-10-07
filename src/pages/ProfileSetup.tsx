@@ -13,8 +13,11 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Building, MapPin, Users, DollarSign, Target, Plus, X } from "lucide-react";
 
+type UserRole = 'startup' | 'advisor' | 'investor' | 'student' | 'mentor';
+
 const ProfileSetup = () => {
   const [step, setStep] = useState(1);
+  const [selectedRole, setSelectedRole] = useState<UserRole | null>(null);
   const [skills, setSkills] = useState<string[]>([]);
   const [currentSkill, setCurrentSkill] = useState("");
   const [loading, setLoading] = useState(false);
@@ -67,10 +70,28 @@ const ProfileSetup = () => {
   };
 
   const saveProfile = async () => {
-    if (!user) return;
+    if (!user || !selectedRole) {
+      toast({
+        title: "Error",
+        description: "Please select a role to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setLoading(true);
     try {
+      // First, save the role to user_roles table
+      const { error: roleError } = await supabase
+        .from('user_roles')
+        .insert([{ user_id: user.id, role: selectedRole }])
+        .select()
+        .single();
+
+      if (roleError && roleError.code !== '23505') { // Ignore unique constraint violation
+        throw roleError;
+      }
+
       // Check if profile exists
       const { data: existingProfile } = await supabase
         .from('profiles')
@@ -82,8 +103,6 @@ const ProfileSetup = () => {
         user_id: user.id,
         email: user.email || '',
         full_name: user.user_metadata?.full_name || '',
-        role: user.user_metadata?.role || 'startup',
-        company_name: formData.company_name,
         bio: formData.bio,
         location: formData.location,
         website: formData.website,
@@ -105,7 +124,7 @@ const ProfileSetup = () => {
       }
 
       // Create or update company profile if startup
-      if (user.user_metadata?.role === 'startup') {
+      if (selectedRole === 'startup' && formData.company_name) {
         const companyData = {
           user_id: user.id,
           name: formData.company_name,
@@ -143,6 +162,16 @@ const ProfileSetup = () => {
   };
 
   const handleNext = () => {
+    // Validate role selection on step 1
+    if (step === 1 && !selectedRole) {
+      toast({
+        title: "Role required",
+        description: "Please select your role to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     if (step < 3) {
       setStep(step + 1);
     } else {
@@ -168,22 +197,57 @@ const ProfileSetup = () => {
         <Card className="glass-morphism border-ocean-border">
           <CardHeader>
             <CardTitle className="text-xl">
-              Step {step} of 3: {step === 1 ? "Company Details" : step === 2 ? "Startup Stage" : "Goals & Skills"}
+              Step {step} of 3: {step === 1 ? "Role Selection" : step === 2 ? selectedRole === 'startup' ? "Startup Details" : "Profile Details" : "Goals & Skills"}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             {step === 1 && (
               <>
                 <div>
-                  <Label htmlFor="companyName">Company Name</Label>
-                  <Input 
-                    id="companyName" 
-                    placeholder="Your company name"
-                    value={formData.company_name}
-                    onChange={(e) => updateFormData('company_name', e.target.value)}
-                    className="mt-2"
-                  />
+                  <Label>Select Your Role</Label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+                    {[
+                      { value: 'startup', label: 'Startup Founder', icon: Building, desc: 'Building a startup' },
+                      { value: 'advisor', label: 'Advisor', icon: Users, desc: 'Provide guidance' },
+                      { value: 'investor', label: 'Investor', icon: DollarSign, desc: 'Invest in startups' },
+                      { value: 'student', label: 'Student', icon: Target, desc: 'Learn and grow' },
+                      { value: 'mentor', label: 'Mentor', icon: Users, desc: 'Guide others' },
+                    ].map(({ value, label, icon: Icon, desc }) => (
+                      <button
+                        key={value}
+                        onClick={() => setSelectedRole(value as UserRole)}
+                        className={`p-4 border-2 rounded-lg text-left transition-all ${
+                          selectedRole === value
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <Icon className="w-5 h-5 mt-1 text-primary" />
+                          <div>
+                            <div className="font-semibold">{label}</div>
+                            <div className="text-sm text-muted-foreground">{desc}</div>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
                 </div>
+
+                {selectedRole === 'startup' && (
+                  <>
+                    <div>
+                      <Label htmlFor="companyName">Company Name</Label>
+                      <Input 
+                        id="companyName" 
+                        placeholder="Your company name"
+                        value={formData.company_name}
+                        onChange={(e) => updateFormData('company_name', e.target.value)}
+                        className="mt-2"
+                      />
+                    </div>
+                  </>
+                )}
                 
                 <div>
                   <Label htmlFor="companyDescription">Company Description</Label>
@@ -245,7 +309,7 @@ const ProfileSetup = () => {
               </>
             )}
 
-            {step === 2 && (
+            {step === 2 && selectedRole === 'startup' && (
               <>
                 <div>
                   <Label>Startup Stage</Label>
@@ -315,6 +379,49 @@ const ProfileSetup = () => {
                       <SelectItem value="7-9">TRL 7-9: System Development</SelectItem>
                     </SelectContent>
                   </Select>
+                </div>
+              </>
+            )}
+
+            {step === 2 && selectedRole !== 'startup' && (
+              <>
+                <div>
+                  <Label htmlFor="bio">Tell us about yourself</Label>
+                  <Textarea 
+                    id="bio" 
+                    placeholder="Your background and experience..."
+                    value={formData.bio}
+                    onChange={(e) => updateFormData('bio', e.target.value)}
+                    className="mt-2"
+                    rows={4}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="location">Location</Label>
+                    <div className="relative mt-2">
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        id="location" 
+                        placeholder="City, Country" 
+                        value={formData.location}
+                        onChange={(e) => updateFormData('location', e.target.value)}
+                        className="pl-10" 
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="website">Website/LinkedIn</Label>
+                    <Input 
+                      id="website" 
+                      placeholder="https://..." 
+                      value={formData.website}
+                      onChange={(e) => updateFormData('website', e.target.value)}
+                      className="mt-2" 
+                    />
+                  </div>
                 </div>
               </>
             )}
