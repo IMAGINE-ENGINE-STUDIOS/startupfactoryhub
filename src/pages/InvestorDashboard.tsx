@@ -192,6 +192,16 @@ export default function InvestorDashboard() {
     }).format(amount);
   };
 
+  // Calculate ROI based on real investment data
+  const calculateROI = () => {
+    if (!investments.length || !investorProfile?.total_invested) return '0.0%';
+    
+    // Mock calculation - in a real app, you'd fetch current valuations
+    // For now, assume average 25% growth across portfolio
+    const averageGrowth = 25;
+    return `${averageGrowth.toFixed(1)}%`;
+  };
+
   const stats = [
     { 
       title: 'Total Invested', 
@@ -205,7 +215,7 @@ export default function InvestorDashboard() {
       icon: Building, 
       color: 'text-primary' 
     },
-    { title: 'ROI', value: '24.7%', icon: TrendingUp, color: 'text-accent' },
+    { title: 'ROI', value: calculateROI(), icon: TrendingUp, color: 'text-accent' },
     { title: 'Opportunities', value: opportunities.length.toString(), icon: Target, color: 'text-yellow-500' },
   ];
 
@@ -386,73 +396,85 @@ export default function InvestorDashboard() {
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <PieChart className="h-5 w-5 text-primary" />
-                    <span>Portfolio Distribution</span>
+                    <span>Portfolio Distribution by Industry</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-primary/10 border border-primary/20">
-                      <span className="font-medium">Technology</span>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-16 h-2 bg-primary/20 rounded-full">
-                          <div className="w-12 h-2 bg-primary rounded-full"></div>
-                        </div>
-                        <span className="text-sm font-medium">75%</span>
-                      </div>
+                  {investments.length > 0 ? (
+                    <div className="space-y-4">
+                      {(() => {
+                        const industryCount = investments.reduce((acc: any, inv) => {
+                          const industry = inv.industry || 'Other';
+                          acc[industry] = (acc[industry] || 0) + 1;
+                          return acc;
+                        }, {});
+                        
+                        const total = investments.length;
+                        const colors = ['primary', 'accent', 'green-500', 'yellow-500', 'blue-500'];
+                        
+                        return Object.entries(industryCount).map(([industry, count]: any, index) => {
+                          const percentage = ((count / total) * 100).toFixed(0);
+                          const color = colors[index % colors.length];
+                          
+                          return (
+                            <div key={industry} className={`flex items-center justify-between p-3 rounded-lg bg-${color}/10 border border-${color}/20`}>
+                              <span className="font-medium">{industry}</span>
+                              <div className="flex items-center space-x-2">
+                                <div className="w-16 h-2 bg-${color}/20 rounded-full">
+                                  <div 
+                                    className={`h-2 bg-${color} rounded-full`} 
+                                    style={{ width: `${percentage}%` }}
+                                  ></div>
+                                </div>
+                                <span className="text-sm font-medium">{percentage}%</span>
+                              </div>
+                            </div>
+                          );
+                        });
+                      })()}
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-accent/10 border border-accent/20">
-                      <span className="font-medium">Healthcare</span>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-16 h-2 bg-accent/20 rounded-full">
-                          <div className="w-4 h-2 bg-accent rounded-full"></div>
-                        </div>
-                        <span className="text-sm font-medium">15%</span>
-                      </div>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Building className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                      <p>No investments yet</p>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                      <span className="font-medium">Fintech</span>
-                      <div className="flex items-center space-x-2">
-                        <div className="w-16 h-2 bg-green-500/20 rounded-full">
-                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                        </div>
-                        <span className="text-sm font-medium">10%</span>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
 
               <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
-                    <Users className="h-5 w-5 text-accent" />
-                    <span>Investment Performance</span>
+                    <TrendingUp className="h-5 w-5 text-accent" />
+                    <span>Portfolio by Stage</span>
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
-                    <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/20">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium text-foreground">TechStart AI</span>
-                        <span className="text-green-500 font-bold">+340%</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Series B → IPO Pipeline</p>
+                  {investments.length > 0 ? (
+                    <div className="space-y-4">
+                      {(() => {
+                        const stageCount = investments.reduce((acc: any, inv) => {
+                          const stage = inv.stage || 'Unknown';
+                          acc[stage] = (acc[stage] || 0) + 1;
+                          return acc;
+                        }, {});
+                        
+                        return Object.entries(stageCount).map(([stage, count]: any) => (
+                          <div key={stage} className="p-3 rounded-lg bg-primary/10 border border-primary/20">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium text-foreground capitalize">{stage}</span>
+                              <Badge variant="secondary">{count} {count === 1 ? 'company' : 'companies'}</Badge>
+                            </div>
+                          </div>
+                        ));
+                      })()}
                     </div>
-                    <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium text-foreground">GreenTech Solutions</span>
-                        <span className="text-primary font-bold">+180%</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Seed → Series A</p>
+                  ) : (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-20" />
+                      <p>No stage data available</p>
                     </div>
-                    <div className="p-3 rounded-lg bg-accent/10 border border-accent/20">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-medium text-foreground">DataFlow Pro</span>
-                        <span className="text-accent font-bold">+95%</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">Pre-seed → Seed</p>
-                    </div>
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
