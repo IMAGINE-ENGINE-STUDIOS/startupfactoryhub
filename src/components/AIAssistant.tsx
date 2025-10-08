@@ -52,7 +52,28 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Handle specific error cases
+        if (error.message?.includes('Rate limit')) {
+          toast({
+            title: "Rate Limit Exceeded",
+            description: "Too many requests. Please wait a moment and try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (error.message?.includes('credits exhausted') || error.message?.includes('Payment required')) {
+          toast({
+            title: "AI Credits Exhausted",
+            description: "Please add credits to your workspace to continue using AI features.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        throw error;
+      }
 
       if (!conversationId) {
         setConversationId(data.conversationId);
@@ -66,6 +87,9 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         description: error.message || "Failed to get AI response. Please try again.",
         variant: "destructive",
       });
+      
+      // Remove the user message on error
+      setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
     }

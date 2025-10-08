@@ -17,3 +17,6 @@ verify_jwt = true
 
 [functions.ai-vision-analyzer]
 verify_jwt = true
+
+[functions.search]
+verify_jwt = true
