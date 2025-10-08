@@ -2,6 +2,9 @@ import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import NotificationCenter from "./NotificationCenter";
+import GlobalSearch from "./GlobalSearch";
+import { ThemeToggle } from "./ThemeToggle";
 const Navigation = () => {
   const navigate = useNavigate();
   const {
@@ -37,6 +40,13 @@ const Navigation = () => {
           </div>
           
           <div className="flex items-center space-x-4">
+            {user && (
+              <>
+                <GlobalSearch />
+                <NotificationCenter />
+              </>
+            )}
+            <ThemeToggle />
             {user ? <>
                 <Button variant="ghost" onClick={() => navigate("/dashboard")}>Dashboard</Button>
                 <Button variant="hero" size="lg" onClick={async () => {
