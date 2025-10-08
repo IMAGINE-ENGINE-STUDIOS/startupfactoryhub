@@ -1,53 +1,88 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar as CalendarIcon, Clock, MapPin, Video, Users } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, Video, Users, Loader2 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useMentoringSessions } from '@/hooks/useMentoringSessions';
 
 interface CalendarEvent {
   id: string;
   title: string;
-  type: 'meeting' | 'event' | 'deadline';
+  type: 'meeting' | 'event' | 'mentoring';
   startTime: Date;
   endTime: Date;
   location?: string;
   isVirtual: boolean;
   attendees: number;
+  description?: string;
 }
 
 export default function CalendarIntegration() {
+  const { user } = useAuth();
+  const { sessions } = useMentoringSessions();
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [events] = useState<CalendarEvent[]>([
-    {
-      id: '1',
-      title: 'Pitch Practice Session',
-      type: 'meeting',
-      startTime: new Date(2025, 9, 8, 14, 0),
-      endTime: new Date(2025, 9, 8, 15, 0),
-      isVirtual: true,
-      attendees: 5,
-    },
-    {
-      id: '2',
-      title: 'Investor Networking Event',
-      type: 'event',
-      startTime: new Date(2025, 9, 10, 18, 0),
-      endTime: new Date(2025, 9, 10, 20, 0),
-      location: 'Tech Hub Downtown',
-      isVirtual: false,
-      attendees: 50,
-    },
-    {
-      id: '3',
-      title: 'Application Deadline',
-      type: 'deadline',
-      startTime: new Date(2025, 9, 15, 23, 59),
-      endTime: new Date(2025, 9, 15, 23, 59),
-      isVirtual: false,
-      attendees: 0,
-    },
-  ]);
+  const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [user, sessions]);
+
+  const fetchEvents = async () => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Fetch community events
+      const { data: eventsData, error: eventsError } = await supabase
+        .from('events')
+        .select('*')
+        .gte('start_date', new Date().toISOString())
+        .order('start_date', { ascending: true })
+        .limit(50);
+
+      if (eventsError) throw eventsError;
+
+      // Convert community events to CalendarEvent format
+      const communityEvents: CalendarEvent[] = (eventsData || []).map(event => ({
+        id: event.id,
+        title: event.title,
+        type: 'event' as const,
+        startTime: new Date(event.start_date),
+        endTime: new Date(event.end_date),
+        location: event.location,
+        isVirtual: !event.location,
+        attendees: 0,
+        description: event.description,
+      }));
+
+      // Convert mentoring sessions to CalendarEvent format
+      const mentoringEvents: CalendarEvent[] = sessions.map(session => ({
+        id: session.id,
+        title: session.topic || 'Mentoring Session',
+        type: 'mentoring' as const,
+        startTime: new Date(session.scheduled_at),
+        endTime: new Date(new Date(session.scheduled_at).getTime() + session.duration_minutes * 60000),
+        isVirtual: true,
+        attendees: 2,
+        description: session.description,
+      }));
+
+      // Combine all events
+      setEvents([...communityEvents, ...mentoringEvents]);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const getEventsByDate = (date: Date) => {
     return events.filter(event => 
@@ -65,12 +100,22 @@ export default function CalendarIntegration() {
         return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
       case 'event':
         return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
-      case 'deadline':
-        return 'bg-red-500/10 text-red-500 border-red-500/20';
+      case 'mentoring':
+        return 'bg-green-500/10 text-green-500 border-green-500/20';
       default:
-        return 'bg-gray-500/10 text-gray-500 border-gray-500/20';
+        return 'bg-muted text-muted-foreground';
     }
   };
+
+  if (loading) {
+    return (
+      <Card className="p-6">
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+        </div>
+      </Card>
+    );
+  }
 
   const selectedEvents = selectedDate ? getEventsByDate(selectedDate) : [];
 

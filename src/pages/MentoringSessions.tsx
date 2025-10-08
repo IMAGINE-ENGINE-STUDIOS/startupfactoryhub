@@ -5,44 +5,26 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Video, Calendar, Clock, User, CheckCircle2, XCircle } from 'lucide-react';
+import { Video, Calendar, Clock, User, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { useMentoringSessions } from '@/hooks/useMentoringSessions';
+import { useAuth } from '@/contexts/AuthContext';
+import { useState } from 'react';
+import { format, formatDistanceToNow } from 'date-fns';
 
 export default function MentoringSessions() {
-  const upcomingSessions = [
-    {
-      id: '1',
-      title: 'Product Strategy Review',
-      mentor: 'Sarah Chen',
-      mentee: 'Alex Johnson',
-      date: 'Today at 2:00 PM',
-      duration: '60 min',
-      status: 'confirmed',
-      type: 'video',
-    },
-    {
-      id: '2',
-      title: 'Marketing Plan Discussion',
-      mentor: 'Mike Rodriguez',
-      mentee: 'Emily Davis',
-      date: 'Tomorrow at 10:00 AM',
-      duration: '45 min',
-      status: 'pending',
-      type: 'video',
-    },
-  ];
+  const { user } = useAuth();
+  const { upcomingSessions, pastSessions, loading, updateSession } = useMentoringSessions();
+  const [activeCallUrl, setActiveCallUrl] = useState<string | undefined>();
 
-  const pastSessions = [
-    {
-      id: '3',
-      title: 'Tech Stack Decisions',
-      mentor: 'David Lee',
-      mentee: 'Chris Taylor',
-      date: 'Yesterday',
-      duration: '60 min',
-      status: 'completed',
-      rating: 5,
-    },
-  ];
+  const handleJoinSession = (session: any) => {
+    if (session.meeting_link) {
+      setActiveCallUrl(session.meeting_link);
+    }
+  };
+
+  const handleUpdateStatus = async (sessionId: string, status: string) => {
+    await updateSession(sessionId, { status });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -73,97 +55,157 @@ export default function MentoringSessions() {
               </TabsList>
 
               <TabsContent value="upcoming" className="mt-6 space-y-4">
-                {upcomingSessions.map((session) => (
-                  <Card key={session.id} className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <h3 className="font-semibold text-lg">{session.title}</h3>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <User className="h-4 w-4" />
-                              <span>Mentor: {session.mentor}</span>
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : upcomingSessions.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <Calendar className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground">No upcoming sessions scheduled</p>
+                  </Card>
+                ) : (
+                  upcomingSessions.map((session) => {
+                    const isMentor = session.mentor_id === user?.id;
+                    const otherUser = isMentor ? session.mentee_profile : session.mentor_profile;
+                    
+                    return (
+                      <Card key={session.id} className="p-6">
+                        <div className="space-y-4">
+                          <div className="flex items-start justify-between">
+                            <div className="space-y-1">
+                              <h3 className="font-semibold text-lg">{session.topic}</h3>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  <span>
+                                    {isMentor ? 'Mentee' : 'Mentor'}: {otherUser?.full_name || 'Unknown'}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>{session.duration_minutes} min</span>
+                                </div>
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              <span>{session.duration}</span>
-                            </div>
+                            <Badge
+                              variant={session.status === 'confirmed' ? 'default' : 'secondary'}
+                            >
+                              {session.status}
+                            </Badge>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="h-4 w-4" />
+                            <span>
+                              {format(new Date(session.scheduled_at), 'PPP p')} 
+                              {' '}({formatDistanceToNow(new Date(session.scheduled_at), { addSuffix: true })})
+                            </span>
+                          </div>
+
+                          {session.description && (
+                            <p className="text-sm text-muted-foreground">{session.description}</p>
+                          )}
+
+                          <div className="flex gap-2">
+                            {session.meeting_link && (
+                              <Button 
+                                className="flex-1"
+                                onClick={() => handleJoinSession(session)}
+                              >
+                                <Video className="h-4 w-4 mr-2" />
+                                Join Session
+                              </Button>
+                            )}
+                            {isMentor && session.status === 'pending' && (
+                              <Button 
+                                variant="outline"
+                                onClick={() => handleUpdateStatus(session.id, 'confirmed')}
+                              >
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                Confirm
+                              </Button>
+                            )}
+                            <Button 
+                              variant="outline" 
+                              size="icon"
+                              onClick={() => handleUpdateStatus(session.id, 'cancelled')}
+                            >
+                              <XCircle className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
-                        <Badge
-                          variant={session.status === 'confirmed' ? 'default' : 'secondary'}
-                        >
-                          {session.status}
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="h-4 w-4" />
-                        <span>{session.date}</span>
-                      </div>
-
-                      <div className="flex gap-2">
-                        <Button className="flex-1">
-                          <Video className="h-4 w-4 mr-2" />
-                          Join Session
-                        </Button>
-                        <Button variant="outline">Reschedule</Button>
-                        <Button variant="outline" size="icon">
-                          <XCircle className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
+                      </Card>
+                    );
+                  })
+                )}
               </TabsContent>
 
               <TabsContent value="past" className="mt-6 space-y-4">
-                {pastSessions.map((session) => (
-                  <Card key={session.id} className="p-6">
-                    <div className="space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <h3 className="font-semibold text-lg">{session.title}</h3>
-                          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <User className="h-4 w-4" />
-                              <span>Mentor: {session.mentor}</span>
-                            </div>
-                            <div className="flex items-center gap-1">
-                              <Clock className="h-4 w-4" />
-                              <span>{session.duration}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <Badge variant="outline" className="bg-green-500/10 text-green-500">
-                          <CheckCircle2 className="h-3 w-3 mr-1" />
-                          {session.status}
-                        </Badge>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="h-4 w-4" />
-                        <span>{session.date}</span>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <span className="text-sm text-muted-foreground">Rating:</span>
-                        <div className="flex">
-                          {[...Array(session.rating)].map((_, i) => (
-                            <span key={i} className="text-yellow-500">★</span>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                {loading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  </div>
+                ) : pastSessions.length === 0 ? (
+                  <Card className="p-8 text-center">
+                    <CheckCircle2 className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-muted-foreground">No past sessions yet</p>
                   </Card>
-                ))}
+                ) : (
+                  pastSessions.map((session) => {
+                    const isMentor = session.mentor_id === user?.id;
+                    const otherUser = isMentor ? session.mentee_profile : session.mentor_profile;
+                    
+                    return (
+                      <Card key={session.id} className="p-6">
+                        <div className="space-y-4">
+                          <div className="flex items-start justify-between">
+                            <div className="space-y-1">
+                              <h3 className="font-semibold text-lg">{session.topic}</h3>
+                              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-1">
+                                  <User className="h-4 w-4" />
+                                  <span>
+                                    {isMentor ? 'Mentee' : 'Mentor'}: {otherUser?.full_name || 'Unknown'}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Clock className="h-4 w-4" />
+                                  <span>{session.duration_minutes} min</span>
+                                </div>
+                              </div>
+                            </div>
+                            <Badge variant="outline" className="bg-green-500/10 text-green-500">
+                              <CheckCircle2 className="h-3 w-3 mr-1" />
+                              {session.status}
+                            </Badge>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-sm">
+                            <Calendar className="h-4 w-4" />
+                            <span>{format(new Date(session.scheduled_at), 'PPP')}</span>
+                          </div>
+
+                          {session.notes && (
+                            <div className="pt-2 border-t">
+                              <p className="text-sm text-muted-foreground">{session.notes}</p>
+                            </div>
+                          )}
+                        </div>
+                      </Card>
+                    );
+                  })
+                )}
               </TabsContent>
             </Tabs>
           </div>
 
           {/* Sidebar */}
           <div className="lg:col-span-1 space-y-6">
-            <VideoConferencing />
+            <VideoConferencing 
+              roomUrl={activeCallUrl}
+              onLeave={() => setActiveCallUrl(undefined)}
+            />
             <CalendarIntegration />
           </div>
         </div>
