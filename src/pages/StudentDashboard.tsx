@@ -15,6 +15,8 @@ import AIFeaturesHub from '@/components/AIFeaturesHub';
 import AIQuickActions from '@/components/AIQuickActions';
 import Leaderboard from '@/components/Leaderboard';
 import StudyGroups from '@/components/StudyGroups';
+import AIAssistantButton from '@/components/AIAssistantButton';
+import FloatingChat from '@/components/FloatingChat';
 
 interface Course {
   id: string;
@@ -481,6 +483,10 @@ export default function StudentDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Floating Buttons */}
+      <AIAssistantButton />
+      <FloatingChat />
     </div>
   );
 }

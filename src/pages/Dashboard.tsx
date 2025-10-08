@@ -22,6 +22,8 @@ import InternshipBoard from '@/components/InternshipBoard';
 import ProfessionalBackground from '@/components/ProfessionalBackground';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import AIAssistantPreview from '@/components/AIAssistantPreview';
+import AIAssistantButton from '@/components/AIAssistantButton';
+import FloatingChat from '@/components/FloatingChat';
 import { 
   Rocket, 
   TrendingUp, 
@@ -209,7 +211,16 @@ const Dashboard = () => {
             <ProfessionalBackground />
           </TabsContent>
         </Tabs>
+
+        {/* AI Features Section */}
+        <div className="mt-8">
+          <AIFeaturesHub />
+        </div>
       </div>
+
+      {/* Floating Buttons */}
+      <AIAssistantButton />
+      <FloatingChat />
     </div>
   );
 };

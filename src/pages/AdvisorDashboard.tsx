@@ -11,6 +11,8 @@ import { Calendar, Users, MessageSquare, TrendingUp, Star, Clock, Award } from '
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import MentorshipRequests from '@/components/MentorshipRequests';
+import AIAssistantButton from '@/components/AIAssistantButton';
+import FloatingChat from '@/components/FloatingChat';
 
 interface Startup {
   id: string;
@@ -469,6 +471,10 @@ export default function AdvisorDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Floating Buttons */}
+      <AIAssistantButton />
+      <FloatingChat />
     </div>
   );
 }
