@@ -57,7 +57,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signUp = async (email: string, password: string, fullName: string, role: string) => {
     const redirectUrl = `${window.location.origin}/profile-setup`;
     
-    const { data, error } = await supabase.auth.signUp({
+    // Role is now created server-side via database trigger
+    const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -68,20 +69,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       }
     });
-
-    // If signup successful, create role entry
-    if (!error && data.user) {
-      const { error: roleError } = await supabase
-        .from('user_roles')
-        .insert([{ 
-          user_id: data.user.id, 
-          role: role as 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' 
-        }]);
-      
-      if (roleError) {
-        console.error('Error creating user role:', roleError);
-      }
-    }
 
     return { error };
   };
