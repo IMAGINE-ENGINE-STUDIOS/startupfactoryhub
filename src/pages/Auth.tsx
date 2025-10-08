@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Rocket, Mail, Lock, User, UserCheck } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { signInSchema, signUpSchema } from '@/lib/validations';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -25,6 +26,20 @@ export default function Auth() {
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+
+    // Validate inputs
+    const validation = signInSchema.safeParse({ email, password });
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
+      toast({
+        title: "Validation Error",
+        description: firstError.message,
+        variant: "destructive",
+      });
+      setLoading(false);
+      return;
+    }
 
     const { error } = await signIn(email, password);
     
@@ -49,10 +64,14 @@ export default function Auth() {
     e.preventDefault();
     setLoading(true);
 
-    if (!role) {
+    // Validate inputs
+    const validation = signUpSchema.safeParse({ email, password, fullName, role });
+    
+    if (!validation.success) {
+      const firstError = validation.error.errors[0];
       toast({
-        title: "Error",
-        description: "Please select your role",
+        title: "Validation Error",
+        description: firstError.message,
         variant: "destructive",
       });
       setLoading(false);
@@ -62,16 +81,30 @@ export default function Auth() {
     const { error } = await signUp(email, password, fullName, role);
     
     if (error) {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      // Handle specific error cases
+      if (error.message?.includes('already registered')) {
+        toast({
+          title: "Account exists",
+          description: "This email is already registered. Please sign in instead.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     } else {
       toast({
         title: "Account created!",
         description: "Please check your email to verify your account.",
       });
+      // Clear form
+      setEmail('');
+      setPassword('');
+      setFullName('');
+      setRole('');
     }
     
     setLoading(false);
