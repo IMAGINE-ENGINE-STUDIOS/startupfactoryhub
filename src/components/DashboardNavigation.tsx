@@ -21,7 +21,8 @@ import {
   Settings, 
   LogOut,
   Search,
-  Bell
+  Bell,
+  BarChart3
 } from "lucide-react";
 
 const DashboardNavigation = () => {
@@ -87,6 +88,14 @@ const DashboardNavigation = () => {
             >
               <Calendar className="w-4 h-4" />
               <span>Events</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="flex items-center space-x-2"
+              onClick={() => navigate("/analytics")}
+            >
+              <BarChart3 className="w-4 h-4" />
+              <span>Analytics</span>
             </Button>
             <Button 
               variant="ghost" 

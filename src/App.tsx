@@ -15,7 +15,7 @@ import StartupProfile from "./pages/StartupProfile";
 import CommunityFeed from "./pages/CommunityFeed";
 import Events from "./pages/Events";
 import Messages from "./pages/Messages";
-
+import Analytics from "./pages/Analytics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +36,7 @@ const App = () => (
               <Route path="/feed" element={<CommunityFeed />} />
               <Route path="/events" element={<Events />} />
               <Route path="/messages" element={<Messages />} />
+              <Route path="/analytics" element={<Analytics />} />
               <Route path="/profile" element={<StartupProfile />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
