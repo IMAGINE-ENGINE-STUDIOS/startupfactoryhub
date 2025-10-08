@@ -6,6 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import DashboardNavigation from "@/components/DashboardNavigation";
+import AvatarUpload from "@/components/AvatarUpload";
+import CompanyLogoUpload from "@/components/CompanyLogoUpload";
+import DocumentUpload from "@/components/DocumentUpload";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -271,12 +274,13 @@ const StartupProfile = () => {
       {/* Profile Content */}
       <div className="container mx-auto px-6 py-8">
         <Tabs defaultValue="activity" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
             <TabsTrigger value="roadmap">Roadmap</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           <TabsContent value="activity" className="mt-8">
@@ -511,6 +515,56 @@ const StartupProfile = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h4 className="text-sm font-medium mb-4">Profile Picture</h4>
+                    <AvatarUpload 
+                      currentAvatarUrl={profile?.avatar_url}
+                      onUploadComplete={(url) => {
+                        setProfile({ ...profile, avatar_url: url });
+                      }}
+                      size="lg"
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Company Settings</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <CompanyLogoUpload 
+                    currentLogoUrl={company?.logo_url}
+                    companyId={company?.id}
+                    onUploadComplete={(url) => {
+                      setCompany({ ...company, logo_url: url });
+                    }}
+                  />
+                </CardContent>
+              </Card>
+
+              <Card className="lg:col-span-2">
+                <CardHeader>
+                  <CardTitle>Documents & Resources</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <DocumentUpload 
+                    onUploadComplete={(docs) => {
+                      console.log('Documents uploaded:', docs);
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
