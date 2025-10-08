@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo, useCallback, memo } from 'react';
 import { Search, Users, Building, Calendar, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,7 +21,7 @@ interface SearchResult {
   avatar?: string;
 }
 
-export default function GlobalSearch() {
+const GlobalSearch = memo(function GlobalSearch() {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<SearchResult[]>([]);
@@ -49,7 +49,7 @@ export default function GlobalSearch() {
     }
   }, [query]);
 
-  const performSearch = async (searchQuery: string) => {
+  const performSearch = useCallback(async (searchQuery: string) => {
     setIsSearching(true);
 
     try {
@@ -116,9 +116,9 @@ export default function GlobalSearch() {
     } finally {
       setIsSearching(false);
     }
-  };
+  }, [toast]);
 
-  const handleSelect = (result: SearchResult) => {
+  const handleSelect = useCallback((result: SearchResult) => {
     setOpen(false);
     
     // Navigate based on type
@@ -136,7 +136,15 @@ export default function GlobalSearch() {
         navigate(`/dashboard?tab=learn&course=${result.id}`);
         break;
     }
-  };
+  }, [navigate]);
+
+  // Memoize filtered results by type
+  const resultsByType = useMemo(() => ({
+    users: results.filter(r => r.type === 'user'),
+    startups: results.filter(r => r.type === 'startup'),
+    events: results.filter(r => r.type === 'event'),
+    resources: results.filter(r => r.type === 'resource'),
+  }), [results]);
 
   return (
     <>
@@ -144,8 +152,9 @@ export default function GlobalSearch() {
         variant="outline"
         className="relative w-full justify-start text-sm text-muted-foreground sm:pr-12 md:w-40 lg:w-64"
         onClick={() => setOpen(true)}
+        aria-label="Open search"
       >
-        <Search className="mr-2 h-4 w-4" />
+        <Search className="mr-2 h-4 w-4" aria-hidden="true" />
         <span className="hidden lg:inline-flex">Search...</span>
         <span className="inline-flex lg:hidden">Search...</span>
         <kbd className="pointer-events-none absolute right-1.5 top-2 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
@@ -157,6 +166,7 @@ export default function GlobalSearch() {
           placeholder="Search users, startups, events..." 
           value={query}
           onValueChange={setQuery}
+          aria-label="Search input"
         />
         <CommandList>
           {isSearching ? (
@@ -167,87 +177,79 @@ export default function GlobalSearch() {
             <CommandEmpty>No results found.</CommandEmpty>
           ) : (
             <>
-              {results.filter(r => r.type === 'user').length > 0 && (
+              {resultsByType.users.length > 0 && (
                 <CommandGroup heading="Users">
-                  {results
-                    .filter(r => r.type === 'user')
-                    .map(result => (
-                      <CommandItem 
-                        key={result.id} 
-                        onSelect={() => handleSelect(result)}
-                      >
-                        <Users className="mr-2 h-4 w-4" />
-                        <div className="flex-1">
-                          <p className="font-medium">{result.title}</p>
-                          {result.subtitle && (
-                            <p className="text-xs text-muted-foreground">{result.subtitle}</p>
-                          )}
-                        </div>
-                      </CommandItem>
-                    ))}
+                  {resultsByType.users.map(result => (
+                    <CommandItem 
+                      key={result.id} 
+                      onSelect={() => handleSelect(result)}
+                    >
+                      <Users className="mr-2 h-4 w-4" aria-hidden="true" />
+                      <div className="flex-1">
+                        <p className="font-medium">{result.title}</p>
+                        {result.subtitle && (
+                          <p className="text-xs text-muted-foreground">{result.subtitle}</p>
+                        )}
+                      </div>
+                    </CommandItem>
+                  ))}
                 </CommandGroup>
               )}
 
-              {results.filter(r => r.type === 'startup').length > 0 && (
+              {resultsByType.startups.length > 0 && (
                 <CommandGroup heading="Startups">
-                  {results
-                    .filter(r => r.type === 'startup')
-                    .map(result => (
-                      <CommandItem 
-                        key={result.id}
-                        onSelect={() => handleSelect(result)}
-                      >
-                        <Building className="mr-2 h-4 w-4" />
-                        <div className="flex-1">
-                          <p className="font-medium">{result.title}</p>
-                          {result.subtitle && (
-                            <p className="text-xs text-muted-foreground">{result.subtitle}</p>
-                          )}
-                        </div>
-                      </CommandItem>
-                    ))}
+                  {resultsByType.startups.map(result => (
+                    <CommandItem 
+                      key={result.id}
+                      onSelect={() => handleSelect(result)}
+                    >
+                      <Building className="mr-2 h-4 w-4" aria-hidden="true" />
+                      <div className="flex-1">
+                        <p className="font-medium">{result.title}</p>
+                        {result.subtitle && (
+                          <p className="text-xs text-muted-foreground">{result.subtitle}</p>
+                        )}
+                      </div>
+                    </CommandItem>
+                  ))}
                 </CommandGroup>
               )}
 
-              {results.filter(r => r.type === 'event').length > 0 && (
+              {resultsByType.events.length > 0 && (
                 <CommandGroup heading="Events">
-                  {results
-                    .filter(r => r.type === 'event')
-                    .map(result => (
-                      <CommandItem 
-                        key={result.id}
-                        onSelect={() => handleSelect(result)}
-                      >
-                        <Calendar className="mr-2 h-4 w-4" />
-                        <div className="flex-1">
-                          <p className="font-medium">{result.title}</p>
-                          {result.subtitle && (
-                            <p className="text-xs text-muted-foreground">{result.subtitle}</p>
-                          )}
-                        </div>
-                      </CommandItem>
-                    ))}
+                  {resultsByType.events.map(result => (
+                    <CommandItem 
+                      key={result.id}
+                      onSelect={() => handleSelect(result)}
+                    >
+                      <Calendar className="mr-2 h-4 w-4" aria-hidden="true" />
+                      <div className="flex-1">
+                        <p className="font-medium">{result.title}</p>
+                        {result.subtitle && (
+                          <p className="text-xs text-muted-foreground">{result.subtitle}</p>
+                        )}
+                      </div>
+                    </CommandItem>
+                  ))}
                 </CommandGroup>
               )}
 
-              {results.filter(r => r.type === 'resource').length > 0 && (
+              {resultsByType.resources.length > 0 && (
                 <CommandGroup heading="Resources">
-                  {results
-                    .filter(r => r.type === 'resource')
-                    .map(result => (
-                      <CommandItem 
-                        key={result.id}
-                        onSelect={() => handleSelect(result)}
-                      >
-                        <BookOpen className="mr-2 h-4 w-4" />
-                        <div className="flex-1">
-                          <p className="font-medium">{result.title}</p>
-                          {result.subtitle && (
-                            <p className="text-xs text-muted-foreground">{result.subtitle}</p>
-                          )}
-                        </div>
-                      </CommandItem>
-                    ))}
+                  {resultsByType.resources.map(result => (
+                    <CommandItem 
+                      key={result.id}
+                      onSelect={() => handleSelect(result)}
+                    >
+                      <BookOpen className="mr-2 h-4 w-4" aria-hidden="true" />
+                      <div className="flex-1">
+                        <p className="font-medium">{result.title}</p>
+                        {result.subtitle && (
+                          <p className="text-xs text-muted-foreground">{result.subtitle}</p>
+                        )}
+                      </div>
+                    </CommandItem>
+                  ))}
                 </CommandGroup>
               )}
             </>
@@ -256,4 +258,6 @@ export default function GlobalSearch() {
       </CommandDialog>
     </>
   );
-}
+});
+
+export default GlobalSearch;

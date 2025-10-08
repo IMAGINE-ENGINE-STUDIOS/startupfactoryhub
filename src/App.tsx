@@ -1,3 +1,4 @@
+import { Suspense, lazy } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,18 +11,34 @@ import FloatingChat from "./components/FloatingChat";
 import RecommendationPopup from "./components/RecommendationPopup";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
-import ProfileSetup from "./pages/ProfileSetup";
-import DashboardRouter from "./components/DashboardRouter";
-import StartupProfile from "./pages/StartupProfile";
-import CommunityFeed from "./pages/CommunityFeed";
-import Events from "./pages/Events";
-import Messages from "./pages/Messages";
-import Analytics from "./pages/Analytics";
-import Explore from "./pages/Explore";
-import MentoringSessions from "./pages/MentoringSessions";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+// Code-split heavy pages
+const ProfileSetup = lazy(() => import("./pages/ProfileSetup"));
+const DashboardRouter = lazy(() => import("./components/DashboardRouter"));
+const StartupProfile = lazy(() => import("./pages/StartupProfile"));
+const CommunityFeed = lazy(() => import("./pages/CommunityFeed"));
+const Events = lazy(() => import("./pages/Events"));
+const Messages = lazy(() => import("./pages/Messages"));
+const Analytics = lazy(() => import("./pages/Analytics"));
+const Explore = lazy(() => import("./pages/Explore"));
+const MentoringSessions = lazy(() => import("./pages/MentoringSessions"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      gcTime: 1000 * 60 * 30, // 30 minutes
+    },
+  },
+});
+
+// Loading component for Suspense
+const PageLoader = () => (
+  <div className="flex items-center justify-center min-h-screen">
+    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+  </div>
+);
 
 const App = () => (
   <ErrorBoundary>
@@ -37,20 +54,22 @@ const App = () => (
                 v7_relativeSplatPath: true,
               }}
             >
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/profile-setup" element={<ProfileSetup />} />
-                <Route path="/dashboard" element={<DashboardRouter />} />
-                <Route path="/feed" element={<CommunityFeed />} />
-                <Route path="/events" element={<Events />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/analytics" element={<Analytics />} />
-                <Route path="/explore" element={<Explore />} />
-                <Route path="/mentoring-sessions" element={<MentoringSessions />} />
-                <Route path="/profile" element={<StartupProfile />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/profile-setup" element={<ProfileSetup />} />
+                  <Route path="/dashboard" element={<DashboardRouter />} />
+                  <Route path="/feed" element={<CommunityFeed />} />
+                  <Route path="/events" element={<Events />} />
+                  <Route path="/messages" element={<Messages />} />
+                  <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/explore" element={<Explore />} />
+                  <Route path="/mentoring-sessions" element={<MentoringSessions />} />
+                  <Route path="/profile" element={<StartupProfile />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </Suspense>
               <FloatingChat />
               <RecommendationPopup />
             </BrowserRouter>

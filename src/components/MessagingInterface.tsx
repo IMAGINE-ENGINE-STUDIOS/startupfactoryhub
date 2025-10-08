@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -40,7 +40,7 @@ interface Profile {
   avatar_url?: string;
 }
 
-export default function MessagingInterface() {
+const MessagingInterface = memo(function MessagingInterface() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -169,7 +169,7 @@ export default function MessagingInterface() {
     }
   };
 
-  const sendMessage = async () => {
+  const sendMessage = useCallback(async () => {
     if (!newMessage.trim() || !user || !selectedConversation) return;
 
     const { error } = await supabase
@@ -191,22 +191,28 @@ export default function MessagingInterface() {
       fetchMessages(selectedConversation);
       fetchConversations();
     }
-  };
+  }, [newMessage, user, selectedConversation, toast]);
 
-  const startNewConversation = (userId: string) => {
+  const startNewConversation = useCallback((userId: string) => {
     setSelectedConversation(userId);
     setShowNewChat(false);
     fetchMessages(userId);
-  };
+  }, []);
 
-  const selectedUser = selectedConversation 
-    ? conversations.find(c => 
-        c.user1_id === selectedConversation || c.user2_id === selectedConversation
-      )?.other_user || allUsers.find(u => u.user_id === selectedConversation)
-    : null;
+  const selectedUser = useMemo(() => 
+    selectedConversation 
+      ? conversations.find(c => 
+          c.user1_id === selectedConversation || c.user2_id === selectedConversation
+        )?.other_user || allUsers.find(u => u.user_id === selectedConversation)
+      : null,
+    [selectedConversation, conversations, allUsers]
+  );
 
-  const filteredUsers = allUsers.filter(u => 
-    u.full_name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = useMemo(() => 
+    allUsers.filter(u => 
+      u.full_name.toLowerCase().includes(searchQuery.toLowerCase())
+    ),
+    [allUsers, searchQuery]
   );
 
   return (
@@ -357,17 +363,23 @@ export default function MessagingInterface() {
             </ScrollArea>
 
             <CardContent className="border-t pt-4">
-              <div className="flex gap-2">
+              <form 
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  sendMessage();
+                }}
+                className="flex gap-2"
+              >
                 <Input
                   placeholder="Type a message..."
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                  aria-label="Message input"
                 />
-                <Button onClick={sendMessage} disabled={!newMessage.trim()}>
+                <Button type="submit" disabled={!newMessage.trim()} aria-label="Send message">
                   <Send className="h-4 w-4" />
                 </Button>
-              </div>
+              </form>
             </CardContent>
           </>
         ) : (
@@ -382,4 +394,6 @@ export default function MessagingInterface() {
       </Card>
     </div>
   );
-}
+});
+
+export default MessagingInterface;
