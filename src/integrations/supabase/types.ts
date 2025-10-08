@@ -1500,8 +1500,10 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string
+          last_profile_update: string | null
           linkedin_url: string | null
           location: string | null
+          update_count: number | null
           updated_at: string
           user_id: string
           website: string | null
@@ -1513,8 +1515,10 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          last_profile_update?: string | null
           linkedin_url?: string | null
           location?: string | null
+          update_count?: number | null
           updated_at?: string
           user_id: string
           website?: string | null
@@ -1526,8 +1530,10 @@ export type Database = {
           email?: string | null
           full_name?: string | null
           id?: string
+          last_profile_update?: string | null
           linkedin_url?: string | null
           location?: string | null
+          update_count?: number | null
           updated_at?: string
           user_id?: string
           website?: string | null
@@ -1632,6 +1638,42 @@ export type Database = {
           step_id?: string
           updated_at?: string | null
           user_id?: string
+        }
+        Relationships: []
+      }
+      security_logs: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
