@@ -63,33 +63,33 @@ export default function PartnersCarousel() {
   }
 
   return (
-    <section className="py-20 px-4">
+    <section className="py-12 sm:py-20 px-4 overflow-hidden">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-4">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-3 sm:mb-4">
             Trusted Partners
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">
             Collaborating with industry leaders to accelerate startup success
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           {visiblePartners.map((partner, index) => (
             <Card 
               key={`${partner.id}-${currentIndex}`}
-              className="tech-card p-6 text-center group cursor-pointer floating"
+              className="tech-card p-4 sm:p-6 text-center group cursor-pointer floating"
               style={{ animationDelay: `${index * 0.2}s` }}
               onClick={() => partner.website && window.open(partner.website, '_blank')}
             >
-              <div className="scan-effect mb-4">
+              <div className="scan-effect mb-3 sm:mb-4">
                 <img
                   src={partner.logo_url}
                   alt={partner.name}
-                  className="h-16 w-auto mx-auto object-contain group-hover:scale-110 transition-transform duration-300"
+                  className="h-12 sm:h-16 w-auto mx-auto object-contain group-hover:scale-110 transition-transform duration-300"
                 />
               </div>
-              <h3 className="font-semibold text-foreground mb-2">{partner.name}</h3>
+              <h3 className="font-semibold text-sm sm:text-base text-foreground mb-2">{partner.name}</h3>
               {partner.tier && (
                 <Badge variant="secondary" className="text-xs">
                   {partner.tier}
@@ -99,13 +99,13 @@ export default function PartnersCarousel() {
           ))}
         </div>
         
-        <div className="flex justify-center mt-8 space-x-2">
+        <div className="flex justify-center mt-6 sm:mt-8 space-x-2">
           {Array.from({ length: Math.ceil(partners.length / 3) }).map((_, index) => (
             <div
               key={index}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
                 Math.floor(currentIndex / 3) === index 
-                  ? 'bg-primary w-6' 
+                  ? 'bg-primary w-4 sm:w-6' 
                   : 'bg-muted-foreground/30'
               }`}
             />

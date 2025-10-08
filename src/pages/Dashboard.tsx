@@ -170,14 +170,16 @@ const Dashboard = () => {
 
         {/* Tabbed Dashboard Content */}
         <Tabs value={currentTab} onValueChange={switchTab} className="space-y-4 sm:space-y-6">
-          <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 max-w-full sm:max-w-2xl overflow-x-auto">
-            <TabsTrigger value="roadmap">Journey</TabsTrigger>
-            <TabsTrigger value="company">Profile</TabsTrigger>
-            <TabsTrigger value="matching">Connect</TabsTrigger>
-            <TabsTrigger value="resources">Learn</TabsTrigger>
-            <TabsTrigger value="internships">Internships</TabsTrigger>
-            <TabsTrigger value="network">Network</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex sm:grid w-auto sm:w-full grid-cols-3 sm:grid-cols-6 min-w-full sm:min-w-0 sm:max-w-2xl">
+              <TabsTrigger value="roadmap" className="whitespace-nowrap">Journey</TabsTrigger>
+              <TabsTrigger value="company" className="whitespace-nowrap">Profile</TabsTrigger>
+              <TabsTrigger value="matching" className="whitespace-nowrap">Connect</TabsTrigger>
+              <TabsTrigger value="resources" className="whitespace-nowrap">Learn</TabsTrigger>
+              <TabsTrigger value="internships" className="whitespace-nowrap">Internships</TabsTrigger>
+              <TabsTrigger value="network" className="whitespace-nowrap">Network</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="roadmap" className="space-y-4 sm:space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">

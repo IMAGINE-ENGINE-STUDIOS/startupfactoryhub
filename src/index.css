@@ -134,10 +134,16 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    overflow-x: hidden;
+  }
+
   body {
     @apply bg-background text-foreground;
     background: var(--gradient-hero);
     min-height: 100vh;
+    overflow-x: hidden;
+    width: 100%;
   }
 }
 

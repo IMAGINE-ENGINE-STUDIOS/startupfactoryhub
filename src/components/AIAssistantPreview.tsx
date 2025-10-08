@@ -38,27 +38,27 @@ export default function AIAssistantPreview() {
   return (
     <>
       <Card className="tech-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Zap className="h-5 w-5 text-primary" />
+        <CardHeader className="pb-3 sm:pb-4">
+          <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+            <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
             AI-Powered Tools
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-xs sm:text-sm">
             Boost your productivity with intelligent features
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
+        <CardContent className="space-y-2 sm:space-y-3">
           {features.map((feature, idx) => (
             <Button
               key={idx}
               variant="outline"
-              className="w-full justify-start gap-3"
+              className="w-full justify-start gap-2 sm:gap-3 h-auto py-2 sm:py-3"
               onClick={feature.action}
             >
-              <span className="text-primary">{feature.icon}</span>
-              <div className="text-left">
-                <div className="font-medium">{feature.title}</div>
-                <div className="text-xs text-muted-foreground">{feature.description}</div>
+              <span className="text-primary flex-shrink-0">{feature.icon}</span>
+              <div className="text-left flex-1 min-w-0">
+                <div className="font-medium text-sm sm:text-base truncate">{feature.title}</div>
+                <div className="text-xs text-muted-foreground truncate">{feature.description}</div>
               </div>
             </Button>
           ))}
