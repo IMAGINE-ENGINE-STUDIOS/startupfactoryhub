@@ -10,11 +10,11 @@ export default function AIAssistantButton() {
     <>
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 left-6 h-14 w-14 rounded-full shadow-lg z-40"
+        className="fixed bottom-24 sm:bottom-6 left-4 sm:left-6 h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg z-40"
         size="icon"
         title="AI Assistant"
       >
-        <Sparkles className="h-6 w-6" />
+        <Sparkles className="h-5 w-5 sm:h-6 sm:w-6" />
       </Button>
       
       <AIAssistant isOpen={isOpen} onClose={() => setIsOpen(false)} />
