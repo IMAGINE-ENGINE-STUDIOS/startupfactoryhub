@@ -22,7 +22,9 @@ import {
   LogOut,
   Search,
   Bell,
-  BarChart3
+  BarChart3,
+  Compass,
+  Video
 } from "lucide-react";
 
 const DashboardNavigation = () => {
@@ -72,14 +74,18 @@ const DashboardNavigation = () => {
             <Button 
               variant="ghost" 
               className="flex items-center space-x-2"
+              onClick={() => navigate("/explore")}
+            >
+              <Compass className="w-4 h-4" />
+              <span>Explore</span>
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="flex items-center space-x-2"
               onClick={() => navigate("/feed")}
             >
               <Users className="w-4 h-4" />
               <span>Community</span>
-            </Button>
-            <Button variant="ghost" className="flex items-center space-x-2">
-              <Building className="w-4 h-4" />
-              <span>Resources</span>
             </Button>
             <Button 
               variant="ghost" 
@@ -92,18 +98,18 @@ const DashboardNavigation = () => {
             <Button 
               variant="ghost" 
               className="flex items-center space-x-2"
-              onClick={() => navigate("/analytics")}
+              onClick={() => navigate("/mentoring-sessions")}
             >
-              <BarChart3 className="w-4 h-4" />
-              <span>Analytics</span>
+              <Video className="w-4 h-4" />
+              <span>Sessions</span>
             </Button>
             <Button 
               variant="ghost" 
               className="flex items-center space-x-2"
-              onClick={() => navigate("/messages")}
+              onClick={() => navigate("/analytics")}
             >
-              <MessageSquare className="w-4 h-4" />
-              <span>Messages</span>
+              <BarChart3 className="w-4 h-4" />
+              <span>Analytics</span>
             </Button>
           </div>
 
