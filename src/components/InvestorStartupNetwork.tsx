@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Building, Users, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import StartupProfileDialog from './StartupProfileDialog';
 
 interface NetworkStartup {
   id: string;
@@ -15,6 +16,12 @@ interface NetworkStartup {
   stage: string;
   industry: string;
   logo_url?: string;
+  pitch_deck_url?: string;
+  website?: string;
+  location?: string;
+  team_size?: number;
+  funding_amount?: number;
+  looking_for?: string[];
   connection_type: 'invested' | 'interested';
 }
 
@@ -23,6 +30,8 @@ export default function InvestorStartupNetwork() {
   const navigate = useNavigate();
   const [startups, setStartups] = useState<NetworkStartup[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedStartup, setSelectedStartup] = useState<NetworkStartup | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -45,7 +54,13 @@ export default function InvestorStartupNetwork() {
             description,
             stage,
             industry,
-            logo_url
+            logo_url,
+            pitch_deck_url,
+            website,
+            location,
+            team_size,
+            funding_amount,
+            looking_for
           )
         `)
         .eq('investor_id', user.id)
@@ -62,7 +77,13 @@ export default function InvestorStartupNetwork() {
             description,
             stage,
             industry,
-            logo_url
+            logo_url,
+            pitch_deck_url,
+            website,
+            location,
+            team_size,
+            funding_amount,
+            looking_for
           )
         `)
         .eq('investor_id', user.id)
@@ -77,6 +98,12 @@ export default function InvestorStartupNetwork() {
           stage: inv.companies.stage || 'Unknown',
           industry: inv.companies.industry || 'General',
           logo_url: inv.companies.logo_url,
+          pitch_deck_url: inv.companies.pitch_deck_url,
+          website: inv.companies.website,
+          location: inv.companies.location,
+          team_size: inv.companies.team_size,
+          funding_amount: inv.companies.funding_amount,
+          looking_for: inv.companies.looking_for,
           connection_type: 'invested' as const,
         }));
 
@@ -89,6 +116,12 @@ export default function InvestorStartupNetwork() {
           stage: int.companies.stage || 'Unknown',
           industry: int.companies.industry || 'General',
           logo_url: int.companies.logo_url,
+          pitch_deck_url: int.companies.pitch_deck_url,
+          website: int.companies.website,
+          location: int.companies.location,
+          team_size: int.companies.team_size,
+          funding_amount: int.companies.funding_amount,
+          looking_for: int.companies.looking_for,
           connection_type: 'interested' as const,
         }));
 
@@ -156,20 +189,34 @@ export default function InvestorStartupNetwork() {
                   </p>
                   
                   <div className="flex gap-2 mb-3">
-                    <Badge variant="outline" className="text-xs">{startup.stage}</Badge>
-                    <Badge variant="outline" className="text-xs">{startup.industry}</Badge>
-                  </div>
-                  
-                  <Button size="sm" variant="outline" className="w-full">
-                    <ExternalLink className="h-3 w-3 mr-2" />
-                    View Details
-                  </Button>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
-      </CardContent>
-    </Card>
+                  <Badge variant="outline" className="text-xs">{startup.stage}</Badge>
+                  <Badge variant="outline" className="text-xs">{startup.industry}</Badge>
+                </div>
+                
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => {
+                    setSelectedStartup(startup);
+                    setDialogOpen(true);
+                  }}
+                >
+                  <ExternalLink className="h-3 w-3 mr-2" />
+                  View Details
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <StartupProfileDialog 
+        company={selectedStartup}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
+    </CardContent>
+  </Card>
   );
 }

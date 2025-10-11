@@ -33,6 +33,7 @@ export default function InvestorDashboard() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [opportunities, setOpportunities] = useState<Investment[]>([]);
   const [investorProfile, setInvestorProfile] = useState<any>(null);
+  const [currentTab, setCurrentTab] = useState('portfolio');
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -240,11 +241,11 @@ export default function InvestorDashboard() {
           
           <div className="flex space-x-2">
             <AIQuickActions />
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setCurrentTab('browse')}>
               <Filter className="h-4 w-4 mr-2" />
               Filter
             </Button>
-            <Button className="pulse-primary">
+            <Button className="pulse-primary" onClick={() => setCurrentTab('browse')}>
               <Search className="h-4 w-4 mr-2" />
               Find Startups
             </Button>
@@ -268,7 +269,7 @@ export default function InvestorDashboard() {
           ))}
         </div>
 
-        <Tabs defaultValue="portfolio" className="space-y-6">
+        <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-7 max-w-5xl">
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>

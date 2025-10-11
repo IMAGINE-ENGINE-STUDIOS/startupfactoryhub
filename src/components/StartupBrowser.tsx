@@ -7,8 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Building, TrendingUp, DollarSign, Users, Filter, Sparkles } from 'lucide-react';
+import { Search, Building, TrendingUp, DollarSign, Users, Filter, Sparkles, FileText } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import StartupProfileDialog from './StartupProfileDialog';
 
 interface Company {
   id: string;
@@ -22,6 +23,9 @@ interface Company {
   looking_for: string[];
   user_id: string;
   ai_summary_id?: string;
+  logo_url?: string;
+  pitch_deck_url?: string;
+  website?: string;
 }
 
 export default function StartupBrowser() {
@@ -31,6 +35,8 @@ export default function StartupBrowser() {
   const [stageFilter, setStageFilter] = useState<string>('all');
   const [industryFilter, setIndustryFilter] = useState<string>('all');
   const [loading, setLoading] = useState(false);
+  const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -206,9 +212,14 @@ export default function StartupBrowser() {
                         <h3 className="font-semibold text-foreground truncate">{company.name}</h3>
                         <p className="text-xs text-muted-foreground">{company.location || 'Remote'}</p>
                       </div>
-                      {company.ai_summary_id && (
+                       {company.ai_summary_id && (
                         <Badge variant="outline" className="gap-1">
                           <Sparkles className="h-3 w-3" />
+                        </Badge>
+                      )}
+                      {company.pitch_deck_url && (
+                        <Badge variant="outline" className="gap-1 text-primary">
+                          <FileText className="h-3 w-3" />
                         </Badge>
                       )}
                     </div>
@@ -263,8 +274,8 @@ export default function StartupBrowser() {
                         size="sm"
                         className="flex-1"
                         onClick={() => {
-                          // TODO: Navigate to company profile
-                          toast({ title: "Coming soon", description: "Company profiles will be available soon" });
+                          setSelectedCompany(company);
+                          setDialogOpen(true);
                         }}
                       >
                         View Profile
@@ -302,6 +313,17 @@ export default function StartupBrowser() {
           )}
         </CardContent>
       </Card>
+
+      <StartupProfileDialog 
+        company={selectedCompany}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onExpressInterest={(companyId) => {
+          if (selectedCompany) {
+            expressInterest(companyId, selectedCompany.name);
+          }
+        }}
+      />
     </div>
   );
 }
