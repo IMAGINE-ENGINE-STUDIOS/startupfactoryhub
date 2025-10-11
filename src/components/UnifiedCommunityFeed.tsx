@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,9 +7,16 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, Bookmark, Repeat2, Send, Calendar, MapPin, Clock } from 'lucide-react';
+import { 
+  Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, 
+  Bookmark, Repeat2, Send, Calendar, Image as ImageIcon, 
+  Video, Sparkles, X
+} from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
+import ShortsCarousel from '@/components/ShortsCarousel';
+import ShortsCreator from '@/components/ShortsCreator';
+import GuestPrompt from '@/components/GuestPrompt';
 
 interface FeedPost {
   id: string;
@@ -19,6 +26,7 @@ interface FeedPost {
   post_type: string;
   internship_data?: any;
   media_urls?: string[] | null;
+  shared_post_id?: string | null;
   profiles?: {
     full_name: string;
     role: string;
@@ -56,9 +64,14 @@ export default function UnifiedCommunityFeed({
   const [expandedComments, setExpandedComments] = useState<Set<string>>(new Set());
   const [comments, setComments] = useState<Record<string, any[]>>({});
   const [newComment, setNewComment] = useState<Record<string, string>>({});
+  const [mediaFiles, setMediaFiles] = useState<File[]>([]);
+  const [mediaPreview, setMediaPreview] = useState<string[]>([]);
+  const [isCreatorOpen, setIsCreatorOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetchPosts();
@@ -94,7 +107,6 @@ export default function UnifiedCommunityFeed({
   }, [user, limit]);
 
   const fetchPosts = async () => {
-    // First fetch posts without profile joins
     const { data: postsData, error: postsError } = await supabase
       .from('feed_posts')
       .select(`
@@ -115,20 +127,13 @@ export default function UnifiedCommunityFeed({
       return;
     }
 
-    // Get unique user IDs from posts
     const userIds = [...new Set(postsData?.map(post => post.user_id).filter(Boolean) || [])];
     
-    // Fetch profiles for those users
-    const { data: profilesData, error: profilesError } = await supabase
+    const { data: profilesData } = await supabase
       .from('profiles')
       .select('user_id, full_name, avatar_url')
       .in('user_id', userIds);
 
-    if (profilesError) {
-      console.error('Error fetching profiles:', profilesError);
-    }
-
-    // Create a map of profiles by user_id
     const profilesMap = (profilesData || []).reduce((acc, profile) => {
       acc[profile.user_id] = profile;
       return acc;
@@ -184,37 +189,104 @@ export default function UnifiedCommunityFeed({
     }
   };
 
+  const handleMediaSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    setMediaFiles(prev => [...prev, ...files]);
+    
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setMediaPreview(prev => [...prev, reader.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeMedia = (index: number) => {
+    setMediaFiles(prev => prev.filter((_, i) => i !== index));
+    setMediaPreview(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const uploadMedia = async (file: File): Promise<string | null> => {
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${user!.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
+      return data.publicUrl;
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      return null;
+    }
+  };
+
   const createPost = async () => {
-    if (!newPost.trim() || !user) return;
+    if (!newPost.trim() || !user) {
+      if (!user) {
+        toast({
+          title: 'Sign In Required',
+          description: 'Please sign in to create posts',
+          variant: 'destructive',
+        });
+      }
+      return;
+    }
 
     setLoading(true);
-    const { error } = await supabase
-      .from('feed_posts')
-      .insert({
-        content: newPost,
-        user_id: user.id,
-        post_type: 'update'
+    try {
+      const mediaUrls: string[] = [];
+      
+      for (const file of mediaFiles) {
+        const url = await uploadMedia(file);
+        if (url) mediaUrls.push(url);
+      }
+
+      const { error } = await supabase
+        .from('feed_posts')
+        .insert({
+          content: newPost,
+          user_id: user.id,
+          post_type: 'update',
+          media_urls: mediaUrls.length > 0 ? mediaUrls : null,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Post created successfully!',
       });
 
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create post",
-        variant: "destructive",
-      });
-    } else {
       setNewPost('');
+      setMediaFiles([]);
+      setMediaPreview([]);
+      fetchPosts();
+    } catch (error: any) {
       toast({
-        title: "Success",
-        description: "Post created successfully!",
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
       });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const toggleLike = async (postId: string) => {
     if (!user) {
-      toast({ title: "Please sign in to like posts", variant: "destructive" });
+      toast({ title: 'Please sign in to like posts', variant: 'destructive' });
       return;
     }
 
@@ -247,7 +319,7 @@ export default function UnifiedCommunityFeed({
 
   const toggleBookmark = async (postId: string) => {
     if (!user) {
-      toast({ title: "Please sign in to bookmark posts", variant: "destructive" });
+      toast({ title: 'Please sign in to bookmark posts', variant: 'destructive' });
       return;
     }
 
@@ -266,7 +338,7 @@ export default function UnifiedCommunityFeed({
           newSet.delete(postId);
           return newSet;
         });
-        toast({ title: "Bookmark removed" });
+        toast({ title: 'Bookmark removed' });
       }
     } else {
       const { error } = await supabase
@@ -275,29 +347,101 @@ export default function UnifiedCommunityFeed({
       
       if (!error) {
         setBookmarkedPosts(prev => new Set([...prev, postId]));
-        toast({ title: "Post bookmarked!" });
+        toast({ title: 'Post bookmarked!' });
       }
     }
   };
 
-  const sharePost = async (postId: string) => {
+  const sharePost = async (postId: string, isRepost: boolean = false) => {
     if (!user) {
-      toast({ title: "Please sign in to share posts", variant: "destructive" });
+      toast({
+        title: 'Sign In Required',
+        description: 'Please sign in to share posts',
+        variant: 'destructive',
+      });
       return;
     }
 
-    const { error } = await supabase
-      .from('feed_posts')
-      .insert({
-        user_id: user.id,
-        content: '',
-        shared_post_id: postId,
-        post_type: 'update'
-      });
+    try {
+      if (isRepost) {
+        const originalPost = posts.find(p => p.id === postId);
+        if (!originalPost) return;
 
-    if (!error) {
-      toast({ title: "Post shared!" });
+        const { error } = await supabase
+          .from('feed_posts')
+          .insert({
+            content: `Reposted: ${originalPost.content}`,
+            user_id: user.id,
+            post_type: 'update',
+            shared_post_id: postId,
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: 'Success',
+          description: 'Post reposted successfully!',
+        });
+        
+        fetchPosts();
+      } else {
+        const url = `${window.location.origin}/post/${postId}`;
+        await navigator.clipboard.writeText(url);
+        
+        toast({
+          title: 'Success',
+          description: 'Post link copied to clipboard!',
+        });
+      }
+    } catch (error) {
+      toast({
+        title: 'Error',
+        description: 'Failed to share post',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleCreateShort = () => {
+    if (!user) {
+      toast({
+        title: 'Sign In Required',
+        description: 'Please sign in to create shorts',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setIsCreatorOpen(true);
+  };
+
+  const handleSaveShort = async (shortData: any) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('feed_posts')
+        .insert({
+          content: shortData.caption || 'New short video',
+          user_id: user.id,
+          post_type: 'update',
+          media_urls: [shortData.videoUrl],
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: 'Success',
+        description: 'Short created successfully!',
+      });
+      
       fetchPosts();
+      setIsCreatorOpen(false);
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
     }
   };
 
@@ -316,7 +460,7 @@ export default function UnifiedCommunityFeed({
 
   const addComment = async (postId: string) => {
     if (!user) {
-      toast({ title: "Please sign in to comment", variant: "destructive" });
+      toast({ title: 'Please sign in to comment', variant: 'destructive' });
       return;
     }
 
@@ -333,7 +477,7 @@ export default function UnifiedCommunityFeed({
 
     if (!error) {
       setNewComment(prev => ({ ...prev, [postId]: '' }));
-      toast({ title: "Comment added!" });
+      toast({ title: 'Comment added!' });
       fetchComments(postId);
       fetchPosts();
     }
@@ -359,29 +503,35 @@ export default function UnifiedCommunityFeed({
     }
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <TrendingUp className="h-6 w-6 text-primary" />
-          <div>
-            <h2 className="text-2xl font-bold text-foreground">Community Feed</h2>
-            <p className="text-muted-foreground">Connect and share with the startup ecosystem</p>
-          </div>
+  if (!user) {
+    return (
+      <div className="space-y-6">
+        <GuestPrompt 
+          feature="Community Feed"
+          description="Sign in to share posts, like content, and connect with the startup community."
+        />
+        <div className="opacity-50 pointer-events-none">
+          <Card className="glass-morphism">
+            <CardContent className="pt-6">
+              <p className="text-muted-foreground text-center">Preview: Sign in to see and create posts</p>
+            </CardContent>
+          </Card>
         </div>
-        <Badge variant="secondary" className="flex items-center space-x-1">
-          <Users className="h-3 w-3" />
-          <span>{posts.length} posts</span>
-        </Badge>
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 sm:space-y-6">
+      {/* Shorts Carousel */}
+      <ShortsCarousel onCreateShort={handleCreateShort} />
 
       {/* Create Post */}
-      {showCreatePost && user && (
+      {showCreatePost && (
         <Card className="tech-card border-0">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2">
-              <Zap className="h-5 w-5 text-primary" />
+            <CardTitle className="flex items-center space-x-2 text-base sm:text-lg">
+              <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               <span>Share your journey</span>
             </CardTitle>
           </CardHeader>
@@ -392,11 +542,71 @@ export default function UnifiedCommunityFeed({
               onChange={(e) => setNewPost(e.target.value)}
               className="min-h-[100px] bg-background/50 border-primary/20 focus:border-primary"
             />
-            <div className="flex justify-between items-center">
-              <div className="flex space-x-2">
-                <Badge variant="secondary" className="text-xs">Update</Badge>
-                <Badge variant="secondary" className="text-xs">Question</Badge>
-                <Badge variant="secondary" className="text-xs">Milestone</Badge>
+            
+            {/* Media Preview */}
+            {mediaPreview.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {mediaPreview.map((preview, index) => (
+                  <div key={index} className="relative group">
+                    {mediaFiles[index].type.startsWith('video/') ? (
+                      <video src={preview} className="w-full h-24 sm:h-32 object-cover rounded-lg" />
+                    ) : (
+                      <img src={preview} alt={`Preview ${index}`} className="w-full h-24 sm:h-32 object-cover rounded-lg" />
+                    )}
+                    <Button
+                      variant="destructive"
+                      size="sm"
+                      className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removeMedia(index)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              <div className="flex gap-1 sm:gap-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={handleMediaSelect}
+                />
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/*"
+                  className="hidden"
+                  onChange={handleMediaSelect}
+                />
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <ImageIcon className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Photo</span>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => videoInputRef.current?.click()}
+                >
+                  <Video className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Video</span>
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={handleCreateShort}
+                >
+                  <Sparkles className="h-4 w-4 sm:mr-2" />
+                  <span className="hidden sm:inline">Short</span>
+                </Button>
               </div>
               <Button 
                 onClick={createPost}
@@ -415,9 +625,9 @@ export default function UnifiedCommunityFeed({
       <div className="space-y-4" style={{ maxHeight, overflowY: 'auto' }}>
         {posts.map((post) => (
           <Card key={post.id} className="tech-card border-0 hover:scale-[1.01] transition-all">
-            <CardContent className="p-6">
-              <div className="flex space-x-4">
-                <Avatar className="h-12 w-12">
+            <CardContent className="p-4 sm:p-6">
+              <div className="flex space-x-3 sm:space-x-4">
+                <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
                   {post.profiles?.avatar_url ? (
                     <AvatarImage src={post.profiles.avatar_url} />
                   ) : null}
@@ -426,156 +636,141 @@ export default function UnifiedCommunityFeed({
                   </AvatarFallback>
                 </Avatar>
                 
-                <div className="flex-1 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <h3 className="font-semibold text-foreground">
+                <div className="flex-1 space-y-3 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                      <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">
                         {post.profiles?.full_name || 'Anonymous User'}
                       </h3>
-                      <span className="text-lg">{getRoleIcon(post.profiles?.role || '')}</span>
+                      <span className="text-base sm:text-lg">{getRoleIcon(post.profiles?.role || '')}</span>
                       <Badge variant="outline" className="text-xs capitalize">
                         {post.profiles?.role || 'Member'}
                       </Badge>
                       <span className="text-muted-foreground">•</span>
-                      <span className="text-sm text-muted-foreground">{formatDate(post.created_at)}</span>
+                      <span className="text-xs sm:text-sm text-muted-foreground">{formatDate(post.created_at)}</span>
                     </div>
                   </div>
                   
-                  <p className="text-foreground leading-relaxed whitespace-pre-wrap">{post.content}</p>
+                  <p className="text-sm sm:text-base text-foreground leading-relaxed whitespace-pre-wrap break-words">{post.content}</p>
                   
-                  {/* Media */}
+                  {/* Media Display */}
                   {post.media_urls && post.media_urls.length > 0 && (
-                    <div className="grid grid-cols-2 gap-2 mt-3">
-                      {post.media_urls.map((url, idx) => (
-                        <img 
-                          key={idx}
-                          src={url} 
-                          alt={`Post media ${idx + 1}`}
-                          className="rounded-lg w-full h-48 object-cover"
-                        />
-                      ))}
+                    <div className={`grid gap-2 mt-3 ${post.media_urls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                      {post.media_urls.map((url, idx) => {
+                        const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.mov');
+                        return isVideo ? (
+                          <video 
+                            key={idx}
+                            src={url} 
+                            controls 
+                            className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover"
+                          />
+                        ) : (
+                          <img 
+                            key={idx}
+                            src={url} 
+                            alt={`Media ${idx + 1}`}
+                            className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover"
+                          />
+                        );
+                      })}
                     </div>
                   )}
-
-                  {/* Event Attend Button */}
-                  {post.post_type === 'event' && post.internship_data?.event_id && (
-                    <Button 
-                      onClick={async () => {
-                        if (!user) {
-                          toast({ title: 'Please sign in to attend events', variant: 'destructive' });
-                          return;
-                        }
-                        
-                        const { error } = await supabase
-                          .from('event_attendees')
-                          .upsert({
-                            event_id: post.internship_data?.event_id,
-                            user_id: user.id,
-                            status: 'going'
-                          });
-
-                        if (error) {
-                          toast({ title: 'Failed to RSVP', variant: 'destructive' });
-                        } else {
-                          toast({ title: 'Successfully RSVPed to event!' });
-                          navigate('/events');
-                        }
-                      }}
-                      className="mt-3 w-full gap-2"
-                      variant="default"
-                    >
-                      <Calendar className="h-4 w-4" />
-                      Attend Event
-                    </Button>
-                  )}
                   
-                  <div className="flex items-center space-x-6 pt-3 border-t border-border">
+                  <div className="flex items-center flex-wrap gap-3 sm:gap-6 pt-3 border-t border-border">
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className={`text-muted-foreground hover:text-primary ${
-                        user && likedPosts.has(post.id) ? 'text-red-500' : ''
+                      className={`text-muted-foreground hover:text-primary px-2 ${
+                        likedPosts.has(post.id) ? 'text-red-500' : ''
                       }`}
                       onClick={() => toggleLike(post.id)}
                     >
-                      <Heart className={`h-4 w-4 mr-2 ${
-                        user && likedPosts.has(post.id) ? 'fill-current' : ''
+                      <Heart className={`h-4 w-4 mr-1 sm:mr-2 ${
+                        likedPosts.has(post.id) ? 'fill-current' : ''
                       }`} />
-                      {post._count?.post_likes || 0}
+                      <span className="text-xs sm:text-sm">{post._count?.post_likes || 0}</span>
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="text-muted-foreground hover:text-primary"
+                      className="text-muted-foreground hover:text-primary px-2"
                       onClick={() => toggleComments(post.id)}
                     >
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      {post._count?.post_comments || 0}
+                      <MessageCircle className="h-4 w-4 mr-1 sm:mr-2" />
+                      <span className="text-xs sm:text-sm">{post._count?.post_comments || 0}</span>
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className="text-muted-foreground hover:text-primary"
-                      onClick={() => sharePost(post.id)}
+                      className="text-muted-foreground hover:text-primary px-2"
+                      onClick={() => sharePost(post.id, false)}
                     >
-                      <Repeat2 className="h-4 w-4 mr-2" />
-                      Share
+                      <Share className="h-4 w-4 mr-1 sm:mr-2" />
+                      <span className="text-xs sm:text-sm hidden sm:inline">Share</span>
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="sm" 
-                      className={`text-muted-foreground hover:text-primary ${
-                        user && bookmarkedPosts.has(post.id) ? 'text-primary' : ''
+                      className="text-muted-foreground hover:text-primary px-2"
+                      onClick={() => sharePost(post.id, true)}
+                    >
+                      <Repeat2 className="h-4 w-4 mr-1 sm:mr-2" />
+                      <span className="text-xs sm:text-sm hidden sm:inline">Repost</span>
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className={`text-muted-foreground hover:text-primary px-2 ${
+                        bookmarkedPosts.has(post.id) ? 'text-primary' : ''
                       }`}
                       onClick={() => toggleBookmark(post.id)}
                     >
                       <Bookmark className={`h-4 w-4 ${
-                        user && bookmarkedPosts.has(post.id) ? 'fill-current' : ''
+                        bookmarkedPosts.has(post.id) ? 'fill-current' : ''
                       }`} />
                     </Button>
                   </div>
 
                   {/* Comments Section */}
                   {expandedComments.has(post.id) && (
-                    <div className="space-y-4 pt-4 border-t border-border mt-4">
+                    <div className="space-y-3 sm:space-y-4 pt-4 border-t border-border mt-4">
                       <div className="space-y-3">
                         {comments[post.id]?.map((comment) => (
-                          <div key={comment.id} className="flex gap-3">
-                            <Avatar className="h-8 w-8">
+                          <div key={comment.id} className="flex gap-2 sm:gap-3">
+                            <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
                               <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">
                                 {comment.profiles?.full_name?.charAt(0) || 'U'}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="flex-1 space-y-1">
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm font-semibold">{comment.profiles?.full_name || 'Anonymous'}</p>
-                                <span className="text-lg">{getRoleIcon(comment.profiles?.role || '')}</span>
+                            <div className="flex-1 space-y-1 min-w-0">
+                              <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                <p className="text-xs sm:text-sm font-semibold truncate">{comment.profiles?.full_name || 'Anonymous'}</p>
+                                <span className="text-sm sm:text-lg">{getRoleIcon(comment.profiles?.role || '')}</span>
                                 <span className="text-xs text-muted-foreground">{formatDate(comment.created_at)}</span>
                               </div>
-                              <p className="text-sm">{comment.content}</p>
+                              <p className="text-xs sm:text-sm break-words">{comment.content}</p>
                             </div>
                           </div>
                         ))}
                       </div>
                       
-                      {user && (
-                        <div className="flex gap-2">
-                          <Input
-                            placeholder="Write a comment..."
-                            value={newComment[post.id] || ''}
-                            onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
-                            onKeyPress={(e) => {
-                              if (e.key === 'Enter') {
-                                addComment(post.id);
-                              }
-                            }}
-                            className="flex-1"
-                          />
-                          <Button onClick={() => addComment(post.id)} size="sm">
-                            <Send className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      )}
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Write a comment..."
+                          value={newComment[post.id] || ''}
+                          onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              addComment(post.id);
+                            }
+                          }}
+                          className="flex-1 text-sm"
+                        />
+                        <Button onClick={() => addComment(post.id)} size="sm">
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -586,12 +781,19 @@ export default function UnifiedCommunityFeed({
       </div>
 
       {posts.length === 0 && (
-        <Card className="tech-card border-0 text-center p-12">
-          <Zap className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No posts yet</h3>
-          <p className="text-muted-foreground">Be the first to share your startup journey!</p>
+        <Card className="tech-card border-0 text-center p-8 sm:p-12">
+          <Zap className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4" />
+          <h3 className="text-lg sm:text-xl font-semibold mb-2">No posts yet</h3>
+          <p className="text-sm sm:text-base text-muted-foreground">Be the first to share your startup journey!</p>
         </Card>
       )}
+
+      {/* Shorts Creator Modal */}
+      <ShortsCreator
+        isOpen={isCreatorOpen}
+        onClose={() => setIsCreatorOpen(false)}
+        onSave={handleSaveShort}
+      />
     </div>
   );
 }

@@ -10,7 +10,6 @@ import MentorCalendarWidget from "@/components/MentorCalendarWidget";
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
 import AIFeaturesHub from "@/components/AIFeaturesHub";
 import AIQuickActions from "@/components/AIQuickActions";
-import MentorFeed from "@/components/MentorFeed";
 import MentorshipRequests from "@/components/MentorshipRequests";
 import ConnectionsWidget from "@/components/ConnectionsWidget";
 import ResourcesWidget from "@/components/ResourcesWidget";

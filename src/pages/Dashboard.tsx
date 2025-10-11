@@ -10,7 +10,6 @@ import DashboardNavigation from '@/components/DashboardNavigation';
 import AIRoadmapWidget from '@/components/AIRoadmapWidget';
 import ConnectionsWidget from '@/components/ConnectionsWidget';
 import ResourcesWidget from '@/components/ResourcesWidget';
-import ProgressFeed from '@/components/ProgressFeed';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import NotificationCenter from '@/components/dashboard/NotificationCenter';
 import AchievementsBadges from '@/components/dashboard/AchievementsBadges';
