@@ -10,6 +10,7 @@ import { Building, Users, TrendingUp, DollarSign, Edit, Plus, Globe, MapPin } fr
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import PitchDeckUpload from './PitchDeckUpload';
 
 export default function CompanyProfileManager() {
   const [company, setCompany] = useState<any>(null);
@@ -543,11 +544,12 @@ export default function CompanyProfileManager() {
 
       {/* Details */}
       <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
+        <TabsList className={`grid w-full ${isInvestor ? 'grid-cols-2' : 'grid-cols-3'} max-w-2xl`}>
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="focus">
             {isInvestor ? 'Investment Focus' : 'Company Details'}
           </TabsTrigger>
+          {!isInvestor && <TabsTrigger value="deck">Pitch Deck</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="about" className="space-y-4">
@@ -604,6 +606,22 @@ export default function CompanyProfileManager() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {!isInvestor && (
+          <TabsContent value="deck" className="space-y-4">
+            <PitchDeckUpload 
+              companyId={company.id}
+              currentDeckUrl={company.pitch_deck_url}
+              onUploadComplete={(url) => {
+                setCompany({ ...company, pitch_deck_url: url });
+                toast({
+                  title: 'Success!',
+                  description: 'Pitch deck updated successfully.',
+                });
+              }}
+            />
+          </TabsContent>
+        )}
       </Tabs>
     </div>
   );

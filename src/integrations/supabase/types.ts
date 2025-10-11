@@ -332,6 +332,7 @@ export type Database = {
           logo_url: string | null
           looking_for: string[] | null
           name: string
+          pitch_deck_url: string | null
           stage: Database["public"]["Enums"]["company_stage"] | null
           team_size: number | null
           updated_at: string
@@ -351,6 +352,7 @@ export type Database = {
           logo_url?: string | null
           looking_for?: string[] | null
           name: string
+          pitch_deck_url?: string | null
           stage?: Database["public"]["Enums"]["company_stage"] | null
           team_size?: number | null
           updated_at?: string
@@ -370,6 +372,7 @@ export type Database = {
           logo_url?: string | null
           looking_for?: string[] | null
           name?: string
+          pitch_deck_url?: string | null
           stage?: Database["public"]["Enums"]["company_stage"] | null
           team_size?: number | null
           updated_at?: string
