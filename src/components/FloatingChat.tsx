@@ -5,10 +5,12 @@ import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Bot, Sparkles, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { useUserRole } from '@/hooks/useUserRole';
 
 interface Message {
   id: string;
@@ -39,11 +41,18 @@ interface Profile {
   avatar_url?: string;
 }
 
+interface AIMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export default function FloatingChat() {
   const { user } = useAuth();
+  const { role } = useUserRole();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
+  const [activeTab, setActiveTab] = useState<'messages' | 'ai'>('messages');
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedConversation, setSelectedConversation] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -52,7 +61,15 @@ export default function FloatingChat() {
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const [showNewChat, setShowNewChat] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
+  
+  // AI Assistant state
+  const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
+  const [aiInput, setAiInput] = useState('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const aiMessagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user) {
@@ -83,6 +100,10 @@ export default function FloatingChat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    aiMessagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [aiMessages]);
 
   const fetchAllUsers = async () => {
     const { data } = await supabase
@@ -198,6 +219,64 @@ export default function FloatingChat() {
     fetchMessages(userId);
   };
 
+  const sendAiMessage = async () => {
+    if (!aiInput.trim() || isAiLoading || !user) return;
+
+    const userMessage = aiInput.trim();
+    setAiInput('');
+    setAiMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setIsAiLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('ai-chatbot', {
+        body: { 
+          message: userMessage,
+          conversationId,
+          userRole: role || 'startup'
+        }
+      });
+
+      if (error) {
+        if (error.message?.includes('Rate limit')) {
+          toast({
+            title: "Rate Limit Exceeded",
+            description: "Too many requests. Please wait a moment and try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        if (error.message?.includes('credits exhausted') || error.message?.includes('Payment required')) {
+          toast({
+            title: "AI Credits Exhausted",
+            description: "Please add credits to your workspace to continue using AI features.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        throw error;
+      }
+
+      if (!conversationId) {
+        setConversationId(data.conversationId);
+      }
+
+      setAiMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
+    } catch (error: any) {
+      console.error('Error calling AI:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to get AI response. Please try again.",
+        variant: "destructive",
+      });
+      
+      setAiMessages(prev => prev.slice(0, -1));
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
   const selectedUser = selectedConversation 
     ? conversations.find(c => 
         c.user1_id === selectedConversation || c.user2_id === selectedConversation
@@ -237,13 +316,22 @@ export default function FloatingChat() {
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b bg-card">
             <div className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              <h3 className="font-semibold">
-                {selectedConversation ? selectedUser?.full_name : 'Messages'}
-              </h3>
+              {activeTab === 'ai' ? (
+                <>
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold">AI Assistant</h3>
+                </>
+              ) : (
+                <>
+                  <MessageSquare className="h-5 w-5" />
+                  <h3 className="font-semibold">
+                    {selectedConversation ? selectedUser?.full_name : 'Messages'}
+                  </h3>
+                </>
+              )}
             </div>
             <div className="flex gap-1">
-              {selectedConversation && (
+              {selectedConversation && activeTab === 'messages' && (
                 <Button
                   variant="ghost"
                   size="icon"
@@ -277,8 +365,22 @@ export default function FloatingChat() {
 
           {!isMinimized && (
             <>
-              {/* Conversations List */}
-              {!selectedConversation && (
+              {/* Tab Navigation */}
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'messages' | 'ai')} className="flex-1 flex flex-col min-h-0">
+                <TabsList className="grid w-full grid-cols-2 mx-3 mt-3">
+                  <TabsTrigger value="messages" className="gap-2">
+                    <MessageSquare className="h-4 w-4" />
+                    Messages
+                  </TabsTrigger>
+                  <TabsTrigger value="ai" className="gap-2">
+                    <Bot className="h-4 w-4" />
+                    AI Assistant
+                  </TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="messages" className="flex-1 flex flex-col min-h-0 mt-0">
+                  {/* Conversations List */}
+                  {!selectedConversation && (
                 <div className="flex-1 flex flex-col min-h-0">
                   <div className="p-3 border-b">
                     <Button 
@@ -413,6 +515,68 @@ export default function FloatingChat() {
                   </div>
                 </div>
               )}
+                </TabsContent>
+
+                <TabsContent value="ai" className="flex-1 flex flex-col min-h-0 mt-0">
+                  <ScrollArea className="flex-1 p-4">
+                    {aiMessages.length === 0 && (
+                      <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
+                        <Bot className="h-12 w-12 mb-4 opacity-50" />
+                        <p className="text-sm">How can I help you today?</p>
+                        <p className="text-xs mt-2">Ask me about your startup, funding, mentorship, or learning!</p>
+                      </div>
+                    )}
+                    
+                    <div className="space-y-4">
+                      {aiMessages.map((message, index) => (
+                        <div
+                          key={index}
+                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                        >
+                          <div
+                            className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                              message.role === 'user'
+                                ? 'bg-primary text-primary-foreground'
+                                : 'bg-muted'
+                            }`}
+                          >
+                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                          </div>
+                        </div>
+                      ))}
+                      
+                      {isAiLoading && (
+                        <div className="flex justify-start">
+                          <div className="bg-muted rounded-lg px-4 py-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          </div>
+                        </div>
+                      )}
+                      <div ref={aiMessagesEndRef} />
+                    </div>
+                  </ScrollArea>
+                  
+                  <div className="border-t p-4">
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        sendAiMessage();
+                      }}
+                      className="flex gap-2"
+                    >
+                      <Input
+                        value={aiInput}
+                        onChange={(e) => setAiInput(e.target.value)}
+                        placeholder="Type your message..."
+                        disabled={isAiLoading}
+                      />
+                      <Button type="submit" size="icon" disabled={isAiLoading || !aiInput.trim()}>
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </form>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </>
           )}
         </div>

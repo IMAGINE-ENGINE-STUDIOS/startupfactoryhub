@@ -14,7 +14,6 @@ import AIFeaturesHub from '@/components/AIFeaturesHub';
 import AIQuickActions from '@/components/AIQuickActions';
 import StartupRecommendationsWidget from '@/components/StartupRecommendationsWidget';
 import StartupBrowser from '@/components/StartupBrowser';
-import AIAssistantButton from '@/components/AIAssistantButton';
 import FloatingChat from '@/components/FloatingChat';
 
 interface Investment {
@@ -484,8 +483,7 @@ export default function InvestorDashboard() {
         </Tabs>
       </div>
 
-      {/* Floating Buttons */}
-      <AIAssistantButton />
+      {/* Floating Chat with AI */}
       <FloatingChat />
     </div>
   );

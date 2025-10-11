@@ -15,7 +15,6 @@ import MentorshipRequests from "@/components/MentorshipRequests";
 import ConnectionsWidget from "@/components/ConnectionsWidget";
 import ResourcesWidget from "@/components/ResourcesWidget";
 import MentorEndorsements from "@/components/MentorEndorsements";
-import AIAssistantButton from "@/components/AIAssistantButton";
 import FloatingChat from "@/components/FloatingChat";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
@@ -159,8 +158,7 @@ const MentorDashboard = () => {
         </div>
       </div>
 
-      {/* Floating Buttons */}
-      <AIAssistantButton />
+      {/* Floating Chat with AI */}
       <FloatingChat />
     </div>
   );
