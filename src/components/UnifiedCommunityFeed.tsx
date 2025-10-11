@@ -216,13 +216,21 @@ export default function UnifiedCommunityFeed({
       const filePath = `${user!.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('documents')
+        .from('feed-media')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        toast({
+          title: 'Upload Failed',
+          description: uploadError.message,
+          variant: 'destructive',
+        });
+        throw uploadError;
+      }
 
       const { data } = supabase.storage
-        .from('documents')
+        .from('feed-media')
         .getPublicUrl(filePath);
 
       return data.publicUrl;
