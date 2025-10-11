@@ -426,13 +426,23 @@ export default function UnifiedCommunityFeed({
     if (!user) return;
 
     try {
+      let videoUrl = null;
+
+      // Upload the video file if provided
+      if (shortData.file) {
+        videoUrl = await uploadMedia(shortData.file);
+        if (!videoUrl) {
+          throw new Error('Failed to upload video');
+        }
+      }
+
       const { error } = await supabase
         .from('feed_posts')
         .insert({
-          content: shortData.caption || 'New short video',
+          content: shortData.title + (shortData.description ? '\n\n' + shortData.description : ''),
           user_id: user.id,
           post_type: 'update',
-          media_urls: [shortData.videoUrl],
+          media_urls: videoUrl ? [videoUrl] : null,
         });
 
       if (error) throw error;

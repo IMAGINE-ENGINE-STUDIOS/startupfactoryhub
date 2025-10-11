@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Play, 
   Pause, 
@@ -19,13 +20,11 @@ import { cn } from "@/lib/utils";
 interface Short {
   id: string;
   video_url: string;
-  title: string;
-  tags: string[];
-  user: {
-    id: string;
+  content: string;
+  user_id: string;
+  profiles?: {
     full_name: string;
     avatar_url?: string;
-    role: string;
   };
   likes_count: number;
   comments_count: number;
@@ -37,43 +36,54 @@ interface ShortsCarouselProps {
 }
 
 const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
-  const [currentShort, setCurrentShort] = useState(0);
+  const [shorts, setShorts] = useState<Short[]>([]);
   const [isPlaying, setIsPlaying] = useState<Record<string, boolean>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Sample data - will be replaced with real data
-  const shorts: Short[] = [
-    {
-      id: "1",
-      video_url: "/api/placeholder/video1.mp4",
-      title: "Startup Journey Day 1",
-      tags: ["startup", "journey", "tech"],
-      user: {
-        id: "1",
-        full_name: "John Doe",
-        avatar_url: "/api/placeholder/150/150",
-        role: "startup"
-      },
-      likes_count: 24,
-      comments_count: 8,
-      created_at: "2024-01-01T00:00:00Z"
-    },
-    {
-      id: "2", 
-      video_url: "/api/placeholder/video2.mp4",
-      title: "Pitch Practice Session",
-      tags: ["pitch", "practice", "entrepreneur"],
-      user: {
-        id: "2",
-        full_name: "Jane Smith",
-        avatar_url: "/api/placeholder/150/150",
-        role: "mentor"
-      },
-      likes_count: 45,
-      comments_count: 12,
-      created_at: "2024-01-02T00:00:00Z"
+  useEffect(() => {
+    fetchShorts();
+  }, []);
+
+  const fetchShorts = async () => {
+    const { data: postsData, error } = await supabase
+      .from('feed_posts')
+      .select(`
+        id,
+        content,
+        user_id,
+        media_urls,
+        likes_count,
+        comments_count,
+        created_at,
+        profiles:user_id(full_name, avatar_url)
+      `)
+      .not('media_urls', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(20);
+
+    if (!error && postsData) {
+      // Filter for video posts (shorts)
+      const videoShorts = postsData
+        .filter(post => {
+          if (!post.media_urls || !Array.isArray(post.media_urls)) return false;
+          return post.media_urls.some(url => 
+            url && (url.includes('.mp4') || url.includes('.webm') || url.includes('.mov') || url.includes('video'))
+          );
+        })
+        .map(post => ({
+          id: post.id,
+          video_url: post.media_urls![0],
+          content: post.content,
+          user_id: post.user_id,
+          profiles: Array.isArray(post.profiles) ? post.profiles[0] : post.profiles,
+          likes_count: post.likes_count || 0,
+          comments_count: post.comments_count || 0,
+          created_at: post.created_at
+        }));
+
+      setShorts(videoShorts);
     }
-  ];
+  };
 
   const togglePlay = (shortId: string) => {
     setIsPlaying(prev => ({
@@ -94,15 +104,6 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
     }
   };
 
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'startup': return 'bg-blue-100 text-blue-800';
-      case 'investor': return 'bg-green-100 text-green-800';
-      case 'mentor': return 'bg-purple-100 text-purple-800';
-      case 'student': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
 
   return (
     <div className="mb-8">
@@ -130,14 +131,20 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
         {shorts.map((short) => (
           <Card key={short.id} className="flex-shrink-0 w-64 h-80 relative overflow-hidden group hover:shadow-lg transition-shadow">
             <CardContent className="p-0 h-full relative">
-              {/* Video Placeholder */}
-              <div className="w-full h-full bg-gradient-to-br from-primary/20 to-secondary/20 relative flex items-center justify-center">
+              <div className="w-full h-full relative">
+                <video 
+                  src={short.video_url} 
+                  className="w-full h-full object-cover"
+                  loop
+                  muted
+                  playsInline
+                />
                 <div className="absolute inset-0 bg-black/20" />
                 <Button
                   variant="ghost"
                   size="lg"
                   onClick={() => togglePlay(short.id)}
-                  className="text-white hover:bg-white/20 z-10"
+                  className="absolute inset-0 flex items-center justify-center text-white hover:bg-white/20 z-10"
                 >
                   {isPlaying[short.id] ? (
                     <Pause className="h-8 w-8" />
@@ -150,38 +157,21 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                 
                 {/* User Info - Top */}
-                <div className="absolute top-4 left-4 flex items-center gap-2">
+                <div className="absolute top-4 left-4 flex items-center gap-2 z-20">
                   <Avatar className="w-8 h-8 border-2 border-white">
-                    <AvatarImage src={short.user.avatar_url} />
-                    <AvatarFallback>{short.user.full_name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={short.profiles?.avatar_url} />
+                    <AvatarFallback className="bg-primary text-primary-foreground">
+                      {short.profiles?.full_name?.charAt(0) || 'U'}
+                    </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-white text-sm font-medium">{short.user.full_name}</p>
-                    <Badge className={cn("text-xs", getRoleColor(short.user.role))}>
-                      {short.user.role}
-                    </Badge>
+                    <p className="text-white text-sm font-medium">{short.profiles?.full_name || 'User'}</p>
                   </div>
                 </div>
 
-                {/* More Options - Top Right */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute top-4 right-4 text-white hover:bg-white/20"
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-
-                {/* Title and Tags - Bottom */}
-                <div className="absolute bottom-4 left-4 right-4">
-                  <h3 className="text-white font-semibold mb-2 line-clamp-2">{short.title}</h3>
-                  <div className="flex flex-wrap gap-1 mb-3">
-                    {short.tags.slice(0, 3).map((tag, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs bg-white/20 text-white border-white/30 hover:bg-white/30">
-                        #{tag}
-                      </Badge>
-                    ))}
-                  </div>
+                {/* Content - Bottom */}
+                <div className="absolute bottom-4 left-4 right-4 z-20">
+                  <p className="text-white text-sm mb-3 line-clamp-2">{short.content}</p>
                   
                   {/* Actions */}
                   <div className="flex items-center gap-4">
