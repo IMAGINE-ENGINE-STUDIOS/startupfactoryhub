@@ -248,9 +248,6 @@ export default function InvestorDashboard() {
           </div>
         </div>
 
-        {/* AI Features Hub */}
-        <AIFeaturesHub />
-
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {stats.map((stat) => (
@@ -481,6 +478,11 @@ export default function InvestorDashboard() {
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* AI Features Hub */}
+        <div className="mt-8">
+          <AIFeaturesHub />
+        </div>
       </div>
 
       {/* Floating Chat with AI */}
