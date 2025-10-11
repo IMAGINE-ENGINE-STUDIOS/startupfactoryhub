@@ -48,13 +48,27 @@ export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencin
       return;
     }
 
+    if (!containerRef.current) {
+      toast({
+        title: 'Error',
+        description: 'Video container not ready',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
       
-      // Create Daily call object
-      const callObject = DailyIframe.createCallObject({
-        audioSource: true,
-        videoSource: true,
+      // Create Daily iframe and attach to container
+      const callObject = DailyIframe.createFrame(containerRef.current, {
+        showLeaveButton: false,
+        iframeStyle: {
+          width: '100%',
+          height: '100%',
+          border: 'none',
+          borderRadius: '0.5rem',
+        },
       });
       
       callObjectRef.current = callObject;
@@ -140,11 +154,11 @@ export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencin
       <Card className="p-6">
         <div className="space-y-4">
           {/* Video Container */}
-          <div 
-            ref={containerRef}
-            className="relative aspect-video bg-accent rounded-lg overflow-hidden"
-          >
-            <div id="daily-video-container" className="w-full h-full" />
+          <div className="relative">
+            <div 
+              ref={containerRef}
+              className="aspect-video bg-accent rounded-lg overflow-hidden"
+            />
             
             {/* Participant Badge */}
             <Badge className="absolute top-4 left-4 z-10">
