@@ -656,8 +656,8 @@ export default function UnifiedCommunityFeed({
                   {/* Media Display */}
                   {post.media_urls && post.media_urls.length > 0 && (
                     <div className={`grid gap-2 mt-3 ${post.media_urls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                      {post.media_urls.map((url, idx) => {
-                        const isVideo = url.includes('.mp4') || url.includes('.webm') || url.includes('.mov');
+                      {post.media_urls.filter(url => url).map((url, idx) => {
+                        const isVideo = url?.includes('.mp4') || url?.includes('.webm') || url?.includes('.mov') || url?.includes('video');
                         return isVideo ? (
                           <video 
                             key={idx}
