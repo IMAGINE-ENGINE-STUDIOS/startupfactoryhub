@@ -190,7 +190,15 @@ export default function FloatingChat() {
   };
 
   const sendMessage = async () => {
-    if (!newMessage.trim() || !user || !selectedConversation) return;
+    if (!newMessage.trim() || !selectedConversation) return;
+    
+    if (!user) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to send messages",
+      });
+      return;
+    }
 
     const { error } = await supabase
       .from('messages')
@@ -220,7 +228,15 @@ export default function FloatingChat() {
   };
 
   const sendAiMessage = async () => {
-    if (!aiInput.trim() || isAiLoading || !user) return;
+    if (!aiInput.trim() || isAiLoading) return;
+    
+    if (!user) {
+      toast({
+        title: "Sign In Required",
+        description: "Please sign in to use AI Assistant",
+      });
+      return;
+    }
 
     const userMessage = aiInput.trim();
     setAiInput('');
@@ -286,8 +302,6 @@ export default function FloatingChat() {
   const filteredUsers = allUsers.filter(u => 
     u.full_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
-  if (!user) return null;
 
   return (
     <>

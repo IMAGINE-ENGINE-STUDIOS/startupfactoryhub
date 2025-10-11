@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import GuestPrompt from '@/components/GuestPrompt';
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
@@ -52,14 +53,10 @@ const Dashboard = () => {
   const currentTab = urlParams.get('tab') || 'roadmap';
 
   useEffect(() => {
-    if (!loading && !user) {
-      navigate("/auth");
-      return;
-    }
     if (user) {
       fetchProfile();
     }
-  }, [user, loading, navigate]);
+  }, [user]);
 
   const switchTab = (tab: string) => {
     const newUrl = `${window.location.pathname}?tab=${tab}`;
@@ -93,8 +90,39 @@ const Dashboard = () => {
     );
   }
 
+  // Guest mode
   if (!user) {
-    return null;
+    return (
+      <div className="min-h-screen bg-background">
+        <DashboardNavigation />
+        <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <GuestPrompt 
+            feature="Full Dashboard"
+            description="Create an account to access your personalized dashboard, track progress, connect with mentors, and more."
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Connect with Mentors</CardTitle>
+                <CardDescription>Get guidance from experienced entrepreneurs</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Find Investors</CardTitle>
+                <CardDescription>Pitch your startup to potential investors</CardDescription>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-lg">Join Community</CardTitle>
+                <CardDescription>Network with other founders and students</CardDescription>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (

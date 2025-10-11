@@ -15,18 +15,13 @@ const DashboardRouter = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      navigate("/auth");
-      return;
-    }
-
-    // If there's an error fetching the role or no role exists, redirect to profile setup
-    if (!roleLoading && user && (!role || error)) {
+    // If logged in user has no role, redirect to profile setup
+    if (!authLoading && user && !roleLoading && (!role || error)) {
       navigate("/profile-setup");
     }
   }, [user, authLoading, role, roleLoading, error, navigate]);
 
-  if (authLoading || roleLoading) {
+  if (authLoading || (user && roleLoading)) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -37,8 +32,9 @@ const DashboardRouter = () => {
     );
   }
 
-  if (!user || !role) {
-    return null;
+  // Guest mode - show default dashboard
+  if (!user) {
+    return <Dashboard />;
   }
 
   // Route to appropriate dashboard based on user role (secured via user_roles table)
