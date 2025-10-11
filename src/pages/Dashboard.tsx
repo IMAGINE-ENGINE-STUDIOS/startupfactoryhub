@@ -23,6 +23,7 @@ import AIFeaturesHub from '@/components/AIFeaturesHub';
 import AIAssistantPreview from '@/components/AIAssistantPreview';
 import AIAssistantButton from '@/components/AIAssistantButton';
 import FloatingChat from '@/components/FloatingChat';
+import ShortsCarousel from '@/components/ShortsCarousel';
 import { 
   Rocket, 
   TrendingUp, 
@@ -245,6 +246,11 @@ const Dashboard = () => {
         {/* AI Features Section */}
         <div className="mt-6 sm:mt-8">
           <AIFeaturesHub />
+        </div>
+
+        {/* Shorts Carousel */}
+        <div className="mt-6 sm:mt-8">
+          <ShortsCarousel onCreateShort={() => navigate('/feed')} />
         </div>
       </div>
 
