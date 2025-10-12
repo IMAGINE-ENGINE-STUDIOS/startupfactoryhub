@@ -23,6 +23,7 @@ const Messages = lazy(() => import("./pages/Messages"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Explore = lazy(() => import("./pages/Explore"));
 const MentoringSessions = lazy(() => import("./pages/MentoringSessions"));
+const Calendar = lazy(() => import("./pages/Calendar"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -61,11 +62,12 @@ const App = () => (
                   <Route path="/profile-setup" element={<ProfileSetup />} />
                   <Route path="/dashboard" element={<DashboardRouter />} />
                   <Route path="/feed" element={<CommunityFeed />} />
-                  <Route path="/events" element={<Events />} />
+                  <Route path="/calendar" element={<Calendar />} />
+                  <Route path="/events" element={<Calendar />} />
+                  <Route path="/mentoring-sessions" element={<Calendar />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/analytics" element={<Analytics />} />
                   <Route path="/explore" element={<Explore />} />
-                  <Route path="/mentoring-sessions" element={<MentoringSessions />} />
                   <Route path="/profile" element={<StartupProfile />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>

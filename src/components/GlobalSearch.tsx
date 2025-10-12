@@ -130,7 +130,7 @@ const GlobalSearch = memo(function GlobalSearch() {
         navigate(`/profile?company=${result.id}`);
         break;
       case 'event':
-        navigate(`/events?id=${result.id}`);
+        navigate(`/calendar?id=${result.id}`);
         break;
       case 'resource':
         navigate(`/dashboard?tab=learn&course=${result.id}`);

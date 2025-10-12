@@ -34,8 +34,8 @@ const Navigation = () => {
             <button onClick={() => navigate("/feed")} className="text-muted-foreground hover:text-foreground transition-colors">
               Community
             </button>
-            <button onClick={() => navigate("/events")} className="text-muted-foreground hover:text-foreground transition-colors">
-              Events
+            <button onClick={() => navigate("/calendar")} className="text-muted-foreground hover:text-foreground transition-colors">
+              Calendar
             </button>
             <a href="#resources" className="text-muted-foreground hover:text-foreground transition-colors">
               Resources
@@ -100,12 +100,12 @@ const Navigation = () => {
                   </button>
                   <button 
                     onClick={() => {
-                      navigate("/events");
+                      navigate("/calendar");
                       closeMenu();
                     }} 
                     className="text-lg py-2 text-left hover:text-ocean-primary transition-colors"
                   >
-                    Events
+                    Calendar
                   </button>
                   <a 
                     href="#resources" 

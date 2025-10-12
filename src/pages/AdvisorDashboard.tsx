@@ -256,7 +256,7 @@ export default function AdvisorDashboard() {
             </div>
           </div>
           
-          <Button className="pulse-primary" onClick={() => navigate("/mentoring-sessions")}>
+          <Button className="pulse-primary" onClick={() => navigate("/calendar")}>
             <MessageSquare className="h-4 w-4 mr-2" />
             Schedule Session
           </Button>

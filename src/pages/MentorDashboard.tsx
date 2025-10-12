@@ -130,7 +130,7 @@ const MentorDashboard = () => {
                   <Users className="w-4 h-4 mr-2" />
                   Browse Startups
                 </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/mentoring-sessions")}>
+                <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/calendar")}>
                   <Calendar className="w-4 h-4 mr-2" />
                   Schedule Session
                 </Button>

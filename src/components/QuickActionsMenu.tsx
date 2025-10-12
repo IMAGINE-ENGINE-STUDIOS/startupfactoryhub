@@ -20,7 +20,7 @@ export default function QuickActionsMenu() {
       icon: Calendar,
       label: 'Schedule Meeting',
       description: 'Book a mentoring session',
-      onClick: () => navigate('/mentoring-sessions'),
+      onClick: () => navigate('/calendar'),
       color: 'bg-blue-500/10 text-blue-500',
     },
     {
@@ -41,7 +41,7 @@ export default function QuickActionsMenu() {
       icon: Video,
       label: 'Join Call',
       description: 'Start video session',
-      onClick: () => navigate('/mentoring-sessions'),
+      onClick: () => navigate('/calendar'),
       color: 'bg-red-500/10 text-red-500',
     },
     {

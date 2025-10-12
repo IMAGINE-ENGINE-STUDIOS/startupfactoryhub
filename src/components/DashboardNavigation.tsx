@@ -96,19 +96,10 @@ const DashboardNavigation = () => {
                 variant="ghost" 
                 size="sm"
                 className="flex items-center space-x-2"
-                onClick={() => navigate("/events")}
+                onClick={() => navigate("/calendar")}
               >
                 <Calendar className="w-4 h-4" />
-                <span>Events</span>
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="flex items-center space-x-2"
-                onClick={() => navigate("/mentoring-sessions")}
-              >
-                <Video className="w-4 h-4" />
-                <span>Sessions</span>
+                <span>Calendar</span>
               </Button>
               <Button 
                 variant="ghost" 
@@ -210,19 +201,10 @@ const DashboardNavigation = () => {
             variant="ghost"
             size="sm"
             className="flex flex-col items-center space-y-1 h-auto py-2"
-            onClick={() => navigate("/events")}
+            onClick={() => navigate("/calendar")}
           >
             <Calendar className="w-5 h-5" />
-            <span className="text-xs">Events</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex flex-col items-center space-y-1 h-auto py-2"
-            onClick={() => navigate("/mentoring-sessions")}
-          >
-            <Video className="w-5 h-5" />
-            <span className="text-xs">Sessions</span>
+            <span className="text-xs">Calendar</span>
           </Button>
           <Button
             variant="ghost"
