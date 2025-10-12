@@ -20,9 +20,3 @@ verify_jwt = true
 
 [functions.search]
 verify_jwt = true
-
-[functions.market-intelligence]
-verify_jwt = false
-
-[functions.government-data]
-verify_jwt = false
