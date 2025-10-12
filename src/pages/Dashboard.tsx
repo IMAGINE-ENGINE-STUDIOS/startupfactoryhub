@@ -48,9 +48,9 @@ const Dashboard = () => {
   const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
   
-  // Get current tab from URL params or default to roadmap (journey)
+  // Get current tab from URL params or default to feed (social)
   const urlParams = new URLSearchParams(window.location.search);
-  const currentTab = urlParams.get('tab') || 'roadmap';
+  const currentTab = urlParams.get('tab') || 'feed';
 
   useEffect(() => {
     if (user) {
@@ -130,16 +130,16 @@ const Dashboard = () => {
       <DashboardNavigation />
       
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
-        {/* Welcome Header */}
-        <div className="mb-6 sm:mb-8">
+        {/* Welcome Header - Social Media Style */}
+        <div className="mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Welcome back! 👋</h1>
-              <p className="text-sm sm:text-base text-muted-foreground mt-1">Here's what's happening with your startup today</p>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Feed</h1>
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">Connect, share, and grow with the community</p>
             </div>
             <div className="flex items-center space-x-2 sm:space-x-3">
               <NotificationCenter />
-              <Button variant="hero" size="sm" onClick={() => navigate('/feed')} className="flex-1 sm:flex-none">
+              <Button variant="hero" size="sm" onClick={() => switchTab('feed')} className="flex-1 sm:flex-none">
                 <Plus className="w-4 h-4 mr-2" />
                 <span className="hidden sm:inline">Share Update</span>
                 <span className="sm:hidden">Share</span>
@@ -148,66 +148,87 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-          <Card>
-            <CardHeader className="pb-2 sm:pb-3">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Profile Views</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">142</div>
-              <p className="text-xs text-muted-foreground hidden sm:block">+12% from last week</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2 sm:pb-3">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Connections</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">24</div>
-              <p className="text-xs text-muted-foreground hidden sm:block">3 new this week</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2 sm:pb-3">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Milestones</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">8/12</div>
-              <Progress value={67} className="mt-2" />
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2 sm:pb-3">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Score</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold text-ocean-primary">A+</div>
-              <p className="text-xs text-muted-foreground hidden sm:block">Excellent progress!</p>
-            </CardContent>
-          </Card>
-        </div>
 
-        {/* Achievement Badges */}
-        <div className="mb-6 sm:mb-8">
-          <AchievementsBadges />
-        </div>
-
-        {/* Tabbed Dashboard Content */}
+        {/* Tabbed Dashboard Content - Feed First */}
         <Tabs value={currentTab} onValueChange={switchTab} className="space-y-4 sm:space-y-6">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex sm:grid w-auto sm:w-full grid-cols-3 sm:grid-cols-6 min-w-full sm:min-w-0 sm:max-w-2xl">
-              <TabsTrigger value="roadmap" className="whitespace-nowrap">Journey</TabsTrigger>
-              <TabsTrigger value="company" className="whitespace-nowrap">Profile</TabsTrigger>
-              <TabsTrigger value="matching" className="whitespace-nowrap">Connect</TabsTrigger>
-              <TabsTrigger value="resources" className="whitespace-nowrap">Learn</TabsTrigger>
-              <TabsTrigger value="internships" className="whitespace-nowrap">Internships</TabsTrigger>
-              <TabsTrigger value="network" className="whitespace-nowrap">Network</TabsTrigger>
+            <TabsList className="inline-flex sm:grid w-auto sm:w-full grid-cols-3 sm:grid-cols-6 min-w-full sm:min-w-0">
+              <TabsTrigger value="feed" className="whitespace-nowrap">
+                <Heart className="w-4 h-4 mr-1 sm:mr-2" />
+                Feed
+              </TabsTrigger>
+              <TabsTrigger value="roadmap" className="whitespace-nowrap">
+                <Target className="w-4 h-4 mr-1 sm:mr-2" />
+                Journey
+              </TabsTrigger>
+              <TabsTrigger value="matching" className="whitespace-nowrap">
+                <Users className="w-4 h-4 mr-1 sm:mr-2" />
+                Connect
+              </TabsTrigger>
+              <TabsTrigger value="company" className="whitespace-nowrap">
+                <Building className="w-4 h-4 mr-1 sm:mr-2" />
+                Profile
+              </TabsTrigger>
+              <TabsTrigger value="resources" className="whitespace-nowrap">
+                <BookOpen className="w-4 h-4 mr-1 sm:mr-2" />
+                Learn
+              </TabsTrigger>
+              <TabsTrigger value="network" className="whitespace-nowrap">
+                <MessageSquare className="w-4 h-4 mr-1 sm:mr-2" />
+                Network
+              </TabsTrigger>
             </TabsList>
           </div>
+
+          {/* Social Feed - Main Focus */}
+          <TabsContent value="feed" className="space-y-4 sm:space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+              {/* Main Feed */}
+              <div className="lg:col-span-2">
+                <UnifiedCommunityFeed showCreatePost={true} />
+              </div>
+              
+              {/* Sidebar */}
+              <div className="space-y-4 sm:space-y-6">
+                {/* Quick Stats Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Your Stats</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Profile Views</span>
+                      <span className="font-bold">142</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Connections</span>
+                      <span className="font-bold">24</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-muted-foreground">Progress</span>
+                      <span className="font-bold">67%</span>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Achievement Badges */}
+                <AchievementsBadges />
+                
+                {/* Shorts Preview */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-sm">Trending Shorts</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ShortsCarousel onCreateShort={() => navigate('/feed')} />
+                  </CardContent>
+                </Card>
+
+                {/* AI Assistant Preview */}
+                <AIAssistantPreview />
+              </div>
+            </div>
+          </TabsContent>
 
           <TabsContent value="roadmap" className="space-y-4 sm:space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -221,20 +242,16 @@ const Dashboard = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="company" className="space-y-4 sm:space-y-6">
-            <CompanyProfileManager />
-          </TabsContent>
-
           <TabsContent value="matching" className="space-y-4 sm:space-y-6">
             <RoleBasedMatching />
           </TabsContent>
 
-          <TabsContent value="resources" className="space-y-4 sm:space-y-6">
-            <EducationalResources />
+          <TabsContent value="company" className="space-y-4 sm:space-y-6">
+            <CompanyProfileManager />
           </TabsContent>
 
-          <TabsContent value="internships" className="space-y-4 sm:space-y-6">
-            <InternshipBoard />
+          <TabsContent value="resources" className="space-y-4 sm:space-y-6">
+            <EducationalResources />
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4 sm:space-y-6">
@@ -246,11 +263,6 @@ const Dashboard = () => {
         {/* AI Features Section */}
         <div className="mt-6 sm:mt-8">
           <AIFeaturesHub />
-        </div>
-
-        {/* Shorts Carousel */}
-        <div className="mt-6 sm:mt-8">
-          <ShortsCarousel onCreateShort={() => navigate('/feed')} />
         </div>
       </div>
 
