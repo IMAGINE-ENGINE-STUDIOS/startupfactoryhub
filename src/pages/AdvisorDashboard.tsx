@@ -248,21 +248,14 @@ export default function AdvisorDashboard() {
     <div className="min-h-screen bg-gradient-hero p-4">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <img src={companyLogo} alt="Company Logo" className="h-12 w-12" />
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Advisor Dashboard
-              </h1>
-              <p className="text-muted-foreground">Guide the next generation of entrepreneurs</p>
-            </div>
+        <div className="flex items-center space-x-4 mb-8">
+          <img src={companyLogo} alt="Company Logo" className="h-12 w-12" />
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              Advisor Dashboard
+            </h1>
+            <p className="text-muted-foreground">Guide the next generation of entrepreneurs</p>
           </div>
-          
-          <Button className="pulse-primary" onClick={() => navigate("/calendar")}>
-            <MessageSquare className="h-4 w-4 mr-2" />
-            Schedule Session
-          </Button>
         </div>
 
         {/* Stats Cards */}
