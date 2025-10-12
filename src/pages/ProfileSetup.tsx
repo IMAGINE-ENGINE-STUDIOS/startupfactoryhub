@@ -12,6 +12,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Building, MapPin, Users, DollarSign, Target, Plus, X } from "lucide-react";
+import AvatarUpload from "@/components/AvatarUpload";
+import CompanyLogoUpload from "@/components/CompanyLogoUpload";
 
 type UserRole = 'startup' | 'advisor' | 'investor' | 'student' | 'mentor';
 
@@ -32,7 +34,9 @@ const ProfileSetup = () => {
     funding_status: "",
     trl_level: "",
     goals: [] as string[],
-    looking_for: ""
+    looking_for: "",
+    avatar_url: "",
+    logo_url: ""
   });
   
   const { user } = useAuth();
@@ -106,6 +110,7 @@ const ProfileSetup = () => {
         bio: formData.bio,
         location: formData.location,
         website: formData.website,
+        avatar_url: formData.avatar_url || null,
       };
 
       if (existingProfile) {
@@ -134,7 +139,8 @@ const ProfileSetup = () => {
           location: formData.location,
           website: formData.website,
           team_size: parseInt(formData.team_size) || 1,
-          looking_for: Array.isArray(formData.goals) ? formData.goals : []
+          looking_for: Array.isArray(formData.goals) ? formData.goals : [],
+          logo_url: formData.logo_url || null
         };
 
         const { error: companyError } = await supabase
@@ -203,6 +209,14 @@ const ProfileSetup = () => {
           <CardContent className="space-y-6">
             {step === 1 && (
               <>
+                <div className="flex justify-center mb-6">
+                  <AvatarUpload 
+                    currentAvatarUrl={formData.avatar_url}
+                    onUploadComplete={(url) => updateFormData('avatar_url', url)}
+                    size="lg"
+                  />
+                </div>
+
                 <div>
                   <Label>Select Your Role</Label>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
@@ -311,6 +325,14 @@ const ProfileSetup = () => {
 
             {step === 2 && selectedRole === 'startup' && (
               <>
+                <div className="mb-6">
+                  <Label className="mb-4 block">Company Logo</Label>
+                  <CompanyLogoUpload
+                    currentLogoUrl={formData.logo_url}
+                    onUploadComplete={(url) => updateFormData('logo_url', url)}
+                  />
+                </div>
+
                 <div>
                   <Label>Startup Stage</Label>
                   <Select value={formData.stage} onValueChange={(value) => updateFormData('stage', value)}>
