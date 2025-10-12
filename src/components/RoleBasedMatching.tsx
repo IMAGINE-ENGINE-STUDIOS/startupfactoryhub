@@ -292,36 +292,32 @@ export default function RoleBasedMatching() {
     if (userProfile.role === 'investor') {
       return (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-          <div className="space-y-1">
-            <Select value={criteria.industry} onValueChange={(value) => setCriteria({...criteria, industry: value === 'all' ? undefined : value})}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Industries" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Industries</SelectItem>
-                <SelectItem value="fintech">Fintech</SelectItem>
-                <SelectItem value="healthtech">Healthtech</SelectItem>
-                <SelectItem value="edtech">Edtech</SelectItem>
-                <SelectItem value="ai">AI/ML</SelectItem>
-                <SelectItem value="saas">SaaS</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={criteria.industry || ''} onValueChange={(value) => setCriteria({...criteria, industry: value})}>
+            <SelectTrigger>
+              <SelectValue placeholder="Industry" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Industries</SelectItem>
+              <SelectItem value="fintech">Fintech</SelectItem>
+              <SelectItem value="healthtech">Healthtech</SelectItem>
+              <SelectItem value="edtech">Edtech</SelectItem>
+              <SelectItem value="ai">AI/ML</SelectItem>
+              <SelectItem value="saas">SaaS</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <div className="space-y-1">
-            <Select value={criteria.stage} onValueChange={(value) => setCriteria({...criteria, stage: value === 'all' ? undefined : value})}>
-              <SelectTrigger>
-                <SelectValue placeholder="All Stages" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Stages</SelectItem>
-                <SelectItem value="pre-seed">Pre-Seed</SelectItem>
-                <SelectItem value="seed">Seed</SelectItem>
-                <SelectItem value="series-a">Series A</SelectItem>
-                <SelectItem value="series-b">Series B</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={criteria.stage || ''} onValueChange={(value) => setCriteria({...criteria, stage: value})}>
+            <SelectTrigger>
+              <SelectValue placeholder="Stage" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">All Stages</SelectItem>
+              <SelectItem value="pre-seed">Pre-Seed</SelectItem>
+              <SelectItem value="seed">Seed</SelectItem>
+              <SelectItem value="series-a">Series A</SelectItem>
+              <SelectItem value="series-b">Series B</SelectItem>
+            </SelectContent>
+          </Select>
 
           <Input
             placeholder="Location"
@@ -329,19 +325,17 @@ export default function RoleBasedMatching() {
             onChange={(e) => setCriteria({...criteria, location: e.target.value})}
           />
 
-          <div className="space-y-1">
-            <Select value={criteria.fundingRange} onValueChange={(value) => setCriteria({...criteria, fundingRange: value === 'all' ? undefined : value})}>
-              <SelectTrigger>
-                <SelectValue placeholder="Any Amount" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Any Amount</SelectItem>
-                <SelectItem value="0-1M">$0 - $1M</SelectItem>
-                <SelectItem value="1M-5M">$1M - $5M</SelectItem>
-                <SelectItem value="5M+">$5M+</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={criteria.fundingRange || ''} onValueChange={(value) => setCriteria({...criteria, fundingRange: value})}>
+            <SelectTrigger>
+              <SelectValue placeholder="Funding Range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">Any Amount</SelectItem>
+              <SelectItem value="0-1M">$0 - $1M</SelectItem>
+              <SelectItem value="1M-5M">$1M - $5M</SelectItem>
+              <SelectItem value="5M+">$5M+</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       );
     }

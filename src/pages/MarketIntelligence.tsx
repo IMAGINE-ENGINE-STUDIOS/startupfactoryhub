@@ -192,7 +192,7 @@ export default function MarketIntelligence() {
 
             {/* Key Metrics */}
             <div className="grid md:grid-cols-4 gap-4">
-              {results.metrics && Object.entries(results.metrics).slice(0, 4).map(([key, value]) => (
+              {Object.entries(results.metrics).slice(0, 4).map(([key, value]) => (
                 <Card key={key} className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-muted-foreground capitalize">
@@ -224,7 +224,7 @@ export default function MarketIntelligence() {
 
               <TabsContent value="insights">
                 <div className="grid md:grid-cols-2 gap-4">
-                  {results.insights && results.insights.map((insight, idx) => (
+                  {results.insights.map((insight, idx) => (
                     <Card key={idx} className="p-4 bg-primary/5 border-primary/20">
                       <div className="flex items-start gap-3">
                         <Sparkles className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
@@ -237,7 +237,7 @@ export default function MarketIntelligence() {
 
               <TabsContent value="predictions">
                 <div className="space-y-3">
-                  {results.predictions && results.predictions.map((prediction, idx) => (
+                  {results.predictions.map((prediction, idx) => (
                     <Card key={idx} className="p-4 bg-blue-500/5 border-blue-500/20">
                       <div className="flex items-start gap-3">
                         <Target className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
@@ -250,7 +250,7 @@ export default function MarketIntelligence() {
 
               <TabsContent value="trends">
                 <div className="grid md:grid-cols-3 gap-4">
-                  {results.trends && results.trends.map((trend, idx) => (
+                  {results.trends.map((trend, idx) => (
                     <Card key={idx} className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium">{trend.label}</span>
@@ -272,7 +272,7 @@ export default function MarketIntelligence() {
             </Tabs>
 
             {/* Additional Metrics Grid */}
-            {results.metrics && Object.keys(results.metrics).length > 4 && (
+            {Object.keys(results.metrics).length > 4 && (
               <Card className="p-6">
                 <h3 className="font-semibold mb-4">Additional Metrics</h3>
                 <div className="grid md:grid-cols-3 gap-4">

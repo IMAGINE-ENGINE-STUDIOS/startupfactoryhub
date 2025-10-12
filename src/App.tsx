@@ -64,6 +64,8 @@ const App = () => (
                   <Route path="/dashboard" element={<DashboardRouter />} />
                   <Route path="/feed" element={<CommunityFeed />} />
                   <Route path="/calendar" element={<Calendar />} />
+                  <Route path="/events" element={<Calendar />} />
+                  <Route path="/mentoring-sessions" element={<Calendar />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/analytics" element={<Analytics />} />
                   <Route path="/market-intelligence" element={<MarketIntelligence />} />

@@ -53,7 +53,7 @@ export default function TrendingCompanies() {
       // Fetch trending companies
       const { data: trendingResponse, error: trendingError } = await supabase.functions.invoke('market-intelligence', {
         body: { 
-          query: 'Top trending technology startups with recent funding, acquisitions, or major product launches',
+          query: 'Top trending technology startups with recent funding, acquisitions, or major product launches in 2025',
           type: 'STARTUPS'
         }
       });
@@ -66,7 +66,7 @@ export default function TrendingCompanies() {
       // Fetch market insights
       const { data: insightsResponse, error: insightsError } = await supabase.functions.invoke('market-intelligence', {
         body: { 
-          query: 'Key market insights and growth metrics for major tech companies',
+          query: 'Key market insights and growth metrics for major tech companies in 2025',
           type: 'INDUSTRIES'
         }
       });
@@ -79,7 +79,7 @@ export default function TrendingCompanies() {
       // Fetch predictions
       const { data: predictionsResponse, error: predictionsError } = await supabase.functions.invoke('market-intelligence', {
         body: { 
-          query: 'AI and technology startup predictions for funding rounds, acquisitions, and IPOs',
+          query: 'AI and technology startup predictions for funding rounds, acquisitions, and IPOs in 2025',
           type: 'STARTUPS'
         }
       });

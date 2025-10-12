@@ -73,7 +73,7 @@ const DashboardNavigation = () => {
                 onClick={() => navigate("/dashboard")}
               >
                 <Home className="w-4 h-4" />
-                <span>Feed</span>
+                <span>Dashboard</span>
               </Button>
               <Button 
                 variant="ghost" 
@@ -88,10 +88,10 @@ const DashboardNavigation = () => {
                 variant="ghost" 
                 size="sm"
                 className="flex items-center space-x-2"
-                onClick={() => navigate("/dashboard?tab=matching")}
+                onClick={() => navigate("/feed")}
               >
                 <Users className="w-4 h-4" />
-                <span>Connect</span>
+                <span>Community</span>
               </Button>
               <Button 
                 variant="ghost" 
@@ -187,7 +187,7 @@ const DashboardNavigation = () => {
             onClick={() => navigate("/dashboard")}
           >
             <Home className="w-5 h-5" />
-            <span className="text-xs">Feed</span>
+            <span className="text-xs">Home</span>
           </Button>
           <Button
             variant="ghost"
@@ -202,10 +202,10 @@ const DashboardNavigation = () => {
             variant="ghost"
             size="sm"
             className="flex flex-col items-center space-y-1 h-auto py-2"
-            onClick={() => navigate("/dashboard?tab=matching")}
+            onClick={() => navigate("/feed")}
           >
             <Users className="w-5 h-5" />
-            <span className="text-xs">Connect</span>
+            <span className="text-xs">Community</span>
           </Button>
           <Button
             variant="ghost"
