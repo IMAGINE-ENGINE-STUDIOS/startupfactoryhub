@@ -1,163 +1,131 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Building2, TrendingUp, Sparkles, Target, Rocket, DollarSign } from 'lucide-react';
+import { TrendingUp, Sparkles, Target, Rocket } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Skeleton } from '@/components/ui/skeleton';
 
-const trendingData = [
-  {
-    name: 'Anthropic',
-    logo: '🤖',
-    activity: 'Series D Funding',
-    description: '$7B valuation after latest funding round',
-    category: 'AI/ML',
-    prediction: 'Likely to reach unicorn status within 6 months',
-    change: '+250%',
-    color: 'from-purple-500/10 to-pink-500/10'
-  },
-  {
-    name: 'Stripe',
-    logo: '💳',
-    activity: 'Product Launch',
-    description: 'Launched new embedded finance platform',
-    category: 'FinTech',
-    prediction: 'Expected to expand into 15 new markets',
-    change: '+45%',
-    color: 'from-blue-500/10 to-cyan-500/10'
-  },
-  {
-    name: 'OpenAI',
-    logo: '🧠',
-    activity: 'Partnership',
-    description: 'Strategic partnership with Microsoft expanded',
-    category: 'AI/ML',
-    prediction: 'Revenue projected to exceed $2B this year',
-    change: '+180%',
-    color: 'from-green-500/10 to-emerald-500/10'
-  },
-  {
-    name: 'Figma',
-    logo: '🎨',
-    activity: 'User Milestone',
-    description: 'Reached 10M+ active users',
-    category: 'Design Tools',
-    prediction: 'Strong acquisition target for major tech companies',
-    change: '+90%',
-    color: 'from-orange-500/10 to-amber-500/10'
-  },
-  {
-    name: 'Notion',
-    logo: '📝',
-    activity: 'Market Expansion',
-    description: 'Expanding AI features and enterprise solutions',
-    category: 'Productivity',
-    prediction: 'IPO expected within next 12-18 months',
-    change: '+120%',
-    color: 'from-indigo-500/10 to-violet-500/10'
-  },
-  {
-    name: 'Databricks',
-    logo: '📊',
-    activity: 'Revenue Milestone',
-    description: 'ARR surpasses $1.5B',
-    category: 'Data & Analytics',
-    prediction: 'Market leader in lakehouse architecture',
-    change: '+65%',
-    color: 'from-red-500/10 to-rose-500/10'
-  }
-];
+interface CompanyData {
+  name: string;
+  domain: string;
+  activity: string;
+  description: string;
+  category: string;
+  prediction: string;
+  change: string;
+  color: string;
+}
 
-const insightsData = [
-  {
-    company: 'Canva',
-    logo: '🖼️',
-    insight: 'AI-powered design features driving 40% user growth',
-    metric: 'Growth Rate',
-    value: '+40%',
-    color: 'from-teal-500/10 to-cyan-500/10'
-  },
-  {
-    company: 'Coinbase',
-    logo: '💰',
-    insight: 'Regulatory clarity improving institutional adoption',
-    metric: 'Institutional Users',
-    value: '+85%',
-    color: 'from-blue-500/10 to-indigo-500/10'
-  },
-  {
-    company: 'SpaceX',
-    logo: '🚀',
-    insight: 'Starlink revenue exceeding satellite launch revenue',
-    metric: 'Revenue Split',
-    value: '60/40',
-    color: 'from-slate-500/10 to-gray-500/10'
-  },
-  {
-    company: 'Rivian',
-    logo: '🔋',
-    insight: 'Production capacity doubled, meeting delivery targets',
-    metric: 'Production Rate',
-    value: '+110%',
-    color: 'from-green-500/10 to-lime-500/10'
-  }
-];
+interface InsightData {
+  company: string;
+  domain: string;
+  insight: string;
+  metric: string;
+  value: string;
+  color: string;
+}
 
-const predictionsData = [
-  {
-    company: 'Mistral AI',
-    logo: '⚡',
-    prediction: 'Expected to raise Series C at $5B+ valuation in Q2 2025',
-    confidence: 'High',
-    timeframe: '3-6 months',
-    color: 'from-violet-500/10 to-purple-500/10'
-  },
-  {
-    company: 'Perplexity',
-    logo: '🔍',
-    prediction: 'Likely acquisition target for major search engines',
-    confidence: 'Medium',
-    timeframe: '6-12 months',
-    color: 'from-cyan-500/10 to-blue-500/10'
-  },
-  {
-    company: 'Character.AI',
-    logo: '💬',
-    prediction: 'Strategic partnership with social media platform incoming',
-    confidence: 'High',
-    timeframe: '1-3 months',
-    color: 'from-pink-500/10 to-rose-500/10'
-  },
-  {
-    company: 'Scale AI',
-    logo: '📈',
-    prediction: 'IPO preparation underway, public listing expected',
-    confidence: 'Medium',
-    timeframe: '12-18 months',
-    color: 'from-emerald-500/10 to-teal-500/10'
-  }
-];
+interface PredictionData {
+  company: string;
+  domain: string;
+  prediction: string;
+  confidence: string;
+  timeframe: string;
+  color: string;
+}
 
 export default function TrendingCompanies() {
-  return (
-    <div className="space-y-6">
-      {/* Stats Section */}
-      <div className="text-center space-y-4">
-        <Badge className="bg-primary">This month on Market Intelligence</Badge>
-        <div className="grid md:grid-cols-3 gap-6">
-          <div>
-            <div className="text-4xl font-bold mb-1">12,082,957</div>
-            <div className="text-sm text-muted-foreground">new predictions</div>
-          </div>
-          <div>
-            <div className="text-4xl font-bold mb-1">53,719</div>
-            <div className="text-sm text-muted-foreground">new insights</div>
-          </div>
-          <div>
-            <div className="text-4xl font-bold mb-1">3,631</div>
-            <div className="text-sm text-muted-foreground">new funding rounds</div>
-          </div>
+  const [trendingData, setTrendingData] = useState<CompanyData[]>([]);
+  const [insightsData, setInsightsData] = useState<InsightData[]>([]);
+  const [predictionsData, setPredictionsData] = useState<PredictionData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchMarketData();
+  }, []);
+
+  const fetchMarketData = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch trending companies
+      const { data: trendingResponse, error: trendingError } = await supabase.functions.invoke('market-intelligence', {
+        body: { 
+          query: 'Top trending technology startups with recent funding, acquisitions, or major product launches in 2025',
+          type: 'STARTUPS'
+        }
+      });
+
+      if (trendingError) throw trendingError;
+      if (trendingResponse?.companies) {
+        setTrendingData(trendingResponse.companies.slice(0, 6));
+      }
+
+      // Fetch market insights
+      const { data: insightsResponse, error: insightsError } = await supabase.functions.invoke('market-intelligence', {
+        body: { 
+          query: 'Key market insights and growth metrics for major tech companies in 2025',
+          type: 'INDUSTRIES'
+        }
+      });
+
+      if (insightsError) throw insightsError;
+      if (insightsResponse?.insights) {
+        setInsightsData(insightsResponse.insights.slice(0, 4));
+      }
+
+      // Fetch predictions
+      const { data: predictionsResponse, error: predictionsError } = await supabase.functions.invoke('market-intelligence', {
+        body: { 
+          query: 'AI and technology startup predictions for funding rounds, acquisitions, and IPOs in 2025',
+          type: 'STARTUPS'
+        }
+      });
+
+      if (predictionsError) throw predictionsError;
+      if (predictionsResponse?.predictions) {
+        setPredictionsData(predictionsResponse.predictions.slice(0, 4));
+      }
+
+    } catch (error) {
+      console.error('Error fetching market data:', error);
+      toast({
+        title: "Error loading market data",
+        description: "Failed to fetch real-time market intelligence. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const getLogoUrl = (domain: string) => {
+    return `https://logo.clearbit.com/${domain}`;
+  };
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...Array(6)].map((_, i) => (
+            <Card key={i} className="p-5">
+              <div className="space-y-3">
+                <Skeleton className="h-12 w-12 rounded" />
+                <Skeleton className="h-4 w-3/4" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-full" />
+              </div>
+            </Card>
+          ))}
         </div>
       </div>
+    );
+  }
 
+  return (
+    <div className="space-y-6">
       {/* Tabs for different views */}
       <Tabs defaultValue="trending" className="space-y-6">
         <TabsList className="w-full justify-start">
@@ -185,7 +153,14 @@ export default function TrendingCompanies() {
               >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
-                    <div className="text-3xl">{company.logo}</div>
+                    <img 
+                      src={getLogoUrl(company.domain)} 
+                      alt={`${company.name} logo`}
+                      className="w-12 h-12 object-contain rounded bg-white p-1"
+                      onError={(e) => {
+                        e.currentTarget.src = 'https://via.placeholder.com/48?text=' + company.name.charAt(0);
+                      }}
+                    />
                     <div>
                       <h3 className="font-semibold text-lg">{company.name}</h3>
                       <Badge variant="secondary" className="text-xs">
@@ -227,7 +202,14 @@ export default function TrendingCompanies() {
                 className={`p-5 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-br ${item.color} border-primary/20`}
               >
                 <div className="flex items-start gap-3 mb-4">
-                  <div className="text-3xl">{item.logo}</div>
+                  <img 
+                    src={getLogoUrl(item.domain)} 
+                    alt={`${item.company} logo`}
+                    className="w-12 h-12 object-contain rounded bg-white p-1"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/48?text=' + item.company.charAt(0);
+                    }}
+                  />
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-1">{item.company}</h3>
                     <div className="flex items-center gap-2">
@@ -252,7 +234,14 @@ export default function TrendingCompanies() {
                 className={`p-5 hover:shadow-lg transition-all cursor-pointer bg-gradient-to-br ${item.color} border-primary/20`}
               >
                 <div className="flex items-start gap-3 mb-4">
-                  <div className="text-3xl">{item.logo}</div>
+                  <img 
+                    src={getLogoUrl(item.domain)} 
+                    alt={`${item.company} logo`}
+                    className="w-12 h-12 object-contain rounded bg-white p-1"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://via.placeholder.com/48?text=' + item.company.charAt(0);
+                    }}
+                  />
                   <div className="flex-1">
                     <h3 className="font-semibold text-lg mb-2">{item.company}</h3>
                     <div className="flex gap-2">

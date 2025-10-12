@@ -21,14 +21,55 @@ serve(async (req) => {
     }
 
     // Build context-aware prompt based on search type
-    const systemPrompt = `You are a market intelligence analyst with access to real-time data. 
-Analyze the query and provide comprehensive insights in JSON format.
+    const systemPrompt = `You are a market intelligence analyst with access to real-time data from the internet. Search for and analyze current, accurate information.
+Return ONLY valid JSON without any markdown formatting or code blocks.`;
 
-For STARTUPS: Include funding rounds, valuation, growth metrics, competitors, market position, team size, technology stack.
-For INDUSTRIES: Include market size, growth rate, key players, trends, opportunities, threats, regulatory landscape.
-For INVESTORS: Include portfolio companies, investment thesis, typical check size, stage focus, notable exits, geographic focus.
+    let userPrompt = '';
+    
+    if (type === 'STARTUPS') {
+      // Check if this is a request for trending companies or predictions
+      if (query.toLowerCase().includes('trending') || query.toLowerCase().includes('top')) {
+        userPrompt = `Search the internet for: "${query}"
 
-CRITICAL: Return ONLY valid JSON with this exact structure (no markdown, no explanation):
+Provide real, current market data in this JSON format:
+{
+  "companies": [
+    {
+      "name": "Company Name",
+      "domain": "company.com",
+      "activity": "Recent activity (e.g., Series D Funding, Product Launch)",
+      "description": "Brief description of the activity with specific details",
+      "category": "Industry category",
+      "prediction": "Future prediction based on current trajectory",
+      "change": "Growth percentage (e.g., +250%)",
+      "color": "from-purple-500/10 to-pink-500/10"
+    }
+  ]
+}
+
+Return 6-8 REAL companies with their ACTUAL domains. Use current 2025 data.`;
+      } else if (query.toLowerCase().includes('prediction')) {
+        userPrompt = `Search the internet for: "${query}"
+
+Provide real market predictions in this JSON format:
+{
+  "predictions": [
+    {
+      "company": "Company Name",
+      "domain": "company.com",
+      "prediction": "Detailed prediction with specific details",
+      "confidence": "High/Medium/Low",
+      "timeframe": "Time estimate (e.g., 3-6 months)",
+      "color": "from-violet-500/10 to-purple-500/10"
+    }
+  ]
+}
+
+Return 4-6 REAL companies with predictions and their ACTUAL domains. Use current 2025 data.`;
+      } else {
+        userPrompt = `Search the internet and analyze: "${query}"
+
+Provide detailed analysis in this JSON format:
 {
   "type": "${type}",
   "name": "string",
@@ -48,8 +89,66 @@ CRITICAL: Return ONLY valid JSON with this exact structure (no markdown, no expl
     {"label": "trend3", "value": 150, "change": 25}
   ]
 }`;
+      }
+    } else if (type === 'INDUSTRIES') {
+      if (query.toLowerCase().includes('insight') || query.toLowerCase().includes('metric')) {
+        userPrompt = `Search the internet for: "${query}"
 
-    const userPrompt = `Analyze "${query}" as a ${type}. Provide market intelligence data with real-time insights, growth metrics, and predictions. Include specific numbers and percentages where possible.`;
+Provide real market insights in this JSON format:
+{
+  "insights": [
+    {
+      "company": "Company Name",
+      "domain": "company.com",
+      "insight": "Key insight about the company with specific details",
+      "metric": "Metric name",
+      "value": "Metric value (e.g., +40%)",
+      "color": "from-teal-500/10 to-cyan-500/10"
+    }
+  ]
+}
+
+Return 4-6 REAL companies with insights and their ACTUAL domains. Use current 2025 data.`;
+      } else {
+        userPrompt = `Search the internet and analyze industry: "${query}"
+
+Provide detailed analysis in this JSON format:
+{
+  "type": "${type}",
+  "name": "string",
+  "description": "string (2-3 sentences)",
+  "metrics": {
+    "metric1": "value",
+    "metric2": "value",
+    "metric3": "value"
+  },
+  "insights": ["insight1", "insight2", "insight3"],
+  "predictions": ["prediction1", "prediction2"],
+  "trends": [
+    {"label": "trend1", "value": 100, "change": 15},
+    {"label": "trend2", "value": 200, "change": -5}
+  ]
+}`;
+      }
+    } else if (type === 'INVESTORS') {
+      userPrompt = `Search the internet and analyze investor: "${query}"
+
+Provide detailed analysis in this JSON format:
+{
+  "type": "${type}",
+  "name": "string",
+  "description": "string (2-3 sentences)",
+  "metrics": {
+    "metric1": "value",
+    "metric2": "value"
+  },
+  "insights": ["insight1", "insight2"],
+  "predictions": ["prediction1"],
+  "trends": [
+    {"label": "trend1", "value": 100, "change": 15}
+  ]
+}`;
+    }
 
     console.log('Calling Lovable AI for analysis...');
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
