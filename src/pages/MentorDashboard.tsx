@@ -14,8 +14,10 @@ import MentorshipRequests from "@/components/MentorshipRequests";
 import ConnectionsWidget from "@/components/ConnectionsWidget";
 import ResourcesWidget from "@/components/ResourcesWidget";
 import MentorEndorsements from "@/components/MentorEndorsements";
+import AvailabilityManager from "@/components/AvailabilityManager";
 import FloatingChat from "@/components/FloatingChat";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { 
   Users, 
   TrendingUp, 
@@ -31,6 +33,7 @@ import {
 
 const MentorDashboard = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-background">
@@ -127,7 +130,7 @@ const MentorDashboard = () => {
                   <Users className="w-4 h-4 mr-2" />
                   Browse Startups
                 </Button>
-                <Button variant="outline" className="w-full justify-start">
+                <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/mentoring-sessions")}>
                   <Calendar className="w-4 h-4 mr-2" />
                   Schedule Session
                 </Button>
@@ -144,6 +147,9 @@ const MentorDashboard = () => {
 
             {/* Calendar Widget */}
             <MentorCalendarWidget />
+            
+            {/* Availability Manager */}
+            <AvailabilityManager />
             
             {/* Connections */}
             <ConnectionsWidget />

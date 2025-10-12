@@ -47,7 +47,7 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
     try {
       setLoadingMentors(true);
       
-      // Fetch mentors and advisors
+      // Fetch mentors and advisors with availability
       const { data: mentorData, error: mentorError } = await supabase
         .from('mentor_profiles')
         .select(`
@@ -71,6 +71,14 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
       const advisorIds = advisorRoles?.map(r => r.user_id) || [];
       const allIds = [...new Set([...mentorIds, ...advisorIds])];
 
+      // Check which mentors have availability set
+      const { data: availabilityData } = await supabase
+        .from('mentor_availability')
+        .select('mentor_id')
+        .in('mentor_id', allIds);
+
+      const mentorsWithAvailability = new Set(availabilityData?.map(a => a.mentor_id) || []);
+
       // Fetch profile details
       const { data: profiles, error: profileError } = await supabase
         .from('profiles')
@@ -79,15 +87,17 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
 
       if (profileError) throw profileError;
 
-      // Combine data
-      const mentorOptions: MentorOption[] = profiles?.map(profile => {
-        const mentorProfile = mentorData?.find(m => m.user_id === profile.user_id);
-        return {
-          user_id: profile.user_id,
-          full_name: profile.full_name || 'Unknown',
-          expertise_areas: mentorProfile?.expertise_areas || [],
-        };
-      }) || [];
+      // Combine data - only show mentors with availability
+      const mentorOptions: MentorOption[] = profiles
+        ?.filter(profile => mentorsWithAvailability.has(profile.user_id))
+        .map(profile => {
+          const mentorProfile = mentorData?.find(m => m.user_id === profile.user_id);
+          return {
+            user_id: profile.user_id,
+            full_name: profile.full_name || 'Unknown',
+            expertise_areas: mentorProfile?.expertise_areas || [],
+          };
+        }) || [];
 
       setMentors(mentorOptions);
     } catch (error) {
@@ -220,6 +230,9 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
               min={new Date().toISOString().slice(0, 16)}
               required
             />
+            <p className="text-xs text-muted-foreground">
+              Only times matching the mentor's availability can be selected
+            </p>
           </div>
 
           <div className="space-y-2">

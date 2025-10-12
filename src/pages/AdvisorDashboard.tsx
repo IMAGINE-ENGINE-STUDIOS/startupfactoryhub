@@ -6,11 +6,13 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Calendar, Users, MessageSquare, TrendingUp, Star, Clock, Award } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import MentorshipRequests from '@/components/MentorshipRequests';
+import AvailabilityManager from '@/components/AvailabilityManager';
 import FloatingChat from '@/components/FloatingChat';
 
 interface Startup {
@@ -30,6 +32,7 @@ export default function AdvisorDashboard() {
   const [upcomingSessions, setUpcomingSessions] = useState<any[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -253,7 +256,7 @@ export default function AdvisorDashboard() {
             </div>
           </div>
           
-          <Button className="pulse-primary">
+          <Button className="pulse-primary" onClick={() => navigate("/mentoring-sessions")}>
             <MessageSquare className="h-4 w-4 mr-2" />
             Schedule Session
           </Button>
@@ -393,6 +396,9 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="schedule" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Availability Manager */}
+              <AvailabilityManager />
+              
               <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
