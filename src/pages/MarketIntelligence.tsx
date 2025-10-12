@@ -224,7 +224,7 @@ export default function MarketIntelligence() {
 
               <TabsContent value="insights">
                 <div className="grid md:grid-cols-2 gap-4">
-                  {results.insights.map((insight, idx) => (
+                  {results.insights && results.insights.map((insight, idx) => (
                     <Card key={idx} className="p-4 bg-primary/5 border-primary/20">
                       <div className="flex items-start gap-3">
                         <Sparkles className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
@@ -237,7 +237,7 @@ export default function MarketIntelligence() {
 
               <TabsContent value="predictions">
                 <div className="space-y-3">
-                  {results.predictions.map((prediction, idx) => (
+                  {results.predictions && results.predictions.map((prediction, idx) => (
                     <Card key={idx} className="p-4 bg-blue-500/5 border-blue-500/20">
                       <div className="flex items-start gap-3">
                         <Target className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
@@ -250,7 +250,7 @@ export default function MarketIntelligence() {
 
               <TabsContent value="trends">
                 <div className="grid md:grid-cols-3 gap-4">
-                  {results.trends.map((trend, idx) => (
+                  {results.trends && results.trends.map((trend, idx) => (
                     <Card key={idx} className="p-4">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm font-medium">{trend.label}</span>
