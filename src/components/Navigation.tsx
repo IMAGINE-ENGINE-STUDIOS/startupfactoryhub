@@ -2,12 +2,10 @@ import { Button } from "@/components/ui/button";
 import logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import NotificationCenter from "./NotificationCenter";
-import GlobalSearch from "./GlobalSearch";
-import { ThemeToggle } from "./ThemeToggle";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu, X } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useState } from "react";
+
 const Navigation = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
@@ -26,42 +24,14 @@ const Navigation = () => {
             </span>
           </div>
           
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
-              Features
-            </a>
-            <button onClick={() => navigate("/feed")} className="text-muted-foreground hover:text-foreground transition-colors">
-              Community
-            </button>
-            <button onClick={() => navigate("/calendar")} className="text-muted-foreground hover:text-foreground transition-colors">
-              Calendar
-            </button>
-            <a href="#resources" className="text-muted-foreground hover:text-foreground transition-colors">
-              Resources
-            </a>
-            <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
-              About
-            </a>
-          </div>
-          
           {/* Desktop Right Side */}
           <div className="hidden md:flex items-center space-x-4">
-            {user && (
-              <>
-                <GlobalSearch />
-                <NotificationCenter />
-              </>
-            )}
-            <ThemeToggle />
+            <Button variant="ghost" onClick={() => navigate("/dashboard")}>Guest Dashboard</Button>
             {user ? (
-              <>
-                <Button variant="ghost" onClick={() => navigate("/dashboard")}>Dashboard</Button>
-                <Button variant="hero" size="lg" onClick={async () => {
-                  await signOut();
-                  navigate("/");
-                }}>Sign Out</Button>
-              </>
+              <Button variant="hero" size="lg" onClick={async () => {
+                await signOut();
+                navigate("/");
+              }}>Sign Out</Button>
             ) : (
               <>
                 <Button variant="ghost" onClick={() => navigate("/auth")}>Sign In</Button>
@@ -72,8 +42,6 @@ const Navigation = () => {
 
           {/* Mobile Right Side */}
           <div className="flex md:hidden items-center space-x-2">
-            {user && <NotificationCenter />}
-            <ThemeToggle />
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="md:hidden">
@@ -82,78 +50,31 @@ const Navigation = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] sm:w-[350px]">
                 <div className="flex flex-col space-y-4 mt-8">
-                  <a 
-                    href="#features" 
-                    className="text-lg py-2 hover:text-ocean-primary transition-colors"
-                    onClick={closeMenu}
-                  >
-                    Features
-                  </a>
-                  <button 
+                  <Button 
+                    variant="outline" 
+                    className="w-full"
                     onClick={() => {
-                      navigate("/feed");
+                      navigate("/dashboard");
                       closeMenu();
-                    }} 
-                    className="text-lg py-2 text-left hover:text-ocean-primary transition-colors"
+                    }}
                   >
-                    Community
-                  </button>
-                  <button 
-                    onClick={() => {
-                      navigate("/calendar");
-                      closeMenu();
-                    }} 
-                    className="text-lg py-2 text-left hover:text-ocean-primary transition-colors"
-                  >
-                    Calendar
-                  </button>
-                  <a 
-                    href="#resources" 
-                    className="text-lg py-2 hover:text-ocean-primary transition-colors"
-                    onClick={closeMenu}
-                  >
-                    Resources
-                  </a>
-                  <a 
-                    href="#about" 
-                    className="text-lg py-2 hover:text-ocean-primary transition-colors"
-                    onClick={closeMenu}
-                  >
-                    About
-                  </a>
+                    Guest Dashboard
+                  </Button>
                   
-                  {user && (
+                  {user ? (
+                    <Button 
+                      variant="hero" 
+                      className="w-full"
+                      onClick={async () => {
+                        await signOut();
+                        navigate("/");
+                        closeMenu();
+                      }}
+                    >
+                      Sign Out
+                    </Button>
+                  ) : (
                     <>
-                      <div className="border-t border-ocean-border pt-4 mt-4">
-                        <GlobalSearch />
-                      </div>
-                      <Button 
-                        variant="outline" 
-                        className="w-full justify-start"
-                        onClick={() => {
-                          navigate("/dashboard");
-                          closeMenu();
-                        }}
-                      >
-                        Dashboard
-                      </Button>
-                      <Button 
-                        variant="hero" 
-                        className="w-full"
-                        onClick={async () => {
-                          await signOut();
-                          navigate("/");
-                          closeMenu();
-                        }}
-                      >
-                        Sign Out
-                      </Button>
-                    </>
-                  )}
-                  
-                  {!user && (
-                    <>
-                      <div className="border-t border-ocean-border pt-4 mt-4"></div>
                       <Button 
                         variant="outline" 
                         className="w-full"
@@ -185,4 +106,5 @@ const Navigation = () => {
     </nav>
   );
 };
+
 export default Navigation;
