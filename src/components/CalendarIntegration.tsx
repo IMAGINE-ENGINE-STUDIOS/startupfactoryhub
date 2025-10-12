@@ -120,96 +120,74 @@ export default function CalendarIntegration() {
   const selectedEvents = selectedDate ? getEventsByDate(selectedDate) : [];
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <Card className="p-4">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <CalendarIcon className="h-5 w-5" />
-          <h3 className="font-semibold">Calendar</h3>
+          <h3 className="font-semibold text-sm">Calendar</h3>
         </div>
-        <Button variant="outline" size="sm">
-          Sync Calendar
-        </Button>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="space-y-4">
         {/* Calendar View */}
-        <div>
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={setSelectedDate}
-            className="rounded-md border"
-            modifiers={{
-              hasEvent: events.map(e => e.startTime),
-            }}
-            modifiersClassNames={{
-              hasEvent: 'bg-primary/10 font-bold',
-            }}
-          />
-        </div>
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={setSelectedDate}
+          className="rounded-md border w-full"
+          modifiers={{
+            hasEvent: events.map(e => e.startTime),
+          }}
+          modifiersClassNames={{
+            hasEvent: 'bg-primary/10 font-bold',
+          }}
+        />
 
         {/* Events List */}
         <div className="space-y-3">
-          <h4 className="font-medium text-sm text-muted-foreground">
+          <h4 className="font-medium text-xs text-muted-foreground">
             {selectedDate ? selectedDate.toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              month: 'long', 
+              month: 'short', 
               day: 'numeric' 
             }) : 'Select a date'}
           </h4>
           
           {selectedEvents.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>No events scheduled</p>
+            <div className="text-center py-4 text-muted-foreground">
+              <CalendarIcon className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p className="text-xs">No events</p>
             </div>
           ) : (
-            <div className="space-y-3 max-h-[300px] overflow-y-auto">
+            <div className="space-y-2 max-h-[200px] overflow-y-auto">
               {selectedEvents.map(event => (
-                <Card key={event.id} className="p-4 space-y-2">
+                <Card key={event.id} className="p-3 space-y-2">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <h5 className="font-medium">{event.title}</h5>
+                    <div className="flex-1 min-w-0">
+                      <h5 className="font-medium text-sm truncate">{event.title}</h5>
                       <Badge 
                         variant="outline" 
-                        className={`mt-1 ${getEventTypeColor(event.type)}`}
+                        className={`mt-1 text-xs ${getEventTypeColor(event.type)}`}
                       >
                         {event.type}
                       </Badge>
                     </div>
                   </div>
                   
-                  <div className="space-y-1 text-sm text-muted-foreground">
+                  <div className="space-y-1 text-xs text-muted-foreground">
                     <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4" />
-                      <span>
+                      <Clock className="h-3 w-3" />
+                      <span className="truncate">
                         {formatTime(event.startTime)} - {formatTime(event.endTime)}
                       </span>
                     </div>
                     
-                    {event.isVirtual ? (
+                    {event.isVirtual && (
                       <div className="flex items-center gap-2">
-                        <Video className="h-4 w-4" />
-                        <span>Virtual Meeting</span>
-                      </div>
-                    ) : event.location && (
-                      <div className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4" />
-                        <span>{event.location}</span>
-                      </div>
-                    )}
-                    
-                    {event.attendees > 0 && (
-                      <div className="flex items-center gap-2">
-                        <Users className="h-4 w-4" />
-                        <span>{event.attendees} attendees</span>
+                        <Video className="h-3 w-3" />
+                        <span>Virtual</span>
                       </div>
                     )}
                   </div>
-                  
-                  <Button variant="outline" size="sm" className="w-full mt-2">
-                    View Details
-                  </Button>
                 </Card>
               ))}
             </div>

@@ -1,6 +1,7 @@
 import DashboardNavigation from '@/components/DashboardNavigation';
 import CalendarIntegration from '@/components/CalendarIntegration';
 import VideoConferencing from '@/components/VideoConferencing';
+import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -13,8 +14,9 @@ import { format, formatDistanceToNow } from 'date-fns';
 
 export default function MentoringSessions() {
   const { user } = useAuth();
-  const { upcomingSessions, pastSessions, loading, updateSession } = useMentoringSessions();
+  const { upcomingSessions, pastSessions, loading, updateSession, refetch } = useMentoringSessions();
   const [activeCallUrl, setActiveCallUrl] = useState<string | undefined>();
+  const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
 
   const handleJoinSession = (session: any) => {
     if (session.meeting_link) {
@@ -30,24 +32,24 @@ export default function MentoringSessions() {
     <div className="min-h-screen bg-background">
       <DashboardNavigation />
       
-      <div className="container mx-auto px-6 py-8 pt-24">
+      <div className="container mx-auto px-4 py-6 pt-20 max-w-7xl">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-bold mb-2">Mentoring Sessions</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-bold mb-2">Mentoring Sessions</h1>
+            <p className="text-sm text-muted-foreground">
               Manage your mentoring schedule and video calls
             </p>
           </div>
-          <Button>
+          <Button onClick={() => setScheduleDialogOpen(true)}>
             <Calendar className="h-4 w-4 mr-2" />
             Schedule Session
           </Button>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
           {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-4 lg:space-y-6">
             <Tabs defaultValue="upcoming" className="w-full">
               <TabsList>
                 <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
@@ -201,7 +203,7 @@ export default function MentoringSessions() {
           </div>
 
           {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-6">
+          <div className="lg:col-span-1 space-y-4 lg:space-y-6">
             <VideoConferencing 
               roomUrl={activeCallUrl}
               onLeave={() => setActiveCallUrl(undefined)}
@@ -210,6 +212,12 @@ export default function MentoringSessions() {
           </div>
         </div>
       </div>
+
+      <CreateSessionDialog 
+        open={scheduleDialogOpen}
+        onOpenChange={setScheduleDialogOpen}
+        onSessionCreated={refetch}
+      />
     </div>
   );
 }
