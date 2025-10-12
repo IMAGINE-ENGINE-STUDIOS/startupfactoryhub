@@ -1,172 +1,143 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DashboardNavigation from "@/components/DashboardNavigation";
-import MentorRoadmapWidget from "@/components/MentorRoadmapWidget";
-import MentorCalendarWidget from "@/components/MentorCalendarWidget";
-import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
-import AIFeaturesHub from "@/components/AIFeaturesHub";
-import AIQuickActions from "@/components/AIQuickActions";
-import MentorshipRequests from "@/components/MentorshipRequests";
-import ConnectionsWidget from "@/components/ConnectionsWidget";
-import ResourcesWidget from "@/components/ResourcesWidget";
-import MentorEndorsements from "@/components/MentorEndorsements";
-import AvailabilityManager from "@/components/AvailabilityManager";
-import FloatingChat from "@/components/FloatingChat";
-import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
-import { 
-  Users, 
-  TrendingUp, 
-  Calendar, 
-  MessageSquare,
-  Bell,
-  Settings,
-  Plus,
-  Award,
-  Clock,
-  Target
-} from "lucide-react";
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { Users, Calendar, Award, Star } from 'lucide-react';
+import DashboardNavigation from '@/components/DashboardNavigation';
+import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
+import AchievementsBadges from '@/components/dashboard/AchievementsBadges';
+import AIAssistantPreview from '@/components/AIAssistantPreview';
+import AIAssistantButton from '@/components/AIAssistantButton';
+import FloatingChat from '@/components/FloatingChat';
+import ShortsCarousel from '@/components/ShortsCarousel';
+import { useNavigate } from 'react-router-dom';
 
-const MentorDashboard = () => {
+export default function MentorDashboard() {
+  const [mentorProfile, setMentorProfile] = useState<any>(null);
+  const [activeMentorships, setActiveMentorships] = useState<any[]>([]);
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (user) {
+      fetchMentorProfile();
+      fetchActiveMentorships();
+    }
+  }, [user]);
+
+  const fetchMentorProfile = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('mentor_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+
+    if (!error && data) {
+      setMentorProfile(data);
+    }
+  };
+
+  const fetchActiveMentorships = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('mentorship_relationships')
+      .select('*')
+      .eq('mentor_id', user.id)
+      .eq('status', 'active');
+
+    if (!error && data) {
+      setActiveMentorships(data);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 lg:pb-8">
       <DashboardNavigation />
       
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Welcome Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Welcome back, Sarah! 👋</h1>
-              <p className="text-muted-foreground mt-1">Ready to guide the next generation of entrepreneurs?</p>
-            </div>
-            <div className="flex items-center space-x-3">
-              <AIQuickActions />
-              <Button variant="outline" size="sm">
-                <Bell className="w-4 h-4 mr-2" />
-                Notifications
-              </Button>
-              <Button variant="hero" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Share Insights
-              </Button>
-            </div>
-          </div>
+        <div className="mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Mentor Feed</h1>
+          <p className="text-sm sm:text-base text-muted-foreground mt-1">
+            Share insights and guide the next generation
+          </p>
         </div>
 
-        {/* AI Features Hub */}
-        <AIFeaturesHub />
-
-        {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Active Mentees</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">12</div>
-              <p className="text-xs text-muted-foreground">+2 this month</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Sessions This Month</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">28</div>
-              <p className="text-xs text-muted-foreground">8 hours mentoring</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Success Stories</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">5</div>
-              <p className="text-xs text-muted-foreground">Startups funded</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Impact Score</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-ocean-primary">98</div>
-              <p className="text-xs text-muted-foreground">Top 5% mentors</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Main Dashboard Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Community Feed - First Priority */}
+        {/* Main Feed Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          {/* Main Feed */}
+          <div className="lg:col-span-2">
             <UnifiedCommunityFeed showCreatePost={true} />
-            
-            {/* Mentee Progress Overview */}
-            <MentorRoadmapWidget />
           </div>
-
-          {/* Right Column - Widgets */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
+          
+          {/* Sidebar */}
+          <div className="space-y-4 sm:space-y-6">
+            {/* Mentorship Stats */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
+                <CardTitle className="text-sm">Mentorship Stats</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
-                  <Users className="w-4 h-4 mr-2" />
-                  Browse Startups
-                </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/calendar")}>
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Schedule Session
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Message Mentees
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Award className="w-4 h-4 mr-2" />
-                  View Programs
-                </Button>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4 text-primary" />
+                    <span className="text-sm text-muted-foreground">Active Mentees</span>
+                  </div>
+                  <span className="font-bold">{activeMentorships.length}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-accent" />
+                    <span className="text-sm text-muted-foreground">Total Sessions</span>
+                  </div>
+                  <span className="font-bold">{mentorProfile?.total_sessions || 0}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Award className="w-4 h-4 text-green-500" />
+                    <span className="text-sm text-muted-foreground">Success Stories</span>
+                  </div>
+                  <span className="font-bold">
+                    {mentorProfile?.success_stories?.length || 0}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <Star className="w-4 h-4 text-yellow-500" />
+                    <span className="text-sm text-muted-foreground">Impact Score</span>
+                  </div>
+                  <span className="font-bold">
+                    {mentorProfile?.average_rating ? (mentorProfile.average_rating * 20).toFixed(0) : '0'}
+                  </span>
+                </div>
               </CardContent>
             </Card>
 
-            {/* Calendar Widget */}
-            <MentorCalendarWidget />
+            {/* Achievement Badges */}
+            <AchievementsBadges />
             
-            {/* Availability Manager */}
-            <AvailabilityManager />
-            
-            {/* Connections */}
-            <ConnectionsWidget />
-            
-            {/* Resources */}
-            <ResourcesWidget />
+            {/* Shorts Preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Trending Shorts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ShortsCarousel onCreateShort={() => navigate('/feed')} />
+              </CardContent>
+            </Card>
 
-            {/* Endorsements */}
-            {user && <MentorEndorsements mentorId={user.id} isOwnProfile={true} />}
+            {/* AI Assistant Preview */}
+            <AIAssistantPreview />
           </div>
         </div>
       </div>
 
-      {/* Floating Chat with AI */}
+      {/* Floating Buttons */}
+      <AIAssistantButton />
       <FloatingChat />
     </div>
   );
-};
-
-export default MentorDashboard;
+}
