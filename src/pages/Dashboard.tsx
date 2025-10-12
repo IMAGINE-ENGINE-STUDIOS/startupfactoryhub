@@ -24,6 +24,9 @@ import AIAssistantPreview from '@/components/AIAssistantPreview';
 import AIAssistantButton from '@/components/AIAssistantButton';
 import FloatingChat from '@/components/FloatingChat';
 import ShortsCarousel from '@/components/ShortsCarousel';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import companyLogo from '@/assets/company-logo.png';
 import { 
   Rocket, 
   TrendingUp, 
@@ -130,29 +133,81 @@ const Dashboard = () => {
       <DashboardNavigation />
       
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
-        {/* Welcome Header - Social Media Style */}
-        <div className="mb-4 sm:mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center space-x-4">
+            <img src={companyLogo} alt="Company Logo" className="h-12 w-12" />
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Feed</h1>
-              <p className="text-sm sm:text-base text-muted-foreground mt-1">Connect, share, and grow with the community</p>
-            </div>
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <NotificationCenter />
-              <Button variant="hero" size="sm" onClick={() => switchTab('feed')} className="flex-1 sm:flex-none">
-                <Plus className="w-4 h-4 mr-2" />
-                <span className="hidden sm:inline">Share Update</span>
-                <span className="sm:hidden">Share</span>
-              </Button>
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                Startup Dashboard
+              </h1>
+              <p className="text-muted-foreground">Build, connect, and grow your startup</p>
             </div>
           </div>
+          
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <NotificationCenter />
+            <Button variant="hero" size="sm" onClick={() => switchTab('feed')} className="flex-1 sm:flex-none">
+              <Plus className="w-4 h-4 mr-2" />
+              <span className="hidden sm:inline">Share Update</span>
+              <span className="sm:hidden">Share</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Profile Views</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">142</div>
+              <p className="text-xs text-muted-foreground">+12 this week</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Connections</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">24</div>
+              <p className="text-xs text-muted-foreground">+3 new</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Progress</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-primary">67%</div>
+              <p className="text-xs text-muted-foreground">Profile complete</p>
+            </CardContent>
+          </Card>
+          
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground">Engagement</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">89%</div>
+              <p className="text-xs text-muted-foreground">This month</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* AI Features Section */}
+        <div className="mb-6 sm:mb-8">
+          <AIFeaturesHub />
         </div>
 
 
         {/* Tabbed Dashboard Content - Feed First */}
         <Tabs value={currentTab} onValueChange={switchTab} className="space-y-4 sm:space-y-6">
           <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex sm:grid w-auto sm:w-full grid-cols-3 sm:grid-cols-6 min-w-full sm:min-w-0">
+            <TabsList className="inline-flex sm:grid w-auto sm:w-full grid-cols-4 sm:grid-cols-8 min-w-full sm:min-w-0">
               <TabsTrigger value="feed" className="whitespace-nowrap">
                 <Heart className="w-4 h-4 mr-1 sm:mr-2" />
                 Feed
@@ -176,6 +231,14 @@ const Dashboard = () => {
               <TabsTrigger value="network" className="whitespace-nowrap">
                 <MessageSquare className="w-4 h-4 mr-1 sm:mr-2" />
                 Network
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="whitespace-nowrap">
+                <TrendingUp className="w-4 h-4 mr-1 sm:mr-2" />
+                Analytics
+              </TabsTrigger>
+              <TabsTrigger value="intelligence" className="whitespace-nowrap">
+                <Lightbulb className="w-4 h-4 mr-1 sm:mr-2" />
+                Intelligence
               </TabsTrigger>
             </TabsList>
           </div>
@@ -258,12 +321,15 @@ const Dashboard = () => {
             <ConnectionsWidget />
             <ProfessionalBackground />
           </TabsContent>
-        </Tabs>
 
-        {/* AI Features Section */}
-        <div className="mt-6 sm:mt-8">
-          <AIFeaturesHub />
-        </div>
+          <TabsContent value="analytics" className="space-y-4 sm:space-y-6">
+            <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="intelligence" className="space-y-4 sm:space-y-6">
+            <MarketIntelligenceWidget />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Floating Buttons */}

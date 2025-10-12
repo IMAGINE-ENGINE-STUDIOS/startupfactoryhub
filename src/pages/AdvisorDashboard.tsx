@@ -14,6 +14,9 @@ import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import MentorshipRequests from '@/components/MentorshipRequests';
 import AvailabilityManager from '@/components/AvailabilityManager';
 import FloatingChat from '@/components/FloatingChat';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import AIFeaturesHub from '@/components/AIFeaturesHub';
 
 interface Startup {
   id: string;
@@ -280,11 +283,13 @@ export default function AdvisorDashboard() {
         </div>
 
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 max-w-lg">
+          <TabsList className="grid w-full grid-cols-6 max-w-3xl">
             <TabsTrigger value="requests">Requests</TabsTrigger>
             <TabsTrigger value="mentees">My Mentees</TabsTrigger>
             <TabsTrigger value="schedule">Schedule</TabsTrigger>
             <TabsTrigger value="community">Community</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
           </TabsList>
 
           <TabsContent value="requests" className="space-y-4">
@@ -474,7 +479,20 @@ export default function AdvisorDashboard() {
           <TabsContent value="community" className="space-y-4">
             <UnifiedCommunityFeed />
           </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="intelligence" className="space-y-4">
+            <MarketIntelligenceWidget />
+          </TabsContent>
         </Tabs>
+
+        {/* AI Features Hub */}
+        <div className="mt-8">
+          <AIFeaturesHub />
+        </div>
       </div>
 
       {/* Floating Chat with AI */}

@@ -18,6 +18,8 @@ import FloatingChat from '@/components/FloatingChat';
 import InvestorProfileForm from '@/components/InvestorProfileForm';
 import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 
 interface Investment {
   id: string;
@@ -269,8 +271,10 @@ export default function InvestorDashboard() {
           ))}
         </div>
 
+        <AIFeaturesHub />
+
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 max-w-5xl">
+          <TabsList className="grid w-full grid-cols-9 max-w-7xl">
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
             <TabsTrigger value="browse">Browse</TabsTrigger>
@@ -278,6 +282,8 @@ export default function InvestorDashboard() {
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="community">Community</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
           </TabsList>
 
           <TabsContent value="portfolio" className="space-y-4">
@@ -410,93 +416,11 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <PieChart className="h-5 w-5 text-primary" />
-                    <span>Portfolio Distribution by Industry</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {investments.length > 0 ? (
-                    <div className="space-y-4">
-                      {(() => {
-                        const industryCount = investments.reduce((acc: any, inv) => {
-                          const industry = inv.industry || 'Other';
-                          acc[industry] = (acc[industry] || 0) + 1;
-                          return acc;
-                        }, {});
-                        
-                        const total = investments.length;
-                        const colors = ['primary', 'accent', 'green-500', 'yellow-500', 'blue-500'];
-                        
-                        return Object.entries(industryCount).map(([industry, count]: any, index) => {
-                          const percentage = ((count / total) * 100).toFixed(0);
-                          const color = colors[index % colors.length];
-                          
-                          return (
-                            <div key={industry} className={`flex items-center justify-between p-3 rounded-lg bg-${color}/10 border border-${color}/20`}>
-                              <span className="font-medium">{industry}</span>
-                              <div className="flex items-center space-x-2">
-                                <div className="w-16 h-2 bg-${color}/20 rounded-full">
-                                  <div 
-                                    className={`h-2 bg-${color} rounded-full`} 
-                                    style={{ width: `${percentage}%` }}
-                                  ></div>
-                                </div>
-                                <span className="text-sm font-medium">{percentage}%</span>
-                              </div>
-                            </div>
-                          );
-                        });
-                      })()}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Building className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                      <p>No investments yet</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+            <AnalyticsDashboard />
+          </TabsContent>
 
-              <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <TrendingUp className="h-5 w-5 text-accent" />
-                    <span>Portfolio by Stage</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {investments.length > 0 ? (
-                    <div className="space-y-4">
-                      {(() => {
-                        const stageCount = investments.reduce((acc: any, inv) => {
-                          const stage = inv.stage || 'Unknown';
-                          acc[stage] = (acc[stage] || 0) + 1;
-                          return acc;
-                        }, {});
-                        
-                        return Object.entries(stageCount).map(([stage, count]: any) => (
-                          <div key={stage} className="p-3 rounded-lg bg-primary/10 border border-primary/20">
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium text-foreground capitalize">{stage}</span>
-                              <Badge variant="secondary">{count} {count === 1 ? 'company' : 'companies'}</Badge>
-                            </div>
-                          </div>
-                        ));
-                      })()}
-                    </div>
-                  ) : (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <TrendingUp className="h-12 w-12 mx-auto mb-3 opacity-20" />
-                      <p>No stage data available</p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+          <TabsContent value="intelligence" className="space-y-4">
+            <MarketIntelligenceWidget />
           </TabsContent>
         </Tabs>
 

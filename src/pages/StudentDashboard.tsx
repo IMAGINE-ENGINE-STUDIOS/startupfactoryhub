@@ -16,6 +16,8 @@ import AIQuickActions from '@/components/AIQuickActions';
 import Leaderboard from '@/components/Leaderboard';
 import StudyGroups from '@/components/StudyGroups';
 import FloatingChat from '@/components/FloatingChat';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 
 interface Course {
   id: string;
@@ -252,7 +254,7 @@ export default function StudentDashboard() {
         <AIFeaturesHub />
 
         <Tabs defaultValue="courses" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 max-w-4xl">
+          <TabsList className="grid w-full grid-cols-9 max-w-5xl">
             <TabsTrigger value="courses">Courses</TabsTrigger>
             <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
             <TabsTrigger value="groups">Study Groups</TabsTrigger>
@@ -260,6 +262,8 @@ export default function StudentDashboard() {
             <TabsTrigger value="startups">Startups</TabsTrigger>
             <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="network">Network</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
           </TabsList>
 
           <TabsContent value="leaderboard">
@@ -480,7 +484,20 @@ export default function StudentDashboard() {
               </Card>
             </div>
           </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="intelligence" className="space-y-4">
+            <MarketIntelligenceWidget />
+          </TabsContent>
         </Tabs>
+
+        {/* AI Features Hub */}
+        <div className="mt-8">
+          <AIFeaturesHub />
+        </div>
       </div>
 
       {/* Floating Chat with AI */}

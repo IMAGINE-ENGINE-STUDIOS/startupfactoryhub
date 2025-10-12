@@ -18,6 +18,8 @@ import AvailabilityManager from "@/components/AvailabilityManager";
 import FloatingChat from "@/components/FloatingChat";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import MarketIntelligenceWidget from "@/components/MarketIntelligenceWidget";
 import { 
   Users, 
   TrendingUp, 
@@ -107,60 +109,82 @@ const MentorDashboard = () => {
           </Card>
         </div>
 
-        {/* Main Dashboard Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Mentee Progress Overview */}
-            <MentorRoadmapWidget />
+        {/* Tabbed Dashboard Content */}
+        <Tabs defaultValue="feed" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-7 max-w-5xl">
+            <TabsTrigger value="feed">Feed</TabsTrigger>
+            <TabsTrigger value="mentees">Mentees</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
+            <TabsTrigger value="endorsements">Endorsements</TabsTrigger>
+            <TabsTrigger value="resources">Resources</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
+          </TabsList>
 
-            {/* Community Feed */}
-            <UnifiedCommunityFeed showCreatePost={false} maxHeight="500px" limit={5} />
-          </div>
+          <TabsContent value="feed" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                <MentorRoadmapWidget />
+                <UnifiedCommunityFeed showCreatePost={false} maxHeight="500px" limit={5} />
+              </div>
+              
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <Button variant="outline" className="w-full justify-start">
+                      <Users className="w-4 h-4 mr-2" />
+                      Browse Startups
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/calendar")}>
+                      <Calendar className="w-4 h-4 mr-2" />
+                      Schedule Session
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Message Mentees
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start">
+                      <Award className="w-4 h-4 mr-2" />
+                      View Programs
+                    </Button>
+                  </CardContent>
+                </Card>
+                <ConnectionsWidget />
+                <ResourcesWidget />
+              </div>
+            </div>
+          </TabsContent>
 
-          {/* Right Column - Widgets */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button variant="outline" className="w-full justify-start">
-                  <Users className="w-4 h-4 mr-2" />
-                  Browse Startups
-                </Button>
-                <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/calendar")}>
-                  <Calendar className="w-4 h-4 mr-2" />
-                  Schedule Session
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <MessageSquare className="w-4 h-4 mr-2" />
-                  Message Mentees
-                </Button>
-                <Button variant="outline" className="w-full justify-start">
-                  <Award className="w-4 h-4 mr-2" />
-                  View Programs
-                </Button>
-              </CardContent>
-            </Card>
+          <TabsContent value="mentees" className="space-y-6">
+            <MentorshipRequests />
+          </TabsContent>
 
-            {/* Calendar Widget */}
-            <MentorCalendarWidget />
-            
-            {/* Availability Manager */}
-            <AvailabilityManager />
-            
-            {/* Connections */}
-            <ConnectionsWidget />
-            
-            {/* Resources */}
-            <ResourcesWidget />
+          <TabsContent value="calendar" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <MentorCalendarWidget />
+              <AvailabilityManager />
+            </div>
+          </TabsContent>
 
-            {/* Endorsements */}
+          <TabsContent value="endorsements" className="space-y-6">
             {user && <MentorEndorsements mentorId={user.id} isOwnProfile={true} />}
-          </div>
-        </div>
+          </TabsContent>
+
+          <TabsContent value="resources" className="space-y-6">
+            <ResourcesWidget />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-6">
+            <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="intelligence" className="space-y-6">
+            <MarketIntelligenceWidget />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Floating Chat with AI */}
