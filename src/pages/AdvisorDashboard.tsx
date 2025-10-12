@@ -199,7 +199,7 @@ export default function AdvisorDashboard() {
         industry,
         user_id
       `)
-      .limit(10);
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error fetching startups:', error);
@@ -297,7 +297,7 @@ export default function AdvisorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {startups.slice(0, 6).map((startup) => (
+                  {startups.map((startup) => (
                     <div key={startup.id} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
                       <div className="flex items-center space-x-4">
                         <Avatar className="h-12 w-12">

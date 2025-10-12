@@ -182,8 +182,7 @@ export default function InvestorDashboard() {
         looking_for
       `)
       .not('id', 'in', `(${investedCompanyIds.join(',') || 'null'})`)
-      .order('created_at', { ascending: false })
-      .limit(8);
+      .order('created_at', { ascending: false });
 
     if (!error && data) {
       setOpportunities(data);
