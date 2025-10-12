@@ -21,6 +21,7 @@ const CommunityFeed = lazy(() => import("./pages/CommunityFeed"));
 const Events = lazy(() => import("./pages/Events"));
 const Messages = lazy(() => import("./pages/Messages"));
 const Analytics = lazy(() => import("./pages/Analytics"));
+const MarketIntelligence = lazy(() => import("./pages/MarketIntelligence"));
 const Explore = lazy(() => import("./pages/Explore"));
 const MentoringSessions = lazy(() => import("./pages/MentoringSessions"));
 const Calendar = lazy(() => import("./pages/Calendar"));
@@ -67,6 +68,7 @@ const App = () => (
                   <Route path="/mentoring-sessions" element={<Calendar />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/analytics" element={<Analytics />} />
+                  <Route path="/market-intelligence" element={<MarketIntelligence />} />
                   <Route path="/explore" element={<Explore />} />
                   <Route path="/profile" element={<StartupProfile />} />
                   <Route path="*" element={<NotFound />} />

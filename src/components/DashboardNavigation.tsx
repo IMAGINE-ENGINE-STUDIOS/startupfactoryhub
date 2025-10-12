@@ -24,7 +24,8 @@ import {
   Bell,
   BarChart3,
   Compass,
-  Video
+  Video,
+  Sparkles
 } from "lucide-react";
 
 const DashboardNavigation = () => {
@@ -109,6 +110,15 @@ const DashboardNavigation = () => {
               >
                 <BarChart3 className="w-4 h-4" />
                 <span>Analytics</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="flex items-center space-x-2"
+                onClick={() => navigate("/market-intelligence")}
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Intelligence</span>
               </Button>
             </div>
 
@@ -214,6 +224,15 @@ const DashboardNavigation = () => {
           >
             <BarChart3 className="w-5 h-5" />
             <span className="text-xs">Stats</span>
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="flex flex-col items-center space-y-1 h-auto py-2"
+            onClick={() => navigate("/market-intelligence")}
+          >
+            <Sparkles className="w-5 h-5" />
+            <span className="text-xs">Intel</span>
           </Button>
         </div>
       </div>

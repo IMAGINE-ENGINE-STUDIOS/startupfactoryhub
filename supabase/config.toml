@@ -6,6 +6,9 @@ verify_jwt = true
 [functions.ai-chatbot]
 verify_jwt = true
 
+[functions.market-intelligence]
+verify_jwt = true
+
 [functions.ai-text-summarizer]
 verify_jwt = true
 
