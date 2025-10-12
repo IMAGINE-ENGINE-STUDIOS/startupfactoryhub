@@ -279,12 +279,12 @@ export default function AdvisorDashboard() {
           ))}
         </div>
 
-        <Tabs defaultValue="requests" className="space-y-6">
+        <Tabs defaultValue="community" className="space-y-6">
           <TabsList className="grid w-full grid-cols-4 max-w-lg">
+            <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="requests">Requests</TabsTrigger>
             <TabsTrigger value="mentees">My Mentees</TabsTrigger>
             <TabsTrigger value="schedule">Schedule</TabsTrigger>
-            <TabsTrigger value="community">Community</TabsTrigger>
           </TabsList>
 
           <TabsContent value="requests" className="space-y-4">

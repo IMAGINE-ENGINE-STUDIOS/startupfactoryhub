@@ -33,7 +33,7 @@ export default function InvestorDashboard() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [opportunities, setOpportunities] = useState<Investment[]>([]);
   const [investorProfile, setInvestorProfile] = useState<any>(null);
-  const [currentTab, setCurrentTab] = useState('portfolio');
+  const [currentTab, setCurrentTab] = useState('community');
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -271,13 +271,13 @@ export default function InvestorDashboard() {
 
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
           <TabsList className="grid w-full grid-cols-7 max-w-5xl">
+            <TabsTrigger value="community">Community</TabsTrigger>
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
             <TabsTrigger value="browse">Browse</TabsTrigger>
             <TabsTrigger value="network">Network</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="community">Community</TabsTrigger>
           </TabsList>
 
           <TabsContent value="portfolio" className="space-y-4">

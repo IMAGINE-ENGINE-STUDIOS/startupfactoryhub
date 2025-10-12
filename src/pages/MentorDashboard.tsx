@@ -111,11 +111,11 @@ const MentorDashboard = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Left Column - Main Content */}
           <div className="lg:col-span-2 space-y-8">
+            {/* Community Feed - First Priority */}
+            <UnifiedCommunityFeed showCreatePost={true} />
+            
             {/* Mentee Progress Overview */}
             <MentorRoadmapWidget />
-
-            {/* Community Feed */}
-            <UnifiedCommunityFeed showCreatePost={false} maxHeight="500px" limit={5} />
           </div>
 
           {/* Right Column - Widgets */}
