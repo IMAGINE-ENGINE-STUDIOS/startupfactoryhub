@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import DashboardNavigation from '@/components/DashboardNavigation';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
-import PerformanceMetrics from '@/components/PerformanceMetrics';
+import MarketIntelligence from '@/components/MarketIntelligence';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -54,7 +54,20 @@ export default function Analytics() {
         </div>
 
         {/* Main Content */}
-        <AnalyticsDashboard />
+        <Tabs defaultValue="community" className="space-y-6">
+          <TabsList>
+            <TabsTrigger value="community">Community Analytics</TabsTrigger>
+            <TabsTrigger value="market">Market Intelligence</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="community">
+            <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="market">
+            <MarketIntelligence />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
