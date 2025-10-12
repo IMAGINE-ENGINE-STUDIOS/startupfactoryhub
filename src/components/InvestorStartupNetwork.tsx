@@ -22,7 +22,7 @@ interface NetworkStartup {
   team_size?: number;
   funding_amount?: number;
   looking_for?: string[];
-  connection_type: 'invested' | 'interested';
+  connection_type: 'invested' | 'interested' | 'available';
 }
 
 export default function InvestorStartupNetwork() {
@@ -89,6 +89,25 @@ export default function InvestorStartupNetwork() {
         .eq('investor_id', user.id)
         .in('status', ['interested', 'due_diligence']);
 
+      // Get all registered startups
+      const { data: allCompanies } = await supabase
+        .from('companies')
+        .select(`
+          id,
+          name,
+          description,
+          stage,
+          industry,
+          logo_url,
+          pitch_deck_url,
+          website,
+          location,
+          team_size,
+          funding_amount,
+          looking_for
+        `)
+        .order('created_at', { ascending: false });
+
       const investedStartups: NetworkStartup[] = (investments || [])
         .filter(inv => inv.companies)
         .map(inv => ({
@@ -125,7 +144,29 @@ export default function InvestorStartupNetwork() {
           connection_type: 'interested' as const,
         }));
 
-      setStartups([...investedStartups, ...interestedStartups]);
+      // Get available startups (not invested or interested)
+      const investedIds = new Set(investedStartups.map(s => s.id));
+      const interestedIds = new Set(interestedStartups.map(s => s.id));
+      
+      const availableStartups: NetworkStartup[] = (allCompanies || [])
+        .filter(company => !investedIds.has(company.id) && !interestedIds.has(company.id))
+        .map(company => ({
+          id: company.id,
+          name: company.name,
+          description: company.description || '',
+          stage: company.stage || 'Unknown',
+          industry: company.industry || 'General',
+          logo_url: company.logo_url,
+          pitch_deck_url: company.pitch_deck_url,
+          website: company.website,
+          location: company.location,
+          team_size: company.team_size,
+          funding_amount: company.funding_amount,
+          looking_for: company.looking_for,
+          connection_type: 'available' as const,
+        }));
+
+      setStartups([...investedStartups, ...interestedStartups, ...availableStartups]);
     } catch (error) {
       console.error('Error fetching network startups:', error);
     } finally {
@@ -176,10 +217,16 @@ export default function InvestorStartupNetwork() {
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-foreground truncate">{startup.name}</h3>
                       <Badge
-                        variant={startup.connection_type === 'invested' ? 'default' : 'secondary'}
+                        variant={
+                          startup.connection_type === 'invested' ? 'default' : 
+                          startup.connection_type === 'interested' ? 'secondary' : 
+                          'outline'
+                        }
                         className="text-xs mt-1"
                       >
-                        {startup.connection_type === 'invested' ? 'Invested' : 'Interested'}
+                        {startup.connection_type === 'invested' ? 'Invested' : 
+                         startup.connection_type === 'interested' ? 'Interested' : 
+                         'Available'}
                       </Badge>
                     </div>
                   </div>
