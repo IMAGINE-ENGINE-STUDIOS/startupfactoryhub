@@ -271,14 +271,11 @@ export default function InvestorDashboard() {
           ))}
         </div>
 
-        <AIFeaturesHub />
-
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9 max-w-7xl">
+          <TabsList className="grid w-full grid-cols-8 max-w-7xl">
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
             <TabsTrigger value="browse">Browse</TabsTrigger>
-            <TabsTrigger value="network">Network</TabsTrigger>
             <TabsTrigger value="events">Events</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="community">Community</TabsTrigger>
@@ -393,11 +390,10 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="browse" className="space-y-4">
-            <StartupBrowser />
-          </TabsContent>
-
-          <TabsContent value="network" className="space-y-4">
-            <InvestorStartupNetwork />
+            <div className="space-y-6">
+              <StartupBrowser />
+              <InvestorStartupNetwork />
+            </div>
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4">
@@ -423,11 +419,6 @@ export default function InvestorDashboard() {
             <MarketIntelligenceWidget />
           </TabsContent>
         </Tabs>
-
-        {/* AI Features Hub */}
-        <div className="mt-8">
-          <AIFeaturesHub />
-        </div>
       </div>
 
       {/* Floating Chat with AI */}
