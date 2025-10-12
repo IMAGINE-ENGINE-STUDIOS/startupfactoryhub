@@ -26,7 +26,6 @@ const Navigation = () => {
           
           {/* Desktop Right Side */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" onClick={() => navigate("/dashboard")}>Guest Dashboard</Button>
             {user ? (
               <Button variant="hero" size="lg" onClick={async () => {
                 await signOut();
@@ -50,17 +49,6 @@ const Navigation = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] sm:w-[350px]">
                 <div className="flex flex-col space-y-4 mt-8">
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => {
-                      navigate("/dashboard");
-                      closeMenu();
-                    }}
-                  >
-                    Guest Dashboard
-                  </Button>
-                  
                   {user ? (
                     <Button 
                       variant="hero" 

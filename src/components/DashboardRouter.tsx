@@ -32,9 +32,10 @@ const DashboardRouter = () => {
     );
   }
 
-  // Guest mode - show default dashboard
+  // Guest mode - redirect to auth
   if (!user) {
-    return <Dashboard />;
+    navigate("/auth");
+    return null;
   }
 
   // Route to appropriate dashboard based on user role (secured via user_roles table)
