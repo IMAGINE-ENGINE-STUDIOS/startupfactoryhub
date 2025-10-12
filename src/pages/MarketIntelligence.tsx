@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import DashboardNavigation from '@/components/DashboardNavigation';
+import TrendingCompanies from '@/components/TrendingCompanies';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -148,6 +149,13 @@ export default function MarketIntelligence() {
             </div>
           </div>
         </Card>
+
+        {/* Trending Companies Section - Only show when no results */}
+        {!loading && !results && (
+          <div className="mb-8">
+            <TrendingCompanies />
+          </div>
+        )}
 
         {/* Loading State */}
         {loading && (
