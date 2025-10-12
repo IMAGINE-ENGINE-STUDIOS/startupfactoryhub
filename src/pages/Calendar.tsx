@@ -5,18 +5,20 @@ import VideoConferencing from '@/components/VideoConferencing';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
-import { Card } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Video, Calendar as CalendarIcon, Clock, User, CheckCircle2, XCircle, Loader2, Plus } from 'lucide-react';
+import { Video, Calendar as CalendarIcon, Clock, User, CheckCircle2, XCircle, Loader2, Plus, MapPin, Users } from 'lucide-react';
 import { useMentoringSessions } from '@/hooks/useMentoringSessions';
+import { useEvents } from '@/hooks/useEvents';
 import { useAuth } from '@/contexts/AuthContext';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, parseISO } from 'date-fns';
 
 export default function Calendar() {
   const { user } = useAuth();
   const { upcomingSessions, pastSessions, loading, updateSession, refetch } = useMentoringSessions();
+  const { upcomingEvents, loading: eventsLoading } = useEvents();
   const [activeCallUrl, setActiveCallUrl] = useState<string | undefined>();
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
@@ -81,6 +83,110 @@ export default function Calendar() {
               onItemClick={handleItemClick}
               filterTypes={['event', 'session', 'availability']}
             />
+            
+            {/* Upcoming Events Grid with Banners */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Upcoming Events & Sessions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Community Events with Banners */}
+                  {upcomingEvents.slice(0, 3).map((event) => (
+                    <div
+                      key={`event-${event.id}`}
+                      className="group cursor-pointer"
+                      onClick={() => {
+                        setSelectedEvent(event);
+                        setShowEventDetails(true);
+                      }}
+                    >
+                      <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
+                        {event.banner_url ? (
+                          <img
+                            src={event.banner_url}
+                            alt={event.title}
+                            className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                          />
+                        ) : (
+                          <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                            <CalendarIcon className="h-16 w-16 text-purple-500/30" />
+                          </div>
+                        )}
+                        <div className="p-4">
+                          <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
+                          <div className="space-y-1 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <Clock className="h-3 w-3" />
+                              {format(parseISO(event.start_date), 'MMM d, h:mm a')}
+                            </div>
+                            {event.location && (
+                              <div className="flex items-center gap-2">
+                                <MapPin className="h-3 w-3" />
+                                <span className="line-clamp-1">{event.location}</span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <Users className="h-3 w-3" />
+                              {event.attendees} attending
+                              {event.max_attendees && ` / ${event.max_attendees}`}
+                            </div>
+                          </div>
+                          <Badge variant="outline" className="mt-2 bg-purple-500/10 text-purple-500">
+                            Event
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  
+                  {/* Mentoring Sessions */}
+                  {upcomingSessions.slice(0, 3).map((session) => {
+                    const isMentor = session.mentor_id === user?.id;
+                    const otherUser = isMentor ? session.mentee_profile : session.mentor_profile;
+                    
+                    return (
+                      <div
+                        key={`session-${session.id}`}
+                        className="group cursor-pointer"
+                        onClick={() => handleJoinSession(session)}
+                      >
+                        <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
+                          <div className="w-full h-48 bg-gradient-to-br from-blue-500/20 to-blue-500/5 flex items-center justify-center">
+                            <Video className="h-16 w-16 text-blue-500/30" />
+                          </div>
+                          <div className="p-4">
+                            <h3 className="font-semibold mb-2 line-clamp-1">{session.topic}</h3>
+                            <div className="space-y-1 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-3 w-3" />
+                                {format(new Date(session.scheduled_at), 'MMM d, h:mm a')}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <User className="h-3 w-3" />
+                                <span className="line-clamp-1">
+                                  {isMentor ? 'Mentee' : 'Mentor'}: {otherUser?.full_name || 'Unknown'}
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Video className="h-3 w-3" />
+                                {session.duration_minutes} min
+                              </div>
+                            </div>
+                            <Badge 
+                              variant="outline"
+                              className="mt-2 bg-blue-500/10 text-blue-500"
+                            >
+                              Session - {session.status}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
             
             {activeCallUrl && (
               <VideoConferencing 
