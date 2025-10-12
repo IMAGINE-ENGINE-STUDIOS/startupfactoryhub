@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -17,10 +17,14 @@ export default function CompanyLogoUpload({
   onUploadComplete 
 }: CompanyLogoUploadProps) {
   const [uploading, setUploading] = useState(false);
-  const [logoUrl, setLogoUrl] = useState(currentLogoUrl);
+  const [logoUrl, setLogoUrl] = useState(currentLogoUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    setLogoUrl(currentLogoUrl || null);
+  }, [currentLogoUrl]);
 
   const uploadLogo = async (event: React.ChangeEvent<HTMLInputElement>) => {
     try {

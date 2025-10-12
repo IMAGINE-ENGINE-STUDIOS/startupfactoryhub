@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -18,10 +18,14 @@ export default function AvatarUpload({
   size = 'md'
 }: AvatarUploadProps) {
   const [uploading, setUploading] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState(currentAvatarUrl);
+  const [avatarUrl, setAvatarUrl] = useState(currentAvatarUrl || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  useEffect(() => {
+    setAvatarUrl(currentAvatarUrl || null);
+  }, [currentAvatarUrl]);
 
   const sizeClasses = {
     sm: 'h-16 w-16',
