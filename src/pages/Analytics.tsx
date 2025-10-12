@@ -60,6 +60,11 @@ export default function Analytics() {
           </div>
         </Card>
 
+        {/* Market Intelligence Search - TOP */}
+        <div className="mb-12">
+          <MarketIntelligence />
+        </div>
+
         {/* Companies Grid */}
         <div className="mb-12">
           <div className="flex items-center justify-between mb-6">
@@ -92,18 +97,7 @@ export default function Analytics() {
           <NetworkCompanies />
         </div>
 
-        {/* Market Intelligence */}
-        <div className="mb-12">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-1">Market Intelligence Search</h2>
-            <p className="text-sm text-muted-foreground">
-              AI-powered research with real-time data from web sources and US government databases
-            </p>
-          </div>
-          <MarketIntelligence />
-        </div>
-
-        {/* Community Analytics */}
+        {/* Community Analytics - BOTTOM */}
         <div>
           <div className="mb-6">
             <h2 className="text-2xl font-bold mb-1">Community Analytics</h2>
