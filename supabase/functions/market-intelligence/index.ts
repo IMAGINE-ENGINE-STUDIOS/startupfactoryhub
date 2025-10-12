@@ -21,8 +21,8 @@ serve(async (req) => {
     }
 
     // Build context-aware prompt based on search type
-    const systemPrompt = `You are a market intelligence analyst with access to real-time data from the internet. Search for and analyze current, accurate information.
-Return ONLY valid JSON without any markdown formatting or code blocks.`;
+    const systemPrompt = `You are a market intelligence analyst with access to real-time data. Analyze current market information from late 2024 and early 2025.
+Return ONLY valid JSON without any markdown formatting or code blocks. Use real companies and actual data.`;
 
     let userPrompt = '';
     
@@ -47,7 +47,7 @@ Provide real, current market data in this JSON format:
   ]
 }
 
-Return 6-8 REAL companies with their ACTUAL domains. Use current 2025 data.`;
+Return 6-8 REAL companies with their ACTUAL domains. Use recent market data.`;
       } else if (query.toLowerCase().includes('prediction')) {
         userPrompt = `Search the internet for: "${query}"
 
@@ -65,7 +65,7 @@ Provide real market predictions in this JSON format:
   ]
 }
 
-Return 4-6 REAL companies with predictions and their ACTUAL domains. Use current 2025 data.`;
+Return 4-6 REAL companies with predictions and their ACTUAL domains. Use recent market data.`;
       } else {
         userPrompt = `Search the internet and analyze: "${query}"
 
@@ -108,7 +108,7 @@ Provide real market insights in this JSON format:
   ]
 }
 
-Return 4-6 REAL companies with insights and their ACTUAL domains. Use current 2025 data.`;
+Return 4-6 REAL companies with insights and their ACTUAL domains. Use recent market data.`;
       } else {
         userPrompt = `Search the internet and analyze industry: "${query}"
 

@@ -192,7 +192,7 @@ export default function MarketIntelligence() {
 
             {/* Key Metrics */}
             <div className="grid md:grid-cols-4 gap-4">
-              {Object.entries(results.metrics).slice(0, 4).map(([key, value]) => (
+              {results.metrics && Object.entries(results.metrics).slice(0, 4).map(([key, value]) => (
                 <Card key={key} className="p-4">
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-muted-foreground capitalize">
@@ -272,7 +272,7 @@ export default function MarketIntelligence() {
             </Tabs>
 
             {/* Additional Metrics Grid */}
-            {Object.keys(results.metrics).length > 4 && (
+            {results.metrics && Object.keys(results.metrics).length > 4 && (
               <Card className="p-6">
                 <h3 className="font-semibold mb-4">Additional Metrics</h3>
                 <div className="grid md:grid-cols-3 gap-4">
