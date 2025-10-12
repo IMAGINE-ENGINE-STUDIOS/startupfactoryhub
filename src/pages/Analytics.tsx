@@ -53,21 +53,19 @@ export default function Analytics() {
           </div>
         </div>
 
-        {/* Main Content */}
-        <Tabs defaultValue="community" className="space-y-6">
-          <TabsList>
-            <TabsTrigger value="community">Community Analytics</TabsTrigger>
-            <TabsTrigger value="market">Market Intelligence</TabsTrigger>
-          </TabsList>
+        {/* Main Content - Community Analytics */}
+        <AnalyticsDashboard />
 
-          <TabsContent value="community">
-            <AnalyticsDashboard />
-          </TabsContent>
-
-          <TabsContent value="market">
-            <MarketIntelligence />
-          </TabsContent>
-        </Tabs>
+        {/* Market Intelligence Section */}
+        <div className="mt-12">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold mb-2">Market Intelligence</h2>
+            <p className="text-sm text-muted-foreground">
+              AI-powered market research with real-time data from web sources and US government databases
+            </p>
+          </div>
+          <MarketIntelligence />
+        </div>
       </div>
     </div>
   );
