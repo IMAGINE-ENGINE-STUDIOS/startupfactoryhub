@@ -28,15 +28,21 @@ const Navigation = () => {
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
+            <a href="#features" className="text-muted-foreground hover:text-foreground transition-colors">
+              Features
+            </a>
             <button onClick={() => navigate("/feed")} className="text-muted-foreground hover:text-foreground transition-colors">
-              Feed
+              Community
             </button>
             <button onClick={() => navigate("/calendar")} className="text-muted-foreground hover:text-foreground transition-colors">
               Calendar
             </button>
-            <button onClick={() => navigate("/market-intelligence")} className="text-muted-foreground hover:text-foreground transition-colors">
-              Intel
-            </button>
+            <a href="#resources" className="text-muted-foreground hover:text-foreground transition-colors">
+              Resources
+            </a>
+            <a href="#about" className="text-muted-foreground hover:text-foreground transition-colors">
+              About
+            </a>
           </div>
           
           {/* Desktop Right Side */}
@@ -76,6 +82,13 @@ const Navigation = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] sm:w-[350px]">
                 <div className="flex flex-col space-y-4 mt-8">
+                  <a 
+                    href="#features" 
+                    className="text-lg py-2 hover:text-ocean-primary transition-colors"
+                    onClick={closeMenu}
+                  >
+                    Features
+                  </a>
                   <button 
                     onClick={() => {
                       navigate("/feed");
@@ -83,7 +96,7 @@ const Navigation = () => {
                     }} 
                     className="text-lg py-2 text-left hover:text-ocean-primary transition-colors"
                   >
-                    Feed
+                    Community
                   </button>
                   <button 
                     onClick={() => {
@@ -94,15 +107,20 @@ const Navigation = () => {
                   >
                     Calendar
                   </button>
-                  <button 
-                    onClick={() => {
-                      navigate("/market-intelligence");
-                      closeMenu();
-                    }} 
-                    className="text-lg py-2 text-left hover:text-ocean-primary transition-colors"
+                  <a 
+                    href="#resources" 
+                    className="text-lg py-2 hover:text-ocean-primary transition-colors"
+                    onClick={closeMenu}
                   >
-                    Intel
-                  </button>
+                    Resources
+                  </a>
+                  <a 
+                    href="#about" 
+                    className="text-lg py-2 hover:text-ocean-primary transition-colors"
+                    onClick={closeMenu}
+                  >
+                    About
+                  </a>
                   
                   {user && (
                     <>
