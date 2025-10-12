@@ -224,26 +224,12 @@ export const useCommunityAnalytics = () => {
   };
 
   const fetchIndustryData = async () => {
-    // Fetch startup industries
-    const { data: companies } = await supabase
+    const { data } = await supabase
       .from('companies')
       .select('industry');
 
-    // Fetch portfolio company industries
-    const { data: portfolio } = await supabase
-      .from('portfolio_companies')
-      .select('industry');
-
     const industries: { [key: string]: number } = {};
-    
-    // Count startup industries
-    companies?.forEach((company) => {
-      const industry = company.industry || 'Other';
-      industries[industry] = (industries[industry] || 0) + 1;
-    });
-
-    // Add portfolio company industries
-    portfolio?.forEach((company) => {
+    data?.forEach((company) => {
       const industry = company.industry || 'Other';
       industries[industry] = (industries[industry] || 0) + 1;
     });
@@ -257,8 +243,7 @@ export const useCommunityAnalytics = () => {
   };
 
   const fetchRecentInvestments = async () => {
-    // Fetch platform investments
-    const { data: platformInvestments } = await supabase
+    const { data } = await supabase
       .from('investments')
       .select(`
         amount,
@@ -269,77 +254,32 @@ export const useCommunityAnalytics = () => {
       .order('investment_date', { ascending: false })
       .limit(10);
 
-    // Fetch portfolio investments
-    const { data: portfolioInvestments } = await supabase
-      .from('portfolio_companies')
-      .select(`
-        investment_amount,
-        investment_year,
-        company_name,
-        investor_id
-      `)
-      .order('investment_year', { ascending: false })
-      .limit(10);
-
-    const allInvestments: any[] = [];
-
-    // Process platform investments
-    if (platformInvestments) {
-      const platformData = await Promise.all(
-        platformInvestments.map(async (inv) => {
+    if (data) {
+      const investmentsWithNames = await Promise.all(
+        data.map(async (inv) => {
           const { data: company } = await supabase
             .from('companies')
             .select('name')
             .eq('id', inv.company_id)
-            .maybeSingle();
+            .single();
 
           const { data: investor } = await supabase
             .from('profiles')
             .select('full_name')
             .eq('user_id', inv.investor_id)
-            .maybeSingle();
+            .single();
 
           return {
             startup: company?.name || 'Unknown',
             amount: inv.amount,
             date: new Date(inv.investment_date).toLocaleDateString(),
             investor: investor?.full_name || 'Anonymous',
-            timestamp: new Date(inv.investment_date).getTime(),
           };
         })
       );
-      allInvestments.push(...platformData);
+
+      setRecentInvestments(investmentsWithNames);
     }
-
-    // Process portfolio investments
-    if (portfolioInvestments) {
-      const portfolioData = await Promise.all(
-        portfolioInvestments.map(async (inv) => {
-          const { data: investor } = await supabase
-            .from('profiles')
-            .select('full_name')
-            .eq('user_id', inv.investor_id)
-            .maybeSingle();
-
-          return {
-            startup: inv.company_name,
-            amount: inv.investment_amount || 0,
-            date: inv.investment_year ? `${inv.investment_year}` : 'N/A',
-            investor: investor?.full_name || 'Anonymous',
-            timestamp: inv.investment_year ? new Date(inv.investment_year, 0, 1).getTime() : 0,
-          };
-        })
-      );
-      allInvestments.push(...portfolioData);
-    }
-
-    // Sort by timestamp and take top 10
-    const sorted = allInvestments
-      .sort((a, b) => b.timestamp - a.timestamp)
-      .slice(0, 10)
-      .map(({ timestamp, ...rest }) => rest);
-
-    setRecentInvestments(sorted);
   };
 
   const fetchActivityData = async () => {

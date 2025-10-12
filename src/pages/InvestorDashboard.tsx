@@ -17,7 +17,6 @@ import StartupBrowser from '@/components/StartupBrowser';
 import FloatingChat from '@/components/FloatingChat';
 import InvestorProfileForm from '@/components/InvestorProfileForm';
 import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
-import PortfolioManager from '@/components/PortfolioManager';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 
 interface Investment {
@@ -271,9 +270,8 @@ export default function InvestorDashboard() {
         </div>
 
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 max-w-5xl">
+          <TabsList className="grid w-full grid-cols-7 max-w-5xl">
             <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-            <TabsTrigger value="showcase">Showcase</TabsTrigger>
             <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
             <TabsTrigger value="browse">Browse</TabsTrigger>
             <TabsTrigger value="network">Network</TabsTrigger>
@@ -331,10 +329,6 @@ export default function InvestorDashboard() {
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="showcase" className="space-y-4">
-            <PortfolioManager />
           </TabsContent>
 
           <TabsContent value="opportunities" className="space-y-4">
@@ -409,15 +403,6 @@ export default function InvestorDashboard() {
 
           <TabsContent value="profile" className="space-y-4">
             <InvestorProfileForm />
-            
-            <Card>
-              <CardHeader>
-                <CardTitle>Industry Focus</CardTitle>
-                <p className="text-sm text-muted-foreground">
-                  Your portfolio spans {investments.length > 0 ? new Set(investments.map(i => i.industry)).size : 0} industries with a total of {investments.length} investments
-                </p>
-              </CardHeader>
-            </Card>
           </TabsContent>
 
           <TabsContent value="community" className="space-y-4">

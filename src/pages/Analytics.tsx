@@ -27,8 +27,8 @@ export default function Analytics() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold mb-2">Community Analytics</h1>
-            <p className="text-sm text-muted-foreground">
-              Real-time community analytics tracking startups, mentors, investors, and activity across industries
+            <p className="text-muted-foreground">
+              Real-time platform statistics and insights
             </p>
           </div>
           
