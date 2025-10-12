@@ -26,8 +26,13 @@ import {
   Target,
   TrendingUp,
   Award,
-  Edit
+  Edit,
+  DollarSign,
+  UserCheck
 } from "lucide-react";
+import InvestorStartupNetwork from "@/components/InvestorStartupNetwork";
+import MentorAdvisorNetwork from "@/components/MentorAdvisorNetwork";
+import StartupInvestorNetwork from "@/components/StartupInvestorNetwork";
 
 const StartupProfile = () => {
   const [isFollowing, setIsFollowing] = useState(false);
@@ -274,9 +279,11 @@ const StartupProfile = () => {
       {/* Profile Content */}
       <div className="container mx-auto px-6 py-8">
         <Tabs defaultValue="activity" className="w-full">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="activity">Activity</TabsTrigger>
             <TabsTrigger value="about">About</TabsTrigger>
+            <TabsTrigger value="investors">Investors</TabsTrigger>
+            <TabsTrigger value="advisors">Advisors</TabsTrigger>
             <TabsTrigger value="roadmap">Roadmap</TabsTrigger>
             <TabsTrigger value="team">Team</TabsTrigger>
             <TabsTrigger value="media">Media</TabsTrigger>
@@ -435,11 +442,9 @@ const StartupProfile = () => {
           <TabsContent value="about">
             <Card>
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold mb-4">About FinPay Solutions</h3>
+                <h3 className="text-lg font-semibold mb-4">About {profileData.name}</h3>
                 <p className="text-muted-foreground leading-relaxed mb-6">
-                  FinPay Solutions is revolutionizing the financial services industry through our AI-powered payment platform. 
-                  We're building the next generation of payment infrastructure that makes financial services more accessible, 
-                  transparent, and efficient for businesses and consumers worldwide.
+                  {company?.description || 'No description available yet.'}
                 </p>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -448,19 +453,19 @@ const StartupProfile = () => {
                     <div className="space-y-2 text-sm">
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Industry</span>
-                        <span>FinTech</span>
+                        <span>{profileData.industry}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Stage</span>
-                        <span>Seed</span>
+                        <span>{profileData.stage}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Founded</span>
-                        <span>2023</span>
+                        <span>{profileData.founded}</span>
                       </div>
                       <div className="flex justify-between">
                         <span className="text-muted-foreground">Team Size</span>
-                        <span>8 people</span>
+                        <span>{profileData.teamSize}</span>
                       </div>
                     </div>
                   </div>
@@ -468,16 +473,22 @@ const StartupProfile = () => {
                   <div>
                     <h4 className="font-medium mb-2">Focus Areas</h4>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="secondary">AI/ML</Badge>
-                      <Badge variant="secondary">Payments</Badge>
-                      <Badge variant="secondary">API Infrastructure</Badge>
-                      <Badge variant="secondary">B2B SaaS</Badge>
-                      <Badge variant="secondary">Financial Services</Badge>
+                      {company?.looking_for?.map((area: string, idx: number) => (
+                        <Badge key={idx} variant="secondary">{area}</Badge>
+                      )) || <span className="text-sm text-muted-foreground">Not specified</span>}
                     </div>
                   </div>
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="investors">
+            <StartupInvestorNetwork />
+          </TabsContent>
+
+          <TabsContent value="advisors">
+            <MentorAdvisorNetwork />
           </TabsContent>
 
           <TabsContent value="roadmap">
