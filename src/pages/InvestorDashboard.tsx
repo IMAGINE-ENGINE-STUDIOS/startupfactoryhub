@@ -17,7 +17,7 @@ import StartupBrowser from '@/components/StartupBrowser';
 import FloatingChat from '@/components/FloatingChat';
 import InvestorProfileForm from '@/components/InvestorProfileForm';
 import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
-import CommunityCalendar from '@/components/CommunityCalendar';
+import UnifiedCalendar from '@/components/UnifiedCalendar';
 
 interface Investment {
   id: string;
@@ -395,7 +395,10 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4">
-            <CommunityCalendar />
+            <UnifiedCalendar 
+              showCreateButton={false}
+              filterTypes={['event', 'session']}
+            />
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">

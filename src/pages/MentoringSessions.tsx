@@ -1,5 +1,5 @@
 import DashboardNavigation from '@/components/DashboardNavigation';
-import CalendarIntegration from '@/components/CalendarIntegration';
+import UnifiedCalendar from '@/components/UnifiedCalendar';
 import VideoConferencing from '@/components/VideoConferencing';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { Card } from '@/components/ui/card';
@@ -47,16 +47,35 @@ export default function MentoringSessions() {
           </Button>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-4 lg:space-y-6">
-            <Tabs defaultValue="upcoming" className="w-full">
-              <TabsList>
-                <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-                <TabsTrigger value="past">Past Sessions</TabsTrigger>
-              </TabsList>
+        <Tabs defaultValue="calendar" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 max-w-md mb-6">
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
+            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+            <TabsTrigger value="past">Past</TabsTrigger>
+          </TabsList>
 
-              <TabsContent value="upcoming" className="mt-6 space-y-4">
+          <TabsContent value="calendar" className="space-y-6">
+            <UnifiedCalendar 
+              showCreateButton={false}
+              onItemClick={(item) => {
+                if (item.type === 'session' && item.meeting_link) {
+                  setActiveCallUrl(item.meeting_link);
+                }
+              }}
+              filterTypes={['event', 'session', 'availability']}
+            />
+            
+            {activeCallUrl && (
+              <VideoConferencing 
+                roomUrl={activeCallUrl}
+                onLeave={() => setActiveCallUrl(undefined)}
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="upcoming" className="space-y-4">
+            <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
+              <div className="lg:col-span-2 space-y-4">
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -141,9 +160,21 @@ export default function MentoringSessions() {
                     );
                   })
                 )}
-              </TabsContent>
+              </div>
 
-              <TabsContent value="past" className="mt-6 space-y-4">
+              {/* Sidebar */}
+              <div className="lg:col-span-1 space-y-4">
+                <VideoConferencing 
+                  roomUrl={activeCallUrl}
+                  onLeave={() => setActiveCallUrl(undefined)}
+                />
+              </div>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="past" className="space-y-4">
+            <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
+              <div className="lg:col-span-2 space-y-4">
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -198,19 +229,18 @@ export default function MentoringSessions() {
                     );
                   })
                 )}
-              </TabsContent>
-            </Tabs>
-          </div>
+              </div>
 
-          {/* Sidebar */}
-          <div className="lg:col-span-1 space-y-4 lg:space-y-6">
-            <VideoConferencing 
-              roomUrl={activeCallUrl}
-              onLeave={() => setActiveCallUrl(undefined)}
-            />
-            <CalendarIntegration />
-          </div>
-        </div>
+              {/* Sidebar */}
+              <div className="lg:col-span-1 space-y-4">
+                <VideoConferencing 
+                  roomUrl={activeCallUrl}
+                  onLeave={() => setActiveCallUrl(undefined)}
+                />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
 
       <CreateSessionDialog 
