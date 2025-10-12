@@ -1031,6 +1031,7 @@ export type Database = {
       investor_profiles: {
         Row: {
           created_at: string | null
+          focus_industries: string[] | null
           id: string
           investment_range_max: number | null
           investment_range_min: number | null
@@ -1043,6 +1044,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          focus_industries?: string[] | null
           id?: string
           investment_range_max?: number | null
           investment_range_min?: number | null
@@ -1055,6 +1057,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          focus_industries?: string[] | null
           id?: string
           investment_range_max?: number | null
           investment_range_min?: number | null
@@ -1399,6 +1402,54 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      portfolio_companies: {
+        Row: {
+          company_logo_url: string | null
+          company_name: string
+          created_at: string | null
+          description: string | null
+          exit_status: string | null
+          id: string
+          industry: string | null
+          investment_amount: number | null
+          investment_year: number | null
+          investor_id: string
+          stage: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          company_logo_url?: string | null
+          company_name: string
+          created_at?: string | null
+          description?: string | null
+          exit_status?: string | null
+          id?: string
+          industry?: string | null
+          investment_amount?: number | null
+          investment_year?: number | null
+          investor_id: string
+          stage?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          company_logo_url?: string | null
+          company_name?: string
+          created_at?: string | null
+          description?: string | null
+          exit_status?: string | null
+          id?: string
+          industry?: string | null
+          investment_amount?: number | null
+          investment_year?: number | null
+          investor_id?: string
+          stage?: string | null
+          updated_at?: string | null
+          website?: string | null
         }
         Relationships: []
       }

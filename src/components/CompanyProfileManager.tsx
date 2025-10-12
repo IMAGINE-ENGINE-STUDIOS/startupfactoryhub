@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import PitchDeckUpload from './PitchDeckUpload';
+import CompanyLogoUpload from './CompanyLogoUpload';
 
 export default function CompanyProfileManager() {
   const [company, setCompany] = useState<any>(null);
@@ -609,6 +610,18 @@ export default function CompanyProfileManager() {
 
         {!isInvestor && (
           <TabsContent value="deck" className="space-y-4">
+            <CompanyLogoUpload 
+              companyId={company.id}
+              currentLogoUrl={company.logo_url}
+              onUploadComplete={(url) => {
+                setCompany({ ...company, logo_url: url });
+                toast({
+                  title: 'Success!',
+                  description: 'Company logo updated successfully.',
+                });
+              }}
+            />
+            
             <PitchDeckUpload 
               companyId={company.id}
               currentDeckUrl={company.pitch_deck_url}
