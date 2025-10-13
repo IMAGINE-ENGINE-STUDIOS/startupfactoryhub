@@ -214,6 +214,7 @@ const ProfileSetup = () => {
                     currentAvatarUrl={formData.avatar_url}
                     onUploadComplete={(url) => updateFormData('avatar_url', url)}
                     size="lg"
+                    userRole={selectedRole}
                   />
                 </div>
 

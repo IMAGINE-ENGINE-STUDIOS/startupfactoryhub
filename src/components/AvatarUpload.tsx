@@ -5,17 +5,21 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Camera, Loader2 } from 'lucide-react';
+import startupBadge from '@/assets/startup-badge.png';
+import advisorBadge from '@/assets/advisor-badge.png';
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
   onUploadComplete?: (url: string) => void;
   size?: 'sm' | 'md' | 'lg';
+  userRole?: 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | null;
 }
 
 export default function AvatarUpload({ 
   currentAvatarUrl, 
   onUploadComplete,
-  size = 'md'
+  size = 'md',
+  userRole
 }: AvatarUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(currentAvatarUrl || null);
@@ -31,6 +35,21 @@ export default function AvatarUpload({
     sm: 'h-16 w-16',
     md: 'h-24 w-24',
     lg: 'h-32 w-32'
+  };
+
+  // Determine the default badge based on role
+  const getDefaultBadge = () => {
+    if (avatarUrl) return avatarUrl;
+    
+    switch (userRole) {
+      case 'startup':
+        return startupBadge;
+      case 'advisor':
+      case 'mentor':
+        return advisorBadge;
+      default:
+        return undefined;
+    }
   };
 
   const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,7 +128,7 @@ export default function AvatarUpload({
     <div className="flex flex-col items-center space-y-4">
       <div className="relative group">
         <Avatar className={sizeClasses[size]}>
-          <AvatarImage src={avatarUrl || undefined} />
+          <AvatarImage src={getDefaultBadge() || undefined} />
           <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
             {user?.email?.charAt(0).toUpperCase() || 'U'}
           </AvatarFallback>

@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -29,6 +30,7 @@ interface Investment {
   industry: string;
   funding_amount: number;
   user_id: string;
+  logo_url?: string | null;
 }
 
 export default function InvestorDashboard() {
@@ -136,7 +138,8 @@ export default function InvestorDashboard() {
           description,
           stage,
           industry,
-          user_id
+          user_id,
+          logo_url
         )
       `)
       .eq('investor_id', user.id)
@@ -151,6 +154,7 @@ export default function InvestorDashboard() {
         industry: inv.companies?.industry || 'General',
         funding_amount: inv.amount,
         user_id: inv.companies?.user_id || '',
+        logo_url: inv.companies?.logo_url || null,
         investment_date: inv.investment_date,
         equity_percentage: inv.equity_percentage
       }));
@@ -179,7 +183,8 @@ export default function InvestorDashboard() {
         industry,
         funding_amount,
         user_id,
-        looking_for
+        looking_for,
+        logo_url
       `)
       .not('id', 'in', `(${investedCompanyIds.join(',') || 'null'})`)
       .order('created_at', { ascending: false });
@@ -296,11 +301,12 @@ export default function InvestorDashboard() {
                     <Card key={investment.id} className="border border-border/50 hover:border-primary/50 transition-colors">
                       <CardContent className="p-4">
                         <div className="flex items-start space-x-3 mb-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                              {investment.name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
+                          <RoleBasedAvatar 
+                            avatarUrl={investment.logo_url}
+                            role="startup"
+                            fallbackText={investment.name}
+                            className="h-10 w-10"
+                          />
                           <div className="flex-1 min-w-0">
                             <h3 className="font-semibold text-foreground truncate">{investment.name}</h3>
                             <p className="text-xs text-muted-foreground">Startup Founder</p>

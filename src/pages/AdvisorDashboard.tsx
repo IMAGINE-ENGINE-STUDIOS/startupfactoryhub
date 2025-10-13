@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -25,6 +26,7 @@ interface Startup {
   stage: string;
   industry: string;
   user_id: string;
+  logo_url?: string | null;
 }
 
 export default function AdvisorDashboard() {
@@ -197,7 +199,8 @@ export default function AdvisorDashboard() {
         description,
         stage,
         industry,
-        user_id
+        user_id,
+        logo_url
       `)
       .order('created_at', { ascending: false });
 
@@ -300,11 +303,12 @@ export default function AdvisorDashboard() {
                   {startups.map((startup) => (
                     <div key={startup.id} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
                       <div className="flex items-center space-x-4">
-                        <Avatar className="h-12 w-12">
-                          <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                            {startup.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
+                        <RoleBasedAvatar 
+                          avatarUrl={startup.logo_url}
+                          role="startup"
+                          fallbackText={startup.name}
+                          className="h-12 w-12"
+                        />
                         <div>
                           <h3 className="font-semibold text-foreground">{startup.name}</h3>
                           <p className="text-sm text-muted-foreground line-clamp-2">{startup.description}</p>

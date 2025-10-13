@@ -543,6 +543,7 @@ const StartupProfile = () => {
                         setProfile({ ...profile, avatar_url: url });
                       }}
                       size="lg"
+                      userRole="startup"
                     />
                   </div>
                 </CardContent>
