@@ -16,14 +16,15 @@ const NasdaqFeature = () => {
           </p>
         </div>
         
-        <div className="max-w-5xl mx-auto">
-          <div className="relative rounded-2xl overflow-hidden shadow-2xl hover:shadow-3xl transition-shadow duration-300">
+        <div className="max-w-6xl mx-auto">
+          <div className="relative rounded-xl overflow-hidden shadow-elegant hover:shadow-glow transition-all duration-500">
             <img 
               src={nasdaqFeature} 
               alt="Startup Factory Hub featured on NASDAQ Tower in Times Square, New York City" 
-              className="w-full h-auto object-cover"
+              className="w-full h-auto object-cover aspect-video"
+              loading="lazy"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-background/40 via-transparent to-transparent pointer-events-none" />
           </div>
         </div>
       </div>
