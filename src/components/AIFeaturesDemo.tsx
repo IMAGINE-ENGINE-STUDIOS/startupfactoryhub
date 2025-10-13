@@ -86,6 +86,16 @@ export default function AIFeaturesDemo() {
       return;
     }
 
+    // Check if URL is a PDF
+    if (imageUrl.toLowerCase().endsWith('.pdf')) {
+      toast({
+        title: "Error",
+        description: "PDF analysis is not supported yet. Please use image files (JPG, PNG, etc.)",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsDocumentLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('ai-vision-analyzer', {
@@ -274,7 +284,7 @@ export default function AIFeaturesDemo() {
                 onChange={(e) => setImageUrl(e.target.value)}
               />
               <p className="text-xs text-muted-foreground">
-                Enter a publicly accessible image or document URL
+                Enter a publicly accessible image URL (JPG, PNG, WEBP). PDFs are not supported.
               </p>
             </div>
             

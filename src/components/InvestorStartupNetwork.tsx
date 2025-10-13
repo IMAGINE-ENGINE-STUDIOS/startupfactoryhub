@@ -1,178 +1,18 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Building, Users, ExternalLink } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import StartupProfileDialog from './StartupProfileDialog';
-
-interface NetworkStartup {
-  id: string;
-  name: string;
-  description: string;
-  stage: string;
-  industry: string;
-  logo_url?: string;
-  pitch_deck_url?: string;
-  website?: string;
-  location?: string;
-  team_size?: number;
-  funding_amount?: number;
-  looking_for?: string[];
-  connection_type: 'invested' | 'interested' | 'available';
-}
+import { useInvestorNetwork } from '@/hooks/useInvestorNetwork';
 
 export default function InvestorStartupNetwork() {
   const { user } = useAuth();
-  const navigate = useNavigate();
-  const [startups, setStartups] = useState<NetworkStartup[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedStartup, setSelectedStartup] = useState<NetworkStartup | null>(null);
+  const { startups, loading } = useInvestorNetwork(user?.id);
+  const [selectedStartup, setSelectedStartup] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      fetchNetworkStartups();
-    }
-  }, [user]);
-
-  const fetchNetworkStartups = async () => {
-    if (!user) return;
-
-    try {
-      // Get invested companies
-      const { data: investments } = await supabase
-        .from('investments')
-        .select(`
-          company_id,
-          companies:company_id (
-            id,
-            name,
-            description,
-            stage,
-            industry,
-            logo_url,
-            pitch_deck_url,
-            website,
-            location,
-            team_size,
-            funding_amount,
-            looking_for
-          )
-        `)
-        .eq('investor_id', user.id)
-        .eq('status', 'active');
-
-      // Get interested companies
-      const { data: interests } = await supabase
-        .from('investment_interests')
-        .select(`
-          company_id,
-          companies:company_id (
-            id,
-            name,
-            description,
-            stage,
-            industry,
-            logo_url,
-            pitch_deck_url,
-            website,
-            location,
-            team_size,
-            funding_amount,
-            looking_for
-          )
-        `)
-        .eq('investor_id', user.id)
-        .in('status', ['interested', 'due_diligence']);
-
-      // Get all registered startups
-      const { data: allCompanies } = await supabase
-        .from('companies')
-        .select(`
-          id,
-          name,
-          description,
-          stage,
-          industry,
-          logo_url,
-          pitch_deck_url,
-          website,
-          location,
-          team_size,
-          funding_amount,
-          looking_for
-        `)
-        .order('created_at', { ascending: false });
-
-      const investedStartups: NetworkStartup[] = (investments || [])
-        .filter(inv => inv.companies)
-        .map(inv => ({
-          id: inv.companies.id,
-          name: inv.companies.name,
-          description: inv.companies.description || '',
-          stage: inv.companies.stage || 'Unknown',
-          industry: inv.companies.industry || 'General',
-          logo_url: inv.companies.logo_url,
-          pitch_deck_url: inv.companies.pitch_deck_url,
-          website: inv.companies.website,
-          location: inv.companies.location,
-          team_size: inv.companies.team_size,
-          funding_amount: inv.companies.funding_amount,
-          looking_for: inv.companies.looking_for,
-          connection_type: 'invested' as const,
-        }));
-
-      const interestedStartups: NetworkStartup[] = (interests || [])
-        .filter(int => int.companies && !investedStartups.some(s => s.id === int.companies.id))
-        .map(int => ({
-          id: int.companies.id,
-          name: int.companies.name,
-          description: int.companies.description || '',
-          stage: int.companies.stage || 'Unknown',
-          industry: int.companies.industry || 'General',
-          logo_url: int.companies.logo_url,
-          pitch_deck_url: int.companies.pitch_deck_url,
-          website: int.companies.website,
-          location: int.companies.location,
-          team_size: int.companies.team_size,
-          funding_amount: int.companies.funding_amount,
-          looking_for: int.companies.looking_for,
-          connection_type: 'interested' as const,
-        }));
-
-      // Get available startups (not invested or interested)
-      const investedIds = new Set(investedStartups.map(s => s.id));
-      const interestedIds = new Set(interestedStartups.map(s => s.id));
-      
-      const availableStartups: NetworkStartup[] = (allCompanies || [])
-        .filter(company => !investedIds.has(company.id) && !interestedIds.has(company.id))
-        .map(company => ({
-          id: company.id,
-          name: company.name,
-          description: company.description || '',
-          stage: company.stage || 'Unknown',
-          industry: company.industry || 'General',
-          logo_url: company.logo_url,
-          pitch_deck_url: company.pitch_deck_url,
-          website: company.website,
-          location: company.location,
-          team_size: company.team_size,
-          funding_amount: company.funding_amount,
-          looking_for: company.looking_for,
-          connection_type: 'available' as const,
-        }));
-
-      setStartups([...investedStartups, ...interestedStartups, ...availableStartups]);
-    } catch (error) {
-      console.error('Error fetching network startups:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   if (loading) {
     return (
