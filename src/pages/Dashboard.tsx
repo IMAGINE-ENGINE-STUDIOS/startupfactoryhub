@@ -135,14 +135,7 @@ const Dashboard = () => {
             </div>
           </div>
           
-          <div className="flex items-center space-x-2 sm:space-x-3">
-            <NotificationCenter />
-            <Button variant="hero" size="sm" onClick={() => navigate('/feed')} className="flex-1 sm:flex-none">
-              <Plus className="w-4 h-4 mr-2" />
-              <span className="hidden sm:inline">Share Update</span>
-              <span className="sm:hidden">Share</span>
-            </Button>
-          </div>
+          <NotificationCenter />
         </div>
 
         {/* Real Stats Cards */}
