@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import logo from "@/assets/logo.png";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -58,10 +59,8 @@ const DashboardNavigation = () => {
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
             <div className="flex items-center space-x-2">
-              <div className="w-7 h-7 sm:w-8 sm:h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-                <Rocket className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
-              </div>
-              <span className="font-bold text-base sm:text-lg hidden sm:inline">Startup Factory</span>
+              <img src={logo} alt="Startup Factory Hub" className="w-7 h-7 sm:w-8 sm:h-8 glow-effect" />
+              <span className="font-bold text-base sm:text-lg hidden sm:inline">Startup Factory Hub</span>
             </div>
 
             {/* Navigation Links - Desktop Only */}
