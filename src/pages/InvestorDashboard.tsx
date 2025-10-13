@@ -233,26 +233,26 @@ export default function InvestorDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-hero p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-hero p-2 sm:p-4 pb-20 lg:pb-4">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-4 mb-8">
+        <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">
           <RoleBasedAvatar 
             avatarUrl={profileWithRole?.avatar_url} 
             role="investor"
             fallbackText={user?.email || 'I'}
-            className="h-16 w-16"
+            className="h-12 w-12 sm:h-16 sm:w-16"
           />
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               {profileWithRole?.full_name || 'Investor'} Dashboard
             </h1>
-            <p className="text-muted-foreground">Discover and fund the next unicorns</p>
+            <p className="text-sm text-muted-foreground">Discover and fund the next unicorns</p>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           {stats.map((stat) => (
             <Card key={stat.title} className="tech-card border-0">
               <CardContent className="p-6">
@@ -269,16 +269,18 @@ export default function InvestorDashboard() {
         </div>
 
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8 max-w-7xl">
-            <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-            <TabsTrigger value="opportunities">Opportunities</TabsTrigger>
-            <TabsTrigger value="browse">Browse</TabsTrigger>
-            <TabsTrigger value="events">Events</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="community">Community</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-7xl">
+              <TabsTrigger value="portfolio" className="flex-shrink-0">Portfolio</TabsTrigger>
+              <TabsTrigger value="opportunities" className="flex-shrink-0">Opportunities</TabsTrigger>
+              <TabsTrigger value="browse" className="flex-shrink-0">Browse</TabsTrigger>
+              <TabsTrigger value="events" className="flex-shrink-0">Events</TabsTrigger>
+              <TabsTrigger value="profile" className="flex-shrink-0">Profile</TabsTrigger>
+              <TabsTrigger value="community" className="flex-shrink-0">Community</TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
+              <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="portfolio" className="space-y-4">
             <Card className="tech-card border-0">

@@ -213,35 +213,35 @@ export default function StudentDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-hero p-2 sm:p-4 pb-20 lg:pb-4">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <RoleBasedAvatar 
               avatarUrl={profileWithRole?.avatar_url} 
               role="student"
               fallbackText={user?.email || 'S'}
-              className="h-16 w-16"
+              className="h-12 w-12 sm:h-16 sm:w-16"
             />
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 {profileWithRole?.full_name || 'Student'} Dashboard
               </h1>
-              <p className="text-muted-foreground">Learn, practice, and build your startup skills</p>
+              <p className="text-sm text-muted-foreground">Learn, practice, and build your startup skills</p>
             </div>
           </div>
           
-          <div className="flex gap-2">
-            <Button className="pulse-primary">
-              <Play className="h-4 w-4 mr-2" />
-              Continue Learning
+          <div className="flex gap-2 w-full sm:w-auto">
+            <Button className="pulse-primary flex-1 sm:flex-none">
+              <Play className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Continue Learning</span>
             </Button>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           {stats.map((stat) => (
             <Card key={stat.title} className="tech-card border-0">
               <CardContent className="p-6">
@@ -261,17 +261,19 @@ export default function StudentDashboard() {
         <AIFeaturesHub />
 
         <Tabs defaultValue="courses" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9 max-w-5xl">
-            <TabsTrigger value="courses">Courses</TabsTrigger>
-            <TabsTrigger value="leaderboard">Leaderboard</TabsTrigger>
-            <TabsTrigger value="groups">Study Groups</TabsTrigger>
-            <TabsTrigger value="assignments">Assignments</TabsTrigger>
-            <TabsTrigger value="startups">Startups</TabsTrigger>
-            <TabsTrigger value="community">Community</TabsTrigger>
-            <TabsTrigger value="network">Network</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
+              <TabsTrigger value="courses" className="flex-shrink-0">Courses</TabsTrigger>
+              <TabsTrigger value="leaderboard" className="flex-shrink-0">Leaderboard</TabsTrigger>
+              <TabsTrigger value="groups" className="flex-shrink-0">Study Groups</TabsTrigger>
+              <TabsTrigger value="assignments" className="flex-shrink-0">Assignments</TabsTrigger>
+              <TabsTrigger value="startups" className="flex-shrink-0">Startups</TabsTrigger>
+              <TabsTrigger value="community" className="flex-shrink-0">Community</TabsTrigger>
+              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
+              <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="leaderboard">
             <Leaderboard />

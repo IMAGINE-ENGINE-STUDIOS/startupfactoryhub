@@ -250,26 +250,26 @@ export default function AdvisorDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero p-4">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gradient-hero p-2 sm:p-4 pb-20 lg:pb-4">
+      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-4 mb-8">
+        <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">
           <RoleBasedAvatar 
             avatarUrl={profileWithRole?.avatar_url} 
             role="advisor"
             fallbackText={user?.email || 'A'}
-            className="h-16 w-16"
+            className="h-12 w-12 sm:h-16 sm:w-16"
           />
           <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               {profileWithRole?.full_name || 'Advisor'} Dashboard
             </h1>
-            <p className="text-muted-foreground">Guide the next generation of entrepreneurs</p>
+            <p className="text-sm text-muted-foreground">Guide the next generation of entrepreneurs</p>
           </div>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           {stats.map((stat) => (
             <Card key={stat.title} className="tech-card border-0">
               <CardContent className="p-6">
@@ -286,14 +286,16 @@ export default function AdvisorDashboard() {
         </div>
 
         <Tabs defaultValue="requests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 max-w-3xl">
-            <TabsTrigger value="requests">Requests</TabsTrigger>
-            <TabsTrigger value="mentees">My Mentees</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
-            <TabsTrigger value="community">Community</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-6 max-w-3xl">
+              <TabsTrigger value="requests" className="flex-shrink-0">Requests</TabsTrigger>
+              <TabsTrigger value="mentees" className="flex-shrink-0">My Mentees</TabsTrigger>
+              <TabsTrigger value="schedule" className="flex-shrink-0">Schedule</TabsTrigger>
+              <TabsTrigger value="community" className="flex-shrink-0">Community</TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
+              <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="requests" className="space-y-4">
             <MentorshipRequests />

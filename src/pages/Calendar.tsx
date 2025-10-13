@@ -57,24 +57,28 @@ export default function Calendar() {
               Manage events, mentoring sessions, and your availability
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={() => setScheduleDialogOpen(true)} variant="outline">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <Button onClick={() => setScheduleDialogOpen(true)} variant="outline" className="flex-1 sm:flex-none">
               <Video className="h-4 w-4 mr-2" />
-              Schedule Session
+              <span className="hidden sm:inline">Schedule Session</span>
+              <span className="sm:hidden">Schedule</span>
             </Button>
-            <Button onClick={() => setCreateEventDialogOpen(true)}>
+            <Button onClick={() => setCreateEventDialogOpen(true)} className="flex-1 sm:flex-none">
               <Plus className="h-4 w-4 mr-2" />
-              Create Event
+              <span className="hidden sm:inline">Create Event</span>
+              <span className="sm:hidden">Create</span>
             </Button>
           </div>
         </div>
 
         <Tabs defaultValue="calendar" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-md mb-6">
-            <TabsTrigger value="calendar">Calendar</TabsTrigger>
-            <TabsTrigger value="sessions">Sessions</TabsTrigger>
-            <TabsTrigger value="history">History</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full sm:grid sm:w-full sm:grid-cols-3 max-w-md mb-6">
+              <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
+              <TabsTrigger value="sessions" className="flex-shrink-0">Sessions</TabsTrigger>
+              <TabsTrigger value="history" className="flex-shrink-0">History</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Unified Calendar View */}
           <TabsContent value="calendar" className="space-y-6">

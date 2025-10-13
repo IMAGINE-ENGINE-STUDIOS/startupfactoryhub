@@ -41,33 +41,33 @@ const MentorDashboard = () => {
   const { profile: profileWithRole } = useProfileWithRole();
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 lg:pb-6">
       <DashboardNavigation />
       
-      <div className="container mx-auto px-6 py-8">
+      <div className="container mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-8">
         {/* Welcome Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center space-x-3 sm:space-x-4">
               <RoleBasedAvatar 
                 avatarUrl={profileWithRole?.avatar_url} 
                 role="mentor"
                 fallbackText={user?.email || 'M'}
-                className="h-16 w-16"
+                className="h-12 w-12 sm:h-16 sm:w-16"
               />
               <div>
-                <h1 className="text-3xl font-bold text-foreground">Welcome back, {profileWithRole?.full_name || 'Mentor'}! 👋</h1>
-                <p className="text-muted-foreground mt-1">Ready to guide the next generation of entrepreneurs?</p>
+                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-foreground">Welcome back, {profileWithRole?.full_name || 'Mentor'}! 👋</h1>
+                <p className="text-sm text-muted-foreground mt-1">Ready to guide the next generation of entrepreneurs?</p>
               </div>
             </div>
-            <div className="flex items-center space-x-3">
-              <Button variant="outline" size="sm">
-                <Bell className="w-4 h-4 mr-2" />
-                Notifications
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
+                <Bell className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Notifications</span>
               </Button>
-              <Button variant="hero" size="sm">
-                <Plus className="w-4 h-4 mr-2" />
-                Share Insights
+              <Button variant="hero" size="sm" className="flex-1 sm:flex-none">
+                <Plus className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Share Insights</span>
               </Button>
             </div>
           </div>
@@ -77,7 +77,7 @@ const MentorDashboard = () => {
         <AIFeaturesHub />
 
         {/* Key Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Active Mentees</CardTitle>
@@ -121,15 +121,17 @@ const MentorDashboard = () => {
 
         {/* Tabbed Dashboard Content */}
         <Tabs defaultValue="feed" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7 max-w-5xl">
-            <TabsTrigger value="feed">Feed</TabsTrigger>
-            <TabsTrigger value="mentees">Mentees</TabsTrigger>
-            <TabsTrigger value="calendar">Calendar</TabsTrigger>
-            <TabsTrigger value="endorsements">Endorsements</TabsTrigger>
-            <TabsTrigger value="resources">Resources</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-7 max-w-5xl">
+              <TabsTrigger value="feed" className="flex-shrink-0">Feed</TabsTrigger>
+              <TabsTrigger value="mentees" className="flex-shrink-0">Mentees</TabsTrigger>
+              <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
+              <TabsTrigger value="endorsements" className="flex-shrink-0">Endorsements</TabsTrigger>
+              <TabsTrigger value="resources" className="flex-shrink-0">Resources</TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
+              <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="feed" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
