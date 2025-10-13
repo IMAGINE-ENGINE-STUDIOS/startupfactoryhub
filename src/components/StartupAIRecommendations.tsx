@@ -124,7 +124,7 @@ export default function StartupAIRecommendations() {
         {recommendations.map((rec, index) => (
           <div
             key={index}
-            className="p-4 rounded-lg border border-border bg-card hover:bg-accent/5 transition-colors"
+            className="p-4 rounded-lg border border-border bg-card"
           >
             <h4 className="font-semibold text-foreground mb-2">{rec.title}</h4>
             <p className="text-sm text-muted-foreground">{rec.description}</p>
