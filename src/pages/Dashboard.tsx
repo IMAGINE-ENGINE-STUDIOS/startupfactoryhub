@@ -25,7 +25,10 @@ import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { 
   Plus,
   Target,
-  Calendar as CalendarIcon
+  Calendar as CalendarIcon,
+  Clock,
+  MapPin,
+  Users
 } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -34,6 +37,8 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
+import { useEvents } from '@/hooks/useEvents';
+import { format, parseISO } from 'date-fns';
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
@@ -41,6 +46,7 @@ const Dashboard = () => {
   const { profile: profileWithRole } = useProfileWithRole();
   const analytics = useStartupAnalytics();
   const roadmapProgress = useRoadmapProgress();
+  const { upcomingEvents } = useEvents();
   const navigate = useNavigate();
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
@@ -228,6 +234,7 @@ const Dashboard = () => {
                 Create Event
               </Button>
             </div>
+            
             <UnifiedCalendar 
               showCreateButton={false}
               onItemClick={(item) => {
@@ -238,6 +245,63 @@ const Dashboard = () => {
               }}
               filterTypes={['event', 'session', 'availability']}
             />
+
+            {/* Upcoming Events with Banners */}
+            {upcomingEvents.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Upcoming Events</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {upcomingEvents.slice(0, 6).map((event) => (
+                      <div
+                        key={event.id}
+                        className="group cursor-pointer"
+                        onClick={() => {
+                          setSelectedEvent(event);
+                          setShowEventDetails(true);
+                        }}
+                      >
+                        <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
+                          {event.banner_url ? (
+                            <img
+                              src={event.banner_url}
+                              alt={event.title}
+                              className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                            />
+                          ) : (
+                            <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                              <CalendarIcon className="h-16 w-16 text-purple-500/30" />
+                            </div>
+                          )}
+                          <div className="p-4">
+                            <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
+                            <div className="space-y-1 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-3 w-3" />
+                                {format(parseISO(event.start_date), 'MMM d, h:mm a')}
+                              </div>
+                              {event.location && (
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-3 w-3" />
+                                  <span className="line-clamp-1">{event.location}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2">
+                                <Users className="h-3 w-3" />
+                                {event.attendees} attending
+                                {event.max_attendees && ` / ${event.max_attendees}`}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Network Tab - Combined Connect & Network */}
