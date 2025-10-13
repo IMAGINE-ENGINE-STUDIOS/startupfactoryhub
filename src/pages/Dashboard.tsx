@@ -174,15 +174,13 @@ const Dashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="feed" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 max-w-7xl">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 max-w-7xl">
             <TabsTrigger value="feed">Feed</TabsTrigger>
             <TabsTrigger value="journey">Journey</TabsTrigger>
-            <TabsTrigger value="connect">Connect</TabsTrigger>
+            <TabsTrigger value="network">Network</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="learn">Learn</TabsTrigger>
-            <TabsTrigger value="network">Network</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
           </TabsList>
 
           {/* Feed Tab */}
@@ -205,11 +203,13 @@ const Dashboard = () => {
             </Card>
           </TabsContent>
 
-          {/* Connect Tab */}
-          <TabsContent value="connect" className="space-y-4">
+          {/* Network Tab - Combined Connect & Network */}
+          <TabsContent value="network" className="space-y-4">
             <div className="space-y-6">
               <MatchingSystem />
               <ConnectionsWidget />
+              <InvestorStartupNetwork />
+              <MentorAdvisorNetwork />
             </div>
           </TabsContent>
 
@@ -223,22 +223,10 @@ const Dashboard = () => {
             <EducationalResources />
           </TabsContent>
 
-          {/* Network Tab */}
-          <TabsContent value="network" className="space-y-4">
-            <div className="space-y-6">
-              <InvestorStartupNetwork />
-              <MentorAdvisorNetwork />
-            </div>
-          </TabsContent>
-
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-4">
-            <AnalyticsDashboard />
-          </TabsContent>
-
-          {/* Intelligence Tab */}
-          <TabsContent value="intelligence" className="space-y-4">
             <div className="space-y-6">
+              <AnalyticsDashboard />
               <StartupAIRecommendations />
               <MarketIntelligenceWidget />
             </div>
