@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import AIAssistant from "./AIAssistant";
+import AIFeaturesDemo from "./AIFeaturesDemo";
 import { 
   Bot, 
   FileText, 
@@ -15,6 +16,7 @@ import {
 
 export default function AIFeaturesHub() {
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
+  const [isDemoOpen, setIsDemoOpen] = useState(false);
 
   const features = [
     {
@@ -30,7 +32,7 @@ export default function AIFeaturesHub() {
       title: 'Smart Summaries',
       description: 'Automatically condense long content into key takeaways',
       icon: FileText,
-      action: () => {},
+      action: () => setIsDemoOpen(true),
       color: 'text-purple-500'
     },
     {
@@ -38,7 +40,7 @@ export default function AIFeaturesHub() {
       title: 'Sentiment Analysis',
       description: 'Understand feedback and communications at scale',
       icon: TrendingUp,
-      action: () => {},
+      action: () => setIsDemoOpen(true),
       color: 'text-green-500'
     },
     {
@@ -46,7 +48,7 @@ export default function AIFeaturesHub() {
       title: 'AI Translator',
       description: 'Communicate globally with instant translations',
       icon: Languages,
-      action: () => {},
+      action: () => setIsDemoOpen(true),
       color: 'text-orange-500'
     },
     {
@@ -54,7 +56,7 @@ export default function AIFeaturesHub() {
       title: 'Document Analysis',
       description: 'Extract insights from images and documents',
       icon: Image,
-      action: () => {},
+      action: () => setIsDemoOpen(true),
       color: 'text-pink-500'
     },
     {
@@ -62,7 +64,7 @@ export default function AIFeaturesHub() {
       title: 'Task Automation',
       description: 'Automate workflows and repetitive tasks',
       icon: Workflow,
-      action: () => {},
+      action: () => setIsDemoOpen(true),
       color: 'text-cyan-500'
     }
   ];
@@ -107,6 +109,21 @@ export default function AIFeaturesHub() {
       </Card>
 
       <AIAssistant isOpen={isAssistantOpen} onClose={() => setIsAssistantOpen(false)} />
+      
+      <Dialog open={isDemoOpen} onOpenChange={setIsDemoOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-primary" />
+              AI Features Demo
+            </DialogTitle>
+            <DialogDescription>
+              Try out all AI-powered features with your own content
+            </DialogDescription>
+          </DialogHeader>
+          <AIFeaturesDemo />
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

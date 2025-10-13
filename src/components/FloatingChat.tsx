@@ -326,19 +326,19 @@ export default function FloatingChat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-background border rounded-lg shadow-2xl flex flex-col z-50">
+        <div className="fixed bottom-6 right-6 w-96 max-h-[calc(100vh-120px)] bg-background border rounded-lg shadow-2xl flex flex-col z-50">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-card">
+          <div className="flex items-center justify-between p-3 border-b bg-card shrink-0">
             <div className="flex items-center gap-2">
               {activeTab === 'ai' ? (
                 <>
                   <Sparkles className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">AI Assistant</h3>
+                  <h3 className="font-semibold text-sm">AI Assistant</h3>
                 </>
               ) : (
                 <>
                   <MessageSquare className="h-5 w-5" />
-                  <h3 className="font-semibold">
+                  <h3 className="font-semibold text-sm">
                     {selectedConversation ? selectedUser?.full_name : 'Messages'}
                   </h3>
                 </>
@@ -349,30 +349,30 @@ export default function FloatingChat() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
+                  className="h-7 w-7"
                   onClick={() => {
                     setSelectedConversation(null);
                     setMessages([]);
                   }}
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3.5 w-3.5" />
                 </Button>
               )}
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-7 w-7"
                 onClick={() => setIsMinimized(!isMinimized)}
               >
-                <Minus className="h-4 w-4" />
+                <Minus className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8"
+                className="h-7 w-7"
                 onClick={() => setIsOpen(false)}
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
@@ -380,14 +380,14 @@ export default function FloatingChat() {
           {!isMinimized && (
             <>
               {/* Tab Navigation */}
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'messages' | 'ai')} className="flex-1 flex flex-col min-h-0">
-                <TabsList className="grid w-full grid-cols-2 mx-3 mt-3">
-                  <TabsTrigger value="messages" className="gap-2">
-                    <MessageSquare className="h-4 w-4" />
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'messages' | 'ai')} className="flex-1 flex flex-col overflow-hidden">
+                <TabsList className="grid w-full grid-cols-2 mx-3 mt-2 mb-2 shrink-0">
+                  <TabsTrigger value="messages" className="gap-2 text-xs">
+                    <MessageSquare className="h-3.5 w-3.5" />
                     Messages
                   </TabsTrigger>
-                  <TabsTrigger value="ai" className="gap-2">
-                    <Bot className="h-4 w-4" />
+                  <TabsTrigger value="ai" className="gap-2 text-xs">
+                    <Bot className="h-3.5 w-3.5" />
                     AI Assistant
                   </TabsTrigger>
                 </TabsList>
@@ -531,46 +531,46 @@ export default function FloatingChat() {
               )}
                 </TabsContent>
 
-                <TabsContent value="ai" className="flex-1 flex flex-col min-h-0 mt-0">
-                  <ScrollArea className="flex-1 p-4">
+                <TabsContent value="ai" className="flex-1 flex flex-col overflow-hidden mt-0 h-[500px]">
+                  <div className="flex-1 overflow-y-auto p-3">
                     {aiMessages.length === 0 && (
-                      <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-                        <Bot className="h-12 w-12 mb-4 opacity-50" />
-                        <p className="text-sm">How can I help you today?</p>
+                      <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground px-4">
+                        <Bot className="h-10 w-10 mb-3 opacity-50" />
+                        <p className="text-sm font-medium">How can I help you today?</p>
                         <p className="text-xs mt-2">Ask me about your startup, funding, mentorship, or learning!</p>
                       </div>
                     )}
                     
-                    <div className="space-y-4">
+                    <div className="space-y-3">
                       {aiMessages.map((message, index) => (
                         <div
                           key={index}
                           className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                         >
                           <div
-                            className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                            className={`max-w-[85%] rounded-lg px-3 py-2 ${
                               message.role === 'user'
                                 ? 'bg-primary text-primary-foreground'
                                 : 'bg-muted'
                             }`}
                           >
-                            <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                           </div>
                         </div>
                       ))}
                       
                       {isAiLoading && (
                         <div className="flex justify-start">
-                          <div className="bg-muted rounded-lg px-4 py-2">
+                          <div className="bg-muted rounded-lg px-3 py-2">
                             <Loader2 className="h-4 w-4 animate-spin" />
                           </div>
                         </div>
                       )}
                       <div ref={aiMessagesEndRef} />
                     </div>
-                  </ScrollArea>
+                  </div>
                   
-                  <div className="border-t p-4">
+                  <div className="border-t p-3 shrink-0">
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
@@ -583,8 +583,9 @@ export default function FloatingChat() {
                         onChange={(e) => setAiInput(e.target.value)}
                         placeholder="Type your message..."
                         disabled={isAiLoading}
+                        className="text-sm"
                       />
-                      <Button type="submit" size="icon" disabled={isAiLoading || !aiInput.trim()}>
+                      <Button type="submit" size="icon" disabled={isAiLoading || !aiInput.trim()} className="shrink-0">
                         <Send className="h-4 w-4" />
                       </Button>
                     </form>
