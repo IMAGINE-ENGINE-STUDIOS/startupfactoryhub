@@ -7,6 +7,7 @@ import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, Doll
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
 
 interface RoadmapStep {
   id: string;
@@ -85,7 +86,7 @@ const roadmapSteps: RoadmapStep[] = [
 export default function StartupRoadmap() {
   const [steps, setSteps] = useState<RoadmapStep[]>(roadmapSteps);
   const [currentStage, setCurrentStage] = useState<string>('idea');
-  const [overallProgress, setOverallProgress] = useState(0);
+  const roadmapProgress = useRoadmapProgress();
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -122,13 +123,6 @@ export default function StartupRoadmap() {
     });
     
     setSteps(updatedSteps);
-    calculateProgress(updatedSteps);
-  };
-
-  const calculateProgress = (stepList: RoadmapStep[]) => {
-    const completedSteps = stepList.filter(step => step.completed).length;
-    const progress = (completedSteps / stepList.length) * 100;
-    setOverallProgress(progress);
   };
 
   const completeStep = async (stepId: string) => {
@@ -166,7 +160,6 @@ export default function StartupRoadmap() {
     }
 
     setSteps(updatedSteps);
-    calculateProgress(updatedSteps);
 
     toast({
       title: "Step Completed!",
@@ -193,11 +186,11 @@ export default function StartupRoadmap() {
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Your Startup Journey</span>
-            <Badge variant="secondary">{Math.round(overallProgress)}% Complete</Badge>
+            <Badge variant="secondary">{roadmapProgress.percentage}% Complete</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Progress value={overallProgress} className="h-3 mb-4" />
+          <Progress value={roadmapProgress.percentage} className="h-3 mb-4" />
           <p className="text-sm text-muted-foreground">
             Follow our proven algorithm to build your startup step by step. Each stage unlocks new resources and opportunities.
           </p>

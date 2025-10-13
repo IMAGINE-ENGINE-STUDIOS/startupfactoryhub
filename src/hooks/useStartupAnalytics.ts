@@ -5,7 +5,6 @@ import { useAuth } from '@/contexts/AuthContext';
 interface AnalyticsData {
   profileViews: number;
   connections: number;
-  progress: number;
   engagement: number;
   loading: boolean;
 }
@@ -15,7 +14,6 @@ export const useStartupAnalytics = () => {
   const [analytics, setAnalytics] = useState<AnalyticsData>({
     profileViews: 0,
     connections: 0,
-    progress: 0,
     engagement: 0,
     loading: true,
   });
@@ -57,42 +55,6 @@ export const useStartupAnalytics = () => {
 
       const companyData = companyQuery.data;
 
-      // Fetch roadmap progress
-      const roadmapQuery = await supabase
-        .from('roadmap_progress')
-        .select('completed')
-        .eq('user_id', user.id);
-
-      const roadmapData = roadmapQuery.data;
-
-      const completedSteps = roadmapData?.filter(step => step.completed).length || 0;
-      const totalSteps = roadmapData?.length || 0;
-
-      // Calculate profile completeness (40%)
-      let profileScore = 0;
-      if (profileData) {
-        if (profileData.full_name) profileScore += 8;
-        if (profileData.bio) profileScore += 8;
-        if (profileData.location) profileScore += 8;
-        if (profileData.website) profileScore += 8;
-        if (profileData.avatar_url) profileScore += 8;
-      }
-
-      // Calculate company completeness (30%)
-      let companyScore = 0;
-      if (companyData) {
-        if (companyData.name) companyScore += 6;
-        if (companyData.description) companyScore += 6;
-        if (companyData.industry) companyScore += 6;
-        if (companyData.stage) companyScore += 6;
-        if (companyData.logo_url) companyScore += 6;
-      }
-
-      // Calculate roadmap progress (30%)
-      const roadmapScore = totalSteps > 0 ? (completedSteps / totalSteps) * 30 : 0;
-
-      const totalProgress = Math.round(profileScore + companyScore + roadmapScore);
-
       // Fetch engagement data (last 30 days)
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -128,7 +90,6 @@ export const useStartupAnalytics = () => {
       setAnalytics({
         profileViews,
         connections: connectionsCount,
-        progress: totalProgress,
         engagement: engagementScore,
         loading: false,
       });
@@ -137,7 +98,6 @@ export const useStartupAnalytics = () => {
       setAnalytics({
         profileViews: 0,
         connections: 0,
-        progress: 0,
         engagement: 0,
         loading: false,
       });

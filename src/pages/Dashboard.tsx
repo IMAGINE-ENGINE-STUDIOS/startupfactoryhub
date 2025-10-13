@@ -28,12 +28,14 @@ import GuestPrompt from '@/components/GuestPrompt';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
+import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const { profile: profileWithRole } = useProfileWithRole();
   const analytics = useStartupAnalytics();
+  const roadmapProgress = useRoadmapProgress();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -153,11 +155,11 @@ const Dashboard = () => {
           
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Progress</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground">Journey Progress</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{analytics.progress}%</div>
-              <p className="text-xs text-muted-foreground">Profile & roadmap</p>
+              <div className="text-2xl font-bold text-primary">{roadmapProgress.percentage}%</div>
+              <p className="text-xs text-muted-foreground">{roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps</p>
             </CardContent>
           </Card>
           
