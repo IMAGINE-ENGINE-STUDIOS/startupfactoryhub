@@ -120,7 +120,7 @@ export default function StartupAIRecommendations() {
           <span>AI Recommendations</span>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 max-h-[600px] overflow-y-auto">
         {recommendations.map((rec, index) => (
           <div
             key={index}
