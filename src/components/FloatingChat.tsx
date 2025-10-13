@@ -380,7 +380,7 @@ export default function FloatingChat() {
           {!isMinimized && (
             <>
               {/* Tab Navigation */}
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'messages' | 'ai')} className="flex-1 flex flex-col overflow-hidden">
+              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'messages' | 'ai')} className="flex-1 flex flex-col min-h-0">
                 <TabsList className="grid w-full grid-cols-2 mx-3 mt-2 mb-2 shrink-0">
                   <TabsTrigger value="messages" className="gap-2 text-xs">
                     <MessageSquare className="h-3.5 w-3.5" />
@@ -392,7 +392,7 @@ export default function FloatingChat() {
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="messages" className="flex-1 flex flex-col min-h-0 mt-0">
+                <TabsContent value="messages" className="flex-1 flex flex-col min-h-0 mt-0 data-[state=active]:flex data-[state=inactive]:hidden">
                   {/* Conversations List */}
                   {!selectedConversation && (
                 <div className="flex-1 flex flex-col min-h-0">
@@ -531,8 +531,8 @@ export default function FloatingChat() {
               )}
                 </TabsContent>
 
-                <TabsContent value="ai" className="flex-1 flex flex-col overflow-hidden mt-0 h-[500px]">
-                  <div className="flex-1 overflow-y-auto p-3">
+                <TabsContent value="ai" className="flex-1 flex flex-col min-h-0 mt-0 data-[state=active]:flex data-[state=inactive]:hidden">
+                  <ScrollArea className="flex-1 p-3">
                     {aiMessages.length === 0 && (
                       <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground px-4">
                         <Bot className="h-10 w-10 mb-3 opacity-50" />
@@ -568,9 +568,9 @@ export default function FloatingChat() {
                       )}
                       <div ref={aiMessagesEndRef} />
                     </div>
-                  </div>
+                  </ScrollArea>
                   
-                  <div className="border-t p-3 shrink-0">
+                  <div className="border-t p-3 shrink-0 bg-background">
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
