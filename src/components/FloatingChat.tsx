@@ -326,7 +326,7 @@ export default function FloatingChat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 w-96 max-h-[calc(100vh-120px)] bg-background border rounded-lg shadow-2xl flex flex-col z-50">
+        <div className="fixed bottom-6 right-6 w-96 h-[600px] bg-background border rounded-lg shadow-2xl flex flex-col z-50">
           {/* Header */}
           <div className="flex items-center justify-between p-3 border-b bg-card shrink-0">
             <div className="flex items-center gap-2">
