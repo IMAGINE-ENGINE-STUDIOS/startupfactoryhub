@@ -8,7 +8,7 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Filter, Search } from 'lucide-react';
+import { DollarSign, TrendingUp, Building, PieChart, Target, Users } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
@@ -236,31 +236,18 @@ export default function InvestorDashboard() {
     <div className="min-h-screen bg-gradient-hero p-4">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <RoleBasedAvatar 
-              avatarUrl={profileWithRole?.avatar_url} 
-              role="investor"
-              fallbackText={user?.email || 'I'}
-              className="h-16 w-16"
-            />
-            <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                {profileWithRole?.full_name || 'Investor'} Dashboard
-              </h1>
-              <p className="text-muted-foreground">Discover and fund the next unicorns</p>
-            </div>
-          </div>
-          
-          <div className="flex space-x-2">
-            <Button variant="outline" onClick={() => setCurrentTab('browse')}>
-              <Filter className="h-4 w-4 mr-2" />
-              Filter
-            </Button>
-            <Button className="pulse-primary" onClick={() => setCurrentTab('browse')}>
-              <Search className="h-4 w-4 mr-2" />
-              Find Startups
-            </Button>
+        <div className="flex items-center space-x-4 mb-8">
+          <RoleBasedAvatar 
+            avatarUrl={profileWithRole?.avatar_url} 
+            role="investor"
+            fallbackText={user?.email || 'I'}
+            className="h-16 w-16"
+          />
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              {profileWithRole?.full_name || 'Investor'} Dashboard
+            </h1>
+            <p className="text-muted-foreground">Discover and fund the next unicorns</p>
           </div>
         </div>
 
