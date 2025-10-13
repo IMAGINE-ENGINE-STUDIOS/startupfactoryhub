@@ -8,7 +8,6 @@ import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import NotificationCenter from '@/components/dashboard/NotificationCenter';
 import StartupRoadmap from '@/components/StartupRoadmap';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
-import AIAssistantButton from '@/components/AIAssistantButton';
 import FloatingChat from '@/components/FloatingChat';
 import StartupAIRecommendations from '@/components/StartupAIRecommendations';
 import MatchingSystem from '@/components/MatchingSystem';
@@ -345,7 +344,6 @@ const Dashboard = () => {
       </div>
 
       {/* Floating Buttons */}
-      <AIAssistantButton />
       <FloatingChat />
 
       {/* Dialogs */}
