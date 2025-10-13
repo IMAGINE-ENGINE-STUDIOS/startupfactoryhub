@@ -18,6 +18,8 @@ import StudyGroups from '@/components/StudyGroups';
 import FloatingChat from '@/components/FloatingChat';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 
 interface Course {
   id: string;
@@ -45,6 +47,7 @@ export default function StudentDashboard() {
   const [certificates, setCertificates] = useState<any[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { profile: profileWithRole } = useProfileWithRole();
 
   useEffect(() => {
     if (user) {
@@ -215,10 +218,15 @@ export default function StudentDashboard() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <img src={companyLogo} alt="Company Logo" className="h-12 w-12" />
+            <RoleBasedAvatar 
+              avatarUrl={profileWithRole?.avatar_url} 
+              role="student"
+              fallbackText={user?.email || 'S'}
+              className="h-16 w-16"
+            />
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Student Dashboard
+                {profileWithRole?.full_name || 'Student'} Dashboard
               </h1>
               <p className="text-muted-foreground">Learn, practice, and build your startup skills</p>
             </div>

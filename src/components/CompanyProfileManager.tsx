@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import PitchDeckUpload from './PitchDeckUpload';
+import AvatarUpload from './AvatarUpload';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export default function CompanyProfileManager() {
   const [company, setCompany] = useState<any>(null);
@@ -34,6 +36,7 @@ export default function CompanyProfileManager() {
   });
   const { user } = useAuth();
   const { toast } = useToast();
+  const { role } = useUserRole();
 
   useEffect(() => {
     if (user) {
@@ -194,6 +197,22 @@ export default function CompanyProfileManager() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Avatar Upload Section */}
+          <div className="flex justify-center mb-6">
+            <AvatarUpload 
+              currentAvatarUrl={userProfile?.avatar_url}
+              onUploadComplete={(url) => {
+                fetchUserProfile();
+                toast({
+                  title: "Profile Updated",
+                  description: "Your avatar has been updated successfully.",
+                });
+              }}
+              size="lg"
+              userRole={role}
+            />
+          </div>
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="text-sm font-medium text-foreground">

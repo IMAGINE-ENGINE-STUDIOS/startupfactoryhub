@@ -20,6 +20,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import MarketIntelligenceWidget from "@/components/MarketIntelligenceWidget";
+import RoleBasedAvatar from "@/components/RoleBasedAvatar";
+import { useProfileWithRole } from "@/hooks/useProfileWithRole";
 import { 
   Users, 
   TrendingUp, 
@@ -36,6 +38,7 @@ import {
 const MentorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { profile: profileWithRole } = useProfileWithRole();
 
   return (
     <div className="min-h-screen bg-background">
@@ -45,9 +48,17 @@ const MentorDashboard = () => {
         {/* Welcome Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">Welcome back, Sarah! 👋</h1>
-              <p className="text-muted-foreground mt-1">Ready to guide the next generation of entrepreneurs?</p>
+            <div className="flex items-center space-x-4">
+              <RoleBasedAvatar 
+                avatarUrl={profileWithRole?.avatar_url} 
+                role="mentor"
+                fallbackText={user?.email || 'M'}
+                className="h-16 w-16"
+              />
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Welcome back, {profileWithRole?.full_name || 'Mentor'}! 👋</h1>
+                <p className="text-muted-foreground mt-1">Ready to guide the next generation of entrepreneurs?</p>
+              </div>
             </div>
             <div className="flex items-center space-x-3">
               <AIQuickActions />

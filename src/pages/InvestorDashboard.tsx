@@ -21,6 +21,7 @@ import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 
 interface Investment {
   id: string;
@@ -40,6 +41,7 @@ export default function InvestorDashboard() {
   const [currentTab, setCurrentTab] = useState('portfolio');
   const { user } = useAuth();
   const { toast } = useToast();
+  const { profile: profileWithRole } = useProfileWithRole();
 
   useEffect(() => {
     if (user) {
@@ -236,10 +238,15 @@ export default function InvestorDashboard() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <img src={companyLogo} alt="Company Logo" className="h-12 w-12" />
+            <RoleBasedAvatar 
+              avatarUrl={profileWithRole?.avatar_url} 
+              role="investor"
+              fallbackText={user?.email || 'I'}
+              className="h-16 w-16"
+            />
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Investor Dashboard
+                {profileWithRole?.full_name || 'Investor'} Dashboard
               </h1>
               <p className="text-muted-foreground">Discover and fund the next unicorns</p>
             </div>

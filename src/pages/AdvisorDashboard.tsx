@@ -18,6 +18,7 @@ import FloatingChat from '@/components/FloatingChat';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 
 interface Startup {
   id: string;
@@ -38,6 +39,7 @@ export default function AdvisorDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { profile: profileWithRole } = useProfileWithRole();
 
   useEffect(() => {
     if (user) {
@@ -252,10 +254,15 @@ export default function AdvisorDashboard() {
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-4 mb-8">
-          <img src={companyLogo} alt="Company Logo" className="h-12 w-12" />
+          <RoleBasedAvatar 
+            avatarUrl={profileWithRole?.avatar_url} 
+            role="advisor"
+            fallbackText={user?.email || 'A'}
+            className="h-16 w-16"
+          />
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Advisor Dashboard
+              {profileWithRole?.full_name || 'Advisor'} Dashboard
             </h1>
             <p className="text-muted-foreground">Guide the next generation of entrepreneurs</p>
           </div>

@@ -45,10 +45,13 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import GuestPrompt from '@/components/GuestPrompt';
+import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<any>(null);
+  const { profile: profileWithRole } = useProfileWithRole();
   const navigate = useNavigate();
   
   // Get current tab from URL params or default to feed (social)
@@ -136,10 +139,15 @@ const Dashboard = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center space-x-4">
-            <img src={companyLogo} alt="Company Logo" className="h-12 w-12" />
+            <RoleBasedAvatar 
+              avatarUrl={profile?.avatar_url} 
+              role={profileWithRole?.role || 'startup'}
+              fallbackText={user?.email || 'U'}
+              className="h-16 w-16"
+            />
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                Startup Dashboard
+                {profile?.full_name || 'Startup'} Dashboard
               </h1>
               <p className="text-muted-foreground">Build, connect, and grow your startup</p>
             </div>
