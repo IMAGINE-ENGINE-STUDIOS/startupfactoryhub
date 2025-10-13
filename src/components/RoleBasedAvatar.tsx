@@ -2,6 +2,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import startupBadge from '@/assets/startup-badge.png';
 import advisorBadge from '@/assets/advisor-badge.png';
 import investorBadge from '@/assets/investor-badge.png';
+import studentBadge from '@/assets/student-badge.png';
+import mentorBadge from '@/assets/mentor-badge.png';
 
 interface RoleBasedAvatarProps {
   avatarUrl?: string | null;
@@ -24,10 +26,13 @@ export default function RoleBasedAvatar({
       case 'startup':
         return startupBadge;
       case 'advisor':
-      case 'mentor':
         return advisorBadge;
+      case 'mentor':
+        return mentorBadge;
       case 'investor':
         return investorBadge;
+      case 'student':
+        return studentBadge;
       default:
         return undefined;
     }

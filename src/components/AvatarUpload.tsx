@@ -8,6 +8,8 @@ import { Camera, Loader2 } from 'lucide-react';
 import startupBadge from '@/assets/startup-badge.png';
 import advisorBadge from '@/assets/advisor-badge.png';
 import investorBadge from '@/assets/investor-badge.png';
+import studentBadge from '@/assets/student-badge.png';
+import mentorBadge from '@/assets/mentor-badge.png';
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
@@ -46,10 +48,13 @@ export default function AvatarUpload({
       case 'startup':
         return startupBadge;
       case 'advisor':
-      case 'mentor':
         return advisorBadge;
+      case 'mentor':
+        return mentorBadge;
       case 'investor':
         return investorBadge;
+      case 'student':
+        return studentBadge;
       default:
         return undefined;
     }
