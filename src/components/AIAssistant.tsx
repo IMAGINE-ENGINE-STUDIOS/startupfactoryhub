@@ -100,10 +100,15 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
   return (
     <Card className="fixed bottom-24 right-6 w-96 h-[600px] shadow-xl z-50 flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b">
-        <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
-          AI Assistant
-        </CardTitle>
+        <div className="flex flex-col gap-1">
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            AI Assistant
+          </CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Get instant help with business advice, mentorship, and learning
+          </p>
+        </div>
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X className="h-4 w-4" />
         </Button>
