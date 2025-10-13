@@ -31,33 +31,39 @@ export const useStartupAnalytics = () => {
 
     try {
       // Fetch real connections count
-      const { count: connectionsCount } = await supabase
+      const connectionsQuery = await supabase
         .from('connections')
         .select('*', { count: 'exact', head: true })
         .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
         .eq('status', 'accepted');
-
       
+      const connectionsCount = connectionsQuery.count || 0;
 
       // Fetch profile data to calculate completeness
-      const { data: profileData } = await supabase
+      const profileQuery = await supabase
         .from('profiles')
         .select('full_name, bio, location, website, avatar_url')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+
+      const profileData = profileQuery.data;
 
       // Fetch company data
-      const { data: companyData } = await supabase
+      const companyQuery = await supabase
         .from('companies')
         .select('name, description, industry, stage, logo_url')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
+
+      const companyData = companyQuery.data;
 
       // Fetch roadmap progress
-      const { data: roadmapData } = await supabase
+      const roadmapQuery = await supabase
         .from('roadmap_progress')
         .select('completed')
         .eq('user_id', user.id);
+
+      const roadmapData = roadmapQuery.data;
 
       const completedSteps = roadmapData?.filter(step => step.completed).length || 0;
       const totalSteps = roadmapData?.length || 0;
@@ -91,44 +97,50 @@ export const useStartupAnalytics = () => {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-      const { data: postsData } = await supabase
+      const postsQuery = await (supabase as any)
         .from('feed_posts')
-        .select('id')
+        .select('*', { count: 'exact', head: true })
         .eq('author_id', user.id)
         .gte('created_at', thirtyDaysAgo.toISOString());
 
-      const { data: commentsData } = await supabase
+      const commentsQuery = await (supabase as any)
         .from('post_comments')
-        .select('id')
+        .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
         .gte('created_at', thirtyDaysAgo.toISOString());
 
-      const { data: likesData } = await supabase
+      const likesQuery = await (supabase as any)
         .from('post_likes')
-        .select('id')
+        .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
         .gte('created_at', thirtyDaysAgo.toISOString());
 
-      const postsCount = postsData?.length || 0;
-      const commentsCount = commentsData?.length || 0;
-      const likesCount = likesData?.length || 0;
+      const postsCount = postsQuery.count || 0;
+      const commentsCount = commentsQuery.count || 0;
+      const likesCount = likesQuery.count || 0;
 
       // Calculate engagement score
       const totalActivity = postsCount * 4 + commentsCount * 2 + likesCount;
       const engagementScore = Math.min(Math.round((totalActivity / 64) * 100), 100);
 
-      const profileViews = Math.round((connectionsCount || 0) * 6 + totalActivity * 2);
+      const profileViews = Math.round(connectionsCount * 6 + totalActivity * 2);
 
       setAnalytics({
         profileViews,
-        connections: connectionsCount || 0,
+        connections: connectionsCount,
         progress: totalProgress,
         engagement: engagementScore,
         loading: false,
       });
     } catch (error) {
       console.error('Error fetching analytics:', error);
-      setAnalytics(prev => ({ ...prev, loading: false }));
+      setAnalytics({
+        profileViews: 0,
+        connections: 0,
+        progress: 0,
+        engagement: 0,
+        loading: false,
+      });
     }
   };
 
