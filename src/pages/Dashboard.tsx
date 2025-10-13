@@ -174,13 +174,14 @@ const Dashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="feed" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 max-w-7xl">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 max-w-7xl">
             <TabsTrigger value="feed">Feed</TabsTrigger>
             <TabsTrigger value="journey">Journey</TabsTrigger>
             <TabsTrigger value="network">Network</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="learn">Learn</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
           </TabsList>
 
           {/* Feed Tab */}
@@ -225,8 +226,12 @@ const Dashboard = () => {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-4">
+            <AnalyticsDashboard />
+          </TabsContent>
+
+          {/* Intelligence Tab */}
+          <TabsContent value="intelligence" className="space-y-4">
             <div className="space-y-6">
-              <AnalyticsDashboard />
               <StartupAIRecommendations />
               <MarketIntelligenceWidget />
             </div>
