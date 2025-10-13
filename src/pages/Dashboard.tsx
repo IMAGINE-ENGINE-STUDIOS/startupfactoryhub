@@ -1,75 +1,43 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import DashboardNavigation from '@/components/DashboardNavigation';
-import AIRoadmapWidget from '@/components/AIRoadmapWidget';
 import ConnectionsWidget from '@/components/ConnectionsWidget';
-import ResourcesWidget from '@/components/ResourcesWidget';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import NotificationCenter from '@/components/dashboard/NotificationCenter';
 import AchievementsBadges from '@/components/dashboard/AchievementsBadges';
 import StartupRoadmap from '@/components/StartupRoadmap';
-import CompanyProfileManager from '@/components/CompanyProfileManager';
-import RoleBasedMatching from '@/components/RoleBasedMatching';
-import EducationalResources from '@/components/EducationalResources';
-import InternshipBoard from '@/components/InternshipBoard';
-import ProfessionalBackground from '@/components/ProfessionalBackground';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
-import AIAssistantPreview from '@/components/AIAssistantPreview';
 import AIAssistantButton from '@/components/AIAssistantButton';
 import FloatingChat from '@/components/FloatingChat';
-import ShortsCarousel from '@/components/ShortsCarousel';
-import AnalyticsDashboard from '@/components/AnalyticsDashboard';
-import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
-import companyLogo from '@/assets/company-logo.png';
+import StartupAIRecommendations from '@/components/StartupAIRecommendations';
 import { 
-  Rocket, 
-  TrendingUp, 
-  Calendar, 
-  MessageSquare,
-  Bell,
-  Settings,
   Plus,
   Users,
   Target,
-  Lightbulb,
-  Building,
-  BookOpen,
-  Heart
+  MessageSquare,
+  TrendingUp
 } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import GuestPrompt from '@/components/GuestPrompt';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
+import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
 
 const Dashboard = () => {
   const { user, loading } = useAuth();
   const [profile, setProfile] = useState<any>(null);
   const { profile: profileWithRole } = useProfileWithRole();
+  const analytics = useStartupAnalytics();
   const navigate = useNavigate();
-  
-  // Get current tab from URL params or default to feed (social)
-  const urlParams = new URLSearchParams(window.location.search);
-  const currentTab = urlParams.get('tab') || 'feed';
 
   useEffect(() => {
     if (user) {
       fetchProfile();
     }
   }, [user]);
-
-  const switchTab = (tab: string) => {
-    const newUrl = `${window.location.pathname}?tab=${tab}`;
-    window.history.pushState({}, '', newUrl);
-    // Trigger a re-render by updating a state or use navigate
-    navigate(`/dashboard?tab=${tab}`, { replace: true });
-  };
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -85,7 +53,7 @@ const Dashboard = () => {
     }
   };
 
-  if (loading) {
+  if (loading || analytics.loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -110,19 +78,16 @@ const Dashboard = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Connect with Mentors</CardTitle>
-                <CardDescription>Get guidance from experienced entrepreneurs</CardDescription>
               </CardHeader>
             </Card>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Find Investors</CardTitle>
-                <CardDescription>Pitch your startup to potential investors</CardDescription>
               </CardHeader>
             </Card>
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">Join Community</CardTitle>
-                <CardDescription>Network with other founders and students</CardDescription>
               </CardHeader>
             </Card>
           </div>
@@ -147,7 +112,7 @@ const Dashboard = () => {
             />
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                {profile?.full_name || 'Startup'} Dashboard
+                Welcome, {profile?.full_name || 'Startup'}
               </h1>
               <p className="text-muted-foreground">Build, connect, and grow your startup</p>
             </div>
@@ -155,7 +120,7 @@ const Dashboard = () => {
           
           <div className="flex items-center space-x-2 sm:space-x-3">
             <NotificationCenter />
-            <Button variant="hero" size="sm" onClick={() => switchTab('feed')} className="flex-1 sm:flex-none">
+            <Button variant="hero" size="sm" onClick={() => navigate('/feed')} className="flex-1 sm:flex-none">
               <Plus className="w-4 h-4 mr-2" />
               <span className="hidden sm:inline">Share Update</span>
               <span className="sm:hidden">Share</span>
@@ -163,15 +128,15 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Real Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">Profile Views</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">142</div>
-              <p className="text-xs text-muted-foreground">+12 this week</p>
+              <div className="text-2xl font-bold">{analytics.profileViews}</div>
+              <p className="text-xs text-muted-foreground">Estimated views</p>
             </CardContent>
           </Card>
           
@@ -180,8 +145,8 @@ const Dashboard = () => {
               <CardTitle className="text-sm font-medium text-muted-foreground">Connections</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">24</div>
-              <p className="text-xs text-muted-foreground">+3 new</p>
+              <div className="text-2xl font-bold">{analytics.connections}</div>
+              <p className="text-xs text-muted-foreground">Active connections</p>
             </CardContent>
           </Card>
           
@@ -190,8 +155,8 @@ const Dashboard = () => {
               <CardTitle className="text-sm font-medium text-muted-foreground">Progress</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">67%</div>
-              <p className="text-xs text-muted-foreground">Profile complete</p>
+              <div className="text-2xl font-bold text-primary">{analytics.progress}%</div>
+              <p className="text-xs text-muted-foreground">Profile & roadmap</p>
             </CardContent>
           </Card>
           
@@ -200,144 +165,84 @@ const Dashboard = () => {
               <CardTitle className="text-sm font-medium text-muted-foreground">Engagement</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">89%</div>
-              <p className="text-xs text-muted-foreground">This month</p>
+              <div className="text-2xl font-bold">{analytics.engagement}%</div>
+              <p className="text-xs text-muted-foreground">Last 30 days</p>
             </CardContent>
           </Card>
         </div>
 
-        {/* AI Features Section */}
-        <div className="mb-6 sm:mb-8">
-          <AIFeaturesHub />
+        {/* Main Content - 2 Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left Column - Main Feed */}
+          <div className="lg:col-span-2 space-y-6">
+            <UnifiedCommunityFeed showCreatePost={true} />
+          </div>
+          
+          {/* Right Sidebar */}
+          <div className="space-y-6">
+            {/* Quick Actions */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate('/dashboard?tab=matching')}
+                >
+                  <Users className="h-4 w-4 mr-2" />
+                  Find Mentors
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate('/explore')}
+                >
+                  <TrendingUp className="h-4 w-4 mr-2" />
+                  Browse Investors
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate('/messages')}
+                >
+                  <MessageSquare className="h-4 w-4 mr-2" />
+                  Messages
+                </Button>
+                <Button 
+                  variant="outline" 
+                  className="w-full justify-start"
+                  onClick={() => navigate('/dashboard?tab=roadmap')}
+                >
+                  <Target className="h-4 w-4 mr-2" />
+                  View Roadmap
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* AI Recommendations */}
+            <StartupAIRecommendations />
+
+            {/* Roadmap Preview */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm">Next Steps</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <StartupRoadmap />
+              </CardContent>
+            </Card>
+
+            {/* Achievement Badges */}
+            <AchievementsBadges />
+          </div>
         </div>
 
-
-        {/* Tabbed Dashboard Content - Feed First */}
-        <Tabs value={currentTab} onValueChange={switchTab} className="space-y-4 sm:space-y-6">
-          <div className="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex sm:grid w-auto sm:w-full grid-cols-4 sm:grid-cols-8 min-w-full sm:min-w-0">
-              <TabsTrigger value="feed" className="whitespace-nowrap">
-                <Heart className="w-4 h-4 mr-1 sm:mr-2" />
-                Feed
-              </TabsTrigger>
-              <TabsTrigger value="roadmap" className="whitespace-nowrap">
-                <Target className="w-4 h-4 mr-1 sm:mr-2" />
-                Journey
-              </TabsTrigger>
-              <TabsTrigger value="matching" className="whitespace-nowrap">
-                <Users className="w-4 h-4 mr-1 sm:mr-2" />
-                Connect
-              </TabsTrigger>
-              <TabsTrigger value="company" className="whitespace-nowrap">
-                <Building className="w-4 h-4 mr-1 sm:mr-2" />
-                Profile
-              </TabsTrigger>
-              <TabsTrigger value="resources" className="whitespace-nowrap">
-                <BookOpen className="w-4 h-4 mr-1 sm:mr-2" />
-                Learn
-              </TabsTrigger>
-              <TabsTrigger value="network" className="whitespace-nowrap">
-                <MessageSquare className="w-4 h-4 mr-1 sm:mr-2" />
-                Network
-              </TabsTrigger>
-              <TabsTrigger value="analytics" className="whitespace-nowrap">
-                <TrendingUp className="w-4 h-4 mr-1 sm:mr-2" />
-                Analytics
-              </TabsTrigger>
-              <TabsTrigger value="intelligence" className="whitespace-nowrap">
-                <Lightbulb className="w-4 h-4 mr-1 sm:mr-2" />
-                Intelligence
-              </TabsTrigger>
-            </TabsList>
-          </div>
-
-          {/* Social Feed - Main Focus */}
-          <TabsContent value="feed" className="space-y-4 sm:space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              {/* Main Feed */}
-              <div className="lg:col-span-2">
-                <UnifiedCommunityFeed showCreatePost={true} />
-              </div>
-              
-              {/* Sidebar */}
-              <div className="space-y-4 sm:space-y-6">
-                {/* Quick Stats Card */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm">Your Stats</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Profile Views</span>
-                      <span className="font-bold">142</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Connections</span>
-                      <span className="font-bold">24</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-muted-foreground">Progress</span>
-                      <span className="font-bold">67%</span>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                {/* Achievement Badges */}
-                <AchievementsBadges />
-                
-                {/* Shorts Preview */}
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-sm">Trending Shorts</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ShortsCarousel onCreateShort={() => navigate('/feed')} />
-                  </CardContent>
-                </Card>
-
-                {/* AI Assistant Preview */}
-                <AIAssistantPreview />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="roadmap" className="space-y-4 sm:space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              <div className="lg:col-span-2">
-                <StartupRoadmap />
-              </div>
-              <div className="space-y-4 sm:space-y-6">
-                <AIRoadmapWidget />
-                <AIAssistantPreview />
-              </div>
-            </div>
-          </TabsContent>
-
-          <TabsContent value="matching" className="space-y-4 sm:space-y-6">
-            <RoleBasedMatching />
-          </TabsContent>
-
-          <TabsContent value="company" className="space-y-4 sm:space-y-6">
-            <CompanyProfileManager />
-          </TabsContent>
-
-          <TabsContent value="resources" className="space-y-4 sm:space-y-6">
-            <EducationalResources />
-          </TabsContent>
-
-          <TabsContent value="network" className="space-y-4 sm:space-y-6">
-            <ConnectionsWidget />
-            <ProfessionalBackground />
-          </TabsContent>
-
-          <TabsContent value="analytics" className="space-y-4 sm:space-y-6">
-            <AnalyticsDashboard />
-          </TabsContent>
-
-          <TabsContent value="intelligence" className="space-y-4 sm:space-y-6">
-            <MarketIntelligenceWidget />
-          </TabsContent>
-        </Tabs>
+        {/* AI Features Hub at Bottom */}
+        <div className="mt-8">
+          <AIFeaturesHub />
+        </div>
       </div>
 
       {/* Floating Buttons */}
