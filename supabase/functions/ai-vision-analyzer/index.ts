@@ -52,28 +52,47 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'google/gemini-2.5-pro',
         messages: [
           { role: "system", content: systemPrompt },
           { 
             role: "user", 
             content: [
               { type: "text", text: userPrompt },
-              { type: "image_url", image_url: { url: imageUrl } }
+              { 
+                type: "image_url", 
+                image_url: { 
+                  url: imageUrl,
+                  detail: "high"
+                } 
+              }
             ]
           }
         ],
+        max_tokens: 4096
       }),
     });
 
     if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`AI API error ${response.status}:`, errorText);
+      
       if (response.status === 429) {
         return new Response(
           JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
-      throw new Error(`AI API error: ${response.status}`);
+      if (response.status === 402) {
+        return new Response(
+          JSON.stringify({ error: 'AI credits exhausted. Please add credits.' }),
+          { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      return new Response(
+        JSON.stringify({ error: `AI API error: ${response.status}. ${errorText}` }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const data = await response.json();
