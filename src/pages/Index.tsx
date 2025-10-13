@@ -1,5 +1,6 @@
 import Navigation from "@/components/Navigation";
 import HeroSection from "@/components/HeroSection";
+import NasdaqFeature from "@/components/NasdaqFeature";
 import FeaturesSection from "@/components/FeaturesSection";
 import CommunitySection from "@/components/CommunitySection";
 import AIAssistantPreview from "@/components/AIAssistantPreview";
@@ -11,6 +12,7 @@ const Index = () => {
     <div className="min-h-screen">
       <Navigation />
       <HeroSection />
+      <NasdaqFeature />
       <FeaturesSection />
       <PartnersCarousel />
       <CommunitySection />
