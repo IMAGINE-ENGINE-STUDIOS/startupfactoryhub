@@ -18,9 +18,14 @@ import MentorAdvisorNetwork from '@/components/MentorAdvisorNetwork';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import CompanyProfileManager from '@/components/CompanyProfileManager';
+import UnifiedCalendar from '@/components/UnifiedCalendar';
+import { CreateEventDialog } from '@/components/CreateEventDialog';
+import { EventDetailsDialog } from '@/components/EventDetailsDialog';
+import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { 
   Plus,
-  Target
+  Target,
+  Calendar as CalendarIcon
 } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -37,6 +42,10 @@ const Dashboard = () => {
   const analytics = useStartupAnalytics();
   const roadmapProgress = useRoadmapProgress();
   const navigate = useNavigate();
+  const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
+  const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
+  const [showEventDetails, setShowEventDetails] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
 
   useEffect(() => {
     if (user) {
@@ -176,9 +185,10 @@ const Dashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="feed" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-7 max-w-7xl">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 max-w-7xl">
             <TabsTrigger value="feed">Feed</TabsTrigger>
             <TabsTrigger value="journey">Journey</TabsTrigger>
+            <TabsTrigger value="calendar">Calendar</TabsTrigger>
             <TabsTrigger value="network">Network</TabsTrigger>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="learn">Learn</TabsTrigger>
@@ -204,6 +214,21 @@ const Dashboard = () => {
                 <StartupRoadmap />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Calendar Tab */}
+          <TabsContent value="calendar" className="space-y-4">
+            <UnifiedCalendar 
+              showCreateButton={true}
+              onCreateEvent={() => setCreateEventDialogOpen(true)}
+              onItemClick={(item) => {
+                if (item.type === 'event') {
+                  setSelectedEvent(item);
+                  setShowEventDetails(true);
+                }
+              }}
+              filterTypes={['event', 'session', 'availability']}
+            />
           </TabsContent>
 
           {/* Network Tab - Combined Connect & Network */}
@@ -249,6 +274,32 @@ const Dashboard = () => {
       {/* Floating Buttons */}
       <AIAssistantButton />
       <FloatingChat />
+
+      {/* Dialogs */}
+      <CreateEventDialog 
+        open={createEventDialogOpen}
+        onOpenChange={setCreateEventDialogOpen}
+        onEventCreated={() => {
+          setCreateEventDialogOpen(false);
+        }}
+      />
+      <CreateSessionDialog 
+        open={createSessionDialogOpen}
+        onOpenChange={setCreateSessionDialogOpen}
+        onSessionCreated={() => {
+          setCreateSessionDialogOpen(false);
+        }}
+      />
+      {selectedEvent && (
+        <EventDetailsDialog 
+          event={selectedEvent}
+          open={showEventDetails}
+          onOpenChange={setShowEventDetails}
+          onEventUpdated={() => {
+            setShowEventDetails(false);
+          }}
+        />
+      )}
     </div>
   );
 };
