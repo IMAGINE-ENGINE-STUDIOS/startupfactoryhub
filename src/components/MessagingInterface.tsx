@@ -216,9 +216,9 @@ const MessagingInterface = memo(function MessagingInterface() {
   );
 
   return (
-    <div className="h-[calc(100vh-200px)] flex gap-4">
+    <div className="h-[calc(100vh-200px)] flex flex-col lg:flex-row gap-4">
       {/* Conversations List */}
-      <Card className="w-80 flex flex-col">
+      <Card className={`w-full lg:w-80 flex flex-col ${selectedConversation ? 'hidden lg:flex' : 'flex'}`}>
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-xl flex items-center gap-2">
@@ -319,11 +319,19 @@ const MessagingInterface = memo(function MessagingInterface() {
       </Card>
 
       {/* Messages Area */}
-      <Card className="flex-1 flex flex-col">
+      <Card className={`flex-1 flex flex-col ${selectedConversation ? 'flex' : 'hidden lg:flex'}`}>
         {selectedConversation && selectedUser ? (
           <>
             <CardHeader className="pb-3 border-b">
               <div className="flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="lg:hidden"
+                  onClick={() => setSelectedConversation(null)}
+                >
+                  ← Back
+                </Button>
                 <Avatar>
                 {selectedUser.avatar_url && <AvatarImage src={selectedUser.avatar_url} />}
                 <AvatarFallback>{selectedUser.full_name?.charAt(0) || 'U'}</AvatarFallback>

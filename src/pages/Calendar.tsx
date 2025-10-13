@@ -48,7 +48,7 @@ export default function Calendar() {
     <div className="min-h-screen bg-background">
       <DashboardNavigation />
       
-      <div className="container mx-auto px-4 py-6 pt-20 max-w-7xl">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-6 pt-16 sm:pt-20 max-w-7xl pb-20 lg:pb-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <div>

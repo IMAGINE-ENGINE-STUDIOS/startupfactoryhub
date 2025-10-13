@@ -267,31 +267,31 @@ export default function UnifiedCalendar({
           <CardHeader>
             <CardTitle>Calendar View</CardTitle>
           </CardHeader>
-          <CardContent className="flex justify-center p-6">
+          <CardContent className="flex justify-center p-2 sm:p-6 overflow-x-auto">
             <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={setSelectedDate}
-              className="rounded-md border pointer-events-auto w-full"
+              className="rounded-md border pointer-events-auto w-full max-w-full"
               classNames={{
                 months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 w-full",
                 month: "space-y-4 w-full",
                 table: "w-full border-collapse",
                 head_row: "flex w-full",
-                head_cell: "text-muted-foreground rounded-md flex-1 font-medium text-sm",
+                head_cell: "text-muted-foreground rounded-md flex-1 font-medium text-[10px] sm:text-sm",
                 row: "flex w-full mt-2",
-                cell: "flex-1 text-center text-sm p-0 relative h-12 sm:h-14 md:h-16",
-                day: "h-12 w-full sm:h-14 md:h-16 p-0 font-normal aria-selected:opacity-100 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors",
+                cell: "flex-1 text-center text-[10px] sm:text-sm p-0 relative h-9 sm:h-12 md:h-16",
+                day: "h-9 w-full sm:h-12 md:h-16 p-0 font-normal aria-selected:opacity-100 rounded-md hover:bg-accent hover:text-accent-foreground transition-colors text-[10px] sm:text-sm",
                 day_selected: "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground font-bold",
                 day_today: "bg-accent text-accent-foreground font-semibold ring-2 ring-primary ring-offset-2",
-                caption_label: "text-base font-semibold",
-                nav_button: "h-8 w-8 bg-transparent p-0 opacity-70 hover:opacity-100 hover:bg-accent transition-all",
+                caption_label: "text-sm sm:text-base font-semibold",
+                nav_button: "h-7 w-7 sm:h-8 sm:w-8 bg-transparent p-0 opacity-70 hover:opacity-100 hover:bg-accent transition-all",
               }}
               modifiers={{
                 hasItem: getDatesWithItems()
               }}
               modifiersClassNames={{
-                hasItem: "relative font-bold text-primary after:content-[''] after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1.5 after:h-1.5 after:rounded-full after:bg-primary"
+                hasItem: "relative font-bold text-primary after:content-[''] after:absolute after:bottom-0.5 sm:after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 sm:after:w-1.5 sm:after:h-1.5 after:rounded-full after:bg-primary"
               }}
             />
           </CardContent>
@@ -300,11 +300,11 @@ export default function UnifiedCalendar({
         {/* Items List */}
         <Card>
           <CardHeader>
-            <CardTitle>
-              {selectedDate ? format(selectedDate, 'MMMM d, yyyy') : 'Select a date'}
+            <CardTitle className="text-base sm:text-lg">
+              {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Select a date'}
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3 max-h-[600px] overflow-y-auto">
+          <CardContent className="space-y-3 max-h-[400px] sm:max-h-[600px] overflow-y-auto">
             {selectedDateItems.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />

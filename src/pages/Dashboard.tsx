@@ -115,23 +115,23 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20 lg:pb-6">
       
-      <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
+      <div className="container mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+          <div className="flex items-center space-x-3 sm:space-x-4">
             <RoleBasedAvatar 
               avatarUrl={profile?.avatar_url} 
               role={profileWithRole?.role || 'startup'}
               fallbackText={user?.email || 'U'}
-              className="h-16 w-16"
+              className="h-12 w-12 sm:h-16 sm:w-16"
             />
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Welcome, {profile?.full_name || 'Startup'}
               </h1>
-              <p className="text-muted-foreground">Build, connect, and grow your startup</p>
+              <p className="text-sm text-muted-foreground">Build, connect, and grow your startup</p>
             </div>
           </div>
           
@@ -139,60 +139,62 @@ const Dashboard = () => {
         </div>
 
         {/* Real Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Profile Views</CardTitle>
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Profile Views</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analytics.profileViews}</div>
-              <p className="text-xs text-muted-foreground">Estimated views</p>
+              <div className="text-xl sm:text-2xl font-bold">{analytics.profileViews}</div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Estimated views</p>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Connections</CardTitle>
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Connections</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analytics.connections}</div>
-              <p className="text-xs text-muted-foreground">Active connections</p>
+              <div className="text-xl sm:text-2xl font-bold">{analytics.connections}</div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Active connections</p>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Journey Progress</CardTitle>
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Journey Progress</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-primary">{roadmapProgress.percentage}%</div>
-              <p className="text-xs text-muted-foreground">{roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps</p>
+              <div className="text-xl sm:text-2xl font-bold text-primary">{roadmapProgress.percentage}%</div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">{roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps</p>
             </CardContent>
           </Card>
           
           <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Engagement</CardTitle>
+            <CardHeader className="pb-2 sm:pb-3">
+              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Engagement</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{analytics.engagement}%</div>
-              <p className="text-xs text-muted-foreground">Last 30 days</p>
+              <div className="text-xl sm:text-2xl font-bold">{analytics.engagement}%</div>
+              <p className="text-[10px] sm:text-xs text-muted-foreground">Last 30 days</p>
             </CardContent>
           </Card>
         </div>
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="feed" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 max-w-7xl">
-            <TabsTrigger value="feed">Feed</TabsTrigger>
-            <TabsTrigger value="journey">Journey</TabsTrigger>
-            <TabsTrigger value="calendar">Calendar</TabsTrigger>
-            <TabsTrigger value="network">Network</TabsTrigger>
-            <TabsTrigger value="profile">Profile</TabsTrigger>
-            <TabsTrigger value="learn">Learn</TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
-            <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-7xl">
+              <TabsTrigger value="feed" className="flex-shrink-0">Feed</TabsTrigger>
+              <TabsTrigger value="journey" className="flex-shrink-0">Journey</TabsTrigger>
+              <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
+              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
+              <TabsTrigger value="profile" className="flex-shrink-0">Profile</TabsTrigger>
+              <TabsTrigger value="learn" className="flex-shrink-0">Learn</TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
+              <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* Feed Tab */}
           <TabsContent value="feed" className="space-y-4">
@@ -216,14 +218,14 @@ const Dashboard = () => {
 
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-4">
-            <div className="flex items-center justify-end gap-2 mb-4">
-              <Button onClick={() => setCreateSessionDialogOpen(true)} variant="outline" className="gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
+              <Button onClick={() => setCreateSessionDialogOpen(true)} variant="outline" className="gap-2 w-full sm:w-auto">
                 <CalendarIcon className="h-4 w-4" />
-                Schedule Session
+                <span className="sm:inline">Schedule Session</span>
               </Button>
-              <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2">
+              <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2 w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
-                Create Event
+                <span className="sm:inline">Create Event</span>
               </Button>
             </div>
             
