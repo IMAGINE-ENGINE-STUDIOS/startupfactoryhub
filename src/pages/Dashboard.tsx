@@ -218,24 +218,15 @@ const Dashboard = () => {
 
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-4">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <CalendarIcon className="h-6 w-6 text-primary" />
-                <div>
-                  <h2 className="text-2xl font-bold">Calendar & Sessions</h2>
-                  <p className="text-sm text-muted-foreground">Schedule mentoring sessions and manage events</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={() => setCreateSessionDialogOpen(true)} variant="outline" className="gap-2">
-                  <CalendarIcon className="h-4 w-4" />
-                  Schedule Session
-                </Button>
-                <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2">
-                  <Plus className="h-4 w-4" />
-                  Create Event
-                </Button>
-              </div>
+            <div className="flex items-center justify-end gap-2 mb-4">
+              <Button onClick={() => setCreateSessionDialogOpen(true)} variant="outline" className="gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                Schedule Session
+              </Button>
+              <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Create Event
+              </Button>
             </div>
             <UnifiedCalendar 
               showCreateButton={false}
