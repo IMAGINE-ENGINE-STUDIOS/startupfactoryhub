@@ -2,22 +2,25 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import DashboardNavigation from '@/components/DashboardNavigation';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import ConnectionsWidget from '@/components/ConnectionsWidget';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import NotificationCenter from '@/components/dashboard/NotificationCenter';
-import AchievementsBadges from '@/components/dashboard/AchievementsBadges';
 import StartupRoadmap from '@/components/StartupRoadmap';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import AIAssistantButton from '@/components/AIAssistantButton';
 import FloatingChat from '@/components/FloatingChat';
 import StartupAIRecommendations from '@/components/StartupAIRecommendations';
+import MatchingSystem from '@/components/MatchingSystem';
+import EducationalResources from '@/components/EducationalResources';
+import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
+import MentorAdvisorNetwork from '@/components/MentorAdvisorNetwork';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import CompanyProfileManager from '@/components/CompanyProfileManager';
 import { 
   Plus,
-  Users,
-  Target,
-  MessageSquare,
-  TrendingUp
+  Target
 } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -68,7 +71,6 @@ const Dashboard = () => {
   if (!user) {
     return (
       <div className="min-h-screen bg-background">
-        <DashboardNavigation />
         <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
           <GuestPrompt 
             feature="Full Dashboard"
@@ -97,8 +99,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 lg:pb-8">
-      <DashboardNavigation />
+    <div className="min-h-screen bg-background">
       
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-8">
         {/* Header */}
@@ -171,73 +172,78 @@ const Dashboard = () => {
           </Card>
         </div>
 
-        {/* Main Content - 2 Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Main Feed */}
-          <div className="lg:col-span-2 space-y-6">
+        {/* Tabs Navigation */}
+        <Tabs defaultValue="feed" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8 max-w-7xl">
+            <TabsTrigger value="feed">Feed</TabsTrigger>
+            <TabsTrigger value="journey">Journey</TabsTrigger>
+            <TabsTrigger value="connect">Connect</TabsTrigger>
+            <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsTrigger value="learn">Learn</TabsTrigger>
+            <TabsTrigger value="network">Network</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
+          </TabsList>
+
+          {/* Feed Tab */}
+          <TabsContent value="feed" className="space-y-4">
             <UnifiedCommunityFeed showCreatePost={true} />
-          </div>
-          
-          {/* Right Sidebar */}
-          <div className="space-y-6">
-            {/* Quick Actions */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => navigate('/dashboard?tab=matching')}
-                >
-                  <Users className="h-4 w-4 mr-2" />
-                  Find Mentors
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => navigate('/explore')}
-                >
-                  <TrendingUp className="h-4 w-4 mr-2" />
-                  Browse Investors
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => navigate('/messages')}
-                >
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Messages
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  onClick={() => navigate('/dashboard?tab=roadmap')}
-                >
-                  <Target className="h-4 w-4 mr-2" />
-                  View Roadmap
-                </Button>
-              </CardContent>
-            </Card>
+          </TabsContent>
 
-            {/* AI Recommendations */}
-            <StartupAIRecommendations />
-
-            {/* Roadmap Preview */}
-            <Card>
+          {/* Journey Tab */}
+          <TabsContent value="journey" className="space-y-4">
+            <Card className="tech-card border-0">
               <CardHeader>
-                <CardTitle className="text-sm">Next Steps</CardTitle>
+                <CardTitle className="flex items-center space-x-2">
+                  <Target className="h-5 w-5 text-primary" />
+                  <span>Your Startup Journey</span>
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <StartupRoadmap />
               </CardContent>
             </Card>
+          </TabsContent>
 
-            {/* Achievement Badges */}
-            <AchievementsBadges />
-          </div>
-        </div>
+          {/* Connect Tab */}
+          <TabsContent value="connect" className="space-y-4">
+            <div className="space-y-6">
+              <MatchingSystem />
+              <ConnectionsWidget />
+            </div>
+          </TabsContent>
+
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="space-y-4">
+            <CompanyProfileManager />
+          </TabsContent>
+
+          {/* Learn Tab */}
+          <TabsContent value="learn" className="space-y-4">
+            <EducationalResources />
+          </TabsContent>
+
+          {/* Network Tab */}
+          <TabsContent value="network" className="space-y-4">
+            <div className="space-y-6">
+              <InvestorStartupNetwork />
+              <MentorAdvisorNetwork />
+            </div>
+          </TabsContent>
+
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-4">
+            <AnalyticsDashboard />
+          </TabsContent>
+
+          {/* Intelligence Tab */}
+          <TabsContent value="intelligence" className="space-y-4">
+            <div className="space-y-6">
+              <StartupAIRecommendations />
+              <MarketIntelligenceWidget />
+            </div>
+          </TabsContent>
+        </Tabs>
 
         {/* AI Features Hub at Bottom */}
         <div className="mt-8">
