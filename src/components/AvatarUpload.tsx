@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Camera, Loader2 } from 'lucide-react';
 import startupBadge from '@/assets/startup-badge.png';
 import advisorBadge from '@/assets/advisor-badge.png';
+import investorBadge from '@/assets/investor-badge.png';
 
 interface AvatarUploadProps {
   currentAvatarUrl?: string | null;
@@ -47,6 +48,8 @@ export default function AvatarUpload({
       case 'advisor':
       case 'mentor':
         return advisorBadge;
+      case 'investor':
+        return investorBadge;
       default:
         return undefined;
     }
