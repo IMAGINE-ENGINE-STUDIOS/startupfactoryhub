@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Sparkles, ArrowRight, Loader2 } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Recommendation {
@@ -128,21 +127,9 @@ export default function StartupAIRecommendations() {
             className="p-4 rounded-lg border border-border bg-card hover:bg-accent/5 transition-colors"
           >
             <h4 className="font-semibold text-foreground mb-2">{rec.title}</h4>
-            <p className="text-sm text-muted-foreground mb-3">{rec.description}</p>
-            <Button variant="ghost" size="sm" className="text-primary hover:text-primary">
-              {rec.action}
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
+            <p className="text-sm text-muted-foreground">{rec.description}</p>
           </div>
         ))}
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={fetchRecommendations}
-        >
-          <Sparkles className="h-4 w-4 mr-2" />
-          Refresh Recommendations
-        </Button>
       </CardContent>
     </Card>
   );
