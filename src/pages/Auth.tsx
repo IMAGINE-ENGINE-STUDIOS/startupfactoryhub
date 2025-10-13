@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Rocket, Mail, Lock, User, UserCheck } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { signInSchema, signUpSchema } from '@/lib/validations';
+import logo from '@/assets/logo.png';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -135,9 +136,7 @@ export default function Auth() {
         <Card className="tech-card border-0">
           <CardHeader className="text-center">
             <div className="flex justify-center mb-4">
-              <div className="p-3 rounded-full bg-gradient-primary">
-                <Rocket className="h-8 w-8 text-primary-foreground" />
-              </div>
+              <img src={logo} alt="Startup Factory Hub" className="w-16 h-16 glow-effect" />
             </div>
             <CardTitle className="text-2xl bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               Startup Factory Hub
