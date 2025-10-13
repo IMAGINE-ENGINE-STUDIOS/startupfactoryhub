@@ -9,7 +9,7 @@ import MentorRoadmapWidget from "@/components/MentorRoadmapWidget";
 import MentorCalendarWidget from "@/components/MentorCalendarWidget";
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
 import AIFeaturesHub from "@/components/AIFeaturesHub";
-import AIQuickActions from "@/components/AIQuickActions";
+
 import MentorshipRequests from "@/components/MentorshipRequests";
 import ConnectionsWidget from "@/components/ConnectionsWidget";
 import ResourcesWidget from "@/components/ResourcesWidget";
@@ -61,7 +61,6 @@ const MentorDashboard = () => {
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <AIQuickActions />
               <Button variant="outline" size="sm">
                 <Bell className="w-4 h-4 mr-2" />
                 Notifications

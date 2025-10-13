@@ -12,7 +12,7 @@ import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Filter, Sear
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
-import AIQuickActions from '@/components/AIQuickActions';
+
 import StartupRecommendationsWidget from '@/components/StartupRecommendationsWidget';
 import StartupBrowser from '@/components/StartupBrowser';
 import FloatingChat from '@/components/FloatingChat';
@@ -253,7 +253,6 @@ export default function InvestorDashboard() {
           </div>
           
           <div className="flex space-x-2">
-            <AIQuickActions />
             <Button variant="outline" onClick={() => setCurrentTab('browse')}>
               <Filter className="h-4 w-4 mr-2" />
               Filter
@@ -431,6 +430,9 @@ export default function InvestorDashboard() {
             <MarketIntelligenceWidget />
           </TabsContent>
         </Tabs>
+
+        {/* AI Features Hub */}
+        <AIFeaturesHub />
       </div>
 
       {/* Floating Chat with AI */}

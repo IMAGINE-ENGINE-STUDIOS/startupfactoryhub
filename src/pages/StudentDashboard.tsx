@@ -12,7 +12,7 @@ import { BookOpen, Users, Trophy, Target, Play, CheckCircle, Clock, Star } from 
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
-import AIQuickActions from '@/components/AIQuickActions';
+
 import Leaderboard from '@/components/Leaderboard';
 import StudyGroups from '@/components/StudyGroups';
 import FloatingChat from '@/components/FloatingChat';
@@ -233,7 +233,6 @@ export default function StudentDashboard() {
           </div>
           
           <div className="flex gap-2">
-            <AIQuickActions />
             <Button className="pulse-primary">
               <Play className="h-4 w-4 mr-2" />
               Continue Learning
