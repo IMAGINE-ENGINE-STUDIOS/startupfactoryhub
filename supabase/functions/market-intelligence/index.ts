@@ -25,8 +25,9 @@ serve(async (req) => {
 Return ONLY valid JSON without any markdown formatting or code blocks.`;
 
     let userPrompt = '';
+    const upperType = type.toUpperCase();
     
-    if (type === 'STARTUPS') {
+    if (upperType === 'STARTUP' || upperType === 'STARTUPS') {
       // Check if this is a request for trending companies or predictions
       if (query.toLowerCase().includes('trending') || query.toLowerCase().includes('top')) {
         userPrompt = `Search the internet for: "${query}"
@@ -90,7 +91,7 @@ Provide detailed analysis in this JSON format:
   ]
 }`;
       }
-    } else if (type === 'INDUSTRIES') {
+    } else if (upperType === 'INDUSTRY' || upperType === 'INDUSTRIES') {
       if (query.toLowerCase().includes('insight') || query.toLowerCase().includes('metric')) {
         userPrompt = `Search the internet for: "${query}"
 
@@ -130,7 +131,7 @@ Provide detailed analysis in this JSON format:
   ]
 }`;
       }
-    } else if (type === 'INVESTORS') {
+    } else if (upperType === 'INVESTOR' || upperType === 'INVESTORS') {
       userPrompt = `Search the internet and analyze investor: "${query}"
 
 Provide detailed analysis in this JSON format:
