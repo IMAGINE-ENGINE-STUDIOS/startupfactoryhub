@@ -15,9 +15,11 @@ interface Investor {
   full_name: string;
   avatar_url?: string;
   preferred_industries: string[];
+  preferred_stages?: string[];
   investment_range_min?: number;
   investment_range_max?: number;
   portfolio_size?: number;
+  total_invested?: number;
   bio?: string;
   connection_type: 'invested' | 'interested';
   investment_amount?: number;
@@ -107,9 +109,11 @@ export default function StartupInvestorNetwork() {
           full_name: userProfile.full_name || 'Unknown',
           avatar_url: userProfile.avatar_url || undefined,
           preferred_industries: investorProfile.preferred_industries || [],
+          preferred_stages: investorProfile.preferred_stages || [],
           investment_range_min: investorProfile.investment_range_min || undefined,
           investment_range_max: investorProfile.investment_range_max || undefined,
           portfolio_size: investorProfile.portfolio_size || undefined,
+          total_invested: investorProfile.total_invested || undefined,
           bio: userProfile.bio || undefined,
           connection_type: investment ? 'invested' : 'interested',
           investment_amount: investment?.amount || undefined,
