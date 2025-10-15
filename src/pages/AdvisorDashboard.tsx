@@ -17,7 +17,6 @@ import AvailabilityManager from '@/components/AvailabilityManager';
 import FloatingChat from '@/components/FloatingChat';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
-import AIFeaturesHub from '@/components/AIFeaturesHub';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import StartupProfileDialog from '@/components/StartupProfileDialog';
 
@@ -510,14 +509,9 @@ export default function AdvisorDashboard() {
             <MarketIntelligenceWidget />
           </TabsContent>
         </Tabs>
-
-        {/* AI Features Hub */}
-        <div className="mt-8">
-          <AIFeaturesHub />
-        </div>
       </div>
 
-      <StartupProfileDialog 
+      <StartupProfileDialog
         company={selectedStartup}
         open={dialogOpen}
         onOpenChange={setDialogOpen}

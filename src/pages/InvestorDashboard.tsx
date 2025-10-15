@@ -11,7 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 import { DollarSign, TrendingUp, Building, PieChart, Target, Users } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
-import AIFeaturesHub from '@/components/AIFeaturesHub';
 
 import StartupRecommendationsWidget from '@/components/StartupRecommendationsWidget';
 import StartupBrowser from '@/components/StartupBrowser';
@@ -461,9 +460,6 @@ export default function InvestorDashboard() {
             <MarketIntelligenceWidget />
           </TabsContent>
         </Tabs>
-
-        {/* AI Features Hub */}
-        <AIFeaturesHub />
       </div>
 
       {/* Floating Chat with AI */}

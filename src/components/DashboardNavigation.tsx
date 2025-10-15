@@ -26,7 +26,8 @@ import {
   BarChart3,
   Compass,
   Video,
-  Sparkles
+  Sparkles,
+  Workflow
 } from "lucide-react";
 
 const DashboardNavigation = () => {
@@ -105,6 +106,15 @@ const DashboardNavigation = () => {
                 variant="ghost" 
                 size="sm"
                 className="flex items-center space-x-2"
+                onClick={() => navigate("/tools")}
+              >
+                <Workflow className="w-4 h-4" />
+                <span>AI Tools</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="flex items-center space-x-2"
                 onClick={() => navigate("/analytics")}
               >
                 <BarChart3 className="w-4 h-4" />
@@ -178,7 +188,7 @@ const DashboardNavigation = () => {
 
       {/* Mobile Bottom Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-ocean-border pb-safe">
-        <div className="grid grid-cols-6 gap-1 px-2 py-2">
+        <div className="grid grid-cols-5 gap-1 px-2 py-2">
           <Button
             variant="ghost"
             size="sm"
@@ -192,19 +202,19 @@ const DashboardNavigation = () => {
             variant="ghost"
             size="sm"
             className="flex flex-col items-center space-y-1 h-auto py-2"
-            onClick={() => navigate("/explore")}
+            onClick={() => navigate("/feed")}
           >
-            <Compass className="w-5 h-5" />
-            <span className="text-xs">Explore</span>
+            <Users className="w-5 h-5" />
+            <span className="text-xs">Feed</span>
           </Button>
           <Button
             variant="ghost"
             size="sm"
             className="flex flex-col items-center space-y-1 h-auto py-2"
-            onClick={() => navigate("/feed")}
+            onClick={() => navigate("/tools")}
           >
-            <Users className="w-5 h-5" />
-            <span className="text-xs">Community</span>
+            <Workflow className="w-5 h-5" />
+            <span className="text-xs">Tools</span>
           </Button>
           <Button
             variant="ghost"
@@ -219,19 +229,10 @@ const DashboardNavigation = () => {
             variant="ghost"
             size="sm"
             className="flex flex-col items-center space-y-1 h-auto py-2"
-            onClick={() => navigate("/analytics")}
+            onClick={() => navigate("/explore")}
           >
-            <BarChart3 className="w-5 h-5" />
-            <span className="text-xs">Stats</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex flex-col items-center space-y-1 h-auto py-2"
-            onClick={() => navigate("/market-intelligence")}
-          >
-            <Sparkles className="w-5 h-5" />
-            <span className="text-xs">Intel</span>
+            <Compass className="w-5 h-5" />
+            <span className="text-xs">More</span>
           </Button>
         </div>
       </div>

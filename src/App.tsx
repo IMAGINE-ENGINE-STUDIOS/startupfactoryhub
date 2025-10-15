@@ -25,6 +25,7 @@ const MarketIntelligence = lazy(() => import("./pages/MarketIntelligence"));
 const Explore = lazy(() => import("./pages/Explore"));
 const MentoringSessions = lazy(() => import("./pages/MentoringSessions"));
 const Calendar = lazy(() => import("./pages/Calendar"));
+const Tools = lazy(() => import("./pages/Tools"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -71,6 +72,7 @@ const App = () => (
                   <Route path="/market-intelligence" element={<MarketIntelligence />} />
                   <Route path="/explore" element={<Explore />} />
                   <Route path="/profile" element={<StartupProfile />} />
+                  <Route path="/tools" element={<Tools />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>

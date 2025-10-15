@@ -8,7 +8,6 @@ import DashboardNavigation from "@/components/DashboardNavigation";
 import MentorRoadmapWidget from "@/components/MentorRoadmapWidget";
 import MentorCalendarWidget from "@/components/MentorCalendarWidget";
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
-import AIFeaturesHub from "@/components/AIFeaturesHub";
 import MentorshipRequests from "@/components/MentorshipRequests";
 import ConnectionsWidget from "@/components/ConnectionsWidget";
 import ResourcesWidget from "@/components/ResourcesWidget";
@@ -72,9 +71,6 @@ const MentorDashboard = () => {
             </div>
           </div>
         </div>
-
-        {/* AI Features Hub */}
-        <AIFeaturesHub />
 
         {/* Key Metrics */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">

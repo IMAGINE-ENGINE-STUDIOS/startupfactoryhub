@@ -7,7 +7,6 @@ import ConnectionsWidget from '@/components/ConnectionsWidget';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import NotificationCenter from '@/components/dashboard/NotificationCenter';
 import StartupRoadmap from '@/components/StartupRoadmap';
-import AIFeaturesHub from '@/components/AIFeaturesHub';
 import FloatingChat from '@/components/FloatingChat';
 import StartupAIRecommendations from '@/components/StartupAIRecommendations';
 import MatchingSystem from '@/components/MatchingSystem';
@@ -331,11 +330,6 @@ const Dashboard = () => {
             </div>
           </TabsContent>
         </Tabs>
-
-        {/* AI Features Hub at Bottom */}
-        <div className="mt-8">
-          <AIFeaturesHub />
-        </div>
       </div>
 
       {/* Floating Buttons */}

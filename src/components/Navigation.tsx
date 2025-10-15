@@ -27,10 +27,14 @@ const Navigation = () => {
           {/* Desktop Right Side */}
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
-              <Button variant="hero" size="lg" onClick={async () => {
-                await signOut();
-                navigate("/");
-              }}>Sign Out</Button>
+              <>
+                <Button variant="ghost" onClick={() => navigate("/dashboard")}>Dashboard</Button>
+                <Button variant="ghost" onClick={() => navigate("/tools")}>AI Tools</Button>
+                <Button variant="hero" size="lg" onClick={async () => {
+                  await signOut();
+                  navigate("/");
+                }}>Sign Out</Button>
+              </>
             ) : (
               <>
                 <Button variant="ghost" onClick={() => navigate("/auth")}>Sign In</Button>
@@ -50,17 +54,39 @@ const Navigation = () => {
               <SheetContent side="right" className="w-[280px] sm:w-[350px]">
                 <div className="flex flex-col space-y-4 mt-8">
                   {user ? (
-                    <Button 
-                      variant="hero" 
-                      className="w-full"
-                      onClick={async () => {
-                        await signOut();
-                        navigate("/");
-                        closeMenu();
-                      }}
-                    >
-                      Sign Out
-                    </Button>
+                    <>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => {
+                          navigate("/dashboard");
+                          closeMenu();
+                        }}
+                      >
+                        Dashboard
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        className="w-full"
+                        onClick={() => {
+                          navigate("/tools");
+                          closeMenu();
+                        }}
+                      >
+                        AI Tools
+                      </Button>
+                      <Button 
+                        variant="hero" 
+                        className="w-full"
+                        onClick={async () => {
+                          await signOut();
+                          navigate("/");
+                          closeMenu();
+                        }}
+                      >
+                        Sign Out
+                      </Button>
+                    </>
                   ) : (
                     <>
                       <Button 
