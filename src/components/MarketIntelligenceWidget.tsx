@@ -77,50 +77,37 @@ export default function MarketIntelligenceWidget() {
   return (
     <div className="space-y-6">
       {/* Search Section */}
-      <Card className="p-6">
+      <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10">
         <div className="space-y-4">
-          <div className="flex gap-2">
-            <Button
-              variant={searchType === 'startup' ? 'default' : 'outline'}
-              onClick={() => setSearchType('startup')}
-              className="flex-1"
-            >
-              <Building2 className="h-4 w-4 mr-2" />
-              Startups
-            </Button>
-            <Button
-              variant={searchType === 'industry' ? 'default' : 'outline'}
-              onClick={() => setSearchType('industry')}
-              className="flex-1"
-            >
-              <Globe className="h-4 w-4 mr-2" />
-              Industries
-            </Button>
-            <Button
-              variant={searchType === 'investor' ? 'default' : 'outline'}
-              onClick={() => setSearchType('investor')}
-              className="flex-1"
-            >
-              <Briefcase className="h-4 w-4 mr-2" />
-              Investors
-            </Button>
+          <div className="flex gap-2 flex-wrap">
+            {[
+              { type: 'startup' as const, icon: Building2, label: 'Startups' },
+              { type: 'industry' as const, icon: Globe, label: 'Industries' },
+              { type: 'investor' as const, icon: Briefcase, label: 'Investors' }
+            ].map(({ type, icon: Icon, label }) => (
+              <Button
+                key={type}
+                variant={searchType === type ? 'default' : 'outline'}
+                onClick={() => setSearchType(type)}
+                size="sm"
+              >
+                <Icon className="h-4 w-4 mr-2" />
+                {label}
+              </Button>
+            ))}
           </div>
 
           <div className="flex gap-2">
             <Input
-              placeholder={`Search for ${searchType}s... (e.g., ${
-                searchType === 'startup' ? 'AI SaaS companies' :
-                searchType === 'industry' ? 'FinTech industry' :
-                'Sequoia Capital'
-              })`}
+              placeholder={`Search ${searchType}s...`}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               className="flex-1"
             />
-            <Button onClick={handleSearch} disabled={loading}>
+            <Button onClick={handleSearch} disabled={loading} size="default">
               <Search className="h-4 w-4 mr-2" />
-              Analyze
+              Search
             </Button>
           </div>
         </div>
