@@ -2,25 +2,21 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-
 const HeroSection = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
-  return (
-    <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
+  const {
+    user
+  } = useAuth();
+  return <section className="min-h-screen flex items-center justify-center relative overflow-hidden">
       {/* Hexagonal background pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="grid grid-cols-8 gap-4 transform rotate-12 scale-150">
-          {Array.from({ length: 64 }).map((_, i) => (
-            <div
-              key={i}
-              className="hexagon w-16 h-16 bg-gradient-primary opacity-20"
-              style={{
-                animationDelay: `${i * 0.1}s`,
-                animation: "pulse 2s ease-in-out infinite"
-              }}
-            />
-          ))}
+          {Array.from({
+          length: 64
+        }).map((_, i) => <div key={i} className="hexagon w-16 h-16 bg-gradient-primary opacity-20" style={{
+          animationDelay: `${i * 0.1}s`,
+          animation: "pulse 2s ease-in-out infinite"
+        }} />)}
         </div>
       </div>
       
@@ -47,39 +43,15 @@ const HeroSection = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6 mb-12 sm:mb-16 px-4">
-            <Button 
-              variant="hero" 
-              size="xl" 
-              className="group w-full sm:w-auto"
-              onClick={() => navigate(user ? "/dashboard" : "/auth")}
-            >
+            <Button variant="hero" size="xl" className="group w-full sm:w-auto" onClick={() => navigate(user ? "/dashboard" : "/auth")}>
               {user ? "Go to Dashboard" : "Start Your Journey"}
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Button>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 md:gap-8 text-center px-4">
-            <div className="glass-morphism p-3 sm:p-4 md:p-6 rounded-lg">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-ocean-primary mb-1 sm:mb-2">10K+</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">Active Startups</div>
-            </div>
-            <div className="glass-morphism p-3 sm:p-4 md:p-6 rounded-lg">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-ocean-primary mb-1 sm:mb-2">5K+</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">Expert Mentors</div>
-            </div>
-            <div className="glass-morphism p-3 sm:p-4 md:p-6 rounded-lg">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-ocean-primary mb-1 sm:mb-2">2K+</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">Active Investors</div>
-            </div>
-            <div className="glass-morphism p-3 sm:p-4 md:p-6 rounded-lg">
-              <div className="text-xl sm:text-2xl md:text-3xl font-bold text-ocean-primary mb-1 sm:mb-2">50M+</div>
-              <div className="text-xs sm:text-sm text-muted-foreground">Resources</div>
-            </div>
-          </div>
+          
         </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;
