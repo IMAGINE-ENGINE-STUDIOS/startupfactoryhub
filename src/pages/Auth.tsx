@@ -61,6 +61,13 @@ export default function Auth() {
     setLoading(false);
   };
 
+  const clearForm = () => {
+    setEmail('');
+    setPassword('');
+    setFullName('');
+    setRole('');
+  };
+
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -101,11 +108,7 @@ export default function Auth() {
         title: "Account created!",
         description: "Please check your email to verify your account.",
       });
-      // Clear form
-      setEmail('');
-      setPassword('');
-      setFullName('');
-      setRole('');
+      clearForm();
     }
     
     setLoading(false);
@@ -147,7 +150,7 @@ export default function Auth() {
           </CardHeader>
           
           <CardContent>
-            <Tabs defaultValue="signin" className="w-full">
+            <Tabs defaultValue="signin" className="w-full" onValueChange={clearForm}>
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="signin">Sign In</TabsTrigger>
                 <TabsTrigger value="signup">Sign Up</TabsTrigger>
@@ -257,7 +260,8 @@ export default function Auth() {
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="startup">Startup Founder</SelectItem>
-                          <SelectItem value="advisor">Advisor/Mentor</SelectItem>
+                          <SelectItem value="mentor">Mentor</SelectItem>
+                          <SelectItem value="advisor">Advisor</SelectItem>
                           <SelectItem value="investor">Investor</SelectItem>
                           <SelectItem value="student">Student</SelectItem>
                         </SelectContent>
