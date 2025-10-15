@@ -2,10 +2,8 @@ import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import AIAssistant from "./AIAssistant";
 import AIFeaturesDemo from "./AIFeaturesDemo";
 import { 
-  Bot, 
   FileText, 
   TrendingUp, 
   Languages, 
@@ -15,24 +13,15 @@ import {
 } from "lucide-react";
 
 export default function AIFeaturesHub() {
-  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isDemoOpen, setIsDemoOpen] = useState(false);
+  const [selectedFeature, setSelectedFeature] = useState<string | null>(null);
 
   const features = [
-    {
-      id: 'chatbot',
-      title: 'AI Assistant',
-      description: 'Get instant help with business advice, mentorship, and learning',
-      icon: Bot,
-      action: () => setIsAssistantOpen(true),
-      color: 'text-blue-500'
-    },
     {
       id: 'summarizer',
       title: 'Smart Summaries',
       description: 'Automatically condense long content into key takeaways',
       icon: FileText,
-      action: () => setIsDemoOpen(true),
       color: 'text-purple-500'
     },
     {
@@ -40,7 +29,6 @@ export default function AIFeaturesHub() {
       title: 'Sentiment Analysis',
       description: 'Understand feedback and communications at scale',
       icon: TrendingUp,
-      action: () => setIsDemoOpen(true),
       color: 'text-green-500'
     },
     {
@@ -48,7 +36,6 @@ export default function AIFeaturesHub() {
       title: 'AI Translator',
       description: 'Communicate globally with instant translations',
       icon: Languages,
-      action: () => setIsDemoOpen(true),
       color: 'text-orange-500'
     },
     {
@@ -56,7 +43,6 @@ export default function AIFeaturesHub() {
       title: 'Document Analysis',
       description: 'Extract insights from images and documents',
       icon: Image,
-      action: () => setIsDemoOpen(true),
       color: 'text-pink-500'
     },
     {
@@ -64,7 +50,6 @@ export default function AIFeaturesHub() {
       title: 'Task Automation',
       description: 'Automate workflows and repetitive tasks',
       icon: Workflow,
-      action: () => setIsDemoOpen(true),
       color: 'text-cyan-500'
     }
   ];
@@ -87,7 +72,10 @@ export default function AIFeaturesHub() {
               <Card 
                 key={feature.id} 
                 className="hover:shadow-md transition-shadow cursor-pointer"
-                onClick={feature.action}
+                onClick={() => {
+                  setSelectedFeature(feature.id);
+                  setIsDemoOpen(true);
+                }}
               >
                 <CardHeader className="pb-3">
                   <div className="flex items-center gap-3">
@@ -107,21 +95,19 @@ export default function AIFeaturesHub() {
           </div>
         </CardContent>
       </Card>
-
-      <AIAssistant isOpen={isAssistantOpen} onClose={() => setIsAssistantOpen(false)} />
       
       <Dialog open={isDemoOpen} onOpenChange={setIsDemoOpen}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Sparkles className="h-5 w-5 text-primary" />
-              AI Features Demo
+              {features.find(f => f.id === selectedFeature)?.title || 'AI Feature'}
             </DialogTitle>
             <DialogDescription>
-              Try out all AI-powered features with your own content
+              {features.find(f => f.id === selectedFeature)?.description}
             </DialogDescription>
           </DialogHeader>
-          <AIFeaturesDemo />
+          <AIFeaturesDemo initialTab={selectedFeature || 'summary'} />
         </DialogContent>
       </Dialog>
     </>

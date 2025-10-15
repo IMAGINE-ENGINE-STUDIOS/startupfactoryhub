@@ -13,12 +13,14 @@ import {
   Image, 
   Loader2,
   CheckCircle,
-  XCircle
+  XCircle,
+  Workflow
 } from "lucide-react";
 import AISummaryCard from "./AISummaryCard";
 import AITranslator from "./AITranslator";
+import TaskAutomation from "./TaskAutomation";
 
-export default function AIFeaturesDemo() {
+export default function AIFeaturesDemo({ initialTab = 'summary' }: { initialTab?: string }) {
   const { toast } = useToast();
   
   // Sentiment Analysis State
@@ -126,30 +128,28 @@ export default function AIFeaturesDemo() {
 
   return (
     <Card className="w-full">
-      <CardHeader>
-        <CardTitle>AI Features Demo</CardTitle>
-        <CardDescription>
-          Test all AI-powered features with your own content
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Tabs defaultValue="summary" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+      <CardContent className="pt-6">
+        <Tabs defaultValue={initialTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="summary" className="gap-2">
               <FileText className="h-4 w-4" />
-              Summary
+              <span className="hidden sm:inline">Summary</span>
             </TabsTrigger>
             <TabsTrigger value="sentiment" className="gap-2">
               <TrendingUp className="h-4 w-4" />
-              Sentiment
+              <span className="hidden sm:inline">Sentiment</span>
             </TabsTrigger>
             <TabsTrigger value="translate" className="gap-2">
               <Languages className="h-4 w-4" />
-              Translate
+              <span className="hidden sm:inline">Translate</span>
             </TabsTrigger>
             <TabsTrigger value="document" className="gap-2">
               <Image className="h-4 w-4" />
-              Document
+              <span className="hidden sm:inline">Document</span>
+            </TabsTrigger>
+            <TabsTrigger value="automation" className="gap-2">
+              <Workflow className="h-4 w-4" />
+              <span className="hidden sm:inline">Automation</span>
             </TabsTrigger>
           </TabsList>
 
@@ -326,6 +326,10 @@ export default function AIFeaturesDemo() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="automation" className="space-y-4">
+            <TaskAutomation />
           </TabsContent>
         </Tabs>
       </CardContent>

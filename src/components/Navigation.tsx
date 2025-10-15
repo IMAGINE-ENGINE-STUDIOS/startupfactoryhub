@@ -29,7 +29,6 @@ const Navigation = () => {
             {user ? (
               <>
                 <Button variant="ghost" onClick={() => navigate("/dashboard")}>Dashboard</Button>
-                <Button variant="ghost" onClick={() => navigate("/tools")}>AI Tools</Button>
                 <Button variant="hero" size="lg" onClick={async () => {
                   await signOut();
                   navigate("/");
@@ -64,16 +63,6 @@ const Navigation = () => {
                         }}
                       >
                         Dashboard
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        className="w-full"
-                        onClick={() => {
-                          navigate("/tools");
-                          closeMenu();
-                        }}
-                      >
-                        AI Tools
                       </Button>
                       <Button 
                         variant="hero" 
