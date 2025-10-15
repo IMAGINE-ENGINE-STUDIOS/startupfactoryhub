@@ -8,6 +8,7 @@ import DashboardNavigation from "@/components/DashboardNavigation";
 import MentorRoadmapWidget from "@/components/MentorRoadmapWidget";
 import MentorCalendarWidget from "@/components/MentorCalendarWidget";
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
+import AIFeaturesHub from "@/components/AIFeaturesHub";
 import MentorshipRequests from "@/components/MentorshipRequests";
 import ConnectionsWidget from "@/components/ConnectionsWidget";
 import ResourcesWidget from "@/components/ResourcesWidget";
@@ -118,7 +119,7 @@ const MentorDashboard = () => {
         {/* Tabbed Dashboard Content */}
         <Tabs defaultValue="feed" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-5xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
               <TabsTrigger value="feed" className="flex-shrink-0">Feed</TabsTrigger>
               <TabsTrigger value="browse" className="flex-shrink-0">Browse</TabsTrigger>
               <TabsTrigger value="mentees" className="flex-shrink-0">Mentees</TabsTrigger>
@@ -127,6 +128,7 @@ const MentorDashboard = () => {
               <TabsTrigger value="resources" className="flex-shrink-0">Resources</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
+              <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
             </TabsList>
           </div>
 
@@ -192,6 +194,10 @@ const MentorDashboard = () => {
 
           <TabsContent value="intelligence" className="space-y-6">
             <MarketIntelligenceWidget />
+          </TabsContent>
+
+          <TabsContent value="tools" className="space-y-6">
+            <AIFeaturesHub />
           </TabsContent>
         </Tabs>
       </div>

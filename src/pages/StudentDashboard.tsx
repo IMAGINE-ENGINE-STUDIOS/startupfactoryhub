@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { BookOpen, Users, Trophy, Target, Play, CheckCircle, Clock, Star } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
+import AIFeaturesHub from '@/components/AIFeaturesHub';
 
 import Leaderboard from '@/components/Leaderboard';
 import StudyGroups from '@/components/StudyGroups';
@@ -258,7 +259,7 @@ export default function StudentDashboard() {
 
         <Tabs defaultValue="courses" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-5xl">
               <TabsTrigger value="courses" className="flex-shrink-0">Courses</TabsTrigger>
               <TabsTrigger value="leaderboard" className="flex-shrink-0">Leaderboard</TabsTrigger>
               <TabsTrigger value="groups" className="flex-shrink-0">Study Groups</TabsTrigger>
@@ -268,6 +269,7 @@ export default function StudentDashboard() {
               <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
+              <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
             </TabsList>
           </div>
 
@@ -496,6 +498,10 @@ export default function StudentDashboard() {
 
           <TabsContent value="intelligence" className="space-y-4">
             <MarketIntelligenceWidget />
+          </TabsContent>
+
+          <TabsContent value="tools" className="space-y-4">
+            <AIFeaturesHub />
           </TabsContent>
         </Tabs>
       </div>

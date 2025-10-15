@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { DollarSign, TrendingUp, Building, PieChart, Target, Users } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
+import AIFeaturesHub from '@/components/AIFeaturesHub';
 
 import StartupRecommendationsWidget from '@/components/StartupRecommendationsWidget';
 import StartupBrowser from '@/components/StartupBrowser';
@@ -310,7 +311,7 @@ export default function InvestorDashboard() {
 
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-7xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl">
               <TabsTrigger value="portfolio" className="flex-shrink-0">Portfolio</TabsTrigger>
               <TabsTrigger value="opportunities" className="flex-shrink-0">Opportunities</TabsTrigger>
               <TabsTrigger value="browse" className="flex-shrink-0">Browse</TabsTrigger>
@@ -319,6 +320,7 @@ export default function InvestorDashboard() {
               <TabsTrigger value="community" className="flex-shrink-0">Community</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
+              <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
             </TabsList>
           </div>
 
@@ -458,6 +460,10 @@ export default function InvestorDashboard() {
 
           <TabsContent value="intelligence" className="space-y-4">
             <MarketIntelligenceWidget />
+          </TabsContent>
+
+          <TabsContent value="tools" className="space-y-4">
+            <AIFeaturesHub />
           </TabsContent>
         </Tabs>
       </div>

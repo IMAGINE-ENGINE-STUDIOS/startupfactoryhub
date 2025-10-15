@@ -17,6 +17,7 @@ import AvailabilityManager from '@/components/AvailabilityManager';
 import FloatingChat from '@/components/FloatingChat';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import AIFeaturesHub from '@/components/AIFeaturesHub';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import StartupProfileDialog from '@/components/StartupProfileDialog';
 
@@ -295,13 +296,14 @@ export default function AdvisorDashboard() {
 
         <Tabs defaultValue="requests" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-6 max-w-3xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-7 max-w-3xl">
               <TabsTrigger value="requests" className="flex-shrink-0">Requests</TabsTrigger>
               <TabsTrigger value="mentees" className="flex-shrink-0">My Mentees</TabsTrigger>
               <TabsTrigger value="schedule" className="flex-shrink-0">Schedule</TabsTrigger>
               <TabsTrigger value="community" className="flex-shrink-0">Community</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
+              <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
             </TabsList>
           </div>
 
@@ -507,6 +509,10 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="intelligence" className="space-y-4">
             <MarketIntelligenceWidget />
+          </TabsContent>
+
+          <TabsContent value="tools" className="space-y-4">
+            <AIFeaturesHub />
           </TabsContent>
         </Tabs>
       </div>

@@ -7,6 +7,7 @@ import ConnectionsWidget from '@/components/ConnectionsWidget';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import NotificationCenter from '@/components/dashboard/NotificationCenter';
 import StartupRoadmap from '@/components/StartupRoadmap';
+import AIFeaturesHub from '@/components/AIFeaturesHub';
 import FloatingChat from '@/components/FloatingChat';
 import StartupAIRecommendations from '@/components/StartupAIRecommendations';
 import MatchingSystem from '@/components/MatchingSystem';
@@ -183,7 +184,7 @@ const Dashboard = () => {
         {/* Tabs Navigation */}
         <Tabs defaultValue="feed" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-7xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl">
               <TabsTrigger value="feed" className="flex-shrink-0">Feed</TabsTrigger>
               <TabsTrigger value="journey" className="flex-shrink-0">Journey</TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
@@ -192,6 +193,7 @@ const Dashboard = () => {
               <TabsTrigger value="learn" className="flex-shrink-0">Learn</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
+              <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
             </TabsList>
           </div>
 
@@ -328,6 +330,11 @@ const Dashboard = () => {
               <StartupAIRecommendations />
               <MarketIntelligenceWidget />
             </div>
+          </TabsContent>
+
+          {/* Tools Tab */}
+          <TabsContent value="tools" className="space-y-4">
+            <AIFeaturesHub />
           </TabsContent>
         </Tabs>
       </div>
