@@ -28,7 +28,7 @@ export default function SentimentAnalyzer() {
         body: {
           text: sentimentText,
           contentType: 'demo',
-          contentId: 'demo-' + Date.now()
+          contentId: crypto.randomUUID()
         }
       });
 

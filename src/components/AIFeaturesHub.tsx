@@ -167,7 +167,7 @@ function SummaryDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o
             <AISummaryCard
               text={summaryText}
               sourceType="demo"
-              sourceId={"demo-" + Date.now()}
+              sourceId={crypto.randomUUID()}
               title="Summary"
             />
           )}
