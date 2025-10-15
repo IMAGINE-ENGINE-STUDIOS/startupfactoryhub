@@ -18,8 +18,6 @@ export default function AIFeaturesHub() {
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [isDemoOpen, setIsDemoOpen] = useState(false);
 
-  const [showAll, setShowAll] = useState(false);
-
   const features = [
     {
       id: 'chatbot',
@@ -27,8 +25,7 @@ export default function AIFeaturesHub() {
       description: 'Get instant help with business advice, mentorship, and learning',
       icon: Bot,
       action: () => setIsAssistantOpen(true),
-      gradient: 'from-blue-500/10 to-blue-500/5',
-      iconColor: 'text-blue-500'
+      color: 'text-blue-500'
     },
     {
       id: 'summarizer',
@@ -36,8 +33,7 @@ export default function AIFeaturesHub() {
       description: 'Automatically condense long content into key takeaways',
       icon: FileText,
       action: () => setIsDemoOpen(true),
-      gradient: 'from-purple-500/10 to-purple-500/5',
-      iconColor: 'text-purple-500'
+      color: 'text-purple-500'
     },
     {
       id: 'sentiment',
@@ -45,8 +41,7 @@ export default function AIFeaturesHub() {
       description: 'Understand feedback and communications at scale',
       icon: TrendingUp,
       action: () => setIsDemoOpen(true),
-      gradient: 'from-green-500/10 to-green-500/5',
-      iconColor: 'text-green-500'
+      color: 'text-green-500'
     },
     {
       id: 'translator',
@@ -54,8 +49,7 @@ export default function AIFeaturesHub() {
       description: 'Communicate globally with instant translations',
       icon: Languages,
       action: () => setIsDemoOpen(true),
-      gradient: 'from-orange-500/10 to-orange-500/5',
-      iconColor: 'text-orange-500'
+      color: 'text-orange-500'
     },
     {
       id: 'vision',
@@ -63,8 +57,7 @@ export default function AIFeaturesHub() {
       description: 'Extract insights from images and documents',
       icon: Image,
       action: () => setIsDemoOpen(true),
-      gradient: 'from-pink-500/10 to-pink-500/5',
-      iconColor: 'text-pink-500'
+      color: 'text-pink-500'
     },
     {
       id: 'automation',
@@ -72,70 +65,48 @@ export default function AIFeaturesHub() {
       description: 'Automate workflows and repetitive tasks',
       icon: Workflow,
       action: () => setIsDemoOpen(true),
-      gradient: 'from-cyan-500/10 to-cyan-500/5',
-      iconColor: 'text-cyan-500'
+      color: 'text-cyan-500'
     }
   ];
 
-  const displayedFeatures = showAll ? features : features.slice(0, 3);
-
   return (
     <>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <Sparkles className="h-6 w-6 text-primary" />
-              AI Features
-            </h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              Intelligent tools to enhance your workflow
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {displayedFeatures.map((feature) => (
-            <Card 
-              key={feature.id} 
-              className={`group hover:shadow-lg transition-all cursor-pointer border-2 hover:border-primary/50 bg-gradient-to-br ${feature.gradient}`}
-              onClick={feature.action}
-            >
-              <CardHeader className="space-y-3">
-                <div className={`w-12 h-12 rounded-xl bg-background flex items-center justify-center group-hover:scale-110 transition-transform ${feature.iconColor}`}>
-                  <feature.icon className="h-6 w-6" />
-                </div>
-                <div>
-                  <CardTitle className="text-lg mb-1">{feature.title}</CardTitle>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-primary" />
+            AI-Powered Features
+          </CardTitle>
+          <CardDescription>
+            Enhance your workflow with intelligent automation and insights
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {features.map((feature) => (
+              <Card 
+                key={feature.id} 
+                className="hover:shadow-md transition-shadow cursor-pointer"
+                onClick={feature.action}
+              >
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <div className={`p-2 rounded-lg bg-muted ${feature.color}`}>
+                      <feature.icon className="h-5 w-5" />
+                    </div>
+                    <CardTitle className="text-base">{feature.title}</CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent>
                   <p className="text-sm text-muted-foreground">
                     {feature.description}
                   </p>
-                </div>
-              </CardHeader>
-            </Card>
-          ))}
-        </div>
-
-        {!showAll && (
-          <Button 
-            variant="outline" 
-            onClick={() => setShowAll(true)}
-            className="w-full"
-          >
-            View All AI Features ({features.length})
-          </Button>
-        )}
-
-        {showAll && (
-          <Button 
-            variant="ghost" 
-            onClick={() => setShowAll(false)}
-            className="w-full"
-          >
-            Show Less
-          </Button>
-        )}
-      </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
 
       <AIAssistant isOpen={isAssistantOpen} onClose={() => setIsAssistantOpen(false)} />
       
