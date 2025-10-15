@@ -29,6 +29,20 @@ interface SearchResult {
   trends: Array<{ label: string; value: number; change: number }>;
 }
 
+const trendingTopics = [
+  { type: 'startup', name: 'AI SaaS', icon: Building2 },
+  { type: 'industry', name: 'FinTech', icon: TrendingUp },
+  { type: 'investor', name: 'Sequoia Capital', icon: Briefcase },
+  { type: 'startup', name: 'Web3 Companies', icon: Building2 },
+  { type: 'industry', name: 'HealthTech', icon: Globe },
+];
+
+const existingPredictions = [
+  { title: 'AI Market Growth', prediction: 'AI SaaS market expected to reach $200B by 2026', trend: '+156%' },
+  { title: 'FinTech Expansion', prediction: 'Digital payments to dominate 80% of transactions', trend: '+89%' },
+  { title: 'Climate Tech', prediction: 'Climate tech investments projected to triple', trend: '+210%' },
+];
+
 export default function MarketIntelligenceWidget() {
   const { toast } = useToast();
   const [query, setQuery] = useState('');
@@ -76,52 +90,78 @@ export default function MarketIntelligenceWidget() {
 
   return (
     <div className="space-y-6">
-      {/* Search Section */}
-      <Card className="p-6">
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <Button
-              variant={searchType === 'startup' ? 'default' : 'outline'}
-              onClick={() => setSearchType('startup')}
-              className="flex-1"
-            >
-              <Building2 className="h-4 w-4 mr-2" />
-              Startups
-            </Button>
-            <Button
-              variant={searchType === 'industry' ? 'default' : 'outline'}
-              onClick={() => setSearchType('industry')}
-              className="flex-1"
-            >
-              <Globe className="h-4 w-4 mr-2" />
-              Industries
-            </Button>
-            <Button
-              variant={searchType === 'investor' ? 'default' : 'outline'}
-              onClick={() => setSearchType('investor')}
-              className="flex-1"
-            >
-              <Briefcase className="h-4 w-4 mr-2" />
-              Investors
-            </Button>
+      {/* Modern Search Section */}
+      <Card className="p-6 bg-gradient-to-br from-primary/5 via-background to-background border-primary/10">
+        <div className="space-y-6">
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold">Market Intelligence</h2>
+            <p className="text-muted-foreground">AI-powered insights on startups, industries, and investors</p>
           </div>
-
+          
           <div className="flex gap-2">
             <Input
-              placeholder={`Search for ${searchType}s... (e.g., ${
-                searchType === 'startup' ? 'AI SaaS companies' :
-                searchType === 'industry' ? 'FinTech industry' :
-                'Sequoia Capital'
-              })`}
+              placeholder="Search startups, industries, or investors..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="flex-1"
+              className="flex-1 h-12"
             />
-            <Button onClick={handleSearch} disabled={loading}>
+            <Button onClick={handleSearch} disabled={loading} size="lg" className="px-6">
               <Search className="h-4 w-4 mr-2" />
               Analyze
             </Button>
+          </div>
+
+          <div className="flex gap-2 justify-center flex-wrap">
+            <Badge
+              variant={searchType === 'startup' ? 'default' : 'outline'}
+              onClick={() => setSearchType('startup')}
+              className="cursor-pointer px-4 py-2"
+            >
+              <Building2 className="h-3 w-3 mr-1" />
+              Startups
+            </Badge>
+            <Badge
+              variant={searchType === 'industry' ? 'default' : 'outline'}
+              onClick={() => setSearchType('industry')}
+              className="cursor-pointer px-4 py-2"
+            >
+              <Globe className="h-3 w-3 mr-1" />
+              Industries
+            </Badge>
+            <Badge
+              variant={searchType === 'investor' ? 'default' : 'outline'}
+              onClick={() => setSearchType('investor')}
+              className="cursor-pointer px-4 py-2"
+            >
+              <Briefcase className="h-3 w-3 mr-1" />
+              Investors
+            </Badge>
+          </div>
+
+          {/* Trending Topics */}
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground">Trending searches:</p>
+            <div className="flex gap-2 flex-wrap">
+              {trendingTopics.map((topic, idx) => {
+                const Icon = topic.icon;
+                return (
+                  <Button
+                    key={idx}
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setSearchType(topic.type as any);
+                      setQuery(topic.name);
+                    }}
+                    className="text-xs"
+                  >
+                    <Icon className="h-3 w-3 mr-1" />
+                    {topic.name}
+                  </Button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </Card>
@@ -242,29 +282,38 @@ export default function MarketIntelligenceWidget() {
         </div>
       )}
 
-      {/* Empty State */}
+      {/* Market Predictions - Always Visible */}
       {!loading && !results && (
-        <Card className="p-12 text-center">
-          <div className="flex flex-col items-center gap-4">
-            <div className="p-4 bg-primary/10 rounded-full">
-              <Search className="h-12 w-12 text-primary" />
-            </div>
-            <div>
-              <h3 className="text-xl font-semibold mb-2">
-                Start Your Market Research
-              </h3>
-              <p className="text-muted-foreground max-w-md mx-auto">
-                Search for startups, industries, or investors to get AI-powered insights,
-                predictions, and real-time market intelligence.
-              </p>
-            </div>
-            <div className="flex gap-2 mt-4">
-              <Badge variant="outline">Real-time Data</Badge>
-              <Badge variant="outline">AI Analysis</Badge>
-              <Badge variant="outline">Market Predictions</Badge>
-            </div>
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Target className="h-5 w-5 text-primary" />
+              Market Predictions & Trends
+            </h3>
           </div>
-        </Card>
+          
+          <div className="grid md:grid-cols-3 gap-4">
+            {existingPredictions.map((pred, idx) => (
+              <Card key={idx} className="p-5 hover:border-primary/50 transition-colors">
+                <div className="space-y-3">
+                  <div className="flex items-start justify-between">
+                    <h4 className="font-semibold">{pred.title}</h4>
+                    <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20">
+                      {pred.trend}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    {pred.prediction}
+                  </p>
+                  <div className="flex items-center gap-1 text-xs text-primary">
+                    <Sparkles className="h-3 w-3" />
+                    AI-Generated Insight
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );
