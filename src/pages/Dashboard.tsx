@@ -11,6 +11,7 @@ import AIFeaturesHub from '@/components/AIFeaturesHub';
 import FloatingChat from '@/components/FloatingChat';
 import StartupAIRecommendations from '@/components/StartupAIRecommendations';
 import MatchingSystem from '@/components/MatchingSystem';
+import NetworkBrowser from '@/components/NetworkBrowser';
 import EducationalResources from '@/components/EducationalResources';
 import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
 import MentorAdvisorNetwork from '@/components/MentorAdvisorNetwork';
@@ -144,9 +145,9 @@ const Dashboard = () => {
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
+              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
               <TabsTrigger value="journey" className="flex-shrink-0">Journey</TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
-              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
               <TabsTrigger value="profile" className="flex-shrink-0">Profile</TabsTrigger>
               <TabsTrigger value="learn" className="flex-shrink-0">Learn</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
@@ -257,14 +258,9 @@ const Dashboard = () => {
             )}
           </TabsContent>
 
-          {/* Network Tab - Combined Connect & Network */}
+          {/* Network Tab */}
           <TabsContent value="network" className="space-y-4">
-            <div className="space-y-6">
-              <MatchingSystem />
-              <ConnectionsWidget />
-              <InvestorStartupNetwork />
-              <MentorAdvisorNetwork />
-            </div>
+            <NetworkBrowser />
           </TabsContent>
 
           {/* Profile Tab */}

@@ -20,6 +20,7 @@ import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
+import NetworkBrowser from '@/components/NetworkBrowser';
 
 interface Course {
   id: string;
@@ -245,12 +246,12 @@ export default function StudentDashboard() {
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-5xl">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
+              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
               <TabsTrigger value="courses" className="flex-shrink-0">Courses</TabsTrigger>
               <TabsTrigger value="leaderboard" className="flex-shrink-0">Leaderboard</TabsTrigger>
               <TabsTrigger value="groups" className="flex-shrink-0">Study Groups</TabsTrigger>
               <TabsTrigger value="assignments" className="flex-shrink-0">Assignments</TabsTrigger>
               <TabsTrigger value="startups" className="flex-shrink-0">Startups</TabsTrigger>
-              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
               <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
@@ -411,70 +412,9 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Trophy className="h-5 w-5 text-yellow-500" />
-                    <span>Leaderboard</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {[
-                      { name: 'Alex Chen', points: 2847, rank: 1 },
-                      { name: 'Sarah Johnson', points: 2654, rank: 2 },
-                      { name: 'Mike Davis', points: 2543, rank: 3 },
-                      { name: 'You', points: 2156, rank: 247 },
-                    ].map((student, index) => (
-                      <div key={index} className={`flex items-center justify-between p-3 rounded-lg ${
-                        student.name === 'You' ? 'bg-primary/10 border border-primary/20' : 'bg-card'
-                      }`}>
-                        <div className="flex items-center space-x-3">
-                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                            student.rank <= 3 ? 'bg-yellow-500 text-white' : 'bg-muted text-muted-foreground'
-                          }`}>
-                            {student.rank}
-                          </span>
-                          <span className="font-medium">{student.name}</span>
-                        </div>
-                        <span className="text-sm font-bold text-primary">{student.points} pts</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <Users className="h-5 w-5 text-accent" />
-                    <span>Study Groups</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-3">
-                    {[
-                      { name: 'Product Management Circle', members: 24, next: 'Today 3PM' },
-                      { name: 'Startup Pitch Practice', members: 18, next: 'Tomorrow 2PM' },
-                      { name: 'Tech Entrepreneur Hub', members: 42, next: 'Friday 4PM' },
-                    ].map((group, index) => (
-                      <div key={index} className="p-3 rounded-lg border border-border/50 hover:border-accent/50 transition-colors">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="font-medium text-foreground">{group.name}</h4>
-                          <Badge variant="secondary" className="text-xs">{group.members} members</Badge>
-                        </div>
-                        <p className="text-sm text-muted-foreground mb-2">Next session: {group.next}</p>
-                        <Button size="sm" variant="outline" className="w-full">
-                          Join Group
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <NetworkBrowser />
           </TabsContent>
+
 
           <TabsContent value="analytics" className="space-y-4">
             {/* Student Stats */}

@@ -15,6 +15,7 @@ import AIFeaturesHub from '@/components/AIFeaturesHub';
 
 import StartupRecommendationsWidget from '@/components/StartupRecommendationsWidget';
 import StartupBrowser from '@/components/StartupBrowser';
+import NetworkBrowser from '@/components/NetworkBrowser';
 import FloatingChat from '@/components/FloatingChat';
 import InvestorProfileForm from '@/components/InvestorProfileForm';
 import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
@@ -297,9 +298,9 @@ export default function InvestorDashboard() {
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
+              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
               <TabsTrigger value="portfolio" className="flex-shrink-0">Portfolio</TabsTrigger>
               <TabsTrigger value="opportunities" className="flex-shrink-0">Opportunities</TabsTrigger>
-              <TabsTrigger value="browse" className="flex-shrink-0">Browse</TabsTrigger>
               <TabsTrigger value="events" className="flex-shrink-0">Events</TabsTrigger>
               <TabsTrigger value="profile" className="flex-shrink-0">Profile</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
@@ -415,11 +416,8 @@ export default function InvestorDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="browse" className="space-y-4">
-            <div className="space-y-6">
-              <StartupBrowser />
-              <InvestorStartupNetwork />
-            </div>
+          <TabsContent value="network" className="space-y-4">
+            <NetworkBrowser />
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4">

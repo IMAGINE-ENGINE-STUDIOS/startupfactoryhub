@@ -22,6 +22,7 @@ import MarketIntelligenceWidget from "@/components/MarketIntelligenceWidget";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 import { useProfileWithRole } from "@/hooks/useProfileWithRole";
 import StartupBrowser from "@/components/StartupBrowser";
+import NetworkBrowser from "@/components/NetworkBrowser";
 import { 
   Users, 
   TrendingUp, 
@@ -79,7 +80,7 @@ const MentorDashboard = () => {
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
-              <TabsTrigger value="browse" className="flex-shrink-0">Browse</TabsTrigger>
+              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
               <TabsTrigger value="mentees" className="flex-shrink-0">Mentees</TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
               <TabsTrigger value="endorsements" className="flex-shrink-0">Endorsements</TabsTrigger>
@@ -123,8 +124,8 @@ const MentorDashboard = () => {
             </div>
           </TabsContent>
 
-          <TabsContent value="browse" className="space-y-4">
-            <StartupBrowser />
+          <TabsContent value="network" className="space-y-4">
+            <NetworkBrowser />
           </TabsContent>
 
           <TabsContent value="mentees" className="space-y-6">
