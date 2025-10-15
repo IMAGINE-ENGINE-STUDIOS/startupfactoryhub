@@ -21,6 +21,7 @@ import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import InvestorAvailabilityManager from '@/components/InvestorAvailabilityManager';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 
 interface Investment {
@@ -445,6 +446,7 @@ export default function InvestorDashboard() {
 
           <TabsContent value="profile" className="space-y-4">
             <InvestorProfileForm />
+            <InvestorAvailabilityManager />
           </TabsContent>
 
           <TabsContent value="community" className="space-y-4">

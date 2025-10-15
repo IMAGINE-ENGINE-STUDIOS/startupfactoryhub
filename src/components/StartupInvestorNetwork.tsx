@@ -5,9 +5,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { DollarSign, Users, MessageSquare, TrendingUp, Eye } from 'lucide-react';
+import { DollarSign, Users, MessageSquare, TrendingUp, Eye, Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import InvestorProfileDialog from './InvestorProfileDialog';
+import BookPitchDialog from './BookPitchDialog';
 
 interface Investor {
   id: string;
@@ -32,8 +33,11 @@ export default function StartupInvestorNetwork() {
   const [investors, setInvestors] = useState<Investor[]>([]);
   const [loading, setLoading] = useState(true);
   const [companyId, setCompanyId] = useState<string | null>(null);
+  const [companyName, setCompanyName] = useState<string>('');
   const [selectedInvestor, setSelectedInvestor] = useState<Investor | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [bookPitchOpen, setBookPitchOpen] = useState(false);
+  const [pitchInvestor, setPitchInvestor] = useState<{id: string, name: string} | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -45,10 +49,10 @@ export default function StartupInvestorNetwork() {
     if (!user) return;
 
     try {
-      // Get company ID
+      // Get company ID and name
       const { data: company } = await supabase
         .from('companies')
-        .select('id')
+        .select('id, name')
         .eq('user_id', user.id)
         .single();
 
@@ -58,6 +62,7 @@ export default function StartupInvestorNetwork() {
       }
 
       setCompanyId(company.id);
+      setCompanyName(company.name);
 
       // Get investors who have invested
       const { data: investments } = await supabase
@@ -137,6 +142,11 @@ export default function StartupInvestorNetwork() {
   const handleViewProfile = (investor: Investor) => {
     setSelectedInvestor(investor);
     setDialogOpen(true);
+  };
+
+  const handleBookPitch = (investor: Investor) => {
+    setPitchInvestor({ id: investor.user_id, name: investor.full_name });
+    setBookPitchOpen(true);
   };
 
   if (loading) {
@@ -253,6 +263,15 @@ export default function StartupInvestorNetwork() {
                       </Button>
                       <Button
                         size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => handleBookPitch(investor)}
+                      >
+                        <Calendar className="h-3 w-3 mr-1" />
+                        Pitch
+                      </Button>
+                      <Button
+                        size="sm"
                         className="flex-1"
                         onClick={() => handleMessageInvestor(investor.user_id)}
                       >
@@ -341,6 +360,15 @@ export default function StartupInvestorNetwork() {
                         size="sm"
                         variant="outline"
                         className="flex-1"
+                        onClick={() => handleBookPitch(investor)}
+                      >
+                        <Calendar className="h-3 w-3 mr-1" />
+                        Pitch
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
                         onClick={() => handleMessageInvestor(investor.user_id)}
                       >
                         <MessageSquare className="h-3 w-3 mr-1" />
@@ -361,6 +389,17 @@ export default function StartupInvestorNetwork() {
         onOpenChange={setDialogOpen}
         onMessage={handleMessageInvestor}
       />
+
+      {companyId && companyName && pitchInvestor && (
+        <BookPitchDialog
+          open={bookPitchOpen}
+          onOpenChange={setBookPitchOpen}
+          investorId={pitchInvestor.id}
+          investorName={pitchInvestor.name}
+          companyId={companyId}
+          companyName={companyName}
+        />
+      )}
     </div>
   );
 }

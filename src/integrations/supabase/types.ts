@@ -1028,9 +1028,43 @@ export type Database = {
           },
         ]
       }
+      investor_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          investor_id: string
+          is_available: boolean | null
+          start_time: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          investor_id: string
+          is_available?: boolean | null
+          start_time: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          investor_id?: string
+          is_available?: boolean | null
+          start_time?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       investor_profiles: {
         Row: {
           created_at: string | null
+          focus_industries: string[] | null
           id: string
           investment_range_max: number | null
           investment_range_min: number | null
@@ -1043,6 +1077,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          focus_industries?: string[] | null
           id?: string
           investment_range_max?: number | null
           investment_range_min?: number | null
@@ -1055,6 +1090,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          focus_industries?: string[] | null
           id?: string
           investment_range_max?: number | null
           investment_range_min?: number | null
@@ -1399,6 +1435,104 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      pitch_meetings: {
+        Row: {
+          company_id: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          investor_id: string
+          meeting_link: string | null
+          meeting_notes: string | null
+          scheduled_date: string
+          startup_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          investor_id: string
+          meeting_link?: string | null
+          meeting_notes?: string | null
+          scheduled_date: string
+          startup_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          investor_id?: string
+          meeting_link?: string | null
+          meeting_notes?: string | null
+          scheduled_date?: string
+          startup_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pitch_meetings_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      portfolio_companies: {
+        Row: {
+          company_logo_url: string | null
+          company_name: string
+          created_at: string | null
+          description: string | null
+          exit_status: string | null
+          id: string
+          industry: string | null
+          investment_amount: number | null
+          investment_year: number | null
+          investor_id: string
+          stage: string | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          company_logo_url?: string | null
+          company_name: string
+          created_at?: string | null
+          description?: string | null
+          exit_status?: string | null
+          id?: string
+          industry?: string | null
+          investment_amount?: number | null
+          investment_year?: number | null
+          investor_id: string
+          stage?: string | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          company_logo_url?: string | null
+          company_name?: string
+          created_at?: string | null
+          description?: string | null
+          exit_status?: string | null
+          id?: string
+          industry?: string | null
+          investment_amount?: number | null
+          investment_year?: number | null
+          investor_id?: string
+          stage?: string | null
+          updated_at?: string | null
+          website?: string | null
         }
         Relationships: []
       }
