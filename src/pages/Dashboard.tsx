@@ -138,48 +138,6 @@ const Dashboard = () => {
           <NotificationCenter />
         </div>
 
-        {/* Real Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-          <Card>
-            <CardHeader className="pb-2 sm:pb-3">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Profile Views</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">{analytics.profileViews}</div>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">Estimated views</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2 sm:pb-3">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Connections</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">{analytics.connections}</div>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">Active connections</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2 sm:pb-3">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Journey Progress</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold text-primary">{roadmapProgress.percentage}%</div>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">{roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2 sm:pb-3">
-              <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Engagement</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-xl sm:text-2xl font-bold">{analytics.engagement}%</div>
-              <p className="text-[10px] sm:text-xs text-muted-foreground">Last 30 days</p>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="feed" className="space-y-6">
@@ -321,6 +279,48 @@ const Dashboard = () => {
 
           {/* Analytics Tab */}
           <TabsContent value="analytics" className="space-y-4">
+            {/* Startup Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6">
+              <Card>
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Profile Views</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xl sm:text-2xl font-bold">{analytics.profileViews}</div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Estimated views</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Connections</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xl sm:text-2xl font-bold">{analytics.connections}</div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Active connections</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Journey Progress</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xl sm:text-2xl font-bold text-primary">{roadmapProgress.percentage}%</div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">{roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2 sm:pb-3">
+                  <CardTitle className="text-xs sm:text-sm font-medium text-muted-foreground">Engagement</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-xl sm:text-2xl font-bold">{analytics.engagement}%</div>
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">Last 30 days</p>
+                </CardContent>
+              </Card>
+            </div>
             <AnalyticsDashboard />
           </TabsContent>
 

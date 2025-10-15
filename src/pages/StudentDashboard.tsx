@@ -240,22 +240,6 @@ export default function StudentDashboard() {
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-          {stats.map((stat) => (
-            <Card key={stat.title} className="tech-card border-0">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  </div>
-                  <stat.icon className={`h-8 w-8 ${stat.color}`} />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
 
         <Tabs defaultValue="courses" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
@@ -493,6 +477,22 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
+            {/* Student Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6">
+              {stats.map((stat) => (
+                <Card key={stat.title} className="tech-card border-0">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+                        <p className="text-2xl font-bold text-foreground">{stat.value}</p>
+                      </div>
+                      <stat.icon className={`h-8 w-8 ${stat.color}`} />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
             <AnalyticsDashboard />
           </TabsContent>
 

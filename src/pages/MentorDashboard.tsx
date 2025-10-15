@@ -73,48 +73,6 @@ const MentorDashboard = () => {
           </div>
         </div>
 
-        {/* Key Metrics */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Active Mentees</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">12</div>
-              <p className="text-xs text-muted-foreground">+2 this month</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Sessions This Month</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">28</div>
-              <p className="text-xs text-muted-foreground">8 hours mentoring</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Success Stories</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">5</div>
-              <p className="text-xs text-muted-foreground">Startups funded</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-sm font-medium text-muted-foreground">Impact Score</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-ocean-primary">98</div>
-              <p className="text-xs text-muted-foreground">Top 5% mentors</p>
-            </CardContent>
-          </Card>
-        </div>
 
         {/* Tabbed Dashboard Content */}
         <Tabs defaultValue="feed" className="space-y-6">
@@ -189,6 +147,48 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
+            {/* Mentor Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Active Mentees</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">12</div>
+                  <p className="text-xs text-muted-foreground">+2 this month</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Sessions This Month</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">28</div>
+                  <p className="text-xs text-muted-foreground">8 hours mentoring</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Success Stories</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">5</div>
+                  <p className="text-xs text-muted-foreground">Startups funded</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Impact Score</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-ocean-primary">98</div>
+                  <p className="text-xs text-muted-foreground">Top 5% mentors</p>
+                </CardContent>
+              </Card>
+            </div>
             <AnalyticsDashboard />
           </TabsContent>
 
