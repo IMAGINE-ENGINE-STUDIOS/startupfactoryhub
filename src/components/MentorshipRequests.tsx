@@ -137,76 +137,85 @@ export default function MentorshipRequests() {
       <CardContent>
         <div className="space-y-4">
           {requests.map((request) => (
-            <div key={request.id} className="flex items-start justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
-              <div className="flex items-start space-x-4 flex-1">
-                <Avatar className="h-12 w-12">
-                  <AvatarImage src={request.mentee?.avatar_url} />
-                  <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                    {request.mentee?.full_name?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-foreground">
-                    {request.mentee?.full_name || 'Anonymous User'}
-                  </h3>
-                  {request.company && (
-                    <>
-                      <p className="text-sm text-muted-foreground">
-                        {request.company.name}
+            <Card key={request.id} className="hover:border-primary/50 transition-colors">
+              <CardContent className="p-4">
+                <div className="flex flex-col md:flex-row gap-4">
+                  {/* Profile Section */}
+                  <div className="flex items-start space-x-4 flex-1">
+                    <Avatar className="h-12 w-12 flex-shrink-0">
+                      <AvatarImage src={request.mentee?.avatar_url} />
+                      <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                        {request.mentee?.full_name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground">
+                        {request.mentee?.full_name || 'Anonymous User'}
+                      </h3>
+                      {request.company && (
+                        <>
+                          <p className="text-sm text-muted-foreground">
+                            {request.company.name}
+                          </p>
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            <Badge variant="secondary" className="text-xs">{request.company.stage}</Badge>
+                            <Badge variant="outline" className="text-xs">{request.company.industry}</Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                            {request.company.description}
+                          </p>
+                        </>
+                      )}
+                      {request.goals && (
+                        <p className="text-sm text-muted-foreground mt-2">
+                          <span className="font-medium">Goals:</span> {request.goals}
+                        </p>
+                      )}
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Requested {new Date(request.created_at).toLocaleDateString()}
                       </p>
-                      <div className="flex space-x-2 mt-2">
-                        <Badge variant="secondary" className="text-xs">{request.company.stage}</Badge>
-                        <Badge variant="outline" className="text-xs">{request.company.industry}</Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                        {request.company.description}
-                      </p>
-                    </>
-                  )}
-                  {request.goals && (
-                    <p className="text-sm text-muted-foreground mt-2">
-                      <span className="font-medium">Goals:</span> {request.goals}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Requested {new Date(request.created_at).toLocaleDateString()}
-                  </p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons Section */}
+                  <div className="flex flex-col gap-2 md:w-48 flex-shrink-0">
+                    {request.company && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="w-full"
+                        onClick={() => {
+                          setSelectedCompany(request.company);
+                          setDialogOpen(true);
+                        }}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        View Profile
+                      </Button>
+                    )}
+                    <div className="flex gap-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handleRequest(request.id, 'decline')}
+                      >
+                        <XCircle className="h-4 w-4" />
+                        <span className="ml-1 hidden sm:inline">Decline</span>
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="flex-1 bg-primary hover:bg-primary/90"
+                        onClick={() => handleRequest(request.id, 'accept')}
+                      >
+                        <CheckCircle className="h-4 w-4" />
+                        <span className="ml-1 hidden sm:inline">Accept</span>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className="flex flex-col gap-2 ml-4">
-                {request.company && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm"
-                    onClick={() => {
-                      setSelectedCompany(request.company);
-                      setDialogOpen(true);
-                    }}
-                  >
-                    <ExternalLink className="h-4 w-4 mr-2" />
-                    View Details
-                  </Button>
-                )}
-                <div className="flex gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={() => handleRequest(request.id, 'decline')}
-                  >
-                    <XCircle className="h-4 w-4 mr-2" />
-                    Decline
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    className="pulse-primary"
-                    onClick={() => handleRequest(request.id, 'accept')}
-                  >
-                    <CheckCircle className="h-4 w-4 mr-2" />
-                    Accept
-                  </Button>
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </CardContent>
