@@ -3,10 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Users, CheckCircle, XCircle } from 'lucide-react';
+import { Users, CheckCircle, XCircle, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import StartupProfileDialog from './StartupProfileDialog';
 
 interface MentorshipRequest {
   id: string;
@@ -20,15 +21,25 @@ interface MentorshipRequest {
     bio: string;
   };
   company: {
+    id: string;
     name: string;
     stage: string;
     industry: string;
     description: string;
+    logo_url?: string;
+    pitch_deck_url?: string;
+    website?: string;
+    location?: string;
+    team_size?: number;
+    funding_amount?: number;
+    looking_for?: string[];
   };
 }
 
 export default function MentorshipRequests() {
   const [requests, setRequests] = useState<MentorshipRequest[]>([]);
+  const [selectedCompany, setSelectedCompany] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -67,7 +78,7 @@ export default function MentorshipRequests() {
         data.map(async (request: any) => {
           const { data: companyData } = await supabase
             .from('companies')
-            .select('name, stage, industry, description')
+            .select('*')
             .eq('user_id', request.mentee?.user_id)
             .single();
           
@@ -162,28 +173,49 @@ export default function MentorshipRequests() {
                   </p>
                 </div>
               </div>
-              <div className="flex space-x-2 ml-4">
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={() => handleRequest(request.id, 'decline')}
-                >
-                  <XCircle className="h-4 w-4 mr-2" />
-                  Decline
-                </Button>
-                <Button 
-                  size="sm" 
-                  className="pulse-primary"
-                  onClick={() => handleRequest(request.id, 'accept')}
-                >
-                  <CheckCircle className="h-4 w-4 mr-2" />
-                  Accept
-                </Button>
+              <div className="flex flex-col gap-2 ml-4">
+                {request.company && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => {
+                      setSelectedCompany(request.company);
+                      setDialogOpen(true);
+                    }}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Details
+                  </Button>
+                )}
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleRequest(request.id, 'decline')}
+                  >
+                    <XCircle className="h-4 w-4 mr-2" />
+                    Decline
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    className="pulse-primary"
+                    onClick={() => handleRequest(request.id, 'accept')}
+                  >
+                    <CheckCircle className="h-4 w-4 mr-2" />
+                    Accept
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </CardContent>
+
+      <StartupProfileDialog 
+        company={selectedCompany}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
     </Card>
   );
 }

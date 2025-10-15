@@ -19,6 +19,7 @@ import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
+import StartupProfileDialog from '@/components/StartupProfileDialog';
 
 interface Startup {
   id: string;
@@ -36,6 +37,8 @@ export default function AdvisorDashboard() {
   const [mentorProfile, setMentorProfile] = useState<any>(null);
   const [activeMentorships, setActiveMentorships] = useState<any[]>([]);
   const [upcomingSessions, setUpcomingSessions] = useState<any[]>([]);
+  const [selectedStartup, setSelectedStartup] = useState<any>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -202,7 +205,13 @@ export default function AdvisorDashboard() {
         stage,
         industry,
         user_id,
-        logo_url
+        logo_url,
+        pitch_deck_url,
+        website,
+        location,
+        team_size,
+        funding_amount,
+        looking_for
       `)
       .order('created_at', { ascending: false });
 
@@ -328,7 +337,14 @@ export default function AdvisorDashboard() {
                         </div>
                       </div>
                       <div className="flex space-x-2">
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedStartup(startup);
+                            setDialogOpen(true);
+                          }}
+                        >
                           View Details
                         </Button>
                         <Button 
@@ -500,6 +516,12 @@ export default function AdvisorDashboard() {
           <AIFeaturesHub />
         </div>
       </div>
+
+      <StartupProfileDialog 
+        company={selectedStartup}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+      />
 
       {/* Floating Chat with AI */}
       <FloatingChat />

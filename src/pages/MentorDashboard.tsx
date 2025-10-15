@@ -9,7 +9,6 @@ import MentorRoadmapWidget from "@/components/MentorRoadmapWidget";
 import MentorCalendarWidget from "@/components/MentorCalendarWidget";
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
 import AIFeaturesHub from "@/components/AIFeaturesHub";
-
 import MentorshipRequests from "@/components/MentorshipRequests";
 import ConnectionsWidget from "@/components/ConnectionsWidget";
 import ResourcesWidget from "@/components/ResourcesWidget";
@@ -22,6 +21,7 @@ import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import MarketIntelligenceWidget from "@/components/MarketIntelligenceWidget";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 import { useProfileWithRole } from "@/hooks/useProfileWithRole";
+import StartupBrowser from "@/components/StartupBrowser";
 import { 
   Users, 
   TrendingUp, 
@@ -122,8 +122,9 @@ const MentorDashboard = () => {
         {/* Tabbed Dashboard Content */}
         <Tabs defaultValue="feed" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-7 max-w-5xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-5xl">
               <TabsTrigger value="feed" className="flex-shrink-0">Feed</TabsTrigger>
+              <TabsTrigger value="browse" className="flex-shrink-0">Browse</TabsTrigger>
               <TabsTrigger value="mentees" className="flex-shrink-0">Mentees</TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
               <TabsTrigger value="endorsements" className="flex-shrink-0">Endorsements</TabsTrigger>
@@ -146,17 +147,13 @@ const MentorDashboard = () => {
                     <CardTitle className="text-lg">Quick Actions</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start">
-                      <Users className="w-4 h-4 mr-2" />
-                      Browse Startups
+                    <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/messages")}>
+                      <MessageSquare className="w-4 h-4 mr-2" />
+                      Message Mentees
                     </Button>
                     <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/calendar")}>
                       <Calendar className="w-4 h-4 mr-2" />
                       Schedule Session
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      Message Mentees
                     </Button>
                     <Button variant="outline" className="w-full justify-start">
                       <Award className="w-4 h-4 mr-2" />
@@ -168,6 +165,10 @@ const MentorDashboard = () => {
                 <ResourcesWidget />
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="browse" className="space-y-4">
+            <StartupBrowser />
           </TabsContent>
 
           <TabsContent value="mentees" className="space-y-6">
