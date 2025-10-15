@@ -7,12 +7,92 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Building, Users, ExternalLink } from 'lucide-react';
 import StartupProfileDialog from './StartupProfileDialog';
 import { useInvestorNetwork } from '@/hooks/useInvestorNetwork';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 export default function InvestorStartupNetwork() {
   const { user } = useAuth();
-  const { startups, loading } = useInvestorNetwork(user?.id);
+  const { toast } = useToast();
+  const { startups, loading, refetch } = useInvestorNetwork(user?.id);
   const [selectedStartup, setSelectedStartup] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleExpressInterest = async (companyId: string) => {
+    if (!user || !selectedStartup) return;
+
+    try {
+      // Get the company owner's user_id
+      const { data: company, error: companyError } = await supabase
+        .from('companies')
+        .select('user_id')
+        .eq('id', companyId)
+        .single();
+
+      if (companyError) throw companyError;
+
+      // Insert investment interest
+      const { error } = await supabase
+        .from('investment_interests')
+        .insert({
+          investor_id: user.id,
+          company_id: companyId,
+          status: 'interested'
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast({
+            title: "Already Interested",
+            description: "You've already expressed interest in this startup.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      // Get investor's profile for notification
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .single();
+
+      const investorName = profile?.full_name || 'An investor';
+
+      // Create notification for the startup owner
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: company.user_id,
+          type: 'investment_interest',
+          title: 'New Investor Interest',
+          message: `${investorName} has expressed interest in ${selectedStartup.name}`,
+          data: {
+            investor_id: user.id,
+            company_id: companyId,
+            company_name: selectedStartup.name,
+            investor_name: investorName
+          }
+        });
+
+      toast({
+        title: "Interest Registered!",
+        description: `Your interest in ${selectedStartup.name} has been recorded. The startup owner will be notified.`,
+      });
+
+      setDialogOpen(false);
+      refetch(); // Refresh the list to show updated connection status
+    } catch (error) {
+      console.error('Error expressing interest:', error);
+      toast({
+        title: "Error",
+        description: "Failed to express interest. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -102,6 +182,7 @@ export default function InvestorStartupNetwork() {
         company={selectedStartup}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
+        onExpressInterest={handleExpressInterest}
       />
     </CardContent>
   </Card>

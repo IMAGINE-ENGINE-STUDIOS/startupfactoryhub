@@ -94,34 +94,77 @@ export default function StartupBrowser() {
       return;
     }
 
-    const { error } = await supabase
-      .from('investment_interests')
-      .insert({
-        investor_id: user.id,
-        company_id: companyId,
-        status: 'interested'
+    try {
+      // Get the company owner's user_id
+      const { data: company, error: companyError } = await supabase
+        .from('companies')
+        .select('user_id')
+        .eq('id', companyId)
+        .single();
+
+      if (companyError) throw companyError;
+
+      // Insert investment interest
+      const { error } = await supabase
+        .from('investment_interests')
+        .insert({
+          investor_id: user.id,
+          company_id: companyId,
+          status: 'interested'
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast({
+            title: "Already Interested",
+            description: "You've already expressed interest in this startup.",
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      // Get investor's profile for notification
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .single();
+
+      const investorName = profile?.full_name || 'An investor';
+
+      // Create notification for the startup owner
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: company.user_id,
+          type: 'investment_interest',
+          title: 'New Investor Interest',
+          message: `${investorName} has expressed interest in ${companyName}`,
+          data: {
+            investor_id: user.id,
+            company_id: companyId,
+            company_name: companyName,
+            investor_name: investorName
+          }
+        });
+
+      toast({
+        title: "Interest Registered!",
+        description: `Your interest in ${companyName} has been recorded. The startup owner will be notified.`,
       });
 
-    if (error) {
-      if (error.code === '23505') {
-        toast({
-          title: "Already Interested",
-          description: "You've already expressed interest in this startup.",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to express interest. Please try again.",
-          variant: "destructive",
-        });
-      }
-      return;
+      setDialogOpen(false);
+      fetchCompanies(); // Refresh to update connection status
+    } catch (error) {
+      console.error('Error expressing interest:', error);
+      toast({
+        title: "Error",
+        description: "Failed to express interest. Please try again.",
+        variant: "destructive",
+      });
     }
-
-    toast({
-      title: "Interest Registered!",
-      description: `Your interest in ${companyName} has been recorded.`,
-    });
   };
 
   const formatCurrency = (amount: number) => {
