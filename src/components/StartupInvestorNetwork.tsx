@@ -5,8 +5,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { DollarSign, Users, MessageSquare, TrendingUp } from 'lucide-react';
+import { DollarSign, Users, MessageSquare, TrendingUp, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import InvestorProfileDialog from './InvestorProfileDialog';
 
 interface Investor {
   id: string;
@@ -29,6 +30,8 @@ export default function StartupInvestorNetwork() {
   const [investors, setInvestors] = useState<Investor[]>([]);
   const [loading, setLoading] = useState(true);
   const [companyId, setCompanyId] = useState<string | null>(null);
+  const [selectedInvestor, setSelectedInvestor] = useState<Investor | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -125,6 +128,11 @@ export default function StartupInvestorNetwork() {
 
   const handleMessageInvestor = (investorId: string) => {
     navigate('/messages', { state: { userId: investorId } });
+  };
+
+  const handleViewProfile = (investor: Investor) => {
+    setSelectedInvestor(investor);
+    setDialogOpen(true);
   };
 
   if (loading) {
@@ -229,14 +237,25 @@ export default function StartupInvestorNetwork() {
                       ))}
                     </div>
 
-                    <Button
-                      size="sm"
-                      className="w-full"
-                      onClick={() => handleMessageInvestor(investor.user_id)}
-                    >
-                      <MessageSquare className="h-3 w-3 mr-1" />
-                      Message
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => handleViewProfile(investor)}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        size="sm"
+                        className="flex-1"
+                        onClick={() => handleMessageInvestor(investor.user_id)}
+                      >
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        Message
+                      </Button>
+                    </div>
 
                     {investor.portfolio_size && (
                       <p className="text-xs text-muted-foreground mt-2 text-center">
@@ -304,15 +323,26 @@ export default function StartupInvestorNetwork() {
                       ))}
                     </div>
 
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => handleMessageInvestor(investor.user_id)}
-                    >
-                      <MessageSquare className="h-3 w-3 mr-1" />
-                      Message
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => handleViewProfile(investor)}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => handleMessageInvestor(investor.user_id)}
+                      >
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        Message
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -320,6 +350,13 @@ export default function StartupInvestorNetwork() {
           </CardContent>
         </Card>
       )}
+
+      <InvestorProfileDialog
+        investor={selectedInvestor}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onMessage={handleMessageInvestor}
+      />
     </div>
   );
 }
