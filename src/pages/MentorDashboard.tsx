@@ -75,10 +75,10 @@ const MentorDashboard = () => {
 
 
         {/* Tabbed Dashboard Content */}
-        <Tabs defaultValue="feed" className="space-y-6">
+        <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
-              <TabsTrigger value="feed" className="flex-shrink-0">Feed</TabsTrigger>
+              <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
               <TabsTrigger value="browse" className="flex-shrink-0">Browse</TabsTrigger>
               <TabsTrigger value="mentees" className="flex-shrink-0">Mentees</TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
@@ -90,7 +90,7 @@ const MentorDashboard = () => {
             </TabsList>
           </div>
 
-          <TabsContent value="feed" className="space-y-6">
+          <TabsContent value="social" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
                 <MentorRoadmapWidget />

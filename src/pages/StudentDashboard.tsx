@@ -241,15 +241,15 @@ export default function StudentDashboard() {
         </div>
 
 
-        <Tabs defaultValue="courses" className="space-y-6">
+        <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-5xl">
+              <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
               <TabsTrigger value="courses" className="flex-shrink-0">Courses</TabsTrigger>
               <TabsTrigger value="leaderboard" className="flex-shrink-0">Leaderboard</TabsTrigger>
               <TabsTrigger value="groups" className="flex-shrink-0">Study Groups</TabsTrigger>
               <TabsTrigger value="assignments" className="flex-shrink-0">Assignments</TabsTrigger>
               <TabsTrigger value="startups" className="flex-shrink-0">Startups</TabsTrigger>
-              <TabsTrigger value="community" className="flex-shrink-0">Community</TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
@@ -406,7 +406,7 @@ export default function StudentDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="community" className="space-y-4">
+          <TabsContent value="social" className="space-y-4">
             <UnifiedCommunityFeed />
           </TabsContent>
 

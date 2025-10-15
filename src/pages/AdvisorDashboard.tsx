@@ -278,13 +278,13 @@ export default function AdvisorDashboard() {
         </div>
 
 
-        <Tabs defaultValue="requests" className="space-y-6">
+        <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-7 max-w-3xl">
+              <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
               <TabsTrigger value="requests" className="flex-shrink-0">Requests</TabsTrigger>
               <TabsTrigger value="mentees" className="flex-shrink-0">My Mentees</TabsTrigger>
               <TabsTrigger value="schedule" className="flex-shrink-0">Schedule</TabsTrigger>
-              <TabsTrigger value="community" className="flex-shrink-0">Community</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
               <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
@@ -483,7 +483,7 @@ export default function AdvisorDashboard() {
             </div>
           </TabsContent>
 
-          <TabsContent value="community" className="space-y-4">
+          <TabsContent value="social" className="space-y-4">
             <UnifiedCommunityFeed />
           </TabsContent>
 

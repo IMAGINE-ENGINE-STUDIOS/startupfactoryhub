@@ -140,10 +140,10 @@ const Dashboard = () => {
 
 
         {/* Tabs Navigation */}
-        <Tabs defaultValue="feed" className="space-y-6">
+        <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl">
-              <TabsTrigger value="feed" className="flex-shrink-0">Feed</TabsTrigger>
+              <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
               <TabsTrigger value="journey" className="flex-shrink-0">Journey</TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
@@ -155,8 +155,8 @@ const Dashboard = () => {
             </TabsList>
           </div>
 
-          {/* Feed Tab */}
-          <TabsContent value="feed" className="space-y-4">
+          {/* Social Tab */}
+          <TabsContent value="social" className="space-y-4">
             <UnifiedCommunityFeed showCreatePost={true} />
           </TabsContent>
 
