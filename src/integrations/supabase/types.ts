@@ -979,6 +979,27 @@ export type Database = {
           },
         ]
       }
+      follows: {
+        Row: {
+          created_at: string | null
+          follower_id: string
+          following_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string | null
+          follower_id: string
+          following_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string | null
+          follower_id?: string
+          following_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
       internship_applications: {
         Row: {
           cover_letter: string | null
@@ -1762,17 +1783,41 @@ export type Database = {
           },
         ]
       }
+      profile_views: {
+        Row: {
+          created_at: string | null
+          id: string
+          viewed_profile_id: string
+          viewer_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          viewed_profile_id: string
+          viewer_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          viewed_profile_id?: string
+          viewer_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
           bio: string | null
           created_at: string
           email: string | null
+          followers_count: number | null
+          following_count: number | null
           full_name: string | null
           id: string
           last_profile_update: string | null
           linkedin_url: string | null
           location: string | null
+          profile_views_count: number | null
           update_count: number | null
           updated_at: string
           user_id: string
@@ -1783,11 +1828,14 @@ export type Database = {
           bio?: string | null
           created_at?: string
           email?: string | null
+          followers_count?: number | null
+          following_count?: number | null
           full_name?: string | null
           id?: string
           last_profile_update?: string | null
           linkedin_url?: string | null
           location?: string | null
+          profile_views_count?: number | null
           update_count?: number | null
           updated_at?: string
           user_id: string
@@ -1798,11 +1846,14 @@ export type Database = {
           bio?: string | null
           created_at?: string
           email?: string | null
+          followers_count?: number | null
+          following_count?: number | null
           full_name?: string | null
           id?: string
           last_profile_update?: string | null
           linkedin_url?: string | null
           location?: string | null
+          profile_views_count?: number | null
           update_count?: number | null
           updated_at?: string
           user_id?: string

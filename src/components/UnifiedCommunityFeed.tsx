@@ -17,6 +17,7 @@ import { useNavigate } from 'react-router-dom';
 import ShortsCarousel from '@/components/ShortsCarousel';
 import ShortsCreator from '@/components/ShortsCreator';
 import GuestPrompt from '@/components/GuestPrompt';
+import UserProfileDialog from '@/components/UserProfileDialog';
 
 interface FeedPost {
   id: string;
@@ -67,11 +68,18 @@ export default function UnifiedCommunityFeed({
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreview, setMediaPreview] = useState<string[]>([]);
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUserClick = (userId: string) => {
+    setSelectedUserId(userId);
+    setIsProfileDialogOpen(true);
+  };
 
   useEffect(() => {
     fetchPosts();
@@ -645,7 +653,10 @@ export default function UnifiedCommunityFeed({
           <Card key={post.id} className="tech-card border-0 hover:scale-[1.01] transition-all">
             <CardContent className="p-4 sm:p-6">
               <div className="flex space-x-3 sm:space-x-4">
-                <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
+                <Avatar 
+                  className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:ring-2 ring-primary transition-all"
+                  onClick={() => handleUserClick(post.user_id)}
+                >
                   {post.profiles?.avatar_url ? (
                     <AvatarImage src={post.profiles.avatar_url} />
                   ) : null}
@@ -657,7 +668,10 @@ export default function UnifiedCommunityFeed({
                 <div className="flex-1 space-y-3 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                      <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">
+                      <h3 
+                        className="font-semibold text-sm sm:text-base text-foreground truncate cursor-pointer hover:text-primary transition-colors"
+                        onClick={() => handleUserClick(post.user_id)}
+                      >
                         {post.profiles?.full_name || 'Anonymous User'}
                       </h3>
                       <span className="text-base sm:text-lg">{getRoleIcon(post.profiles?.role || '')}</span>
@@ -807,10 +821,17 @@ export default function UnifiedCommunityFeed({
       )}
 
       {/* Shorts Creator Modal */}
-      <ShortsCreator
+      <ShortsCreator 
         isOpen={isCreatorOpen}
         onClose={() => setIsCreatorOpen(false)}
         onSave={handleSaveShort}
+      />
+
+      {/* User Profile Dialog */}
+      <UserProfileDialog
+        userId={selectedUserId}
+        open={isProfileDialogOpen}
+        onOpenChange={setIsProfileDialogOpen}
       />
     </div>
   );

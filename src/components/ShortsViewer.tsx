@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import UserProfileDialog from "@/components/UserProfileDialog";
 import { 
   X, 
   Heart, 
@@ -39,10 +40,17 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isMuted, setIsMuted] = useState(false);
   const [isLiked, setIsLiked] = useState<Record<string, boolean>>({});
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const currentShort = shorts[currentIndex];
+
+  const handleUserClick = (userId: string) => {
+    setSelectedUserId(userId);
+    setIsProfileDialogOpen(true);
+  };
 
   useEffect(() => {
     setCurrentIndex(initialIndex);
@@ -181,14 +189,20 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
             <div className="absolute bottom-0 left-0 right-0 p-6 z-40">
               {/* User Info */}
               <div className="flex items-center gap-3 mb-4">
-                <Avatar className="h-12 w-12 border-2 border-white/20">
+                <Avatar 
+                  className="h-12 w-12 border-2 border-white/20 cursor-pointer hover:ring-2 ring-white/50 transition-all"
+                  onClick={() => handleUserClick(currentShort.user_id)}
+                >
                   <AvatarImage src={currentShort.profiles?.avatar_url} />
                   <AvatarFallback className="bg-primary text-primary-foreground">
                     {currentShort.profiles?.full_name?.[0] || "U"}
                   </AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-white font-semibold text-lg">
+                  <p 
+                    className="text-white font-semibold text-lg cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => handleUserClick(currentShort.user_id)}
+                  >
                     {currentShort.profiles?.full_name || "User"}
                   </p>
                   <p className="text-white/70 text-sm">
@@ -275,6 +289,13 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
             </div>
           </div>
         </div>
+
+        {/* User Profile Dialog */}
+        <UserProfileDialog
+          userId={selectedUserId}
+          open={isProfileDialogOpen}
+          onOpenChange={setIsProfileDialogOpen}
+        />
       </DialogContent>
     </Dialog>
   );

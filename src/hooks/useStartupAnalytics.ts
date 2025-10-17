@@ -37,23 +37,21 @@ export const useStartupAnalytics = () => {
       
       const connectionsCount = connectionsQuery.count || 0;
 
-      // Fetch profile data to calculate completeness
-      const profileQuery = await supabase
-        .from('profiles')
-        .select('full_name, bio, location, website, avatar_url')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      // Fetch followers count
+      const followersQuery = await supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('following_id', user.id);
+      
+      const followersCount = followersQuery.count || 0;
 
-      const profileData = profileQuery.data;
-
-      // Fetch company data
-      const companyQuery = await supabase
-        .from('companies')
-        .select('name, description, industry, stage, logo_url')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      const companyData = companyQuery.data;
+      // Fetch following count
+      const followingQuery = await supabase
+        .from('follows')
+        .select('*', { count: 'exact', head: true })
+        .eq('follower_id', user.id);
+      
+      const followingCount = followingQuery.count || 0;
 
       // Fetch engagement data (last 30 days)
       const thirtyDaysAgo = new Date();
@@ -77,18 +75,32 @@ export const useStartupAnalytics = () => {
         .eq('user_id', user.id)
         .gte('created_at', thirtyDaysAgo.toISOString());
 
+      // Fetch profile views (last 30 days)
+      const profileViewsQuery = await supabase
+        .from('profile_views')
+        .select('*', { count: 'exact', head: true })
+        .eq('viewed_profile_id', user.id)
+        .gte('created_at', thirtyDaysAgo.toISOString());
+
       const postsCount = postsQuery.count || 0;
       const commentsCount = commentsQuery.count || 0;
       const likesCount = likesQuery.count || 0;
+      const profileViewsCount = profileViewsQuery.count || 0;
 
-      // Calculate engagement score
-      const totalActivity = postsCount * 4 + commentsCount * 2 + likesCount;
-      const engagementScore = Math.min(Math.round((totalActivity / 64) * 100), 100);
+      // Calculate engagement score including follower interactions
+      const totalActivity = postsCount * 4 + commentsCount * 2 + likesCount + followersCount;
+      const engagementScore = Math.min(Math.round((totalActivity / 100) * 100), 100);
 
-      const profileViews = Math.round(connectionsCount * 6 + totalActivity * 2);
+      // Calculate profile views with enhanced formula
+      const calculatedViews = Math.round(
+        connectionsCount * 6 + 
+        totalActivity * 2 + 
+        followersCount * 3 + 
+        profileViewsCount
+      );
 
       setAnalytics({
-        profileViews,
+        profileViews: calculatedViews,
         connections: connectionsCount,
         engagement: engagementScore,
         loading: false,
