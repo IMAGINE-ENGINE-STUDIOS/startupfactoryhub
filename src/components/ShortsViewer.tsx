@@ -3,6 +3,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import UserProfileDialog from "@/components/UserProfileDialog";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   X, 
   Heart, 
@@ -40,6 +41,7 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isMuted, setIsMuted] = useState(false);
   const [isLiked, setIsLiked] = useState<Record<string, boolean>>({});
+  const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
@@ -55,6 +57,15 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
   useEffect(() => {
     setCurrentIndex(initialIndex);
   }, [initialIndex]);
+
+  // Initialize like counts from shorts data
+  useEffect(() => {
+    const counts: Record<string, number> = {};
+    shorts.forEach(short => {
+      counts[short.id] = short.likes_count || 0;
+    });
+    setLikeCounts(counts);
+  }, [shorts]);
 
   useEffect(() => {
     if (open && videoRefs.current[currentIndex]) {
@@ -87,11 +98,49 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
     }
   };
 
-  const toggleLike = () => {
+  const toggleLike = async () => {
+    const shortId = currentShort.id;
+    const wasLiked = isLiked[shortId];
+    
+    // Optimistic update
     setIsLiked(prev => ({
       ...prev,
-      [currentShort.id]: !prev[currentShort.id]
+      [shortId]: !wasLiked
     }));
+    
+    setLikeCounts(prev => ({
+      ...prev,
+      [shortId]: (prev[shortId] || 0) + (wasLiked ? -1 : 1)
+    }));
+
+    // Update in database
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      if (wasLiked) {
+        await supabase
+          .from('post_likes')
+          .delete()
+          .eq('post_id', shortId)
+          .eq('user_id', user.id);
+      } else {
+        await supabase
+          .from('post_likes')
+          .insert({ post_id: shortId, user_id: user.id });
+      }
+    } catch (error) {
+      // Revert on error
+      setIsLiked(prev => ({
+        ...prev,
+        [shortId]: wasLiked
+      }));
+      
+      setLikeCounts(prev => ({
+        ...prev,
+        [shortId]: (prev[shortId] || 0) + (wasLiked ? 1 : -1)
+      }));
+    }
   };
 
   useEffect(() => {
@@ -239,7 +288,7 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
                   />
                 </div>
                 <span className="text-white text-sm font-semibold">
-                  {currentShort.likes_count + (isLiked[currentShort.id] ? 1 : 0)}
+                  {likeCounts[currentShort.id] || 0}
                 </span>
               </button>
 
