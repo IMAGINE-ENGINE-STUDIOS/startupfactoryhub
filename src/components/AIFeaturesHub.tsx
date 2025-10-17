@@ -8,13 +8,15 @@ import AITranslator from "./AITranslator";
 import TaskAutomation from "./TaskAutomation";
 import SentimentAnalyzer from "./SentimentAnalyzer";
 import DocumentAnalyzer from "./DocumentAnalyzer";
+import CRMBoard from "./CRMBoard";
 import { 
   FileText, 
   TrendingUp, 
   Languages, 
   Image, 
   Workflow,
-  Sparkles 
+  Sparkles,
+  Kanban 
 } from "lucide-react";
 
 export default function AIFeaturesHub() {
@@ -23,7 +25,8 @@ export default function AIFeaturesHub() {
     sentiment: false,
     translate: false,
     document: false,
-    automation: false
+    automation: false,
+    crm: false
   });
 
   const openDialog = (featureId: string) => {
@@ -69,6 +72,13 @@ export default function AIFeaturesHub() {
       description: 'Automate workflows and repetitive tasks',
       icon: Workflow,
       color: 'text-cyan-500'
+    },
+    {
+      id: 'crm',
+      title: 'CRM Board',
+      description: 'Manage your leads, contacts, and deals',
+      icon: Kanban,
+      color: 'text-blue-500'
     }
   ];
 
@@ -131,6 +141,10 @@ export default function AIFeaturesHub() {
       <AutomationDialog 
         open={openDialogs.automation} 
         onOpenChange={(open) => !open && closeDialog('automation')} 
+      />
+      <CRMDialog 
+        open={openDialogs.crm} 
+        onOpenChange={(open) => !open && closeDialog('crm')} 
       />
     </>
   );
@@ -264,6 +278,25 @@ function AutomationDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
           </DialogDescription>
         </DialogHeader>
         <TaskAutomation />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function CRMDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-7xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Kanban className="h-5 w-5 text-blue-500" />
+            CRM Board
+          </DialogTitle>
+          <DialogDescription>
+            Manage your leads, contacts, and deals in one place
+          </DialogDescription>
+        </DialogHeader>
+        <CRMBoard />
       </DialogContent>
     </Dialog>
   );
