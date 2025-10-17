@@ -22,8 +22,7 @@ import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
-import CRMBoard from '@/components/CRMBoard';
-import { 
+import {
   Plus,
   Target,
   Calendar as CalendarIcon,
@@ -144,10 +143,9 @@ const Dashboard = () => {
         {/* Tabs Navigation */}
         <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-7xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
-              <TabsTrigger value="crm" className="flex-shrink-0">CRM</TabsTrigger>
               <TabsTrigger value="journey" className="flex-shrink-0">Journey</TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
               <TabsTrigger value="profile" className="flex-shrink-0">Profile</TabsTrigger>
@@ -263,11 +261,6 @@ const Dashboard = () => {
           {/* Network Tab */}
           <TabsContent value="network" className="space-y-4">
             <NetworkBrowser />
-          </TabsContent>
-
-          {/* CRM Tab */}
-          <TabsContent value="crm" className="space-y-4">
-            <CRMBoard />
           </TabsContent>
 
           {/* Profile Tab */}

@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bot, FileText, TrendingUp, Languages, Image, Workflow, Sparkles } from "lucide-react";
+import { Bot, FileText, TrendingUp, Languages, Image, Workflow, Sparkles, Kanban } from "lucide-react";
+import CRMBoard from "@/components/CRMBoard";
 import AIAssistant from "@/components/AIAssistant";
 import AISummaryCard from "@/components/AISummaryCard";
 import AITranslator from "@/components/AITranslator";
@@ -167,6 +168,24 @@ const Tools = () => {
           <p className="text-muted-foreground">
             Enhance your productivity with intelligent automation and insights
           </p>
+        </div>
+
+        {/* CRM Board Section */}
+        <div className="mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Kanban className="h-5 w-5 text-primary" />
+                CRM Board
+              </CardTitle>
+              <CardDescription>
+                Manage your leads, contacts, and deals in one place
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CRMBoard />
+            </CardContent>
+          </Card>
         </div>
 
         {/* Main Tabs */}
