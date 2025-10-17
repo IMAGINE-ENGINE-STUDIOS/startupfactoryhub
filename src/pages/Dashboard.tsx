@@ -8,6 +8,7 @@ import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import NotificationCenter from '@/components/dashboard/NotificationCenter';
 import StartupRoadmap from '@/components/StartupRoadmap';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import CRMBoard from '@/components/CRMBoard';
 import FloatingChat from '@/components/FloatingChat';
 import StartupAIRecommendations from '@/components/StartupAIRecommendations';
 import MatchingSystem from '@/components/MatchingSystem';
@@ -330,6 +331,14 @@ const Dashboard = () => {
 
           {/* Tools Tab */}
           <TabsContent value="tools" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>CRM Board</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CRMBoard />
+              </CardContent>
+            </Card>
             <AIFeaturesHub />
           </TabsContent>
         </Tabs>
