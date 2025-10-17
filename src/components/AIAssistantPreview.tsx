@@ -75,7 +75,6 @@ export default function AIAssistantPreview() {
                 className="group relative"
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
-                onClick={() => setIsAssistantOpen(true)}
               >
                 {/* Glow effect */}
                 <div className={`absolute -inset-0.5 bg-gradient-to-r ${feature.color} rounded-xl opacity-0 group-hover:opacity-100 blur transition-all duration-500`} />
