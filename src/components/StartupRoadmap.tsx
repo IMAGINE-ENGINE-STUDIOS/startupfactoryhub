@@ -3,11 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign } from 'lucide-react';
+import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
 
 interface RoadmapStep {
   id: string;
@@ -86,6 +90,9 @@ const roadmapSteps: RoadmapStep[] = [
 export default function StartupRoadmap() {
   const [steps, setSteps] = useState<RoadmapStep[]>(roadmapSteps);
   const [currentStage, setCurrentStage] = useState<string>('idea');
+  const [isAddStepOpen, setIsAddStepOpen] = useState(false);
+  const [newStepTitle, setNewStepTitle] = useState('');
+  const [newStepDescription, setNewStepDescription] = useState('');
   const roadmapProgress = useRoadmapProgress();
   const { user } = useAuth();
   const { toast } = useToast();
@@ -164,6 +171,100 @@ export default function StartupRoadmap() {
     toast({
       title: "Step Completed!",
       description: "Great progress! You've unlocked the next step.",
+    });
+  };
+
+  const uncompleteStep = async (stepId: string) => {
+    if (!user) return;
+
+    const { error } = await supabase
+      .from('roadmap_progress')
+      .upsert({
+        user_id: user.id,
+        step_id: stepId,
+        completed: false,
+        completed_at: null
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update progress. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const updatedSteps = steps.map(step => {
+      if (step.id === stepId) {
+        return { ...step, completed: false };
+      }
+      return step;
+    });
+
+    // Lock all subsequent steps
+    const currentIndex = steps.findIndex(step => step.id === stepId);
+    for (let i = currentIndex + 1; i < updatedSteps.length; i++) {
+      updatedSteps[i].locked = true;
+      updatedSteps[i].completed = false;
+    }
+
+    setSteps(updatedSteps);
+
+    toast({
+      title: "Step Unmarked",
+      description: "Progress has been reset for this step.",
+    });
+  };
+
+  const addCustomStep = async () => {
+    if (!user || !newStepTitle.trim()) {
+      toast({
+        title: "Error",
+        description: "Please provide a title for your custom step.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const customStepId = `custom-${Date.now()}`;
+    const newStep: RoadmapStep = {
+      id: customStepId,
+      title: newStepTitle,
+      description: newStepDescription || 'Custom step for your journey',
+      stage: 'growth',
+      completed: false,
+      locked: false,
+      resources: [],
+      icon: Circle
+    };
+
+    const { error } = await supabase
+      .from('roadmap_progress')
+      .insert({
+        user_id: user.id,
+        step_id: customStepId,
+        completed: false,
+        notes: JSON.stringify({ title: newStepTitle, description: newStepDescription })
+      });
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create custom step. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSteps([...steps, newStep]);
+    setNewStepTitle('');
+    setNewStepDescription('');
+    setIsAddStepOpen(false);
+
+    toast({
+      title: "Custom Step Added!",
+      description: "Your custom step has been added to your journey.",
     });
   };
 
@@ -269,9 +370,20 @@ export default function StartupRoadmap() {
                           </Button>
                         )}
                         {step.completed && (
-                          <Badge variant="default" className="bg-green-500">
-                            ✓ Completed
-                          </Badge>
+                          <>
+                            <Badge variant="default" className="bg-green-500">
+                              ✓ Completed
+                            </Badge>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => uncompleteStep(step.id)}
+                              className="text-muted-foreground hover:text-foreground"
+                            >
+                              <RotateCcw className="w-4 h-4 mr-1" />
+                              Undo
+                            </Button>
+                          </>
                         )}
                       </div>
                     </div>
@@ -281,6 +393,62 @@ export default function StartupRoadmap() {
             </Card>
           );
         })}
+        
+        {/* Add Custom Step Card */}
+        <Card className="tech-card border-0 border-dashed border-2 border-primary/20 hover:border-primary/40 transition-colors">
+          <CardContent className="p-6">
+            <Dialog open={isAddStepOpen} onOpenChange={setIsAddStepOpen}>
+              <DialogTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  className="w-full h-full min-h-[120px] flex flex-col items-center justify-center gap-2 hover:bg-primary/5"
+                >
+                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                    <Plus className="w-6 h-6 text-primary" />
+                  </div>
+                  <div className="text-center">
+                    <p className="font-semibold text-foreground">Add Custom Step</p>
+                    <p className="text-sm text-muted-foreground">Create your own milestone</p>
+                  </div>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Add Custom Step</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="step-title">Step Title *</Label>
+                    <Input
+                      id="step-title"
+                      placeholder="e.g., Hire First Employee"
+                      value={newStepTitle}
+                      onChange={(e) => setNewStepTitle(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="step-description">Description</Label>
+                    <Textarea
+                      id="step-description"
+                      placeholder="Describe what this step involves..."
+                      value={newStepDescription}
+                      onChange={(e) => setNewStepDescription(e.target.value)}
+                      rows={3}
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button variant="outline" onClick={() => setIsAddStepOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button onClick={addCustomStep}>
+                      Add Step
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
