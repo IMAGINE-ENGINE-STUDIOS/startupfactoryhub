@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bot, FileText, TrendingUp, Languages, Image, Workflow, Sparkles, Kanban } from "lucide-react";
+import { Bot, FileText, TrendingUp, Languages, Image, Workflow, Sparkles } from "lucide-react";
 import AIAssistant from "@/components/AIAssistant";
 import AISummaryCard from "@/components/AISummaryCard";
 import AITranslator from "@/components/AITranslator";
@@ -15,13 +15,12 @@ import TaskAutomation from "@/components/TaskAutomation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import GuestPrompt from "@/components/GuestPrompt";
-import CRMBoard from "@/components/CRMBoard";
 
 const Tools = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [activeTab, setActiveTab] = useState("crm");
+  const [activeTab, setActiveTab] = useState("chatbot");
 
   // AI Assistant state
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
@@ -172,11 +171,7 @@ const Tools = () => {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-7 h-auto">
-            <TabsTrigger value="crm" className="gap-2 py-3">
-              <Kanban className="h-4 w-4" />
-              <span className="hidden sm:inline">CRM</span>
-            </TabsTrigger>
+          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 h-auto">
             <TabsTrigger value="chatbot" className="gap-2 py-3">
               <Bot className="h-4 w-4" />
               <span className="hidden sm:inline">Assistant</span>
@@ -202,11 +197,6 @@ const Tools = () => {
               <span className="hidden sm:inline">Automation</span>
             </TabsTrigger>
           </TabsList>
-
-          {/* CRM Board */}
-          <TabsContent value="crm" className="space-y-4">
-            <CRMBoard />
-          </TabsContent>
 
           {/* AI Chatbot */}
           <TabsContent value="chatbot" className="space-y-4">
