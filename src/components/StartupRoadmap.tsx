@@ -117,10 +117,26 @@ export default function StartupRoadmap() {
     }
 
     const progressMap = new Map(data?.map(p => [p.step_id, p.completed]) || []);
+    const customStepsData = data?.filter(p => p.step_id.startsWith('custom-')) || [];
     
-    const updatedSteps = steps.map((step, index) => {
+    // Load custom steps from database
+    const customSteps: RoadmapStep[] = customStepsData.map(customStep => {
+      const notes = customStep.notes ? JSON.parse(customStep.notes) : {};
+      return {
+        id: customStep.step_id,
+        title: notes.title || 'Custom Step',
+        description: notes.description || 'Custom step for your journey',
+        stage: 'growth',
+        completed: customStep.completed || false,
+        locked: false,
+        resources: [],
+        icon: Circle
+      };
+    });
+    
+    const updatedSteps = roadmapSteps.map((step, index) => {
       const completed = progressMap.get(step.id) || false;
-      const prevCompleted = index === 0 || progressMap.get(steps[index - 1].id) || false;
+      const prevCompleted = index === 0 || progressMap.get(roadmapSteps[index - 1].id) || false;
       
       return {
         ...step,
@@ -129,7 +145,7 @@ export default function StartupRoadmap() {
       };
     });
     
-    setSteps(updatedSteps);
+    setSteps([...updatedSteps, ...customSteps]);
   };
 
   const completeStep = async (stepId: string) => {
@@ -177,14 +193,18 @@ export default function StartupRoadmap() {
   const uncompleteStep = async (stepId: string) => {
     if (!user) return;
 
+    const currentIndex = steps.findIndex(step => step.id === stepId);
+    const subsequentStepIds = steps.slice(currentIndex).map(s => s.id);
+
+    // Update ALL affected steps in database
     const { error } = await supabase
       .from('roadmap_progress')
-      .upsert({
-        user_id: user.id,
-        step_id: stepId,
+      .update({
         completed: false,
         completed_at: null
-      });
+      })
+      .eq('user_id', user.id)
+      .in('step_id', subsequentStepIds);
 
     if (error) {
       toast({
@@ -195,25 +215,19 @@ export default function StartupRoadmap() {
       return;
     }
 
-    const updatedSteps = steps.map(step => {
-      if (step.id === stepId) {
-        return { ...step, completed: false };
+    // Update local state
+    const updatedSteps = steps.map((step, i) => {
+      if (i >= currentIndex) {
+        return { ...step, completed: false, locked: i !== currentIndex };
       }
       return step;
     });
-
-    // Lock all subsequent steps
-    const currentIndex = steps.findIndex(step => step.id === stepId);
-    for (let i = currentIndex + 1; i < updatedSteps.length; i++) {
-      updatedSteps[i].locked = true;
-      updatedSteps[i].completed = false;
-    }
 
     setSteps(updatedSteps);
 
     toast({
       title: "Step Unmarked",
-      description: "Progress has been reset for this step.",
+      description: "Progress has been reset for this step and all subsequent steps.",
     });
   };
 

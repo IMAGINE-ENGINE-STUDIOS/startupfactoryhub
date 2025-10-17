@@ -66,7 +66,7 @@ export default function Analytics() {
           </TabsList>
 
           <TabsContent value="overview">
-            <AnalyticsDashboard />
+            <AnalyticsDashboard userId={user?.id} />
           </TabsContent>
 
           <TabsContent value="performance">

@@ -64,8 +64,9 @@ export const useRoadmapProgress = () => {
       return;
     }
 
+    // Count ALL steps including custom ones
+    const totalSteps = data?.length || 6;
     const completedSteps = data?.filter(step => step.completed).length || 0;
-    const totalSteps = 6;
     const percentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
     setProgress({

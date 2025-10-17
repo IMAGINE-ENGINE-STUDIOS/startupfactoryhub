@@ -24,6 +24,7 @@ interface Connection {
 export default function NetworkBrowser() {
   const [currentConnections, setCurrentConnections] = useState<Connection[]>([]);
   const [searchResults, setSearchResults] = useState<Connection[]>([]);
+  const [suggestedUsers, setSuggestedUsers] = useState<Connection[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Connection | null>(null);
@@ -35,6 +36,7 @@ export default function NetworkBrowser() {
   useEffect(() => {
     if (user) {
       fetchCurrentConnections();
+      fetchSuggestedUsers();
     }
   }, [user]);
 
@@ -191,6 +193,51 @@ export default function NetworkBrowser() {
 
   const handleMessage = (connectionUserId: string) => {
     navigate(`/messages?user=${connectionUserId}`);
+  };
+
+  const fetchSuggestedUsers = async () => {
+    if (!user) return;
+
+    try {
+      // Get existing connection IDs
+      const { data: existingConnections } = await supabase
+        .from('connections')
+        .select('requester_id, addressee_id')
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`);
+
+      const connectedIds = existingConnections?.flatMap(c => 
+        [c.requester_id, c.addressee_id]
+      ).filter(id => id !== user.id) || [];
+
+      // Fetch random users not already connected
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url, bio, location')
+        .neq('user_id', user.id)
+        .not('user_id', 'in', connectedIds.length > 0 ? `(${connectedIds.join(',')})` : '(00000000-0000-0000-0000-000000000000)')
+        .limit(9);
+
+      if (profiles && profiles.length > 0) {
+        // Get roles
+        const userIds = profiles.map(p => p.user_id);
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('user_id, role')
+          .in('user_id', userIds);
+
+        const profilesWithRoles = profiles.map(profile => {
+          const userRole = userRoles?.find(ur => ur.user_id === profile.user_id);
+          return {
+            ...profile,
+            role: userRole?.role || null
+          };
+        });
+
+        setSuggestedUsers(profilesWithRoles);
+      }
+    } catch (error) {
+      console.error('Error fetching suggested users:', error);
+    }
   };
 
   const viewProfile = (connection: Connection) => {
@@ -363,6 +410,23 @@ export default function NetworkBrowser() {
           )}
         </CardContent>
       </Card>
+
+      {/* Suggested Connections */}
+      {suggestedUsers.length > 0 && (
+        <Card className="tech-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5 text-primary" />
+              Suggested Connections
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {suggestedUsers.map((user) => renderUserCard(user, false))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Profile Dialog */}
       <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
