@@ -11,7 +11,6 @@ interface Recommendation {
   type: 'connection' | 'investor' | 'course' | 'general';
   title: string;
   description: string;
-  action: string;
   reference_id?: string;
 }
 
@@ -88,7 +87,7 @@ export default function RecommendationPopup() {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl max-h-[80vh] overflow-auto shadow-2xl border-2">
+      <Card className="w-full max-w-2xl max-h-[85vh] shadow-2xl border-2 flex flex-col">
         <CardHeader className="relative">
           <Button
             variant="ghost"
@@ -100,44 +99,32 @@ export default function RecommendationPopup() {
           </Button>
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="h-6 w-6 text-primary" />
-            <CardTitle className="text-2xl">AI-Powered Recommendations</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl break-words">AI-Powered Recommendations</CardTitle>
           </div>
           <CardDescription>
             Personalized suggestions to help you grow your startup
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="overflow-y-auto flex-1">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12">
               <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground">Generating personalized recommendations...</p>
+              <p className="text-muted-foreground text-sm sm:text-base">Generating personalized recommendations...</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="space-y-4 pb-4">
               {recommendations.map((rec, index) => (
                 <Card key={index} className="border-2 hover:border-primary/50 transition-colors">
                   <CardContent className="p-4">
                     <div className="flex items-start gap-3">
-                      <Badge variant="outline" className={`${getTypeColor(rec.type)} mt-1`}>
+                      <Badge variant="outline" className={`${getTypeColor(rec.type)} mt-1 flex-shrink-0`}>
                         {getIcon(rec.type)}
                       </Badge>
-                      <div className="flex-1 space-y-2">
-                        <h3 className="font-semibold text-lg">{rec.title}</h3>
-                        <p className="text-muted-foreground text-sm leading-relaxed">
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <h3 className="font-semibold text-base sm:text-lg break-words">{rec.title}</h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed break-words">
                           {rec.description}
                         </p>
-                        <Button 
-                          size="sm" 
-                          className="mt-2"
-                          onClick={() => {
-                            toast({
-                              title: 'Action noted!',
-                              description: 'This feature will be available soon.',
-                            });
-                          }}
-                        >
-                          {rec.action}
-                        </Button>
                       </div>
                     </div>
                   </CardContent>
@@ -145,22 +132,6 @@ export default function RecommendationPopup() {
               ))}
             </div>
           )}
-
-          <div className="mt-6 flex justify-between items-center pt-4 border-t">
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
-              Close
-            </Button>
-            <Button onClick={loadRecommendations} disabled={isLoading}>
-              {isLoading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Refreshing...
-                </>
-              ) : (
-                'Refresh Recommendations'
-              )}
-            </Button>
-          </div>
         </CardContent>
       </Card>
     </div>
