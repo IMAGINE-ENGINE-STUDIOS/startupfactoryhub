@@ -1,41 +1,8 @@
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Brain, Users, MapPin, MessageSquare, Calendar, Target, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import WebGLBackground from "./WebGLBackground";
-
-const features = [
-  {
-    icon: Brain,
-    title: "AI Roadmaps",
-    description: "Personalized startup roadmaps powered by AI"
-  },
-  {
-    icon: Users,
-    title: "Instant Matching",
-    description: "Connect with mentors & investors instantly"
-  },
-  {
-    icon: MapPin,
-    title: "Global Resources",
-    description: "Access labs, grants & events worldwide"
-  },
-  {
-    icon: MessageSquare,
-    title: "Real-Time Chat",
-    description: "Seamless communication tools"
-  },
-  {
-    icon: Calendar,
-    title: "Event Management",
-    description: "Organize & discover opportunities"
-  },
-  {
-    icon: Target,
-    title: "Smart Milestones",
-    description: "AI-powered actionable steps"
-  }
-];
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -111,51 +78,6 @@ const HeroSection = () => {
             >
               Explore Features
             </Button>
-          </div>
-
-          {/* Features Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
-            {features.map((feature, index) => (
-              <div
-                key={index}
-                className="glass-morphism p-6 rounded-2xl border border-primary/10 hover:border-primary/30 transition-all duration-300 group hover:scale-105 animate-fade-in"
-                style={{ animationDelay: `${0.3 + index * 0.1}s` }}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-lg">
-                    <feature.icon className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-base sm:text-lg font-bold mb-1 text-foreground group-hover:text-primary transition-colors">
-                      {feature.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {feature.description}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Stats Bar */}
-          <div className="mt-12 sm:mt-16 flex flex-wrap items-center justify-center gap-8 sm:gap-12 animate-fade-in" style={{ animationDelay: '0.9s' }}>
-            <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">10K+</div>
-              <div className="text-sm text-muted-foreground mt-1">Active Users</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">500+</div>
-              <div className="text-sm text-muted-foreground mt-1">Startups Launched</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">$50M+</div>
-              <div className="text-sm text-muted-foreground mt-1">Funding Raised</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl sm:text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">98%</div>
-              <div className="text-sm text-muted-foreground mt-1">Success Rate</div>
-            </div>
           </div>
         </div>
       </div>
