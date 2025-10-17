@@ -21,7 +21,6 @@ import AIFeaturesHub from '@/components/AIFeaturesHub';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import StartupProfileDialog from '@/components/StartupProfileDialog';
 import NetworkBrowser from '@/components/NetworkBrowser';
-import CRMBoard from '@/components/CRMBoard';
 
 interface Startup {
   id: string;
@@ -282,10 +281,9 @@ export default function AdvisorDashboard() {
 
         <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-4xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-4xl">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
-              <TabsTrigger value="crm" className="flex-shrink-0">CRM</TabsTrigger>
               <TabsTrigger value="requests" className="flex-shrink-0">Requests</TabsTrigger>
               <TabsTrigger value="mentees" className="flex-shrink-0">My Mentees</TabsTrigger>
               <TabsTrigger value="schedule" className="flex-shrink-0">Schedule</TabsTrigger>
@@ -493,10 +491,6 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="network" className="space-y-4">
             <NetworkBrowser />
-          </TabsContent>
-
-          <TabsContent value="crm" className="space-y-4">
-            <CRMBoard />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">

@@ -21,7 +21,6 @@ import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import NetworkBrowser from '@/components/NetworkBrowser';
-import CRMBoard from '@/components/CRMBoard';
 
 interface Course {
   id: string;
@@ -245,10 +244,9 @@ export default function StudentDashboard() {
 
         <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-11 max-w-5xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-5xl">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
-              <TabsTrigger value="crm" className="flex-shrink-0">CRM</TabsTrigger>
               <TabsTrigger value="courses" className="flex-shrink-0">Courses</TabsTrigger>
               <TabsTrigger value="leaderboard" className="flex-shrink-0">Leaderboard</TabsTrigger>
               <TabsTrigger value="groups" className="flex-shrink-0">Study Groups</TabsTrigger>
@@ -256,6 +254,7 @@ export default function StudentDashboard() {
               <TabsTrigger value="startups" className="flex-shrink-0">Startups</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
+              <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
               <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
             </TabsList>
           </div>
@@ -415,10 +414,6 @@ export default function StudentDashboard() {
 
           <TabsContent value="network" className="space-y-4">
             <NetworkBrowser />
-          </TabsContent>
-
-          <TabsContent value="crm" className="space-y-4">
-            <CRMBoard />
           </TabsContent>
 
 

@@ -24,7 +24,6 @@ import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import InvestorAvailabilityManager from '@/components/InvestorAvailabilityManager';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
-import CRMBoard from '@/components/CRMBoard';
 
 interface Investment {
   id: string;
@@ -297,10 +296,9 @@ export default function InvestorDashboard() {
 
         <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-7xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
-              <TabsTrigger value="crm" className="flex-shrink-0">CRM</TabsTrigger>
               <TabsTrigger value="portfolio" className="flex-shrink-0">Portfolio</TabsTrigger>
               <TabsTrigger value="opportunities" className="flex-shrink-0">Opportunities</TabsTrigger>
               <TabsTrigger value="events" className="flex-shrink-0">Events</TabsTrigger>
@@ -420,10 +418,6 @@ export default function InvestorDashboard() {
 
           <TabsContent value="network" className="space-y-4">
             <NetworkBrowser />
-          </TabsContent>
-
-          <TabsContent value="crm" className="space-y-4">
-            <CRMBoard />
           </TabsContent>
 
           <TabsContent value="events" className="space-y-4">
