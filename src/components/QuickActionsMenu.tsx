@@ -10,12 +10,20 @@ import {
   BarChart3,
   Plus,
   FileText,
+  Kanban,
 } from 'lucide-react';
 
 export default function QuickActionsMenu() {
   const navigate = useNavigate();
 
   const actions = [
+    {
+      icon: Kanban,
+      label: 'CRM Board',
+      description: 'Manage leads & deals',
+      onClick: () => navigate('/tools'),
+      color: 'bg-emerald-500/10 text-emerald-500',
+    },
     {
       icon: Calendar,
       label: 'Schedule Meeting',
