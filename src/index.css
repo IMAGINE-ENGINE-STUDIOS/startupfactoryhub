@@ -159,6 +159,29 @@ All colors MUST be HSL.
     backdrop-filter: blur(10px);
     border: 1px solid hsl(var(--border));
   }
+
+  @keyframes gridMove {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(50px);
+    }
+  }
+
+  @keyframes gradient {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+
+  .animate-gradient {
+    background-size: 200% auto;
+    animation: gradient 3s ease infinite;
+  }
   
   /* Futuristic elements */
   .neon-glow {
