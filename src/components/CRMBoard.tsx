@@ -163,9 +163,9 @@ export default function CRMBoard() {
         ...stage,
         cards: cardsData.filter((card) => card.stage_id === stage.id).map(card => ({
           ...card,
-          status: card.status || "active",
-          tasks: card.tasks || [],
-          notes: card.notes || null
+          status: (card as any).status || "active",
+          tasks: (card as any).tasks || [],
+          notes: (card as any).notes || null
         })),
       }));
 
@@ -203,9 +203,9 @@ export default function CRMBoard() {
         priority: newCard.priority,
         due_date: newCard.due_date || null,
         status: newCard.status,
-        tasks: newCard.tasks,
+        tasks: newCard.tasks as any,
         notes: newCard.notes || null,
-      });
+      } as any);
 
       if (error) throw error;
 
@@ -255,9 +255,9 @@ export default function CRMBoard() {
           priority: editingCard.priority,
           due_date: editingCard.due_date,
           status: editingCard.status,
-          tasks: editingCard.tasks,
+          tasks: editingCard.tasks as any,
           notes: editingCard.notes,
-        })
+        } as any)
         .eq("id", editingCard.id);
 
       if (error) throw error;

@@ -642,10 +642,13 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
+          notes: string | null
           position: number
           priority: string | null
           stage_id: string
+          status: string | null
           tags: string[] | null
+          tasks: Json | null
           title: string
           updated_at: string
           user_id: string
@@ -659,10 +662,13 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          notes?: string | null
           position?: number
           priority?: string | null
           stage_id: string
+          status?: string | null
           tags?: string[] | null
+          tasks?: Json | null
           title: string
           updated_at?: string
           user_id: string
@@ -676,10 +682,13 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
+          notes?: string | null
           position?: number
           priority?: string | null
           stage_id?: string
+          status?: string | null
           tags?: string[] | null
+          tasks?: Json | null
           title?: string
           updated_at?: string
           user_id?: string
