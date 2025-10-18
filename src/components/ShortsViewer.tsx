@@ -352,58 +352,48 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
             <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black via-black/60 to-transparent pointer-events-none" />
 
             {/* Content Overlay - HUD Style */}
-            <div className="absolute bottom-0 left-0 right-24 p-6 z-40">
-              {/* User Info - Metal Card */}
-              <div className="relative mb-4">
+            <div className="absolute bottom-0 left-0 right-20 p-4 z-40">
+              {/* User Info - Slim Metal Card */}
+              <div className="relative mb-3">
                 {/* Card Glow */}
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 rounded-2xl blur" />
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 rounded-xl blur" />
                 
                 {/* Metal Frame */}
-                <div className="relative bg-gradient-to-br from-slate-900/90 via-slate-800/90 to-slate-900/90 backdrop-blur-xl rounded-2xl border border-slate-700/50 p-4 shadow-2xl">
+                <div className="relative bg-gradient-to-br from-slate-900/80 via-slate-800/80 to-slate-900/80 backdrop-blur-xl rounded-xl border border-slate-700/30 p-2.5 shadow-xl">
                   {/* Metallic Shine */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-transparent rounded-2xl pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/3 via-transparent to-transparent rounded-xl pointer-events-none" />
                   
-                  {/* Tech Corner Accents */}
-                  <div className="absolute top-1 left-1 w-4 h-4 border-t border-l border-cyan-400/30" />
-                  <div className="absolute top-1 right-1 w-4 h-4 border-t border-r border-cyan-400/30" />
-                  
-                  <div className="relative flex items-center gap-3">
+                  <div className="relative flex items-center gap-2">
                     <div className="relative">
                       {/* Avatar Glow */}
-                      <div className="absolute -inset-1 bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 rounded-full blur-md opacity-60" />
+                      <div className="absolute -inset-0.5 bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 rounded-full blur opacity-40" />
                       
-                      {/* Hexagonal Frame */}
-                      <div className="relative">
-                        <Avatar 
-                          className="relative h-14 w-14 border-2 border-slate-700 cursor-pointer hover:border-cyan-400 transition-all ring-2 ring-cyan-400/20 hover:ring-cyan-400/50"
-                          onClick={() => handleUserClick(currentShort.user_id)}
-                        >
-                          <AvatarImage src={currentShort.profiles?.avatar_url} />
-                          <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 font-bold">
-                            {currentShort.profiles?.full_name?.[0] || "U"}
-                          </AvatarFallback>
-                        </Avatar>
-                        
-                        {/* Status Indicator */}
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border-2 border-slate-900 shadow-[0_0_10px_rgba(34,197,94,0.5)]" />
-                      </div>
+                      <Avatar 
+                        className="relative h-9 w-9 border border-slate-700 cursor-pointer hover:border-cyan-400 transition-all ring-1 ring-cyan-400/10 hover:ring-cyan-400/30"
+                        onClick={() => handleUserClick(currentShort.user_id)}
+                      >
+                        <AvatarImage src={currentShort.profiles?.avatar_url} />
+                        <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 font-bold text-xs">
+                          {currentShort.profiles?.full_name?.[0] || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      {/* Status Indicator */}
+                      <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-gradient-to-br from-green-400 to-emerald-500 rounded-full border border-slate-900 shadow-[0_0_6px_rgba(34,197,94,0.4)]" />
                     </div>
                     
-                    <div className="flex-1">
+                    <div className="flex-1 min-w-0">
                       <p 
-                        className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400 font-bold text-base cursor-pointer hover:from-cyan-300 hover:via-blue-300 hover:to-cyan-300 transition-all flex items-center gap-2"
+                        className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400 font-semibold text-sm cursor-pointer hover:from-cyan-300 hover:via-blue-300 hover:to-cyan-300 transition-all flex items-center gap-1.5 truncate"
                         onClick={() => handleUserClick(currentShort.user_id)}
                       >
                         {currentShort.profiles?.full_name || "User"}
-                        <Zap className="h-4 w-4 text-cyan-400 animate-pulse" />
+                        <Zap className="h-3 w-3 text-cyan-400 animate-pulse flex-shrink-0" />
                       </p>
-                      <p className="text-slate-400 text-xs font-mono">
+                      <p className="text-slate-500 text-[10px] font-mono">
                         {new Date(currentShort.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    
-                    {/* Tech Detail Line */}
-                    <div className="h-px flex-1 bg-gradient-to-r from-cyan-400/50 to-transparent" />
                   </div>
                 </div>
               </div>
@@ -417,48 +407,48 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
               </div>
             </div>
 
-            {/* Action Buttons - Octagonal Tech Design */}
-            <div className="absolute right-6 bottom-36 flex flex-col gap-5 z-40">
+            {/* Action Buttons - Compact Tech Design */}
+            <div className="absolute right-4 bottom-32 flex flex-col gap-3 z-40">
               {/* Like Button */}
               <button
                 onClick={toggleLike}
-                className="group relative flex flex-col items-center gap-2"
+                className="group relative flex flex-col items-center gap-1"
               >
                 <div className="relative">
                   {/* Outer Glow */}
                   <div className={cn(
-                    "absolute -inset-3 rounded-2xl blur-xl transition-all duration-500",
+                    "absolute -inset-2 rounded-xl blur-lg transition-all duration-500",
                     isLiked[currentShort.id] 
-                      ? "bg-gradient-to-br from-rose-500 to-pink-500 opacity-70" 
-                      : "bg-gradient-to-br from-cyan-500/0 to-blue-500/0 group-hover:from-cyan-500/50 group-hover:to-blue-500/50"
+                      ? "bg-gradient-to-br from-rose-500 to-pink-500 opacity-60" 
+                      : "bg-gradient-to-br from-cyan-500/0 to-blue-500/0 group-hover:from-cyan-500/40 group-hover:to-blue-500/40"
                   )} />
                   
                   {/* Metal Container */}
                   <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl" />
-                    <div className="absolute inset-0 bg-gradient-to-tl from-white/5 to-white/10 rounded-2xl" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl" />
+                    <div className="absolute inset-0 bg-gradient-to-tl from-white/3 to-white/5 rounded-xl" />
                     
                     <div className={cn(
-                      "relative w-16 h-16 rounded-2xl flex items-center justify-center backdrop-blur-xl border transition-all duration-300 shadow-[inset_0_2px_0_0_rgba(255,255,255,0.1)]",
+                      "relative w-12 h-12 rounded-xl flex items-center justify-center backdrop-blur-xl border transition-all duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]",
                       isLiked[currentShort.id]
-                        ? "bg-gradient-to-br from-rose-500/20 to-pink-500/20 border-rose-400/50 shadow-[0_0_30px_rgba(244,63,94,0.4)]"
-                        : "bg-gradient-to-br from-slate-900 to-black border-slate-700/50 group-hover:border-cyan-400/50"
+                        ? "bg-gradient-to-br from-rose-500/20 to-pink-500/20 border-rose-400/40 shadow-[0_0_20px_rgba(244,63,94,0.3)]"
+                        : "bg-gradient-to-br from-slate-900 to-black border-slate-700/40 group-hover:border-cyan-400/40"
                     )}>
                       {/* Tech Corner Details */}
                       <div className={cn(
-                        "absolute top-1 left-1 w-3 h-3 border-t border-l transition-all duration-300",
-                        isLiked[currentShort.id] ? "border-rose-400/60" : "border-cyan-400/0 group-hover:border-cyan-400/60"
+                        "absolute top-0.5 left-0.5 w-2 h-2 border-t border-l transition-all duration-300",
+                        isLiked[currentShort.id] ? "border-rose-400/50" : "border-cyan-400/0 group-hover:border-cyan-400/50"
                       )} />
                       <div className={cn(
-                        "absolute bottom-1 right-1 w-3 h-3 border-b border-r transition-all duration-300",
-                        isLiked[currentShort.id] ? "border-rose-400/60" : "border-cyan-400/0 group-hover:border-cyan-400/60"
+                        "absolute bottom-0.5 right-0.5 w-2 h-2 border-b border-r transition-all duration-300",
+                        isLiked[currentShort.id] ? "border-rose-400/50" : "border-cyan-400/0 group-hover:border-cyan-400/50"
                       )} />
                       
                       <Heart
                         className={cn(
-                          "h-7 w-7 transition-all duration-300 relative z-10",
+                          "h-5 w-5 transition-all duration-300 relative z-10",
                           isLiked[currentShort.id]
-                            ? "fill-rose-500 text-rose-500 scale-110 drop-shadow-[0_0_10px_rgba(244,63,94,0.8)]"
+                            ? "fill-rose-500 text-rose-500 scale-110 drop-shadow-[0_0_8px_rgba(244,63,94,0.7)]"
                             : "text-slate-400 group-hover:text-cyan-400 group-hover:scale-110"
                         )}
                       />
@@ -466,8 +456,8 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
                   </div>
                 </div>
                 <span className={cn(
-                  "text-xs font-mono font-bold transition-colors",
-                  isLiked[currentShort.id] ? "text-rose-400" : "text-slate-400 group-hover:text-cyan-400"
+                  "text-[10px] font-mono font-semibold transition-colors",
+                  isLiked[currentShort.id] ? "text-rose-400" : "text-slate-500 group-hover:text-cyan-400"
                 )}>
                   {likeCounts[currentShort.id] || 0}
                 </span>
@@ -476,24 +466,24 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
               {/* Comment Button */}
               <button 
                 onClick={handleComment}
-                className="group relative flex flex-col items-center gap-2"
+                className="group relative flex flex-col items-center gap-1"
               >
                 <div className="relative">
-                  <div className="absolute -inset-3 bg-gradient-to-br from-emerald-500/0 to-green-500/0 group-hover:from-emerald-500/50 group-hover:to-green-500/50 rounded-2xl blur-xl transition-all duration-500" />
+                  <div className="absolute -inset-2 bg-gradient-to-br from-emerald-500/0 to-green-500/0 group-hover:from-emerald-500/40 group-hover:to-green-500/40 rounded-xl blur-lg transition-all duration-500" />
                   
                   <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl" />
-                    <div className="absolute inset-0 bg-gradient-to-tl from-white/5 to-white/10 rounded-2xl" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl" />
+                    <div className="absolute inset-0 bg-gradient-to-tl from-white/3 to-white/5 rounded-xl" />
                     
-                    <div className="relative w-16 h-16 bg-gradient-to-br from-slate-900 to-black rounded-2xl border border-slate-700/50 group-hover:border-emerald-400/50 backdrop-blur-xl flex items-center justify-center transition-all duration-300 shadow-[inset_0_2px_0_0_rgba(255,255,255,0.1)]">
-                      <div className="absolute top-1 left-1 w-3 h-3 border-t border-l border-emerald-400/0 group-hover:border-emerald-400/60 transition-all duration-300" />
-                      <div className="absolute bottom-1 right-1 w-3 h-3 border-b border-r border-emerald-400/0 group-hover:border-emerald-400/60 transition-all duration-300" />
+                    <div className="relative w-12 h-12 bg-gradient-to-br from-slate-900 to-black rounded-xl border border-slate-700/40 group-hover:border-emerald-400/40 backdrop-blur-xl flex items-center justify-center transition-all duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]">
+                      <div className="absolute top-0.5 left-0.5 w-2 h-2 border-t border-l border-emerald-400/0 group-hover:border-emerald-400/50 transition-all duration-300" />
+                      <div className="absolute bottom-0.5 right-0.5 w-2 h-2 border-b border-r border-emerald-400/0 group-hover:border-emerald-400/50 transition-all duration-300" />
                       
-                      <MessageCircle className="h-7 w-7 text-slate-400 group-hover:text-emerald-400 group-hover:scale-110 transition-all duration-300 relative z-10" />
+                      <MessageCircle className="h-5 w-5 text-slate-400 group-hover:text-emerald-400 group-hover:scale-110 transition-all duration-300 relative z-10" />
                     </div>
                   </div>
                 </div>
-                <span className="text-slate-400 group-hover:text-emerald-400 text-xs font-mono font-bold transition-colors">
+                <span className="text-slate-500 group-hover:text-emerald-400 text-[10px] font-mono font-semibold transition-colors opacity-70">
                   {currentShort.comments_count}
                 </span>
               </button>
@@ -501,46 +491,45 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
               {/* Share Button */}
               <button 
                 onClick={handleShare}
-                className="group relative flex flex-col items-center gap-2"
+                className="group relative flex flex-col items-center gap-1"
               >
                 <div className="relative">
-                  <div className="absolute -inset-3 bg-gradient-to-br from-purple-500/0 to-pink-500/0 group-hover:from-purple-500/50 group-hover:to-pink-500/50 rounded-2xl blur-xl transition-all duration-500" />
+                  <div className="absolute -inset-2 bg-gradient-to-br from-purple-500/0 to-pink-500/0 group-hover:from-purple-500/40 group-hover:to-pink-500/40 rounded-xl blur-lg transition-all duration-500" />
                   
                   <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl" />
-                    <div className="absolute inset-0 bg-gradient-to-tl from-white/5 to-white/10 rounded-2xl" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl" />
+                    <div className="absolute inset-0 bg-gradient-to-tl from-white/3 to-white/5 rounded-xl" />
                     
-                    <div className="relative w-16 h-16 bg-gradient-to-br from-slate-900 to-black rounded-2xl border border-slate-700/50 group-hover:border-purple-400/50 backdrop-blur-xl flex items-center justify-center transition-all duration-300 shadow-[inset_0_2px_0_0_rgba(255,255,255,0.1)]">
-                      <div className="absolute top-1 left-1 w-3 h-3 border-t border-l border-purple-400/0 group-hover:border-purple-400/60 transition-all duration-300" />
-                      <div className="absolute bottom-1 right-1 w-3 h-3 border-b border-r border-purple-400/0 group-hover:border-purple-400/60 transition-all duration-300" />
+                    <div className="relative w-12 h-12 bg-gradient-to-br from-slate-900 to-black rounded-xl border border-slate-700/40 group-hover:border-purple-400/40 backdrop-blur-xl flex items-center justify-center transition-all duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]">
+                      <div className="absolute top-0.5 left-0.5 w-2 h-2 border-t border-l border-purple-400/0 group-hover:border-purple-400/50 transition-all duration-300" />
+                      <div className="absolute bottom-0.5 right-0.5 w-2 h-2 border-b border-r border-purple-400/0 group-hover:border-purple-400/50 transition-all duration-300" />
                       
-                      <Share2 className="h-7 w-7 text-slate-400 group-hover:text-purple-400 group-hover:scale-110 transition-all duration-300 relative z-10" />
+                      <Share2 className="h-5 w-5 text-slate-400 group-hover:text-purple-400 group-hover:scale-110 transition-all duration-300 relative z-10" />
                     </div>
                   </div>
                 </div>
-                <span className="text-slate-400 group-hover:text-purple-400 text-xs font-mono font-bold transition-colors">Share</span>
               </button>
 
               {/* Mute Button */}
               <button
                 onClick={toggleMute}
-                className="group relative flex flex-col items-center gap-2"
+                className="group relative flex flex-col items-center gap-1"
               >
                 <div className="relative">
-                  <div className="absolute -inset-3 bg-gradient-to-br from-cyan-500/0 to-blue-500/0 group-hover:from-cyan-500/50 group-hover:to-blue-500/50 rounded-2xl blur-xl transition-all duration-500" />
+                  <div className="absolute -inset-2 bg-gradient-to-br from-cyan-500/0 to-blue-500/0 group-hover:from-cyan-500/40 group-hover:to-blue-500/40 rounded-xl blur-lg transition-all duration-500" />
                   
                   <div className="relative">
-                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl" />
-                    <div className="absolute inset-0 bg-gradient-to-tl from-white/5 to-white/10 rounded-2xl" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl" />
+                    <div className="absolute inset-0 bg-gradient-to-tl from-white/3 to-white/5 rounded-xl" />
                     
-                    <div className="relative w-16 h-16 bg-gradient-to-br from-slate-900 to-black rounded-2xl border border-slate-700/50 group-hover:border-cyan-400/50 backdrop-blur-xl flex items-center justify-center transition-all duration-300 shadow-[inset_0_2px_0_0_rgba(255,255,255,0.1)]">
-                      <div className="absolute top-1 left-1 w-3 h-3 border-t border-l border-cyan-400/0 group-hover:border-cyan-400/60 transition-all duration-300" />
-                      <div className="absolute bottom-1 right-1 w-3 h-3 border-b border-r border-cyan-400/0 group-hover:border-cyan-400/60 transition-all duration-300" />
+                    <div className="relative w-12 h-12 bg-gradient-to-br from-slate-900 to-black rounded-xl border border-slate-700/40 group-hover:border-cyan-400/40 backdrop-blur-xl flex items-center justify-center transition-all duration-300 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)]">
+                      <div className="absolute top-0.5 left-0.5 w-2 h-2 border-t border-l border-cyan-400/0 group-hover:border-cyan-400/50 transition-all duration-300" />
+                      <div className="absolute bottom-0.5 right-0.5 w-2 h-2 border-b border-r border-cyan-400/0 group-hover:border-cyan-400/50 transition-all duration-300" />
                       
                       {isMuted ? (
-                        <VolumeX className="h-7 w-7 text-slate-400 group-hover:text-cyan-400 group-hover:scale-110 transition-all duration-300 relative z-10" />
+                        <VolumeX className="h-5 w-5 text-slate-400 group-hover:text-cyan-400 group-hover:scale-110 transition-all duration-300 relative z-10" />
                       ) : (
-                        <Volume2 className="h-7 w-7 text-slate-400 group-hover:text-cyan-400 group-hover:scale-110 transition-all duration-300 relative z-10" />
+                        <Volume2 className="h-5 w-5 text-slate-400 group-hover:text-cyan-400 group-hover:scale-110 transition-all duration-300 relative z-10" />
                       )}
                     </div>
                   </div>
