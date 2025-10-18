@@ -10,6 +10,7 @@ import StartupRoadmap from '@/components/StartupRoadmap';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import CRMBoard from '@/components/CRMBoard';
 import FloatingChat from '@/components/FloatingChat';
+import StartupAIRecommendations from '@/components/StartupAIRecommendations';
 import MatchingSystem from '@/components/MatchingSystem';
 import NetworkBrowser from '@/components/NetworkBrowser';
 import EducationalResources from '@/components/EducationalResources';
@@ -24,14 +25,7 @@ import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import JobTaskManager from '@/components/JobTaskManager';
-import {
-  Plus,
-  Target,
-  Calendar as CalendarIcon,
-  Clock,
-  MapPin,
-  Users
-} from "lucide-react";
+import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import GuestPrompt from '@/components/GuestPrompt';
@@ -42,60 +36,54 @@ import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
-
 const Dashboard = () => {
-  const { user, loading } = useAuth();
+  const {
+    user,
+    loading
+  } = useAuth();
   const [profile, setProfile] = useState<any>(null);
-  const { profile: profileWithRole } = useProfileWithRole();
+  const {
+    profile: profileWithRole
+  } = useProfileWithRole();
   const analytics = useStartupAnalytics();
   const roadmapProgress = useRoadmapProgress();
-  const { upcomingEvents } = useEvents();
+  const {
+    upcomingEvents
+  } = useEvents();
   const navigate = useNavigate();
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
-
   useEffect(() => {
     if (user) {
       fetchProfile();
     }
   }, [user]);
-
   const fetchProfile = async () => {
     if (!user) return;
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
+    const {
+      data,
+      error
+    } = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
     if (!error && data) {
       setProfile(data);
     }
   };
-
   if (loading || analytics.loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+    return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Guest mode
   if (!user) {
-    return (
-      <div className="min-h-screen bg-background">
+    return <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <GuestPrompt 
-            feature="Full Dashboard"
-            description="Create an account to access your personalized dashboard, track progress, connect with mentors, and more."
-          />
+          <GuestPrompt feature="Full Dashboard" description="Create an account to access your personalized dashboard, track progress, connect with mentors, and more." />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
             <Card>
               <CardHeader>
@@ -114,24 +102,16 @@ const Dashboard = () => {
             </Card>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-background pb-24 lg:pb-6 relative overflow-x-hidden">
+  return <div className="min-h-screen bg-background pb-24 lg:pb-6 relative overflow-x-hidden">
       <DashboardHeader />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
           <div className="flex items-center space-x-3 sm:space-x-4">
-            <RoleBasedAvatar 
-              avatarUrl={profile?.avatar_url} 
-              role={profileWithRole?.role || 'startup'}
-              fallbackText={user?.email || 'U'}
-              className="h-12 w-12 sm:h-16 sm:w-16"
-            />
+            <RoleBasedAvatar avatarUrl={profile?.avatar_url} role={profileWithRole?.role || 'startup'} fallbackText={user?.email || 'U'} className="h-12 w-12 sm:h-16 sm:w-16" />
             <div>
               <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 Welcome, {profile?.full_name || 'Startup'}
@@ -195,34 +175,20 @@ const Dashboard = () => {
             </div>
 
             {/* Upcoming Events with Banners */}
-            {upcomingEvents.length > 0 && (
-              <Card>
+            {upcomingEvents.length > 0 && <Card>
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {upcomingEvents.slice(0, 6).map((event) => (
-                      <div
-                        key={event.id}
-                        className="group cursor-pointer"
-                        onClick={() => {
-                          setSelectedEvent(event);
-                          setShowEventDetails(true);
-                        }}
-                      >
+                    {upcomingEvents.slice(0, 6).map(event => <div key={event.id} className="group cursor-pointer" onClick={() => {
+                  setSelectedEvent(event);
+                  setShowEventDetails(true);
+                }}>
                         <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
-                          {event.banner_url ? (
-                            <img
-                              src={event.banner_url}
-                              alt={event.title}
-                              className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                            />
-                          ) : (
-                            <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                          {event.banner_url ? <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" /> : <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
                               <CalendarIcon className="h-16 w-16 text-purple-500/30" />
-                            </div>
-                          )}
+                            </div>}
                           <div className="p-4">
                             <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
                             <div className="space-y-1 text-sm text-muted-foreground">
@@ -230,12 +196,10 @@ const Dashboard = () => {
                                 <Clock className="h-3 w-3" />
                                 {format(parseISO(event.start_date), 'MMM d, h:mm a')}
                               </div>
-                              {event.location && (
-                                <div className="flex items-center gap-2">
+                              {event.location && <div className="flex items-center gap-2">
                                   <MapPin className="h-3 w-3" />
                                   <span className="line-clamp-1">{event.location}</span>
-                                </div>
-                              )}
+                                </div>}
                               <div className="flex items-center gap-2">
                                 <Users className="h-3 w-3" />
                                 {event.attendees} attending
@@ -244,23 +208,17 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
             
-            <UnifiedCalendar
-              showCreateButton={false}
-              onItemClick={(item) => {
-                if (item.type === 'event') {
-                  setSelectedEvent(item);
-                  setShowEventDetails(true);
-                }
-              }}
-              filterTypes={['event', 'session', 'availability']}
-            />
+            <UnifiedCalendar showCreateButton={false} onItemClick={item => {
+            if (item.type === 'event') {
+              setSelectedEvent(item);
+              setShowEventDetails(true);
+            }
+          }} filterTypes={['event', 'session', 'availability']} />
           </TabsContent>
 
           {/* Network Tab */}
@@ -308,14 +266,7 @@ const Dashboard = () => {
 
           {/* Tools Tab */}
           <TabsContent value="tools" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>CRM Board</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CRMBoard />
-              </CardContent>
-            </Card>
+            
             <AIFeaturesHub />
           </TabsContent>
         </Tabs>
@@ -325,32 +276,15 @@ const Dashboard = () => {
       <FloatingChat />
 
       {/* Dialogs */}
-      <CreateEventDialog 
-        open={createEventDialogOpen}
-        onOpenChange={setCreateEventDialogOpen}
-        onEventCreated={() => {
-          setCreateEventDialogOpen(false);
-        }}
-      />
-      <CreateSessionDialog 
-        open={createSessionDialogOpen}
-        onOpenChange={setCreateSessionDialogOpen}
-        onSessionCreated={() => {
-          setCreateSessionDialogOpen(false);
-        }}
-      />
-      {selectedEvent && (
-        <EventDetailsDialog 
-          event={selectedEvent}
-          open={showEventDetails}
-          onOpenChange={setShowEventDetails}
-          onEventUpdated={() => {
-            setShowEventDetails(false);
-          }}
-        />
-      )}
-    </div>
-  );
+      <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {
+      setCreateEventDialogOpen(false);
+    }} />
+      <CreateSessionDialog open={createSessionDialogOpen} onOpenChange={setCreateSessionDialogOpen} onSessionCreated={() => {
+      setCreateSessionDialogOpen(false);
+    }} />
+      {selectedEvent && <EventDetailsDialog event={selectedEvent} open={showEventDetails} onOpenChange={setShowEventDetails} onEventUpdated={() => {
+      setShowEventDetails(false);
+    }} />}
+    </div>;
 };
-
 export default Dashboard;
