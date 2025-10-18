@@ -26,6 +26,7 @@ import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import InvestorAvailabilityManager from '@/components/InvestorAvailabilityManager';
 import VideoConferencing from '@/components/VideoConferencing';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
+import { DashboardHeader } from '@/components/DashboardHeader';
 
 interface Investment {
   id: string;
@@ -300,7 +301,8 @@ export default function InvestorDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-hero p-2 sm:p-4 pb-20 lg:pb-4">
+    <div className="min-h-screen bg-gradient-hero p-2 sm:p-4 pb-20 lg:pb-4 relative">
+      <DashboardHeader />
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">

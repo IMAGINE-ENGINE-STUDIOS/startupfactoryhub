@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Building, MapPin, Users, DollarSign, Target, Plus, X } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 import CompanyLogoUpload from "@/components/CompanyLogoUpload";
+import { PasswordChangeDialog } from "@/components/PasswordChangeDialog";
 
 type UserRole = 'startup' | 'advisor' | 'investor' | 'student' | 'mentor';
 
@@ -192,7 +193,11 @@ const ProfileSetup = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero p-6">
+    <div className="min-h-screen bg-gradient-hero p-6 relative">
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <PasswordChangeDialog />
+      </div>
+      
       <div className="container max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Complete Your Profile</h1>

@@ -22,6 +22,7 @@ import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import StartupProfileDialog from '@/components/StartupProfileDialog';
 import NetworkBrowser from '@/components/NetworkBrowser';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
+import { DashboardHeader } from '@/components/DashboardHeader';
 
 interface Startup {
   id: string;
@@ -347,7 +348,8 @@ export default function AdvisorDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero p-2 sm:p-4 pb-20 lg:pb-4">
+    <div className="min-h-screen bg-gradient-hero p-2 sm:p-4 pb-20 lg:pb-4 relative">
+      <DashboardHeader />
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">

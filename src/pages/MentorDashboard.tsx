@@ -24,6 +24,7 @@ import { useProfileWithRole } from "@/hooks/useProfileWithRole";
 import StartupBrowser from "@/components/StartupBrowser";
 import NetworkBrowser from "@/components/NetworkBrowser";
 import MentorOffersBoard from "@/components/MentorOffersBoard";
+import { DashboardHeader } from "@/components/DashboardHeader";
 import { 
   Users, 
   TrendingUp, 
@@ -43,7 +44,8 @@ const MentorDashboard = () => {
   const { profile: profileWithRole } = useProfileWithRole();
 
   return (
-    <div className="min-h-screen bg-background pb-20 lg:pb-6">
+    <div className="min-h-screen bg-background pb-20 lg:pb-6 relative">
+      <DashboardHeader />
       <DashboardNavigation />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-8">

@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Rocket, Mail, Lock, User, UserCheck } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { signInSchema, signUpSchema } from '@/lib/validations';
+import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
 
 export default function Auth() {
@@ -66,6 +67,36 @@ export default function Auth() {
     setPassword('');
     setFullName('');
     setRole('');
+  };
+
+  const handleForgotPassword = async () => {
+    if (!email) {
+      toast({
+        title: "Email required",
+        description: "Please enter your email address to reset your password.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+    
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Reset email sent",
+        description: "Check your email for a password reset link.",
+      });
+    }
+    setLoading(false);
   };
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -197,6 +228,18 @@ export default function Auth() {
                   >
                     {loading ? 'Signing In...' : 'Sign In'}
                   </Button>
+                  
+                  <div className="text-center mt-4">
+                    <Button
+                      type="button"
+                      variant="link"
+                      onClick={handleForgotPassword}
+                      disabled={loading}
+                      className="text-sm text-muted-foreground hover:text-primary"
+                    >
+                      Forgot password?
+                    </Button>
+                  </div>
                 </form>
               </TabsContent>
               

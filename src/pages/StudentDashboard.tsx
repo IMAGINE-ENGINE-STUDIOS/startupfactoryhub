@@ -22,6 +22,7 @@ import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import NetworkBrowser from '@/components/NetworkBrowser';
+import { DashboardHeader } from '@/components/DashboardHeader';
 
 interface Course {
   id: string;
@@ -215,7 +216,8 @@ export default function StudentDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero p-2 sm:p-4 pb-20 lg:pb-4">
+    <div className="min-h-screen bg-gradient-hero p-2 sm:p-4 pb-20 lg:pb-4 relative">
+      <DashboardHeader />
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">

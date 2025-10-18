@@ -36,6 +36,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import GuestPrompt from '@/components/GuestPrompt';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+import { DashboardHeader } from '@/components/DashboardHeader';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
@@ -118,7 +119,8 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 lg:pb-6">
+    <div className="min-h-screen bg-background pb-20 lg:pb-6 relative">
+      <DashboardHeader />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-8">
         {/* Header */}
