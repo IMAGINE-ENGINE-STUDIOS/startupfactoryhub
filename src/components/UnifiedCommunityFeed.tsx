@@ -727,6 +727,56 @@ export default function UnifiedCommunityFeed({
               </div>
             )}
 
+            {/* Hashtags Section */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="relative flex-1">
+                  <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    value={newHashtag}
+                    onChange={(e) => setNewHashtag(e.target.value)}
+                    placeholder="Add hashtags (optional)"
+                    className="pl-10"
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        if (newHashtag.trim() && postHashtags.length < 10) {
+                          setPostHashtags([...postHashtags, newHashtag.trim().replace(/^#/, '')]);
+                          setNewHashtag('');
+                        }
+                      }
+                    }}
+                  />
+                </div>
+                <Button 
+                  type="button" 
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    if (newHashtag.trim() && postHashtags.length < 10) {
+                      setPostHashtags([...postHashtags, newHashtag.trim().replace(/^#/, '')]);
+                      setNewHashtag('');
+                    }
+                  }}
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              {postHashtags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {postHashtags.map((tag, index) => (
+                    <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                      #{tag}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => setPostHashtags(postHashtags.filter((_, i) => i !== index))}
+                      />
+                    </Badge>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="flex flex-wrap justify-between items-center gap-2">
               <div className="flex gap-1 sm:gap-2">
                 <input
