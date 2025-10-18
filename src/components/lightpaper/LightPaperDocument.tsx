@@ -587,7 +587,7 @@ export function LightPaperDocument({
   };
   return <div className="flex flex-col h-[calc(100vh-12rem)]">
       <CollapsibleToolbar>
-        <div className="flex items-center gap-2 overflow-x-auto">
+        <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
           {/* Font Controls */}
           <Select value={selectedFont} onValueChange={font => {
           setSelectedFont(font);
@@ -618,7 +618,7 @@ export function LightPaperDocument({
           </Select>
 
           {/* Text Formatting */}
-          <div className="flex gap-1 border-l pl-2">
+          <div className="flex gap-0.5 border-l pl-1">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("bold")} title="Bold (Ctrl+B)">
               <Bold className="h-4 w-4" />
             </Button>
@@ -634,7 +634,7 @@ export function LightPaperDocument({
           </div>
 
           {/* Alignment */}
-          <div className="flex gap-1 border-l pl-2">
+          <div className="flex gap-0.5 border-l pl-1">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyLeft")} title="Align Left">
               <AlignLeft className="h-4 w-4" />
             </Button>
@@ -650,7 +650,7 @@ export function LightPaperDocument({
           </div>
 
           {/* Lists */}
-          <div className="flex gap-1 border-l pl-2">
+          <div className="flex gap-0.5 border-l pl-1">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertUnorderedList")} title="Bullet List">
               <List className="h-4 w-4" />
             </Button>
@@ -661,7 +661,7 @@ export function LightPaperDocument({
 
           {/* Version History Navigation */}
           {versions.length > 0 && (
-            <div className="flex gap-1 border-l pl-2 items-center">
+            <div className="flex gap-0.5 border-l pl-1 items-center">
               <Button 
                 variant="ghost" 
                 size="sm" 
@@ -688,9 +688,9 @@ export function LightPaperDocument({
             </div>
           )}
           
-
+          
           {/* Image Upload */}
-          <div className="flex gap-1 border-l pl-2">
+          <div className="flex gap-0.5 border-l pl-1">
             <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => fileInputRef.current?.click()} title="Insert Image">
               <Image className="h-4 w-4" />
@@ -698,14 +698,14 @@ export function LightPaperDocument({
           </div>
 
           {/* Calculator */}
-          <div className="flex gap-1 border-l pl-2">
+          <div className="flex gap-0.5 border-l pl-1">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowCalculator(true)} title="Calculator">
               <Calculator className="h-4 w-4" />
             </Button>
           </div>
 
           {/* Highlight */}
-          <div className="flex gap-1 border-l pl-2">
+          <div className="flex gap-0.5 border-l pl-1">
             <Select value={selectedHighlight} onValueChange={activateHighlighter}>
               <SelectTrigger className={`w-28 h-8 text-xs ${isHighlighterActive ? 'bg-primary/20 border-primary' : ''}`}>
                 <Highlighter className="h-4 w-4 mr-1" />
@@ -725,21 +725,21 @@ export function LightPaperDocument({
           </div>
 
           {/* Signature */}
-          <div className="flex gap-1 border-l pl-2">
+          <div className="flex gap-0.5 border-l pl-1">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSignDialog(true)} title="Add Signature">
               <PenLine className="h-4 w-4" />
             </Button>
           </div>
 
           {/* Dark/Light Mode Toggle */}
-          <div className="flex gap-1 border-l pl-2">
+          <div className="flex gap-0.5 border-l pl-1">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={toggleDarkMode} title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
               {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
           </div>
 
           {/* Save Button */}
-          <div className="flex gap-1 border-l pl-2">
+          <div className="flex gap-0.5 border-l pl-1 ml-auto shrink-0">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSaveDialog(true)} title="Save Document (Ctrl+S)">
               <Save className="h-4 w-4" />
             </Button>
