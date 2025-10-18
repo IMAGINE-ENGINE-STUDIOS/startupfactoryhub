@@ -103,6 +103,10 @@ export default function BookPitchDialog({
       const scheduledDate = new Date(date);
       scheduledDate.setHours(hours, minutes, 0, 0);
 
+      // Generate Daily.co room URL for video conferencing
+      const meetingId = crypto.randomUUID();
+      const meetingLink = `https://startup-platform.daily.co/${meetingId}`;
+
       // Create pitch meeting
       const { error: pitchError } = await supabase
         .from('pitch_meetings')
@@ -112,7 +116,8 @@ export default function BookPitchDialog({
           company_id: companyId,
           scheduled_date: scheduledDate.toISOString(),
           duration_minutes: 30,
-          status: 'scheduled'
+          status: 'scheduled',
+          meeting_link: meetingLink
         });
 
       if (pitchError) throw pitchError;

@@ -455,13 +455,6 @@ export default function InvestorDashboard() {
                 }
               }}
             />
-            
-            {activeVideoUrl && (
-              <VideoConferencing
-                roomUrl={activeVideoUrl}
-                onLeave={() => setActiveVideoUrl(undefined)}
-              />
-            )}
           </TabsContent>
 
           <TabsContent value="pitches" className="space-y-4">
@@ -530,15 +523,6 @@ export default function InvestorDashboard() {
                     ))}
                   </div>
                 )}
-                
-                {activeVideoUrl && (
-                  <div className="mt-6">
-                    <VideoConferencing
-                      roomUrl={activeVideoUrl}
-                      onLeave={() => setActiveVideoUrl(undefined)}
-                    />
-                  </div>
-                )}
               </CardContent>
             </Card>
           </TabsContent>
@@ -580,6 +564,16 @@ export default function InvestorDashboard() {
             <AIFeaturesHub />
           </TabsContent>
         </Tabs>
+
+        {/* Centralized Video Conferencing - Outside Tabs */}
+        {activeVideoUrl && (
+          <div className="mt-6">
+            <VideoConferencing
+              roomUrl={activeVideoUrl}
+              onLeave={() => setActiveVideoUrl(undefined)}
+            />
+          </div>
+        )}
       </div>
 
       {/* Floating Chat with AI */}

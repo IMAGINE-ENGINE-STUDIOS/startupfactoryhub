@@ -97,18 +97,10 @@ export default function MentoringSessions() {
               }}
               filterTypes={['event', 'session', 'availability']}
             />
-            
-            {activeCallUrl && (
-              <VideoConferencing 
-                roomUrl={activeCallUrl}
-                onLeave={() => setActiveCallUrl(undefined)}
-              />
-            )}
           </TabsContent>
 
           <TabsContent value="upcoming" className="space-y-4">
-            <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
-              <div className="lg:col-span-2 space-y-4">
+            <div className="space-y-4">
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -193,21 +185,11 @@ export default function MentoringSessions() {
                     );
                   })
                 )}
-              </div>
-
-              {/* Sidebar */}
-              <div className="lg:col-span-1 space-y-4">
-                <VideoConferencing 
-                  roomUrl={activeCallUrl}
-                  onLeave={() => setActiveCallUrl(undefined)}
-                />
-              </div>
             </div>
           </TabsContent>
 
           <TabsContent value="past" className="space-y-4">
-            <div className="grid lg:grid-cols-3 gap-4 lg:gap-6">
-              <div className="lg:col-span-2 space-y-4">
+            <div className="space-y-4">
                 {loading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -295,18 +277,19 @@ export default function MentoringSessions() {
                     );
                   })
                 )}
-              </div>
-
-              {/* Sidebar */}
-              <div className="lg:col-span-1 space-y-4">
-                <VideoConferencing 
-                  roomUrl={activeCallUrl}
-                  onLeave={() => setActiveCallUrl(undefined)}
-                />
-              </div>
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Centralized Video Conferencing - Outside Tabs */}
+        {activeCallUrl && (
+          <div className="mt-6">
+            <VideoConferencing 
+              roomUrl={activeCallUrl}
+              onLeave={() => setActiveCallUrl(undefined)}
+            />
+          </div>
+        )}
       </div>
 
       <CreateSessionDialog 
