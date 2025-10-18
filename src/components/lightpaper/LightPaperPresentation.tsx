@@ -4,10 +4,13 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Trash2, ChevronLeft, ChevronRight, Play, Download, Upload, ImageIcon, Save, FileText } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, ChevronRight, Play, Download, Upload, ImageIcon, Save, FileText, Keyboard } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { useLightPaperProjects } from "@/hooks/useLightPaperProjects";
+import { ShortcutsDialog } from "./ShortcutsDialog";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Slide {
   id: string;
@@ -38,11 +41,25 @@ export function LightPaperPresentation() {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isPresenting, setIsPresenting] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
   const [projectTitle, setProjectTitle] = useState("Untitled Presentation");
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const { saveProject, projects } = useLightPaperProjects("presentation");
+  const isMobile = useIsMobile();
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    { key: 'd', ctrl: true, handler: (e) => { e.preventDefault(); if (!isPresenting) { const newSlide = {...currentSlide, id: Date.now().toString()}; setSlides([...slides, newSlide]); toast.success("Slide duplicated!"); } }, description: 'Duplicate slide' },
+    { key: 'Delete', handler: () => { if (!isPresenting) deleteSlide(); }, description: 'Delete slide' },
+    { key: 'F5', handler: (e) => { e.preventDefault(); setIsPresenting(true); }, description: 'Start presentation' },
+    { key: 'Escape', handler: () => { if (isPresenting) setIsPresenting(false); }, description: 'Exit presentation' },
+    { key: 'ArrowLeft', handler: () => prevSlide(), description: 'Previous slide' },
+    { key: 'ArrowRight', handler: () => nextSlide(), description: 'Next slide' },
+    { key: 's', ctrl: true, handler: (e) => { e.preventDefault(); setShowSaveDialog(true); }, description: 'Save' },
+    { key: '/', ctrl: true, handler: (e) => { e.preventDefault(); setShowShortcutsDialog(true); }, description: 'Shortcuts' },
+  ], true);
 
   // Auto-save functionality
   const autoSave = useCallback(async () => {
@@ -241,6 +258,10 @@ export function LightPaperPresentation() {
                 </Button>
               </div>
               <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setShowShortcutsDialog(true)}>
+                  <Keyboard className="h-4 w-4 mr-1" />
+                  {!isMobile && "Shortcuts"}
+                </Button>
                 <Button variant="outline" size="sm" onClick={prevSlide} disabled={currentSlideIndex === 0}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -428,6 +449,13 @@ export function LightPaperPresentation() {
           </div>
         </div>
       )}
+
+      {/* Keyboard Shortcuts Dialog */}
+      <ShortcutsDialog
+        open={showShortcutsDialog}
+        onOpenChange={setShowShortcutsDialog}
+        type="presentation"
+      />
 
       {/* Save Dialog */}
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>

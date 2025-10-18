@@ -15,11 +15,13 @@ import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Upload, ZoomIn, ZoomOut, Download, FileText, Pencil, Type, Square, Circle as CircleIcon, Eraser, ChevronLeft, ChevronRight, Save, Trash2, Share2, Image as ImageIcon, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Strikethrough, Check, Pen } from "lucide-react";
+import { Upload, ZoomIn, ZoomOut, Download, FileText, Pencil, Type, Square, Circle as CircleIcon, Eraser, ChevronLeft, ChevronRight, Save, Trash2, Share2, Image as ImageIcon, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Strikethrough, Check, Pen, Keyboard } from "lucide-react";
 import { toast } from "sonner";
 import CollapsibleToolbar from "./CollapsibleToolbar";
 import FloatingActionMenu from "./FloatingActionMenu";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
+import { ShortcutsDialog } from "./ShortcutsDialog";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { supabase } from "@/integrations/supabase/client";
 
 // Configure PDF.js worker
@@ -135,9 +137,21 @@ export function LightPaperPDFEditor({
   const [projectTitle, setProjectTitle] = useState<string>("Untitled PDF");
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
   const {
     saveProject
   } = useLightPaperProjects("pdf");
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    { key: 'Delete', handler: () => { const canvas = canvasInstances.get(currentPage); const activeObj = canvas?.getActiveObject(); if (activeObj) { canvas?.remove(activeObj); toast.success("Deleted"); } }, description: 'Delete annotation' },
+    { key: 'Escape', handler: () => { const canvas = canvasInstances.get(currentPage); canvas?.discardActiveObject(); canvas?.renderAll(); }, description: 'Deselect' },
+    { key: '=', ctrl: true, handler: (e) => { e.preventDefault(); setZoom(z => Math.min(z + 0.1, 3)); }, description: 'Zoom in' },
+    { key: '-', ctrl: true, handler: (e) => { e.preventDefault(); setZoom(z => Math.max(z - 0.1, 0.5)); }, description: 'Zoom out' },
+    { key: 'ArrowLeft', handler: () => setCurrentPage(p => Math.max(1, p - 1)), description: 'Previous page' },
+    { key: 'ArrowRight', handler: () => setCurrentPage(p => Math.min(numPages, p + 1)), description: 'Next page' },
+    { key: '/', ctrl: true, handler: (e) => { e.preventDefault(); setShowShortcutsDialog(true); }, description: 'Shortcuts' },
+  ], true);
 
   // Auto-save functionality
   const autoSave = useCallback(async () => {
@@ -1558,6 +1572,13 @@ export function LightPaperPDFEditor({
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Keyboard Shortcuts Dialog */}
+      <ShortcutsDialog
+        open={showShortcutsDialog}
+        onOpenChange={setShowShortcutsDialog}
+        type="pdf"
+      />
 
       {/* Share Dialog */}
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>

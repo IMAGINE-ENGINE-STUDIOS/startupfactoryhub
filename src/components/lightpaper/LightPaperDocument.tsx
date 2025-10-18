@@ -5,14 +5,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
 import FloatingActionMenu from "./FloatingActionMenu";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
+import { SearchDialog } from "./SearchDialog";
+import { ShortcutsDialog } from "./ShortcutsDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CommandHistory, Command } from "@/lib/commandHistory";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
 const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
@@ -50,7 +54,12 @@ export function LightPaperDocument({
   const [signaturePreviewPosition, setSignaturePreviewPosition] = useState<{x: number, y: number} | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
+  const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
+  const [searchMatches, setSearchMatches] = useState<number[]>([]);
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const commandHistory = useRef(new CommandHistory());
   const {
     saveProject
   } = useLightPaperProjects("document");
@@ -299,6 +308,80 @@ export function LightPaperDocument({
       toast.info("No later versions available");
     }
   };
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    { key: 'b', ctrl: true, handler: () => execCommand('bold'), description: 'Bold' },
+    { key: 'i', ctrl: true, handler: () => execCommand('italic'), description: 'Italic' },
+    { key: 'u', ctrl: true, handler: () => execCommand('underline'), description: 'Underline' },
+    { key: 's', ctrl: true, handler: (e) => { e.preventDefault(); setShowSaveDialog(true); }, description: 'Save' },
+    { key: 'z', ctrl: true, handler: () => goToPreviousVersion(), description: 'Undo' },
+    { key: 'y', ctrl: true, handler: () => goToNextVersion(), description: 'Redo' },
+    { key: 'f', ctrl: true, handler: (e) => { e.preventDefault(); setShowSearchDialog(true); }, description: 'Find' },
+    { key: '/', ctrl: true, handler: (e) => { e.preventDefault(); setShowShortcutsDialog(true); }, description: 'Shortcuts' },
+  ], true);
+
+  // Search functionality
+  const handleSearch = (query: string, options: { caseSensitive: boolean; wholeWord: boolean }) => {
+    if (!editorRef.current) return;
+    
+    const content = editorRef.current.textContent || '';
+    const searchContent = options.caseSensitive ? content : content.toLowerCase();
+    const searchQuery = options.caseSensitive ? query : query.toLowerCase();
+    
+    const matches: number[] = [];
+    let index = 0;
+    
+    while (true) {
+      index = searchContent.indexOf(searchQuery, index);
+      if (index === -1) break;
+      matches.push(index);
+      index += searchQuery.length;
+    }
+    
+    setSearchMatches(matches);
+    setCurrentSearchIndex(0);
+    
+    if (matches.length > 0) {
+      highlightSearchMatch(matches[0], query.length);
+      toast.success(`Found ${matches.length} matches`);
+    } else {
+      toast.info("No matches found");
+    }
+  };
+
+  const highlightSearchMatch = (index: number, length: number) => {
+    if (!editorRef.current) return;
+    
+    const text = editorRef.current.textContent || '';
+    const beforeMatch = text.substring(0, index);
+    const match = text.substring(index, index + length);
+    const afterMatch = text.substring(index + length);
+    
+    const highlightedHTML = `${beforeMatch}<mark style="background-color: yellow;">${match}</mark>${afterMatch}`;
+    const selection = window.getSelection();
+    const range = document.createRange();
+    
+    // Scroll to the match
+    editorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  const goToNextMatch = () => {
+    if (searchMatches.length === 0) return;
+    const nextIndex = (currentSearchIndex + 1) % searchMatches.length;
+    setCurrentSearchIndex(nextIndex);
+    const query = editorRef.current?.textContent?.substring(searchMatches[nextIndex], searchMatches[nextIndex] + 10) || '';
+    highlightSearchMatch(searchMatches[nextIndex], query.length);
+  };
+
+  const goToPreviousMatch = () => {
+    if (searchMatches.length === 0) return;
+    const prevIndex = (currentSearchIndex - 1 + searchMatches.length) % searchMatches.length;
+    setCurrentSearchIndex(prevIndex);
+    const query = editorRef.current?.textContent?.substring(searchMatches[prevIndex], searchMatches[prevIndex] + 10) || '';
+    highlightSearchMatch(searchMatches[prevIndex], query.length);
+  };
+
   const execCommand = (command: string, value?: string) => {
     if (editorRef.current) {
       editorRef.current.focus();
@@ -879,6 +962,20 @@ export function LightPaperDocument({
             </Button>
           </div>
 
+          {/* Search */}
+          <div className="flex gap-0.5 border-l pl-1">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSearchDialog(true)} title="Find (Ctrl+F)">
+              <Search className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Keyboard Shortcuts */}
+          <div className="flex gap-0.5 border-l pl-1">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowShortcutsDialog(true)} title="Keyboard Shortcuts (Ctrl+/)">
+              <Keyboard className="h-4 w-4" />
+            </Button>
+          </div>
+
           {/* Export Options */}
           <div className="flex gap-0.5 border-l pl-1">
             <DropdownMenu>
@@ -1061,6 +1158,25 @@ export function LightPaperDocument({
 
       {/* Calculator */}
       <ScientificCalculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} onInsertResult={insertCalculatorResult} />
+
+      {/* Search Dialog */}
+      <SearchDialog
+        open={showSearchDialog}
+        onOpenChange={setShowSearchDialog}
+        onSearch={handleSearch}
+        matchCount={searchMatches.length}
+        currentMatch={currentSearchIndex}
+        onNext={goToNextMatch}
+        onPrevious={goToPreviousMatch}
+        showReplace={false}
+      />
+
+      {/* Keyboard Shortcuts Dialog */}
+      <ShortcutsDialog
+        open={showShortcutsDialog}
+        onOpenChange={setShowShortcutsDialog}
+        type="document"
+      />
 
       {/* Signature Dialog */}
       <Dialog open={showSignDialog} onOpenChange={setShowSignDialog}>

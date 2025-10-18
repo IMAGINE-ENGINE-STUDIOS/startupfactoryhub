@@ -5,15 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Download, Upload, Calculator, BookOpen, Save, FileText, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify } from "lucide-react";
+import { Plus, Download, Upload, Calculator, BookOpen, Save, FileText, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, Keyboard, Undo, Redo } from "lucide-react";
 import { toast } from "sonner";
 import { FormulaBuilder } from "./FormulaBuilder";
 import { FormulaEngine } from "@/lib/formulaEngine";
 import { useLightPaperProjects } from "@/hooks/useLightPaperProjects";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
+import { ShortcutsDialog } from "./ShortcutsDialog";
 import * as XLSX from "xlsx";
 import CollapsibleToolbar from "./CollapsibleToolbar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Generate column names: A, B, C, ... Z, AA, AB, ...
 const generateColumns = (count: number): string[] => {
@@ -48,10 +51,19 @@ export function LightPaperSpreadsheet() {
   const [showFormulas, setShowFormulas] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
   const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
   const [projectTitle, setProjectTitle] = useState("Untitled Spreadsheet");
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [visibleRows, setVisibleRows] = useState(INITIAL_ROWS);
   const { saveProject, projects } = useLightPaperProjects("spreadsheet");
+  const isMobile = useIsMobile();
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    { key: 's', ctrl: true, handler: (e) => { e.preventDefault(); setShowSaveDialog(true); }, description: 'Save' },
+    { key: 'Delete', handler: () => { if (selectedCell) handleCellChange(selectedCell, ''); }, description: 'Clear cell' },
+    { key: '/', ctrl: true, handler: (e) => { e.preventDefault(); setShowShortcutsDialog(true); }, description: 'Shortcuts' },
+  ], true);
 
   const getCellId = (col: string, row: number) => `${col}${row}`;
 
@@ -358,6 +370,9 @@ export function LightPaperSpreadsheet() {
 
             {/* Save Button */}
             <div className="flex gap-0.5 border-l pl-1 ml-auto shrink-0">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowShortcutsDialog(true)} title="Keyboard Shortcuts (Ctrl+/)">
+                <Keyboard className="h-4 w-4" />
+              </Button>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSaveDialog(true)} title="Save">
                 <Save className="h-4 w-4" />
               </Button>
@@ -365,7 +380,7 @@ export function LightPaperSpreadsheet() {
           </div>
         </CollapsibleToolbar>
 
-        <div className="overflow-auto border rounded-lg spreadsheet-scroll-container" style={{ maxHeight: '600px' }}>
+        <div className={`overflow-auto border rounded-lg spreadsheet-scroll-container ${isMobile ? 'text-sm' : ''}`} style={{ maxHeight: isMobile ? '400px' : '600px' }}>
           <table className="w-full border-collapse">
             <thead className="sticky top-0 z-10">
               <tr>
@@ -428,6 +443,12 @@ export function LightPaperSpreadsheet() {
         isOpen={showCalculator}
         onClose={() => setShowCalculator(false)}
         onInsertResult={insertCalculatorResult}
+      />
+
+      <ShortcutsDialog
+        open={showShortcutsDialog}
+        onOpenChange={setShowShortcutsDialog}
+        type="spreadsheet"
       />
 
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
