@@ -15,7 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Upload, ZoomIn, ZoomOut, Download, FileText, Pencil, Type, Square, Circle as CircleIcon, Eraser, ChevronLeft, ChevronRight, Save, Trash2, Share2, Image as ImageIcon, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Strikethrough, Check, Pen, Keyboard } from "lucide-react";
+import { Upload, ZoomIn, ZoomOut, Download, FileText, Pencil, Type, Square, Circle as CircleIcon, Eraser, ChevronLeft, ChevronRight, Save, Trash2, Share2, Image as ImageIcon, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Strikethrough, Check, Pen, Keyboard, Search } from "lucide-react";
 import { toast } from "sonner";
 import CollapsibleToolbar from "./CollapsibleToolbar";
 import FloatingActionMenu from "./FloatingActionMenu";
@@ -25,6 +25,8 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { SignatureLibrary } from "./SignatureLibrary";
 import ShareDialog from "./ShareDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { TextFormatToolbar } from "./TextFormatToolbar";
+import { TextSearchDialog, SearchOptions } from "./TextSearchDialog";
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -128,6 +130,24 @@ export function LightPaperPDFEditor({
   const [pageViewports, setPageViewports] = useState<Map<number, PDFPageViewport>>(new Map());
   const [draggingSignature, setDraggingSignature] = useState<SavedSignature | null>(null);
   const [signaturePosition, setSignaturePosition] = useState<{x: number, y: number} | null>(null);
+  
+  // Text formatting state
+  const [textFormat, setTextFormat] = useState({
+    bold: false,
+    italic: false,
+    underline: false,
+    align: 'left' as 'left' | 'center' | 'right',
+    fontSize: 16,
+    lineHeight: 1.2,
+  });
+  const [formatToolbarPosition, setFormatToolbarPosition] = useState<{ x: number; y: number } | null>(null);
+  const [selectedTextObject, setSelectedTextObject] = useState<fabric.Textbox | null>(null);
+  
+  // Search state
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
+  const [searchMatches, setSearchMatches] = useState<Array<{ pageNum: number; index: number; textItem: PDFTextItem }>>([]);
+  const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
+  
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const textLayerRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -153,6 +173,7 @@ export function LightPaperPDFEditor({
     { key: 'ArrowLeft', handler: () => setCurrentPage(p => Math.max(1, p - 1)), description: 'Previous page' },
     { key: 'ArrowRight', handler: () => setCurrentPage(p => Math.min(numPages, p + 1)), description: 'Next page' },
     { key: '/', ctrl: true, handler: (e) => { e.preventDefault(); setShowShortcutsDialog(true); }, description: 'Shortcuts' },
+    { key: 'f', ctrl: true, handler: (e) => { e.preventDefault(); setShowSearchDialog(true); }, description: 'Search' },
   ], true);
 
   // Auto-save functionality
@@ -367,22 +388,18 @@ export function LightPaperPDFEditor({
     setEditingTextIndex({ pageNum, index: textIndex });
 
     // Convert PDF.js coordinates to canvas coordinates
-    // PDF.js uses bottom-left origin, Fabric uses top-left origin
     const x = textItem.transform[4];
     const y = textItem.transform[5];
     const textHeight = textItem.height || Math.abs(textItem.transform[3]);
     
-    // Convert to canvas coordinates (top-left origin)
     const canvasY = viewport.height - y - textHeight;
-    
-    // Scale to match canvas size
     const scaleX = canvas.width! / viewport.width;
     const scaleY = canvas.height! / viewport.height;
     
     const canvasX = x * scaleX;
     const scaledY = canvasY * scaleY;
     const canvasWidth = textItem.width * scaleX;
-    const fontSize = Math.abs(textItem.transform[3]) * scaleY;
+    const calculatedFontSize = Math.abs(textItem.transform[3]) * scaleY;
     
     // Check if already replaced
     const replacements = textReplacements.get(pageNum) || [];
@@ -391,12 +408,22 @@ export function LightPaperPDFEditor({
       Math.abs(r.originalX - x) < 1
     );
     
+    // Apply text formatting
+    let fontWeight = textFormat.bold ? 'bold' : 'normal';
+    let fontStyle = textFormat.italic ? 'italic' : 'normal';
+    let textDecoration = textFormat.underline ? 'underline' : '';
+    
     const text = new Textbox(existingReplacement ? existingReplacement.newText : textItem.str, {
       left: canvasX,
       top: scaledY,
-      fill: existingReplacement ? existingReplacement.color : '#000000',
-      fontSize: existingReplacement ? existingReplacement.fontSize * scaleY : fontSize,
-      fontFamily: existingReplacement ? existingReplacement.fontFamily : 'Arial',
+      fill: existingReplacement ? existingReplacement.color : color,
+      fontSize: existingReplacement ? existingReplacement.fontSize * scaleY : calculatedFontSize,
+      fontFamily: existingReplacement ? existingReplacement.fontFamily : selectedFont,
+      fontWeight: fontWeight,
+      fontStyle: fontStyle,
+      underline: textFormat.underline,
+      textAlign: textFormat.align,
+      lineHeight: textFormat.lineHeight,
       width: canvasWidth > 0 ? canvasWidth : 200,
       editable: true,
       selectable: true,
@@ -408,7 +435,14 @@ export function LightPaperPDFEditor({
     text.selectAll();
     canvas.renderAll();
 
-    // Switch to select mode for immediate dragging after editing
+    // Show formatting toolbar
+    setSelectedTextObject(text);
+    const canvasRect = canvas.getElement().getBoundingClientRect();
+    setFormatToolbarPosition({
+      x: canvasRect.left + canvasX,
+      y: canvasRect.top + scaledY,
+    });
+
     setTool("select");
     canvas.defaultCursor = "default";
 
@@ -419,8 +453,8 @@ export function LightPaperPDFEditor({
         originalText: textItem.str,
         newText: text.text || '',
         fontSize: Math.abs(textItem.transform[3]),
-        fontFamily: text.fontFamily || 'Arial',
-        color: text.fill as string || '#000000',
+        fontFamily: text.fontFamily || selectedFont,
+        color: text.fill as string || color,
         width: textItem.width,
         height: textHeight,
       };
@@ -439,8 +473,152 @@ export function LightPaperPDFEditor({
       
       setTextReplacements(prev => new Map(prev).set(pageNum, newReplacements));
       setEditingTextIndex(null);
+      setFormatToolbarPosition(null);
+      setSelectedTextObject(null);
       toast.success("Text updated - will be saved on export");
     });
+  };
+  
+  const applyTextFormat = (format: Partial<typeof textFormat>) => {
+    setTextFormat(prev => ({ ...prev, ...format }));
+    
+    if (selectedTextObject) {
+      if (format.bold !== undefined) {
+        selectedTextObject.set('fontWeight', format.bold ? 'bold' : 'normal');
+      }
+      if (format.italic !== undefined) {
+        selectedTextObject.set('fontStyle', format.italic ? 'italic' : 'normal');
+      }
+      if (format.underline !== undefined) {
+        selectedTextObject.set('underline', format.underline);
+      }
+      if (format.align !== undefined) {
+        selectedTextObject.set('textAlign', format.align);
+      }
+      if (format.fontSize !== undefined) {
+        selectedTextObject.set('fontSize', format.fontSize);
+      }
+      if (format.lineHeight !== undefined) {
+        selectedTextObject.set('lineHeight', format.lineHeight);
+      }
+      
+      const canvas = canvasInstances.get(currentPage);
+      if (canvas) {
+        canvas.renderAll();
+      }
+    }
+  };
+  
+  const handleSearch = (query: string, options: SearchOptions) => {
+    const matches: Array<{ pageNum: number; index: number; textItem: PDFTextItem }> = [];
+    
+    pdfTextItems.forEach((items, pageNum) => {
+      items.forEach((textItem, index) => {
+        let text = textItem.str;
+        let searchQuery = query;
+        
+        if (!options.caseSensitive) {
+          text = text.toLowerCase();
+          searchQuery = searchQuery.toLowerCase();
+        }
+        
+        if (options.wholeWord) {
+          const regex = new RegExp(`\\b${searchQuery}\\b`);
+          if (regex.test(text)) {
+            matches.push({ pageNum, index, textItem });
+          }
+        } else {
+          if (text.includes(searchQuery)) {
+            matches.push({ pageNum, index, textItem });
+          }
+        }
+      });
+    });
+    
+    setSearchMatches(matches);
+    setCurrentSearchIndex(0);
+    
+    if (matches.length > 0) {
+      highlightSearchMatch(matches[0]);
+      toast.success(`Found ${matches.length} match${matches.length > 1 ? 'es' : ''}`);
+    } else {
+      toast.error("No matches found");
+    }
+  };
+  
+  const highlightSearchMatch = (match: { pageNum: number; index: number; textItem: PDFTextItem }) => {
+    setCurrentPage(match.pageNum);
+    
+    // Scroll to the page
+    setTimeout(() => {
+      const pageEl = pageRefs.current.get(match.pageNum);
+      if (pageEl) {
+        pageEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
+  };
+  
+  const handleNextMatch = () => {
+    if (searchMatches.length === 0) return;
+    const nextIndex = (currentSearchIndex + 1) % searchMatches.length;
+    setCurrentSearchIndex(nextIndex);
+    highlightSearchMatch(searchMatches[nextIndex]);
+  };
+  
+  const handlePreviousMatch = () => {
+    if (searchMatches.length === 0) return;
+    const prevIndex = (currentSearchIndex - 1 + searchMatches.length) % searchMatches.length;
+    setCurrentSearchIndex(prevIndex);
+    highlightSearchMatch(searchMatches[prevIndex]);
+  };
+  
+  const handleReplace = (searchQuery: string, replaceText: string, replaceAll: boolean) => {
+    if (searchMatches.length === 0) {
+      toast.error("No matches to replace");
+      return;
+    }
+    
+    if (replaceAll) {
+      searchMatches.forEach(match => {
+        const replacements = textReplacements.get(match.pageNum) || [];
+        const x = match.textItem.transform[4];
+        const y = match.textItem.transform[5];
+        const textHeight = match.textItem.height || Math.abs(match.textItem.transform[3]);
+        
+        const replacement: TextReplacement = {
+          originalX: x,
+          originalY: y,
+          originalText: match.textItem.str,
+          newText: match.textItem.str.replace(new RegExp(searchQuery, 'g'), replaceText),
+          fontSize: Math.abs(match.textItem.transform[3]),
+          fontFamily: selectedFont,
+          color: color,
+          width: match.textItem.width,
+          height: textHeight,
+        };
+        
+        const newReplacements = [...replacements];
+        const replacementIndex = newReplacements.findIndex(r => 
+          r.originalText === match.textItem.str && 
+          Math.abs(r.originalX - x) < 1
+        );
+        
+        if (replacementIndex >= 0) {
+          newReplacements[replacementIndex] = replacement;
+        } else {
+          newReplacements.push(replacement);
+        }
+        
+        setTextReplacements(prev => new Map(prev).set(match.pageNum, newReplacements));
+      });
+      
+      toast.success(`Replaced ${searchMatches.length} occurrence${searchMatches.length > 1 ? 's' : ''}`);
+      setSearchMatches([]);
+    } else {
+      const match = searchMatches[currentSearchIndex];
+      handleTextClick(match.pageNum, match.index, match.textItem);
+      toast.info("Edit the text manually to replace");
+    }
   };
   const setupCanvas = (pageNumber: number) => {
     const canvasEl = canvasRefs.current.get(pageNumber);
@@ -1332,6 +1510,18 @@ export function LightPaperPDFEditor({
 
             <Separator orientation="vertical" className="h-6" />
 
+            {/* Search */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setShowSearchDialog(true)} 
+              title="Search Text (Ctrl+F)"
+            >
+              <Search className="h-4 w-4" />
+            </Button>
+
+            <Separator orientation="vertical" className="h-6" />
+
             {/* Page Navigation */}
             <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage <= 1} title="Previous Page">
               <ChevronLeft className="h-4 w-4" />
@@ -1634,6 +1824,29 @@ export function LightPaperPDFEditor({
         onClose={() => setShowShareDialog(false)} 
         shareData={shareData}
         onSendEmail={handleSendEmailInvitation}
+      />
+
+      {/* Text Format Toolbar */}
+      <TextFormatToolbar
+        position={formatToolbarPosition}
+        format={textFormat}
+        onFormatChange={applyTextFormat}
+        onClose={() => {
+          setFormatToolbarPosition(null);
+          setSelectedTextObject(null);
+        }}
+      />
+
+      {/* Text Search Dialog */}
+      <TextSearchDialog
+        open={showSearchDialog}
+        onOpenChange={setShowSearchDialog}
+        onSearch={handleSearch}
+        onReplace={handleReplace}
+        currentMatch={currentSearchIndex}
+        totalMatches={searchMatches.length}
+        onNextMatch={handleNextMatch}
+        onPreviousMatch={handlePreviousMatch}
       />
     </div>;
 }
