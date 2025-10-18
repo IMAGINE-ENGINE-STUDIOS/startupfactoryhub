@@ -35,7 +35,7 @@ export function LightPaperDocument({
   const [versions, setVersions] = useState<any[]>([]);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(-1);
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random()}`);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedHighlight, setSelectedHighlight] = useState("#FFFF00");
   const [showSignDialog, setShowSignDialog] = useState(false);
   const [signatures, setSignatures] = useState<Array<{type: "draw" | "text", data: string, id: string}>>([]);
@@ -49,6 +49,17 @@ export function LightPaperDocument({
   const {
     saveProject
   } = useLightPaperProjects("document");
+
+  // Apply dark mode on initial load
+  useEffect(() => {
+    if (editorRef.current && containerRef.current && wrapperRef.current) {
+      editorRef.current.style.backgroundColor = 'black';
+      editorRef.current.style.color = 'white';
+      containerRef.current.style.backgroundColor = 'black';
+      containerRef.current.style.color = 'white';
+      wrapperRef.current.style.backgroundColor = '#1a1a1a';
+    }
+  }, []);
 
   // Load project and versions when selectedProject changes
   useEffect(() => {
