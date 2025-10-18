@@ -156,6 +156,9 @@ export default function MatchingSystem() {
   const sendConnectionRequest = async (targetId: string, targetName: string, onSuccess: () => void) => {
     if (!user) return;
 
+    // Remove card immediately - no matter what
+    onSuccess();
+
     try {
       // Get current user's name for notification
       const senderName = userProfile?.full_name || 'Someone';
@@ -183,9 +186,6 @@ export default function MatchingSystem() {
           });
           return;
         }
-
-        // Remove card immediately for instant feedback
-        onSuccess();
 
         // Send mentorship request
         const { error } = await supabase
@@ -224,9 +224,6 @@ export default function MatchingSystem() {
           return;
         }
 
-        // Remove card immediately for instant feedback
-        onSuccess();
-
         // Send regular connection request
         const { error } = await supabase
           .from('connections')
@@ -251,11 +248,6 @@ export default function MatchingSystem() {
       }
     } catch (error) {
       console.error('Unexpected error sending connection:', error);
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred.",
-        variant: "destructive",
-      });
     }
   };
 
