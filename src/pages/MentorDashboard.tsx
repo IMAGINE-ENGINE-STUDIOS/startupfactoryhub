@@ -23,6 +23,7 @@ import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 import { useProfileWithRole } from "@/hooks/useProfileWithRole";
 import StartupBrowser from "@/components/StartupBrowser";
 import NetworkBrowser from "@/components/NetworkBrowser";
+import MentorOffersBoard from "@/components/MentorOffersBoard";
 import { 
   Users, 
   TrendingUp, 
@@ -130,6 +131,7 @@ const MentorDashboard = () => {
 
           <TabsContent value="mentees" className="space-y-6">
             <MentorshipRequests />
+            <MentorOffersBoard />
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-6">
