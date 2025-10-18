@@ -13,7 +13,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Upload, ZoomIn, ZoomOut, Download, FileText, Pencil, Type, Square, Circle as CircleIcon, Eraser, ChevronLeft, ChevronRight, Save, Trash2, Share2, Image as ImageIcon, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Strikethrough, Check } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Upload, ZoomIn, ZoomOut, Download, FileText, Pencil, Type, Square, Circle as CircleIcon, Eraser, ChevronLeft, ChevronRight, Save, Trash2, Share2, Image as ImageIcon, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Strikethrough, Check, Pen } from "lucide-react";
 import { toast } from "sonner";
 import CollapsibleToolbar from "./CollapsibleToolbar";
 import FloatingActionMenu from "./FloatingActionMenu";
@@ -58,6 +59,7 @@ export function LightPaperPDFEditor({
   const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareLink, setShareLink] = useState("");
+  const [showSignaturePanel, setShowSignaturePanel] = useState(false);
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -712,9 +714,9 @@ export function LightPaperPDFEditor({
       toast.error(error.message || "Failed to save PDF");
     }
   };
-  return <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[calc(100vh-200px)]">
+  return <div className="flex flex-col gap-4 h-[calc(100vh-200px)] relative">
       {/* Main PDF Viewer */}
-      <div className="lg:col-span-2 flex flex-col gap-4">
+      <div className="flex flex-col gap-4 flex-1">
         <CollapsibleToolbar>
           <div className="flex items-center gap-2 flex-wrap">
             {/* File Upload */}
@@ -944,101 +946,118 @@ export function LightPaperPDFEditor({
 
       <FloatingActionMenu onSave={handleSaveToAccount} onPrint={handleExport} />
 
-      {/* Signature Panel - Same as Document Feature */}
-      <div className="space-y-4">
-        <Card className="p-4">
-          <h3 className="font-medium mb-3">Add Signature</h3>
-          <Tabs value={signatureMode} onValueChange={(v) => setSignatureMode(v as "draw" | "text")}>
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="draw">
-                <Pencil className="h-4 w-4 mr-1" />
-                Draw
-              </TabsTrigger>
-              <TabsTrigger value="text">
-                <Type className="h-4 w-4 mr-1" />
-                Type
-              </TabsTrigger>
-            </TabsList>
+      {/* Floating Signature Button */}
+      <Sheet open={showSignaturePanel} onOpenChange={setShowSignaturePanel}>
+        <SheetTrigger asChild>
+          <Button
+            className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-lg z-50"
+            size="icon"
+          >
+            <Pen className="h-6 w-6" />
+          </Button>
+        </SheetTrigger>
+        <SheetContent side="right" className="w-[400px] sm:w-[540px] overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>Signature Tools</SheetTitle>
+          </SheetHeader>
+          
+          <div className="space-y-4 mt-6">
+            {/* Add Signature */}
+            <Card className="p-4">
+              <h3 className="font-medium mb-3">Add Signature</h3>
+              <Tabs value={signatureMode} onValueChange={(v) => setSignatureMode(v as "draw" | "text")}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="draw">
+                    <Pencil className="h-4 w-4 mr-1" />
+                    Draw
+                  </TabsTrigger>
+                  <TabsTrigger value="text">
+                    <Type className="h-4 w-4 mr-1" />
+                    Type
+                  </TabsTrigger>
+                </TabsList>
 
-            <TabsContent value="draw" className="space-y-3">
-              <canvas
-                ref={signatureCanvasRef}
-                width={300}
-                height={150}
-                className="border rounded cursor-crosshair bg-white w-full"
-                onMouseDown={startDrawingSignature}
-                onMouseMove={drawSignature}
-                onMouseUp={stopDrawingSignature}
-                onMouseLeave={stopDrawingSignature}
-              />
-              <div className="flex gap-2">
-                <Button size="sm" onClick={clearSignatureCanvas} variant="outline" className="flex-1">
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Clear
-                </Button>
-                <Button size="sm" onClick={stopDrawingSignature} className="flex-1">
-                  <Check className="h-4 w-4 mr-1" />
-                  Save
-                </Button>
-              </div>
-            </TabsContent>
+                <TabsContent value="draw" className="space-y-3">
+                  <canvas
+                    ref={signatureCanvasRef}
+                    width={300}
+                    height={150}
+                    className="border rounded cursor-crosshair bg-white w-full"
+                    onMouseDown={startDrawingSignature}
+                    onMouseMove={drawSignature}
+                    onMouseUp={stopDrawingSignature}
+                    onMouseLeave={stopDrawingSignature}
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={clearSignatureCanvas} variant="outline" className="flex-1">
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Clear
+                    </Button>
+                    <Button size="sm" onClick={stopDrawingSignature} className="flex-1">
+                      <Check className="h-4 w-4 mr-1" />
+                      Save
+                    </Button>
+                  </div>
+                </TabsContent>
 
-            <TabsContent value="text" className="space-y-3">
-              <div>
-                <Label>Signature Text</Label>
-                <Input
-                  value={textSignature}
-                  onChange={(e) => setTextSignature(e.target.value)}
-                  placeholder="Your Name"
-                  className="font-signature text-2xl"
-                  style={{ fontFamily: "cursive" }}
-                />
-              </div>
-              <Button onClick={addTextSignature} className="w-full">
-                <Check className="h-4 w-4 mr-1" />
-                Add Signature
-              </Button>
-            </TabsContent>
-          </Tabs>
-        </Card>
+                <TabsContent value="text" className="space-y-3">
+                  <div>
+                    <Label>Signature Text</Label>
+                    <Input
+                      value={textSignature}
+                      onChange={(e) => setTextSignature(e.target.value)}
+                      placeholder="Your Name"
+                      className="font-signature text-2xl"
+                      style={{ fontFamily: "cursive" }}
+                    />
+                  </div>
+                  <Button onClick={addTextSignature} className="w-full">
+                    <Check className="h-4 w-4 mr-1" />
+                    Add Signature
+                  </Button>
+                </TabsContent>
+              </Tabs>
+            </Card>
 
-        {/* Saved Signatures */}
-        <Card className="p-4">
-          <h3 className="font-medium mb-3">Signatures ({signatures.length})</h3>
-          <div className="space-y-2">
-            {signatures.map((sig) => (
-              <div 
-                key={sig.id} 
-                className="flex items-center justify-between p-2 border rounded cursor-pointer hover:bg-accent"
-                onClick={() => placeSignature(sig)}
-              >
-                {sig.type === "draw" ? (
-                  <img src={sig.preview} alt="Signature" className="h-8" />
-                ) : (
-                  <span className="text-lg" style={{ fontFamily: "cursive" }}>
-                    {sig.data}
-                  </span>
+            {/* Saved Signatures */}
+            <Card className="p-4">
+              <h3 className="font-medium mb-3">Signatures ({signatures.length})</h3>
+              <div className="space-y-2">
+                {signatures.map((sig) => (
+                  <div 
+                    key={sig.id} 
+                    className="flex items-center justify-between p-2 border rounded cursor-pointer hover:bg-accent"
+                    onClick={() => placeSignature(sig)}
+                  >
+                    {sig.type === "draw" ? (
+                      <img src={sig.preview} alt="Signature" className="h-8" />
+                    ) : (
+                      <span className="text-lg" style={{ fontFamily: "cursive" }}>
+                        {sig.data}
+                      </span>
+                    )}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteSignature(sig.id);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                ))}
+                {signatures.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No signatures yet
+                  </p>
                 )}
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    deleteSignature(sig.id);
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
               </div>
-            ))}
-            {signatures.length === 0 && (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No signatures yet
-              </p>
-            )}
+            </Card>
           </div>
-        </Card>
-      </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Share Dialog */}
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>

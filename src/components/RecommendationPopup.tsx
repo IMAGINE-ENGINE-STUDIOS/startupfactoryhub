@@ -85,7 +85,17 @@ export default function RecommendationPopup({
           <Lightbulb className="h-12 w-12 text-muted-foreground mb-4" />
           <p className="text-muted-foreground text-sm text-center">No recommendations available at the moment</p>
         </div> : <div className="space-y-3 p-4">
-          {recommendations.map((rec, index) => {})}
+          {recommendations.map((rec, index) => (
+            <Card key={index} className="p-3">
+              <div className="flex items-start gap-3">
+                <Lightbulb className="h-5 w-5 text-primary mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="font-medium text-sm mb-1">{rec.title}</h4>
+                  <p className="text-xs text-muted-foreground">{rec.description}</p>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>}
     </ScrollArea>;
 }
