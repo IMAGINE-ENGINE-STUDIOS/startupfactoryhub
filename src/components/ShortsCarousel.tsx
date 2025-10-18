@@ -71,18 +71,11 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
     try {
       setIsLoading(true);
       console.log('[Shorts] Fetching shorts with post_type=short...');
+      
+      // Fetch posts without profiles join
       const { data: postsData, error } = await supabase
         .from('feed_posts')
-        .select(`
-          id,
-          content,
-          user_id,
-          media_urls,
-          likes_count,
-          comments_count,
-          created_at,
-          profiles:user_id(full_name, avatar_url)
-        `)
+        .select('id, content, user_id, media_urls, likes_count, comments_count, created_at')
         .eq('post_type', 'short')
         .order('created_at', { ascending: false })
         .limit(20);
@@ -94,7 +87,21 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
 
       console.log('[Shorts] Shorts fetched:', postsData?.length || 0);
 
-      if (postsData) {
+      if (postsData && postsData.length > 0) {
+        // Get unique user IDs
+        const userIds = [...new Set(postsData.map(post => post.user_id))];
+        
+        // Fetch profiles separately
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url')
+          .in('user_id', userIds);
+
+        // Create a map of user_id to profile
+        const profilesMap = new Map(
+          profilesData?.map(profile => [profile.user_id, profile]) || []
+        );
+
         const videoShorts = postsData
           .filter(post => {
             const hasUrl = post.media_urls && Array.isArray(post.media_urls) && post.media_urls.length > 0;
@@ -114,7 +121,7 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
               video_url: videoUrl,
               content: post.content,
               user_id: post.user_id,
-              profiles: Array.isArray(post.profiles) ? post.profiles[0] : post.profiles,
+              profiles: profilesMap.get(post.user_id),
               likes_count: post.likes_count || 0,
               comments_count: post.comments_count || 0,
               created_at: post.created_at

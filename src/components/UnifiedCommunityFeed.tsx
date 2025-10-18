@@ -591,19 +591,17 @@ export default function UnifiedCommunityFeed({
           post_type: 'short',
           media_urls: videoUrl ? [videoUrl] : null,
         })
-        .select(`
-          id,
-          content,
-          user_id,
-          media_urls,
-          likes_count,
-          comments_count,
-          created_at,
-          profiles:user_id(full_name, avatar_url)
-        `)
+        .select('id, content, user_id, media_urls, likes_count, comments_count, created_at')
         .single();
 
       if (error) throw error;
+
+      // Fetch user profile separately
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url')
+        .eq('user_id', user.id)
+        .single();
 
       // Immediately show the new short in the carousel
       if (newPost && videoUrl) {
@@ -612,7 +610,7 @@ export default function UnifiedCommunityFeed({
           video_url: videoUrl,
           content: newPost.content,
           user_id: newPost.user_id,
-          profiles: Array.isArray(newPost.profiles) ? newPost.profiles[0] : newPost.profiles,
+          profiles: profileData,
           likes_count: newPost.likes_count || 0,
           comments_count: newPost.comments_count || 0,
           created_at: newPost.created_at
