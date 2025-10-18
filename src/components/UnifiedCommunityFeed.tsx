@@ -39,6 +39,10 @@ interface FeedPost {
     content: string; 
     created_at: string; 
     user_id: string;
+    profiles?: {
+      full_name: string;
+      avatar_url?: string;
+    } | null;
   }[];
   _count?: {
     post_likes: number;
@@ -144,7 +148,7 @@ export default function UnifiedCommunityFeed({
     
     const currentOffset = loadMore ? offset : 0;
     
-    const { data: postsData, error: postsError } = await supabase
+    const { data: postsData, error: postsError} = await supabase
       .from('feed_posts')
       .select(`
         *,
@@ -172,10 +176,20 @@ export default function UnifiedCommunityFeed({
 
     const userIds = [...new Set(postsData?.map(post => post.user_id).filter(Boolean) || [])];
     
+    // Get all comment user IDs
+    const commentUserIds = [...new Set(
+      postsData?.flatMap(post => 
+        post.post_comments?.map(comment => comment.user_id) || []
+      ).filter(Boolean) || []
+    )];
+    
+    // Combine all user IDs
+    const allUserIds = [...new Set([...userIds, ...commentUserIds])];
+    
     const { data: profilesData } = await supabase
       .from('profiles')
       .select('user_id, full_name, avatar_url')
-      .in('user_id', userIds);
+      .in('user_id', allUserIds);
 
     // Fetch user roles
     const { data: rolesData } = await supabase
@@ -197,6 +211,10 @@ export default function UnifiedCommunityFeed({
       ...post,
       profiles: profilesMap[post.user_id] || null,
       user_role: rolesMap[post.user_id] || null,
+      post_comments: (post.post_comments || []).map(comment => ({
+        ...comment,
+        profiles: profilesMap[comment.user_id] || null
+      })),
       _count: {
         post_likes: post.post_likes?.length || 0,
         post_comments: post.post_comments?.length || 0
@@ -829,17 +847,19 @@ export default function UnifiedCommunityFeed({
                     </Button>
                   </div>
 
-                  {/* Comments Section */}
-                  {expandedComments.has(post.id) && (
+                  {/* Comments Section - Always show first 2 comments */}
+                  {(post._count?.post_comments || 0) > 0 && (
                     <div className="space-y-3 sm:space-y-4 pt-4 border-t border-border mt-4">
-                      <div className="space-y-3">
-                        {comments[post.id]?.map((comment) => (
-                          <div key={comment.id} className="flex gap-2 sm:gap-3">
-                            <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
-                              <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">
-                                {comment.profiles?.full_name?.charAt(0) || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
+                      {/* Show first 2 comments as preview */}
+                      {!expandedComments.has(post.id) && post.post_comments && (
+                        <div className="space-y-3">
+                          {post.post_comments.slice(0, 2).map((comment) => (
+                            <div key={comment.id} className="flex gap-2 sm:gap-3">
+                              <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
+                                <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">
+                                  {comment.profiles?.full_name?.charAt(0) || 'U'}
+                                </AvatarFallback>
+                              </Avatar>
                               <div className="flex-1 space-y-1 min-w-0">
                                 <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
                                   <p className="text-xs sm:text-sm font-semibold truncate">{comment.profiles?.full_name || 'Anonymous'}</p>
@@ -847,13 +867,83 @@ export default function UnifiedCommunityFeed({
                                 </div>
                                 <p className="text-xs sm:text-sm break-words">{comment.content}</p>
                               </div>
-                          </div>
-                        ))}
-                      </div>
+                            </div>
+                          ))}
+                          
+                          {(post._count?.post_comments || 0) > 2 && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-xs text-muted-foreground hover:text-primary"
+                              onClick={() => toggleComments(post.id)}
+                            >
+                              View all {post._count?.post_comments} comments
+                            </Button>
+                          )}
+                        </div>
+                      )}
                       
+                      {/* Show all comments when expanded */}
+                      {expandedComments.has(post.id) && (
+                        <>
+                          <div className="space-y-3">
+                            {comments[post.id]?.map((comment) => (
+                              <div key={comment.id} className="flex gap-2 sm:gap-3">
+                                <Avatar className="h-6 w-6 sm:h-8 sm:w-8">
+                                  <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs">
+                                    {comment.profiles?.full_name?.charAt(0) || 'U'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 space-y-1 min-w-0">
+                                  <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                    <p className="text-xs sm:text-sm font-semibold truncate">{comment.profiles?.full_name || 'Anonymous'}</p>
+                                    <span className="text-xs text-muted-foreground">{formatDate(comment.created_at)}</span>
+                                  </div>
+                                  <p className="text-xs sm:text-sm break-words">{comment.content}</p>
+                                </div>
+                              </div>
+                            ))}
+                            
+                            {(post._count?.post_comments || 0) > 2 && (
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-xs text-muted-foreground hover:text-primary"
+                                onClick={() => toggleComments(post.id)}
+                              >
+                                Show less
+                              </Button>
+                            )}
+                          </div>
+                        </>
+                      )}
+                      
+                      {/* Add comment input - always visible */}
                       <div className="flex gap-2">
                         <Input
                           placeholder="Write a comment..."
+                          value={newComment[post.id] || ''}
+                          onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              addComment(post.id);
+                            }
+                          }}
+                          className="flex-1 text-sm"
+                        />
+                        <Button onClick={() => addComment(post.id)} size="sm">
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Show add comment input even if no comments yet */}
+                  {(post._count?.post_comments || 0) === 0 && expandedComments.has(post.id) && (
+                    <div className="space-y-3 sm:space-y-4 pt-4 border-t border-border mt-4">
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder="Be the first to comment..."
                           value={newComment[post.id] || ''}
                           onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
                           onKeyPress={(e) => {
