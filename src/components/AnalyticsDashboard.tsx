@@ -55,13 +55,13 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
     
     setHistoricalData(data);
 
-    // Engagement breakdown - show unique activity metrics
-    const engagement = [
-      { name: 'Posts', value: analytics.posts },
-      { name: 'Comments', value: analytics.comments },
-      { name: 'Likes', value: analytics.likes },
-      { name: 'Followers', value: analytics.followers },
-    ].filter(item => item.value > 0); // Only show metrics with actual data
+    // Engagement breakdown - calculate activity percentages (not raw numbers)
+    const totalActivity = analytics.posts + analytics.comments + analytics.likes;
+    const engagement = totalActivity > 0 ? [
+      { name: 'Posts', value: Math.round((analytics.posts / totalActivity) * 100) },
+      { name: 'Comments', value: Math.round((analytics.comments / totalActivity) * 100) },
+      { name: 'Likes', value: Math.round((analytics.likes / totalActivity) * 100) },
+    ] : [];
     
     setEngagementData(engagement);
   };
@@ -103,6 +103,20 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
       icon: Activity,
     },
     {
+      title: 'Comments',
+      value: analytics.comments.toString(),
+      change: analytics.comments > 0 ? '+' : '0%',
+      trend: 'up',
+      icon: Activity,
+    },
+    {
+      title: 'Likes',
+      value: analytics.likes.toString(),
+      change: analytics.likes > 0 ? '+' : '0%',
+      trend: 'up',
+      icon: Activity,
+    },
+    {
       title: 'Engagement Score',
       value: `${analytics.engagement}%`,
       change: analytics.engagement > 50 ? '+' : analytics.engagement > 0 ? '' : '0%',
@@ -114,7 +128,7 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {analytics.loading ? (
           <div className="col-span-4 text-center py-8">
             <p className="text-muted-foreground">Loading analytics...</p>
@@ -200,8 +214,8 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
         <TabsContent value="engagement" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <Card className="p-6">
-              <h3 className="font-semibold mb-4">Engagement Distribution</h3>
-              {engagementData.length > 0 && engagementData.some(d => d.value > 0) ? (
+              <h3 className="font-semibold mb-4">Activity Distribution (%)</h3>
+              {engagementData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
@@ -209,7 +223,7 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, value }) => `${name} ${value}%`}
                       outerRadius={80}
                       fill="hsl(var(--primary))"
                       dataKey="value"
@@ -218,25 +232,25 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip />
+                    <Tooltip formatter={(value) => `${value}%`} />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
                 <div className="text-center py-12 text-muted-foreground">
-                  <p>No engagement data yet</p>
+                  <p>No activity data yet</p>
                 </div>
               )}
             </Card>
 
             <Card className="p-6">
-              <h3 className="font-semibold mb-4">Engagement Metrics</h3>
+              <h3 className="font-semibold mb-4">Activity Breakdown (%)</h3>
               {engagementData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={engagementData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
                     <YAxis />
-                    <Tooltip />
+                    <Tooltip formatter={(value) => `${value}%`} />
                     <Bar dataKey="value" fill="hsl(var(--primary))" />
                   </BarChart>
                 </ResponsiveContainer>
