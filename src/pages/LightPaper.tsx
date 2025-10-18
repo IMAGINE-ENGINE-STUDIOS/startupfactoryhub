@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, FileSignature, FileCheck, Sparkles } from "lucide-react";
+import { FileText, Table, Presentation, FileSignature, FileCheck, Sparkles, Calculator } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
 import { LightPaperPDF } from "@/components/lightpaper/LightPaperPDF";
 import { LightPaperSign } from "@/components/lightpaper/LightPaperSign";
 import AIAssistant from "@/components/AIAssistant";
+import { ScientificCalculator } from "@/components/ScientificCalculator";
 import { Button } from "@/components/ui/button";
 
 export default function LightPaper() {
   const [activeTab, setActiveTab] = useState("document");
   const [showAI, setShowAI] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -29,13 +31,23 @@ export default function LightPaper() {
                 Complete Productivity Suite
               </span>
             </div>
-            <Button
-              onClick={() => setShowAI(true)}
-              className="gap-2"
-            >
-              <Sparkles className="h-4 w-4" />
-              AI Assistant
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowCalculator(true)}
+                className="gap-2"
+              >
+                <Calculator className="h-4 w-4" />
+                Calculator
+              </Button>
+              <Button
+                onClick={() => setShowAI(true)}
+                className="gap-2"
+              >
+                <Sparkles className="h-4 w-4" />
+                AI Assistant
+              </Button>
+            </div>
           </div>
         </div>
       </div>
@@ -88,6 +100,7 @@ export default function LightPaper() {
       </div>
 
       <AIAssistant isOpen={showAI} onClose={() => setShowAI(false)} />
+      <ScientificCalculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} />
     </div>
   );
 }

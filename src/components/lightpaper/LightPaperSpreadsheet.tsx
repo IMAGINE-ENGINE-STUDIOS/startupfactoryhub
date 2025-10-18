@@ -1,12 +1,35 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2, Download, Upload, Calculator } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Plus, Download, Upload, Calculator, BookOpen, Save, FileText } from "lucide-react";
 import { toast } from "sonner";
+import { FormulaBuilder } from "./FormulaBuilder";
+import { FormulaEngine } from "@/lib/formulaEngine";
+import { useLightPaperProjects } from "@/hooks/useLightPaperProjects";
+import { ScientificCalculator } from "@/components/ScientificCalculator";
+import * as XLSX from "xlsx";
 
-const COLUMNS = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
-const INITIAL_ROWS = 20;
+// Generate column names: A, B, C, ... Z, AA, AB, ...
+const generateColumns = (count: number): string[] => {
+  const cols: string[] = [];
+  for (let i = 0; i < count; i++) {
+    let col = "";
+    let num = i;
+    while (num >= 0) {
+      col = String.fromCharCode(65 + (num % 26)) + col;
+      num = Math.floor(num / 26) - 1;
+    }
+    cols.push(col);
+  }
+  return cols;
+};
+
+const COLUMNS = generateColumns(50); // Support up to 50 columns
+const INITIAL_ROWS = 100; // Start with 100 rows
 
 interface Cell {
   value: string;
@@ -16,6 +39,13 @@ interface Cell {
 export function LightPaperSpreadsheet() {
   const [data, setData] = useState<{ [key: string]: Cell }>({});
   const [selectedCell, setSelectedCell] = useState<string | null>(null);
+  const [showFormulas, setShowFormulas] = useState(false);
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [projectTitle, setProjectTitle] = useState("Untitled Spreadsheet");
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [visibleRows, setVisibleRows] = useState(INITIAL_ROWS);
+  const { saveProject, projects } = useLightPaperProjects("spreadsheet");
 
   const getCellId = (col: string, row: number) => `${col}${row}`;
 
@@ -26,41 +56,79 @@ export function LightPaperSpreadsheet() {
     }));
   };
 
-  const evaluateFormula = (formula: string): string => {
-    try {
-      // Simple formula evaluation (e.g., =A1+B1)
-      if (formula.startsWith("=")) {
-        const expression = formula.slice(1);
-        // Replace cell references with their values
-        let evalExpression = expression;
-        Object.keys(data).forEach((cellId) => {
-          const cellValue = data[cellId].value;
-          if (!cellValue.startsWith("=")) {
-            evalExpression = evalExpression.replace(new RegExp(cellId, "g"), cellValue || "0");
-          }
-        });
-        // Basic math evaluation
-        const result = eval(evalExpression);
-        return result.toString();
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.scrollTop + target.clientHeight >= target.scrollHeight - 100) {
+        setVisibleRows(prev => Math.min(prev + 50, 1000));
       }
-      return formula;
-    } catch {
-      return "#ERROR";
-    }
-  };
+    };
+
+    const scrollContainer = document.querySelector('.spreadsheet-scroll-container');
+    scrollContainer?.addEventListener('scroll', handleScroll);
+    return () => scrollContainer?.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const getCellDisplay = (cellId: string): string => {
-    const cell = data[cellId];
-    if (!cell) return "";
-    if (cell.formula) {
-      return evaluateFormula(cell.formula);
-    }
-    return cell.value;
+    const engine = new FormulaEngine(data);
+    return engine.evaluate(cellId);
   };
 
-  const handleExport = () => {
+  const handleSaveToAccount = async () => {
+    const result = await saveProject(projectTitle, "spreadsheet", { data }, currentProjectId || undefined);
+    if (result) {
+      setCurrentProjectId(result.id);
+      setShowSaveDialog(false);
+    }
+  };
+
+  const handleLoadProject = async (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      setData(project.content.data || {});
+      setProjectTitle(project.title);
+      setCurrentProjectId(project.id);
+      toast.success("Project loaded!");
+    }
+  };
+
+  const handleInsertFormula = (formula: string) => {
+    if (selectedCell) {
+      handleCellChange(selectedCell, formula);
+      toast.success("Formula inserted!");
+    } else {
+      toast.error("Please select a cell first");
+    }
+  };
+
+  const insertCalculatorResult = (value: string) => {
+    if (selectedCell) {
+      handleCellChange(selectedCell, value);
+    }
+  };
+
+  const handleExportExcel = () => {
+    const worksheet = XLSX.utils.aoa_to_sheet([]);
+    
+    Object.keys(data).forEach((cellId) => {
+      const col = cellId.match(/[A-Z]+/)?.[0] || "";
+      const row = parseInt(cellId.match(/\d+/)?.[0] || "0");
+      const colIndex = COLUMNS.indexOf(col);
+      
+      if (!worksheet[cellId]) {
+        worksheet[cellId] = { v: getCellDisplay(cellId), t: "s" };
+      }
+    });
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+    XLSX.writeFile(workbook, `${projectTitle}.xlsx`);
+    toast.success("Exported to Excel!");
+  };
+
+  const handleExportCSV = () => {
     const csv = [];
-    for (let row = 1; row <= INITIAL_ROWS; row++) {
+    for (let row = 1; row <= visibleRows; row++) {
       const rowData = COLUMNS.map((col) => {
         const cellId = getCellId(col, row);
         return `"${getCellDisplay(cellId)}"`;
@@ -71,117 +139,193 @@ export function LightPaperSpreadsheet() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "spreadsheet.csv";
+    a.download = `${projectTitle}.csv`;
     a.click();
-    toast.success("Spreadsheet exported successfully!");
+    toast.success("Exported to CSV!");
   };
 
   const handleImport = () => {
     const input = document.createElement("input");
     input.type = "file";
-    input.accept = ".csv";
+    input.accept = ".csv,.xlsx,.xls";
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const csv = e.target?.result as string;
-          const rows = csv.split("\n");
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const fileData = e.target?.result;
+          let workbook: XLSX.WorkBook;
+
+          if (file.name.endsWith('.csv')) {
+            const text = fileData as string;
+            workbook = XLSX.read(text, { type: 'string' });
+          } else {
+            workbook = XLSX.read(fileData, { type: 'array' });
+          }
+
+          const worksheet = workbook.Sheets[workbook.SheetNames[0]];
+          const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }) as any[][];
+
           const newData: { [key: string]: Cell } = {};
-          rows.forEach((row, rowIndex) => {
-            const cells = row.split(",");
-            cells.forEach((cell, colIndex) => {
-              if (colIndex < COLUMNS.length) {
+          jsonData.forEach((row, rowIndex) => {
+            row.forEach((cell, colIndex) => {
+              if (colIndex < COLUMNS.length && cell !== undefined) {
                 const cellId = getCellId(COLUMNS[colIndex], rowIndex + 1);
-                newData[cellId] = { value: cell.replace(/"/g, "") };
+                newData[cellId] = { value: String(cell) };
               }
             });
           });
+
           setData(newData);
-          toast.success("Spreadsheet imported successfully!");
-        };
+          toast.success("File imported successfully!");
+        } catch (error) {
+          toast.error("Failed to import file");
+        }
+      };
+
+      if (file.name.endsWith('.csv')) {
         reader.readAsText(file);
+      } else {
+        reader.readAsArrayBuffer(file);
       }
     };
     input.click();
   };
 
-  const calculateSum = () => {
-    if (!selectedCell) {
-      toast.error("Please select a cell first");
-      return;
-    }
-    const formula = prompt("Enter range (e.g., A1:A5):");
-    if (formula) {
-      handleCellChange(selectedCell, `=SUM(${formula})`);
-    }
-  };
-
   return (
-    <Card className="p-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Button variant="outline" size="sm" onClick={handleImport}>
-          <Upload className="h-4 w-4 mr-1" />
-          Import CSV
-        </Button>
-        <Button variant="outline" size="sm" onClick={handleExport}>
-          <Download className="h-4 w-4 mr-1" />
-          Export CSV
-        </Button>
-        <Button variant="outline" size="sm" onClick={calculateSum}>
-          <Calculator className="h-4 w-4 mr-1" />
-          Calculate
-        </Button>
-      </div>
-
-      <div className="overflow-auto border rounded-lg">
-        <table className="w-full border-collapse">
-          <thead>
-            <tr>
-              <th className="border bg-muted p-2 w-12 text-xs font-medium">#</th>
-              {COLUMNS.map((col) => (
-                <th key={col} className="border bg-muted p-2 min-w-[120px] text-xs font-medium">
-                  {col}
-                </th>
+    <>
+      <Card className="p-6">
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <Button variant="outline" size="sm" onClick={() => setShowSaveDialog(true)}>
+            <Save className="h-4 w-4 mr-1" />
+            Save to Account
+          </Button>
+          <Select value={currentProjectId || ""} onValueChange={handleLoadProject}>
+            <SelectTrigger className="w-[180px]">
+              <FileText className="h-4 w-4 mr-2" />
+              <SelectValue placeholder="My Projects" />
+            </SelectTrigger>
+            <SelectContent>
+              {projects.map((project) => (
+                <SelectItem key={project.id} value={project.id}>
+                  {project.title}
+                </SelectItem>
               ))}
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: INITIAL_ROWS }, (_, rowIndex) => {
-              const row = rowIndex + 1;
-              return (
-                <tr key={row}>
-                  <td className="border bg-muted p-2 text-xs font-medium text-center">
-                    {row}
-                  </td>
-                  {COLUMNS.map((col) => {
-                    const cellId = getCellId(col, row);
-                    return (
-                      <td key={cellId} className="border p-0">
-                        <Input
-                          value={selectedCell === cellId ? (data[cellId]?.value || "") : getCellDisplay(cellId)}
-                          onChange={(e) => handleCellChange(cellId, e.target.value)}
-                          onFocus={() => setSelectedCell(cellId)}
-                          className="border-0 rounded-none h-8 text-sm"
-                        />
-                      </td>
-                    );
-                  })}
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {selectedCell && (
-        <div className="mt-4 p-3 bg-muted rounded-lg">
-          <div className="text-sm font-medium mb-1">Selected Cell: {selectedCell}</div>
-          <div className="text-xs text-muted-foreground">
-            {data[selectedCell]?.formula ? `Formula: ${data[selectedCell].formula}` : "Enter = to start a formula"}
-          </div>
+            </SelectContent>
+          </Select>
+          <Button variant="outline" size="sm" onClick={handleImport}>
+            <Upload className="h-4 w-4 mr-1" />
+            Import
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportExcel}>
+            <Download className="h-4 w-4 mr-1" />
+            Export Excel
+          </Button>
+          <Button variant="outline" size="sm" onClick={handleExportCSV}>
+            <Download className="h-4 w-4 mr-1" />
+            Export CSV
+          </Button>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm">
+                <BookOpen className="h-4 w-4 mr-1" />
+                Formulas
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80" side="right">
+              <FormulaBuilder onSelectFormula={handleInsertFormula} />
+            </PopoverContent>
+          </Popover>
+          <Button variant="outline" size="sm" onClick={() => setShowCalculator(true)}>
+            <Calculator className="h-4 w-4 mr-1" />
+            Calculator
+          </Button>
         </div>
-      )}
-    </Card>
+
+        <div className="overflow-auto border rounded-lg spreadsheet-scroll-container" style={{ maxHeight: '600px' }}>
+          <table className="w-full border-collapse">
+            <thead className="sticky top-0 z-10">
+              <tr>
+                <th className="border bg-muted p-2 w-12 text-xs font-medium sticky left-0 z-20">#</th>
+                {COLUMNS.map((col) => (
+                  <th key={col} className="border bg-muted p-2 min-w-[120px] text-xs font-medium">
+                    {col}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {Array.from({ length: visibleRows }, (_, rowIndex) => {
+                const row = rowIndex + 1;
+                return (
+                  <tr key={row}>
+                    <td className="border bg-muted p-2 text-xs font-medium text-center sticky left-0 z-10">
+                      {row}
+                    </td>
+                    {COLUMNS.map((col) => {
+                      const cellId = getCellId(col, row);
+                      return (
+                        <td key={cellId} className="border p-0">
+                          <Input
+                            value={selectedCell === cellId ? (data[cellId]?.value || "") : getCellDisplay(cellId)}
+                            onChange={(e) => handleCellChange(cellId, e.target.value)}
+                            onFocus={() => setSelectedCell(cellId)}
+                            className="border-0 rounded-none h-8 text-sm"
+                          />
+                        </td>
+                      );
+                    })}
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {selectedCell && (
+          <div className="mt-4 p-3 bg-muted rounded-lg">
+            <div className="text-sm font-medium mb-1">Selected Cell: {selectedCell}</div>
+            <div className="text-xs text-muted-foreground">
+              {data[selectedCell]?.formula ? `Formula: ${data[selectedCell].formula}` : "Enter = to start a formula"}
+            </div>
+          </div>
+        )}
+      </Card>
+
+      <ScientificCalculator
+        isOpen={showCalculator}
+        onClose={() => setShowCalculator(false)}
+        onInsertResult={insertCalculatorResult}
+      />
+
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save Spreadsheet</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Spreadsheet Title</label>
+              <Input
+                value={projectTitle}
+                onChange={(e) => setProjectTitle(e.target.value)}
+                placeholder="Enter spreadsheet title"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveToAccount}>
+                <Save className="h-4 w-4 mr-2" />
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

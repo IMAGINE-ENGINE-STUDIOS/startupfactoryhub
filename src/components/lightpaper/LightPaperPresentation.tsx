@@ -3,9 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, ChevronLeft, ChevronRight, Play, Download } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Plus, Trash2, ChevronLeft, ChevronRight, Play, Download, Upload, ImageIcon, Save, FileText } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
+import { useLightPaperProjects } from "@/hooks/useLightPaperProjects";
 
 interface Slide {
   id: string;
@@ -14,6 +16,10 @@ interface Slide {
   backgroundColor: string;
   textColor: string;
   layout: "title" | "content" | "two-column" | "image";
+  imageUrl?: string;
+  imagePosition?: { x: number; y: number; width: number; height: number };
+  animation?: "none" | "fade" | "slide" | "zoom";
+  transition?: "none" | "fade" | "slide" | "zoom";
 }
 
 export function LightPaperPresentation() {
@@ -24,11 +30,17 @@ export function LightPaperPresentation() {
       content: "Create stunning presentations with ease",
       backgroundColor: "#1a1a1a",
       textColor: "#ffffff",
-      layout: "title"
+      layout: "title",
+      animation: "fade",
+      transition: "fade"
     }
   ]);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isPresenting, setIsPresenting] = useState(false);
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [projectTitle, setProjectTitle] = useState("Untitled Presentation");
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const { saveProject, projects } = useLightPaperProjects("presentation");
 
   const currentSlide = slides[currentSlideIndex];
 
@@ -39,7 +51,9 @@ export function LightPaperPresentation() {
       content: "Add your content here",
       backgroundColor: "#ffffff",
       textColor: "#000000",
-      layout: "content"
+      layout: "content",
+      animation: "none",
+      transition: "fade"
     };
     setSlides([...slides, newSlide]);
     setCurrentSlideIndex(slides.length);
@@ -81,9 +95,46 @@ export function LightPaperPresentation() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "presentation.json";
+    a.download = `${projectTitle}.json`;
     a.click();
     toast.success("Presentation exported!");
+  };
+
+  const handleSaveToAccount = async () => {
+    const result = await saveProject(projectTitle, "presentation", { slides }, currentProjectId || undefined);
+    if (result) {
+      setCurrentProjectId(result.id);
+      setShowSaveDialog(false);
+    }
+  };
+
+  const handleLoadProject = async (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      setSlides(project.content.slides || []);
+      setProjectTitle(project.title);
+      setCurrentProjectId(project.id);
+      setCurrentSlideIndex(0);
+      toast.success("Project loaded!");
+    }
+  };
+
+  const handleImageUpload = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          updateSlide({ imageUrl: e.target?.result as string });
+          toast.success("Image added!");
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
   };
 
   return (
@@ -93,6 +144,23 @@ export function LightPaperPresentation() {
           <Card className="p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" onClick={() => setShowSaveDialog(true)}>
+                  <Save className="h-4 w-4 mr-1" />
+                  Save to Account
+                </Button>
+                <Select value={currentProjectId || ""} onValueChange={handleLoadProject}>
+                  <SelectTrigger className="w-[180px]">
+                    <FileText className="h-4 w-4 mr-2" />
+                    <SelectValue placeholder="My Projects" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {projects.map((project) => (
+                      <SelectItem key={project.id} value={project.id}>
+                        {project.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <Button variant="outline" size="sm" onClick={addSlide}>
                   <Plus className="h-4 w-4 mr-1" />
                   Add Slide
@@ -104,6 +172,10 @@ export function LightPaperPresentation() {
                 <Button variant="outline" size="sm" onClick={exportPresentation}>
                   <Download className="h-4 w-4 mr-1" />
                   Export
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleImageUpload}>
+                  <ImageIcon className="h-4 w-4 mr-1" />
+                  Add Image
                 </Button>
               </div>
               <div className="flex items-center gap-2">
@@ -123,7 +195,7 @@ export function LightPaperPresentation() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-3 gap-4 mb-4">
               <div>
                 <label className="text-sm font-medium mb-1 block">Layout</label>
                 <Select value={currentSlide.layout} onValueChange={(value) => updateSlide({ layout: value as Slide["layout"] })}>
@@ -138,25 +210,54 @@ export function LightPaperPresentation() {
                   </SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Background</label>
-                  <input
-                    type="color"
-                    value={currentSlide.backgroundColor}
-                    onChange={(e) => updateSlide({ backgroundColor: e.target.value })}
-                    className="w-full h-10 cursor-pointer rounded"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium mb-1 block">Text Color</label>
-                  <input
-                    type="color"
-                    value={currentSlide.textColor}
-                    onChange={(e) => updateSlide({ textColor: e.target.value })}
-                    className="w-full h-10 cursor-pointer rounded"
-                  />
-                </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Animation</label>
+                <Select value={currentSlide.animation || "none"} onValueChange={(value) => updateSlide({ animation: value as Slide["animation"] })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="fade">Fade</SelectItem>
+                    <SelectItem value="slide">Slide</SelectItem>
+                    <SelectItem value="zoom">Zoom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Transition</label>
+                <Select value={currentSlide.transition || "fade"} onValueChange={(value) => updateSlide({ transition: value as Slide["transition"] })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None</SelectItem>
+                    <SelectItem value="fade">Fade</SelectItem>
+                    <SelectItem value="slide">Slide</SelectItem>
+                    <SelectItem value="zoom">Zoom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">Background</label>
+                <input
+                  type="color"
+                  value={currentSlide.backgroundColor}
+                  onChange={(e) => updateSlide({ backgroundColor: e.target.value })}
+                  className="w-full h-10 cursor-pointer rounded"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">Text Color</label>
+                <input
+                  type="color"
+                  value={currentSlide.textColor}
+                  onChange={(e) => updateSlide({ textColor: e.target.value })}
+                  className="w-full h-10 cursor-pointer rounded"
+                />
               </div>
             </div>
 
@@ -184,14 +285,27 @@ export function LightPaperPresentation() {
           {/* Slide Preview */}
           <Card
             className="p-12 min-h-[400px] flex flex-col justify-center items-center text-center"
-            style={{
-              backgroundColor: currentSlide.backgroundColor,
-              color: currentSlide.textColor
-            }}
-          >
-            <h1 className="text-5xl font-bold mb-6">{currentSlide.title}</h1>
-            <p className="text-2xl whitespace-pre-wrap max-w-3xl">{currentSlide.content}</p>
-          </Card>
+              style={{
+                backgroundColor: currentSlide.backgroundColor,
+                color: currentSlide.textColor
+              }}
+            >
+              {currentSlide.imageUrl && (
+                <img 
+                  src={currentSlide.imageUrl} 
+                  alt="Slide" 
+                  className="absolute inset-0 w-full h-full object-cover opacity-50"
+                />
+              )}
+              <div className={`relative z-10 ${
+                currentSlide.animation === "fade" ? "animate-fade-in" :
+                currentSlide.animation === "slide" ? "animate-slide-in-right" :
+                currentSlide.animation === "zoom" ? "animate-scale-in" : ""
+              }`}>
+                <h1 className="text-5xl font-bold mb-6">{currentSlide.title}</h1>
+                <p className="text-2xl whitespace-pre-wrap max-w-3xl">{currentSlide.content}</p>
+              </div>
+            </Card>
 
           {/* Thumbnail Strip */}
           <div className="flex gap-2 overflow-x-auto pb-2">
@@ -215,14 +329,27 @@ export function LightPaperPresentation() {
         <div className="fixed inset-0 z-50 bg-black">
           <div
             className="w-full h-full flex flex-col justify-center items-center text-center p-16"
-            style={{
-              backgroundColor: currentSlide.backgroundColor,
-              color: currentSlide.textColor
-            }}
-          >
-            <h1 className="text-7xl font-bold mb-8">{currentSlide.title}</h1>
-            <p className="text-4xl whitespace-pre-wrap max-w-5xl">{currentSlide.content}</p>
-          </div>
+              style={{
+                backgroundColor: currentSlide.backgroundColor,
+                color: currentSlide.textColor
+              }}
+            >
+              {currentSlide.imageUrl && (
+                <img 
+                  src={currentSlide.imageUrl} 
+                  alt="Slide" 
+                  className="absolute inset-0 w-full h-full object-cover opacity-30"
+                />
+              )}
+              <div className={`relative z-10 ${
+                currentSlide.transition === "fade" ? "animate-fade-in" :
+                currentSlide.transition === "slide" ? "animate-slide-in-right" :
+                currentSlide.transition === "zoom" ? "animate-scale-in" : ""
+              }`}>
+                <h1 className="text-7xl font-bold mb-8">{currentSlide.title}</h1>
+                <p className="text-4xl whitespace-pre-wrap max-w-5xl">{currentSlide.content}</p>
+              </div>
+            </div>
           <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex items-center gap-4 bg-black/80 p-4 rounded-lg">
             <Button variant="outline" size="sm" onClick={prevSlide} disabled={currentSlideIndex === 0}>
               <ChevronLeft className="h-4 w-4" />
@@ -239,6 +366,34 @@ export function LightPaperPresentation() {
           </div>
         </div>
       )}
+
+      {/* Save Dialog */}
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save Presentation</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Presentation Title</label>
+              <Input
+                value={projectTitle}
+                onChange={(e) => setProjectTitle(e.target.value)}
+                placeholder="Enter presentation title"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveToAccount}>
+                <Save className="h-4 w-4 mr-2" />
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

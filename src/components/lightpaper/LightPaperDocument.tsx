@@ -47,23 +47,54 @@ export function LightPaperDocument() {
   useEffect(() => {
     if (editorRef.current) {
       editorRef.current.style.fontFamily = selectedFont;
+      editorRef.current.style.backgroundColor = bgColor;
     }
-  }, [selectedFont]);
+  }, [selectedFont, bgColor]);
 
   const execCommand = (command: string, value?: string) => {
-    document.execCommand(command, false, value);
     editorRef.current?.focus();
+    document.execCommand(command, false, value);
   };
 
-  const handleSave = () => {
+  const handleSaveToAccount = async () => {
+    const content = {
+      html: editorRef.current?.innerHTML || "",
+      font: selectedFont,
+      size: selectedSize,
+      color: selectedColor,
+      bgColor,
+    };
+    
+    const result = await saveProject(projectTitle, "document", content, currentProjectId || undefined);
+    if (result) {
+      setCurrentProjectId(result.id);
+      setShowSaveDialog(false);
+    }
+  };
+
+  const handleLoadProject = async (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (project && editorRef.current) {
+      editorRef.current.innerHTML = project.content.html || "";
+      setSelectedFont(project.content.font || "Arial");
+      setSelectedSize(project.content.size || "16");
+      setSelectedColor(project.content.color || "#000000");
+      setBgColor(project.content.bgColor || "#ffffff");
+      setProjectTitle(project.title);
+      setCurrentProjectId(project.id);
+      toast.success("Project loaded!");
+    }
+  };
+
+  const handleDownload = () => {
     const content = editorRef.current?.innerHTML || "";
     const blob = new Blob([content], { type: "text/html" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "document.html";
+    a.download = `${projectTitle}.html`;
     a.click();
-    toast.success("Document saved successfully!");
+    toast.success("Document downloaded!");
   };
 
   const handleExport = () => {
@@ -109,24 +140,56 @@ export function LightPaperDocument() {
     }
   };
 
+  const insertImage = () => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/*";
+    input.onchange = (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = `<img src="${e.target?.result}" style="max-width: 100%; height: auto;" />`;
+          document.execCommand('insertHTML', false, img);
+        };
+        reader.readAsDataURL(file);
+      }
+    };
+    input.click();
+  };
+
   return (
-    <Card className="p-6">
-      {/* Toolbar */}
-      <div className="space-y-4 mb-4">
-        {/* Row 1: File operations and font selection */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" size="sm" onClick={handleSave}>
-            <Save className="h-4 w-4 mr-1" />
-            Save
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleImport}>
-            <Upload className="h-4 w-4 mr-1" />
-            Import
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExport}>
-            <Download className="h-4 w-4 mr-1" />
-            Export
-          </Button>
+    <>
+      <Card className="p-6">
+        {/* Toolbar */}
+        <div className="space-y-4 mb-4">
+          {/* Row 1: File operations and font selection */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button variant="outline" size="sm" onClick={() => setShowSaveDialog(true)}>
+              <Save className="h-4 w-4 mr-1" />
+              Save to Account
+            </Button>
+            <Select value={currentProjectId || ""} onValueChange={handleLoadProject}>
+              <SelectTrigger className="w-[180px]">
+                <FileText className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="My Projects" />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" size="sm" onClick={handleImport}>
+              <Upload className="h-4 w-4 mr-1" />
+              Import
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleDownload}>
+              <Download className="h-4 w-4 mr-1" />
+              Download
+            </Button>
           <Separator orientation="vertical" className="h-8" />
           <Select value={selectedFont} onValueChange={setSelectedFont}>
             <SelectTrigger className="w-[180px]">
@@ -153,16 +216,39 @@ export function LightPaperDocument() {
               ))}
             </SelectContent>
           </Select>
-          <div className="flex items-center gap-1">
-            <Palette className="h-4 w-4" />
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              <Palette className="h-4 w-4" />
+              <input
+                type="color"
+                value={selectedColor}
+                onChange={(e) => {
+                  setSelectedColor(e.target.value);
+                  execCommand('foreColor', e.target.value);
+                }}
+                className="w-10 h-8 cursor-pointer"
+                title="Text Color"
+              />
+            </div>
+            <div className="flex items-center gap-1">
+              <Highlighter className="h-4 w-4" />
+              <input
+                type="color"
+                value={highlightColor}
+                onChange={(e) => {
+                  setHighlightColor(e.target.value);
+                  execCommand('backColor', e.target.value);
+                }}
+                className="w-10 h-8 cursor-pointer"
+                title="Highlight"
+              />
+            </div>
             <input
               type="color"
-              value={selectedColor}
-              onChange={(e) => {
-                setSelectedColor(e.target.value);
-                execCommand('foreColor', e.target.value);
-              }}
+              value={bgColor}
+              onChange={(e) => setBgColor(e.target.value)}
               className="w-10 h-8 cursor-pointer"
+              title="Background Color"
             />
           </div>
         </div>
@@ -177,6 +263,9 @@ export function LightPaperDocument() {
           </Button>
           <Button variant="outline" size="sm" onClick={() => execCommand('underline')}>
             <Underline className="h-4 w-4" />
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => execCommand('strikeThrough')}>
+            <Strikethrough className="h-4 w-4" />
           </Button>
           <Separator orientation="vertical" className="h-8" />
           <Button variant="outline" size="sm" onClick={() => execCommand('justifyLeft')}>
@@ -212,6 +301,10 @@ export function LightPaperDocument() {
 
         {/* Row 3: Insert and undo/redo */}
         <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" onClick={insertImage}>
+            <ImageIcon className="h-4 w-4 mr-1" />
+            Image
+          </Button>
           <Button variant="outline" size="sm" onClick={insertLink}>
             <Link className="h-4 w-4 mr-1" />
             Link
@@ -236,14 +329,46 @@ export function LightPaperDocument() {
       <div
         ref={editorRef}
         contentEditable
-        className="min-h-[600px] p-8 bg-white text-foreground border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
+        suppressContentEditableWarning
+        className="min-h-[600px] p-8 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring"
         style={{
           fontFamily: selectedFont,
           fontSize: `${selectedSize}px`,
-          lineHeight: "1.6"
+          lineHeight: "1.6",
+          color: selectedColor,
+          backgroundColor: bgColor
         }}
         data-placeholder="Start typing..."
       />
-    </Card>
+      </Card>
+
+      {/* Save Dialog */}
+      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Save Document</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Document Title</label>
+              <Input
+                value={projectTitle}
+                onChange={(e) => setProjectTitle(e.target.value)}
+                placeholder="Enter document title"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveToAccount}>
+                <Save className="h-4 w-4 mr-2" />
+                Save
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
