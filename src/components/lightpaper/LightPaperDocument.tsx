@@ -65,6 +65,18 @@ export function LightPaperDocument({
     }, 100);
   }, []);
 
+  // Initialize signature canvas with transparent background
+  useEffect(() => {
+    const canvas = signCanvasRef.current;
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        // Clear canvas with transparency
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+  }, [showSignDialog]);
+
   // Load project and versions when selectedProject changes
   useEffect(() => {
     const loadProjectWithVersions = async () => {
@@ -387,7 +399,8 @@ export function LightPaperDocument({
 
   const stopDrawingSignature = () => {
     if (isDrawingSignature && signCanvasRef.current) {
-      const signatureData = signCanvasRef.current.toDataURL();
+      // Save as PNG with transparent background
+      const signatureData = signCanvasRef.current.toDataURL('image/png');
       setSignatures([
         ...signatures,
         {
@@ -441,7 +454,7 @@ export function LightPaperDocument({
       padding: 8px;
       border: 2px dashed #ccc;
       margin: 4px;
-      background: white;
+      background: transparent;
       position: relative;
     `;
 
@@ -454,6 +467,7 @@ export function LightPaperDocument({
       signatureElement.style.fontFamily = "cursive";
       signatureElement.style.fontSize = "24px";
       signatureElement.textContent = signature.data;
+      signatureElement.style.color = isDarkMode ? 'white' : 'black';
     }
 
     signatureElement.ondragstart = (e) => {
@@ -863,16 +877,23 @@ export function LightPaperDocument({
                 </TabsList>
                 
                 <TabsContent value="draw" className="space-y-3">
-                  <canvas
-                    ref={signCanvasRef}
-                    width={400}
-                    height={200}
-                    className="border rounded cursor-crosshair bg-white w-full"
-                    onMouseDown={startDrawingSignature}
-                    onMouseMove={drawSignature}
-                    onMouseUp={stopDrawingSignature}
-                    onMouseLeave={stopDrawingSignature}
-                  />
+                  <div className="relative">
+                    <canvas
+                      ref={signCanvasRef}
+                      width={400}
+                      height={200}
+                      className="border rounded cursor-crosshair w-full bg-transparent"
+                      style={{ 
+                        backgroundColor: 'transparent',
+                        backgroundImage: 'repeating-conic-gradient(#d1d5db 0% 25%, transparent 0% 50%) 50% / 20px 20px'
+                      }}
+                      onMouseDown={startDrawingSignature}
+                      onMouseMove={drawSignature}
+                      onMouseUp={stopDrawingSignature}
+                      onMouseLeave={stopDrawingSignature}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">Draw your signature above. It will be saved with a transparent background.</p>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={clearSignCanvas} variant="outline" className="flex-1">
                       Clear
