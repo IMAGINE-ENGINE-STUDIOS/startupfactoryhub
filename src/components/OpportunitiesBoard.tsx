@@ -134,15 +134,24 @@ export function OpportunitiesBoard() {
       return;
     }
 
-    const table = type === 'job' ? 'job_applications' : 'internship_applications';
-    const idField = type === 'job' ? 'job_id' : 'internship_id';
-
     try {
-      const { error } = await supabase.from(table).insert({
-        [idField]: opportunityId,
-        user_id: user.id,
-        status: 'pending',
-      });
+      let error;
+      
+      if (type === 'job') {
+        const result = await supabase.from('job_applications').insert({
+          job_id: opportunityId,
+          user_id: user.id,
+          status: 'pending',
+        });
+        error = result.error;
+      } else {
+        const result = await supabase.from('internship_applications').insert({
+          internship_id: opportunityId,
+          user_id: user.id,
+          status: 'pending',
+        });
+        error = result.error;
+      }
 
       if (error) {
         if (error.code === '23505') {
@@ -211,17 +220,17 @@ export function OpportunitiesBoard() {
 
     const internshipData = {
       company_id: userCompanyId,
-      title: formData.get('title'),
-      description: formData.get('description'),
-      location: formData.get('location'),
-      duration: formData.get('duration'),
-      compensation: formData.get('compensation'),
+      title: formData.get('title') as string,
+      description: formData.get('description') as string,
+      location: (formData.get('location') as string) || null,
+      duration: (formData.get('duration') as string) || null,
+      compensation: (formData.get('compensation') as string) || null,
       requirements: requirementsText.split(',').map(r => r.trim()).filter(r => r),
-      status: 'active',
+      status: 'active' as const,
     };
 
     try {
-      const { error } = await supabase.from('internships').insert(internshipData);
+      const { error } = await supabase.from('internships').insert([internshipData]);
       if (error) throw error;
       toast.success('Internship posted successfully!');
       setIsCreateInternshipDialogOpen(false);
