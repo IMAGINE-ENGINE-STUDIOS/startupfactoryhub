@@ -4,15 +4,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenTool } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
 import FloatingActionMenu from "./FloatingActionMenu";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
 import { supabase } from "@/integrations/supabase/client";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
 const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
+const HIGHLIGHT_COLORS = ["#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "transparent"];
 interface LightPaperDocumentProps {
   selectedProject?: LightPaperProject | null;
 }
@@ -33,6 +36,15 @@ export function LightPaperDocument({
   const [currentVersionIndex, setCurrentVersionIndex] = useState(-1);
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random()}`);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [selectedHighlight, setSelectedHighlight] = useState("#FFFF00");
+  const [showSignDialog, setShowSignDialog] = useState(false);
+  const [signatures, setSignatures] = useState<Array<{type: "draw" | "text", data: string, id: string}>>([]);
+  const [signatureMode, setSignatureMode] = useState<"draw" | "text">("draw");
+  const [textSignature, setTextSignature] = useState("");
+  const [isDrawingSignature, setIsDrawingSignature] = useState(false);
+  const [lastSignPos, setLastSignPos] = useState({ x: 0, y: 0 });
+  const signCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [draggingSignature, setDraggingSignature] = useState<string | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const {
     saveProject
@@ -243,7 +255,6 @@ export function LightPaperDocument({
       setIsDarkMode(newDarkMode);
       
       if (newDarkMode) {
-        // Apply dark mode
         editorRef.current.style.backgroundColor = 'black';
         editorRef.current.style.color = 'white';
         containerRef.current.style.backgroundColor = 'black';
@@ -251,7 +262,6 @@ export function LightPaperDocument({
         wrapperRef.current.style.backgroundColor = '#1a1a1a';
         toast.success("Dark mode enabled");
       } else {
-        // Apply light mode (reset)
         editorRef.current.style.backgroundColor = 'white';
         editorRef.current.style.color = 'black';
         containerRef.current.style.backgroundColor = 'white';
@@ -260,6 +270,140 @@ export function LightPaperDocument({
         toast.success("Light mode enabled");
       }
     }
+  };
+
+  const applyHighlight = (color: string) => {
+    if (editorRef.current) {
+      editorRef.current.focus();
+      execCommand("hiliteColor", color);
+      toast.success(color === "transparent" ? "Highlight removed" : "Text highlighted");
+    }
+  };
+
+  // Signature functions
+  const startDrawingSignature = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (signatureMode !== "draw") return;
+    setIsDrawingSignature(true);
+    const canvas = signCanvasRef.current;
+    if (canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      setLastSignPos({ x, y });
+    }
+  };
+
+  const drawSignature = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawingSignature || signatureMode !== "draw") return;
+    const canvas = signCanvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (ctx && canvas) {
+      const rect = canvas.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      ctx.beginPath();
+      ctx.moveTo(lastSignPos.x, lastSignPos.y);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      ctx.stroke();
+
+      setLastSignPos({ x, y });
+    }
+  };
+
+  const stopDrawingSignature = () => {
+    if (isDrawingSignature && signCanvasRef.current) {
+      const signatureData = signCanvasRef.current.toDataURL();
+      setSignatures([
+        ...signatures,
+        {
+          type: "draw",
+          data: signatureData,
+          id: Date.now().toString()
+        }
+      ]);
+      clearSignCanvas();
+      toast.success("Signature saved!");
+    }
+    setIsDrawingSignature(false);
+  };
+
+  const clearSignCanvas = () => {
+    const canvas = signCanvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (ctx && canvas) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  };
+
+  const addTextSignature = () => {
+    if (!textSignature.trim()) {
+      toast.error("Please enter text for signature");
+      return;
+    }
+    setSignatures([
+      ...signatures,
+      {
+        type: "text",
+        data: textSignature,
+        id: Date.now().toString()
+      }
+    ]);
+    setTextSignature("");
+    toast.success("Signature added!");
+  };
+
+  const insertSignature = (signature: {type: "draw" | "text", data: string, id: string}) => {
+    if (!editorRef.current) return;
+    
+    const signatureElement = document.createElement('div');
+    signatureElement.contentEditable = "false";
+    signatureElement.draggable = true;
+    signatureElement.id = `sig-${signature.id}`;
+    signatureElement.style.cssText = `
+      display: inline-block;
+      cursor: move;
+      padding: 8px;
+      border: 2px dashed #ccc;
+      margin: 4px;
+      background: white;
+    `;
+
+    if (signature.type === "draw") {
+      const img = document.createElement('img');
+      img.src = signature.data;
+      img.style.cssText = "height: 60px; display: block;";
+      signatureElement.appendChild(img);
+    } else {
+      signatureElement.style.fontFamily = "cursive";
+      signatureElement.style.fontSize = "24px";
+      signatureElement.textContent = signature.data;
+    }
+
+    signatureElement.ondragstart = (e) => {
+      setDraggingSignature(signature.id);
+    };
+
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      range.insertNode(signatureElement);
+      range.setStartAfter(signatureElement);
+      range.setEndAfter(signatureElement);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+
+    toast.success("Signature inserted! Drag to reposition");
+  };
+
+  const deleteSignature = (id: string) => {
+    setSignatures(signatures.filter(sig => sig.id !== id));
+    toast.success("Signature removed!");
   };
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -450,6 +594,36 @@ export function LightPaperDocument({
             </Button>
           </div>
 
+          {/* Highlight */}
+          <div className="flex gap-1 border-l pl-2">
+            <Select value={selectedHighlight} onValueChange={(color) => {
+              setSelectedHighlight(color);
+              applyHighlight(color);
+            }}>
+              <SelectTrigger className="w-28 h-8 text-xs">
+                <Highlighter className="h-4 w-4 mr-1" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                {HIGHLIGHT_COLORS.map(color => (
+                  <SelectItem key={color} value={color}>
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border" style={{ backgroundColor: color }} />
+                      {color === "transparent" ? "None" : color}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Signature */}
+          <div className="flex gap-1 border-l pl-2">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSignDialog(true)} title="Add Signature">
+              <PenTool className="h-4 w-4" />
+            </Button>
+          </div>
+
           {/* Dark/Light Mode Toggle */}
           <div className="flex gap-1 border-l pl-2">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={toggleDarkMode} title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
@@ -466,16 +640,36 @@ export function LightPaperDocument({
         </div>
       </CollapsibleToolbar>
 
-      {/* Main Editor Area - Takes Full Height */}
+      {/* Main Editor Area - Takes Full Height with Pages */}
       <div ref={wrapperRef} className="flex-1 overflow-auto p-8 bg-muted/30">
-        <div ref={containerRef} className="max-w-4xl mx-auto bg-background shadow-lg rounded-lg p-12 min-h-full overflow-hidden">
-          <div ref={editorRef} contentEditable className="outline-none min-h-[600px] prose prose-lg max-w-none overflow-hidden" style={{
-          fontFamily: selectedFont,
-          fontSize: `${selectedSize}px`,
-          wordWrap: 'break-word',
-          overflowWrap: 'break-word'
-        }} suppressContentEditableWarning>
-            <p>Start typing your document here...</p>
+        <style>{`
+          .page {
+            width: 21cm;
+            min-height: 29.7cm;
+            padding: 2cm;
+            margin: 1cm auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            page-break-after: always;
+          }
+          @media print {
+            .page {
+              margin: 0;
+              box-shadow: none;
+              page-break-after: always;
+            }
+          }
+        `}</style>
+        <div ref={containerRef} className="max-w-[21cm] mx-auto">
+          <div className="page">
+            <div ref={editorRef} contentEditable className="outline-none min-h-full prose prose-lg max-w-none" style={{
+            fontFamily: selectedFont,
+            fontSize: `${selectedSize}px`,
+            wordWrap: 'break-word',
+            overflowWrap: 'break-word'
+          }} suppressContentEditableWarning>
+              <p>Start typing your document here...</p>
+            </div>
           </div>
         </div>
       </div>
@@ -504,5 +698,91 @@ export function LightPaperDocument({
 
       {/* Calculator */}
       <ScientificCalculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} onInsertResult={insertCalculatorResult} />
+
+      {/* Signature Dialog */}
+      <Dialog open={showSignDialog} onOpenChange={setShowSignDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add Signature</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <Tabs value={signatureMode} onValueChange={(v) => setSignatureMode(v as any)}>
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="draw">Draw</TabsTrigger>
+                  <TabsTrigger value="text">Type</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="draw" className="space-y-3">
+                  <canvas
+                    ref={signCanvasRef}
+                    width={400}
+                    height={200}
+                    className="border rounded cursor-crosshair bg-white w-full"
+                    onMouseDown={startDrawingSignature}
+                    onMouseMove={drawSignature}
+                    onMouseUp={stopDrawingSignature}
+                    onMouseLeave={stopDrawingSignature}
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={clearSignCanvas} variant="outline" className="flex-1">
+                      Clear
+                    </Button>
+                    <Button size="sm" onClick={stopDrawingSignature} className="flex-1">
+                      Save
+                    </Button>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="text" className="space-y-3">
+                  <Label>Signature Text</Label>
+                  <Input
+                    value={textSignature}
+                    onChange={(e) => setTextSignature(e.target.value)}
+                    placeholder="Your Name"
+                    className="font-signature text-2xl"
+                    style={{ fontFamily: "cursive" }}
+                  />
+                  <Button onClick={addTextSignature} className="w-full">
+                    Add Signature
+                  </Button>
+                </TabsContent>
+              </Tabs>
+            </div>
+
+            <div>
+              <h3 className="font-medium mb-3">Saved Signatures ({signatures.length})</h3>
+              <div className="space-y-2 max-h-[300px] overflow-auto">
+                {signatures.map((sig) => (
+                  <div key={sig.id} className="flex items-center justify-between p-2 border rounded">
+                    <div className="flex-1 cursor-pointer" onClick={() => insertSignature(sig)}>
+                      {sig.type === "draw" ? (
+                        <img src={sig.data} alt="Signature" className="h-12" />
+                      ) : (
+                        <span className="text-xl" style={{ fontFamily: "cursive" }}>
+                          {sig.data}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button size="sm" variant="outline" onClick={() => insertSignature(sig)}>
+                        Insert
+                      </Button>
+                      <Button size="sm" variant="ghost" onClick={() => deleteSignature(sig.id)}>
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+                {signatures.length === 0 && (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    No signatures yet
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>;
 }
