@@ -364,6 +364,7 @@ export function LightPaperDocument({
     signatureElement.contentEditable = "false";
     signatureElement.draggable = true;
     signatureElement.id = `sig-${signature.id}`;
+    signatureElement.dataset.signatureId = signature.id;
     signatureElement.style.cssText = `
       display: inline-block;
       cursor: move;
@@ -371,12 +372,13 @@ export function LightPaperDocument({
       border: 2px dashed #ccc;
       margin: 4px;
       background: white;
+      position: relative;
     `;
 
     if (signature.type === "draw") {
       const img = document.createElement('img');
       img.src = signature.data;
-      img.style.cssText = "height: 60px; display: block;";
+      img.style.cssText = "height: 60px; display: block; pointer-events: none;";
       signatureElement.appendChild(img);
     } else {
       signatureElement.style.fontFamily = "cursive";
@@ -385,7 +387,14 @@ export function LightPaperDocument({
     }
 
     signatureElement.ondragstart = (e) => {
+      e.dataTransfer!.effectAllowed = "move";
+      e.dataTransfer!.setData("text/html", signatureElement.outerHTML);
+      e.dataTransfer!.setData("signatureId", signature.id);
       setDraggingSignature(signature.id);
+    };
+
+    signatureElement.ondragend = () => {
+      setDraggingSignature(null);
     };
 
     const selection = window.getSelection();
@@ -398,6 +407,7 @@ export function LightPaperDocument({
       selection.addRange(range);
     }
 
+    setShowSignDialog(false);
     toast.success("Signature inserted! Drag to reposition");
   };
 
@@ -662,12 +672,56 @@ export function LightPaperDocument({
         `}</style>
         <div ref={containerRef} className="max-w-[21cm] mx-auto">
           <div className="page">
-            <div ref={editorRef} contentEditable className="outline-none min-h-full prose prose-lg max-w-none" style={{
-            fontFamily: selectedFont,
-            fontSize: `${selectedSize}px`,
-            wordWrap: 'break-word',
-            overflowWrap: 'break-word'
-          }} suppressContentEditableWarning>
+            <div 
+              ref={editorRef} 
+              contentEditable 
+              className="outline-none min-h-full prose prose-lg max-w-none" 
+              style={{
+                fontFamily: selectedFont,
+                fontSize: `${selectedSize}px`,
+                wordWrap: 'break-word',
+                overflowWrap: 'break-word'
+              }}
+              onDragOver={(e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = "move";
+              }}
+              onDrop={(e) => {
+                e.preventDefault();
+                const signatureHtml = e.dataTransfer.getData("text/html");
+                const signatureId = e.dataTransfer.getData("signatureId");
+                
+                if (signatureHtml && editorRef.current) {
+                  // Remove old signature element if it exists
+                  const oldElement = document.querySelector(`[data-signature-id="${signatureId}"]`);
+                  if (oldElement) {
+                    oldElement.remove();
+                  }
+
+                  // Get the drop position
+                  const range = document.caretRangeFromPoint(e.clientX, e.clientY);
+                  if (range) {
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = signatureHtml;
+                    const signatureElement = tempDiv.firstChild as HTMLElement;
+                    
+                    if (signatureElement) {
+                      range.insertNode(signatureElement);
+                      range.setStartAfter(signatureElement);
+                      range.setEndAfter(signatureElement);
+                      
+                      const selection = window.getSelection();
+                      if (selection) {
+                        selection.removeAllRanges();
+                        selection.addRange(range);
+                      }
+                    }
+                  }
+                }
+                setDraggingSignature(null);
+              }}
+              suppressContentEditableWarning
+            >
               <p>Start typing your document here...</p>
             </div>
           </div>
