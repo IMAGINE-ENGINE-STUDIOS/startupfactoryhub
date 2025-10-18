@@ -159,7 +159,7 @@ export default function UnifiedCalendar({
           end_date: parseISO(event.end_date),
           location: event.location,
           banner_url: event.banner_url,
-          organizer: event.profiles?.full_name,
+          organizer: event.profiles?.full_name || 'Unknown Organizer',
           attendees: event.attendees,
           max_attendees: event.max_attendees,
         });
@@ -403,6 +403,12 @@ export default function UnifiedCalendar({
                     
                     {item.type === 'event' && (
                       <>
+                        {item.organizer && (
+                          <div className="flex items-center gap-2">
+                            <User className="h-3 w-3" />
+                            <span className="line-clamp-1">Organizer: {item.organizer}</span>
+                          </div>
+                        )}
                         {item.location && (
                           <div className="flex items-center gap-2">
                             <MapPin className="h-3 w-3" />
