@@ -1,62 +1,23 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
-import { BookOpen, Users, Trophy, Target, Play, CheckCircle, Clock, Star } from 'lucide-react';
-import companyLogo from '@/assets/company-logo.png';
-import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
-import AIFeaturesHub from '@/components/AIFeaturesHub';
-import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
-
-import Leaderboard from '@/components/Leaderboard';
-import StudyGroups from '@/components/StudyGroups';
-import FloatingChat from '@/components/FloatingChat';
-import AnalyticsDashboard from '@/components/AnalyticsDashboard';
-import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import { BookOpen, Trophy, Target, Star } from 'lucide-react';
+import { DashboardHeader } from '@/components/DashboardHeader';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
-import NetworkBrowser from '@/components/NetworkBrowser';
-import { DashboardHeader } from '@/components/DashboardHeader';
-import StudentJobTasks from '@/components/StudentJobTasks';
-
-interface Course {
-  id: string;
-  title: string;
-  description: string;
-  progress: number;
-  instructor: string;
-  difficulty: string;
-}
-
-interface Startup {
-  id: string;
-  name: string;
-  description: string;
-  stage: string;
-  industry: string;
-  user_id: string;
-}
+import FloatingChat from '@/components/FloatingChat';
 
 export default function StudentDashboard() {
-  const [startups, setStartups] = useState<Startup[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [studentProfile, setStudentProfile] = useState<any>(null);
   const [certificates, setCertificates] = useState<any[]>([]);
   const { user } = useAuth();
-  const { toast } = useToast();
   const { profile: profileWithRole } = useProfileWithRole();
 
   useEffect(() => {
     if (user) {
       fetchStudentProfile();
-      fetchStartups();
       fetchEnrollments();
       fetchCertificates();
     }
@@ -98,15 +59,6 @@ export default function StudentDashboard() {
 
     if (!error && data) {
       setEnrollments(data);
-      const coursesData = data.map((enrollment: any) => ({
-        id: enrollment.course?.id || '',
-        title: enrollment.course?.title || '',
-        description: enrollment.course?.description || '',
-        progress: enrollment.progress_percentage || 0,
-        instructor: enrollment.course?.instructor_name || '',
-        difficulty: enrollment.course?.difficulty || 'Beginner'
-      }));
-      setCourses(coursesData);
     }
   };
 
@@ -125,24 +77,6 @@ export default function StudentDashboard() {
 
     if (!error && data) {
       setCertificates(data);
-    }
-  };
-
-  const fetchStartups = async () => {
-    const { data, error } = await supabase
-      .from('companies')
-      .select(`
-        id,
-        name,
-        description,
-        stage,
-        industry,
-        user_id
-      `)
-      .limit(6);
-
-    if (!error && data) {
-      setStartups(data);
     }
   };
 
@@ -175,286 +109,56 @@ export default function StudentDashboard() {
     },
   ];
 
-  const assignments = [
-    { title: 'Business Model Canvas', dueDate: 'Tomorrow', status: 'pending' },
-    { title: 'Market Research Report', dueDate: 'In 3 days', status: 'in-progress' },
-    { title: 'Pitch Deck Review', dueDate: 'Next week', status: 'completed' },
-  ];
-
-  const enrollInCourse = async (courseId: string) => {
-    if (!user) return;
-
-    const { error } = await supabase
-      .from('course_enrollments')
-      .insert({
-        student_id: user.id,
-        course_id: courseId
-      });
-
-    if (error) {
-      if (error.code === '23505') {
-        toast({
-          title: "Already Enrolled",
-          description: "You're already enrolled in this course.",
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: "Failed to enroll in course. Please try again.",
-          variant: "destructive",
-        });
-      }
-      return;
-    }
-
-    toast({
-      title: "Enrolled Successfully!",
-      description: "You can now start learning.",
-    });
-
-    fetchEnrollments();
-  };
-
   return (
     <div className="min-h-screen bg-gradient-hero p-2 sm:p-4 pb-20 lg:pb-4 relative">
       <DashboardHeader />
       <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <RoleBasedAvatar 
-              avatarUrl={profileWithRole?.avatar_url} 
-              role="student"
-              fallbackText={user?.email || 'S'}
-              className="h-12 w-12 sm:h-16 sm:w-16"
-            />
-            <div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                {profileWithRole?.full_name || 'Student'} Dashboard
-              </h1>
-              <p className="text-sm text-muted-foreground">Learn, practice, and build your startup skills</p>
-            </div>
-          </div>
-          
-          <div className="flex gap-2 w-full sm:w-auto">
-            <Button className="pulse-primary flex-1 sm:flex-none">
-              <Play className="h-4 w-4 sm:mr-2" />
-              <span className="hidden sm:inline">Continue Learning</span>
-            </Button>
+        <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">
+          <RoleBasedAvatar 
+            avatarUrl={profileWithRole?.avatar_url} 
+            role="student"
+            fallbackText={user?.email || 'S'}
+            className="h-12 w-12 sm:h-16 sm:w-16"
+          />
+          <div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+              {profileWithRole?.full_name || 'Student'} Dashboard
+            </h1>
+            <p className="text-sm text-muted-foreground">Learn, practice, and build your startup skills</p>
           </div>
         </div>
 
-
-        <Tabs defaultValue="social" className="space-y-6">
-          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-11 max-w-6xl">
-              <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
-              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
-              <TabsTrigger value="courses" className="flex-shrink-0">Courses</TabsTrigger>
-              <TabsTrigger value="leaderboard" className="flex-shrink-0">Leaderboard</TabsTrigger>
-              <TabsTrigger value="groups" className="flex-shrink-0">Study Groups</TabsTrigger>
-              <TabsTrigger value="assignments" className="flex-shrink-0">Assignments</TabsTrigger>
-              <TabsTrigger value="startups" className="flex-shrink-0">Startups</TabsTrigger>
-              <TabsTrigger value="jobs" className="flex-shrink-0">Opportunities</TabsTrigger>
-              <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
-              <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
-              <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
-            </TabsList>
-          </div>
-
-          <TabsContent value="leaderboard">
-            <Leaderboard />
-          </TabsContent>
-
-          <TabsContent value="groups">
-            <StudyGroups />
-          </TabsContent>
-
-          <TabsContent value="courses" className="space-y-4">
-            <Card className="tech-card border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <BookOpen className="h-5 w-5 text-primary" />
-                  <span>My Courses</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {courses.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {courses.map((course) => (
-                      <Card key={course.id} className="border border-border/50 hover:border-primary/50 transition-colors">
-                        <CardContent className="p-4">
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-start">
-                              <h3 className="font-semibold text-foreground">{course.title}</h3>
-                              <Badge 
-                                variant={course.difficulty === 'Beginner' ? 'secondary' : 
-                                       course.difficulty === 'Intermediate' ? 'default' : 'destructive'}
-                                className="text-xs"
-                              >
-                                {course.difficulty}
-                              </Badge>
-                            </div>
-                            
-                            <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
-                            
-                            <div className="space-y-2">
-                              <div className="flex justify-between text-sm">
-                                <span className="text-muted-foreground">Progress</span>
-                                <span className="font-medium">{course.progress}%</span>
-                              </div>
-                              <Progress value={course.progress} className="h-2" />
-                            </div>
-                            
-                            <div className="flex justify-between items-center pt-2">
-                              <span className="text-xs text-muted-foreground">by {course.instructor}</span>
-                              <Button size="sm" variant={course.progress > 0 ? "default" : "outline"}>
-                                {course.progress > 0 ? 'Continue' : 'Start'}
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+        {/* Student Stats */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
+          {stats.map((stat) => (
+            <Card key={stat.title} className="tech-card border-0">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
+                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
                   </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <BookOpen className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No courses yet</h3>
-                    <p className="text-muted-foreground mb-4">Start your learning journey by enrolling in a course</p>
-                    <Button className="pulse-primary">
-                      Browse Courses
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="assignments" className="space-y-4">
-            <StudentJobTasks />
-            
-            <Card className="tech-card border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-primary" />
-                  <span>Course Assignments</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {assignments.map((assignment, index) => (
-                    <div key={index} className="flex items-center justify-between p-4 rounded-lg border border-border/50">
-                      <div className="flex items-center space-x-3">
-                        {assignment.status === 'completed' ? (
-                          <CheckCircle className="h-5 w-5 text-green-500" />
-                        ) : (
-                          <Clock className="h-5 w-5 text-yellow-500" />
-                        )}
-                        <div>
-                          <h4 className="font-medium text-foreground">{assignment.title}</h4>
-                          <p className="text-sm text-muted-foreground">Due: {assignment.dueDate}</p>
-                        </div>
-                      </div>
-                      <Badge 
-                        variant={assignment.status === 'completed' ? 'default' : 
-                               assignment.status === 'in-progress' ? 'secondary' : 'outline'}
-                      >
-                        {assignment.status === 'completed' ? 'Completed' : 
-                         assignment.status === 'in-progress' ? 'In Progress' : 'Pending'}
-                      </Badge>
-                    </div>
-                  ))}
+                  <stat.icon className={`h-8 w-8 ${stat.color}`} />
                 </div>
               </CardContent>
             </Card>
-          </TabsContent>
+          ))}
+        </div>
 
-          <TabsContent value="startups" className="space-y-4">
-            <Card className="tech-card border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  <span>Featured Startups to Learn From</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {startups.map((startup) => (
-                    <Card key={startup.id} className="border border-border/50 hover:border-primary/50 transition-colors">
-                      <CardContent className="p-4">
-                        <div className="flex items-start space-x-3 mb-3">
-                          <Avatar className="h-10 w-10">
-                            <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                              {startup.name.charAt(0)}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground truncate">{startup.name}</h3>
-                            <p className="text-xs text-muted-foreground">Startup Founder</p>
-                          </div>
-                        </div>
-                        
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{startup.description}</p>
-                        
-                        <div className="flex space-x-1 mb-3">
-                          <Badge variant="secondary" className="text-xs">{startup.stage}</Badge>
-                          <Badge variant="outline" className="text-xs">{startup.industry}</Badge>
-                        </div>
-                        
-                        <Button size="sm" variant="outline" className="w-full">
-                          View Case Study
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="social" className="space-y-4">
-            <UnifiedCommunityFeed />
-          </TabsContent>
-
-          <TabsContent value="network" className="space-y-4">
-            <NetworkBrowser />
-          </TabsContent>
-
-
-          <TabsContent value="analytics" className="space-y-4">
-            {/* Student Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6">
-              {stats.map((stat) => (
-                <Card key={stat.title} className="tech-card border-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                        <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                      </div>
-                      <stat.icon className={`h-8 w-8 ${stat.color}`} />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+        {/* Main Content Area - Ready for new features */}
+        <Card className="tech-card border-0">
+          <CardContent className="p-8 text-center">
+            <div className="max-w-md mx-auto space-y-4">
+              <BookOpen className="h-16 w-16 text-primary mx-auto" />
+              <h2 className="text-2xl font-bold">Welcome to Your Student Dashboard</h2>
+              <p className="text-muted-foreground">
+                Your personalized learning hub is being designed. This space will feature your courses, 
+                assignments, and learning progress.
+              </p>
             </div>
-            <AnalyticsDashboard />
-          </TabsContent>
-
-          <TabsContent value="intelligence" className="space-y-4">
-            <MarketIntelligenceWidget />
-          </TabsContent>
-
-          <TabsContent value="jobs" className="space-y-4">
-            <UnifiedJobsBoard />
-          </TabsContent>
-
-          <TabsContent value="tools" className="space-y-4">
-            <AIFeaturesHub />
-          </TabsContent>
-        </Tabs>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Floating Chat with AI */}
