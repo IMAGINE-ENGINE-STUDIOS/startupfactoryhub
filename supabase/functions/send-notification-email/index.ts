@@ -39,7 +39,7 @@ const handler = async (req: Request): Promise<Response> => {
               * { margin: 0; padding: 0; box-sizing: border-box; }
               body { 
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
-                background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+                background-color: #0a0f1e;
                 margin: 0; 
                 padding: 20px;
                 line-height: 1.6;
@@ -52,7 +52,7 @@ const handler = async (req: Request): Promise<Response> => {
                 box-shadow: 0 10px 40px rgba(16, 185, 129, 0.15);
               }
               .header { 
-                background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); 
+                background: linear-gradient(135deg, #0ea270 0%, #0ea270 100%); 
                 color: white; 
                 padding: 40px 32px; 
                 text-align: center;
@@ -74,20 +74,22 @@ const handler = async (req: Request): Promise<Response> => {
                 100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
               }
               .logo-container {
-                margin-bottom: 16px;
+                margin-bottom: 20px;
                 position: relative;
                 z-index: 1;
               }
               .logo {
-                width: 64px;
-                height: 64px;
-                background: white;
-                border-radius: 12px;
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 32px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                width: 80px;
+                height: 80px;
+                background: transparent;
+                border-radius: 16px;
+                display: inline-block;
+              }
+              .logo img {
+                width: 100%;
+                height: 100%;
+                object-fit: contain;
+                filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
               }
               .header h1 { 
                 margin: 0; 
@@ -108,27 +110,27 @@ const handler = async (req: Request): Promise<Response> => {
               .hero-section {
                 padding: 32px;
                 text-align: center;
-                background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+                background: linear-gradient(180deg, #1a1f35 0%, #0f1419 100%);
               }
               .hero-icon {
                 width: 80px;
                 height: 80px;
                 margin: 0 auto 20px;
-                background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+                background: linear-gradient(135deg, #0ea270 0%, #0ea270 100%);
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 font-size: 40px;
-                box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+                box-shadow: 0 8px 24px rgba(14, 162, 112, 0.4);
               }
               .content { padding: 0 32px 32px; }
               .notification-card {
-                background: white;
+                background: #1a1f35;
                 border-radius: 12px;
                 padding: 24px;
-                border: 2px solid #ecfdf5;
-                box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+                border: 2px solid rgba(14, 162, 112, 0.2);
+                box-shadow: 0 2px 8px rgba(14, 162, 112, 0.15);
               }
               .notification-type { 
                 display: inline-block; 
@@ -149,13 +151,13 @@ const handler = async (req: Request): Promise<Response> => {
               .type-event { background: linear-gradient(135deg, #fbcfe8 0%, #f9a8d4 100%); color: #831843; }
               .title {
                 margin: 0 0 16px 0; 
-                color: #064e3b; 
+                color: #0ea270; 
                 font-size: 22px;
                 font-weight: 700;
                 line-height: 1.3;
               }
               .message { 
-                color: #1f2937; 
+                color: #e5e7eb; 
                 font-size: 16px; 
                 line-height: 1.7; 
                 margin: 16px 0;
@@ -163,14 +165,14 @@ const handler = async (req: Request): Promise<Response> => {
               .button { 
                 display: inline-block; 
                 padding: 14px 32px; 
-                background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); 
+                background: #0ea270;
                 color: white; 
                 text-decoration: none; 
                 border-radius: 10px; 
                 font-weight: 600;
                 font-size: 15px;
                 margin-top: 24px;
-                box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+                box-shadow: 0 4px 16px rgba(14, 162, 112, 0.5);
                 transition: all 0.3s ease;
               }
               .button:hover {
@@ -180,12 +182,12 @@ const handler = async (req: Request): Promise<Response> => {
               .tips-section {
                 margin-top: 32px;
                 padding: 20px;
-                background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+                background: rgba(14, 162, 112, 0.1);
                 border-radius: 12px;
-                border-left: 4px solid #10b981;
+                border-left: 4px solid #0ea270;
               }
               .tips-title {
-                color: #064e3b;
+                color: #0ea270;
                 font-size: 14px;
                 font-weight: 700;
                 margin-bottom: 8px;
@@ -193,15 +195,16 @@ const handler = async (req: Request): Promise<Response> => {
                 letter-spacing: 0.5px;
               }
               .tips-text {
-                color: #065f46;
+                color: #d1d5db;
                 font-size: 14px;
                 line-height: 1.6;
               }
               .footer { 
-                background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+                background: #0a0f1e;
                 padding: 32px 24px; 
                 text-align: center; 
-                color: #d1fae5;
+                color: #9ca3af;
+                border-top: 1px solid rgba(14, 162, 112, 0.2);
               }
               .social-links {
                 margin: 20px 0;
@@ -267,7 +270,9 @@ const handler = async (req: Request): Promise<Response> => {
               <div class="container">
                 <div class="header">
                   <div class="logo-container">
-                    <div class="logo">🚀</div>
+                    <div class="logo">
+                      <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/startup-factory-hub-logo.png" alt="Startup Factory Hub" />
+                    </div>
                   </div>
                   <h1>Startup Factory Hub</h1>
                   <div class="tagline">AI-Powered Startup Accelerator Platform</div>

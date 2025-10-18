@@ -34,7 +34,11 @@ export const MagicLinkEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <div style={logo}>🚀</div>
+          <img 
+            src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/startup-factory-hub-logo.png" 
+            alt="Startup Factory Hub"
+            style={logo}
+          />
           <Heading style={h1}>Startup Factory Hub</Heading>
           <Text style={tagline}>AI-Powered Startup Accelerator Platform</Text>
         </Section>
@@ -94,37 +98,34 @@ export default MagicLinkEmail;
 
 // Styles
 const main = {
-  backgroundColor: "#ecfdf5",
+  backgroundColor: "#0a0f1e",
   fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
   padding: "20px",
 };
 
 const container = {
-  backgroundColor: "#ffffff",
+  backgroundColor: "#0f1419",
   maxWidth: "600px",
   margin: "0 auto",
   borderRadius: "16px",
   overflow: "hidden",
-  boxShadow: "0 10px 40px rgba(16, 185, 129, 0.15)",
+  boxShadow: "0 10px 40px rgba(14, 162, 112, 0.3)",
 };
 
 const header = {
-  background: "linear-gradient(135deg, #10b981 0%, #14b8a6 100%)",
+  background: "#0ea270",
   padding: "40px 32px",
   textAlign: "center" as const,
 };
 
 const logo = {
-  width: "64px",
-  height: "64px",
-  backgroundColor: "white",
-  borderRadius: "12px",
-  display: "inline-flex",
-  alignItems: "center",
-  justifyContent: "center",
-  fontSize: "32px",
-  margin: "0 auto 16px",
-  boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+  width: "80px",
+  height: "80px",
+  backgroundColor: "transparent",
+  borderRadius: "16px",
+  display: "inline-block",
+  margin: "0 auto 20px",
+  filter: "drop-shadow(0 4px 12px rgba(0,0,0,0.3))",
 };
 
 const h1 = {
@@ -145,24 +146,24 @@ const tagline = {
 const heroSection = {
   padding: "32px",
   textAlign: "center" as const,
-  background: "linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%)",
+  background: "linear-gradient(180deg, #1a1f35 0%, #0f1419 100%)",
 };
 
 const heroIcon = {
   width: "80px",
   height: "80px",
   margin: "0 auto 20px",
-  background: "linear-gradient(135deg, #10b981 0%, #14b8a6 100%)",
+  background: "#0ea270",
   borderRadius: "50%",
   display: "flex",
   alignItems: "center",
   justifyContent: "center",
   fontSize: "40px",
-  boxShadow: "0 8px 24px rgba(16, 185, 129, 0.25)",
+  boxShadow: "0 8px 24px rgba(14, 162, 112, 0.4)",
 };
 
 const h2 = {
-  color: "#064e3b",
+  color: "#0ea270",
   fontSize: "22px",
   fontWeight: "700",
   margin: "0",
@@ -173,23 +174,23 @@ const content = {
 };
 
 const card = {
-  backgroundColor: "white",
+  backgroundColor: "#1a1f35",
   borderRadius: "12px",
   padding: "24px",
-  border: "2px solid #ecfdf5",
-  boxShadow: "0 2px 8px rgba(16, 185, 129, 0.08)",
+  border: "2px solid rgba(14, 162, 112, 0.2)",
+  boxShadow: "0 2px 8px rgba(14, 162, 112, 0.15)",
 };
 
 const paragraph = {
-  color: "#1f2937",
+  color: "#e5e7eb",
   fontSize: "16px",
   lineHeight: "1.7",
   margin: "0 0 24px 0",
 };
 
 const button = {
-  backgroundColor: "#10b981",
-  background: "linear-gradient(135deg, #10b981 0%, #14b8a6 100%)",
+  backgroundColor: "#0ea270",
+  background: "#0ea270",
   borderRadius: "10px",
   color: "white",
   fontSize: "15px",
@@ -198,16 +199,16 @@ const button = {
   textAlign: "center" as const,
   display: "block",
   padding: "14px 32px",
-  boxShadow: "0 4px 16px rgba(16, 185, 129, 0.3)",
+  boxShadow: "0 4px 16px rgba(14, 162, 112, 0.5)",
 };
 
 const divider = {
-  borderTop: "1px solid #e5e7eb",
+  borderTop: "1px solid rgba(14, 162, 112, 0.2)",
   margin: "24px 0",
 };
 
 const codeLabel = {
-  color: "#6b7280",
+  color: "#9ca3af",
   fontSize: "14px",
   fontWeight: "600",
   margin: "0 0 12px 0",
@@ -216,10 +217,10 @@ const codeLabel = {
 const code = {
   display: "block",
   padding: "16px",
-  backgroundColor: "#f3f4f6",
-  border: "2px dashed #d1d5db",
+  backgroundColor: "rgba(14, 162, 112, 0.1)",
+  border: "2px dashed rgba(14, 162, 112, 0.3)",
   borderRadius: "8px",
-  color: "#064e3b",
+  color: "#0ea270",
   fontSize: "18px",
   fontWeight: "700",
   textAlign: "center" as const,
@@ -230,13 +231,13 @@ const code = {
 const tipsSection = {
   marginTop: "24px",
   padding: "20px",
-  background: "linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%)",
+  background: "rgba(14, 162, 112, 0.1)",
   borderRadius: "12px",
-  borderLeft: "4px solid #10b981",
+  borderLeft: "4px solid #0ea270",
 };
 
 const tipsTitle = {
-  color: "#064e3b",
+  color: "#0ea270",
   fontSize: "14px",
   fontWeight: "700",
   margin: "0 0 8px 0",
@@ -245,20 +246,21 @@ const tipsTitle = {
 };
 
 const tipsText = {
-  color: "#065f46",
+  color: "#d1d5db",
   fontSize: "14px",
   lineHeight: "1.6",
   margin: "0",
 };
 
 const footer = {
-  background: "linear-gradient(135deg, #064e3b 0%, #065f46 100%)",
+  background: "#0a0f1e",
   padding: "32px 24px",
   textAlign: "center" as const,
+  borderTop: "1px solid rgba(14, 162, 112, 0.2)",
 };
 
 const footerText = {
-  color: "#d1fae5",
+  color: "#9ca3af",
   fontSize: "14px",
   margin: "0 0 12px 0",
 };
