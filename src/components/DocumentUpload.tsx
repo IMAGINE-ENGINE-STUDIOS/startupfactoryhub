@@ -71,14 +71,16 @@ export default function DocumentUpload({
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
+      // Get signed URL for private documents (valid for 1 year)
+      const { data: signedData, error: signError } = await supabase.storage
         .from('documents')
-        .getPublicUrl(filePath);
+        .createSignedUrl(filePath, 365 * 24 * 60 * 60); // 1 year in seconds
+
+      if (signError) throw signError;
 
       const newDocument: Document = {
         name: file.name,
-        url: publicUrl,
+        url: signedData.signedUrl,
         size: file.size,
         uploaded_at: new Date().toISOString()
       };
@@ -107,10 +109,13 @@ export default function DocumentUpload({
     try {
       if (!user) throw new Error('Not authenticated');
 
-      // Extract file path from URL
+      // Extract file path from URL (works with both public and signed URLs)
       const urlParts = doc.url.split('/documents/');
       if (urlParts.length < 2) throw new Error('Invalid document URL');
-      const filePath = urlParts[1];
+      
+      // Remove query parameters if present (from signed URLs)
+      const pathWithParams = urlParts[1];
+      const filePath = pathWithParams.split('?')[0];
 
       const { error } = await supabase.storage
         .from('documents')

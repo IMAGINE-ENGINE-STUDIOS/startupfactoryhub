@@ -74,8 +74,8 @@ export default function PublicJobApplication() {
       const filePath = `public-resumes/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('documents')
-        .upload(filePath, resumeFile);
+        .from('public-resumes')
+        .upload(fileName, resumeFile);
 
       if (uploadError) {
         toast.error('Failed to upload resume');
@@ -83,8 +83,8 @@ export default function PublicJobApplication() {
       }
 
       const { data: { publicUrl } } = supabase.storage
-        .from('documents')
-        .getPublicUrl(filePath);
+        .from('public-resumes')
+        .getPublicUrl(fileName);
 
       resumeUrl = publicUrl;
     }
