@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, 
   Bookmark, Repeat2, Send, Calendar, Image as ImageIcon, 
-  Video, Sparkles, X, Trash2
+  Video, Sparkles, X, Trash2, Hash
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -80,6 +80,8 @@ export default function UnifiedCommunityFeed({
   const [newComment, setNewComment] = useState<Record<string, string>>({});
   const [mediaFiles, setMediaFiles] = useState<File[]>([]);
   const [mediaPreview, setMediaPreview] = useState<string[]>([]);
+  const [postHashtags, setPostHashtags] = useState<string[]>([]);
+  const [newHashtag, setNewHashtag] = useState('');
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
@@ -360,10 +362,14 @@ export default function UnifiedCommunityFeed({
         if (url) mediaUrls.push(url);
       }
 
+      const hashtagString = postHashtags.length > 0 
+        ? '\n\n' + postHashtags.map(tag => `#${tag}`).join(' ') 
+        : '';
+
       const { error } = await supabase
         .from('feed_posts')
         .insert({
-          content: newPost,
+          content: newPost + hashtagString,
           user_id: user.id,
           post_type: 'update',
           media_urls: mediaUrls.length > 0 ? mediaUrls : null,
@@ -379,6 +385,8 @@ export default function UnifiedCommunityFeed({
       setNewPost('');
       setMediaFiles([]);
       setMediaPreview([]);
+      setPostHashtags([]);
+      setNewHashtag('');
       fetchPosts();
     } catch (error: any) {
       toast({
@@ -562,12 +570,16 @@ export default function UnifiedCommunityFeed({
         }
       }
 
+      const hashtagString = shortData.tags?.length > 0 
+        ? '\n\n' + shortData.tags.map((tag: string) => `#${tag}`).join(' ') 
+        : '';
+
       const { error } = await supabase
         .from('feed_posts')
         .insert({
-          content: shortData.title + (shortData.description ? '\n\n' + shortData.description : ''),
+          content: shortData.title + (shortData.description ? '\n\n' + shortData.description : '') + hashtagString,
           user_id: user.id,
-          post_type: 'update',
+          post_type: 'short',
           media_urls: videoUrl ? [videoUrl] : null,
         });
 

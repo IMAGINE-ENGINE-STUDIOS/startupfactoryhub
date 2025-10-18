@@ -4,21 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Video, Upload, X, Plus, Hash, Square } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  Upload, 
-  Video, 
-  Camera, 
-  Image as ImageIcon, 
-  Type, 
-  X, 
-  Play, 
-  Pause,
-  Plus,
-  Hash
-} from "lucide-react";
 
 interface ShortsCreatorProps {
   isOpen: boolean;
@@ -31,67 +18,129 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
   const [description, setDescription] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const [newTag, setNewTag] = useState("");
-  const [isRecording, setIsRecording] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [postType, setPostType] = useState<"short" | "long" | "image" | "text">("short");
-  const [isPlaying, setIsPlaying] = useState(false);
-  
+  const [isRecording, setIsRecording] = useState(false);
+  const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
   const { toast } = useToast();
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
-      if (file.size > 100 * 1024 * 1024) { // 100MB limit
+      const fileType = file.type;
+      
+      if (!fileType.startsWith('video/')) {
         toast({
-          title: "File too large",
-          description: "Please select a file smaller than 100MB",
+          title: "Invalid file type",
+          description: "Only short videos are allowed (60 seconds max)",
           variant: "destructive",
         });
         return;
       }
-      
-      setSelectedFile(file);
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-      
-      // Determine post type based on file type
-      if (file.type.startsWith('video/')) {
-        const video = document.createElement('video');
-        video.onloadedmetadata = () => {
-          if (video.duration <= 60) {
-            setPostType("short");
-          } else {
-            setPostType("long");
-          }
-        };
-        video.src = url;
-      } else if (file.type.startsWith('image/')) {
-        setPostType("image");
+
+      if (file.size > 100 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Video must be under 100MB",
+          variant: "destructive",
+        });
+        return;
       }
+
+      // Check video duration
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.onloadedmetadata = () => {
+        window.URL.revokeObjectURL(video.src);
+        const duration = Math.floor(video.duration);
+        
+        if (duration > 60) {
+          toast({
+            title: "Video too long",
+            description: `Shorts must be 60 seconds or less. Your video is ${duration} seconds.`,
+            variant: "destructive",
+          });
+          setSelectedFile(null);
+          setPreviewUrl(null);
+          setVideoDuration(null);
+          return;
+        }
+        
+        setVideoDuration(duration);
+        setSelectedFile(file);
+        const url = URL.createObjectURL(file);
+        setPreviewUrl(url);
+      };
+      
+      video.src = URL.createObjectURL(file);
     }
   };
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' }, 
+        video: true, 
         audio: true 
       });
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-      
-      setIsRecording(true);
-      toast({
-        title: "Recording started",
-        description: "Click stop when you're done recording",
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'video/webm;codecs=vp8,opus'
       });
+      
+      mediaRecorderRef.current = mediaRecorder;
+      chunksRef.current = [];
+      
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          chunksRef.current.push(event.data);
+        }
+      };
+      
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: 'video/webm' });
+        const file = new File([blob], `recording-${Date.now()}.webm`, { type: 'video/webm' });
+        
+        // Check duration of recorded video
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.onloadedmetadata = () => {
+          window.URL.revokeObjectURL(video.src);
+          const duration = Math.floor(video.duration);
+          
+          if (duration > 60) {
+            toast({
+              title: "Recording too long",
+              description: `Shorts must be 60 seconds or less. Your recording is ${duration} seconds.`,
+              variant: "destructive",
+            });
+            return;
+          }
+          
+          setVideoDuration(duration);
+          setSelectedFile(file);
+          const url = URL.createObjectURL(file);
+          setPreviewUrl(url);
+        };
+        
+        video.src = URL.createObjectURL(blob);
+        stream.getTracks().forEach(track => track.stop());
+      };
+      
+      mediaRecorder.start();
+      setIsRecording(true);
+      
+      // Auto-stop after 60 seconds
+      setTimeout(() => {
+        if (mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+          setIsRecording(false);
+        }
+      }, 60000);
     } catch (error) {
+      console.error('Error accessing camera:', error);
       toast({
         title: "Camera access denied",
         description: "Please allow camera access to record videos",
@@ -101,21 +150,21 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
   };
 
   const stopRecording = () => {
-    if (videoRef.current?.srcObject) {
-      const stream = videoRef.current.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
-      videoRef.current.srcObject = null;
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
     }
-    setIsRecording(false);
-    toast({
-      title: "Recording stopped",
-      description: "Your video has been saved",
-    });
+  };
+
+  const removeMedia = () => {
+    setSelectedFile(null);
+    setPreviewUrl(null);
+    setVideoDuration(null);
   };
 
   const addTag = () => {
     if (newTag.trim() && !tags.includes(newTag.trim()) && tags.length < 10) {
-      setTags([...tags, newTag.trim()]);
+      setTags([...tags, newTag.trim().replace(/^#/, '')]);
       setNewTag("");
     }
   };
@@ -125,34 +174,32 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
   };
 
   const handleSave = () => {
+    if (!selectedFile) {
+      toast({
+        title: "Video required",
+        description: "Please select or record a short video (60 seconds max)",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!title.trim()) {
       toast({
         title: "Title required",
-        description: "Please add a title for your post",
+        description: "Please add a title for your short",
         variant: "destructive",
       });
       return;
     }
 
-    if (postType !== "text" && !selectedFile && !isRecording) {
-      toast({
-        title: "Content required",
-        description: "Please add media content or switch to text post",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const shortData = {
-      title: title.trim(),
-      description: description.trim(),
+    onSave({
+      title,
+      description,
       tags,
-      postType,
       file: selectedFile,
-      previewUrl
-    };
+      postType: 'short'
+    });
 
-    onSave(shortData);
     handleClose();
   };
 
@@ -163,195 +210,116 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
     setNewTag("");
     setSelectedFile(null);
     setPreviewUrl(null);
-    setPostType("short");
     setIsRecording(false);
-    setIsPlaying(false);
+    setVideoDuration(null);
     onClose();
-  };
-
-  const togglePreviewPlay = () => {
-    if (videoRef.current) {
-      if (isPlaying) {
-        videoRef.current.pause();
-      } else {
-        videoRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Post</DialogTitle>
+          <DialogTitle>Create Short Video (Max 60 seconds)</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Post Type Tabs */}
-          <Tabs value={postType} onValueChange={(value) => setPostType(value as any)}>
-            <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="short" className="flex items-center gap-2">
-                <Video className="h-4 w-4" />
-                Short
-              </TabsTrigger>
-              <TabsTrigger value="long" className="flex items-center gap-2">
-                <Video className="h-4 w-4" />
-                Long Video
-              </TabsTrigger>
-              <TabsTrigger value="image" className="flex items-center gap-2">
-                <ImageIcon className="h-4 w-4" />
-                Image
-              </TabsTrigger>
-              <TabsTrigger value="text" className="flex items-center gap-2">
-                <Type className="h-4 w-4" />
-                Text
-              </TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="short" className="space-y-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <Button
-                        variant="outline"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="h-32 border-dashed"
-                      >
-                        <div className="text-center">
-                          <Upload className="h-8 w-8 mx-auto mb-2" />
-                          <p className="text-sm">Upload Video</p>
-                          <p className="text-xs text-muted-foreground">Max 60s, 100MB</p>
-                        </div>
-                      </Button>
-                      
-                      <Button
-                        variant="outline"
-                        onClick={isRecording ? stopRecording : startRecording}
-                        className="h-32 border-dashed"
-                      >
-                        <div className="text-center">
-                          <Camera className="h-8 w-8 mx-auto mb-2" />
-                          <p className="text-sm">{isRecording ? 'Stop Recording' : 'Record Video'}</p>
-                          <p className="text-xs text-muted-foreground">Direct camera</p>
-                        </div>
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="long" className="space-y-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <Button
-                    variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full h-32 border-dashed"
-                  >
-                    <div className="text-center">
-                      <Video className="h-8 w-8 mx-auto mb-2" />
-                      <p className="text-sm">Upload Long Video</p>
-                      <p className="text-xs text-muted-foreground">Any duration, 100MB max</p>
-                    </div>
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="image" className="space-y-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <Button
-                    variant="outline"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="w-full h-32 border-dashed"
-                  >
-                    <div className="text-center">
-                      <ImageIcon className="h-8 w-8 mx-auto mb-2" />
-                      <p className="text-sm">Upload Images</p>
-                      <p className="text-xs text-muted-foreground">JPG, PNG, GIF</p>
-                    </div>
-                  </Button>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="text" className="space-y-4">
-              <Card>
-                <CardContent className="pt-6">
-                  <div className="text-center py-8">
-                    <Type className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground">Text-only post selected</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
-
-          {/* Preview */}
-          {(previewUrl || isRecording) && (
-            <Card>
-              <CardContent className="pt-6">
-                <div className="relative w-full h-64 bg-black rounded-lg overflow-hidden">
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full object-cover"
-                    src={previewUrl || undefined}
-                    controls={!isRecording}
-                  />
-                  {previewUrl && postType === "short" && (
+        <div className="space-y-4">
+          <div className="border-2 border-dashed rounded-lg p-8 text-center">
+            {!previewUrl ? (
+              <div className="space-y-4">
+                <Video className="w-12 h-12 mx-auto text-muted-foreground" />
+                <div>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Upload or record a short video (60 seconds max)
+                  </p>
+                  <div className="flex gap-2 justify-center">
                     <Button
-                      variant="ghost"
-                      size="lg"
-                      onClick={togglePreviewPlay}
-                      className="absolute inset-0 text-white hover:bg-black/20"
+                      type="button"
+                      variant="outline"
+                      onClick={() => fileInputRef.current?.click()}
                     >
-                      {isPlaying ? <Pause className="h-8 w-8" /> : <Play className="h-8 w-8" />}
+                      <Upload className="w-4 h-4 mr-2" />
+                      Upload Video
                     </Button>
-                  )}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={isRecording ? stopRecording : startRecording}
+                    >
+                      {isRecording ? (
+                        <>
+                          <Square className="w-4 h-4 mr-2" />
+                          Stop Recording
+                        </>
+                      ) : (
+                        <>
+                          <Video className="w-4 h-4 mr-2" />
+                          Record Video
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="video/*"
+                    onChange={handleFileSelect}
+                    className="hidden"
+                  />
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <video
+                  src={previewUrl}
+                  controls
+                  className="w-full rounded-lg max-h-96"
+                />
+                {videoDuration && (
+                  <p className="text-sm text-muted-foreground">
+                    Duration: {videoDuration} seconds
+                  </p>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={removeMedia}
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Remove Video
+                </Button>
+              </div>
+            )}
+          </div>
 
-          {/* Title */}
-          <div>
-            <label className="text-sm font-medium mb-2 block">Title *</label>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Title</label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Give your post a catchy title..."
-              maxLength={100}
+              placeholder="Give your short a catchy title"
             />
-            <p className="text-xs text-muted-foreground mt-1">{title.length}/100</p>
           </div>
 
-          {/* Description */}
-          <div>
-            <label className="text-sm font-medium mb-2 block">Description</label>
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Description (Optional)</label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Tell us more about your post..."
+              placeholder="Add a description..."
               rows={3}
-              maxLength={500}
             />
-            <p className="text-xs text-muted-foreground mt-1">{description.length}/500</p>
           </div>
 
-          {/* Tags */}
-          <div>
-            <label className="text-sm font-medium mb-2 block">Tags</label>
-            <div className="flex items-center gap-2 mb-2">
+          <div className="space-y-2">
+            <label className="text-sm font-medium">Hashtags</label>
+            <div className="flex items-center gap-2">
               <div className="relative flex-1">
                 <Hash className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                 <Input
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
-                  placeholder="Add a tag"
+                  placeholder="Add a hashtag"
                   className="pl-10"
                   onKeyPress={(e) => {
                     if (e.key === 'Enter') {
@@ -361,46 +329,34 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
                   }}
                 />
               </div>
-              <Button onClick={addTag} size="sm" disabled={!newTag.trim() || tags.length >= 10}>
+              <Button type="button" onClick={addTag} size="sm">
                 <Plus className="h-4 w-4" />
               </Button>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {tags.map((tag, index) => (
-                <Badge key={index} variant="secondary" className="pl-2 pr-1">
-                  #{tag}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => removeTag(tag)}
-                    className="ml-1 h-4 w-4 p-0 hover:bg-transparent"
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </Badge>
-              ))}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">{tags.length}/10 tags</p>
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {tags.map((tag, index) => (
+                  <Badge key={index} variant="secondary" className="flex items-center gap-1">
+                    #{tag}
+                    <X
+                      className="h-3 w-3 cursor-pointer"
+                      onClick={() => removeTag(tag)}
+                    />
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Actions */}
-          <div className="flex justify-end gap-2 pt-4 border-t">
-            <Button variant="outline" onClick={handleClose}>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button onClick={handleSave}>
-              Create Post
+            <Button type="button" onClick={handleSave}>
+              Create Short
             </Button>
           </div>
         </div>
-
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept="video/*,image/*"
-          onChange={handleFileSelect}
-          className="hidden"
-        />
       </DialogContent>
     </Dialog>
   );

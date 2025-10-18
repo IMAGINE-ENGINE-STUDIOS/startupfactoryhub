@@ -30,20 +30,18 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
   useEffect(() => {
     fetchShorts();
     
-    // Set up real-time subscription for new shorts
+    // Set up real-time subscription for shorts only
     const channel = supabase
       .channel('shorts-updates')
       .on('postgres_changes', 
-        { event: 'INSERT', schema: 'public', table: 'feed_posts' },
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'feed_posts',
+          filter: 'post_type=eq.short'
+        },
         () => {
-          console.log('New post detected, refreshing shorts');
-          fetchShorts();
-        }
-      )
-      .on('postgres_changes', 
-        { event: 'UPDATE', schema: 'public', table: 'feed_posts' },
-        () => {
-          console.log('Post updated, refreshing shorts');
+          console.log('Shorts updated, refreshing');
           fetchShorts();
         }
       )
@@ -56,7 +54,7 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
 
   const fetchShorts = async () => {
     try {
-      console.log('[Shorts] Fetching posts with videos...');
+      console.log('[Shorts] Fetching shorts with post_type=short...');
       const { data: postsData, error } = await supabase
         .from('feed_posts')
         .select(`
@@ -69,65 +67,35 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
           created_at,
           profiles:user_id(full_name, avatar_url)
         `)
-        .not('media_urls', 'is', null)
+        .eq('post_type', 'short')
         .order('created_at', { ascending: false })
         .limit(20);
 
       if (error) {
-        console.error('[Shorts] Error fetching posts:', error);
+        console.error('[Shorts] Error fetching shorts:', error);
         return;
       }
 
-      console.log('[Shorts] Posts fetched:', postsData?.length || 0);
-      console.log('[Shorts] Sample post media_urls:', postsData?.[0]?.media_urls);
+      console.log('[Shorts] Shorts fetched:', postsData?.length || 0);
 
       if (postsData) {
         const videoShorts = postsData
           .filter(post => {
-            if (!post.media_urls || !Array.isArray(post.media_urls) || post.media_urls.length === 0) {
-              console.log('[Shorts] Filtered out - no media_urls:', post.id);
-              return false;
+            const hasUrl = post.media_urls && Array.isArray(post.media_urls) && post.media_urls.length > 0;
+            if (!hasUrl) {
+              console.log('[Shorts] Filtered out - no media URL:', post.id);
             }
-            
-            // Check if any media URL is a video
-            const hasVideo = post.media_urls.some(url => {
-              if (!url || typeof url !== 'string') return false;
-              const lowerUrl = url.toLowerCase();
-              const isVideo = lowerUrl.includes('.mp4') || 
-                     lowerUrl.includes('.webm') || 
-                     lowerUrl.includes('.mov') || 
-                     lowerUrl.includes('video/') ||
-                     lowerUrl.includes('feed-media'); // Supabase storage bucket
-              
-              if (isVideo) {
-                console.log('[Shorts] Found video URL:', url);
-              }
-              return isVideo;
-            });
-
-            if (!hasVideo) {
-              console.log('[Shorts] Filtered out - no video URLs:', post.id);
-            }
-            
-            return hasVideo;
+            return hasUrl;
           })
           .map(post => {
-            // Find the first video URL
-            const videoUrl = post.media_urls!.find(url => {
-              if (!url || typeof url !== 'string') return false;
-              const lowerUrl = url.toLowerCase();
-              return lowerUrl.includes('.mp4') || 
-                     lowerUrl.includes('.webm') || 
-                     lowerUrl.includes('.mov') || 
-                     lowerUrl.includes('video/') ||
-                     lowerUrl.includes('feed-media');
-            });
+            // Use first media_urls entry
+            const videoUrl = Array.isArray(post.media_urls) && post.media_urls.length > 0 ? post.media_urls[0] : '';
 
-            console.log('[Shorts] Mapped video URL:', videoUrl);
+            console.log('[Shorts] Mapped short:', { id: post.id, video_url: videoUrl });
 
             return {
               id: post.id,
-              video_url: videoUrl || post.media_urls![0],
+              video_url: videoUrl,
               content: post.content,
               user_id: post.user_id,
               profiles: Array.isArray(post.profiles) ? post.profiles[0] : post.profiles,
@@ -137,14 +105,7 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
             };
           });
 
-        console.log('[Shorts] Final video shorts count:', videoShorts.length);
-        if (videoShorts.length > 0) {
-          console.log('[Shorts] Sample short:', {
-            id: videoShorts[0].id,
-            video_url: videoShorts[0].video_url,
-            content: videoShorts[0].content?.substring(0, 50)
-          });
-        }
+        console.log('[Shorts] Final shorts count:', videoShorts.length);
         setShorts(videoShorts);
       }
     } catch (error) {
