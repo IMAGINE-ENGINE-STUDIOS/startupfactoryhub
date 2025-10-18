@@ -290,19 +290,19 @@ export function LightPaperPresentation() {
                 color: currentSlide.textColor
               }}
             >
-              {currentSlide.imageUrl && (
-                <img 
-                  src={currentSlide.imageUrl} 
-                  alt="Slide" 
-                  className="absolute inset-0 w-full h-full object-cover opacity-50"
-                />
-              )}
               <div className={`relative z-10 ${
                 currentSlide.animation === "fade" ? "animate-fade-in" :
                 currentSlide.animation === "slide" ? "animate-slide-in-right" :
                 currentSlide.animation === "zoom" ? "animate-scale-in" : ""
               }`}>
                 <h1 className="text-5xl font-bold mb-6">{currentSlide.title}</h1>
+                {currentSlide.imageUrl && (
+                  <img 
+                    src={currentSlide.imageUrl} 
+                    alt="Slide" 
+                    className="max-w-full max-h-[300px] object-contain mx-auto mb-6 rounded-lg"
+                  />
+                )}
                 <p className="text-2xl whitespace-pre-wrap max-w-3xl">{currentSlide.content}</p>
               </div>
             </Card>
@@ -334,19 +334,19 @@ export function LightPaperPresentation() {
                 color: currentSlide.textColor
               }}
             >
-              {currentSlide.imageUrl && (
-                <img 
-                  src={currentSlide.imageUrl} 
-                  alt="Slide" 
-                  className="absolute inset-0 w-full h-full object-cover opacity-30"
-                />
-              )}
               <div className={`relative z-10 ${
                 currentSlide.transition === "fade" ? "animate-fade-in" :
                 currentSlide.transition === "slide" ? "animate-slide-in-right" :
                 currentSlide.transition === "zoom" ? "animate-scale-in" : ""
               }`}>
                 <h1 className="text-7xl font-bold mb-8">{currentSlide.title}</h1>
+                {currentSlide.imageUrl && (
+                  <img 
+                    src={currentSlide.imageUrl} 
+                    alt="Slide" 
+                    className="max-w-full max-h-[500px] object-contain mx-auto mb-8 rounded-lg"
+                  />
+                )}
                 <p className="text-4xl whitespace-pre-wrap max-w-5xl">{currentSlide.content}</p>
               </div>
             </div>
