@@ -2,6 +2,7 @@ import { Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useNavigate } from "react-router-dom";
+import NotificationCenter from "@/components/NotificationCenter";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export function DashboardHeader() {
       >
         <Home className="h-5 w-5" />
       </Button>
+      <NotificationCenter />
       <ThemeToggle />
     </div>
   );
