@@ -122,6 +122,8 @@ export function LightPaperPDFEditor({
   const [editingTextIndex, setEditingTextIndex] = useState<{pageNum: number, index: number} | null>(null);
   const [pdfDocumentProxy, setPdfDocumentProxy] = useState<PDFDocumentProxy | null>(null);
   const [pageViewports, setPageViewports] = useState<Map<number, PDFPageViewport>>(new Map());
+  const [draggingSignature, setDraggingSignature] = useState<SavedSignature | null>(null);
+  const [signaturePosition, setSignaturePosition] = useState<{x: number, y: number} | null>(null);
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const textLayerRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -416,6 +418,96 @@ export function LightPaperPDFEditor({
     canvas.selection = true;
     canvas.isDrawingMode = false;
 
+    // Handle signature dragging mode
+    if (draggingSignature) {
+      canvas.defaultCursor = "none";
+      canvas.selection = false;
+      
+      canvas.on("mouse:move", (e) => {
+        if (e.pointer) {
+          setSignaturePosition({ x: e.pointer.x, y: e.pointer.y });
+        }
+      });
+      
+      canvas.on("mouse:down", async (e) => {
+        if (!e.pointer) return;
+        
+        try {
+          const img = await fabric.FabricImage.fromURL(draggingSignature.preview);
+          img.scaleToWidth(200);
+          img.set({
+            left: e.pointer.x - 100,
+            top: e.pointer.y - 50,
+            selectable: true,
+            hasControls: true,
+            hasBorders: true,
+            lockMovementX: false,
+            lockMovementY: false,
+          });
+          
+          // Add custom delete control
+          img.controls = {
+            ...img.controls,
+            deleteControl: new fabric.Control({
+              x: 0.5,
+              y: -0.5,
+              offsetX: 16,
+              offsetY: -16,
+              cursorStyle: 'pointer',
+              mouseUpHandler: (eventData, transform) => {
+                const target = transform.target;
+                const canvas = target.canvas;
+                canvas?.remove(target);
+                canvas?.requestRenderAll();
+                toast.success("Signature deleted");
+                return true;
+              },
+              render: (ctx, left, top, styleOverride, fabricObject) => {
+                const size = 24;
+                ctx.save();
+                ctx.translate(left, top);
+                ctx.rotate(fabric.util.degreesToRadians(fabricObject.angle || 0));
+                ctx.fillStyle = '#ff4444';
+                ctx.beginPath();
+                ctx.arc(0, 0, size / 2, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(-6, -6);
+                ctx.lineTo(6, 6);
+                ctx.moveTo(6, -6);
+                ctx.lineTo(-6, 6);
+                ctx.stroke();
+                ctx.restore();
+              }
+            })
+          };
+          
+          canvas.add(img);
+          canvas.setActiveObject(img);
+          canvas.renderAll();
+          toast.success("Signature placed!");
+          
+          // Reset signature dragging state
+          setDraggingSignature(null);
+          setSignaturePosition(null);
+          setTool("select");
+        } catch (error) {
+          console.error("Error placing signature:", error);
+          toast.error("Failed to place signature");
+          setDraggingSignature(null);
+          setSignaturePosition(null);
+        }
+      });
+      
+      return () => {
+        canvas.off("mouse:down");
+        canvas.off("mouse:move");
+        canvas.off("mouse:up");
+      };
+    }
+
     if (tool === "select") {
       // Default selection mode - everything is draggable
       canvas.defaultCursor = "default";
@@ -542,7 +634,7 @@ export function LightPaperPDFEditor({
       canvas.off("mouse:move");
       canvas.off("mouse:up");
     };
-  }, [tool, color, strokeWidth, currentPage, canvasInstances, selectedFont, selectedFontSize]);
+  }, [tool, color, strokeWidth, currentPage, canvasInstances, selectedFont, selectedFontSize, draggingSignature]);
 
   const applyTextFormatting = (command: string) => {
     const canvas = canvasInstances.get(currentPage);
@@ -650,36 +742,10 @@ export function LightPaperPDFEditor({
     setTextSignature("");
     toast.success("Signature added!");
   };
-  const placeSignature = async (signature: SavedSignature) => {
-    const canvas = canvasInstances.get(currentPage);
-    if (!canvas) {
-      toast.error("Please select a page first");
-      return;
-    }
-    
-    try {
-      const img = await fabric.FabricImage.fromURL(signature.preview);
-      img.scaleToWidth(200);
-      img.set({
-        left: canvas.width! / 2 - 100,
-        top: canvas.height! / 2 - 50,
-        selectable: true,
-        hasControls: true,
-        hasBorders: true,
-        lockMovementX: false,
-        lockMovementY: false,
-      });
-      canvas.add(img);
-      canvas.setActiveObject(img);
-      canvas.renderAll();
-      toast.success("Signature placed! Drag to reposition");
-      
-      // Switch to select tool for immediate dragging
-      setTool("select");
-    } catch (error) {
-      console.error("Error placing signature:", error);
-      toast.error("Failed to place signature");
-    }
+  const placeSignature = (signature: SavedSignature) => {
+    setDraggingSignature(signature);
+    setShowSignaturePanel(false);
+    toast.info("Move your cursor to position the signature, then click to place it");
   };
   const deleteSignature = (id: string) => {
     setSignatures(signatures.filter(sig => sig.id !== id));
@@ -1296,9 +1362,25 @@ export function LightPaperPDFEditor({
                             width: "100%",
                             height: "100%",
                             zIndex: 2,
-                            pointerEvents: tool === "select" ? "auto" : "none",
+                            pointerEvents: tool === "select" || draggingSignature ? "auto" : "none",
                           }} 
                         />
+                        
+                        {/* Signature preview while dragging */}
+                        {draggingSignature && pageNum === currentPage && signaturePosition && (
+                          <img 
+                            src={draggingSignature.preview}
+                            alt="Signature preview"
+                            className="absolute pointer-events-none"
+                            style={{
+                              left: signaturePosition.x - 100,
+                              top: signaturePosition.y - 50,
+                              width: 200,
+                              zIndex: 10,
+                              opacity: 0.7,
+                            }}
+                          />
+                        )}
                       </div>
                     </div>
                   ))}
