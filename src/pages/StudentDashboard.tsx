@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
@@ -13,7 +14,9 @@ import AIFeaturesHub from '@/components/AIFeaturesHub';
 import NetworkBrowser from '@/components/NetworkBrowser';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import EducationalResources from '@/components/EducationalResources';
+import StudentProfileView from '@/components/StudentProfileView';
 import FloatingChat from '@/components/FloatingChat';
+import { BookOpen } from 'lucide-react';
 
 export default function StudentDashboard() {
   const [enrollments, setEnrollments] = useState<any[]>([]);
@@ -108,22 +111,47 @@ export default function StudentDashboard() {
         </div>
 
         {/* Main Tabs Navigation */}
-        <Tabs defaultValue="social" className="space-y-6">
+        <Tabs defaultValue="overview" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="social">Social</TabsTrigger>
+              <TabsTrigger value="network">Network</TabsTrigger>
               <TabsTrigger value="learning">Learning</TabsTrigger>
               <TabsTrigger value="jobs">Opportunities</TabsTrigger>
+              <TabsTrigger value="calendar">Calendar</TabsTrigger>
               <TabsTrigger value="analytics">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
               <TabsTrigger value="tools">Tools</TabsTrigger>
-              <TabsTrigger value="calendar">Calendar</TabsTrigger>
-              <TabsTrigger value="network">Network</TabsTrigger>
             </TabsList>
           </div>
 
+          <TabsContent value="overview" className="space-y-4">
+            <Card className="tech-card border-0">
+              <CardContent className="p-8 text-center">
+                <div className="max-w-md mx-auto space-y-4">
+                  <BookOpen className="h-16 w-16 text-primary mx-auto" />
+                  <h2 className="text-2xl font-bold">Welcome to Your Student Dashboard</h2>
+                  <p className="text-muted-foreground">
+                    Your personalized learning hub. Navigate through the tabs to explore courses, 
+                    connect with mentors, find opportunities, and track your progress.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="profile" className="space-y-4">
+            <StudentProfileView />
+          </TabsContent>
+
           <TabsContent value="social" className="space-y-4">
             <UnifiedCommunityFeed />
+          </TabsContent>
+
+          <TabsContent value="network" className="space-y-4">
+            <NetworkBrowser />
           </TabsContent>
 
           <TabsContent value="learning" className="space-y-4">
@@ -132,6 +160,10 @@ export default function StudentDashboard() {
 
           <TabsContent value="jobs" className="space-y-4">
             <UnifiedJobsBoard />
+          </TabsContent>
+
+          <TabsContent value="calendar" className="space-y-4">
+            <UnifiedCalendar />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
@@ -144,14 +176,6 @@ export default function StudentDashboard() {
 
           <TabsContent value="tools" className="space-y-4">
             <AIFeaturesHub />
-          </TabsContent>
-
-          <TabsContent value="calendar" className="space-y-4">
-            <UnifiedCalendar />
-          </TabsContent>
-
-          <TabsContent value="network" className="space-y-4">
-            <NetworkBrowser />
           </TabsContent>
         </Tabs>
       </div>
