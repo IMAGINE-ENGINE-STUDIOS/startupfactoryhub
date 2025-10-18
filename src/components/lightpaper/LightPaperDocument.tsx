@@ -54,17 +54,17 @@ export function LightPaperDocument() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-12rem)]">
-      <CollapsibleToolbar title="Formatting Tools">
-        <div className="flex flex-wrap items-center gap-2">
+      <CollapsibleToolbar>
+        <div className="flex items-center gap-2 overflow-x-auto">
           {/* Font Controls */}
           <Select value={selectedFont} onValueChange={(font) => {
             setSelectedFont(font);
             if (editorRef.current) editorRef.current.style.fontFamily = font;
           }}>
-            <SelectTrigger className="w-36">
+            <SelectTrigger className="w-28 h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background z-50">
               {FONTS.map((font) => (
                 <SelectItem key={font} value={font} style={{ fontFamily: font }}>
                   {font}
@@ -77,10 +77,10 @@ export function LightPaperDocument() {
             setSelectedSize(size);
             if (editorRef.current) editorRef.current.style.fontSize = `${size}px`;
           }}>
-            <SelectTrigger className="w-20">
+            <SelectTrigger className="w-16 h-8 text-xs">
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-background z-50">
               {FONT_SIZES.map((size) => (
                 <SelectItem key={size} value={size}>{size}</SelectItem>
               ))}
@@ -89,16 +89,16 @@ export function LightPaperDocument() {
 
           {/* Text Formatting */}
           <div className="flex gap-1 border-l pl-2">
-            <Button variant="ghost" size="icon" onClick={() => execCommand("bold")} title="Bold (Ctrl+B)">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("bold")} title="Bold (Ctrl+B)">
               <Bold className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => execCommand("italic")} title="Italic (Ctrl+I)">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("italic")} title="Italic (Ctrl+I)">
               <Italic className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => execCommand("underline")} title="Underline (Ctrl+U)">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("underline")} title="Underline (Ctrl+U)">
               <Underline className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => execCommand("strikeThrough")} title="Strikethrough">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("strikeThrough")} title="Strikethrough">
               <Strikethrough className="h-4 w-4" />
             </Button>
           </div>
@@ -112,8 +112,8 @@ export function LightPaperDocument() {
                 toast.success(`Applied ${value.toUpperCase()}`);
               }
             }}>
-              <SelectTrigger className="w-32 h-9">
-                <SelectValue placeholder="Heading" />
+              <SelectTrigger className="w-24 h-8 text-xs">
+                <SelectValue placeholder="Style" />
               </SelectTrigger>
               <SelectContent className="bg-background z-50">
                 <SelectItem value="p">Normal</SelectItem>
@@ -129,26 +129,26 @@ export function LightPaperDocument() {
 
           {/* Alignment */}
           <div className="flex gap-1 border-l pl-2">
-            <Button variant="ghost" size="icon" onClick={() => execCommand("justifyLeft")} title="Align Left">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyLeft")} title="Align Left">
               <AlignLeft className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => execCommand("justifyCenter")} title="Align Center">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyCenter")} title="Align Center">
               <AlignCenter className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => execCommand("justifyRight")} title="Align Right">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyRight")} title="Align Right">
               <AlignRight className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => execCommand("justifyFull")} title="Justify">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyFull")} title="Justify">
               <AlignJustify className="h-4 w-4" />
             </Button>
           </div>
 
           {/* Lists */}
           <div className="flex gap-1 border-l pl-2">
-            <Button variant="ghost" size="icon" onClick={() => execCommand("insertUnorderedList")} title="Bullet List">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertUnorderedList")} title="Bullet List">
               <List className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => execCommand("insertOrderedList")} title="Numbered List">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertOrderedList")} title="Numbered List">
               <ListOrdered className="h-4 w-4" />
             </Button>
           </div>
@@ -157,7 +157,8 @@ export function LightPaperDocument() {
           <div className="flex gap-1 border-l pl-2">
             <Button 
               variant="ghost" 
-              size="icon" 
+              size="sm"
+              className="h-8 w-8 p-0"
               onClick={() => {
                 document.execCommand("undo", false);
                 editorRef.current?.focus();
@@ -168,7 +169,8 @@ export function LightPaperDocument() {
             </Button>
             <Button 
               variant="ghost" 
-              size="icon" 
+              size="sm"
+              className="h-8 w-8 p-0"
               onClick={() => {
                 document.execCommand("redo", false);
                 editorRef.current?.focus();
