@@ -5,13 +5,15 @@ import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Download, Upload, Calculator, BookOpen, Save, FileText } from "lucide-react";
+import { Plus, Download, Upload, Calculator, BookOpen, Save, FileText, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify } from "lucide-react";
 import { toast } from "sonner";
 import { FormulaBuilder } from "./FormulaBuilder";
 import { FormulaEngine } from "@/lib/formulaEngine";
 import { useLightPaperProjects } from "@/hooks/useLightPaperProjects";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
 import * as XLSX from "xlsx";
+import CollapsibleToolbar from "./CollapsibleToolbar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 // Generate column names: A, B, C, ... Z, AA, AB, ...
 const generateColumns = (count: number): string[] => {
@@ -46,6 +48,23 @@ export function LightPaperSpreadsheet() {
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [visibleRows, setVisibleRows] = useState(INITIAL_ROWS);
   const { saveProject, projects } = useLightPaperProjects("spreadsheet");
+
+  // Listen for export/import events from header
+  useEffect(() => {
+    const handleImportEvent = () => handleImport();
+    const handleExportExcelEvent = () => handleExportExcel();
+    const handleExportCSVEvent = () => handleExportCSV();
+
+    window.addEventListener('spreadsheet-import', handleImportEvent);
+    window.addEventListener('spreadsheet-export-excel', handleExportExcelEvent);
+    window.addEventListener('spreadsheet-export-csv', handleExportCSVEvent);
+
+    return () => {
+      window.removeEventListener('spreadsheet-import', handleImportEvent);
+      window.removeEventListener('spreadsheet-export-excel', handleExportExcelEvent);
+      window.removeEventListener('spreadsheet-export-csv', handleExportCSVEvent);
+    };
+  }, [data, projectTitle, visibleRows]);
 
   const getCellId = (col: string, row: number) => `${col}${row}`;
 
@@ -197,52 +216,63 @@ export function LightPaperSpreadsheet() {
   return (
     <>
       <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4 flex-wrap">
-          <Button variant="outline" size="sm" onClick={() => setShowSaveDialog(true)}>
-            <Save className="h-4 w-4 mr-1" />
-            Save to Account
-          </Button>
-          <Select value={currentProjectId || ""} onValueChange={handleLoadProject}>
-            <SelectTrigger className="w-[180px]">
-              <FileText className="h-4 w-4 mr-2" />
-              <SelectValue placeholder="My Projects" />
-            </SelectTrigger>
-            <SelectContent>
-              {projects.map((project) => (
-                <SelectItem key={project.id} value={project.id}>
-                  {project.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button variant="outline" size="sm" onClick={handleImport}>
-            <Upload className="h-4 w-4 mr-1" />
-            Import
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExportExcel}>
-            <Download className="h-4 w-4 mr-1" />
-            Export Excel
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleExportCSV}>
-            <Download className="h-4 w-4 mr-1" />
-            Export CSV
-          </Button>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm">
-                <BookOpen className="h-4 w-4 mr-1" />
-                Formulas
+        <CollapsibleToolbar>
+          <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+            {/* Format Options */}
+            <div className="flex gap-0.5 items-center">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Bold">
+                <Bold className="h-4 w-4" />
               </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80" side="right">
-              <FormulaBuilder onSelectFormula={handleInsertFormula} />
-            </PopoverContent>
-          </Popover>
-          <Button variant="outline" size="sm" onClick={() => setShowCalculator(true)}>
-            <Calculator className="h-4 w-4 mr-1" />
-            Calculator
-          </Button>
-        </div>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Italic">
+                <Italic className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Underline">
+                <Underline className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Alignment */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Align Left">
+                <AlignLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Align Center">
+                <AlignCenter className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Align Right">
+                <AlignRight className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Formulas */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Formulas">
+                    <BookOpen className="h-4 w-4" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 bg-background z-50" side="right">
+                  <FormulaBuilder onSelectFormula={handleInsertFormula} />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            {/* Calculator */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowCalculator(true)} title="Calculator">
+                <Calculator className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Save Button */}
+            <div className="flex gap-0.5 border-l pl-1 ml-auto shrink-0">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSaveDialog(true)} title="Save">
+                <Save className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CollapsibleToolbar>
 
         <div className="overflow-auto border rounded-lg spreadsheet-scroll-container" style={{ maxHeight: '600px' }}>
           <table className="w-full border-collapse">
