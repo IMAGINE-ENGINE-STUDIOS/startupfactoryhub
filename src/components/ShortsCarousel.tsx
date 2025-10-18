@@ -56,6 +56,7 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
 
   const fetchShorts = async () => {
     try {
+      console.log('[Shorts] Fetching posts with videos...');
       const { data: postsData, error } = await supabase
         .from('feed_posts')
         .select(`
@@ -73,25 +74,42 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
         .limit(20);
 
       if (error) {
-        console.error('Error fetching shorts:', error);
+        console.error('[Shorts] Error fetching posts:', error);
         return;
       }
+
+      console.log('[Shorts] Posts fetched:', postsData?.length || 0);
+      console.log('[Shorts] Sample post media_urls:', postsData?.[0]?.media_urls);
 
       if (postsData) {
         const videoShorts = postsData
           .filter(post => {
-            if (!post.media_urls || !Array.isArray(post.media_urls) || post.media_urls.length === 0) return false;
+            if (!post.media_urls || !Array.isArray(post.media_urls) || post.media_urls.length === 0) {
+              console.log('[Shorts] Filtered out - no media_urls:', post.id);
+              return false;
+            }
             
             // Check if any media URL is a video
-            return post.media_urls.some(url => {
+            const hasVideo = post.media_urls.some(url => {
               if (!url || typeof url !== 'string') return false;
               const lowerUrl = url.toLowerCase();
-              return lowerUrl.includes('.mp4') || 
+              const isVideo = lowerUrl.includes('.mp4') || 
                      lowerUrl.includes('.webm') || 
                      lowerUrl.includes('.mov') || 
                      lowerUrl.includes('video/') ||
                      lowerUrl.includes('feed-media'); // Supabase storage bucket
+              
+              if (isVideo) {
+                console.log('[Shorts] Found video URL:', url);
+              }
+              return isVideo;
             });
+
+            if (!hasVideo) {
+              console.log('[Shorts] Filtered out - no video URLs:', post.id);
+            }
+            
+            return hasVideo;
           })
           .map(post => {
             // Find the first video URL
@@ -105,6 +123,8 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
                      lowerUrl.includes('feed-media');
             });
 
+            console.log('[Shorts] Mapped video URL:', videoUrl);
+
             return {
               id: post.id,
               video_url: videoUrl || post.media_urls![0],
@@ -117,11 +137,18 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
             };
           });
 
-        console.log('Fetched shorts:', videoShorts.length);
+        console.log('[Shorts] Final video shorts count:', videoShorts.length);
+        if (videoShorts.length > 0) {
+          console.log('[Shorts] Sample short:', {
+            id: videoShorts[0].id,
+            video_url: videoShorts[0].video_url,
+            content: videoShorts[0].content?.substring(0, 50)
+          });
+        }
         setShorts(videoShorts);
       }
     } catch (error) {
-      console.error('Error in fetchShorts:', error);
+      console.error('[Shorts] Error in fetchShorts:', error);
     }
   };
 

@@ -229,6 +229,19 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
               playsInline
               autoPlay
               muted={isMuted}
+              onError={(e) => {
+                console.error('[Shorts] Video load error:', {
+                  url: currentShort.video_url,
+                  error: e,
+                  currentTarget: e.currentTarget
+                });
+              }}
+              onLoadStart={() => {
+                console.log('[Shorts] Video loading started:', currentShort.video_url);
+              }}
+              onCanPlay={() => {
+                console.log('[Shorts] Video can play:', currentShort.video_url);
+              }}
             />
 
             {/* Overlay Gradient */}
