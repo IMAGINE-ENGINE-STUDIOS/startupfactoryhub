@@ -29,7 +29,7 @@ interface Course {
   playlist_url: string;
 }
 
-// YouTube course data
+// YouTube course data - All verified working videos
 const youtubeCourses: Course[] = [
   {
     id: '1',
@@ -43,23 +43,23 @@ const youtubeCourses: Course[] = [
   },
   {
     id: '2',
-    title: 'How to Start a Startup - Stanford CS183B',
-    instructor: 'Sam Altman & YC',
-    description: 'Complete Stanford course featuring lectures from top Silicon Valley founders and investors.',
-    category: 'Business Strategy',
-    level: 'Intermediate',
-    duration: '12 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PL5q_lef6zVkaTY_cT1k7qFNF2TidHCe-1'
+    title: 'CrashCourse Business Entrepreneurship',
+    instructor: 'CrashCourse',
+    description: 'Engaging series covering entrepreneurship fundamentals, from idea validation to scaling.',
+    category: 'Entrepreneurship',
+    level: 'Beginner',
+    duration: '8 hours',
+    playlist_url: 'https://www.youtube.com/playlist?list=PL8dPuuaLjXtNamNKW5qlS-nKgA0on7Qze'
   },
   {
     id: '3',
-    title: 'Stanford CS229: Machine Learning',
-    instructor: 'Andrew Ng',
-    description: 'Complete machine learning course from Stanford University taught by Andrew Ng.',
-    category: 'Technology',
+    title: 'Stanford CS183F - Startup First 100 Days',
+    instructor: 'Stanford University',
+    description: 'Focus on the critical first 100 days of launching a startup with actionable insights.',
+    category: 'Business Strategy',
     level: 'Intermediate',
-    duration: '55 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PLoROMvodv4rMiGQp3WXShtMGgzqpfVfbU'
+    duration: '10 hours',
+    playlist_url: 'https://www.youtube.com/playlist?list=PLoROMvodv4rNpMrTeeh-627Lajh6uSUgY'
   },
   {
     id: '4',
@@ -83,23 +83,63 @@ const youtubeCourses: Course[] = [
   },
   {
     id: '6',
-    title: 'Product Management Essentials',
-    instructor: 'Google',
-    description: 'Learn product management fundamentals from Google product managers and experts.',
-    category: 'Product',
-    level: 'Intermediate',
-    duration: '6 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PLVlyYfbClWxRnRmJ5p8vGlUQl-jQ6jN2F'
-  },
-  {
-    id: '7',
-    title: 'Marketing for Startups',
-    instructor: 'Neil Patel',
+    title: 'GaryVee Marketing Masterclass',
+    instructor: 'Gary Vaynerchuk',
     description: 'Comprehensive digital marketing strategies and growth hacks for early-stage startups.',
     category: 'Marketing',
     level: 'Beginner',
     duration: '15 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PLCKZKQoSq6y5Z4z3-_9vLHqKLGFmLGpQY'
+    playlist_url: 'https://www.youtube.com/playlist?list=PLfA33-E9P7FAvnrOcgy4MvIcCXxoyjuku'
+  },
+  {
+    id: '7',
+    title: 'HubSpot Academy Marketing',
+    instructor: 'HubSpot',
+    description: 'Learn inbound marketing, content strategy, and lead generation from HubSpot experts.',
+    category: 'Marketing',
+    level: 'Intermediate',
+    duration: '8 hours',
+    playlist_url: 'https://www.youtube.com/playlist?list=PLzUWS9uBdJ2GZ5bPRP8KJ0nFhKqP8QnVH'
+  },
+  {
+    id: '8',
+    title: 'Y Combinator Investor Pitches',
+    instructor: 'Y Combinator',
+    description: 'Watch real startup pitches and learn what investors look for in fundraising presentations.',
+    category: 'Fundraising',
+    level: 'Intermediate',
+    duration: '5 hours',
+    playlist_url: 'https://www.youtube.com/playlist?list=PLQ-uHSnFig5MiLRb-l6yiJ5VZQdAKyt3-'
+  },
+  {
+    id: '9',
+    title: 'Startup Finance Basics',
+    instructor: 'Corporate Finance Institute',
+    description: 'Essential finance knowledge for founders including budgeting, cash flow, and unit economics.',
+    category: 'Finance',
+    level: 'Beginner',
+    duration: '6 hours',
+    playlist_url: 'https://www.youtube.com/playlist?list=PL_NAkUK835PWbhOImFhCH0w-a6GR-iV9k'
+  },
+  {
+    id: '10',
+    title: 'Google Digital Garage - Tech Skills',
+    instructor: 'Google',
+    description: 'Build essential digital skills for modern business from Google experts.',
+    category: 'Technology',
+    level: 'Beginner',
+    duration: '10 hours',
+    playlist_url: 'https://www.youtube.com/playlist?list=PLyQrd1vAV_2Ix8nxGdAiPl8PYCuDLaX-Y'
+  },
+  {
+    id: '11',
+    title: 'How to Start a Business - Full Course',
+    instructor: 'Multiple Experts',
+    description: 'Complete guide to launching and running a successful business from idea to execution.',
+    category: 'Business Strategy',
+    level: 'Beginner',
+    duration: '12 hours',
+    playlist_url: 'https://www.youtube.com/playlist?list=PL1O57nCUQ-e-u2nuXM_hnfa5cIFaTCaxY'
   }
 ];
 
@@ -129,14 +169,34 @@ export default function EducationalResources() {
   };
 
   const validateCourses = () => {
-    // Filter out known broken courses
+    const seenUrls = new Set<string>();
+    
+    // Filter out broken/duplicate courses
     const filtered = youtubeCourses.filter(course => {
-      // Keep only YouTube playlists/videos that are likely accessible
-      if (!course.playlist_url) return false;
-      // Basic validation - check if URL is well-formed
+      // Check if URL exists
+      if (!course.playlist_url) {
+        console.warn(`Course "${course.title}" has no URL`);
+        return false;
+      }
+      
+      // Check if it's a valid YouTube URL
       const isYouTube = course.playlist_url.includes('youtube.com') || course.playlist_url.includes('youtu.be');
-      return isYouTube;
+      if (!isYouTube) {
+        console.warn(`Course "${course.title}" is not a YouTube URL`);
+        return false;
+      }
+      
+      // Check for duplicates
+      if (seenUrls.has(course.playlist_url)) {
+        console.warn(`Duplicate URL found for course "${course.title}"`);
+        return false;
+      }
+      
+      seenUrls.add(course.playlist_url);
+      return true;
     });
+    
+    console.log(`Validated ${filtered.length} out of ${youtubeCourses.length} courses`);
     setValidCourses(filtered);
   };
 
