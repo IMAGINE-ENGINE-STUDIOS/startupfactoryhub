@@ -271,7 +271,7 @@ const handler = async (req: Request): Promise<Response> => {
                 <div class="header">
                   <div class="logo-container">
                     <div class="logo">
-                      <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/startup-factory-hub-logo.png" alt="Startup Factory Hub" />
+                      <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="Startup Factory Hub" />
                     </div>
                   </div>
                   <h1>Startup Factory Hub</h1>

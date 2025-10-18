@@ -34,7 +34,11 @@ export const PasswordResetEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={header}>
-          <div style={logo}>🚀</div>
+          <img 
+            src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" 
+            alt="Startup Factory Hub"
+            style={logo}
+          />
           <Heading style={h1}>Startup Factory Hub</Heading>
           <Text style={tagline}>AI-Powered Startup Accelerator Platform</Text>
         </Section>

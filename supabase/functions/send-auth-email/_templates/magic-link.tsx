@@ -35,7 +35,7 @@ export const MagicLinkEmail = ({
       <Container style={container}>
         <Section style={header}>
           <img 
-            src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/startup-factory-hub-logo.png" 
+            src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" 
             alt="Startup Factory Hub"
             style={logo}
           />
