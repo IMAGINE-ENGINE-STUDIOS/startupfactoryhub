@@ -443,6 +443,36 @@ export type Database = {
         }
         Relationships: []
       }
+      course_completions: {
+        Row: {
+          completed_at: string | null
+          course_id: string
+          created_at: string | null
+          id: string
+          points_earned: number | null
+          user_id: string
+          watch_time_minutes: number | null
+        }
+        Insert: {
+          completed_at?: string | null
+          course_id: string
+          created_at?: string | null
+          id?: string
+          points_earned?: number | null
+          user_id: string
+          watch_time_minutes?: number | null
+        }
+        Update: {
+          completed_at?: string | null
+          course_id?: string
+          created_at?: string | null
+          id?: string
+          points_earned?: number | null
+          user_id?: string
+          watch_time_minutes?: number | null
+        }
+        Relationships: []
+      }
       course_enrollments: {
         Row: {
           certificate_issued: boolean | null

@@ -11,13 +11,15 @@ import {
   Trophy, 
   TrendingUp, 
   ExternalLink,
-  PlayCircle
+  PlayCircle,
+  CheckCircle2
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CourseVideoDialog } from './CourseVideoDialog';
+import { useCourseCompletion } from '@/hooks/useCourseCompletion';
 
 interface Course {
-  id: number;
+  id: string;
   title: string;
   instructor: string;
   description: string;
@@ -30,54 +32,74 @@ interface Course {
 // YouTube course data
 const youtubeCourses: Course[] = [
   {
-    id: 1,
-    title: "Startup Fundamentals",
-    instructor: "Y Combinator",
-    description: "Learn how to start a company from the best startup accelerator",
-    category: "Startup",
-    level: "Beginner",
-    duration: "6 hours",
-    playlist_url: "https://www.youtube.com/playlist?list=PL5q_lef6zVkaTY_cT1k7qFNF2TidHCe-1"
+    id: '1',
+    title: 'Y Combinator Startup School',
+    instructor: 'Y Combinator',
+    description: 'Comprehensive course on how to start and grow a successful startup from Y Combinator.',
+    category: 'Entrepreneurship',
+    level: 'Beginner',
+    duration: '10 hours',
+    playlist_url: 'https://www.youtube.com/playlist?list=PL5q_lef6zVkaTY_cT1k7qFNF2TidHCe-1'
   },
   {
-    id: 2,
-    title: "How to Build the Future",
-    instructor: "Y Combinator",
-    description: "Conversations with founders, investors, and technologists",
-    category: "Startup",
-    level: "Intermediate",
-    duration: "10 hours",
-    playlist_url: "https://www.youtube.com/playlist?list=PLoROMvodv4rMiGQp3WXShtMGgzqpfVfbU"
+    id: '2',
+    title: 'How to Start a Startup - Stanford CS183B',
+    instructor: 'Sam Altman & YC',
+    description: 'Complete Stanford course featuring lectures from top Silicon Valley founders and investors.',
+    category: 'Business Strategy',
+    level: 'Intermediate',
+    duration: '12 hours',
+    playlist_url: 'https://www.youtube.com/playlist?list=PL5q_lef6zVkaTY_cT1k7qFNF2TidHCe-1'
   },
   {
-    id: 3,
-    title: "Stanford CS229: Machine Learning",
-    instructor: "Andrew Ng",
-    description: "Comprehensive ML course from Stanford University",
-    category: "Technology",
-    level: "Advanced",
-    duration: "20 hours",
-    playlist_url: "https://www.youtube.com/playlist?list=PLoROMvodv4rMiGQp3WXShtMGgzqpfVfbU"
+    id: '3',
+    title: 'Stanford CS229: Machine Learning',
+    instructor: 'Andrew Ng',
+    description: 'Complete machine learning course from Stanford University taught by Andrew Ng.',
+    category: 'Technology',
+    level: 'Intermediate',
+    duration: '55 hours',
+    playlist_url: 'https://www.youtube.com/playlist?list=PLoROMvodv4rMiGQp3WXShtMGgzqpfVfbU'
   },
   {
-    id: 4,
-    title: "Financial Modeling & Valuation",
-    instructor: "Corporate Finance Institute",
-    description: "Master financial modeling for startups and investors",
-    category: "Business",
-    level: "Intermediate",
-    duration: "8 hours",
-    playlist_url: "https://www.youtube.com/watch?v=WEDIj9JBTC8"
+    id: '4',
+    title: 'Pitch Deck Masterclass',
+    instructor: 'Dave McClure',
+    description: 'Learn to create compelling pitch decks that attract investors from 500 Startups founder.',
+    category: 'Fundraising',
+    level: 'Beginner',
+    duration: '1 hour',
+    playlist_url: 'https://www.youtube.com/watch?v=9c2oiXPZkc0'
   },
   {
-    id: 5,
-    title: "Pitch Perfect",
-    instructor: "500 Startups",
-    description: "Learn how to create and deliver winning pitch decks",
-    category: "Startup",
-    level: "Beginner",
-    duration: "4 hours",
-    playlist_url: "https://www.youtube.com/watch?v=9c2oiXPZkc0"
+    id: '5',
+    title: 'Financial Modeling for Startups',
+    instructor: 'Corporate Finance Institute',
+    description: 'Master financial modeling techniques essential for startup founders and finance teams.',
+    category: 'Finance',
+    level: 'Advanced',
+    duration: '2 hours',
+    playlist_url: 'https://www.youtube.com/watch?v=WEDIj9JBTC8'
+  },
+  {
+    id: '6',
+    title: 'Product Management Essentials',
+    instructor: 'Google',
+    description: 'Learn product management fundamentals from Google product managers and experts.',
+    category: 'Product',
+    level: 'Intermediate',
+    duration: '6 hours',
+    playlist_url: 'https://www.youtube.com/playlist?list=PLVlyYfbClWxRnRmJ5p8vGlUQl-jQ6jN2F'
+  },
+  {
+    id: '7',
+    title: 'Marketing for Startups',
+    instructor: 'Neil Patel',
+    description: 'Comprehensive digital marketing strategies and growth hacks for early-stage startups.',
+    category: 'Marketing',
+    level: 'Beginner',
+    duration: '15 hours',
+    playlist_url: 'https://www.youtube.com/playlist?list=PLCKZKQoSq6y5Z4z3-_9vLHqKLGFmLGpQY'
   }
 ];
 
@@ -89,14 +111,22 @@ export default function EducationalResources() {
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [validCourses, setValidCourses] = useState<Course[]>(youtubeCourses);
+  const [stats, setStats] = useState({ totalCompleted: 0, totalPoints: 0 });
+  const { isCompleted, getStats } = useCourseCompletion();
 
   useEffect(() => {
     validateCourses();
+    loadStats();
   }, []);
 
   useEffect(() => {
     filterCourses();
   }, [searchQuery, selectedCategory, selectedLevel, validCourses]);
+
+  const loadStats = async () => {
+    const courseStats = await getStats();
+    setStats(courseStats);
+  };
 
   const validateCourses = () => {
     // Filter out known broken courses
@@ -169,7 +199,7 @@ export default function EducationalResources() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
           <Card className="tech-card">
             <CardContent className="pt-6">
               <div className="text-center">
@@ -181,16 +211,30 @@ export default function EducationalResources() {
           <Card className="tech-card">
             <CardContent className="pt-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-accent mb-1">{categories.length}</div>
-                <div className="text-sm text-muted-foreground">Categories</div>
+                <div className="text-3xl font-bold text-green-600 mb-1">{stats.totalCompleted}</div>
+                <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Completed
+                </div>
               </div>
             </CardContent>
           </Card>
           <Card className="tech-card">
             <CardContent className="pt-6">
               <div className="text-center">
-                <div className="text-3xl font-bold text-secondary mb-1">Free</div>
-                <div className="text-sm text-muted-foreground">All Resources</div>
+                <div className="text-3xl font-bold text-yellow-600 mb-1">{stats.totalPoints}</div>
+                <div className="text-sm text-muted-foreground flex items-center justify-center gap-1">
+                  <Trophy className="w-4 h-4" />
+                  Points Earned
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="tech-card">
+            <CardContent className="pt-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-accent mb-1">{categories.length}</div>
+                <div className="text-sm text-muted-foreground">Categories</div>
               </div>
             </CardContent>
           </Card>
@@ -249,9 +293,17 @@ export default function EducationalResources() {
             >
               <CardHeader className="space-y-3">
                 <div className="flex items-start justify-between">
-                  <Badge className={getLevelColor(course.level)}>
-                    {course.level}
-                  </Badge>
+                  <div className="flex gap-2">
+                    <Badge className={getLevelColor(course.level)}>
+                      {course.level}
+                    </Badge>
+                    {isCompleted(course.id) && (
+                      <Badge variant="default" className="bg-green-600">
+                        <CheckCircle2 className="w-3 h-3 mr-1" />
+                        Completed
+                      </Badge>
+                    )}
+                  </div>
                   <PlayCircle className="h-8 w-8 text-primary group-hover:scale-110 transition-transform" />
                 </div>
                 <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
@@ -271,10 +323,16 @@ export default function EducationalResources() {
                     {course.category}
                   </Badge>
                 </div>
+                {isCompleted(course.id) && (
+                  <p className="text-sm text-green-600 font-medium flex items-center gap-1">
+                    <Trophy className="w-4 h-4" />
+                    Earned 50 points
+                  </p>
+                )}
                 <div className="flex items-center justify-between pt-3 border-t border-border/50">
                   <span className="text-xs text-muted-foreground">{course.duration}</span>
-                  <Button size="sm" variant="ghost" className="gap-1">
-                    Watch Now
+                  <Button size="sm" variant={isCompleted(course.id) ? "outline" : "ghost"} className="gap-1">
+                    {isCompleted(course.id) ? 'Watch Again' : 'Watch Now'}
                     <ExternalLink className="h-3 w-3" />
                   </Button>
                 </div>
