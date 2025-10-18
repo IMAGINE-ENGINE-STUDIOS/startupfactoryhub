@@ -136,9 +136,7 @@ export default function UnifiedJobsBoard() {
 
     const formData = new FormData(e.currentTarget);
     const category = formData.get('category') as 'full-time' | 'part-time' | 'contract' | 'internship';
-    const externalUrl = formData.get('external_url') as string;
-    
-    console.log('Creating job with external URL:', externalUrl || 'none');
+    const externalUrl = (formData.get('external_url') as string)?.trim();
     
     try {
       const { data, error } = await supabase
@@ -163,14 +161,13 @@ export default function UnifiedJobsBoard() {
 
       if (error) throw error;
 
-      console.log('Job created successfully:', data);
       toast({
         title: 'Success!',
         description: 'Job posted successfully',
       });
 
       setShowPostDialog(false);
-      fetchJobs();
+      await fetchJobs();
       e.currentTarget.reset();
     } catch (error) {
       console.error('Error creating job:', error);
@@ -320,7 +317,6 @@ export default function UnifiedJobsBoard() {
   };
 
   const handleViewResume = (resumeUrl: string | null) => {
-    console.log('Viewing resume:', resumeUrl);
     if (!resumeUrl) {
       toast({
         title: 'No Resume',
@@ -330,26 +326,15 @@ export default function UnifiedJobsBoard() {
       return;
     }
 
-    try {
-      // Since bucket is public, just open the URL directly
-      console.log('Opening resume URL:', resumeUrl);
-      window.open(resumeUrl, '_blank');
-      toast({
-        title: 'Opening Resume',
-        description: 'Resume opened in new tab',
-      });
-    } catch (error) {
-      console.error('Error viewing resume:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to open resume. Please try again.',
-        variant: 'destructive',
-      });
-    }
+    console.log('Opening resume:', resumeUrl);
+    window.open(resumeUrl, '_blank');
+    toast({
+      title: 'Opening Resume',
+      description: 'Resume opened in new tab',
+    });
   };
 
   const updateApplicationStatus = async (applicationId: string, newStatus: string, applicationType: 'internal' | 'external', jobId: string) => {
-    console.log('Updating application:', { applicationId, newStatus, applicationType, jobId });
     setUpdatingApplicationId(applicationId);
     try {
       const table = applicationType === 'internal' ? 'job_applications' : 'public_job_applications';
@@ -369,7 +354,6 @@ export default function UnifiedJobsBoard() {
         return;
       }
 
-      console.log('Application status updated successfully');
       toast({
         title: 'Success',
         description: `Application ${newStatus} successfully`,
@@ -379,13 +363,20 @@ export default function UnifiedJobsBoard() {
       if (applicationType === 'external' && newStatus === 'accepted') {
         const job = jobs.find(j => j.id === jobId);
         if (job?.is_task_based) {
-          console.log('Creating invitation for task-based job');
           await createInvitation(applicationId, jobId);
         }
       }
 
-      fetchApplicationsForJob(jobId);
-      fetchJobs();
+      // Refresh data
+      await fetchApplicationsForJob(jobId);
+      await fetchJobs();
+    } catch (error) {
+      console.error('Unexpected error:', error);
+      toast({
+        title: 'Error',
+        description: 'An unexpected error occurred',
+        variant: 'destructive',
+      });
     } finally {
       setUpdatingApplicationId(null);
     }
@@ -846,7 +837,7 @@ export default function UnifiedJobsBoard() {
                               <>
                                 <Button
                                   size="sm"
-                                  onClick={() => selectedJobId && updateApplicationStatus(app.id, 'accepted', app.application_type, selectedJobId)}
+                                  onClick={() => updateApplicationStatus(app.id, 'accepted', app.application_type, selectedJobId)}
                                   disabled={updatingApplicationId === app.id}
                                 >
                                   {updatingApplicationId === app.id ? 'Processing...' : 'Accept'}
@@ -854,7 +845,7 @@ export default function UnifiedJobsBoard() {
                                 <Button
                                   size="sm"
                                   variant="destructive"
-                                  onClick={() => selectedJobId && updateApplicationStatus(app.id, 'rejected', app.application_type, selectedJobId)}
+                                  onClick={() => updateApplicationStatus(app.id, 'rejected', app.application_type, selectedJobId)}
                                   disabled={updatingApplicationId === app.id}
                                 >
                                   {updatingApplicationId === app.id ? 'Processing...' : 'Reject'}
