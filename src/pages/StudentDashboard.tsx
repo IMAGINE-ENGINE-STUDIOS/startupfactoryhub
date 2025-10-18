@@ -12,6 +12,8 @@ import { BookOpen, Users, Trophy, Target, Play, CheckCircle, Clock, Star } from 
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import InternshipBoard from '@/components/InternshipBoard';
+import { JobsBoard } from '@/components/JobsBoard';
 
 import Leaderboard from '@/components/Leaderboard';
 import StudyGroups from '@/components/StudyGroups';
@@ -244,7 +246,7 @@ export default function StudentDashboard() {
 
         <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-5xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-11 max-w-6xl">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
               <TabsTrigger value="courses" className="flex-shrink-0">Courses</TabsTrigger>
@@ -252,9 +254,10 @@ export default function StudentDashboard() {
               <TabsTrigger value="groups" className="flex-shrink-0">Study Groups</TabsTrigger>
               <TabsTrigger value="assignments" className="flex-shrink-0">Assignments</TabsTrigger>
               <TabsTrigger value="startups" className="flex-shrink-0">Startups</TabsTrigger>
+              <TabsTrigger value="internships" className="flex-shrink-0">Internships</TabsTrigger>
+              <TabsTrigger value="jobs" className="flex-shrink-0">Jobs</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
-              <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
               <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
             </TabsList>
           </div>
@@ -439,6 +442,14 @@ export default function StudentDashboard() {
 
           <TabsContent value="intelligence" className="space-y-4">
             <MarketIntelligenceWidget />
+          </TabsContent>
+
+          <TabsContent value="internships" className="space-y-4">
+            <InternshipBoard />
+          </TabsContent>
+
+          <TabsContent value="jobs" className="space-y-4">
+            <JobsBoard />
           </TabsContent>
 
           <TabsContent value="tools" className="space-y-4">
