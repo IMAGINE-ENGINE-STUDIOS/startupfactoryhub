@@ -6,6 +6,10 @@ interface AnalyticsData {
   profileViews: number;
   connections: number;
   followers: number;
+  following: number;
+  posts: number;
+  comments: number;
+  likes: number;
   engagement: number;
   loading: boolean;
 }
@@ -16,6 +20,10 @@ export const useStartupAnalytics = () => {
     profileViews: 0,
     connections: 0,
     followers: 0,
+    following: 0,
+    posts: 0,
+    comments: 0,
+    likes: 0,
     engagement: 0,
     loading: true,
   });
@@ -105,6 +113,10 @@ export const useStartupAnalytics = () => {
         profileViews: calculatedViews,
         connections: connectionsCount,
         followers: followersCount,
+        following: followingCount,
+        posts: postsCount,
+        comments: commentsCount,
+        likes: likesCount,
         engagement: engagementScore,
         loading: false,
       });
@@ -114,6 +126,10 @@ export const useStartupAnalytics = () => {
         profileViews: 0,
         connections: 0,
         followers: 0,
+        following: 0,
+        posts: 0,
+        comments: 0,
+        likes: 0,
         engagement: 0,
         loading: false,
       });

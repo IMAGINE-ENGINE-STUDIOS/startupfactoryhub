@@ -49,17 +49,20 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
     const data = months.map((month, idx) => ({
       month,
       connections: Math.round(analytics.connections * (idx + 1) / 6),
-      views: Math.round(analytics.profileViews * (idx + 1) / 6),
+      followers: Math.round(analytics.followers * (idx + 1) / 6),
+      following: Math.round(analytics.following * (idx + 1) / 6),
     }));
     
     setHistoricalData(data);
 
-    // Engagement breakdown
+    // Engagement breakdown - show unique activity metrics
     const engagement = [
-      { name: 'Connections', value: analytics.connections },
-      { name: 'Profile Views', value: Math.min(analytics.profileViews, 100) },
-      { name: 'Engagement', value: analytics.engagement },
-    ];
+      { name: 'Posts', value: analytics.posts },
+      { name: 'Comments', value: analytics.comments },
+      { name: 'Likes', value: analytics.likes },
+      { name: 'Followers', value: analytics.followers },
+    ].filter(item => item.value > 0); // Only show metrics with actual data
+    
     setEngagementData(engagement);
   };
 
@@ -86,6 +89,20 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
       icon: Users,
     },
     {
+      title: 'Following',
+      value: analytics.following.toString(),
+      change: analytics.following > 0 ? '+' : '0%',
+      trend: 'up',
+      icon: Users,
+    },
+    {
+      title: 'Posts',
+      value: analytics.posts.toString(),
+      change: analytics.posts > 0 ? '+' : '0%',
+      trend: 'up',
+      icon: Activity,
+    },
+    {
       title: 'Engagement Score',
       value: `${analytics.engagement}%`,
       change: analytics.engagement > 50 ? '+' : analytics.engagement > 0 ? '' : '0%',
@@ -97,7 +114,7 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
   return (
     <div className="space-y-6">
       {/* Key Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {analytics.loading ? (
           <div className="col-span-4 text-center py-8">
             <p className="text-muted-foreground">Loading analytics...</p>
@@ -149,7 +166,6 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
                   <Area
                     type="monotone"
                     dataKey="connections"
-                    stackId="1"
                     stroke="hsl(var(--primary))"
                     fill="hsl(var(--primary))"
                     fillOpacity={0.6}
@@ -157,12 +173,19 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
                   />
                   <Area
                     type="monotone"
-                    dataKey="views"
-                    stackId="1"
+                    dataKey="followers"
                     stroke="hsl(var(--secondary))"
                     fill="hsl(var(--secondary))"
                     fillOpacity={0.6}
-                    name="Profile Views"
+                    name="Followers"
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="following"
+                    stroke="hsl(var(--accent))"
+                    fill="hsl(var(--accent))"
+                    fillOpacity={0.6}
+                    name="Following"
                   />
                 </AreaChart>
               </ResponsiveContainer>
