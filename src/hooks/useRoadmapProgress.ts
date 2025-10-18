@@ -50,7 +50,7 @@ export const useRoadmapProgress = () => {
 
     const { data, error } = await supabase
       .from('roadmap_progress')
-      .select('completed')
+      .select('step_id, completed')
       .eq('user_id', user.id);
 
     if (error) {
@@ -64,8 +64,10 @@ export const useRoadmapProgress = () => {
       return;
     }
 
-    // Count ALL steps including custom ones
-    const totalSteps = data?.length || 6;
+    // Default steps are IDs 1-6, custom steps start with 'custom-'
+    const customSteps = data?.filter(step => step.step_id.startsWith('custom-')) || [];
+    const totalSteps = 6 + customSteps.length;
+    
     const completedSteps = data?.filter(step => step.completed).length || 0;
     const percentage = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
 
