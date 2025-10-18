@@ -259,7 +259,7 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
           topic: formData.topic,
           description: formData.description,
           meeting_link: meetingLink,
-          status: 'pending',
+          status: 'scheduled',
         });
 
       if (error) throw error;

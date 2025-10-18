@@ -22,7 +22,6 @@ interface Event {
   max_attendees: number | null;
   profiles?: {
     full_name: string;
-    role: string;
   };
   attendees?: number;
 }
@@ -68,7 +67,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const fetchAttendees = async () => {
     const { data } = await supabase
       .from('event_attendees')
-      .select('*, profiles:user_id(full_name, role)')
+      .select('*, profiles:user_id(full_name)')
       .eq('event_id', event.id)
       .eq('status', 'going');
 
@@ -78,7 +77,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const fetchAllUsers = async () => {
     const { data } = await supabase
       .from('profiles')
-      .select('user_id, full_name, role')
+      .select('user_id, full_name')
       .neq('user_id', event.organizer_id);
 
     setAllUsers(data || []);
@@ -195,7 +194,6 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                 </AvatarFallback>
               </Avatar>
               <span>{event.profiles?.full_name || 'Anonymous'}</span>
-              <Badge variant="secondary">{event.profiles?.role}</Badge>
             </div>
           </div>
 
@@ -235,7 +233,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                   <SelectContent>
                     {allUsers.map(u => (
                       <SelectItem key={u.user_id} value={u.user_id}>
-                        {u.full_name || 'Anonymous'} ({u.role})
+                        {u.full_name || 'Anonymous'}
                       </SelectItem>
                     ))}
                   </SelectContent>
