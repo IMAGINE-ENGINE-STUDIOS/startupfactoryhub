@@ -36,12 +36,15 @@ import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
+import MobileNavigationController from '@/components/MobileNavigationController';
+
 const Dashboard = () => {
   const {
     user,
     loading
   } = useAuth();
   const [profile, setProfile] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("social");
   const {
     profile: profileWithRole
   } = useProfileWithRole();
@@ -104,7 +107,7 @@ const Dashboard = () => {
         </div>
       </div>;
   }
-  return <div className="min-h-screen bg-background pb-24 lg:pb-6 relative overflow-x-hidden">
+  return <div className="min-h-screen bg-background pb-28 md:pb-6 relative overflow-x-hidden">
       <DashboardHeader />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-20 sm:pt-24 pb-4">
@@ -125,48 +128,49 @@ const Dashboard = () => {
 
 
         {/* Tabs Navigation */}
-        <Tabs defaultValue="social" className="space-y-6">
-          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-thin">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap">
-              <TabsTrigger value="social" className="flex-shrink-0 gap-2" title="Social">
-                <MessageCircle className="h-5 w-5" />
-                <span className="hidden md:inline">Social</span>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          {/* Desktop Tabs - Hidden on Mobile */}
+          <div className="hidden md:block overflow-x-auto scrollbar-thin">
+            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap">
+              <TabsTrigger value="social" className="flex-shrink-0 gap-2">
+                <MessageCircle className="h-4 w-4" />
+                <span>Social</span>
               </TabsTrigger>
-              <TabsTrigger value="network" className="flex-shrink-0 gap-2" title="Network">
-                <Network className="h-5 w-5" />
-                <span className="hidden md:inline">Network</span>
+              <TabsTrigger value="network" className="flex-shrink-0 gap-2">
+                <Network className="h-4 w-4" />
+                <span>Network</span>
               </TabsTrigger>
-              <TabsTrigger value="journey" className="flex-shrink-0 gap-2" title="Journey">
-                <Map className="h-5 w-5" />
-                <span className="hidden md:inline">Journey</span>
+              <TabsTrigger value="journey" className="flex-shrink-0 gap-2">
+                <Map className="h-4 w-4" />
+                <span>Journey</span>
               </TabsTrigger>
-              <TabsTrigger value="calendar" className="flex-shrink-0 gap-2" title="Calendar">
-                <CalendarIcon className="h-5 w-5" />
-                <span className="hidden md:inline">Calendar</span>
+              <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                <span>Calendar</span>
               </TabsTrigger>
-              <TabsTrigger value="profile" className="flex-shrink-0 gap-2" title="Profile">
-                <UserCircle className="h-5 w-5" />
-                <span className="hidden md:inline">Profile</span>
+              <TabsTrigger value="profile" className="flex-shrink-0 gap-2">
+                <UserCircle className="h-4 w-4" />
+                <span>Profile</span>
               </TabsTrigger>
-              <TabsTrigger value="jobs" className="flex-shrink-0 gap-2" title="Jobs">
-                <Briefcase className="h-5 w-5" />
-                <span className="hidden md:inline">Jobs</span>
+              <TabsTrigger value="jobs" className="flex-shrink-0 gap-2">
+                <Briefcase className="h-4 w-4" />
+                <span>Jobs</span>
               </TabsTrigger>
-              <TabsTrigger value="learn" className="flex-shrink-0 gap-2" title="Learn">
-                <GraduationCap className="h-5 w-5" />
-                <span className="hidden md:inline">Learn</span>
+              <TabsTrigger value="learn" className="flex-shrink-0 gap-2">
+                <GraduationCap className="h-4 w-4" />
+                <span>Learn</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex-shrink-0 gap-2" title="Analytics">
-                <BarChart className="h-5 w-5" />
-                <span className="hidden md:inline">Analytics</span>
+              <TabsTrigger value="analytics" className="flex-shrink-0 gap-2">
+                <BarChart className="h-4 w-4" />
+                <span>Analytics</span>
               </TabsTrigger>
-              <TabsTrigger value="intelligence" className="flex-shrink-0 gap-2" title="Intelligence">
-                <Brain className="h-5 w-5" />
-                <span className="hidden md:inline">Intelligence</span>
+              <TabsTrigger value="intelligence" className="flex-shrink-0 gap-2">
+                <Brain className="h-4 w-4" />
+                <span>Intelligence</span>
               </TabsTrigger>
-              <TabsTrigger value="tools" className="flex-shrink-0 gap-2" title="Tools">
-                <Wrench className="h-5 w-5" />
-                <span className="hidden md:inline">Tools</span>
+              <TabsTrigger value="tools" className="flex-shrink-0 gap-2">
+                <Wrench className="h-4 w-4" />
+                <span>Tools</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -301,6 +305,9 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Mobile Navigation Controller */}
+      <MobileNavigationController activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Floating Buttons */}
       <FloatingChat />
