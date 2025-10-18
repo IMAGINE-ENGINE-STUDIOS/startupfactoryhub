@@ -136,6 +136,9 @@ export default function UnifiedJobsBoard() {
 
     const formData = new FormData(e.currentTarget);
     const category = formData.get('category') as 'full-time' | 'part-time' | 'contract' | 'internship';
+    const externalUrl = formData.get('external_url') as string;
+    
+    console.log('Creating job with external URL:', externalUrl || 'none');
     
     try {
       const { data, error } = await supabase
@@ -152,7 +155,7 @@ export default function UnifiedJobsBoard() {
           salary_range_min: formData.get('salary_min') ? Number(formData.get('salary_min')) : null,
           salary_range_max: formData.get('salary_max') ? Number(formData.get('salary_max')) : null,
           is_task_based: formData.get('is_task_based') === 'true',
-          external_application_url: formData.get('external_url') as string || null,
+          external_application_url: externalUrl || null,
           status: 'active',
         }] as any)
         .select()
@@ -160,6 +163,7 @@ export default function UnifiedJobsBoard() {
 
       if (error) throw error;
 
+      console.log('Job created successfully:', data);
       toast({
         title: 'Success!',
         description: 'Job posted successfully',
@@ -309,7 +313,14 @@ export default function UnifiedJobsBoard() {
     fetchApplicationsForJob(jobId);
   };
 
-  const handleViewResume = async (resumeUrl: string | null) => {
+  const handleCloseApplicationsDialog = () => {
+    setShowApplicationsDialog(false);
+    setSelectedJobId(null);
+    setApplications([]);
+  };
+
+  const handleViewResume = (resumeUrl: string | null) => {
+    console.log('Viewing resume:', resumeUrl);
     if (!resumeUrl) {
       toast({
         title: 'No Resume',
@@ -320,26 +331,13 @@ export default function UnifiedJobsBoard() {
     }
 
     try {
-      // If it's a Supabase storage URL, try to create signed URL or use public URL
-      if (resumeUrl.includes('supabase.co/storage')) {
-        const urlParts = resumeUrl.split('public-resumes/');
-        if (urlParts.length > 1) {
-          const filePath = decodeURIComponent(urlParts[1]);
-          
-          // Try to create signed URL (for private buckets)
-          const { data, error } = await supabase.storage
-            .from('public-resumes')
-            .createSignedUrl(filePath, 3600);
-
-          if (!error && data?.signedUrl) {
-            window.open(data.signedUrl, '_blank');
-            return;
-          }
-        }
-      }
-      
-      // Fallback: open URL directly (works if bucket is public)
+      // Since bucket is public, just open the URL directly
+      console.log('Opening resume URL:', resumeUrl);
       window.open(resumeUrl, '_blank');
+      toast({
+        title: 'Opening Resume',
+        description: 'Resume opened in new tab',
+      });
     } catch (error) {
       console.error('Error viewing resume:', error);
       toast({
@@ -351,6 +349,7 @@ export default function UnifiedJobsBoard() {
   };
 
   const updateApplicationStatus = async (applicationId: string, newStatus: string, applicationType: 'internal' | 'external', jobId: string) => {
+    console.log('Updating application:', { applicationId, newStatus, applicationType, jobId });
     setUpdatingApplicationId(applicationId);
     try {
       const table = applicationType === 'internal' ? 'job_applications' : 'public_job_applications';
@@ -370,6 +369,7 @@ export default function UnifiedJobsBoard() {
         return;
       }
 
+      console.log('Application status updated successfully');
       toast({
         title: 'Success',
         description: `Application ${newStatus} successfully`,
@@ -379,6 +379,7 @@ export default function UnifiedJobsBoard() {
       if (applicationType === 'external' && newStatus === 'accepted') {
         const job = jobs.find(j => j.id === jobId);
         if (job?.is_task_based) {
+          console.log('Creating invitation for task-based job');
           await createInvitation(applicationId, jobId);
         }
       }
@@ -756,7 +757,7 @@ export default function UnifiedJobsBoard() {
       </div>
 
       {/* Applications Dialog */}
-      <Dialog open={showApplicationsDialog} onOpenChange={setShowApplicationsDialog}>
+      <Dialog open={showApplicationsDialog} onOpenChange={handleCloseApplicationsDialog}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Job Applications</DialogTitle>
@@ -845,7 +846,7 @@ export default function UnifiedJobsBoard() {
                               <>
                                 <Button
                                   size="sm"
-                                  onClick={() => updateApplicationStatus(app.id, 'accepted', app.application_type, selectedJobId)}
+                                  onClick={() => selectedJobId && updateApplicationStatus(app.id, 'accepted', app.application_type, selectedJobId)}
                                   disabled={updatingApplicationId === app.id}
                                 >
                                   {updatingApplicationId === app.id ? 'Processing...' : 'Accept'}
@@ -853,7 +854,7 @@ export default function UnifiedJobsBoard() {
                                 <Button
                                   size="sm"
                                   variant="destructive"
-                                  onClick={() => updateApplicationStatus(app.id, 'rejected', app.application_type, selectedJobId)}
+                                  onClick={() => selectedJobId && updateApplicationStatus(app.id, 'rejected', app.application_type, selectedJobId)}
                                   disabled={updatingApplicationId === app.id}
                                 >
                                   {updatingApplicationId === app.id ? 'Processing...' : 'Reject'}
