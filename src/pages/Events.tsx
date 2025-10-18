@@ -11,8 +11,13 @@ export default function Events() {
 
   const handleItemClick = (item: any) => {
     if (item.type === 'event') {
-      // Fetch full event details
-      setSelectedEvent(item);
+      // Convert Date objects to ISO strings for EventDetailsDialog
+      const eventData = {
+        ...item,
+        start_date: item.start_date instanceof Date ? item.start_date.toISOString() : item.start_date,
+        end_date: item.end_date instanceof Date ? item.end_date.toISOString() : item.end_date,
+      };
+      setSelectedEvent(eventData);
       setShowEventDetails(true);
     }
   };
