@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
@@ -32,6 +32,7 @@ export function LightPaperDocument({
   const [versions, setVersions] = useState<any[]>([]);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(-1);
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random()}`);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const {
     saveProject
@@ -236,19 +237,28 @@ export function LightPaperDocument({
       toast.error("Failed to apply heading");
     }
   };
-  const resetColors = () => {
+  const toggleDarkMode = () => {
     if (editorRef.current && containerRef.current && wrapperRef.current) {
-      // Reset editor
-      editorRef.current.style.backgroundColor = 'white';
-      editorRef.current.style.color = 'black';
-
-      // Reset container
-      containerRef.current.style.backgroundColor = 'white';
-      containerRef.current.style.color = 'black';
-
-      // Reset wrapper
-      wrapperRef.current.style.backgroundColor = 'white';
-      toast.success("Colors reset to default");
+      const newDarkMode = !isDarkMode;
+      setIsDarkMode(newDarkMode);
+      
+      if (newDarkMode) {
+        // Apply dark mode
+        editorRef.current.style.backgroundColor = 'black';
+        editorRef.current.style.color = 'white';
+        containerRef.current.style.backgroundColor = 'black';
+        containerRef.current.style.color = 'white';
+        wrapperRef.current.style.backgroundColor = '#1a1a1a';
+        toast.success("Dark mode enabled");
+      } else {
+        // Apply light mode (reset)
+        editorRef.current.style.backgroundColor = 'white';
+        editorRef.current.style.color = 'black';
+        containerRef.current.style.backgroundColor = 'white';
+        containerRef.current.style.color = 'black';
+        wrapperRef.current.style.backgroundColor = 'white';
+        toast.success("Light mode enabled");
+      }
     }
   };
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -440,10 +450,10 @@ export function LightPaperDocument({
             </Button>
           </div>
 
-          {/* Color Reset */}
+          {/* Dark/Light Mode Toggle */}
           <div className="flex gap-1 border-l pl-2">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={resetColors} title="Reset Colors">
-              <Palette className="h-4 w-4" />
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={toggleDarkMode} title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+              {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </Button>
           </div>
 
