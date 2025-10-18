@@ -44,11 +44,16 @@ export function JobApplicationsViewer() {
       if (!user) return;
 
       // Get user's company
-      const { data: company } = await supabase
+      const { data: company, error: companyError } = await supabase
         .from('companies')
         .select('id')
         .eq('user_id', user.id)
         .maybeSingle();
+
+      if (companyError) {
+        console.error('Error fetching company:', companyError);
+        throw companyError;
+      }
 
       if (!company) {
         setApplications([]);
