@@ -3,18 +3,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import AISummaryCard from "./AISummaryCard";
 import AITranslator from "./AITranslator";
 import TaskAutomation from "./TaskAutomation";
 import SentimentAnalyzer from "./SentimentAnalyzer";
 import DocumentAnalyzer from "./DocumentAnalyzer";
+import { LightPaperDocument } from "./lightpaper/LightPaperDocument";
+import { LightPaperSpreadsheet } from "./lightpaper/LightPaperSpreadsheet";
+import { LightPaperPresentation } from "./lightpaper/LightPaperPresentation";
+import { LightPaperPDFEditor } from "./lightpaper/LightPaperPDFEditor";
+import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import { 
   FileText, 
   TrendingUp, 
   Languages, 
   Image, 
   Workflow,
-  Sparkles
+  Sparkles,
+  Table,
+  Presentation,
+  FileSignature
 } from "lucide-react";
 
 export default function AIFeaturesHub() {
@@ -25,6 +34,8 @@ export default function AIFeaturesHub() {
     document: false,
     automation: false
   });
+  const [lightPaperTab, setLightPaperTab] = useState("document");
+  const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
 
   const openDialog = (featureId: string) => {
     setOpenDialogs({ ...openDialogs, [featureId]: true });
@@ -108,6 +119,80 @@ export default function AIFeaturesHub() {
               </Card>
             ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* LightPaper Full Tool */}
+      <Card className="mt-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                LightPaper - Complete Productivity Suite
+              </CardTitle>
+              <CardDescription>
+                Create, edit, and sign documents, spreadsheets, presentations, and PDFs
+              </CardDescription>
+            </div>
+            <div className="flex border rounded-lg p-1 bg-muted/30">
+              <Button 
+                variant={lightPaperTab === "document" ? "secondary" : "ghost"} 
+                size="sm" 
+                className="h-8 w-8 p-0"
+                onClick={() => setLightPaperTab("document")}
+                title="Document"
+              >
+                <FileText className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant={lightPaperTab === "spreadsheet" ? "secondary" : "ghost"} 
+                size="sm" 
+                className="h-8 w-8 p-0"
+                onClick={() => setLightPaperTab("spreadsheet")}
+                title="Spreadsheet"
+              >
+                <Table className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant={lightPaperTab === "presentation" ? "secondary" : "ghost"} 
+                size="sm" 
+                className="h-8 w-8 p-0"
+                onClick={() => setLightPaperTab("presentation")}
+                title="Presentation"
+              >
+                <Presentation className="h-4 w-4" />
+              </Button>
+              <Button 
+                variant={lightPaperTab === "pdf-editor" ? "secondary" : "ghost"} 
+                size="sm" 
+                className="h-8 w-8 p-0"
+                onClick={() => setLightPaperTab("pdf-editor")}
+                title="PDF Editor & Sign"
+              >
+                <FileSignature className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <Tabs value={lightPaperTab} onValueChange={setLightPaperTab} className="w-full">
+            <TabsContent value="document" className="mt-0">
+              <LightPaperDocument selectedProject={selectedProject} />
+            </TabsContent>
+
+            <TabsContent value="spreadsheet" className="mt-0">
+              <LightPaperSpreadsheet />
+            </TabsContent>
+
+            <TabsContent value="presentation" className="mt-0">
+              <LightPaperPresentation />
+            </TabsContent>
+
+            <TabsContent value="pdf-editor" className="mt-0">
+              <LightPaperPDFEditor />
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
       
