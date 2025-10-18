@@ -616,7 +616,7 @@ export function LightPaperDocument({
   const handlePrint = () => {
     window.print();
   };
-  return <div className="flex flex-col h-[calc(100vh-12rem)]">
+  return <div className="flex flex-col h-[calc(100vh-8rem)]">
       <CollapsibleToolbar>
         <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
           {/* Font Controls */}
@@ -779,7 +779,7 @@ export function LightPaperDocument({
       </CollapsibleToolbar>
 
       {/* Main Editor Area - Takes Full Height with Pages */}
-      <div ref={wrapperRef} className="flex-1 overflow-auto p-8 bg-muted/30">
+      <div ref={wrapperRef} className="flex-1 overflow-auto p-4 bg-muted/30">
         <style>{`
           .page {
             width: 21cm;
