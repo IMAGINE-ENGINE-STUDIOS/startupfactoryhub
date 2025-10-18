@@ -276,26 +276,17 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
             </div>
           </button>
 
-          {/* Navigation - Vertical Tech Bars */}
+          {/* Navigation - Minimal Clean Design */}
           {currentIndex > 0 && (
             <button
               onClick={handlePrevious}
-              className="absolute left-8 top-1/2 -translate-y-1/2 z-50 group"
+              className="absolute left-6 top-1/2 -translate-y-1/2 z-50 group"
             >
               <div className="relative">
-                <div className="absolute -inset-2 bg-gradient-to-b from-cyan-500/0 to-blue-500/0 group-hover:from-cyan-500/40 group-hover:to-blue-500/40 blur-2xl transition-all duration-500" />
+                <div className="absolute -inset-1 bg-cyan-500/0 group-hover:bg-cyan-500/30 rounded-lg blur-md transition-all duration-300" />
                 
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-b from-slate-800 to-slate-900 rounded-xl" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-xl" />
-                  
-                  <div className="relative w-12 h-16 bg-gradient-to-b from-slate-900 to-black rounded-xl border border-slate-700/50 group-hover:border-cyan-400/50 backdrop-blur-xl flex items-center justify-center transition-all duration-300 shadow-[inset_0_2px_0_0_rgba(255,255,255,0.1)]">
-                    {/* Tech Lines */}
-                    <div className="absolute left-1 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-cyan-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute right-1 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-blue-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    
-                    <ChevronUp className="h-7 w-7 text-slate-400 group-hover:text-cyan-400 transition-colors relative z-10" />
-                  </div>
+                <div className="relative w-10 h-10 bg-slate-900/80 backdrop-blur-md rounded-lg border border-slate-700/30 group-hover:border-cyan-400/40 flex items-center justify-center transition-all duration-300">
+                  <ChevronUp className="h-5 w-5 text-slate-400 group-hover:text-cyan-400 transition-colors" />
                 </div>
               </div>
             </button>
@@ -304,21 +295,13 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
           {currentIndex < shorts.length - 1 && (
             <button
               onClick={handleNext}
-              className="absolute left-8 bottom-36 z-50 group"
+              className="absolute left-6 bottom-32 z-50 group"
             >
               <div className="relative">
-                <div className="absolute -inset-2 bg-gradient-to-t from-cyan-500/0 to-blue-500/0 group-hover:from-cyan-500/40 group-hover:to-blue-500/40 blur-2xl transition-all duration-500" />
+                <div className="absolute -inset-1 bg-cyan-500/0 group-hover:bg-cyan-500/30 rounded-lg blur-md transition-all duration-300" />
                 
-                <div className="relative">
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-800 to-slate-900 rounded-xl" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent rounded-xl" />
-                  
-                  <div className="relative w-12 h-16 bg-gradient-to-t from-slate-900 to-black rounded-xl border border-slate-700/50 group-hover:border-cyan-400/50 backdrop-blur-xl flex items-center justify-center transition-all duration-300 shadow-[inset_0_-2px_0_0_rgba(255,255,255,0.1)]">
-                    <div className="absolute left-1 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-cyan-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute right-1 top-2 bottom-2 w-px bg-gradient-to-b from-transparent via-blue-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    
-                    <ChevronDown className="h-7 w-7 text-slate-400 group-hover:text-cyan-400 transition-colors relative z-10" />
-                  </div>
+                <div className="relative w-10 h-10 bg-slate-900/80 backdrop-blur-md rounded-lg border border-slate-700/30 group-hover:border-cyan-400/40 flex items-center justify-center transition-all duration-300">
+                  <ChevronDown className="h-5 w-5 text-slate-400 group-hover:text-cyan-400 transition-colors" />
                 </div>
               </div>
             </button>
