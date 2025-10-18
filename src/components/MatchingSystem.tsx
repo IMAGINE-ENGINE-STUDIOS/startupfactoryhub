@@ -156,6 +156,9 @@ export default function MatchingSystem() {
   const sendConnectionRequest = async (targetId: string, targetName: string, onSuccess: () => void) => {
     if (!user) return;
 
+    // Remove card immediately for instant feedback
+    onSuccess();
+
     try {
       // Get current user's name for notification
       const senderName = userProfile?.full_name || 'Someone';
@@ -182,7 +185,6 @@ export default function MatchingSystem() {
             toast({
               title: "Request Already Sent",
               description: "You've already requested mentorship from this person.",
-              variant: "destructive",
             });
           } else {
             console.error('Mentorship request error:', error);
@@ -200,10 +202,8 @@ export default function MatchingSystem() {
 
         toast({
           title: "Mentorship Request Sent!",
-          description: `Your mentorship request has been sent to ${targetName}. They'll be notified to respond.`,
+          description: `Your request has been sent to ${targetName}.`,
         });
-        
-        onSuccess();
       } else {
         // Send regular connection request
         const { error } = await supabase
@@ -219,7 +219,6 @@ export default function MatchingSystem() {
             toast({
               title: "Request Already Sent",
               description: "You've already sent a connection request to this person.",
-              variant: "destructive",
             });
           } else {
             console.error('Connection request error:', error);
@@ -237,16 +236,14 @@ export default function MatchingSystem() {
 
         toast({
           title: "Connection Request Sent!",
-          description: `Your connection request has been sent to ${targetName}. They'll be notified to respond.`,
+          description: `Your request has been sent to ${targetName}.`,
         });
-        
-        onSuccess();
       }
     } catch (error) {
       console.error('Unexpected error sending connection:', error);
       toast({
         title: "Error",
-        description: "An unexpected error occurred. Please try again.",
+        description: "An unexpected error occurred.",
         variant: "destructive",
       });
     }
