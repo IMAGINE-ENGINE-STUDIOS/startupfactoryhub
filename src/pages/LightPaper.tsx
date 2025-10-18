@@ -99,7 +99,7 @@ export default function LightPaper() {
           </TabsContent>
 
           <TabsContent value="pdf-editor" className="mt-0">
-            <LightPaperPDFEditor />
+            <LightPaperPDFEditor selectedProject={selectedProject} />
           </TabsContent>
         </Tabs>
       </div>

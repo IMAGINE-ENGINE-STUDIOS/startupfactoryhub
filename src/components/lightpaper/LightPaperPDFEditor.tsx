@@ -30,7 +30,8 @@ import {
 import { toast } from "sonner";
 import CollapsibleToolbar from "./CollapsibleToolbar";
 import FloatingActionMenu from "./FloatingActionMenu";
-import { useLightPaperProjects } from "@/hooks/useLightPaperProjects";
+import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
+import { supabase } from "@/integrations/supabase/client";
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
@@ -42,7 +43,11 @@ interface SavedSignature {
   preview: string;
 }
 
-export function LightPaperPDFEditor() {
+interface LightPaperPDFEditorProps {
+  selectedProject?: LightPaperProject | null;
+}
+
+export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProps = {}) {
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -60,8 +65,44 @@ export function LightPaperPDFEditor() {
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const signatureDrawingCanvas = useRef<FabricCanvas | null>(null);
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [projectTitle, setProjectTitle] = useState<string>("Untitled PDF");
 
   const { saveProject } = useLightPaperProjects("pdf");
+
+  // Load project when selectedProject changes
+  useEffect(() => {
+    const loadProject = async () => {
+      if (selectedProject && selectedProject.project_type === "pdf") {
+        setCurrentProjectId(selectedProject.id);
+        setProjectTitle(selectedProject.title);
+        
+        const content = selectedProject.content as any;
+        if (content?.pdfUrl) {
+          try {
+            // Fetch the PDF from storage
+            const { data, error } = await supabase.storage
+              .from('documents')
+              .download(content.pdfUrl);
+            
+            if (error) throw error;
+            
+            // Convert blob to File
+            const file = new File([data], selectedProject.title, { type: 'application/pdf' });
+            setPdfFile(file);
+            setCurrentPage(content.currentPage || 1);
+            setSignatures(content.signatures || []);
+            toast.success("PDF loaded from MyFiles");
+          } catch (error) {
+            console.error("Error loading PDF:", error);
+            toast.error("Failed to load PDF file");
+          }
+        }
+      }
+    };
+    
+    loadProject();
+  }, [selectedProject]);
 
   useEffect(() => {
     if (signatureCanvasRef.current && isDrawingSignature) {
@@ -379,15 +420,35 @@ export function LightPaperPDFEditor() {
       return;
     }
 
-    const projectData = {
-      fileName: pdfFile.name,
-      numPages,
-      currentPage,
-      signatures: signatures.map(s => ({ ...s })),
-    };
+    try {
+      // Upload PDF to storage
+      const fileName = `${Date.now()}_${pdfFile.name}`;
+      const filePath = `${(await supabase.auth.getUser()).data.user?.id}/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, pdfFile);
 
-    await saveProject(pdfFile.name, "pdf", projectData);
-    toast.success("Project saved!");
+      if (uploadError) throw uploadError;
+
+      // Save project metadata
+      const projectData = {
+        pdfUrl: filePath,
+        fileName: pdfFile.name,
+        numPages,
+        currentPage,
+        signatures: signatures.map(s => ({ ...s })),
+      };
+
+      const result = await saveProject(projectTitle || pdfFile.name, "pdf", projectData, currentProjectId || undefined);
+      if (result) {
+        setCurrentProjectId(result.id);
+      }
+      toast.success("PDF saved to MyFiles!");
+    } catch (error) {
+      console.error("Save error:", error);
+      toast.error("Failed to save PDF");
+    }
   };
 
   return (
