@@ -19,8 +19,8 @@ export default function LightPaper() {
   const [showFiles, setShowFiles] = useState(false);
   const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
-  return <div className="min-h-screen bg-background">
-      <div className="border-b bg-card">
+  return <div className="h-screen flex flex-col bg-background overflow-hidden">
+      <div className="border-b bg-card flex-shrink-0">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -83,21 +83,21 @@ export default function LightPaper() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsContent value="document" className="mt-0">
+      <div className="flex-1 overflow-hidden">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+          <TabsContent value="document" className="flex-1 mt-0 overflow-hidden">
             <LightPaperDocument selectedProject={selectedProject} />
           </TabsContent>
 
-          <TabsContent value="spreadsheet" className="mt-0">
+          <TabsContent value="spreadsheet" className="flex-1 mt-0 overflow-hidden">
             <LightPaperSpreadsheet />
           </TabsContent>
 
-          <TabsContent value="presentation" className="mt-0">
+          <TabsContent value="presentation" className="flex-1 mt-0 overflow-hidden">
             <LightPaperPresentation />
           </TabsContent>
 
-          <TabsContent value="pdf-editor" className="mt-0">
+          <TabsContent value="pdf-editor" className="flex-1 mt-0 overflow-hidden">
             <LightPaperPDFEditor selectedProject={selectedProject} />
           </TabsContent>
         </Tabs>
