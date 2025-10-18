@@ -231,6 +231,15 @@ export default function UnifiedJobsBoard() {
     }
   };
 
+  const handleCopyPublicLink = (jobId: string) => {
+    const publicLink = `${window.location.origin}/jobs/public/${jobId}`;
+    navigator.clipboard.writeText(publicLink);
+    toast({
+      title: "Public link copied!",
+      description: "Anyone can use this link to apply to your job",
+    });
+  };
+
   const fetchApplicationsForJob = async (jobId: string) => {
     setLoadingApplications(true);
     try {
@@ -749,21 +758,19 @@ export default function UnifiedJobsBoard() {
                           <Users className="w-4 h-4" />
                           View Applications ({job.applications_count})
                         </Button>
-                        {job.external_application_url && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleCopyExternalLink(job.external_application_url!);
-                            }}
-                            className="gap-1"
-                            title="Copy external application link"
-                          >
-                            <Copy className="w-3 h-3" />
-                            Copy Link
-                          </Button>
-                        )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleCopyPublicLink(job.id);
+                          }}
+                          className="gap-1"
+                          title="Copy public application link - anyone can apply via this link"
+                        >
+                          <Copy className="w-3 h-3" />
+                          Copy Public Link
+                        </Button>
                       </>
                     )}
                     {!isCompanyUser && (
