@@ -86,47 +86,17 @@ export default function AIFeaturesHub() {
 
   return (
     <>
+      {/* LightPaper Professional Workspace */}
       <Card>
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="h-5 w-5 text-primary" />
-            AI-Powered Tools
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {features.map((feature) => (
-              <Button
-                key={feature.id}
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={() => openDialog(feature.id)}
-              >
-                <feature.icon className={`h-4 w-4 ${feature.color}`} />
-                {feature.title}
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* CRM Board */}
-      <div className="mt-6">
-        <CRMBoard />
-      </div>
-
-      {/* LightPaper Full Tool */}
-      <Card className="mt-6">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
-                LightPaper - Complete Productivity Suite
+                LightPaper Professional Workspace
               </CardTitle>
               <CardDescription>
-                Create, edit, and sign documents, spreadsheets, presentations, and PDFs
+                Enterprise-grade document creation, spreadsheet management, presentations, and digital signatures
               </CardDescription>
             </div>
             <div className="flex border rounded-lg p-1 bg-muted/30">
@@ -189,6 +159,37 @@ export default function AIFeaturesHub() {
           </Tabs>
         </CardContent>
       </Card>
+
+      {/* AI-Powered Tools */}
+      <Card className="mt-6">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <Sparkles className="h-5 w-5 text-primary" />
+            AI-Powered Tools
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-2">
+            {features.map((feature) => (
+              <Button
+                key={feature.id}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+                onClick={() => openDialog(feature.id)}
+              >
+                <feature.icon className={`h-4 w-4 ${feature.color}`} />
+                {feature.title}
+              </Button>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* CRM Board */}
+      <div className="mt-6">
+        <CRMBoard />
+      </div>
       
       {/* Individual dialogs for each feature */}
       <SummaryDialog 
