@@ -46,7 +46,8 @@ export function LightPaperDocument({
   const [isDrawingSignature, setIsDrawingSignature] = useState(false);
   const [lastSignPos, setLastSignPos] = useState({ x: 0, y: 0 });
   const signCanvasRef = useRef<HTMLCanvasElement>(null);
-  const [draggingSignature, setDraggingSignature] = useState<string | null>(null);
+  const [draggingSignature, setDraggingSignature] = useState<{type: "draw" | "text", data: string, id: string} | null>(null);
+  const [signaturePreviewPosition, setSignaturePreviewPosition] = useState<{x: number, y: number} | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const {
     saveProject
@@ -480,73 +481,10 @@ export function LightPaperDocument({
   };
 
   const insertSignature = (signature: {type: "draw" | "text", data: string, id: string}) => {
-    if (!containerRef.current) return;
-    
-    const pageElement = containerRef.current.querySelector('.page') as HTMLElement;
-    if (!pageElement) return;
-    
-    const signatureElement = document.createElement('div');
-    signatureElement.contentEditable = "false";
-    signatureElement.id = `sig-${signature.id}`;
-    signatureElement.dataset.signatureId = signature.id;
-    signatureElement.style.cssText = `
-      position: absolute;
-      cursor: move;
-      padding: 8px;
-      border: 2px dashed transparent;
-      background: transparent;
-      transition: border-color 0.2s ease;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      z-index: 100;
-    `;
-    signatureElement.classList.add('signature-element');
-
-    if (signature.type === "draw") {
-      const img = document.createElement('img');
-      img.src = signature.data;
-      img.style.cssText = "height: 60px; display: block; pointer-events: none;";
-      signatureElement.appendChild(img);
-    } else {
-      signatureElement.style.fontFamily = "cursive";
-      signatureElement.style.fontSize = "24px";
-      signatureElement.textContent = signature.data;
-      signatureElement.style.color = isDarkMode ? 'white' : 'black';
-    }
-
-    // Custom drag functionality
-    let isDragging = false;
-    let offsetX = 0;
-    let offsetY = 0;
-
-    signatureElement.onmousedown = (e) => {
-      e.preventDefault();
-      isDragging = true;
-      const rect = signatureElement.getBoundingClientRect();
-      const pageRect = pageElement.getBoundingClientRect();
-      offsetX = e.clientX - rect.left;
-      offsetY = e.clientY - rect.top;
-      signatureElement.style.cursor = 'grabbing';
-    };
-
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isDragging) return;
-      e.preventDefault();
-      
-      const pageRect = pageElement.getBoundingClientRect();
-      let newX = e.clientX - pageRect.left - offsetX;
-      let newY = e.clientY - pageRect.top - offsetY;
-      
-      // Keep within page bounds
-      const sigRect = signatureElement.getBoundingClientRect();
-      newX = Math.max(0, Math.min(newX, pageRect.width - sigRect.width));
-      newY = Math.max(0, Math.min(newY, pageRect.height - sigRect.height));
-      
-      signatureElement.style.left = `${newX}px`;
-      signatureElement.style.top = `${newY}px`;
-      signatureElement.style.transform = 'none';
-    };
+    setDraggingSignature(signature);
+    setShowSignDialog(false);
+    toast.info("Move your cursor to position the signature, then click to place it");
+  };
 
     const onMouseUp = () => {
       isDragging = false;
@@ -564,6 +502,124 @@ export function LightPaperDocument({
     setShowSignDialog(false);
     toast.success("Signature inserted! Drag to reposition");
   };
+
+  // Handle signature dragging
+  useEffect(() => {
+    if (!draggingSignature || !containerRef.current) return;
+
+    const pageElement = containerRef.current.querySelector('.page') as HTMLElement;
+    if (!pageElement) return;
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const pageRect = pageElement.getBoundingClientRect();
+      const x = e.clientX - pageRect.left;
+      const y = e.clientY - pageRect.top;
+      setSignaturePreviewPosition({ x, y });
+    };
+
+    const handleClick = (e: MouseEvent) => {
+      if (!draggingSignature) return;
+      
+      const pageRect = pageElement.getBoundingClientRect();
+      const x = e.clientX - pageRect.left;
+      const y = e.clientY - pageRect.top;
+
+      // Create and place the signature element
+      const signatureElement = document.createElement('div');
+      signatureElement.contentEditable = "false";
+      signatureElement.id = `sig-${draggingSignature.id}`;
+      signatureElement.dataset.signatureId = draggingSignature.id;
+      signatureElement.style.cssText = `
+        position: absolute;
+        cursor: move;
+        padding: 8px;
+        border: 2px dashed transparent;
+        background: transparent;
+        transition: border-color 0.2s ease;
+        left: ${x}px;
+        top: ${y}px;
+        transform: translate(-50%, -50%);
+        z-index: 100;
+      `;
+      signatureElement.classList.add('signature-element');
+
+      if (draggingSignature.type === "draw") {
+        const img = document.createElement('img');
+        img.src = draggingSignature.data;
+        img.style.cssText = "height: 60px; display: block; pointer-events: none;";
+        signatureElement.appendChild(img);
+      } else {
+        signatureElement.style.fontFamily = "cursive";
+        signatureElement.style.fontSize = "24px";
+        signatureElement.textContent = draggingSignature.data;
+        signatureElement.style.color = isDarkMode ? 'white' : 'black';
+      }
+
+      // Add drag functionality to placed signature
+      let isDragging = false;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      signatureElement.onmousedown = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        isDragging = true;
+        const rect = signatureElement.getBoundingClientRect();
+        offsetX = e.clientX - rect.left;
+        offsetY = e.clientY - rect.top;
+        signatureElement.style.cursor = 'grabbing';
+      };
+
+      const onMouseMove = (e: MouseEvent) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        
+        const pageRect = pageElement.getBoundingClientRect();
+        let newX = e.clientX - pageRect.left - offsetX;
+        let newY = e.clientY - pageRect.top - offsetY;
+        
+        const sigRect = signatureElement.getBoundingClientRect();
+        newX = Math.max(0, Math.min(newX, pageRect.width - sigRect.width));
+        newY = Math.max(0, Math.min(newY, pageRect.height - sigRect.height));
+        
+        signatureElement.style.left = `${newX}px`;
+        signatureElement.style.top = `${newY}px`;
+        signatureElement.style.transform = 'none';
+      };
+
+      const onMouseUp = () => {
+        isDragging = false;
+        signatureElement.style.cursor = 'move';
+      };
+
+      document.addEventListener('mousemove', onMouseMove);
+      document.addEventListener('mouseup', onMouseUp);
+
+      signatureElement.addEventListener('dblclick', () => {
+        pageElement.removeChild(signatureElement);
+        toast.success("Signature removed");
+        document.removeEventListener('mousemove', onMouseMove);
+        document.removeEventListener('mouseup', onMouseUp);
+      });
+
+      pageElement.appendChild(signatureElement);
+      toast.success("Signature placed! Double-click to remove");
+      
+      // Reset dragging state
+      setDraggingSignature(null);
+      setSignaturePreviewPosition(null);
+    };
+
+    pageElement.addEventListener('mousemove', handleMouseMove);
+    pageElement.addEventListener('click', handleClick);
+    pageElement.style.cursor = 'none';
+
+    return () => {
+      pageElement.removeEventListener('mousemove', handleMouseMove);
+      pageElement.removeEventListener('click', handleClick);
+      pageElement.style.cursor = 'text';
+    };
+  }, [draggingSignature, isDarkMode]);
 
   const deleteSignature = (id: string) => {
     setSignatures(signatures.filter(sig => sig.id !== id));
@@ -661,7 +717,9 @@ export function LightPaperDocument({
     window.print(); // Uses browser's print to PDF functionality
     toast.success("Print dialog opened - select 'Save as PDF'");
   };
-  return <div className="flex flex-col h-[calc(100vh-8rem)]">
+  
+  return (
+    <div className="flex flex-col h-[calc(100vh-8rem)]">
       <CollapsibleToolbar>
         <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
           {/* Font Controls */}
@@ -924,6 +982,33 @@ export function LightPaperDocument({
             >
               <p>Start typing your document here...</p>
             </div>
+            
+            {/* Signature preview while dragging */}
+            {draggingSignature && signaturePreviewPosition && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: signaturePreviewPosition.x,
+                  top: signaturePreviewPosition.y,
+                  transform: 'translate(-50%, -50%)',
+                  pointerEvents: 'none',
+                  opacity: 0.7,
+                  zIndex: 1000,
+                  padding: '8px',
+                  background: 'rgba(255, 255, 255, 0.9)',
+                  border: '2px dashed #666',
+                  borderRadius: '4px',
+                }}
+              >
+                {draggingSignature.type === "draw" ? (
+                  <img src={draggingSignature.data} alt="Signature preview" style={{ height: '60px', display: 'block' }} />
+                ) : (
+                  <span style={{ fontFamily: 'cursive', fontSize: '24px', color: isDarkMode ? 'black' : 'black' }}>
+                    {draggingSignature.data}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -1045,5 +1130,6 @@ export function LightPaperDocument({
           </div>
         </DialogContent>
       </Dialog>
-    </div>;
+    </div>
+  );
 }
