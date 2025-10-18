@@ -128,35 +128,45 @@ const Dashboard = () => {
         <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-thin">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap">
-              <TabsTrigger value="social" className="flex-shrink-0" title="Social">
+              <TabsTrigger value="social" className="flex-shrink-0 gap-2" title="Social">
                 <MessageCircle className="h-5 w-5" />
+                <span className="hidden md:inline">Social</span>
               </TabsTrigger>
-              <TabsTrigger value="network" className="flex-shrink-0" title="Network">
+              <TabsTrigger value="network" className="flex-shrink-0 gap-2" title="Network">
                 <Network className="h-5 w-5" />
+                <span className="hidden md:inline">Network</span>
               </TabsTrigger>
-              <TabsTrigger value="journey" className="flex-shrink-0" title="Journey">
+              <TabsTrigger value="journey" className="flex-shrink-0 gap-2" title="Journey">
                 <Map className="h-5 w-5" />
+                <span className="hidden md:inline">Journey</span>
               </TabsTrigger>
-              <TabsTrigger value="calendar" className="flex-shrink-0" title="Calendar">
+              <TabsTrigger value="calendar" className="flex-shrink-0 gap-2" title="Calendar">
                 <CalendarIcon className="h-5 w-5" />
+                <span className="hidden md:inline">Calendar</span>
               </TabsTrigger>
-              <TabsTrigger value="profile" className="flex-shrink-0" title="Profile">
+              <TabsTrigger value="profile" className="flex-shrink-0 gap-2" title="Profile">
                 <UserCircle className="h-5 w-5" />
+                <span className="hidden md:inline">Profile</span>
               </TabsTrigger>
-              <TabsTrigger value="jobs" className="flex-shrink-0" title="Jobs">
+              <TabsTrigger value="jobs" className="flex-shrink-0 gap-2" title="Jobs">
                 <Briefcase className="h-5 w-5" />
+                <span className="hidden md:inline">Jobs</span>
               </TabsTrigger>
-              <TabsTrigger value="learn" className="flex-shrink-0" title="Learn">
+              <TabsTrigger value="learn" className="flex-shrink-0 gap-2" title="Learn">
                 <GraduationCap className="h-5 w-5" />
+                <span className="hidden md:inline">Learn</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex-shrink-0" title="Analytics">
+              <TabsTrigger value="analytics" className="flex-shrink-0 gap-2" title="Analytics">
                 <BarChart className="h-5 w-5" />
+                <span className="hidden md:inline">Analytics</span>
               </TabsTrigger>
-              <TabsTrigger value="intelligence" className="flex-shrink-0" title="Intelligence">
+              <TabsTrigger value="intelligence" className="flex-shrink-0 gap-2" title="Intelligence">
                 <Brain className="h-5 w-5" />
+                <span className="hidden md:inline">Intelligence</span>
               </TabsTrigger>
-              <TabsTrigger value="tools" className="flex-shrink-0" title="Tools">
+              <TabsTrigger value="tools" className="flex-shrink-0 gap-2" title="Tools">
                 <Wrench className="h-5 w-5" />
+                <span className="hidden md:inline">Tools</span>
               </TabsTrigger>
             </TabsList>
           </div>
