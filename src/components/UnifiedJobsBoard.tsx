@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useRealtime } from '@/hooks/useRealtime';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,7 +12,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Job {
@@ -37,6 +40,24 @@ interface Job {
   } | null;
 }
 
+interface JobApplication {
+  id: string;
+  status: string;
+  created_at: string;
+  applicant_name: string | null;
+  applicant_email: string | null;
+  applicant_phone: string | null;
+  cover_letter: string | null;
+  resume_url: string | null;
+  user_id: string | null;
+  application_type: 'internal' | 'external';
+  profiles?: {
+    full_name: string | null;
+    email: string | null;
+    avatar_url: string | null;
+  } | null;
+}
+
 export default function UnifiedJobsBoard() {
   const { user } = useAuth();
   const { role } = useUserRole();
@@ -46,6 +67,10 @@ export default function UnifiedJobsBoard() {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [showPostDialog, setShowPostDialog] = useState(false);
   const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
+  const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
+  const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [loadingApplications, setLoadingApplications] = useState(false);
+  const [showApplicationsDialog, setShowApplicationsDialog] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -203,6 +228,229 @@ export default function UnifiedJobsBoard() {
       });
     }
   };
+
+  const fetchApplicationsForJob = async (jobId: string) => {
+    setLoadingApplications(true);
+    try {
+      // Fetch internal applications
+      const { data: internalApps, error: internalError } = await supabase
+        .from('job_applications')
+        .select('*')
+        .eq('job_id', jobId);
+
+      if (internalError) throw internalError;
+
+      // Fetch profiles for internal applications separately
+      const internalAppProfiles = await Promise.all(
+        (internalApps || []).map(async (app) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email, avatar_url')
+            .eq('user_id', app.user_id)
+            .single();
+          return { ...app, profiles: profile };
+        })
+      );
+
+      // Fetch external applications
+      const { data: externalApps, error: externalError } = await supabase
+        .from('public_job_applications')
+        .select('*')
+        .eq('job_id', jobId);
+
+      if (externalError) throw externalError;
+
+      // Combine and format applications
+      const formattedInternal: JobApplication[] = internalAppProfiles.map(app => ({
+        id: app.id,
+        status: app.status,
+        created_at: app.created_at,
+        applicant_name: app.profiles?.full_name || null,
+        applicant_email: app.profiles?.email || null,
+        applicant_phone: null,
+        cover_letter: app.cover_letter,
+        resume_url: app.resume_url,
+        user_id: app.user_id,
+        application_type: 'internal' as const,
+        profiles: app.profiles,
+      }));
+
+      const formattedExternal: JobApplication[] = (externalApps || []).map(app => ({
+        id: app.id,
+        status: app.status,
+        created_at: app.created_at,
+        applicant_name: app.applicant_name,
+        applicant_email: app.applicant_email,
+        applicant_phone: app.applicant_phone,
+        cover_letter: app.cover_letter,
+        resume_url: app.resume_url,
+        user_id: null,
+        application_type: 'external' as const,
+        profiles: null,
+      }));
+
+      setApplications([...formattedInternal, ...formattedExternal]);
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load applications',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingApplications(false);
+    }
+  };
+
+  const handleViewApplications = (jobId: string) => {
+    setSelectedJobId(jobId);
+    setShowApplicationsDialog(true);
+    fetchApplicationsForJob(jobId);
+  };
+
+  const handleViewResume = async (resumeUrl: string | null) => {
+    if (!resumeUrl) {
+      toast({
+        title: 'No Resume',
+        description: 'This applicant has not uploaded a resume',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      // Check if it's a Supabase storage URL
+      if (resumeUrl.includes('supabase.co/storage')) {
+        const pathMatch = resumeUrl.match(/public-resumes\/(.+)$/);
+        if (pathMatch) {
+          const filePath = pathMatch[1];
+          const { data, error } = await supabase.storage
+            .from('public-resumes')
+            .createSignedUrl(filePath, 3600); // 1 hour expiry
+
+          if (error) throw error;
+          if (data?.signedUrl) {
+            window.open(data.signedUrl, '_blank');
+            return;
+          }
+        }
+      }
+      
+      // Fallback to direct URL
+      window.open(resumeUrl, '_blank');
+    } catch (error) {
+      console.error('Error viewing resume:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to open resume',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const updateApplicationStatus = async (applicationId: string, newStatus: string, applicationType: 'internal' | 'external', jobId: string) => {
+    try {
+      const table = applicationType === 'internal' ? 'job_applications' : 'public_job_applications';
+      
+      const { error } = await supabase
+        .from(table)
+        .update({ status: newStatus })
+        .eq('id', applicationId);
+
+      if (error) throw error;
+
+      // If accepted and it's an external application for a task-based job, send invitation
+      if (newStatus === 'accepted' && applicationType === 'external') {
+        const job = jobs.find(j => j.id === jobId);
+        if (job?.is_task_based) {
+          await createInvitation(applicationId, jobId);
+        }
+      }
+
+      toast({
+        title: 'Success',
+        description: `Application ${newStatus}`,
+      });
+
+      // Refresh applications
+      fetchApplicationsForJob(jobId);
+      fetchJobs(); // Refresh job list to update counts
+    } catch (error) {
+      console.error('Error updating application status:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update application status',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const createInvitation = async (applicationId: string, jobId: string) => {
+    try {
+      const token = crypto.randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+
+      // Get the applicant email from the application
+      const application = applications.find(app => app.id === applicationId);
+      if (!application || !application.applicant_email) {
+        throw new Error('Applicant email not found');
+      }
+
+      const { error: inviteError } = await supabase
+        .from('application_invitations')
+        .insert({
+          application_id: applicationId,
+          applicant_email: application.applicant_email,
+          invitation_token: token,
+          expires_at: expiresAt.toISOString(),
+          status: 'pending',
+        });
+
+      if (inviteError) throw inviteError;
+
+      // Call edge function to send invitation email
+      const { error: emailError } = await supabase.functions.invoke('send-application-invitation', {
+        body: { applicationId, token },
+      });
+
+      if (emailError) {
+        console.error('Error sending invitation email:', emailError);
+      }
+
+      toast({
+        title: 'Invitation Sent',
+        description: 'Task assignment invitation sent to applicant',
+      });
+    } catch (error) {
+      console.error('Error creating invitation:', error);
+    }
+  };
+
+  // Real-time updates for applications
+  useRealtime({
+    table: 'job_applications',
+    onInsert: () => {
+      if (selectedJobId) fetchApplicationsForJob(selectedJobId);
+      fetchJobs();
+    },
+    onUpdate: () => {
+      if (selectedJobId) fetchApplicationsForJob(selectedJobId);
+      fetchJobs();
+    },
+  });
+
+  useRealtime({
+    table: 'public_job_applications',
+    onInsert: () => {
+      if (selectedJobId) fetchApplicationsForJob(selectedJobId);
+      fetchJobs();
+    },
+    onUpdate: () => {
+      if (selectedJobId) fetchApplicationsForJob(selectedJobId);
+      fetchJobs();
+    },
+  });
 
   const getCategoryColor = (category: string) => {
     const colors = {
@@ -461,14 +709,27 @@ export default function UnifiedJobsBoard() {
                         Task-Based
                       </Badge>
                     )}
-                    <div className="flex items-center gap-1">
-                      <Users className="w-4 h-4" />
-                      {job.applications_count} applicants
-                    </div>
+                    {isCompanyUser && job.companies?.id === userCompanyId && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleViewApplications(job.id)}
+                        className="gap-1"
+                      >
+                        <Users className="w-4 h-4" />
+                        View Applications ({job.applications_count})
+                      </Button>
+                    )}
+                    {!isCompanyUser && (
+                      <div className="flex items-center gap-1">
+                        <Users className="w-4 h-4" />
+                        {job.applications_count} applicants
+                      </div>
+                    )}
                   </div>
                   
                   {canApply && (
-                    <Button 
+                    <Button
                       onClick={() => handleApply(job.id, job.external_application_url)}
                       variant={job.external_application_url ? 'outline' : 'default'}
                     >
@@ -488,6 +749,106 @@ export default function UnifiedJobsBoard() {
           ))
         )}
       </div>
+
+      {/* Applications Dialog */}
+      <Dialog open={showApplicationsDialog} onOpenChange={setShowApplicationsDialog}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+          <DialogHeader>
+            <DialogTitle>Job Applications</DialogTitle>
+            <DialogDescription>
+              Manage applications for this job posting
+            </DialogDescription>
+          </DialogHeader>
+          
+          {loadingApplications ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : applications.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              No applications yet
+            </div>
+          ) : (
+            <ScrollArea className="flex-1 pr-4">
+              <div className="space-y-4">
+                {applications.map((app) => (
+                  <Card key={app.id}>
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-start justify-between">
+                            <div>
+                              <h4 className="font-semibold">{app.applicant_name || 'Anonymous'}</h4>
+                              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                                <Mail className="w-3 h-3" />
+                                {app.applicant_email}
+                              </div>
+                              {app.applicant_phone && (
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                                  <Phone className="w-3 h-3" />
+                                  {app.applicant_phone}
+                                </div>
+                              )}
+                            </div>
+                            <Badge variant={
+                              app.status === 'accepted' ? 'default' :
+                              app.status === 'rejected' ? 'destructive' :
+                              'secondary'
+                            }>
+                              {app.status}
+                            </Badge>
+                          </div>
+
+                          {app.cover_letter && (
+                            <div className="space-y-1">
+                              <p className="text-sm font-medium">Cover Letter:</p>
+                              <p className="text-sm text-muted-foreground line-clamp-3">
+                                {app.cover_letter}
+                              </p>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-2">
+                            {app.resume_url && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewResume(app.resume_url)}
+                                className="gap-1"
+                              >
+                                <Eye className="w-3 h-3" />
+                                View Resume
+                              </Button>
+                            )}
+                            
+                            {app.status === 'pending' && selectedJobId && (
+                              <>
+                                <Button
+                                  size="sm"
+                                  onClick={() => updateApplicationStatus(app.id, 'accepted', app.application_type, selectedJobId)}
+                                >
+                                  Accept
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="destructive"
+                                  onClick={() => updateApplicationStatus(app.id, 'rejected', app.application_type, selectedJobId)}
+                                >
+                                  Reject
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

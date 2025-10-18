@@ -22,7 +22,6 @@ import CompanyProfileManager from '@/components/CompanyProfileManager';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
-import { JobApplicationsViewer } from '@/components/JobApplicationsViewer';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import JobTaskManager from '@/components/JobTaskManager';
@@ -149,14 +148,13 @@ const Dashboard = () => {
         {/* Tabs Navigation */}
         <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-7xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
               <TabsTrigger value="journey" className="flex-shrink-0">Journey</TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
               <TabsTrigger value="profile" className="flex-shrink-0">Profile</TabsTrigger>
               <TabsTrigger value="jobs" className="flex-shrink-0">Jobs</TabsTrigger>
-              <TabsTrigger value="applications" className="flex-shrink-0">Applications</TabsTrigger>
               <TabsTrigger value="learn" className="flex-shrink-0">Learn</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
@@ -283,10 +281,6 @@ const Dashboard = () => {
             <JobTaskManager />
           </TabsContent>
 
-          {/* Applications Tab */}
-          <TabsContent value="applications" className="space-y-4">
-            <JobApplicationsViewer />
-          </TabsContent>
 
           {/* Learn Tab */}
           <TabsContent value="learn" className="space-y-4">
