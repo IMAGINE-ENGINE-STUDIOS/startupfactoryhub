@@ -10,7 +10,7 @@ import { format, isSameDay, parseISO } from 'date-fns';
 import { useMentoringSessions } from '@/hooks/useMentoringSessions';
 import { useMentorAvailability } from '@/hooks/useMentorAvailability';
 
-type CalendarItemType = 'event' | 'session' | 'availability';
+type CalendarItemType = 'event' | 'session' | 'availability' | 'pitch';
 
 interface CalendarItem {
   id: string;
@@ -42,16 +42,18 @@ export default function UnifiedCalendar({
   showCreateButton = true, 
   onCreateEvent,
   onItemClick,
-  filterTypes = ['event', 'session', 'availability']
+  filterTypes = ['event', 'session', 'availability', 'pitch']
 }: UnifiedCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<any[]>([]);
+  const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
   const { user } = useAuth();
   const { sessions } = useMentoringSessions();
   const { availability } = useMentorAvailability();
 
   useEffect(() => {
     fetchEvents();
+    fetchPitchMeetings();
 
     // Real-time subscription for events
     const channel = supabase
@@ -59,12 +61,15 @@ export default function UnifiedCalendar({
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
         fetchEvents();
       })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pitch_meetings' }, () => {
+        fetchPitchMeetings();
+      })
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [user]);
 
   const fetchEvents = async () => {
     const { data: eventsData, error } = await supabase
@@ -111,6 +116,28 @@ export default function UnifiedCalendar({
     }));
 
     setEvents(formattedEvents);
+  };
+
+  const fetchPitchMeetings = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('pitch_meetings')
+      .select(`
+        *,
+        company:companies(name, logo_url),
+        startup:profiles!pitch_meetings_startup_id_fkey(full_name),
+        investor:profiles!pitch_meetings_investor_id_fkey(full_name)
+      `)
+      .or(`startup_id.eq.${user.id},investor_id.eq.${user.id}`)
+      .order('scheduled_date', { ascending: true });
+
+    if (error) {
+      console.error('Error fetching pitch meetings:', error);
+      return;
+    }
+
+    setPitchMeetings(data || []);
   };
 
   // Combine all calendar items
@@ -185,6 +212,24 @@ export default function UnifiedCalendar({
       });
     }
 
+    // Add pitch meetings
+    if (filterTypes.includes('pitch') && user) {
+      pitchMeetings.forEach(meeting => {
+        const isStartup = meeting.startup_id === user.id;
+        items.push({
+          id: meeting.id,
+          type: 'pitch',
+          title: `Pitch: ${meeting.company?.name || 'Company'}`,
+          description: `With ${isStartup ? meeting.investor?.full_name : meeting.startup?.full_name}`,
+          start_date: parseISO(meeting.scheduled_date),
+          end_date: new Date(parseISO(meeting.scheduled_date).getTime() + meeting.duration_minutes * 60000),
+          meeting_link: meeting.meeting_link,
+          status: meeting.status,
+          duration_minutes: meeting.duration_minutes,
+        });
+      });
+    }
+
     return items.sort((a, b) => a.start_date.getTime() - b.start_date.getTime());
   };
 
@@ -208,6 +253,8 @@ export default function UnifiedCalendar({
         return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
       case 'availability':
         return 'bg-green-500/10 text-green-500 border-green-500/20';
+      case 'pitch':
+        return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -221,6 +268,8 @@ export default function UnifiedCalendar({
         return <Video className="h-4 w-4" />;
       case 'availability':
         return <Clock className="h-4 w-4" />;
+      case 'pitch':
+        return <Users className="h-4 w-4" />;
     }
   };
 
@@ -258,6 +307,10 @@ export default function UnifiedCalendar({
         <Badge variant="outline" className={getItemTypeColor('availability')}>
           <Clock className="h-3 w-3 mr-1" />
           Available Times
+        </Badge>
+        <Badge variant="outline" className={getItemTypeColor('pitch')}>
+          <Users className="h-3 w-3 mr-1" />
+          Pitch Meetings
         </Badge>
       </div>
 
@@ -314,9 +367,19 @@ export default function UnifiedCalendar({
               selectedDateItems.map(item => (
                 <div
                   key={`${item.type}-${item.id}`}
-                  className="p-3 rounded-lg border hover:border-primary cursor-pointer transition-all"
+                  className="p-3 rounded-lg border hover:border-primary cursor-pointer transition-all overflow-hidden"
                   onClick={() => onItemClick?.(item)}
                 >
+                  {/* Event Banner */}
+                  {item.type === 'event' && item.banner_url && (
+                    <img
+                      src={item.banner_url}
+                      alt={item.title}
+                      className="w-full h-24 object-cover rounded-lg mb-3 -mt-3 -mx-3"
+                      style={{ width: 'calc(100% + 1.5rem)' }}
+                    />
+                  )}
+                  
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <h3 className="font-semibold text-sm">{item.title}</h3>
                     <Badge variant="outline" className={`text-xs ${getItemTypeColor(item.type)}`}>
@@ -352,6 +415,28 @@ export default function UnifiedCalendar({
                           <div className="flex items-center gap-2">
                             <User className="h-3 w-3" />
                             Mentor: {item.mentor_name}
+                          </div>
+                        )}
+                        {item.meeting_link && (
+                          <div className="flex items-center gap-2">
+                            <Video className="h-3 w-3" />
+                            Video call available
+                          </div>
+                        )}
+                        {item.status && (
+                          <Badge variant="secondary" className="text-xs mt-1">
+                            {item.status}
+                          </Badge>
+                        )}
+                      </>
+                    )}
+
+                    {item.type === 'pitch' && (
+                      <>
+                        {item.description && (
+                          <div className="flex items-center gap-2">
+                            <User className="h-3 w-3" />
+                            {item.description}
                           </div>
                         )}
                         {item.meeting_link && (

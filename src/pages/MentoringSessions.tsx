@@ -2,21 +2,27 @@ import DashboardNavigation from '@/components/DashboardNavigation';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import VideoConferencing from '@/components/VideoConferencing';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
+import { SessionRatingDialog } from '@/components/SessionRatingDialog';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Video, Calendar, Clock, User, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { Video, Calendar, Clock, User, CheckCircle2, XCircle, Loader2, Star } from 'lucide-react';
 import { useMentoringSessions } from '@/hooks/useMentoringSessions';
 import { useAuth } from '@/contexts/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { format, formatDistanceToNow } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function MentoringSessions() {
   const { user } = useAuth();
   const { upcomingSessions, pastSessions, loading, updateSession, refetch } = useMentoringSessions();
   const [activeCallUrl, setActiveCallUrl] = useState<string | undefined>();
   const [scheduleDialogOpen, setScheduleDialogOpen] = useState(false);
+  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
+  const [ratingSessionId, setRatingSessionId] = useState<string>('');
+  const [ratingSessionTopic, setRatingSessionTopic] = useState<string>('');
+  const [sessionRatings, setSessionRatings] = useState<Record<string, any>>({});
 
   const handleJoinSession = (session: any) => {
     if (session.meeting_link) {
@@ -27,6 +33,33 @@ export default function MentoringSessions() {
   const handleUpdateStatus = async (sessionId: string, status: string) => {
     await updateSession(sessionId, { status });
   };
+
+  const openRatingDialog = (session: any) => {
+    setRatingSessionId(session.id);
+    setRatingSessionTopic(session.topic || 'Session');
+    setRatingDialogOpen(true);
+  };
+
+  const fetchSessionRatings = async () => {
+    if (!user || pastSessions.length === 0) return;
+
+    const sessionIds = pastSessions.map((s) => s.id);
+    const { data } = await supabase
+      .from('session_feedback')
+      .select('session_id, rating, feedback_text')
+      .in('session_id', sessionIds)
+      .eq('given_by', user.id);
+
+    const ratingsMap: Record<string, any> = {};
+    (data || []).forEach((r) => {
+      ratingsMap[r.session_id] = r;
+    });
+    setSessionRatings(ratingsMap);
+  };
+
+  useEffect(() => {
+    fetchSessionRatings();
+  }, [pastSessions, user]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -224,6 +257,39 @@ export default function MentoringSessions() {
                               <p className="text-sm text-muted-foreground">{session.notes}</p>
                             </div>
                           )}
+
+                          {/* Rating Section */}
+                          <div className="pt-3 border-t">
+                            {sessionRatings[session.id] ? (
+                              <div className="flex items-center gap-2 text-sm">
+                                <div className="flex items-center gap-1">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star
+                                      key={star}
+                                      className={`h-4 w-4 ${
+                                        star <= sessionRatings[session.id].rating
+                                          ? 'fill-yellow-400 text-yellow-400'
+                                          : 'text-muted-foreground'
+                                      }`}
+                                    />
+                                  ))}
+                                </div>
+                                <span className="text-muted-foreground">
+                                  You rated: {sessionRatings[session.id].rating}/5
+                                </span>
+                              </div>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openRatingDialog(session)}
+                                className="w-full"
+                              >
+                                <Star className="h-4 w-4 mr-2" />
+                                Rate Session
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </Card>
                     );
@@ -247,6 +313,17 @@ export default function MentoringSessions() {
         open={scheduleDialogOpen}
         onOpenChange={setScheduleDialogOpen}
         onSessionCreated={refetch}
+      />
+
+      <SessionRatingDialog
+        open={ratingDialogOpen}
+        onOpenChange={setRatingDialogOpen}
+        sessionId={ratingSessionId}
+        sessionTopic={ratingSessionTopic}
+        onRatingSubmitted={() => {
+          fetchSessionRatings();
+          refetch();
+        }}
       />
     </div>
   );

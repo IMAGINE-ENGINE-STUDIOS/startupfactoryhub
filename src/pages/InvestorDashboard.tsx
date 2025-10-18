@@ -8,7 +8,7 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Calendar, ExternalLink } from 'lucide-react';
+import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Calendar, ExternalLink, Video } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
@@ -24,6 +24,7 @@ import UnifiedCalendar from '@/components/UnifiedCalendar';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import InvestorAvailabilityManager from '@/components/InvestorAvailabilityManager';
+import VideoConferencing from '@/components/VideoConferencing';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 
 interface Investment {
@@ -43,6 +44,7 @@ export default function InvestorDashboard() {
   const [investorProfile, setInvestorProfile] = useState<any>(null);
   const [currentTab, setCurrentTab] = useState('social');
   const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
+  const [activeVideoUrl, setActiveVideoUrl] = useState<string | undefined>();
   const { user } = useAuth();
   const { toast } = useToast();
   const { profile: profileWithRole } = useProfileWithRole();
@@ -446,8 +448,20 @@ export default function InvestorDashboard() {
           <TabsContent value="events" className="space-y-4">
             <UnifiedCalendar 
               showCreateButton={false}
-              filterTypes={['event', 'session']}
+              filterTypes={['event', 'session', 'pitch']}
+              onItemClick={(item) => {
+                if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
+                  setActiveVideoUrl(item.meeting_link);
+                }
+              }}
             />
+            
+            {activeVideoUrl && (
+              <VideoConferencing
+                roomUrl={activeVideoUrl}
+                onLeave={() => setActiveVideoUrl(undefined)}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="pitches" className="space-y-4">
@@ -501,9 +515,28 @@ export default function InvestorDashboard() {
                               </Button>
                             )}
                           </div>
+                          
+                          {meeting.meeting_link && (
+                            <Button
+                              className="w-full mt-3"
+                              onClick={() => setActiveVideoUrl(meeting.meeting_link)}
+                            >
+                              <Video className="h-4 w-4 mr-2" />
+                              Join Pitch Meeting
+                            </Button>
+                          )}
                         </CardContent>
                       </Card>
                     ))}
+                  </div>
+                )}
+                
+                {activeVideoUrl && (
+                  <div className="mt-6">
+                    <VideoConferencing
+                      roomUrl={activeVideoUrl}
+                      onLeave={() => setActiveVideoUrl(undefined)}
+                    />
                   </div>
                 )}
               </CardContent>
