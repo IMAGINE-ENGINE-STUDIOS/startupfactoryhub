@@ -6,12 +6,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  List, ListOrdered, Undo, Redo, Save, Strikethrough
+  List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
 import FloatingActionMenu from "./FloatingActionMenu";
+import { ScientificCalculator } from "@/components/ScientificCalculator";
+import { supabase } from "@/integrations/supabase/client";
 
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
 const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
@@ -22,11 +24,15 @@ interface LightPaperDocumentProps {
 
 export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps = {}) {
   const editorRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFont, setSelectedFont] = useState("Arial");
   const [selectedSize, setSelectedSize] = useState("16");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [projectTitle, setProjectTitle] = useState("Untitled Document");
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [showCalculator, setShowCalculator] = useState(false);
+  const [versionHistory, setVersionHistory] = useState<string[]>([]);
+  const [currentVersionIndex, setCurrentVersionIndex] = useState(-1);
   const { saveProject } = useLightPaperProjects("document");
 
   // Load project when selectedProject changes
@@ -39,6 +45,7 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
       if (content) {
         if (content.html && editorRef.current) {
           editorRef.current.innerHTML = content.html;
+          saveToHistory(content.html);
         }
         if (content.font) setSelectedFont(content.font);
         if (content.size) setSelectedSize(content.size);
@@ -47,11 +54,153 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
     }
   }, [selectedProject]);
 
+  // Save to version history
+  const saveToHistory = (html: string) => {
+    const newHistory = versionHistory.slice(0, currentVersionIndex + 1);
+    newHistory.push(html);
+    if (newHistory.length > 50) newHistory.shift(); // Keep last 50 versions
+    setVersionHistory(newHistory);
+    setCurrentVersionIndex(newHistory.length - 1);
+  };
+
+  // Handle content changes
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const handleInput = () => {
+      saveToHistory(editor.innerHTML);
+    };
+
+    const handlePaste = (e: ClipboardEvent) => {
+      e.preventDefault();
+      const text = e.clipboardData?.getData('text/plain') || '';
+      document.execCommand('insertText', false, text);
+    };
+
+    editor.addEventListener('input', handleInput);
+    editor.addEventListener('paste', handlePaste);
+
+    return () => {
+      editor.removeEventListener('input', handleInput);
+      editor.removeEventListener('paste', handlePaste);
+    };
+  }, []);
+
+  // Navigate version history
+  const goToPreviousVersion = () => {
+    if (currentVersionIndex > 0 && editorRef.current) {
+      const newIndex = currentVersionIndex - 1;
+      editorRef.current.innerHTML = versionHistory[newIndex];
+      setCurrentVersionIndex(newIndex);
+      toast.success("Restored previous version");
+    }
+  };
+
+  const goToNextVersion = () => {
+    if (currentVersionIndex < versionHistory.length - 1 && editorRef.current) {
+      const newIndex = currentVersionIndex + 1;
+      editorRef.current.innerHTML = versionHistory[newIndex];
+      setCurrentVersionIndex(newIndex);
+      toast.success("Restored next version");
+    }
+  };
+
   const execCommand = (command: string, value?: string) => {
     if (editorRef.current) {
       editorRef.current.focus();
       document.execCommand(command, false, value);
-      toast.success("Formatting applied");
+    }
+  };
+
+  const applyHeading = (tag: string) => {
+    if (!editorRef.current) return;
+    
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const selectedText = range.toString();
+    
+    if (!selectedText) {
+      toast.error("Please select text first");
+      return;
+    }
+
+    // Create the heading element
+    const heading = document.createElement(tag);
+    heading.textContent = selectedText;
+    
+    // Replace the selection with the heading
+    range.deleteContents();
+    range.insertNode(heading);
+    
+    // Move cursor after the heading
+    range.setStartAfter(heading);
+    range.setEndAfter(heading);
+    selection.removeAllRanges();
+    selection.addRange(range);
+    
+    toast.success(`Applied ${tag.toUpperCase()}`);
+  };
+
+  const resetColors = () => {
+    if (editorRef.current) {
+      editorRef.current.style.backgroundColor = 'white';
+      editorRef.current.style.color = 'black';
+      toast.success("Colors reset to default");
+    }
+  };
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) throw new Error("Not authenticated");
+
+      const fileName = `${Date.now()}_${file.name}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('documents')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('documents')
+        .getPublicUrl(filePath);
+
+      // Insert image at cursor
+      const img = document.createElement('img');
+      img.src = data.publicUrl;
+      img.style.maxWidth = '100%';
+      img.style.height = 'auto';
+      
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        range.insertNode(img);
+        range.setStartAfter(img);
+        range.setEndAfter(img);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+
+      toast.success("Image uploaded");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload image");
+    }
+  };
+
+  const insertCalculatorResult = (value: string) => {
+    if (editorRef.current) {
+      editorRef.current.focus();
+      document.execCommand('insertText', false, value);
+      setShowCalculator(false);
     }
   };
 
@@ -126,24 +275,18 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
 
           {/* Headings Dropdown */}
           <div className="border-l pl-2">
-            <Select value="" onValueChange={(value) => {
-              if (editorRef.current) {
-                editorRef.current.focus();
-                document.execCommand("formatBlock", false, `<${value}>`);
-                toast.success(`Applied ${value.toUpperCase()}`);
-              }
-            }}>
+            <Select value="" onValueChange={applyHeading}>
               <SelectTrigger className="w-24 h-8 text-xs">
                 <SelectValue placeholder="Style" />
               </SelectTrigger>
               <SelectContent className="bg-background z-50">
                 <SelectItem value="p">Normal</SelectItem>
-                <SelectItem value="h1" className="text-3xl font-bold">Heading 1</SelectItem>
-                <SelectItem value="h2" className="text-2xl font-bold">Heading 2</SelectItem>
-                <SelectItem value="h3" className="text-xl font-bold">Heading 3</SelectItem>
-                <SelectItem value="h4" className="text-lg font-bold">Heading 4</SelectItem>
-                <SelectItem value="h5" className="text-base font-bold">Heading 5</SelectItem>
-                <SelectItem value="h6" className="text-sm font-bold">Heading 6</SelectItem>
+                <SelectItem value="h1">Heading 1</SelectItem>
+                <SelectItem value="h2">Heading 2</SelectItem>
+                <SelectItem value="h3">Heading 3</SelectItem>
+                <SelectItem value="h4">Heading 4</SelectItem>
+                <SelectItem value="h5">Heading 5</SelectItem>
+                <SelectItem value="h6">Heading 6</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -166,25 +309,41 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
 
           {/* Lists */}
           <div className="flex gap-1 border-l pl-2">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertUnorderedList")} title="Bullet List">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0" 
+              onClick={() => {
+                editorRef.current?.focus();
+                document.execCommand("insertUnorderedList", false);
+              }} 
+              title="Bullet List"
+            >
               <List className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertOrderedList")} title="Numbered List">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0" 
+              onClick={() => {
+                editorRef.current?.focus();
+                document.execCommand("insertOrderedList", false);
+              }} 
+              title="Numbered List"
+            >
               <ListOrdered className="h-4 w-4" />
             </Button>
           </div>
 
-          {/* Undo/Redo */}
+          {/* Version History Navigation */}
           <div className="flex gap-1 border-l pl-2">
             <Button 
               variant="ghost" 
               size="sm"
               className="h-8 w-8 p-0"
-              onClick={() => {
-                document.execCommand("undo", false);
-                editorRef.current?.focus();
-              }} 
-              title="Undo (Ctrl+Z)"
+              onClick={goToPreviousVersion}
+              disabled={currentVersionIndex <= 0}
+              title="Previous Version"
             >
               <Undo className="h-4 w-4" />
             </Button>
@@ -192,13 +351,57 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
               variant="ghost" 
               size="sm"
               className="h-8 w-8 p-0"
-              onClick={() => {
-                document.execCommand("redo", false);
-                editorRef.current?.focus();
-              }} 
-              title="Redo (Ctrl+Y)"
+              onClick={goToNextVersion}
+              disabled={currentVersionIndex >= versionHistory.length - 1}
+              title="Next Version"
             >
               <Redo className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Image Upload */}
+          <div className="flex gap-1 border-l pl-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => fileInputRef.current?.click()}
+              title="Insert Image"
+            >
+              <Image className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Calculator */}
+          <div className="flex gap-1 border-l pl-2">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => setShowCalculator(true)}
+              title="Calculator"
+            >
+              <Calculator className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Color Reset */}
+          <div className="flex gap-1 border-l pl-2">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={resetColors}
+              title="Reset Colors"
+            >
+              <Palette className="h-4 w-4" />
             </Button>
           </div>
 
@@ -261,6 +464,13 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Calculator */}
+      <ScientificCalculator
+        isOpen={showCalculator}
+        onClose={() => setShowCalculator(false)}
+        onInsertResult={insertCalculatorResult}
+      />
     </div>
   );
 }
