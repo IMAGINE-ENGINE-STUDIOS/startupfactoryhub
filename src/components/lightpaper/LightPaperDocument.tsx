@@ -52,8 +52,38 @@ export function LightPaperDocument() {
   }, [selectedFont, bgColor]);
 
   const execCommand = (command: string, value?: string) => {
-    editorRef.current?.focus();
-    document.execCommand(command, false, value);
+    if (editorRef.current) {
+      editorRef.current.focus();
+      document.execCommand(command, false, value);
+    }
+  };
+
+  const applyHeading = (tag: string) => {
+    if (editorRef.current) {
+      editorRef.current.focus();
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        document.execCommand('formatBlock', false, tag);
+      }
+    }
+  };
+
+  const applyFontSize = (size: string) => {
+    if (editorRef.current) {
+      editorRef.current.focus();
+      const selection = window.getSelection();
+      if (selection && selection.toString().length > 0) {
+        document.execCommand('fontSize', false, '7');
+        const fontElements = editorRef.current.querySelectorAll('font[size="7"]');
+        fontElements.forEach((element) => {
+          (element as HTMLElement).removeAttribute('size');
+          (element as HTMLElement).style.fontSize = `${size}px`;
+        });
+      } else {
+        // Apply to entire editor if no selection
+        editorRef.current.style.fontSize = `${size}px`;
+      }
+    }
   };
 
   const handleSaveToAccount = async () => {
@@ -129,14 +159,24 @@ export function LightPaperDocument() {
   };
 
   const insertTable = () => {
-    const table = '<table border="1" style="border-collapse: collapse; width: 100%;"><tr><td style="padding: 8px;">Cell 1</td><td style="padding: 8px;">Cell 2</td></tr><tr><td style="padding: 8px;">Cell 3</td><td style="padding: 8px;">Cell 4</td></tr></table>';
-    document.execCommand('insertHTML', false, table);
+    if (editorRef.current) {
+      editorRef.current.focus();
+      const table = '<table border="1" style="border-collapse: collapse; width: 100%; margin: 10px 0;"><tr><td style="padding: 8px; border: 1px solid #ccc;">Cell 1</td><td style="padding: 8px; border: 1px solid #ccc;">Cell 2</td></tr><tr><td style="padding: 8px; border: 1px solid #ccc;">Cell 3</td><td style="padding: 8px; border: 1px solid #ccc;">Cell 4</td></tr></table><p><br></p>';
+      document.execCommand('insertHTML', false, table);
+      toast.success("Table inserted!");
+    }
   };
 
   const insertLink = () => {
-    const url = prompt('Enter URL:');
+    const selection = window.getSelection();
+    if (!selection || selection.toString().length === 0) {
+      toast.error("Please select text first to create a link");
+      return;
+    }
+    const url = prompt('Enter URL (include https://):');
     if (url) {
       execCommand('createLink', url);
+      toast.success("Link created!");
     }
   };
 
@@ -149,8 +189,12 @@ export function LightPaperDocument() {
       if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          const img = `<img src="${e.target?.result}" style="max-width: 100%; height: auto;" />`;
-          document.execCommand('insertHTML', false, img);
+          if (editorRef.current) {
+            editorRef.current.focus();
+            const img = `<img src="${e.target?.result}" style="max-width: 100%; height: auto; margin: 10px 0;" /><p><br></p>`;
+            document.execCommand('insertHTML', false, img);
+            toast.success("Image inserted!");
+          }
         };
         reader.readAsDataURL(file);
       }
@@ -204,7 +248,10 @@ export function LightPaperDocument() {
               ))}
             </SelectContent>
           </Select>
-          <Select value={selectedSize} onValueChange={(size) => { setSelectedSize(size); execCommand('fontSize', '7'); document.execCommand('fontSize', false, size); }}>
+          <Select value={selectedSize} onValueChange={(size) => { 
+            setSelectedSize(size); 
+            applyFontSize(size);
+          }}>
             <SelectTrigger className="w-[100px]">
               <SelectValue />
             </SelectTrigger>
@@ -255,69 +302,69 @@ export function LightPaperDocument() {
 
         {/* Row 2: Text formatting */}
         <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" size="sm" onClick={() => execCommand('bold')}>
+          <Button variant="outline" size="sm" onClick={() => execCommand('bold')} title="Bold">
             <Bold className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('italic')}>
+          <Button variant="outline" size="sm" onClick={() => execCommand('italic')} title="Italic">
             <Italic className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('underline')}>
+          <Button variant="outline" size="sm" onClick={() => execCommand('underline')} title="Underline">
             <Underline className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('strikeThrough')}>
+          <Button variant="outline" size="sm" onClick={() => execCommand('strikeThrough')} title="Strikethrough">
             <Strikethrough className="h-4 w-4" />
           </Button>
           <Separator orientation="vertical" className="h-8" />
-          <Button variant="outline" size="sm" onClick={() => execCommand('justifyLeft')}>
+          <Button variant="outline" size="sm" onClick={() => execCommand('justifyLeft')} title="Align Left">
             <AlignLeft className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('justifyCenter')}>
+          <Button variant="outline" size="sm" onClick={() => execCommand('justifyCenter')} title="Align Center">
             <AlignCenter className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('justifyRight')}>
+          <Button variant="outline" size="sm" onClick={() => execCommand('justifyRight')} title="Align Right">
             <AlignRight className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('justifyFull')}>
+          <Button variant="outline" size="sm" onClick={() => execCommand('justifyFull')} title="Justify">
             <AlignJustify className="h-4 w-4" />
           </Button>
           <Separator orientation="vertical" className="h-8" />
-          <Button variant="outline" size="sm" onClick={() => execCommand('insertUnorderedList')}>
+          <Button variant="outline" size="sm" onClick={() => execCommand('insertUnorderedList')} title="Bullet List">
             <List className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('insertOrderedList')}>
+          <Button variant="outline" size="sm" onClick={() => execCommand('insertOrderedList')} title="Numbered List">
             <ListOrdered className="h-4 w-4" />
           </Button>
           <Separator orientation="vertical" className="h-8" />
-          <Button variant="outline" size="sm" onClick={() => execCommand('formatBlock', '<h1>')}>
+          <Button variant="outline" size="sm" onClick={() => applyHeading('h1')} title="Heading 1">
             <Heading1 className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('formatBlock', '<h2>')}>
+          <Button variant="outline" size="sm" onClick={() => applyHeading('h2')} title="Heading 2">
             <Heading2 className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('formatBlock', '<h3>')}>
+          <Button variant="outline" size="sm" onClick={() => applyHeading('h3')} title="Heading 3">
             <Heading3 className="h-4 w-4" />
           </Button>
         </div>
 
         {/* Row 3: Insert and undo/redo */}
         <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" size="sm" onClick={insertImage}>
+          <Button variant="outline" size="sm" onClick={insertImage} title="Insert Image">
             <ImageIcon className="h-4 w-4 mr-1" />
             Image
           </Button>
-          <Button variant="outline" size="sm" onClick={insertLink}>
+          <Button variant="outline" size="sm" onClick={insertLink} title="Insert Link">
             <Link className="h-4 w-4 mr-1" />
             Link
           </Button>
-          <Button variant="outline" size="sm" onClick={insertTable}>
+          <Button variant="outline" size="sm" onClick={insertTable} title="Insert Table">
             <Table className="h-4 w-4 mr-1" />
             Table
           </Button>
           <Separator orientation="vertical" className="h-8" />
-          <Button variant="outline" size="sm" onClick={() => execCommand('undo')}>
+          <Button variant="outline" size="sm" onClick={() => execCommand('undo')} title="Undo">
             <Undo className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="sm" onClick={() => execCommand('redo')}>
+          <Button variant="outline" size="sm" onClick={() => execCommand('redo')} title="Redo">
             <Redo className="h-4 w-4" />
           </Button>
         </div>
