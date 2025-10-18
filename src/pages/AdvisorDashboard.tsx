@@ -21,6 +21,7 @@ import AIFeaturesHub from '@/components/AIFeaturesHub';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import StartupProfileDialog from '@/components/StartupProfileDialog';
 import NetworkBrowser from '@/components/NetworkBrowser';
+import UnifiedCalendar from '@/components/UnifiedCalendar';
 
 interface Startup {
   id: string;
@@ -196,6 +197,71 @@ export default function AdvisorDashboard() {
     setProfile(data);
   };
 
+  const offerMentorship = async (companyId: string, menteeUserId: string, startupName: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('mentorship_relationships')
+        .insert({
+          mentor_id: user.id,
+          mentee_id: menteeUserId,
+          status: 'pending',
+          goals: `Mentorship offer for ${startupName}`
+        });
+
+      if (error) {
+        if (error.code === '23505') {
+          toast({
+            title: "Already Offered",
+            description: "You've already offered mentorship to this startup.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
+
+      // Get advisor profile for notification
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('full_name')
+        .eq('user_id', user.id)
+        .single();
+
+      const advisorName = profile?.full_name || 'An advisor';
+
+      // Send notification to startup
+      await supabase
+        .from('notifications')
+        .insert({
+          user_id: menteeUserId,
+          type: 'connection',
+          title: 'New Mentorship Offer',
+          message: `${advisorName} has offered to mentor your startup!`,
+          data: {
+            mentor_id: user.id,
+            startup_name: startupName
+          }
+        });
+
+      toast({
+        title: "Mentorship Offered!",
+        description: `Your mentorship offer to ${startupName} has been sent.`,
+      });
+
+      fetchStartups();
+    } catch (error) {
+      console.error('Error offering mentorship:', error);
+      toast({
+        title: "Error",
+        description: "Failed to offer mentorship. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const fetchStartups = async () => {
     const { data, error } = await supabase
       .from('companies')
@@ -281,11 +347,12 @@ export default function AdvisorDashboard() {
 
         <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-4xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
               <TabsTrigger value="requests" className="flex-shrink-0">Requests</TabsTrigger>
               <TabsTrigger value="mentees" className="flex-shrink-0">My Mentees</TabsTrigger>
+              <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
               <TabsTrigger value="schedule" className="flex-shrink-0">Schedule</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
@@ -337,12 +404,7 @@ export default function AdvisorDashboard() {
                         <Button 
                           size="sm" 
                           className="pulse-primary"
-                          onClick={() => {
-                            toast({
-                              title: "Feature Coming Soon",
-                              description: "The mentorship application process is being finalized.",
-                            });
-                          }}
+                          onClick={() => offerMentorship(startup.id, startup.user_id, startup.name)}
                         >
                           Offer Mentorship
                         </Button>
@@ -406,6 +468,10 @@ export default function AdvisorDashboard() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="calendar" className="space-y-4">
+            <UnifiedCalendar />
           </TabsContent>
 
           <TabsContent value="schedule" className="space-y-4">

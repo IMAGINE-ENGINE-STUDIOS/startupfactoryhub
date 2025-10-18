@@ -32,6 +32,7 @@ interface FeedPost {
     full_name: string;
     avatar_url?: string;
   } | null;
+  user_role?: string | null;
   post_likes: { user_id: string }[];
   post_comments: { 
     id: string; 
@@ -141,14 +142,26 @@ export default function UnifiedCommunityFeed({
       .select('user_id, full_name, avatar_url')
       .in('user_id', userIds);
 
+    // Fetch user roles
+    const { data: rolesData } = await supabase
+      .from('user_roles')
+      .select('user_id, role')
+      .in('user_id', userIds);
+
     const profilesMap = (profilesData || []).reduce((acc, profile) => {
       acc[profile.user_id] = profile;
       return acc;
     }, {} as Record<string, any>);
 
+    const rolesMap = (rolesData || []).reduce((acc, roleEntry) => {
+      acc[roleEntry.user_id] = roleEntry.role;
+      return acc;
+    }, {} as Record<string, string>);
+
     const formattedPosts = (postsData || []).map(post => ({
       ...post,
       profiles: profilesMap[post.user_id] || null,
+      user_role: rolesMap[post.user_id] || null,
       _count: {
         post_likes: post.post_likes?.length || 0,
         post_comments: post.post_comments?.length || 0
@@ -517,6 +530,22 @@ export default function UnifiedCommunityFeed({
     });
   };
 
+  const getRoleBadgeColor = (role: string | null) => {
+    switch (role) {
+      case 'startup': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+      case 'investor': return 'bg-green-500/10 text-green-500 border-green-500/20';
+      case 'mentor': return 'bg-purple-500/10 text-purple-500 border-purple-500/20';
+      case 'advisor': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+      case 'student': return 'bg-pink-500/10 text-pink-500 border-pink-500/20';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
+  const getRoleLabel = (role: string | null) => {
+    if (!role) return null;
+    return role.charAt(0).toUpperCase() + role.slice(1);
+  };
+
   if (!user) {
     return (
       <div className="space-y-6">
@@ -662,6 +691,14 @@ export default function UnifiedCommunityFeed({
                         >
                           {post.profiles?.full_name || 'Anonymous User'}
                         </h3>
+                        {post.user_role && (
+                          <Badge 
+                            variant="outline" 
+                            className={`text-xs ${getRoleBadgeColor(post.user_role)}`}
+                          >
+                            {getRoleLabel(post.user_role)}
+                          </Badge>
+                        )}
                         <span className="text-muted-foreground">•</span>
                         <span className="text-xs sm:text-sm text-muted-foreground">{formatDate(post.created_at)}</span>
                       </div>
