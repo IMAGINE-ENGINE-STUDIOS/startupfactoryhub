@@ -886,6 +886,94 @@ export type Database = {
           },
         ]
       }
+      document_comments: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          position: Json | null
+          project_id: string
+          thread_id: string | null
+          updated_at: string
+          user_avatar: string | null
+          user_id: string | null
+          user_name: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          position?: Json | null
+          project_id: string
+          thread_id?: string | null
+          updated_at?: string
+          user_avatar?: string | null
+          user_id?: string | null
+          user_name: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          position?: Json | null
+          project_id?: string
+          thread_id?: string | null
+          updated_at?: string
+          user_avatar?: string | null
+          user_id?: string | null
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_comments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "lightpaper_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_cursors: {
+        Row: {
+          id: string
+          last_active: string
+          position: Json
+          project_id: string
+          user_avatar: string | null
+          user_color: string
+          user_id: string | null
+          user_name: string
+        }
+        Insert: {
+          id?: string
+          last_active?: string
+          position: Json
+          project_id: string
+          user_avatar?: string | null
+          user_color: string
+          user_id?: string | null
+          user_name: string
+        }
+        Update: {
+          id?: string
+          last_active?: string
+          position?: Json
+          project_id?: string
+          user_avatar?: string | null
+          user_color?: string
+          user_id?: string | null
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_cursors_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "lightpaper_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_versions: {
         Row: {
           content: Json
@@ -3008,6 +3096,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      cleanup_old_cursors: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]

@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
@@ -17,6 +17,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CommandHistory, Command } from "@/lib/commandHistory";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { useDocumentCollaboration } from "@/hooks/useDocumentCollaboration";
+import { LiveCursors } from "./LiveCursors";
+import { CommentsSidebar } from "./CommentsSidebar";
+import { CollaborationPresence } from "./CollaborationPresence";
+import { useAuth } from "@/contexts/AuthContext";
 
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
 const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
@@ -58,11 +63,27 @@ export function LightPaperDocument({
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
   const [searchMatches, setSearchMatches] = useState<number[]>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
+  const [showComments, setShowComments] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const commandHistory = useRef(new CommandHistory());
+  const { user } = useAuth();
   const {
     saveProject
   } = useLightPaperProjects("document");
+
+  // Real-time collaboration
+  const {
+    cursors,
+    comments,
+    myColor,
+    addComment,
+    updateComment,
+    deleteComment,
+    updateCursor,
+  } = useDocumentCollaboration({
+    projectId: currentProjectId,
+    enabled: true,
+  });
 
   // Apply dark mode only once on mount if no project loaded
   useEffect(() => {
@@ -976,6 +997,19 @@ export function LightPaperDocument({
             </Button>
           </div>
 
+          {/* Collaboration - Comments */}
+          <div className="flex gap-0.5 border-l pl-1">
+            <Button 
+              variant={showComments ? "secondary" : "ghost"} 
+              size="sm" 
+              className="h-8 w-8 p-0" 
+              onClick={() => setShowComments(!showComments)} 
+              title="Toggle Comments"
+            >
+              <MessageSquare className="h-4 w-4" />
+            </Button>
+          </div>
+
           {/* Export Options */}
           <div className="flex gap-0.5 border-l pl-1">
             <DropdownMenu>
@@ -1024,7 +1058,18 @@ export function LightPaperDocument({
       </CollapsibleToolbar>
 
       {/* Main Editor Area - Takes Full Height with Pages */}
-      <div ref={wrapperRef} className="flex-1 overflow-auto p-4 bg-muted/30">
+      <div ref={wrapperRef} className="flex-1 overflow-auto p-4 bg-muted/30 flex gap-0">
+        {/* Collaboration Presence */}
+        {currentProjectId && (
+          <div className="fixed top-20 right-4 z-40">
+            <CollaborationPresence documentId={currentProjectId} currentStatus="editing" />
+          </div>
+        )}
+
+        {/* Live Cursors */}
+        {currentProjectId && (
+          <LiveCursors cursors={cursors} containerRef={containerRef} />
+        )}
         <style>{`
           .page {
             width: 21cm;
@@ -1100,6 +1145,16 @@ export function LightPaperDocument({
                 overflowWrap: 'break-word'
               }}
               suppressContentEditableWarning
+              onMouseMove={(e) => {
+                if (currentProjectId) {
+                  updateCursor(e.clientX, e.clientY);
+                }
+              }}
+              onClick={(e) => {
+                if (currentProjectId) {
+                  updateCursor(e.clientX, e.clientY);
+                }
+              }}
             >
               <p>Start typing your document here...</p>
             </div>
@@ -1132,6 +1187,19 @@ export function LightPaperDocument({
             )}
           </div>
         </div>
+
+        {/* Comments Sidebar */}
+        {showComments && currentProjectId && (
+          <CommentsSidebar
+            comments={comments}
+            onAddComment={async (content) => {
+              await addComment(content);
+            }}
+            onUpdateComment={updateComment}
+            onDeleteComment={deleteComment}
+            currentUserId={user?.id}
+          />
+        )}
       </div>
 
       {/* Floating Action Menu */}
