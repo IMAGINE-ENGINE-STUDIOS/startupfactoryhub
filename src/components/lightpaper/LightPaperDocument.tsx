@@ -441,22 +441,26 @@ export function LightPaperDocument({
   };
 
   const insertSignature = (signature: {type: "draw" | "text", data: string, id: string}) => {
-    if (!editorRef.current) return;
+    if (!containerRef.current) return;
+    
+    const pageElement = containerRef.current.querySelector('.page') as HTMLElement;
+    if (!pageElement) return;
     
     const signatureElement = document.createElement('div');
     signatureElement.contentEditable = "false";
-    signatureElement.draggable = true;
     signatureElement.id = `sig-${signature.id}`;
     signatureElement.dataset.signatureId = signature.id;
     signatureElement.style.cssText = `
-      display: inline-block;
+      position: absolute;
       cursor: move;
       padding: 8px;
       border: 2px dashed transparent;
-      margin: 4px;
       background: transparent;
-      position: relative;
       transition: border-color 0.2s ease;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 100;
     `;
     signatureElement.classList.add('signature-element');
 
@@ -472,26 +476,51 @@ export function LightPaperDocument({
       signatureElement.style.color = isDarkMode ? 'white' : 'black';
     }
 
-    signatureElement.ondragstart = (e) => {
-      e.dataTransfer!.effectAllowed = "move";
-      e.dataTransfer!.setData("text/html", signatureElement.outerHTML);
-      e.dataTransfer!.setData("signatureId", signature.id);
-      setDraggingSignature(signature.id);
+    // Custom drag functionality
+    let isDragging = false;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    signatureElement.onmousedown = (e) => {
+      e.preventDefault();
+      isDragging = true;
+      const rect = signatureElement.getBoundingClientRect();
+      const pageRect = pageElement.getBoundingClientRect();
+      offsetX = e.clientX - rect.left;
+      offsetY = e.clientY - rect.top;
+      signatureElement.style.cursor = 'grabbing';
     };
 
-    signatureElement.ondragend = () => {
-      setDraggingSignature(null);
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging) return;
+      e.preventDefault();
+      
+      const pageRect = pageElement.getBoundingClientRect();
+      let newX = e.clientX - pageRect.left - offsetX;
+      let newY = e.clientY - pageRect.top - offsetY;
+      
+      // Keep within page bounds
+      const sigRect = signatureElement.getBoundingClientRect();
+      newX = Math.max(0, Math.min(newX, pageRect.width - sigRect.width));
+      newY = Math.max(0, Math.min(newY, pageRect.height - sigRect.height));
+      
+      signatureElement.style.left = `${newX}px`;
+      signatureElement.style.top = `${newY}px`;
+      signatureElement.style.transform = 'none';
     };
 
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      range.insertNode(signatureElement);
-      range.setStartAfter(signatureElement);
-      range.setEndAfter(signatureElement);
-      selection.removeAllRanges();
-      selection.addRange(range);
-    }
+    const onMouseUp = () => {
+      isDragging = false;
+      signatureElement.style.cursor = 'move';
+    };
+
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+
+    // Store cleanup function
+    signatureElement.dataset.cleanup = 'true';
+    
+    pageElement.appendChild(signatureElement);
 
     setShowSignDialog(false);
     toast.success("Signature inserted! Drag to reposition");
@@ -814,8 +843,8 @@ export function LightPaperDocument({
           }
         `}</style>
         <div ref={containerRef} className="max-w-[21cm] mx-auto">
-          <div className="page">
-            <div 
+          <div className="page" style={{ position: 'relative' }}>
+            <div
               ref={editorRef} 
               contentEditable 
               className="outline-none min-h-full prose prose-lg max-w-none" 
@@ -824,44 +853,6 @@ export function LightPaperDocument({
                 fontSize: `${selectedSize}px`,
                 wordWrap: 'break-word',
                 overflowWrap: 'break-word'
-              }}
-              onDragOver={(e) => {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = "move";
-              }}
-              onDrop={(e) => {
-                e.preventDefault();
-                const signatureHtml = e.dataTransfer.getData("text/html");
-                const signatureId = e.dataTransfer.getData("signatureId");
-                
-                if (signatureHtml && editorRef.current) {
-                  // Remove old signature element if it exists
-                  const oldElement = document.querySelector(`[data-signature-id="${signatureId}"]`);
-                  if (oldElement) {
-                    oldElement.remove();
-                  }
-
-                  // Get the drop position
-                  const range = document.caretRangeFromPoint(e.clientX, e.clientY);
-                  if (range) {
-                    const tempDiv = document.createElement('div');
-                    tempDiv.innerHTML = signatureHtml;
-                    const signatureElement = tempDiv.firstChild as HTMLElement;
-                    
-                    if (signatureElement) {
-                      range.insertNode(signatureElement);
-                      range.setStartAfter(signatureElement);
-                      range.setEndAfter(signatureElement);
-                      
-                      const selection = window.getSelection();
-                      if (selection) {
-                        selection.removeAllRanges();
-                        selection.addRange(range);
-                      }
-                    }
-                  }
-                }
-                setDraggingSignature(null);
               }}
               suppressContentEditableWarning
             >
