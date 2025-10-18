@@ -1,9 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { CheckCircle2, ExternalLink, AlertCircle } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { useCourseCompletion } from '@/hooks/useCourseCompletion';
-import { useState } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface CourseVideoDialogProps {
   open: boolean;
@@ -45,7 +43,6 @@ const convertToEmbedUrl = (url: string): string => {
 
 export function CourseVideoDialog({ open, onOpenChange, course }: CourseVideoDialogProps) {
   const { isCompleted, markCourseComplete } = useCourseCompletion();
-  const [hasError, setHasError] = useState(false);
 
   if (!course) return null;
 
@@ -54,10 +51,6 @@ export function CourseVideoDialog({ open, onOpenChange, course }: CourseVideoDia
 
   const handleMarkComplete = () => {
     markCourseComplete(course.id, course.title);
-  };
-
-  const openInYouTube = () => {
-    window.open(course.playlist_url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -75,15 +68,6 @@ export function CourseVideoDialog({ open, onOpenChange, course }: CourseVideoDia
           </div>
         </DialogHeader>
         <div className="p-6">
-          {hasError && (
-            <Alert className="mb-4">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Unable to load video. Click "Open in YouTube" to watch directly on YouTube.
-              </AlertDescription>
-            </Alert>
-          )}
-          
           <div className="aspect-video w-full rounded-lg overflow-hidden bg-black shadow-2xl">
             <iframe
               width="100%"
@@ -94,22 +78,16 @@ export function CourseVideoDialog({ open, onOpenChange, course }: CourseVideoDia
               allowFullScreen
               className="w-full h-full"
               title={course.title}
-              onError={() => setHasError(true)}
             />
           </div>
-          
-          <div className="mt-4 flex justify-between items-center gap-2">
-            <Button onClick={openInYouTube} variant="outline" size="sm">
-              <ExternalLink className="w-4 h-4 mr-2" />
-              Open in YouTube
-            </Button>
-            {!completed && (
+          {!completed && (
+            <div className="mt-4 flex justify-end">
               <Button onClick={handleMarkComplete} variant="default">
                 <CheckCircle2 className="w-4 h-4 mr-2" />
                 Mark as Complete & Earn 50 Points
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </DialogContent>
     </Dialog>

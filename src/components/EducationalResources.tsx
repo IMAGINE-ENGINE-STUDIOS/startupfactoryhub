@@ -29,7 +29,7 @@ interface Course {
   playlist_url: string;
 }
 
-// YouTube course data - All verified working videos
+// YouTube course data - Verified working videos only
 const youtubeCourses: Course[] = [
   {
     id: '1',
@@ -53,16 +53,6 @@ const youtubeCourses: Course[] = [
   },
   {
     id: '3',
-    title: 'Stanford CS183F - Startup First 100 Days',
-    instructor: 'Stanford University',
-    description: 'Focus on the critical first 100 days of launching a startup with actionable insights.',
-    category: 'Business Strategy',
-    level: 'Intermediate',
-    duration: '10 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PLoROMvodv4rNpMrTeeh-627Lajh6uSUgY'
-  },
-  {
-    id: '4',
     title: 'Pitch Deck Masterclass',
     instructor: 'Dave McClure',
     description: 'Learn to create compelling pitch decks that attract investors from 500 Startups founder.',
@@ -72,7 +62,7 @@ const youtubeCourses: Course[] = [
     playlist_url: 'https://www.youtube.com/watch?v=9c2oiXPZkc0'
   },
   {
-    id: '5',
+    id: '4',
     title: 'Financial Modeling for Startups',
     instructor: 'Corporate Finance Institute',
     description: 'Master financial modeling techniques essential for startup founders and finance teams.',
@@ -82,7 +72,7 @@ const youtubeCourses: Course[] = [
     playlist_url: 'https://www.youtube.com/watch?v=WEDIj9JBTC8'
   },
   {
-    id: '6',
+    id: '5',
     title: 'GaryVee Marketing Masterclass',
     instructor: 'Gary Vaynerchuk',
     description: 'Comprehensive digital marketing strategies and growth hacks for early-stage startups.',
@@ -92,17 +82,7 @@ const youtubeCourses: Course[] = [
     playlist_url: 'https://www.youtube.com/playlist?list=PLfA33-E9P7FAvnrOcgy4MvIcCXxoyjuku'
   },
   {
-    id: '7',
-    title: 'HubSpot Academy Marketing',
-    instructor: 'HubSpot',
-    description: 'Learn inbound marketing, content strategy, and lead generation from HubSpot experts.',
-    category: 'Marketing',
-    level: 'Intermediate',
-    duration: '8 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PLzUWS9uBdJ2GZ5bPRP8KJ0nFhKqP8QnVH'
-  },
-  {
-    id: '8',
+    id: '6',
     title: 'Y Combinator Investor Pitches',
     instructor: 'Y Combinator',
     description: 'Watch real startup pitches and learn what investors look for in fundraising presentations.',
@@ -112,17 +92,7 @@ const youtubeCourses: Course[] = [
     playlist_url: 'https://www.youtube.com/playlist?list=PLQ-uHSnFig5MiLRb-l6yiJ5VZQdAKyt3-'
   },
   {
-    id: '9',
-    title: 'Startup Finance Basics',
-    instructor: 'Corporate Finance Institute',
-    description: 'Essential finance knowledge for founders including budgeting, cash flow, and unit economics.',
-    category: 'Finance',
-    level: 'Beginner',
-    duration: '6 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PL_NAkUK835PWbhOImFhCH0w-a6GR-iV9k'
-  },
-  {
-    id: '10',
+    id: '7',
     title: 'Google Digital Garage - Tech Skills',
     instructor: 'Google',
     description: 'Build essential digital skills for modern business from Google experts.',
@@ -130,16 +100,6 @@ const youtubeCourses: Course[] = [
     level: 'Beginner',
     duration: '10 hours',
     playlist_url: 'https://www.youtube.com/playlist?list=PLyQrd1vAV_2Ix8nxGdAiPl8PYCuDLaX-Y'
-  },
-  {
-    id: '11',
-    title: 'How to Start a Business - Full Course',
-    instructor: 'Multiple Experts',
-    description: 'Complete guide to launching and running a successful business from idea to execution.',
-    category: 'Business Strategy',
-    level: 'Beginner',
-    duration: '12 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PL1O57nCUQ-e-u2nuXM_hnfa5cIFaTCaxY'
   }
 ];
 
