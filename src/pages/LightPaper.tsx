@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/button";
 import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
-
 export default function LightPaper() {
   const [activeTab, setActiveTab] = useState("document");
   const [showAI, setShowAI] = useState(false);
@@ -19,9 +18,7 @@ export default function LightPaper() {
   const [showFiles, setShowFiles] = useState(false);
   const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       <div className="border-b bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -37,29 +34,12 @@ export default function LightPaper() {
               </span>
             </div>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowFiles(true)}
-                className="gap-2"
-              >
+              <Button variant="outline" onClick={() => setShowFiles(true)} className="gap-2">
                 <FolderOpen className="h-4 w-4" />
                 My Files
               </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowCalculator(true)}
-                className="gap-2"
-              >
-                <Calculator className="h-4 w-4" />
-                Calculator
-              </Button>
-              <Button
-                onClick={() => setShowAI(true)}
-                className="gap-2"
-              >
-                <Sparkles className="h-4 w-4" />
-                AI Assistant
-              </Button>
+              
+              
             </div>
           </div>
         </div>
@@ -107,24 +87,14 @@ export default function LightPaper() {
       <AIAssistant isOpen={showAI} onClose={() => setShowAI(false)} />
       <ScientificCalculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} />
 
-      <MyFilesDrawer
-        isOpen={showFiles}
-        onClose={() => setShowFiles(false)}
-        onOpenProject={(project) => {
-          setSelectedProject(project);
-          setActiveTab(project.project_type);
-        }}
-        onShareProject={(project) => {
-          setSelectedProject(project);
-          setShowShareDialog(true);
-        }}
-      />
+      <MyFilesDrawer isOpen={showFiles} onClose={() => setShowFiles(false)} onOpenProject={project => {
+      setSelectedProject(project);
+      setActiveTab(project.project_type);
+    }} onShareProject={project => {
+      setSelectedProject(project);
+      setShowShareDialog(true);
+    }} />
 
-      <ShareDialog
-        isOpen={showShareDialog}
-        onClose={() => setShowShareDialog(false)}
-        project={selectedProject}
-      />
-    </div>
-  );
+      <ShareDialog isOpen={showShareDialog} onClose={() => setShowShareDialog(false)} project={selectedProject} />
+    </div>;
 }
