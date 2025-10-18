@@ -151,16 +151,20 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
 
           {/* Event Info */}
           <div className="space-y-4">
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Calendar className="h-5 w-5" />
-              <span>{format(parseISO(event.start_date), 'EEEE, MMMM d, yyyy')}</span>
-            </div>
-            <div className="flex items-center gap-2 text-muted-foreground">
-              <Clock className="h-5 w-5" />
-              <span>
-                {format(parseISO(event.start_date), 'h:mm a')} - {format(parseISO(event.end_date), 'h:mm a')}
-              </span>
-            </div>
+            {event.start_date && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Calendar className="h-5 w-5" />
+                <span>{format(parseISO(event.start_date), 'EEEE, MMMM d, yyyy')}</span>
+              </div>
+            )}
+            {event.start_date && event.end_date && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <Clock className="h-5 w-5" />
+                <span>
+                  {format(parseISO(event.start_date), 'h:mm a')} - {format(parseISO(event.end_date), 'h:mm a')}
+                </span>
+              </div>
+            )}
             {event.location && (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <MapPin className="h-5 w-5" />
