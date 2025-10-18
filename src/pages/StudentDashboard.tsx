@@ -1,11 +1,20 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { BookOpen, Trophy, Target, Star } from 'lucide-react';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
+import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
+import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import AIFeaturesHub from '@/components/AIFeaturesHub';
+import NetworkBrowser from '@/components/NetworkBrowser';
+import UnifiedCalendar from '@/components/UnifiedCalendar';
+import EducationalResources from '@/components/EducationalResources';
 import FloatingChat from '@/components/FloatingChat';
 
 export default function StudentDashboard() {
@@ -146,19 +155,53 @@ export default function StudentDashboard() {
           ))}
         </div>
 
-        {/* Main Content Area - Ready for new features */}
-        <Card className="tech-card border-0">
-          <CardContent className="p-8 text-center">
-            <div className="max-w-md mx-auto space-y-4">
-              <BookOpen className="h-16 w-16 text-primary mx-auto" />
-              <h2 className="text-2xl font-bold">Welcome to Your Student Dashboard</h2>
-              <p className="text-muted-foreground">
-                Your personalized learning hub is being designed. This space will feature your courses, 
-                assignments, and learning progress.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Main Tabs Navigation */}
+        <Tabs defaultValue="social" className="space-y-6">
+          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8">
+              <TabsTrigger value="social">Social</TabsTrigger>
+              <TabsTrigger value="learning">Learning</TabsTrigger>
+              <TabsTrigger value="jobs">Opportunities</TabsTrigger>
+              <TabsTrigger value="analytics">Analytics</TabsTrigger>
+              <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
+              <TabsTrigger value="tools">Tools</TabsTrigger>
+              <TabsTrigger value="calendar">Calendar</TabsTrigger>
+              <TabsTrigger value="network">Network</TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="social" className="space-y-4">
+            <UnifiedCommunityFeed />
+          </TabsContent>
+
+          <TabsContent value="learning" className="space-y-4">
+            <EducationalResources />
+          </TabsContent>
+
+          <TabsContent value="jobs" className="space-y-4">
+            <UnifiedJobsBoard />
+          </TabsContent>
+
+          <TabsContent value="analytics" className="space-y-4">
+            <AnalyticsDashboard />
+          </TabsContent>
+
+          <TabsContent value="intelligence" className="space-y-4">
+            <MarketIntelligenceWidget />
+          </TabsContent>
+
+          <TabsContent value="tools" className="space-y-4">
+            <AIFeaturesHub />
+          </TabsContent>
+
+          <TabsContent value="calendar" className="space-y-4">
+            <UnifiedCalendar />
+          </TabsContent>
+
+          <TabsContent value="network" className="space-y-4">
+            <NetworkBrowser />
+          </TabsContent>
+        </Tabs>
       </div>
 
       {/* Floating Chat with AI */}
