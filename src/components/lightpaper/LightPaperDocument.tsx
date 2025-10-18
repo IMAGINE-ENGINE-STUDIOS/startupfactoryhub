@@ -252,6 +252,13 @@ export function LightPaperDocument({
       // Ensure the editor maintains focus and execute command
       setTimeout(() => {
         document.execCommand(command, false, value);
+        
+        // Show toast for list commands
+        if (command === "insertUnorderedList") {
+          toast.success("Bullet list created");
+        } else if (command === "insertOrderedList") {
+          toast.success("Numbered list created");
+        }
       }, 0);
     }
   };
@@ -285,6 +292,12 @@ export function LightPaperDocument({
       if (pageElement) {
         pageElement.style.backgroundColor = 'black';
         pageElement.style.color = 'white';
+        
+        // Update list styles for dark mode
+        const lists = pageElement.querySelectorAll('ul, ol, li');
+        lists.forEach((list) => {
+          (list as HTMLElement).style.color = 'white';
+        });
       }
       if (editorRef.current) {
         editorRef.current.style.color = 'white';
@@ -295,6 +308,12 @@ export function LightPaperDocument({
       if (pageElement) {
         pageElement.style.backgroundColor = 'white';
         pageElement.style.color = 'black';
+        
+        // Update list styles for light mode
+        const lists = pageElement.querySelectorAll('ul, ol, li');
+        lists.forEach((list) => {
+          (list as HTMLElement).style.color = 'black';
+        });
       }
       if (editorRef.current) {
         editorRef.current.style.color = 'black';
@@ -699,6 +718,45 @@ export function LightPaperDocument({
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             page-break-after: always;
           }
+          
+          /* List Styles */
+          .page ul {
+            list-style-type: disc;
+            padding-left: 40px;
+            margin: 16px 0;
+          }
+          
+          .page ol {
+            list-style-type: decimal;
+            padding-left: 40px;
+            margin: 16px 0;
+          }
+          
+          .page li {
+            margin: 8px 0;
+            padding-left: 8px;
+            display: list-item;
+          }
+          
+          /* Nested lists */
+          .page ul ul {
+            list-style-type: circle;
+            margin: 4px 0;
+          }
+          
+          .page ul ul ul {
+            list-style-type: square;
+          }
+          
+          .page ol ol {
+            list-style-type: lower-alpha;
+            margin: 4px 0;
+          }
+          
+          .page ol ol ol {
+            list-style-type: lower-roman;
+          }
+          
           @media print {
             .page {
               margin: 0;
