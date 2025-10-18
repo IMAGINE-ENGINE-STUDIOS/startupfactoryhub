@@ -120,7 +120,7 @@ const Dashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 lg:pb-6 relative">
+    <div className="min-h-screen bg-background pb-24 lg:pb-6 relative overflow-x-hidden">
       <DashboardHeader />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-8">
@@ -147,8 +147,8 @@ const Dashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs defaultValue="social" className="space-y-6">
-          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl">
+          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-thin">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
               <TabsTrigger value="journey" className="flex-shrink-0">Journey</TabsTrigger>

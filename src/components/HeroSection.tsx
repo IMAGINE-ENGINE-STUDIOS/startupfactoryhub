@@ -44,7 +44,7 @@ const HeroSection = () => {
 
           {/* Main Heading */}
           <div className="text-center mb-8 sm:mb-12 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <h1 className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-bold mb-4 sm:mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold mb-4 sm:mb-6 leading-tight">
               <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent animate-gradient">
                 Startup Factory
               </span>
@@ -52,7 +52,7 @@ const HeroSection = () => {
               <span className="text-foreground">Hub</span>
             </h1>
             
-            <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">
               The ultimate social accelerator platform where startups, mentors, investors, and students 
               connect in real-time with AI-powered tools.
             </p>

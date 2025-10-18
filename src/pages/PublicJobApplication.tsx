@@ -137,30 +137,30 @@ export default function PublicJobApplication() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12 px-4">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-background py-6 sm:py-12 px-4">
+      <div className="max-w-3xl mx-auto overflow-hidden">
         {/* Job Info */}
-        <Card className="mb-6">
+        <Card className="mb-6 overflow-hidden">
           <CardHeader>
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-3 sm:gap-4">
               {job.companies.logo_url && (
                 <img
                   src={job.companies.logo_url}
                   alt={job.companies.name}
-                  className="w-16 h-16 rounded-lg object-cover"
+                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg object-cover flex-shrink-0"
                 />
               )}
-              <div className="flex-1">
-                <CardTitle className="text-2xl mb-2">{job.title}</CardTitle>
-                <CardDescription className="flex items-center gap-3 text-base">
+              <div className="flex-1 min-w-0">
+                <CardTitle className="text-xl sm:text-2xl mb-2 break-words">{job.title}</CardTitle>
+                <CardDescription className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 text-sm sm:text-base">
                   <span className="flex items-center gap-1">
-                    <Building className="h-4 w-4" />
-                    {job.companies.name}
+                    <Building className="h-4 w-4 flex-shrink-0" />
+                    <span className="truncate">{job.companies.name}</span>
                   </span>
                   {job.location && (
                     <span className="flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      {job.location}
+                      <MapPin className="h-4 w-4 flex-shrink-0" />
+                      <span className="truncate">{job.location}</span>
                     </span>
                   )}
                 </CardDescription>
@@ -168,7 +168,7 @@ export default function PublicJobApplication() {
             </div>
           </CardHeader>
           <CardContent>
-            <p className="text-muted-foreground mb-4">{job.description}</p>
+            <p className="text-muted-foreground mb-4 break-words">{job.description}</p>
             <Badge variant="secondary" className="flex items-center gap-1 w-fit">
               <Briefcase className="h-3 w-3" />
               {job.job_type}
@@ -177,13 +177,13 @@ export default function PublicJobApplication() {
         </Card>
 
         {/* Application Form */}
-        <Card>
+        <Card className="overflow-hidden">
           <CardHeader>
-            <CardTitle>Apply for this Position</CardTitle>
-            <CardDescription>Fill out the form below to submit your application</CardDescription>
+            <CardTitle className="text-lg sm:text-xl">Apply for this Position</CardTitle>
+            <CardDescription className="text-sm">Fill out the form below to submit your application</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="name">Full Name *</Label>
                 <Input

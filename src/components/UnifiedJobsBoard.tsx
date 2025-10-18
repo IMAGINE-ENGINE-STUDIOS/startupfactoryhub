@@ -696,19 +696,19 @@ export default function UnifiedJobsBoard() {
           jobs.map((job) => (
             <Card key={job.id} className="hover:shadow-lg transition-shadow">
               <CardHeader>
-                <div className="flex items-start gap-4">
+                <div className="flex items-start gap-3 sm:gap-4">
                   {job.companies?.logo_url && (
                     <img 
                       src={job.companies.logo_url} 
                       alt={job.companies.name} 
-                      className="w-12 h-12 rounded object-cover"
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover flex-shrink-0"
                     />
                   )}
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                      <CardTitle className="text-lg">{job.title}</CardTitle>
-                        <CardDescription className="text-sm">{job.companies?.name}</CardDescription>
+                      <div className="flex-1 min-w-0">
+                      <CardTitle className="text-base sm:text-lg break-words">{job.title}</CardTitle>
+                        <CardDescription className="text-sm truncate">{job.companies?.name}</CardDescription>
                       </div>
                       <Badge className={getCategoryColor(job.category)}>
                         {job.category}
@@ -717,32 +717,32 @@ export default function UnifiedJobsBoard() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground line-clamp-3">{job.description}</p>
+              <CardContent className="space-y-3 sm:space-y-4">
+                <p className="text-sm text-muted-foreground line-clamp-3 break-words">{job.description}</p>
                 
-                <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
                   {job.location && (
                     <div className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      {job.location}
+                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="truncate max-w-[120px] sm:max-w-none">{job.location}</span>
                     </div>
                   )}
                   {job.duration && (
                     <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      {job.duration}
+                      <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="truncate">{job.duration}</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1">
-                    <DollarSign className="w-4 h-4" />
-                    {getCompensationDisplay(job)}
+                    <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                    <span className="truncate">{getCompensationDisplay(job)}</span>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between pt-2">
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
+                  <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground w-full sm:w-auto">
                     {job.is_task_based && (
-                      <Badge variant="outline" className="gap-1">
+                      <Badge variant="outline" className="gap-1 text-xs">
                         <CheckCircle className="w-3 h-3" />
                         Task-Based
                       </Badge>
@@ -753,10 +753,11 @@ export default function UnifiedJobsBoard() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleViewApplications(job.id)}
-                          className="gap-1"
+                          className="gap-1 text-xs sm:text-sm h-8 sm:h-9"
                         >
-                          <Users className="w-4 h-4" />
-                          View Applications ({job.applications_count})
+                          <Users className="w-3 h-3 sm:w-4 sm:h-4" />
+                          <span className="hidden sm:inline">View Applications</span>
+                          <span className="sm:hidden">Apps</span> ({job.applications_count})
                         </Button>
                         <Button
                           variant="outline"
@@ -765,17 +766,18 @@ export default function UnifiedJobsBoard() {
                             e.stopPropagation();
                             handleCopyPublicLink(job.id);
                           }}
-                          className="gap-1"
+                          className="gap-1 text-xs sm:text-sm h-8 sm:h-9"
                           title="Copy public application link - anyone can apply via this link"
                         >
                           <Copy className="w-3 h-3" />
-                          Copy Public Link
+                          <span className="hidden sm:inline">Copy Public Link</span>
+                          <span className="sm:hidden">Copy Link</span>
                         </Button>
                       </>
                     )}
                     {!isCompanyUser && (
                       <div className="flex items-center gap-1">
-                        <Users className="w-4 h-4" />
+                        <Users className="w-3 h-3 sm:w-4 sm:h-4" />
                         {job.applications_count} applicants
                       </div>
                     )}
@@ -785,11 +787,14 @@ export default function UnifiedJobsBoard() {
                     <Button
                       onClick={() => handleApply(job.id, job.external_application_url)}
                       variant={job.external_application_url ? 'outline' : 'default'}
+                      size="sm"
+                      className="w-full sm:w-auto h-9 text-sm"
                     >
                       {job.external_application_url ? (
                         <>
-                          Apply Externally
-                          <ExternalLink className="ml-2 h-4 w-4" />
+                          <span className="hidden sm:inline">Apply Externally</span>
+                          <span className="sm:hidden">Apply</span>
+                          <ExternalLink className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
                         </>
                       ) : (
                         'Apply Now'

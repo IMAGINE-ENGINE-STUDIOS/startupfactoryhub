@@ -299,16 +299,16 @@ export const JobApplicationsViewer = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2 text-sm">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                      <a href={`mailto:${app.applicant_email}`} className="hover:underline">
+                    <div className="flex items-center gap-2 text-sm min-w-0">
+                      <Mail className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                      <a href={`mailto:${app.applicant_email}`} className="hover:underline truncate">
                         {app.applicant_email}
                       </a>
                     </div>
                     {app.applicant_phone && (
-                      <div className="flex items-center gap-2 text-sm">
-                        <Phone className="h-4 w-4 text-muted-foreground" />
-                        <a href={`tel:${app.applicant_phone}`} className="hover:underline">
+                      <div className="flex items-center gap-2 text-sm min-w-0">
+                        <Phone className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                        <a href={`tel:${app.applicant_phone}`} className="hover:underline truncate">
                           {app.applicant_phone}
                         </a>
                       </div>
@@ -318,18 +318,19 @@ export const JobApplicationsViewer = () => {
                   {app.cover_letter && (
                     <div className="space-y-2">
                       <h4 className="font-semibold text-sm">Cover Letter</h4>
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words overflow-hidden">
                         {app.cover_letter}
                       </p>
                     </div>
                   )}
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                     {app.resume_url && (
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => window.open(app.resume_url, '_blank')}
+                        className="w-full sm:w-auto min-h-[44px] sm:min-h-[36px]"
                       >
                         <FileText className="h-4 w-4 mr-2" />
                         View Resume
@@ -342,6 +343,7 @@ export const JobApplicationsViewer = () => {
                           size="sm"
                           variant="default"
                           onClick={() => updateApplicationStatus(app.id, 'accepted', app.applicationType)}
+                          className="w-full sm:w-auto min-h-[44px] sm:min-h-[36px]"
                         >
                           <CheckCircle className="h-4 w-4 mr-2" />
                           Accept
@@ -350,6 +352,7 @@ export const JobApplicationsViewer = () => {
                           size="sm"
                           variant="destructive"
                           onClick={() => updateApplicationStatus(app.id, 'rejected', app.applicationType)}
+                          className="w-full sm:w-auto min-h-[44px] sm:min-h-[36px]"
                         >
                           <XCircle className="h-4 w-4 mr-2" />
                           Reject

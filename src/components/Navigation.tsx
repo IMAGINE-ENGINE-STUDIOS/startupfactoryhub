@@ -28,16 +28,16 @@ const Navigation = () => {
           <div className="hidden md:flex items-center space-x-4">
             {user ? (
               <>
-                <Button variant="ghost" onClick={() => navigate("/dashboard")}>Dashboard</Button>
+                <Button variant="ghost" onClick={() => navigate("/dashboard")} className="min-h-[44px]">Dashboard</Button>
                 <Button variant="hero" size="lg" onClick={async () => {
                   await signOut();
                   navigate("/");
-                }}>Sign Out</Button>
+                }} className="min-h-[44px]">Sign Out</Button>
               </>
             ) : (
               <>
-                <Button variant="ghost" onClick={() => navigate("/auth")}>Sign In</Button>
-                <Button variant="hero" size="lg" onClick={() => navigate("/auth")}>Get Started</Button>
+                <Button variant="ghost" onClick={() => navigate("/auth")} className="min-h-[44px]">Sign In</Button>
+                <Button variant="hero" size="lg" onClick={() => navigate("/auth")} className="min-h-[44px]">Get Started</Button>
               </>
             )}
           </div>
@@ -46,17 +46,17 @@ const Navigation = () => {
           <div className="flex md:hidden items-center space-x-2">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="md:hidden">
+                <Button variant="ghost" size="icon" className="md:hidden min-h-[44px] min-w-[44px]">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] sm:w-[350px]">
-                <div className="flex flex-col space-y-4 mt-8">
+                <div className="flex flex-col space-y-4 mt-8 px-2">
                   {user ? (
                     <>
                       <Button 
                         variant="outline" 
-                        className="w-full"
+                        className="w-full min-h-[48px] text-base"
                         onClick={() => {
                           navigate("/dashboard");
                           closeMenu();
@@ -66,7 +66,7 @@ const Navigation = () => {
                       </Button>
                       <Button 
                         variant="hero" 
-                        className="w-full"
+                        className="w-full min-h-[48px] text-base"
                         onClick={async () => {
                           await signOut();
                           navigate("/");
@@ -80,7 +80,7 @@ const Navigation = () => {
                     <>
                       <Button 
                         variant="outline" 
-                        className="w-full"
+                        className="w-full min-h-[48px] text-base"
                         onClick={() => {
                           navigate("/auth");
                           closeMenu();
@@ -90,7 +90,7 @@ const Navigation = () => {
                       </Button>
                       <Button 
                         variant="hero" 
-                        className="w-full"
+                        className="w-full min-h-[48px] text-base"
                         onClick={() => {
                           navigate("/auth");
                           closeMenu();
