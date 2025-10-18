@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Briefcase, MapPin, DollarSign, Clock, Building2, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import logo from '@/assets/logo.png';
 
 interface Job {
   id: string;
@@ -211,6 +212,23 @@ export default function PublicJobApplicationPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header with Startup Factory Hub Branding */}
+      <div className="bg-gradient-to-r from-purple-600 to-pink-600 py-6 mb-8">
+        <div className="container mx-auto px-4 max-w-4xl">
+          <div className="flex items-center gap-3">
+            <img 
+              src={logo} 
+              alt="Startup Factory Hub" 
+              className="h-12 w-12"
+            />
+            <div>
+              <h1 className="text-2xl font-bold text-white">Startup Factory Hub</h1>
+              <p className="text-white/90 text-sm">AI-Powered Startup Accelerator Platform</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Job Details */}
         <Card className="mb-8">

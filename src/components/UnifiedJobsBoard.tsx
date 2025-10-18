@@ -232,7 +232,7 @@ export default function UnifiedJobsBoard() {
   };
 
   const handleCopyPublicLink = (jobId: string) => {
-    const publicLink = `${window.location.origin}/jobs/public/${jobId}`;
+    const publicLink = `${window.location.origin}/jobs/${jobId}/apply`;
     navigator.clipboard.writeText(publicLink);
     toast({
       title: "Public link copied!",
