@@ -845,6 +845,47 @@ export type Database = {
           },
         ]
       }
+      document_collaborators: {
+        Row: {
+          created_at: string
+          document_id: string
+          id: string
+          last_seen: string
+          status: string
+          user_avatar: string | null
+          user_id: string | null
+          user_name: string
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          id?: string
+          last_seen?: string
+          status?: string
+          user_avatar?: string | null
+          user_id?: string | null
+          user_name: string
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          id?: string
+          last_seen?: string
+          status?: string
+          user_avatar?: string | null
+          user_id?: string | null
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_collaborators_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "shared_pdf_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_versions: {
         Row: {
           content: Json

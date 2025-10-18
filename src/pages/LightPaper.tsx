@@ -19,6 +19,7 @@ export default function LightPaper() {
   const [showFiles, setShowFiles] = useState(false);
   const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareData, setShareData] = useState<{shareUrl: string, shareToken: string, documentTitle: string} | null>(null);
   return <div className="h-screen flex flex-col bg-background overflow-hidden">
       <div className="border-b bg-card flex-shrink-0">
         <div className="container mx-auto px-4 py-4">
@@ -109,11 +110,63 @@ export default function LightPaper() {
       <MyFilesDrawer isOpen={showFiles} onClose={() => setShowFiles(false)} onOpenProject={project => {
       setSelectedProject(project);
       setActiveTab(project.project_type);
-    }} onShareProject={project => {
+    }} onShareProject={async (project) => {
       setSelectedProject(project);
-      setShowShareDialog(true);
+      
+      // For PDF projects, create shareable link
+      if (project.project_type === 'pdf' && project.content) {
+        try {
+          const content = project.content as any;
+          if (content.pdfUrl) {
+            // Generate shareable link
+            const { supabase } = await import("@/integrations/supabase/client");
+            const { data } = await supabase.storage
+              .from('feed-media')
+              .download(content.pdfUrl);
+            
+            if (data) {
+              const file = new File([data], project.title, { type: 'application/pdf' });
+              const { useSharedPDF } = await import("@/hooks/useSharedPDF");
+              const hook = useSharedPDF();
+              const result = await hook.createSharedDocument(project.id, project.title, file, 'sign');
+              
+              if (result) {
+                setShareData({
+                  shareUrl: result.shareUrl,
+                  shareToken: result.shareToken,
+                  documentTitle: project.title,
+                });
+                setShowShareDialog(true);
+              }
+            }
+          }
+        } catch (error) {
+          console.error('Error creating shareable link:', error);
+        }
+      }
     }} />
 
-      {/* ShareDialog temporarily disabled - will be integrated with PDF sharing in next update */}
+      <ShareDialog 
+        isOpen={showShareDialog} 
+        onClose={() => {
+          setShowShareDialog(false);
+          setShareData(null);
+        }}
+        shareData={shareData}
+        onSendEmail={async (email, message, accessLevel) => {
+          if (shareData) {
+            const { useSharedPDF } = await import("@/hooks/useSharedPDF");
+            const hook = useSharedPDF();
+            await hook.sendEmailInvitation(
+              shareData.shareToken,
+              shareData.documentTitle,
+              email,
+              'User',
+              message,
+              accessLevel
+            );
+          }
+        }}
+      />
     </div>;
 }

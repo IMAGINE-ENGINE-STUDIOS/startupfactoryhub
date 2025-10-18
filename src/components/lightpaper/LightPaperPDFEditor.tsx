@@ -27,6 +27,8 @@ import ShareDialog from "./ShareDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { TextFormatToolbar } from "./TextFormatToolbar";
 import { TextSearchDialog, SearchOptions } from "./TextSearchDialog";
+import { CollaborationPresence } from "./CollaborationPresence";
+import { PDFActivityPanel } from "./PDFActivityPanel";
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -122,6 +124,9 @@ export function LightPaperPDFEditor({
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareData, setShareData] = useState<{shareUrl: string, shareToken: string, documentTitle: string} | null>(null);
   const [showSignaturePanel, setShowSignaturePanel] = useState(false);
+  const [showActivityPanel, setShowActivityPanel] = useState(false);
+  const [sharedDocumentId, setSharedDocumentId] = useState<string | null>(null);
+  const [collaborationStatus, setCollaborationStatus] = useState<'viewing' | 'editing' | 'signing'>('viewing');
   const [originalPdfBytes, setOriginalPdfBytes] = useState<Uint8Array | null>(null);
   const [pdfTextItems, setPdfTextItems] = useState<Map<number, PDFTextItem[]>>(new Map());
   const [textReplacements, setTextReplacements] = useState<Map<number, TextReplacement[]>>(new Map());
@@ -197,7 +202,16 @@ export function LightPaperPDFEditor({
     }
   }, [pdfFile, currentPage, signatures, textReplacements, projectTitle, currentProjectId, saveProject]);
 
-  // Debounced auto-save
+  // Update collaboration status when tool changes
+  useEffect(() => {
+    if (tool === 'select') {
+      setCollaborationStatus('viewing');
+    } else if (signatureMode === 'draw' || signatureMode === 'text') {
+      setCollaborationStatus('signing');
+    } else {
+      setCollaborationStatus('editing');
+    }
+  }, [tool, signatureMode]);
   useEffect(() => {
     if (!currentProjectId || !pdfFile) return;
     
@@ -1566,6 +1580,14 @@ export function LightPaperPDFEditor({
             <Button variant="outline" size="sm" onClick={handleShareDocument} title="Share">
               <Share2 className="h-4 w-4" />
             </Button>
+            
+            {/* Collaboration Presence */}
+            {sharedDocumentId && (
+              <CollaborationPresence 
+                documentId={sharedDocumentId} 
+                currentStatus={collaborationStatus}
+              />
+            )}
           </div>
         </CollapsibleToolbar>
 
@@ -1584,8 +1606,9 @@ export function LightPaperPDFEditor({
           className="hidden"
         />
 
-        <Card className="flex-1 overflow-auto">
-          {pdfFile ? <div className="p-4">
+        <div className="flex-1 flex gap-4 overflow-hidden">
+          <Card className="flex-1 overflow-auto">
+            {pdfFile ? <div className="p-4">
               {isLoading && <div className="flex items-center justify-center p-8">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
@@ -1693,7 +1716,15 @@ export function LightPaperPDFEditor({
                 Upload a PDF file to view, annotate, and sign
               </p>
             </div>}
-        </Card>
+          </Card>
+
+          {/* Activity Panel - Collapsible Sidebar */}
+          {sharedDocumentId && (
+            <div className="w-80 flex-shrink-0">
+              <PDFActivityPanel documentId={sharedDocumentId} />
+            </div>
+          )}
+        </div>
       </div>
 
       <FloatingActionMenu onSave={handleSaveToAccount} onPrint={handleExport} />
