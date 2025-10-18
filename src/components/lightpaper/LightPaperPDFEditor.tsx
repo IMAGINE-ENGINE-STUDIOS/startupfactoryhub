@@ -1054,18 +1054,18 @@ export function LightPaperPDFEditor({
               <div className="mx-auto" style={{
             width: pageWidth * zoom
           }}>
-                <Document file={pdfFile} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError} loading={null} className="flex flex-col items-center gap-6">
+                <Document file={pdfFile} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError} loading={null} className="flex flex-col items-center">
                   {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
-                    <div key={pageNum} className="relative flex flex-col items-center gap-2" style={{
+                    <div key={pageNum} className="relative" style={{
                       width: pageWidth * zoom
                     }}>
-                      <div ref={el => el && pageRefs.current.set(pageNum, el)} className="relative shadow-lg">
+                      <div ref={el => el && pageRefs.current.set(pageNum, el)} className="relative">
                         <Page 
                           pageNumber={pageNum} 
                           width={pageWidth * zoom} 
                           onLoadSuccess={() => setupCanvas(pageNum)} 
-                          renderTextLayer={true} 
-                          renderAnnotationLayer={true}
+                          renderTextLayer={false} 
+                          renderAnnotationLayer={false}
                           className="pointer-events-none"
                         />
                         <canvas 
@@ -1077,9 +1077,6 @@ export function LightPaperPDFEditor({
                             touchAction: "none"
                           }} 
                         />
-                      </div>
-                      <div className="text-sm text-muted-foreground font-medium">
-                        Page {pageNum} of {numPages}
                       </div>
                     </div>
                   ))}
