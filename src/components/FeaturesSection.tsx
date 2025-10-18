@@ -79,7 +79,7 @@ const FeaturesSection = () => {
               <div className={`absolute -inset-0.5 bg-gradient-to-r ${feature.gradient} rounded-xl opacity-0 group-hover:opacity-100 blur transition-all duration-500`} />
               
               {/* Card content */}
-              <div className="relative glass-morphism p-6 sm:p-8 rounded-xl transition-all duration-300 group-hover:translate-y-[-8px]">
+              <div className="relative glass-morphism p-6 sm:p-8 rounded-xl transition-all duration-300 group-hover:translate-y-[-8px] h-full">
                 {/* Animated scan line */}
                 <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${feature.gradient} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-700`} />
                 

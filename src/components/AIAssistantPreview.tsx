@@ -89,12 +89,12 @@ export default function AIAssistantPreview() {
                 <div className={`absolute -inset-0.5 bg-gradient-to-r ${feature.color} rounded-xl opacity-0 group-hover:opacity-100 blur transition-all duration-500`} />
                 
                 {/* Card */}
-                <div className="relative glass-morphism p-6 rounded-xl cursor-pointer transition-all duration-300 group-hover:translate-y-[-8px] h-full">
+                <div className="relative glass-morphism p-6 sm:p-8 rounded-xl cursor-pointer transition-all duration-300 group-hover:translate-y-[-8px] h-full">
                   {/* Scan line */}
-                  <div className={`absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r ${feature.color} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-700`} />
+                  <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${feature.color} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-700`} />
                   
                   {/* Icon with circular orbit */}
-                  <div className="relative w-16 h-16 mb-6 mx-auto">
+                  <div className="relative w-16 h-16 sm:w-20 sm:h-20 mb-6 mx-auto">
                     {/* Rotating ring */}
                     <div className={`absolute inset-0 rounded-full border-2 border-dashed border-ocean-primary/30 ${hoveredIndex === index ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }}>
                       <div className="absolute top-0 left-1/2 w-1.5 h-1.5 bg-ocean-primary rounded-full -translate-x-1/2 -translate-y-1/2" />
@@ -107,11 +107,11 @@ export default function AIAssistantPreview() {
                     </div>
                   </div>
                   
-                  <h3 className="text-lg font-bold mb-3 text-center group-hover:text-ocean-primary transition-colors">
+                  <h3 className="text-lg sm:text-xl font-bold mb-3 sm:mb-4 text-center group-hover:text-ocean-primary transition-colors">
                     {feature.title}
                   </h3>
                   
-                  <p className="text-sm text-muted-foreground text-center leading-relaxed">
+                  <p className="text-sm sm:text-base text-muted-foreground text-center leading-relaxed">
                     {feature.description}
                   </p>
                   
