@@ -28,8 +28,6 @@ import {
   PenTool,
 } from "lucide-react";
 import { toast } from "sonner";
-import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import "react-pdf/dist/esm/Page/TextLayer.css";
 import CollapsibleToolbar from "./CollapsibleToolbar";
 import FloatingActionMenu from "./FloatingActionMenu";
 import { useLightPaperProjects } from "@/hooks/useLightPaperProjects";
