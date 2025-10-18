@@ -219,29 +219,22 @@ export function LightPaperDocument({
   };
   const applyHeading = (tag: string) => {
     if (!editorRef.current) return;
+    editorRef.current.focus();
+    
     const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-    const range = selection.getRangeAt(0);
-    const selectedText = range.toString();
-    if (!selectedText) {
+    if (!selection || selection.rangeCount === 0) {
       toast.error("Please select text first");
       return;
     }
 
-    // Create the heading element
-    const heading = document.createElement(tag);
-    heading.textContent = selectedText;
-
-    // Replace the selection with the heading
-    range.deleteContents();
-    range.insertNode(heading);
-
-    // Move cursor after the heading
-    range.setStartAfter(heading);
-    range.setEndAfter(heading);
-    selection.removeAllRanges();
-    selection.addRange(range);
-    toast.success(`Applied ${tag.toUpperCase()}`);
+    // Use formatBlock for proper heading formatting
+    try {
+      document.execCommand('formatBlock', false, `<${tag}>`);
+      toast.success(`Applied ${tag.toUpperCase()}`);
+    } catch (error) {
+      console.error('Error applying heading:', error);
+      toast.error("Failed to apply heading");
+    }
   };
   const resetColors = () => {
     if (editorRef.current && containerRef.current && wrapperRef.current) {
