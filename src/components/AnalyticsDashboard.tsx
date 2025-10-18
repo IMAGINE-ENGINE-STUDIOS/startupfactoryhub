@@ -80,8 +80,8 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
     },
     {
       title: 'Followers',
-      value: analytics.connections.toString(),
-      change: analytics.connections > 0 ? '+' : '0%',
+      value: analytics.followers.toString(),
+      change: analytics.followers > 0 ? '+' : '0%',
       trend: 'up',
       icon: Users,
     },

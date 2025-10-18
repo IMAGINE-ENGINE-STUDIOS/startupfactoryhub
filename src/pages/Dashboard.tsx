@@ -24,6 +24,7 @@ import { CreateEventDialog } from '@/components/CreateEventDialog';
 import OpportunitiesBoard from '@/components/OpportunitiesBoard';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
+import InternshipTasksManager from '@/components/InternshipTasksManager';
 import {
   Plus,
   Target,
@@ -265,6 +266,7 @@ const Dashboard = () => {
 
           {/* Network Tab */}
           <TabsContent value="network" className="space-y-4">
+            <MatchingSystem />
             <NetworkBrowser />
           </TabsContent>
 
@@ -276,6 +278,7 @@ const Dashboard = () => {
           {/* Jobs Tab */}
           <TabsContent value="jobs" className="space-y-4">
             <OpportunitiesBoard />
+            <InternshipTasksManager />
           </TabsContent>
 
           {/* Learn Tab */}
@@ -332,10 +335,7 @@ const Dashboard = () => {
 
           {/* Intelligence Tab */}
           <TabsContent value="intelligence" className="space-y-4">
-            <div className="space-y-6">
-              <StartupAIRecommendations />
-              <MarketIntelligenceWidget />
-            </div>
+            <MarketIntelligenceWidget />
           </TabsContent>
 
           {/* Tools Tab */}

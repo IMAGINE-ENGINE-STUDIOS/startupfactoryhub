@@ -23,6 +23,7 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import NetworkBrowser from '@/components/NetworkBrowser';
 import { DashboardHeader } from '@/components/DashboardHeader';
+import StudentInternshipTasks from '@/components/StudentInternshipTasks';
 
 interface Course {
   id: string;
@@ -332,11 +333,13 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="assignments" className="space-y-4">
+            <StudentInternshipTasks />
+            
             <Card className="tech-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <Target className="h-5 w-5 text-primary" />
-                  <span>Upcoming Assignments</span>
+                  <span>Course Assignments</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>

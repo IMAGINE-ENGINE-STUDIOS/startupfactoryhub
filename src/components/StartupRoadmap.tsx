@@ -151,43 +151,53 @@ export default function StartupRoadmap() {
   const completeStep = async (stepId: string) => {
     if (!user) return;
 
-    const { error } = await supabase
-      .from('roadmap_progress')
-      .upsert({
-        user_id: user.id,
-        step_id: stepId,
-        completed: true,
-        completed_at: new Date().toISOString()
+    try {
+      const { error } = await supabase
+        .from('roadmap_progress')
+        .upsert({
+          user_id: user.id,
+          step_id: stepId,
+          completed: true,
+          completed_at: new Date().toISOString()
+        });
+
+      if (error) {
+        console.error('Error completing step:', error);
+        toast({
+          title: "Error",
+          description: "Failed to save progress. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const updatedSteps = steps.map(step => {
+        if (step.id === stepId) {
+          return { ...step, completed: true };
+        }
+        return step;
       });
 
-    if (error) {
+      // Unlock next step
+      const currentIndex = steps.findIndex(step => step.id === stepId);
+      if (currentIndex < steps.length - 1) {
+        updatedSteps[currentIndex + 1].locked = false;
+      }
+
+      setSteps(updatedSteps);
+
+      toast({
+        title: "Step Completed!",
+        description: "Great progress! You've unlocked the next step.",
+      });
+    } catch (error) {
+      console.error('Unexpected error completing step:', error);
       toast({
         title: "Error",
-        description: "Failed to save progress. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
-      return;
     }
-
-    const updatedSteps = steps.map(step => {
-      if (step.id === stepId) {
-        return { ...step, completed: true };
-      }
-      return step;
-    });
-
-    // Unlock next step
-    const currentIndex = steps.findIndex(step => step.id === stepId);
-    if (currentIndex < steps.length - 1) {
-      updatedSteps[currentIndex + 1].locked = false;
-    }
-
-    setSteps(updatedSteps);
-
-    toast({
-      title: "Step Completed!",
-      description: "Great progress! You've unlocked the next step.",
-    });
   };
 
   const uncompleteStep = async (stepId: string) => {

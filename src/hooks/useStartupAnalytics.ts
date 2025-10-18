@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 interface AnalyticsData {
   profileViews: number;
   connections: number;
+  followers: number;
   engagement: number;
   loading: boolean;
 }
@@ -14,6 +15,7 @@ export const useStartupAnalytics = () => {
   const [analytics, setAnalytics] = useState<AnalyticsData>({
     profileViews: 0,
     connections: 0,
+    followers: 0,
     engagement: 0,
     loading: true,
   });
@@ -102,6 +104,7 @@ export const useStartupAnalytics = () => {
       setAnalytics({
         profileViews: calculatedViews,
         connections: connectionsCount,
+        followers: followersCount,
         engagement: engagementScore,
         loading: false,
       });
@@ -110,6 +113,7 @@ export const useStartupAnalytics = () => {
       setAnalytics({
         profileViews: 0,
         connections: 0,
+        followers: 0,
         engagement: 0,
         loading: false,
       });
