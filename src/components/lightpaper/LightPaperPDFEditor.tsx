@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Upload, ZoomIn, ZoomOut, Download, FileText, Pencil, Type, Square, Circle as CircleIcon, Eraser, ChevronLeft, ChevronRight, Save, Trash2, PenTool, Share2, Image as ImageIcon } from "lucide-react";
+import { Upload, ZoomIn, ZoomOut, Download, FileText, Pencil, Type, Square, Circle as CircleIcon, Eraser, ChevronLeft, ChevronRight, Save, Trash2, PenTool, Share2, Image as ImageIcon, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Strikethrough } from "lucide-react";
 import { toast } from "sonner";
 import CollapsibleToolbar from "./CollapsibleToolbar";
 import FloatingActionMenu from "./FloatingActionMenu";
@@ -21,6 +22,10 @@ import { supabase } from "@/integrations/supabase/client";
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
+const FONT_SIZES = ["8", "10", "12", "14", "16", "18", "20", "24", "28", "32", "36", "48"];
+
 interface SavedSignature {
   id: string;
   type: "draw" | "text";
@@ -41,6 +46,8 @@ export function LightPaperPDFEditor({
   const [tool, setTool] = useState<"select" | "draw" | "text" | "rect" | "circle" | "erase">("select");
   const [color, setColor] = useState("#000000");
   const [strokeWidth, setStrokeWidth] = useState(2);
+  const [selectedFont, setSelectedFont] = useState("Arial");
+  const [selectedFontSize, setSelectedFontSize] = useState("16");
   const [isDrawingSignature, setIsDrawingSignature] = useState(false);
   const [signatureText, setSignatureText] = useState("");
   const [signatures, setSignatures] = useState<SavedSignature[]>([]);
@@ -175,8 +182,8 @@ export function LightPaperPDFEditor({
           left: e.pointer.x,
           top: e.pointer.y,
           fill: color,
-          fontSize: 16,
-          fontFamily: "Arial"
+          fontSize: parseInt(selectedFontSize),
+          fontFamily: selectedFont
         });
         canvas.add(text);
         canvas.setActiveObject(text);
@@ -263,7 +270,88 @@ export function LightPaperPDFEditor({
       canvas.off("mouse:move");
       canvas.off("mouse:up");
     };
-  }, [tool, color, strokeWidth, currentPage, canvasInstances]);
+  }, [tool, color, strokeWidth, currentPage, canvasInstances, selectedFont, selectedFontSize]);
+
+  const applyTextFormatting = (command: string) => {
+    const canvas = canvasInstances.get(currentPage);
+    if (!canvas) return;
+
+    const activeObject = canvas.getActiveObject();
+    if (activeObject && activeObject.type === 'textbox') {
+      const textObj = activeObject as Textbox;
+      
+      switch (command) {
+        case 'bold':
+          textObj.set('fontWeight', textObj.fontWeight === 'bold' ? 'normal' : 'bold');
+          break;
+        case 'italic':
+          textObj.set('fontStyle', textObj.fontStyle === 'italic' ? 'normal' : 'italic');
+          break;
+        case 'underline':
+          textObj.set('underline', !textObj.underline);
+          break;
+        case 'linethrough':
+          textObj.set('linethrough', !textObj.linethrough);
+          break;
+        case 'alignLeft':
+          textObj.set('textAlign', 'left');
+          break;
+        case 'alignCenter':
+          textObj.set('textAlign', 'center');
+          break;
+        case 'alignRight':
+          textObj.set('textAlign', 'right');
+          break;
+      }
+      
+      canvas.renderAll();
+      toast.success("Text formatting applied");
+    } else {
+      toast.error("Please select a text object first");
+    }
+  };
+
+  const changeFontFamily = (font: string) => {
+    setSelectedFont(font);
+    const canvas = canvasInstances.get(currentPage);
+    if (!canvas) return;
+
+    const activeObject = canvas.getActiveObject();
+    if (activeObject && activeObject.type === 'textbox') {
+      const textObj = activeObject as Textbox;
+      textObj.set('fontFamily', font);
+      canvas.renderAll();
+      toast.success(`Font changed to ${font}`);
+    }
+  };
+
+  const changeFontSize = (size: string) => {
+    setSelectedFontSize(size);
+    const canvas = canvasInstances.get(currentPage);
+    if (!canvas) return;
+
+    const activeObject = canvas.getActiveObject();
+    if (activeObject && activeObject.type === 'textbox') {
+      const textObj = activeObject as Textbox;
+      textObj.set('fontSize', parseInt(size));
+      canvas.renderAll();
+      toast.success(`Font size changed to ${size}`);
+    }
+  };
+
+  const changeTextColor = (newColor: string) => {
+    setColor(newColor);
+    const canvas = canvasInstances.get(currentPage);
+    if (!canvas) return;
+
+    const activeObject = canvas.getActiveObject();
+    if (activeObject && activeObject.type === 'textbox') {
+      const textObj = activeObject as Textbox;
+      textObj.set('fill', newColor);
+      canvas.renderAll();
+      toast.success("Text color changed");
+    }
+  };
   const saveDrawnSignature = () => {
     if (!signatureDrawingCanvas.current) return;
     const dataUrl = signatureDrawingCanvas.current.toDataURL({
@@ -532,21 +620,133 @@ export function LightPaperPDFEditor({
       <div className="flex-1 flex flex-col gap-4">
         <CollapsibleToolbar>
           <div className="flex flex-col gap-3">
-            {/* First Row - Navigation and Zoom */}
+            {/* First Row - Text Formatting Controls */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Select value={selectedFont} onValueChange={changeFontFamily}>
+                <SelectTrigger className="w-[140px] h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  {FONTS.map(font => (
+                    <SelectItem key={font} value={font} style={{ fontFamily: font }}>
+                      {font}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={selectedFontSize} onValueChange={changeFontSize}>
+                <SelectTrigger className="w-[70px] h-8">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  {FONT_SIZES.map(size => (
+                    <SelectItem key={size} value={size}>
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Separator orientation="vertical" className="h-6" />
+
+              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('bold')} title="Bold">
+                <Bold className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('italic')} title="Italic">
+                <Italic className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('underline')} title="Underline">
+                <Underline className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('linethrough')} title="Strikethrough">
+                <Strikethrough className="h-4 w-4" />
+              </Button>
+
+              <Separator orientation="vertical" className="h-6" />
+
+              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('alignLeft')} title="Align Left">
+                <AlignLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('alignCenter')} title="Align Center">
+                <AlignCenter className="h-4 w-4" />
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('alignRight')} title="Align Right">
+                <AlignRight className="h-4 w-4" />
+              </Button>
+
+              <Separator orientation="vertical" className="h-6" />
+
+              <div className="flex items-center gap-2">
+                <Label className="text-xs whitespace-nowrap">Text Color:</Label>
+                <Input type="color" value={color} onChange={e => changeTextColor(e.target.value)} className="h-8 w-12 p-1" />
+              </div>
+            </div>
+
+            {/* Second Row - Drawing Tools & Shapes */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button variant={tool === "select" ? "default" : "outline"} size="sm" onClick={() => setTool("select")} title="Select">
+                Select
+              </Button>
+              <Button variant={tool === "text" ? "default" : "outline"} size="sm" onClick={() => setTool("text")} title="Add Text">
+                <Type className="h-4 w-4 mr-1" />
+                Text
+              </Button>
+              <Button variant={tool === "draw" ? "default" : "outline"} size="sm" onClick={() => setTool("draw")} title="Draw">
+                <Pencil className="h-4 w-4 mr-1" />
+                Draw
+              </Button>
+              <Button variant={tool === "rect" ? "default" : "outline"} size="sm" onClick={() => setTool("rect")} title="Rectangle">
+                <Square className="h-4 w-4 mr-1" />
+                Rect
+              </Button>
+              <Button variant={tool === "circle" ? "default" : "outline"} size="sm" onClick={() => setTool("circle")} title="Circle">
+                <CircleIcon className="h-4 w-4 mr-1" />
+                Circle
+              </Button>
+              <Button variant={tool === "erase" ? "default" : "outline"} size="sm" onClick={() => setTool("erase")} title="Erase">
+                <Eraser className="h-4 w-4 mr-1" />
+                Erase
+              </Button>
+
+              <Separator orientation="vertical" className="h-6" />
+
+              <div className="flex items-center gap-2">
+                <Label className="text-xs whitespace-nowrap">Draw Color:</Label>
+                <Input type="color" value={color} onChange={e => setColor(e.target.value)} className="h-8 w-12 p-1" />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Label className="text-xs whitespace-nowrap">Background:</Label>
+                <Input type="color" value={backgroundColor} onChange={e => handleBackgroundColor(e.target.value)} className="h-8 w-12 p-1" />
+              </div>
+
+              <Button variant="outline" size="sm" onClick={() => imageInputRef.current?.click()} title="Add Image">
+                <ImageIcon className="h-4 w-4 mr-1" />
+                Image
+              </Button>
+
+              <Button variant="outline" size="sm" onClick={clearPage} title="Clear Page">
+                <Trash2 className="h-4 w-4 mr-1" />
+                Clear
+              </Button>
+            </div>
+
+            {/* Third Row - Page Navigation & Actions */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-2">
                 <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage <= 1}>
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                <span className="text-sm whitespace-nowrap">
-                  Page {currentPage} of {numPages}
+                <span className="text-sm whitespace-nowrap px-2">
+                  Page {currentPage} / {numPages}
                 </span>
                 <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))} disabled={currentPage >= numPages}>
                   <ChevronRight className="h-4 w-4" />
                 </Button>
-              </div>
 
-              <div className="flex items-center gap-2">
+                <Separator orientation="vertical" className="h-6 mx-2" />
+
                 <Button variant="outline" size="sm" onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}>
                   <ZoomOut className="h-4 w-4" />
                 </Button>
@@ -555,80 +755,32 @@ export function LightPaperPDFEditor({
                   <ZoomIn className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
-
-            {/* Second Row - Tools */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button variant={tool === "select" ? "default" : "outline"} size="sm" onClick={() => setTool("select")}>
-                Select
-              </Button>
-              <Button variant={tool === "draw" ? "default" : "outline"} size="sm" onClick={() => setTool("draw")}>
-                <Pencil className="h-4 w-4 mr-2" />
-                Draw
-              </Button>
-              <Button variant={tool === "text" ? "default" : "outline"} size="sm" onClick={() => setTool("text")}>
-                <Type className="h-4 w-4 mr-2" />
-                Text
-              </Button>
-              <Button variant={tool === "rect" ? "default" : "outline"} size="sm" onClick={() => setTool("rect")}>
-                <Square className="h-4 w-4 mr-2" />
-                Rectangle
-              </Button>
-              <Button variant={tool === "circle" ? "default" : "outline"} size="sm" onClick={() => setTool("circle")}>
-                <CircleIcon className="h-4 w-4 mr-2" />
-                Circle
-              </Button>
-              <Button variant={tool === "erase" ? "default" : "outline"} size="sm" onClick={() => setTool("erase")}>
-                <Eraser className="h-4 w-4 mr-2" />
-                Erase
-              </Button>
-
-              <div className="flex items-center gap-2 ml-4">
-                <Label className="text-sm whitespace-nowrap">Color:</Label>
-                <Input type="color" value={color} onChange={e => setColor(e.target.value)} className="h-8 w-16 p-1" />
-              </div>
 
               <div className="flex items-center gap-2">
-                <Label className="text-sm whitespace-nowrap">Background:</Label>
-                <Input type="color" value={backgroundColor} onChange={e => handleBackgroundColor(e.target.value)} className="h-8 w-16 p-1" />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4 mr-2" />
+                      Export
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="bg-background z-50">
+                    <DropdownMenuItem onClick={handleExport}>
+                      <FileText className="h-4 w-4 mr-2" />
+                      Export as PDF
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleExportJPG}>
+                      <ImageIcon className="h-4 w-4 mr-2" />
+                      Export Page as JPG
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <Button variant="outline" size="sm" onClick={handleShareDocument}>
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share
+                </Button>
               </div>
-
-              <Button variant="outline" size="sm" onClick={() => imageInputRef.current?.click()}>
-                <ImageIcon className="h-4 w-4 mr-2" />
-                Add Image
-              </Button>
-            </div>
-
-            {/* Third Row - Actions */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4 mr-2" />
-                    Export
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="bg-background z-50">
-                  <DropdownMenuItem onClick={handleExport}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Export as PDF
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleExportJPG}>
-                    <ImageIcon className="h-4 w-4 mr-2" />
-                    Export Page as JPG
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <Button variant="outline" size="sm" onClick={handleShareDocument}>
-                <Share2 className="h-4 w-4 mr-2" />
-                Share for Signing
-              </Button>
-
-              <Button variant="outline" size="sm" onClick={clearPage}>
-                <Trash2 className="h-4 w-4 mr-2" />
-                Clear Page
-              </Button>
             </div>
           </div>
         </CollapsibleToolbar>
