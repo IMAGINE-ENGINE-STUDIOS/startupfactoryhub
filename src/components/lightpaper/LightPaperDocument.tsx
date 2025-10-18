@@ -452,11 +452,13 @@ export function LightPaperDocument({
       display: inline-block;
       cursor: move;
       padding: 8px;
-      border: 2px dashed #ccc;
+      border: 2px dashed transparent;
       margin: 4px;
       background: transparent;
       position: relative;
+      transition: border-color 0.2s ease;
     `;
+    signatureElement.classList.add('signature-element');
 
     if (signature.type === "draw") {
       const img = document.createElement('img');
@@ -796,6 +798,11 @@ export function LightPaperDocument({
           
           .page ol ol ol {
             list-style-type: lower-roman;
+          }
+          
+          /* Signature hover styles */
+          .signature-element:hover {
+            border-color: #ccc !important;
           }
           
           @media print {
