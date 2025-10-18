@@ -1,14 +1,14 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, FileSignature, FileCheck, Sparkles, Calculator, FolderOpen, Upload, Download } from "lucide-react";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { FileText, Table, Presentation, FileSignature } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { FolderOpen } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
 import { LightPaperPDFEditor } from "@/components/lightpaper/LightPaperPDFEditor";
 import AIAssistant from "@/components/AIAssistant";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
-import { Button } from "@/components/ui/button";
 import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
@@ -39,39 +39,6 @@ export default function LightPaper() {
                 <FolderOpen className="h-4 w-4" />
                 My Files
               </Button>
-
-              {activeTab === "spreadsheet" && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" className="gap-2">
-                      <Upload className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-background z-50">
-                    <DropdownMenuItem onClick={() => {
-                      const event = new CustomEvent('spreadsheet-import');
-                      window.dispatchEvent(event);
-                    }}>
-                      <Upload className="h-4 w-4 mr-2" />
-                      Import
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      const event = new CustomEvent('spreadsheet-export-excel');
-                      window.dispatchEvent(event);
-                    }}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Export Excel
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => {
-                      const event = new CustomEvent('spreadsheet-export-csv');
-                      window.dispatchEvent(event);
-                    }}>
-                      <Download className="h-4 w-4 mr-2" />
-                      Export CSV
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
               
               <div className="flex border rounded-lg p-1 bg-muted/30">
                 <Button 

@@ -49,23 +49,6 @@ export function LightPaperSpreadsheet() {
   const [visibleRows, setVisibleRows] = useState(INITIAL_ROWS);
   const { saveProject, projects } = useLightPaperProjects("spreadsheet");
 
-  // Listen for export/import events from header
-  useEffect(() => {
-    const handleImportEvent = () => handleImport();
-    const handleExportExcelEvent = () => handleExportExcel();
-    const handleExportCSVEvent = () => handleExportCSV();
-
-    window.addEventListener('spreadsheet-import', handleImportEvent);
-    window.addEventListener('spreadsheet-export-excel', handleExportExcelEvent);
-    window.addEventListener('spreadsheet-export-csv', handleExportCSVEvent);
-
-    return () => {
-      window.removeEventListener('spreadsheet-import', handleImportEvent);
-      window.removeEventListener('spreadsheet-export-excel', handleExportExcelEvent);
-      window.removeEventListener('spreadsheet-export-csv', handleExportCSVEvent);
-    };
-  }, [data, projectTitle, visibleRows]);
-
   const getCellId = (col: string, row: number) => `${col}${row}`;
 
   const handleCellChange = (cellId: string, value: string) => {
@@ -263,6 +246,30 @@ export function LightPaperSpreadsheet() {
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowCalculator(true)} title="Calculator">
                 <Calculator className="h-4 w-4" />
               </Button>
+            </div>
+
+            {/* Import/Export */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={handleImport} title="Import">
+                <Upload className="h-4 w-4" />
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Export">
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background z-50">
+                  <DropdownMenuItem onClick={handleExportExcel}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export Excel
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportCSV}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export CSV
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Save Button */}
