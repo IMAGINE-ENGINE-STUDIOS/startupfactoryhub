@@ -323,15 +323,21 @@ export default function UnifiedCalendar({
       </div>
 
       {/* Upcoming Events Section */}
-      {upcomingItems.length > 0 && (
-        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
-          <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <CalendarIcon className="h-5 w-5 text-primary" />
-              Upcoming Events
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
+      <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2">
+            <CalendarIcon className="h-5 w-5 text-primary" />
+            Upcoming Events
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {upcomingItems.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />
+              <p className="text-sm">No upcoming events</p>
+              <p className="text-xs mt-1">Create an event or schedule a session to get started</p>
+            </div>
+          ) : (
             <ScrollArea className="h-[200px]">
               <div className="space-y-3 pr-4">
                 {upcomingItems.map(item => (
@@ -382,9 +388,9 @@ export default function UnifiedCalendar({
                 ))}
               </div>
             </ScrollArea>
-          </CardContent>
-        </Card>
-      )}
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
