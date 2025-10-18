@@ -659,7 +659,12 @@ export default function UnifiedCommunityFeed({
     }
 
     const commentContent = newComment[postId]?.trim();
-    if (!commentContent) return;
+    if (!commentContent) {
+      toast({ title: 'Comment cannot be empty', variant: 'destructive' });
+      return;
+    }
+
+    console.log('Adding comment to post:', postId, 'Content:', commentContent);
 
     const { error } = await supabase
       .from('post_comments')
@@ -669,7 +674,14 @@ export default function UnifiedCommunityFeed({
         content: commentContent
       });
 
-    if (!error) {
+    if (error) {
+      console.error('Error adding comment:', error);
+      toast({ 
+        title: 'Failed to add comment', 
+        description: error.message,
+        variant: 'destructive' 
+      });
+    } else {
       setNewComment(prev => ({ ...prev, [postId]: '' }));
       toast({ title: 'Comment added!' });
       fetchComments(postId);
