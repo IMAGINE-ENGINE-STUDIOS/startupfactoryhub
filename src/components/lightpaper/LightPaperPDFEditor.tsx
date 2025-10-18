@@ -34,7 +34,7 @@ import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperP
 import { supabase } from "@/integrations/supabase/client";
 
 // Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface SavedSignature {
   id: string;
@@ -60,6 +60,7 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
   const [signatureText, setSignatureText] = useState("");
   const [signatures, setSignatures] = useState<SavedSignature[]>([]);
   const [canvasInstances, setCanvasInstances] = useState<Map<number, FabricCanvas>>(new Map());
+  const [isLoading, setIsLoading] = useState(false);
   
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
@@ -133,6 +134,7 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
     const file = e.target.files?.[0];
     if (file) {
       if (file.type === "application/pdf") {
+        setIsLoading(true);
         setPdfFile(file);
         setCurrentPage(1);
         setCanvasInstances(new Map());
@@ -145,6 +147,14 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
 
   const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
+    setIsLoading(false);
+    toast.success(`PDF loaded with ${numPages} pages`);
+  };
+
+  const onDocumentLoadError = (error: Error) => {
+    console.error("PDF load error:", error);
+    setIsLoading(false);
+    toast.error(`Failed to load PDF: ${error.message}`);
   };
 
   const setupCanvas = (pageNumber: number) => {
@@ -710,10 +720,20 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
         <Card className="flex-1 overflow-auto">
           {pdfFile ? (
             <div className="p-4">
+              {isLoading && (
+                <div className="flex items-center justify-center p-8">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                    <p className="text-sm text-muted-foreground">Loading PDF...</p>
+                  </div>
+                </div>
+              )}
               <div className="mx-auto" style={{ width: pageWidth * zoom }}>
                 <Document
                   file={pdfFile}
                   onLoadSuccess={onDocumentLoadSuccess}
+                  onLoadError={onDocumentLoadError}
+                  loading={null}
                   className="flex flex-col items-center gap-4"
                 >
                   <div className="relative" style={{ width: pageWidth * zoom }}>
@@ -725,6 +745,8 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
                         pageNumber={currentPage}
                         width={pageWidth * zoom}
                         onLoadSuccess={() => setupCanvas(currentPage)}
+                        renderTextLayer={false}
+                        renderAnnotationLayer={false}
                       />
                       <canvas
                         ref={(el) => el && canvasRefs.current.set(currentPage, el)}
