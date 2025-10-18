@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
-import { BookOpen, Trophy, Target, Star } from 'lucide-react';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
@@ -89,35 +87,6 @@ export default function StudentDashboard() {
     }
   };
 
-  const stats = [
-    { 
-      title: 'Courses Enrolled', 
-      value: enrollments.length.toString(), 
-      icon: BookOpen, 
-      color: 'text-primary' 
-    },
-    { 
-      title: 'Learning Streak', 
-      value: `${studentProfile?.learning_streak_days || 0} days`, 
-      icon: Target, 
-      color: 'text-accent' 
-    },
-    { 
-      title: 'Certificates', 
-      value: certificates.length.toString(), 
-      icon: Trophy, 
-      color: 'text-yellow-500' 
-    },
-    { 
-      title: 'Avg Progress', 
-      value: enrollments.length > 0 
-        ? `${Math.round(enrollments.reduce((acc, e) => acc + e.progress_percentage, 0) / enrollments.length)}%`
-        : '0%', 
-      icon: Star, 
-      color: 'text-purple-500' 
-    },
-  ];
-
   return (
     <div className="min-h-screen bg-gradient-hero p-2 sm:p-4 pb-20 lg:pb-4 relative">
       <DashboardHeader />
@@ -136,23 +105,6 @@ export default function StudentDashboard() {
             </h1>
             <p className="text-sm text-muted-foreground">Learn, practice, and build your startup skills</p>
           </div>
-        </div>
-
-        {/* Student Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6">
-          {stats.map((stat) => (
-            <Card key={stat.title} className="tech-card border-0">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                  </div>
-                  <stat.icon className={`h-8 w-8 ${stat.color}`} />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
         </div>
 
         {/* Main Tabs Navigation */}
