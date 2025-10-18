@@ -24,6 +24,7 @@ import { ShortcutsDialog } from "./ShortcutsDialog";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { SignatureLibrary } from "./SignatureLibrary";
 import ShareDialog from "./ShareDialog";
+import { supabase } from "@/integrations/supabase/client";
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
