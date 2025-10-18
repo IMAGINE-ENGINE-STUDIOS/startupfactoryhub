@@ -114,6 +114,6 @@ export default function LightPaper() {
       setShowShareDialog(true);
     }} />
 
-      <ShareDialog isOpen={showShareDialog} onClose={() => setShowShareDialog(false)} project={selectedProject} />
+      {/* ShareDialog temporarily disabled - will be integrated with PDF sharing in next update */}
     </div>;
 }

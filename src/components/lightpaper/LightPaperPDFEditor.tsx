@@ -22,7 +22,8 @@ import FloatingActionMenu from "./FloatingActionMenu";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import { ShortcutsDialog } from "./ShortcutsDialog";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { supabase } from "@/integrations/supabase/client";
+import { SignatureLibrary } from "./SignatureLibrary";
+import ShareDialog from "./ShareDialog";
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -116,7 +117,7 @@ export function LightPaperPDFEditor({
   const [isLoading, setIsLoading] = useState(false);
   const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
   const [showShareDialog, setShowShareDialog] = useState(false);
-  const [shareLink, setShareLink] = useState("");
+  const [shareData, setShareData] = useState<{shareUrl: string, shareToken: string, documentTitle: string} | null>(null);
   const [showSignaturePanel, setShowSignaturePanel] = useState(false);
   const [originalPdfBytes, setOriginalPdfBytes] = useState<Uint8Array | null>(null);
   const [pdfTextItems, setPdfTextItems] = useState<Map<number, PDFTextItem[]>>(new Map());
@@ -1085,6 +1086,47 @@ export function LightPaperPDFEditor({
     }
   };
   const handleShareDocument = async () => {
+    if (!pdfFile) {
+      toast.error("Please load a PDF first");
+      return;
+    }
+
+    try {
+      const { useSharedPDF } = await import("@/hooks/useSharedPDF");
+      const hook = useSharedPDF();
+      const result = await hook.createSharedDocument(currentProjectId, projectTitle, pdfFile, 'sign');
+      
+      if (result) {
+        setShareData({
+          shareUrl: result.shareUrl,
+          shareToken: result.shareToken,
+          documentTitle: projectTitle
+        });
+        setShowShareDialog(true);
+      }
+    } catch (error) {
+      console.error("Error sharing:", error);
+      toast.error("Failed to share document");
+    }
+  };
+
+  const handleSendEmailInvitation = async (email: string, message: string, accessLevel: 'view' | 'sign' | 'edit') => {
+    if (!shareData) return;
+    
+    const { useSharedPDF } = await import("@/hooks/useSharedPDF");
+    const hook = useSharedPDF();
+    const { data: { user } } = await supabase.auth.getUser();
+    await hook.sendEmailInvitation(
+      shareData.shareToken,
+      shareData.documentTitle,
+      email,
+      user?.user_metadata?.full_name || 'A user',
+      message,
+      accessLevel
+    );
+  };
+
+  const oldHandleShareDocument = async () => {
     if (!pdfFile || !currentProjectId) {
       toast.error("Please save the document first");
       return;
@@ -1112,7 +1154,11 @@ export function LightPaperPDFEditor({
       }).select().single();
       if (error) throw error;
       const shareUrl = `${window.location.origin}/shared-pdf/${data.share_token}`;
-      setShareLink(shareUrl);
+      setShareData({
+        shareUrl,
+        shareToken: data.share_token,
+        documentTitle: projectTitle
+      });
       setShowShareDialog(true);
       toast.success("Shareable link created!");
     } catch (error: any) {
@@ -1121,7 +1167,8 @@ export function LightPaperPDFEditor({
     }
   };
   const copyShareLink = () => {
-    navigator.clipboard.writeText(shareLink);
+    if (!shareData) return;
+    navigator.clipboard.writeText(shareData.shareUrl);
     toast.success("Link copied to clipboard!");
   };
   const handleSaveToAccount = async () => {
@@ -1581,26 +1628,11 @@ export function LightPaperPDFEditor({
       />
 
       {/* Share Dialog */}
-      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Share PDF Document</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label>Shareable Link</Label>
-              <div className="flex gap-2 mt-2">
-                <Input value={shareLink} readOnly className="flex-1" />
-                <Button onClick={copyShareLink} size="sm">
-                  Copy
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Anyone with this link can view and sign the document
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ShareDialog 
+        isOpen={showShareDialog} 
+        onClose={() => setShowShareDialog(false)} 
+        shareData={shareData}
+        onSendEmail={handleSendEmailInvitation}
+      />
     </div>;
 }

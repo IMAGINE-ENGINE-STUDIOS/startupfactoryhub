@@ -9,10 +9,12 @@ export interface SharedPDFDocument {
   project_id: string | null;
   title: string;
   share_token: string;
+  storage_path: string | null;
   pdf_content: any;
   annotations: any[];
   signatures: any[];
   is_active: boolean;
+  access_level: string;
   expires_at: string | null;
   created_at: string;
   updated_at: string;
@@ -36,6 +38,14 @@ export function useSharedPDF(shareToken?: string) {
         .single();
 
       if (error) throw error;
+      
+      // Check if expired
+      if (data.expires_at && new Date(data.expires_at) < new Date()) {
+        toast.error("This document link has expired");
+        setDocument(null);
+        return;
+      }
+
       setDocument(data as unknown as SharedPDFDocument);
       
       // Load signatures
@@ -45,6 +55,22 @@ export function useSharedPDF(shareToken?: string) {
       toast.error("Failed to load document");
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Load PDF file from storage
+  const loadPDFFile = async (storagePath: string) => {
+    try {
+      const { data, error } = await supabase.storage
+        .from('pdf-documents')
+        .download(storagePath);
+
+      if (error) throw error;
+      return data;
+    } catch (error: any) {
+      console.error("Error loading PDF file:", error);
+      toast.error("Failed to load PDF file");
+      return null;
     }
   };
 
@@ -97,11 +123,13 @@ export function useSharedPDF(shareToken?: string) {
     }
   };
 
-  // Create new shared document
+  // Create new shared document with PDF file upload
   const createSharedDocument = async (
     projectId: string | null,
     title: string,
-    pdfContent: any
+    pdfFile: File,
+    accessLevel: 'view' | 'sign' | 'edit' = 'view',
+    expiresAt?: Date
   ) => {
     if (!user) {
       toast.error("Please sign in to share documents");
@@ -109,25 +137,70 @@ export function useSharedPDF(shareToken?: string) {
     }
 
     try {
+      // Upload PDF to storage
+      const fileExt = pdfFile.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('pdf-documents')
+        .upload(fileName, pdfFile);
+
+      if (uploadError) throw uploadError;
+
+      // Create shared document record
       const { data, error } = await supabase
         .from("shared_pdf_documents")
         .insert({
           owner_id: user.id,
           project_id: projectId,
           title,
-          pdf_content: pdfContent,
-        })
+          storage_path: fileName,
+          access_level: accessLevel,
+          expires_at: expiresAt?.toISOString(),
+        } as any)
         .select()
         .single();
 
       if (error) throw error;
       
-      const shareUrl = `${window.location.origin}/shared-pdf/${data.share_token}`;
-      return shareUrl;
+      const shareUrl = `${window.location.origin}/pdf-view/${data.share_token}`;
+      toast.success("PDF shared successfully!");
+      return { shareUrl, shareToken: data.share_token, documentId: data.id };
     } catch (error: any) {
       console.error("Error creating shared document:", error);
       toast.error("Failed to create shareable link");
       return null;
+    }
+  };
+
+  // Send email invitation
+  const sendEmailInvitation = async (
+    shareToken: string,
+    documentTitle: string,
+    recipientEmail: string,
+    senderName: string,
+    message?: string,
+    accessLevel: 'view' | 'sign' | 'edit' = 'sign'
+  ) => {
+    try {
+      const { error } = await supabase.functions.invoke('send-pdf-signature-request', {
+        body: {
+          to: recipientEmail,
+          documentTitle,
+          shareToken,
+          senderName,
+          message,
+          accessLevel,
+        }
+      });
+
+      if (error) throw error;
+      toast.success(`Invitation sent to ${recipientEmail}`);
+      return true;
+    } catch (error: any) {
+      console.error("Error sending email:", error);
+      toast.error("Failed to send invitation email");
+      return false;
     }
   };
 
@@ -136,7 +209,7 @@ export function useSharedPDF(shareToken?: string) {
     try {
       const { error } = await supabase
         .from("shared_pdf_documents")
-        .update({ annotations })
+        .update({ annotations } as any)
         .eq("id", documentId);
 
       if (error) throw error;
@@ -160,7 +233,8 @@ export function useSharedPDF(shareToken?: string) {
           table: "pdf_signatures",
           filter: `document_id=eq.${document.id}`,
         },
-        () => {
+        (payload) => {
+          toast.info(`${payload.new.signer_name} just signed the document`);
           loadSignatures(document.id);
         }
       )
@@ -183,13 +257,40 @@ export function useSharedPDF(shareToken?: string) {
     };
   }, [shareToken, document?.id]);
 
+  // Save signature to library
+  const saveSignatureToLibrary = async (
+    signatureData: string,
+    signatureType: 'draw' | 'text'
+  ) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('pdf_editor_signatures')
+        .insert({
+          user_id: user.id,
+          signature_type: signatureType,
+          signature_data: signatureData,
+          is_default: false,
+        });
+
+      if (error) throw error;
+      toast.success("Signature saved to your library");
+    } catch (error: any) {
+      console.error("Error saving signature:", error);
+    }
+  };
+
   return {
     document,
     loading,
     signatures,
     loadSharedDocument,
+    loadPDFFile,
     addSignature,
     createSharedDocument,
+    sendEmailInvitation,
     updateAnnotations,
+    saveSignatureToLibrary,
   };
 }

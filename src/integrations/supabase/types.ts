@@ -2040,6 +2040,33 @@ export type Database = {
         }
         Relationships: []
       }
+      pdf_editor_signatures: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_default: boolean | null
+          signature_data: string
+          signature_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          signature_data: string
+          signature_type: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_default?: boolean | null
+          signature_data?: string
+          signature_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pdf_signatures: {
         Row: {
           document_id: string
@@ -2627,44 +2654,53 @@ export type Database = {
       }
       shared_pdf_documents: {
         Row: {
+          access_level: string | null
           annotations: Json | null
           created_at: string | null
           expires_at: string | null
           id: string
           is_active: boolean | null
           owner_id: string
+          password_hash: string | null
           pdf_content: Json
           project_id: string | null
           share_token: string
           signatures: Json | null
+          storage_path: string | null
           title: string
           updated_at: string | null
         }
         Insert: {
+          access_level?: string | null
           annotations?: Json | null
           created_at?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
           owner_id: string
+          password_hash?: string | null
           pdf_content: Json
           project_id?: string | null
           share_token?: string
           signatures?: Json | null
+          storage_path?: string | null
           title: string
           updated_at?: string | null
         }
         Update: {
+          access_level?: string | null
           annotations?: Json | null
           created_at?: string | null
           expires_at?: string | null
           id?: string
           is_active?: boolean | null
           owner_id?: string
+          password_hash?: string | null
           pdf_content?: Json
           project_id?: string | null
           share_token?: string
           signatures?: Json | null
+          storage_path?: string | null
           title?: string
           updated_at?: string | null
         }

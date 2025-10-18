@@ -73,18 +73,15 @@ export default function SharedPDFView() {
   }, [showSignDialog, signatureMode]);
 
   const loadPDFFile = async () => {
-    if (!pdfDocument) return;
+    if (!pdfDocument || !pdfDocument.storage_path) return;
 
     try {
-      const pdfContent = pdfDocument.pdf_content as any;
-      if (pdfContent?.pdfUrl) {
-        const { data: fileData } = await supabase.storage
-          .from("feed-media")
-          .download(pdfContent.pdfUrl);
+      const { data: fileData } = await supabase.storage
+        .from("pdf-documents")
+        .download(pdfDocument.storage_path);
 
-        if (fileData) {
-          setPdfBlob(fileData);
-        }
+      if (fileData) {
+        setPdfBlob(fileData);
       }
     } catch (error: any) {
       console.error("Error loading PDF:", error);
@@ -238,11 +235,17 @@ export default function SharedPDFView() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold">{pdfDocument.title}</h1>
-              <p className="text-sm text-muted-foreground">Shared PDF Document - {signatures.length} signature(s)</p>
+              <p className="text-sm text-muted-foreground">
+                {pdfDocument.access_level === 'view' && 'View Only'}
+                {pdfDocument.access_level === 'sign' && `${signatures.length} signature(s)`}
+                {pdfDocument.access_level === 'edit' && 'Collaborative Editing'}
+              </p>
             </div>
-            <Button onClick={() => setShowSignDialog(true)}>
-              Sign Document
-            </Button>
+            {pdfDocument.access_level !== 'view' && (
+              <Button onClick={() => setShowSignDialog(true)}>
+                Sign Document
+              </Button>
+            )}
           </div>
         </Card>
 

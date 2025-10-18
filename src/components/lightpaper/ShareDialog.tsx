@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -18,69 +19,54 @@ import {
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Copy, Mail, Link as LinkIcon, Check } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { LightPaperProject } from "@/hooks/useLightPaperProjects";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
 
 interface ShareDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  project: LightPaperProject | null;
+  shareData: {
+    shareUrl: string;
+    shareToken: string;
+    documentTitle: string;
+  } | null;
+  onSendEmail: (email: string, message: string, accessLevel: 'view' | 'sign' | 'edit') => Promise<void>;
 }
 
-export default function ShareDialog({ isOpen, onClose, project }: ShareDialogProps) {
-  const [shareLink, setShareLink] = useState("");
+export default function ShareDialog({ isOpen, onClose, shareData, onSendEmail }: ShareDialogProps) {
   const [copied, setCopied] = useState(false);
-  const [accessType, setAccessType] = useState<"view" | "edit" | "comment">("view");
+  const [accessLevel, setAccessLevel] = useState<"view" | "sign" | "edit">("sign");
   const [email, setEmail] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const generateShareLink = async () => {
-    if (!project) return;
-
-    setLoading(true);
-    try {
-      const token = Math.random().toString(36).substring(2, 15);
-      
-      const { error } = await supabase.from("lightpaper_share_links").insert({
-        project_id: project.id,
-        share_token: token,
-        access_type: accessType,
-        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
-      });
-
-      if (error) throw error;
-
-      const link = `${window.location.origin}/shared/${token}`;
-      setShareLink(link);
-      toast.success("Share link generated");
-    } catch (error: any) {
-      console.error("Error generating share link:", error);
-      toast.error("Failed to generate share link");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [expiresAt, setExpiresAt] = useState<Date | undefined>(undefined);
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(shareLink);
+    if (!shareData) return;
+    navigator.clipboard.writeText(shareData.shareUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
     toast.success("Link copied to clipboard");
   };
 
-  const sendEmail = async () => {
-    if (!email || !project) return;
+  const handleSendEmail = async () => {
+    if (!email || !shareData) return;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
 
     setLoading(true);
     try {
-      // Generate link if not exists
-      if (!shareLink) {
-        await generateShareLink();
-      }
-
-      toast.success("Email sent successfully");
+      await onSendEmail(email, message, accessLevel);
       setEmail("");
+      setMessage("");
+      toast.success(`Invitation sent to ${email}`);
     } catch (error: any) {
       console.error("Error sending email:", error);
       toast.error("Failed to send email");
@@ -89,13 +75,15 @@ export default function ShareDialog({ isOpen, onClose, project }: ShareDialogPro
     }
   };
 
+  if (!shareData) return null;
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Share "{project?.title}"</DialogTitle>
+          <DialogTitle>Share PDF Document</DialogTitle>
           <DialogDescription>
-            Choose how you want to share this file
+            "{shareData.documentTitle}"
           </DialogDescription>
         </DialogHeader>
 
@@ -113,48 +101,68 @@ export default function ShareDialog({ isOpen, onClose, project }: ShareDialogPro
 
           <TabsContent value="link" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="access-type">Access Level</Label>
-              <Select value={accessType} onValueChange={(v: any) => setAccessType(v)}>
-                <SelectTrigger id="access-type">
+              <Label htmlFor="access-level">Access Level</Label>
+              <Select value={accessLevel} onValueChange={(v: any) => setAccessLevel(v)}>
+                <SelectTrigger id="access-level">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="view">View only</SelectItem>
+                  <SelectItem value="sign">Can sign</SelectItem>
                   <SelectItem value="edit">Can edit</SelectItem>
-                  <SelectItem value="comment">Can comment</SelectItem>
                 </SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">
+                {accessLevel === 'view' && 'Recipients can only view the PDF'}
+                {accessLevel === 'sign' && 'Recipients can view and add signatures'}
+                {accessLevel === 'edit' && 'Recipients can view, sign, and edit annotations'}
+              </p>
             </div>
 
-            {!shareLink ? (
-              <Button onClick={generateShareLink} disabled={loading} className="w-full">
-                Generate Share Link
-              </Button>
-            ) : (
-              <div className="space-y-2">
-                <Label>Share Link</Label>
-                <div className="flex gap-2">
-                  <Input value={shareLink} readOnly />
-                  <Button
-                    onClick={copyToClipboard}
-                    size="icon"
-                    variant="outline"
-                  >
-                    {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+            <div className="space-y-2">
+              <Label>Expires</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {expiresAt ? format(expiresAt, "PPP") : "Never"}
                   </Button>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Link expires in 7 days
-                </p>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={expiresAt}
+                    onSelect={setExpiresAt}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Share Link</Label>
+              <div className="flex gap-2">
+                <Input value={shareData.shareUrl} readOnly className="text-sm" />
+                <Button
+                  onClick={copyToClipboard}
+                  size="icon"
+                  variant="outline"
+                >
+                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                </Button>
               </div>
-            )}
+              <p className="text-xs text-muted-foreground">
+                Anyone with this link can {accessLevel} the document
+              </p>
+            </div>
           </TabsContent>
 
           <TabsContent value="email" className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Recipient Email</Label>
+              <Label htmlFor="recipient-email">Recipient Email *</Label>
               <Input
-                id="email"
+                id="recipient-email"
                 type="email"
                 placeholder="colleague@example.com"
                 value={email}
@@ -163,21 +171,32 @@ export default function ShareDialog({ isOpen, onClose, project }: ShareDialogPro
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="access-type-email">Access Level</Label>
-              <Select value={accessType} onValueChange={(v: any) => setAccessType(v)}>
-                <SelectTrigger id="access-type-email">
+              <Label htmlFor="access-level-email">Access Level</Label>
+              <Select value={accessLevel} onValueChange={(v: any) => setAccessLevel(v)}>
+                <SelectTrigger id="access-level-email">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="view">View only</SelectItem>
+                  <SelectItem value="sign">Can sign</SelectItem>
                   <SelectItem value="edit">Can edit</SelectItem>
-                  <SelectItem value="comment">Can comment</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <Button onClick={sendEmail} disabled={loading || !email} className="w-full">
-              Send Invitation
+            <div className="space-y-2">
+              <Label htmlFor="message">Personal Message (Optional)</Label>
+              <Textarea
+                id="message"
+                placeholder="Add a message to your invitation..."
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={3}
+              />
+            </div>
+
+            <Button onClick={handleSendEmail} disabled={loading || !email} className="w-full">
+              {loading ? "Sending..." : "Send Invitation"}
             </Button>
           </TabsContent>
         </Tabs>
