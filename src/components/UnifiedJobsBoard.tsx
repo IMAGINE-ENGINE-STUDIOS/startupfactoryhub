@@ -766,8 +766,8 @@ export default function UnifiedJobsBoard() {
               No applications yet
             </div>
           ) : (
-            <ScrollArea className="flex-1 pr-4">
-              <div className="space-y-4">
+            <ScrollArea className="max-h-[60vh] pr-4">
+              <div className="space-y-4 pb-4">
                 {applications.map((app) => (
                   <Card key={app.id}>
                     <CardContent className="pt-6">
@@ -795,13 +795,6 @@ export default function UnifiedJobsBoard() {
                               )}
                             </div>
                             <div className="flex flex-col items-end gap-2">
-                              <Badge variant={
-                                app.status === 'accepted' ? 'default' :
-                                app.status === 'rejected' ? 'destructive' :
-                                'secondary'
-                              }>
-                                {app.status}
-                              </Badge>
                               {app.application_type === 'external' && app.status === 'accepted' && (
                                 <Badge variant="secondary" className="gap-1 text-xs">
                                   <Mail className="w-3 h-3" />
@@ -833,24 +826,24 @@ export default function UnifiedJobsBoard() {
                               </Button>
                             )}
                             
-                            {app.status === 'pending' && selectedJobId && (
-                              <>
-                                <Button
-                                  size="sm"
-                                  onClick={() => updateApplicationStatus(app.id, 'accepted', app.application_type, selectedJobId)}
+                            {selectedJobId && (
+                              <div className="flex items-center gap-2">
+                                <Label htmlFor={`status-${app.id}`} className="text-sm">Status:</Label>
+                                <Select
+                                  value={app.status}
+                                  onValueChange={(newStatus) => updateApplicationStatus(app.id, newStatus, app.application_type, selectedJobId)}
                                   disabled={updatingApplicationId === app.id}
                                 >
-                                  {updatingApplicationId === app.id ? 'Processing...' : 'Accept'}
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="destructive"
-                                  onClick={() => updateApplicationStatus(app.id, 'rejected', app.application_type, selectedJobId)}
-                                  disabled={updatingApplicationId === app.id}
-                                >
-                                  {updatingApplicationId === app.id ? 'Processing...' : 'Reject'}
-                                </Button>
-                              </>
+                                  <SelectTrigger id={`status-${app.id}`} className="w-32 h-9">
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent className="bg-background z-50">
+                                    <SelectItem value="pending">Pending</SelectItem>
+                                    <SelectItem value="accepted">Accepted</SelectItem>
+                                    <SelectItem value="rejected">Rejected</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
                             )}
                           </div>
                         </div>
