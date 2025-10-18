@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Briefcase, DollarSign, MapPin, Clock, Users } from 'lucide-react';
+import { JobApplicationsViewer } from './JobApplicationsViewer';
 
 interface Job {
   id: string;
@@ -160,8 +162,10 @@ export function JobsBoard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold">Full-Time Jobs</h2>
-          <p className="text-muted-foreground">Explore career opportunities</p>
+          <h2 className="text-3xl font-bold">Job Opportunities</h2>
+          <p className="text-muted-foreground">
+            {userCompanyId ? 'Manage your job postings and applications' : 'Explore career opportunities'}
+          </p>
         </div>
         {userCompanyId && (
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
@@ -249,8 +253,89 @@ export function JobsBoard() {
         )}
       </div>
 
-      <div className="grid gap-4">
-        {jobs.length === 0 ? (
+      {userCompanyId ? (
+        <Tabs defaultValue="browse" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="browse">Browse Jobs</TabsTrigger>
+            <TabsTrigger value="applications">Manage Applications</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="browse" className="space-y-4">
+            <div className="grid gap-4">
+              {jobs.length === 0 ? (
+                <Card>
+                  <CardContent className="p-8 text-center text-muted-foreground">
+                    No jobs posted yet
+                  </CardContent>
+                </Card>
+              ) : (
+                jobs.map((job) => (
+                  <Card key={job.id} className="hover:shadow-lg transition-shadow">
+                    <CardHeader>
+                      <div className="flex justify-between items-start">
+                        <div className="flex gap-4">
+                          {job.companies.logo_url && (
+                            <img
+                              src={job.companies.logo_url}
+                              alt={job.companies.name}
+                              className="w-12 h-12 rounded-lg object-cover"
+                            />
+                          )}
+                          <div>
+                            <CardTitle className="text-xl">{job.title}</CardTitle>
+                            <CardDescription className="flex items-center gap-2 mt-1">
+                              <span>{job.companies.name}</span>
+                              {job.location && (
+                                <>
+                                  <span>•</span>
+                                  <MapPin className="h-3 w-3" />
+                                  <span>{job.location}</span>
+                                </>
+                              )}
+                            </CardDescription>
+                          </div>
+                        </div>
+                        <Button onClick={() => handleApply(job.id)}>Apply Now</Button>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      <p className="text-sm">{job.description}</p>
+                      <div className="flex flex-wrap gap-2">
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          <Briefcase className="h-3 w-3" />
+                          {job.job_type}
+                        </Badge>
+                        {job.experience_level && (
+                          <Badge variant="secondary" className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {job.experience_level}
+                          </Badge>
+                        )}
+                        <Badge variant="secondary" className="flex items-center gap-1">
+                          <DollarSign className="h-3 w-3" />
+                          {getCompensationDisplay(job)}
+                        </Badge>
+                        {job.applications_count > 0 && (
+                          <Badge variant="outline" className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {job.applications_count} applicants
+                          </Badge>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="applications">
+            <JobApplicationsViewer />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <div className="grid gap-4">
+          {jobs.length === 0 ? (
           <Card>
             <CardContent className="p-8 text-center text-muted-foreground">
               No jobs posted yet
@@ -314,7 +399,8 @@ export function JobsBoard() {
             </Card>
           ))
         )}
-      </div>
+        </div>
+      )}
     </div>
   );
 }

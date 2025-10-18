@@ -6,11 +6,13 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { GraduationCap, Plus, MapPin, Clock, DollarSign, Users, Building, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { InternshipApplicationsViewer } from './InternshipApplicationsViewer';
 
 interface Internship {
   id: string;
@@ -341,8 +343,16 @@ export default function InternshipBoard() {
         </CardContent>
       </Card>
 
-      {/* Internship Listings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {canCreateInternships ? (
+        <Tabs defaultValue="browse" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="browse">Browse Internships</TabsTrigger>
+            <TabsTrigger value="applications">Manage Applications</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="browse" className="space-y-4">
+            {/* Internship Listings */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {internships.map((internship) => (
           <Card key={internship.id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
             <CardContent className="p-6">
@@ -410,16 +420,104 @@ export default function InternshipBoard() {
             </CardContent>
           </Card>
         ))}
-      </div>
+            </div>
 
-      {internships.length === 0 && (
-        <Card className="tech-card border-0 text-center p-12">
-          <GraduationCap className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-xl font-semibold mb-2">No internships available yet</h3>
-          <p className="text-muted-foreground">
-            {canCreateInternships ? 'Be the first to post an internship opportunity!' : 'Check back soon for new opportunities.'}
-          </p>
-        </Card>
+            {internships.length === 0 && (
+              <Card className="tech-card border-0 text-center p-12">
+                <GraduationCap className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-2">No internships available yet</h3>
+                <p className="text-muted-foreground">
+                  Be the first to post an internship opportunity!
+                </p>
+              </Card>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="applications">
+            <InternshipApplicationsViewer />
+          </TabsContent>
+        </Tabs>
+      ) : (
+        <>
+          {/* Internship Listings for non-company users */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {internships.map((internship) => (
+              <Card key={internship.id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
+                <CardContent className="p-6">
+                  <div className="flex items-start space-x-4 mb-4">
+                    <Avatar className="h-12 w-12">
+                      <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                        {internship.company_name.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-foreground line-clamp-2">{internship.title}</h3>
+                      <p className="text-sm text-muted-foreground">{internship.company_name}</p>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{internship.description}</p>
+
+                  <div className="space-y-2 mb-4">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4 mr-2 text-primary" />
+                      {internship.location}
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Clock className="h-4 w-4 mr-2 text-primary" />
+                      {internship.duration}
+                    </div>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <DollarSign className="h-4 w-4 mr-2 text-primary" />
+                      {internship.compensation}
+                    </div>
+                    {internship.applications_count !== undefined && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Users className="h-4 w-4 mr-2 text-primary" />
+                        {internship.applications_count} applications
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-foreground mb-2">Requirements:</p>
+                    <div className="flex flex-wrap gap-1">
+                      {internship.requirements.slice(0, 3).map((req, idx) => (
+                        <Badge key={idx} variant="secondary" className="text-xs">
+                          {req}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex space-x-2">
+                    <Button variant="outline" size="sm" className="flex-1">
+                      View Details
+                    </Button>
+                    {canApplyToInternships && (
+                      <Button 
+                        size="sm" 
+                        onClick={() => applyToInternship(internship.id, internship.company_name)}
+                        className="flex-1 pulse-primary"
+                      >
+                        <Send className="h-4 w-4 mr-2" />
+                        Apply
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {internships.length === 0 && (
+            <Card className="tech-card border-0 text-center p-12">
+              <GraduationCap className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-2">No internships available yet</h3>
+              <p className="text-muted-foreground">Check back soon for new opportunities.</p>
+            </Card>
+          )}
+        </>
       )}
     </div>
   );
