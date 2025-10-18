@@ -4,8 +4,7 @@ import { FileText, Table, Presentation, FileSignature, FileCheck, Sparkles, Calc
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
-import { LightPaperPDF } from "@/components/lightpaper/LightPaperPDF";
-import { LightPaperSign } from "@/components/lightpaper/LightPaperSign";
+import { LightPaperPDFEditor } from "@/components/lightpaper/LightPaperPDFEditor";
 import AIAssistant from "@/components/AIAssistant";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
 import { Button } from "@/components/ui/button";
@@ -68,7 +67,7 @@ export default function LightPaper() {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="document" className="gap-2">
               <FileText className="h-4 w-4" />
               Document
@@ -81,13 +80,9 @@ export default function LightPaper() {
               <Presentation className="h-4 w-4" />
               Presentation
             </TabsTrigger>
-            <TabsTrigger value="pdf" className="gap-2">
-              <FileCheck className="h-4 w-4" />
-              PDF Reader
-            </TabsTrigger>
-            <TabsTrigger value="sign" className="gap-2">
+            <TabsTrigger value="pdf-editor" className="gap-2">
               <FileSignature className="h-4 w-4" />
-              Sign
+              PDF Editor & Sign
             </TabsTrigger>
           </TabsList>
 
@@ -103,12 +98,8 @@ export default function LightPaper() {
             <LightPaperPresentation />
           </TabsContent>
 
-          <TabsContent value="pdf" className="mt-0">
-            <LightPaperPDF />
-          </TabsContent>
-
-          <TabsContent value="sign" className="mt-0">
-            <LightPaperSign />
+          <TabsContent value="pdf-editor" className="mt-0">
+            <LightPaperPDFEditor />
           </TabsContent>
         </Tabs>
       </div>
