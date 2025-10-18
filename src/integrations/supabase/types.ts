@@ -1579,6 +1579,41 @@ export type Database = {
         }
         Relationships: []
       }
+      lightpaper_activity: {
+        Row: {
+          action: string
+          created_at: string | null
+          id: string
+          metadata: Json | null
+          project_id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          project_id: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          id?: string
+          metadata?: Json | null
+          project_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lightpaper_activity_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "lightpaper_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lightpaper_projects: {
         Row: {
           content: Json
@@ -1614,6 +1649,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      lightpaper_share_links: {
+        Row: {
+          access_type: string
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          password_hash: string | null
+          project_id: string
+          share_token: string
+          updated_at: string | null
+          view_count: number | null
+        }
+        Insert: {
+          access_type: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          password_hash?: string | null
+          project_id: string
+          share_token: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Update: {
+          access_type?: string
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          password_hash?: string | null
+          project_id?: string
+          share_token?: string
+          updated_at?: string | null
+          view_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lightpaper_share_links_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "lightpaper_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       mentor_availability: {
         Row: {

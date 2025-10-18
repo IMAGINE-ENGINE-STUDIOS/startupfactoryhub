@@ -33,16 +33,24 @@ export function LightPaperSign() {
     }
   };
 
+  const getCanvasCoordinates = (e: React.MouseEvent<HTMLCanvasElement>, canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    return {
+      x: (e.clientX - rect.left) * scaleX,
+      y: (e.clientY - rect.top) * scaleY
+    };
+  };
+
   const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (signatureMode !== "draw") return;
     setIsDrawing(true);
     const canvas = canvasRef.current;
     if (canvas) {
-      const rect = canvas.getBoundingClientRect();
-      setLastPos({
-        x: e.clientX - rect.left,
-        y: e.clientY - rect.top
-      });
+      const coords = getCanvasCoordinates(e, canvas);
+      setLastPos(coords);
     }
   };
 
@@ -51,18 +59,18 @@ export function LightPaperSign() {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (ctx && canvas) {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const coords = getCanvasCoordinates(e, canvas);
 
       ctx.beginPath();
       ctx.moveTo(lastPos.x, lastPos.y);
-      ctx.lineTo(x, y);
+      ctx.lineTo(coords.x, coords.y);
       ctx.strokeStyle = "#000000";
       ctx.lineWidth = 2;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
       ctx.stroke();
 
-      setLastPos({ x, y });
+      setLastPos(coords);
     }
   };
 

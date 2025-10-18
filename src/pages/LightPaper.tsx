@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, FileSignature, FileCheck, Sparkles, Calculator } from "lucide-react";
+import { FileText, Table, Presentation, FileSignature, FileCheck, Sparkles, Calculator, FolderOpen } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
@@ -9,11 +9,17 @@ import { LightPaperSign } from "@/components/lightpaper/LightPaperSign";
 import AIAssistant from "@/components/AIAssistant";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
 import { Button } from "@/components/ui/button";
+import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
+import ShareDialog from "@/components/lightpaper/ShareDialog";
+import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 
 export default function LightPaper() {
   const [activeTab, setActiveTab] = useState("document");
   const [showAI, setShowAI] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
+  const [showFiles, setShowFiles] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
+  const [showShareDialog, setShowShareDialog] = useState(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -32,6 +38,14 @@ export default function LightPaper() {
               </span>
             </div>
             <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setShowFiles(true)}
+                className="gap-2"
+              >
+                <FolderOpen className="h-4 w-4" />
+                My Files
+              </Button>
               <Button
                 variant="outline"
                 onClick={() => setShowCalculator(true)}
@@ -101,6 +115,25 @@ export default function LightPaper() {
 
       <AIAssistant isOpen={showAI} onClose={() => setShowAI(false)} />
       <ScientificCalculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} />
+
+      <MyFilesDrawer
+        isOpen={showFiles}
+        onClose={() => setShowFiles(false)}
+        onOpenProject={(project) => {
+          setSelectedProject(project);
+          setActiveTab(project.project_type);
+        }}
+        onShareProject={(project) => {
+          setSelectedProject(project);
+          setShowShareDialog(true);
+        }}
+      />
+
+      <ShareDialog
+        isOpen={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        project={selectedProject}
+      />
     </div>
   );
 }

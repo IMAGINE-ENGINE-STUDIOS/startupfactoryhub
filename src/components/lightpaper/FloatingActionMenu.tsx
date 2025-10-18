@@ -1,0 +1,67 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Save,
+  Share2,
+  Printer,
+  Plus,
+  X,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+
+interface FloatingActionMenuProps {
+  onSave?: () => void;
+  onShare?: () => void;
+  onPrint?: () => void;
+  position?: "left" | "right";
+}
+
+export default function FloatingActionMenu({
+  onSave,
+  onShare,
+  onPrint,
+  position = "right",
+}: FloatingActionMenuProps) {
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const actions = [
+    { icon: Save, label: "Save", onClick: onSave, show: !!onSave },
+    { icon: Share2, label: "Share", onClick: onShare, show: !!onShare },
+    { icon: Printer, label: "Print", onClick: onPrint, show: !!onPrint },
+  ].filter((action) => action.show);
+
+  return (
+    <div
+      className={cn(
+        "fixed bottom-6 z-50 flex flex-col gap-2",
+        position === "right" ? "right-6" : "left-6"
+      )}
+    >
+      {isExpanded &&
+        actions.map((action, index) => (
+          <Button
+            key={index}
+            onClick={() => {
+              action.onClick?.();
+              setIsExpanded(false);
+            }}
+            size="icon"
+            className="h-12 w-12 rounded-full shadow-lg animate-scale-in"
+            style={{ animationDelay: `${index * 50}ms` }}
+            title={action.label}
+          >
+            <action.icon className="h-5 w-5" />
+          </Button>
+        ))}
+
+      <Button
+        onClick={() => setIsExpanded(!isExpanded)}
+        size="icon"
+        className="h-14 w-14 rounded-full shadow-xl"
+        title={isExpanded ? "Close menu" : "Quick actions"}
+      >
+        {isExpanded ? <X className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
+      </Button>
+    </div>
+  );
+}
