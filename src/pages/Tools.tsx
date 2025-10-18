@@ -153,10 +153,10 @@ const Tools = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-20 lg:pb-6">
-      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+    <div className="h-screen flex flex-col bg-background overflow-hidden">
+      <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-shrink-0">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
               <Sparkles className="h-6 w-6 text-primary" />
@@ -169,56 +169,59 @@ const Tools = () => {
             Enhance your productivity with intelligent automation and insights
           </p>
         </div>
+      </div>
 
-        {/* CRM Board Section */}
-        <div className="mb-8">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Kanban className="h-5 w-5 text-primary" />
-                CRM Board
-              </CardTitle>
-              <CardDescription>
-                Manage your leads, contacts, and deals in one place
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <CRMBoard />
-            </CardContent>
-          </Card>
-        </div>
+      <div className="flex-1 overflow-hidden">
+        <div className="container mx-auto px-4 sm:px-6 h-full flex flex-col">
+          {/* CRM Board Section */}
+          <div className="mb-6 flex-shrink-0">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Kanban className="h-5 w-5 text-primary" />
+                  CRM Board
+                </CardTitle>
+                <CardDescription>
+                  Manage your leads, contacts, and deals in one place
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CRMBoard />
+              </CardContent>
+            </Card>
+          </div>
 
-        {/* Main Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 h-auto">
-            <TabsTrigger value="chatbot" className="gap-2 py-3">
-              <Bot className="h-4 w-4" />
-              <span className="hidden sm:inline">Assistant</span>
-            </TabsTrigger>
-            <TabsTrigger value="summary" className="gap-2 py-3">
-              <FileText className="h-4 w-4" />
-              <span className="hidden sm:inline">Summary</span>
-            </TabsTrigger>
-            <TabsTrigger value="sentiment" className="gap-2 py-3">
-              <TrendingUp className="h-4 w-4" />
-              <span className="hidden sm:inline">Sentiment</span>
-            </TabsTrigger>
-            <TabsTrigger value="translate" className="gap-2 py-3">
-              <Languages className="h-4 w-4" />
-              <span className="hidden sm:inline">Translate</span>
-            </TabsTrigger>
-            <TabsTrigger value="document" className="gap-2 py-3">
-              <Image className="h-4 w-4" />
-              <span className="hidden sm:inline">Document</span>
-            </TabsTrigger>
-            <TabsTrigger value="automation" className="gap-2 py-3">
-              <Workflow className="h-4 w-4" />
-              <span className="hidden sm:inline">Automation</span>
-            </TabsTrigger>
-          </TabsList>
+          {/* Main Tabs */}
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 h-auto flex-shrink-0 mb-4">
+              <TabsTrigger value="chatbot" className="gap-2 py-3">
+                <Bot className="h-4 w-4" />
+                <span className="hidden sm:inline">Assistant</span>
+              </TabsTrigger>
+              <TabsTrigger value="summary" className="gap-2 py-3">
+                <FileText className="h-4 w-4" />
+                <span className="hidden sm:inline">Summary</span>
+              </TabsTrigger>
+              <TabsTrigger value="sentiment" className="gap-2 py-3">
+                <TrendingUp className="h-4 w-4" />
+                <span className="hidden sm:inline">Sentiment</span>
+              </TabsTrigger>
+              <TabsTrigger value="translate" className="gap-2 py-3">
+                <Languages className="h-4 w-4" />
+                <span className="hidden sm:inline">Translate</span>
+              </TabsTrigger>
+              <TabsTrigger value="document" className="gap-2 py-3">
+                <Image className="h-4 w-4" />
+                <span className="hidden sm:inline">Document</span>
+              </TabsTrigger>
+              <TabsTrigger value="automation" className="gap-2 py-3">
+                <Workflow className="h-4 w-4" />
+                <span className="hidden sm:inline">Automation</span>
+              </TabsTrigger>
+            </TabsList>
 
-          {/* AI Chatbot */}
-          <TabsContent value="chatbot" className="space-y-4">
+            {/* AI Chatbot */}
+            <TabsContent value="chatbot" className="flex-1 overflow-y-auto">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -237,8 +240,8 @@ const Tools = () => {
             </Card>
           </TabsContent>
 
-          {/* Text Summarizer */}
-          <TabsContent value="summary" className="space-y-4">
+            {/* Text Summarizer */}
+            <TabsContent value="summary" className="flex-1 overflow-y-auto">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -272,8 +275,8 @@ const Tools = () => {
             </Card>
           </TabsContent>
 
-          {/* Sentiment Analyzer */}
-          <TabsContent value="sentiment" className="space-y-4">
+            {/* Sentiment Analyzer */}
+            <TabsContent value="sentiment" className="flex-1 overflow-y-auto">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -373,8 +376,8 @@ const Tools = () => {
             </Card>
           </TabsContent>
 
-          {/* Translator */}
-          <TabsContent value="translate" className="space-y-4">
+            {/* Translator */}
+            <TabsContent value="translate" className="flex-1 overflow-y-auto">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -403,8 +406,8 @@ const Tools = () => {
             </Card>
           </TabsContent>
 
-          {/* Document Analyzer */}
-          <TabsContent value="document" className="space-y-4">
+            {/* Document Analyzer */}
+            <TabsContent value="document" className="flex-1 overflow-y-auto">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -472,11 +475,12 @@ const Tools = () => {
             </Card>
           </TabsContent>
 
-          {/* Task Automation */}
-          <TabsContent value="automation" className="space-y-4">
-            <TaskAutomation />
-          </TabsContent>
-        </Tabs>
+            {/* Task Automation */}
+            <TabsContent value="automation" className="flex-1 overflow-y-auto">
+              <TaskAutomation />
+            </TabsContent>
+          </Tabs>
+        </div>
       </div>
 
       {/* AI Assistant Dialog */}
