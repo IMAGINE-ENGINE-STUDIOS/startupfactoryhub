@@ -29,6 +29,7 @@ export default function MentorOffersBoard() {
   const [goals, setGoals] = useState('');
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(false);
+  const [processingStartupId, setProcessingStartupId] = useState<string | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -37,15 +38,36 @@ export default function MentorOffersBoard() {
   }, []);
 
   const fetchStartups = async () => {
-    const { data, error } = await supabase
+    if (!user) return;
+
+    // Fetch all companies
+    const { data: allCompanies, error: companiesError } = await supabase
       .from('companies')
       .select('*')
       .order('created_at', { ascending: false })
-      .limit(20);
+      .limit(50);
 
-    if (!error && data) {
-      setStartups(data);
+    if (companiesError || !allCompanies) {
+      console.error('Error fetching companies:', companiesError);
+      return;
     }
+
+    // Fetch existing mentorship relationships for this mentor
+    const { data: existingRelationships } = await supabase
+      .from('mentorship_relationships')
+      .select('mentee_id')
+      .eq('mentor_id', user.id);
+
+    // Filter out companies where mentorship already exists
+    const existingMenteeIds = new Set(
+      (existingRelationships || []).map(r => r.mentee_id)
+    );
+
+    const availableStartups = allCompanies.filter(
+      company => !existingMenteeIds.has(company.user_id)
+    );
+
+    setStartups(availableStartups.slice(0, 20));
   };
 
   const offerMentorship = async () => {
@@ -54,17 +76,23 @@ export default function MentorOffersBoard() {
     setLoading(true);
 
     // Check if relationship already exists
-    const { data: existing } = await supabase
+    const { data: existing, error: checkError } = await supabase
       .from('mentorship_relationships')
-      .select('id')
+      .select('id, status')
       .eq('mentor_id', user.id)
       .eq('mentee_id', selectedStartup.user_id)
-      .single();
+      .maybeSingle();
 
     if (existing) {
+      const statusMessage = existing.status === 'pending' 
+        ? 'You already have a pending offer with this startup.'
+        : existing.status === 'active'
+        ? 'You already have an active mentorship with this startup.'
+        : 'You previously had a mentorship with this startup.';
+        
       toast({
         title: "Already Connected",
-        description: "You already have a mentorship relationship with this startup.",
+        description: statusMessage,
         variant: "destructive",
       });
       setLoading(false);
@@ -97,10 +125,16 @@ export default function MentorOffersBoard() {
       description: `Your mentorship offer has been sent to ${selectedStartup.name}`,
     });
 
+    // Remove the startup from the list immediately
+    setStartups(prevStartups => 
+      prevStartups.filter(s => s.id !== selectedStartup.id)
+    );
+
     setDialogOpen(false);
     setGoals('');
     setNotes('');
     setLoading(false);
+    setProcessingStartupId(null);
   };
 
   return (
@@ -155,14 +189,16 @@ export default function MentorOffersBoard() {
 
                   <Button 
                     onClick={() => {
+                      setProcessingStartupId(startup.id);
                       setSelectedStartup(startup);
                       setDialogOpen(true);
                     }}
+                    disabled={processingStartupId === startup.id}
                     className="w-full pulse-primary"
                     size="sm"
                   >
                     <Send className="h-4 w-4 mr-2" />
-                    Offer Mentorship
+                    {processingStartupId === startup.id ? 'Processing...' : 'Offer Mentorship'}
                   </Button>
                 </CardContent>
               </Card>

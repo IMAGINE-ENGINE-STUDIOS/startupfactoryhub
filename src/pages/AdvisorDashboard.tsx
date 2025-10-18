@@ -251,7 +251,10 @@ export default function AdvisorDashboard() {
         description: `Your mentorship offer to ${startupName} has been sent.`,
       });
 
-      fetchStartups();
+      // Remove the startup from the list immediately
+      setStartups(prevStartups => 
+        prevStartups.filter(s => s.id !== companyId)
+      );
     } catch (error) {
       console.error('Error offering mentorship:', error);
       toast({
@@ -263,7 +266,10 @@ export default function AdvisorDashboard() {
   };
 
   const fetchStartups = async () => {
-    const { data, error } = await supabase
+    if (!user) return;
+
+    // Fetch all companies
+    const { data: allCompanies, error } = await supabase
       .from('companies')
       .select(`
         id,
@@ -287,7 +293,22 @@ export default function AdvisorDashboard() {
       return;
     }
 
-    setStartups(data || []);
+    // Fetch existing mentorship relationships for this advisor
+    const { data: existingRelationships } = await supabase
+      .from('mentorship_relationships')
+      .select('mentee_id')
+      .eq('mentor_id', user.id);
+
+    // Filter out companies where mentorship already exists
+    const existingMenteeIds = new Set(
+      (existingRelationships || []).map(r => r.mentee_id)
+    );
+
+    const availableStartups = (allCompanies || []).filter(
+      company => !existingMenteeIds.has(company.user_id)
+    );
+
+    setStartups(availableStartups);
   };
 
   const stats = [
@@ -361,7 +382,7 @@ export default function AdvisorDashboard() {
           </div>
 
           <TabsContent value="requests" className="space-y-4">
-            <MentorshipRequests />
+            <MentorshipRequests onRequestHandled={fetchStartups} />
             
             <Card className="tech-card border-0">
               <CardHeader>

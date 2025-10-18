@@ -36,7 +36,11 @@ interface MentorshipRequest {
   };
 }
 
-export default function MentorshipRequests() {
+interface MentorshipRequestsProps {
+  onRequestHandled?: () => void;
+}
+
+export default function MentorshipRequests({ onRequestHandled }: MentorshipRequestsProps = {}) {
   const [requests, setRequests] = useState<MentorshipRequest[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -119,6 +123,11 @@ export default function MentorshipRequests() {
     });
 
     fetchPendingRequests();
+    
+    // Notify parent component to refresh opportunities list
+    if (onRequestHandled) {
+      onRequestHandled();
+    }
   };
 
   if (requests.length === 0) {
