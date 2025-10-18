@@ -33,45 +33,144 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
   const [projectTitle, setProjectTitle] = useState("Untitled Document");
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
-  const [versionHistory, setVersionHistory] = useState<string[]>([]);
+  const [versions, setVersions] = useState<any[]>([]);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(-1);
+  const [sessionId] = useState(() => `session_${Date.now()}_${Math.random()}`);
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const { saveProject } = useLightPaperProjects("document");
 
-  // Load project when selectedProject changes
+  // Load project and versions when selectedProject changes
   useEffect(() => {
-    if (selectedProject && selectedProject.project_type === "document") {
-      setCurrentProjectId(selectedProject.id);
-      setProjectTitle(selectedProject.title);
-      
-      const content = selectedProject.content as any;
-      if (content) {
-        if (content.html && editorRef.current) {
-          editorRef.current.innerHTML = content.html;
-          saveToHistory(content.html);
+    const loadProjectWithVersions = async () => {
+      if (selectedProject && selectedProject.project_type === "document") {
+        setCurrentProjectId(selectedProject.id);
+        setProjectTitle(selectedProject.title);
+        
+        const content = selectedProject.content as any;
+        if (content) {
+          if (content.html && editorRef.current) {
+            editorRef.current.innerHTML = content.html;
+          }
+          if (content.font) setSelectedFont(content.font);
+          if (content.size) setSelectedSize(content.size);
         }
-        if (content.font) setSelectedFont(content.font);
-        if (content.size) setSelectedSize(content.size);
+
+        // Load version history for this session
+        await loadVersionHistory();
+        toast.success("Document loaded");
       }
-      toast.success("Document loaded");
-    }
+    };
+
+    loadProjectWithVersions();
   }, [selectedProject]);
 
-  // Save to version history
-  const saveToHistory = (html: string) => {
-    const newHistory = versionHistory.slice(0, currentVersionIndex + 1);
-    newHistory.push(html);
-    if (newHistory.length > 50) newHistory.shift(); // Keep last 50 versions
-    setVersionHistory(newHistory);
-    setCurrentVersionIndex(newHistory.length - 1);
+  // Cleanup temporary versions on logout or unmount
+  useEffect(() => {
+    const cleanupOnLogout = async () => {
+      try {
+        const user = (await supabase.auth.getUser()).data.user;
+        if (user) {
+          await supabase
+            .from('document_versions')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('session_id', sessionId)
+            .eq('is_temporary', true);
+        }
+      } catch (error) {
+        console.error('Error cleaning up versions:', error);
+      }
+    };
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        cleanupOnLogout();
+      }
+    });
+
+    // Cleanup on unmount
+    return () => {
+      subscription.unsubscribe();
+      cleanupOnLogout();
+    };
+  }, [sessionId]);
+
+  // Load version history from database
+  const loadVersionHistory = async () => {
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('document_versions')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('session_id', sessionId)
+        .eq('is_temporary', true)
+        .order('version_number', { ascending: true });
+
+      if (error) throw error;
+
+      if (data && data.length > 0) {
+        setVersions(data);
+        setCurrentVersionIndex(data.length - 1);
+      }
+    } catch (error) {
+      console.error('Error loading version history:', error);
+    }
   };
 
-  // Handle content changes
+  // Save version to database
+  const saveVersionToDatabase = async (html: string) => {
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) return;
+
+      const versionNumber = versions.length;
+      
+      const { data, error } = await supabase
+        .from('document_versions')
+        .insert({
+          user_id: user.id,
+          project_id: currentProjectId,
+          session_id: sessionId,
+          content: { html, font: selectedFont, size: selectedSize },
+          version_number: versionNumber,
+          is_temporary: true
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setVersions([...versions, data]);
+        setCurrentVersionIndex(versions.length);
+      }
+    } catch (error) {
+      console.error('Error saving version:', error);
+    }
+  };
+
+  // Auto-save version with debounce
+  const autoSaveVersion = (html: string) => {
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    saveTimeoutRef.current = setTimeout(() => {
+      saveVersionToDatabase(html);
+    }, 2000); // Save after 2 seconds of inactivity
+  };
+
+  // Handle content changes and auto-save
   useEffect(() => {
     const editor = editorRef.current;
     if (!editor) return;
 
     const handleInput = () => {
-      saveToHistory(editor.innerHTML);
+      autoSaveVersion(editor.innerHTML);
     };
 
     const handlePaste = (e: ClipboardEvent) => {
@@ -86,25 +185,44 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
     return () => {
       editor.removeEventListener('input', handleInput);
       editor.removeEventListener('paste', handlePaste);
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
     };
-  }, []);
+  }, [versions, selectedFont, selectedSize]);
 
-  // Navigate version history
-  const goToPreviousVersion = () => {
-    if (currentVersionIndex > 0 && editorRef.current) {
+  // Navigate version history from database
+  const goToPreviousVersion = async () => {
+    if (currentVersionIndex > 0 && editorRef.current && versions.length > 0) {
       const newIndex = currentVersionIndex - 1;
-      editorRef.current.innerHTML = versionHistory[newIndex];
-      setCurrentVersionIndex(newIndex);
-      toast.success("Restored previous version");
+      const version = versions[newIndex];
+      
+      if (version && version.content) {
+        editorRef.current.innerHTML = version.content.html;
+        if (version.content.font) setSelectedFont(version.content.font);
+        if (version.content.size) setSelectedSize(version.content.size);
+        setCurrentVersionIndex(newIndex);
+        toast.success(`Restored version ${newIndex + 1}`);
+      }
+    } else {
+      toast.info("No previous versions available");
     }
   };
 
-  const goToNextVersion = () => {
-    if (currentVersionIndex < versionHistory.length - 1 && editorRef.current) {
+  const goToNextVersion = async () => {
+    if (currentVersionIndex < versions.length - 1 && editorRef.current) {
       const newIndex = currentVersionIndex + 1;
-      editorRef.current.innerHTML = versionHistory[newIndex];
-      setCurrentVersionIndex(newIndex);
-      toast.success("Restored next version");
+      const version = versions[newIndex];
+      
+      if (version && version.content) {
+        editorRef.current.innerHTML = version.content.html;
+        if (version.content.font) setSelectedFont(version.content.font);
+        if (version.content.size) setSelectedSize(version.content.size);
+        setCurrentVersionIndex(newIndex);
+        toast.success(`Restored version ${newIndex + 1}`);
+      }
+    } else {
+      toast.info("No later versions available");
     }
   };
 
@@ -247,6 +365,25 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
     if (result) {
       setCurrentProjectId(result.id);
       setShowSaveDialog(false);
+
+      // Clean up temporary versions on save
+      try {
+        const user = (await supabase.auth.getUser()).data.user;
+        if (user) {
+          await supabase
+            .from('document_versions')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('session_id', sessionId)
+            .eq('is_temporary', true);
+          
+          setVersions([]);
+          setCurrentVersionIndex(-1);
+          toast.success("Document saved and temporary versions cleared");
+        }
+      } catch (error) {
+        console.error('Error cleaning up versions:', error);
+      }
     }
   };
 
@@ -374,8 +511,8 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
               size="sm"
               className="h-8 w-8 p-0"
               onClick={goToPreviousVersion}
-              disabled={currentVersionIndex <= 0}
-              title="Previous Version"
+              disabled={currentVersionIndex <= 0 || versions.length === 0}
+              title="Previous Version (Undo)"
             >
               <Undo className="h-4 w-4" />
             </Button>
@@ -384,8 +521,8 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
               size="sm"
               className="h-8 w-8 p-0"
               onClick={goToNextVersion}
-              disabled={currentVersionIndex >= versionHistory.length - 1}
-              title="Next Version"
+              disabled={currentVersionIndex >= versions.length - 1 || versions.length === 0}
+              title="Next Version (Redo)"
             >
               <Redo className="h-4 w-4" />
             </Button>

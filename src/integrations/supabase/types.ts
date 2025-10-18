@@ -842,6 +842,47 @@ export type Database = {
           },
         ]
       }
+      document_versions: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          is_temporary: boolean
+          project_id: string | null
+          session_id: string
+          user_id: string
+          version_number: number
+        }
+        Insert: {
+          content: Json
+          created_at?: string
+          id?: string
+          is_temporary?: boolean
+          project_id?: string | null
+          session_id: string
+          user_id: string
+          version_number: number
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_temporary?: boolean
+          project_id?: string | null
+          session_id?: string
+          user_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_versions_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "lightpaper_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       endorsements: {
         Row: {
           comment: string | null
