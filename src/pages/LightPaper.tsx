@@ -83,7 +83,7 @@ export default function LightPaper() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
           <TabsContent value="document" className="flex-1 mt-0 overflow-hidden">
             <LightPaperDocument selectedProject={selectedProject} />
@@ -93,11 +93,11 @@ export default function LightPaper() {
             <LightPaperSpreadsheet />
           </TabsContent>
 
-          <TabsContent value="presentation" className="flex-1 mt-0 overflow-hidden">
+          <TabsContent value="presentation" className="flex-1 mt-0 overflow-auto">
             <LightPaperPresentation />
           </TabsContent>
 
-          <TabsContent value="pdf-editor" className="flex-1 mt-0 overflow-hidden">
+          <TabsContent value="pdf-editor" className="flex-1 mt-0 overflow-auto">
             <LightPaperPDFEditor selectedProject={selectedProject} />
           </TabsContent>
         </Tabs>

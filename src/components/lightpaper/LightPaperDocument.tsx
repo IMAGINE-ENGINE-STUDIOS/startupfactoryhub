@@ -486,23 +486,6 @@ export function LightPaperDocument({
     toast.info("Move your cursor to position the signature, then click to place it");
   };
 
-    const onMouseUp = () => {
-      isDragging = false;
-      signatureElement.style.cursor = 'move';
-    };
-
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', onMouseUp);
-
-    // Store cleanup function
-    signatureElement.dataset.cleanup = 'true';
-    
-    pageElement.appendChild(signatureElement);
-
-    setShowSignDialog(false);
-    toast.success("Signature inserted! Drag to reposition");
-  };
-
   // Handle signature dragging
   useEffect(() => {
     if (!draggingSignature || !containerRef.current) return;
