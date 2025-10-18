@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import type { PDFDocumentProxy } from "pdfjs-dist";
+import type { PDFDocumentProxy, TextItem } from 'pdfjs-dist/types/src/display/api';
 import { Canvas as FabricCanvas, PencilBrush, IText, Rect, Circle, Textbox, util as fabricUtil, FabricImage } from "fabric";
 import * as fabric from "fabric";
 import { PDFDocument, rgb, StandardFonts, degrees } from "pdf-lib";
@@ -80,12 +80,14 @@ interface TextReplacement {
   height: number;
 }
 
-interface PDFTextItem {
-  str: string;
-  transform: number[];
+interface PDFTextItem extends TextItem {
+  height: number;
+}
+
+interface PDFPageViewport {
   width: number;
   height: number;
-  fontName: string;
+  scale: number;
 }
 interface LightPaperPDFEditorProps {
   selectedProject?: LightPaperProject | null;
@@ -119,6 +121,7 @@ export function LightPaperPDFEditor({
   const [textReplacements, setTextReplacements] = useState<Map<number, TextReplacement[]>>(new Map());
   const [editingTextIndex, setEditingTextIndex] = useState<{pageNum: number, index: number} | null>(null);
   const [pdfDocumentProxy, setPdfDocumentProxy] = useState<PDFDocumentProxy | null>(null);
+  const [pageViewports, setPageViewports] = useState<Map<number, PDFPageViewport>>(new Map());
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const textLayerRefs = useRef<Map<number, HTMLDivElement>>(new Map());
@@ -269,19 +272,22 @@ export function LightPaperPDFEditor({
   const extractPageText = async (pdf: PDFDocumentProxy, pageNum: number) => {
     try {
       const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 1.0 });
       const textContent = await page.getTextContent();
       
       const items: PDFTextItem[] = textContent.items
         .filter((item: any) => 'str' in item)
         .map((item: any) => ({
-          str: item.str,
-          transform: item.transform,
-          width: item.width,
-          height: item.height,
-          fontName: item.fontName,
+          ...item,
+          height: item.height || Math.abs(item.transform[3]),
         }));
       
       setPdfTextItems(prev => new Map(prev).set(pageNum, items));
+      setPageViewports(prev => new Map(prev).set(pageNum, {
+        width: viewport.width,
+        height: viewport.height,
+        scale: viewport.scale,
+      }));
     } catch (error) {
       console.error(`Error extracting text from page ${pageNum}:`, error);
     }
@@ -289,29 +295,43 @@ export function LightPaperPDFEditor({
 
   const handleTextClick = (pageNum: number, textIndex: number, textItem: PDFTextItem) => {
     const canvas = canvasInstances.get(pageNum);
-    if (!canvas) return;
+    const viewport = pageViewports.get(pageNum);
+    if (!canvas || !viewport) return;
 
+    setEditingTextIndex({ pageNum, index: textIndex });
+
+    // Convert PDF.js coordinates to canvas coordinates
+    // PDF.js uses bottom-left origin, Fabric uses top-left origin
+    const x = textItem.transform[4];
+    const y = textItem.transform[5];
+    const textHeight = textItem.height || Math.abs(textItem.transform[3]);
+    
+    // Convert to canvas coordinates (top-left origin)
+    const canvasY = viewport.height - y - textHeight;
+    
+    // Scale to match canvas size
+    const scaleX = canvas.width! / viewport.width;
+    const scaleY = canvas.height! / viewport.height;
+    
+    const canvasX = x * scaleX;
+    const scaledY = canvasY * scaleY;
+    const canvasWidth = textItem.width * scaleX;
+    const fontSize = Math.abs(textItem.transform[3]) * scaleY;
+    
     // Check if already replaced
     const replacements = textReplacements.get(pageNum) || [];
     const existingReplacement = replacements.find(r => 
       r.originalText === textItem.str && 
-      Math.abs(r.originalX - textItem.transform[4]) < 1 &&
-      Math.abs(r.originalY - textItem.transform[5]) < 1
+      Math.abs(r.originalX - x) < 1
     );
-
-    // Calculate position (PDF.js uses bottom-left origin)
-    const x = textItem.transform[4];
-    const y = canvas.height! - textItem.transform[5] - textItem.height;
-    const fontSize = Math.sqrt(textItem.transform[0] * textItem.transform[0] + textItem.transform[1] * textItem.transform[1]);
-
-    // Create editable textbox
+    
     const text = new Textbox(existingReplacement ? existingReplacement.newText : textItem.str, {
-      left: x,
-      top: y,
+      left: canvasX,
+      top: scaledY,
       fill: existingReplacement ? existingReplacement.color : '#000000',
-      fontSize: existingReplacement ? existingReplacement.fontSize : fontSize,
+      fontSize: existingReplacement ? existingReplacement.fontSize * scaleY : fontSize,
       fontFamily: existingReplacement ? existingReplacement.fontFamily : 'Arial',
-      width: textItem.width > 0 ? textItem.width : 200,
+      width: canvasWidth > 0 ? canvasWidth : 200,
       editable: true,
       selectable: true,
     });
@@ -322,35 +342,35 @@ export function LightPaperPDFEditor({
     text.selectAll();
     canvas.renderAll();
 
-    setEditingTextIndex({ pageNum, index: textIndex });
+    // Switch to select mode for immediate dragging after editing
+    setTool("select");
+    canvas.defaultCursor = "default";
 
-    // When editing is done, save the replacement
     text.on('editing:exited', () => {
-      const newReplacements = [...(textReplacements.get(pageNum) || [])];
-      const replacementIndex = newReplacements.findIndex(r => 
-        r.originalText === textItem.str && 
-        Math.abs(r.originalX - textItem.transform[4]) < 1 &&
-        Math.abs(r.originalY - textItem.transform[5]) < 1
-      );
-
       const replacement: TextReplacement = {
-        originalX: textItem.transform[4],
-        originalY: textItem.transform[5],
+        originalX: x,
+        originalY: y,
         originalText: textItem.str,
         newText: text.text || '',
-        fontSize: (text.fontSize || 16) * (text.scaleY || 1),
+        fontSize: Math.abs(textItem.transform[3]),
         fontFamily: text.fontFamily || 'Arial',
         color: text.fill as string || '#000000',
         width: textItem.width,
-        height: textItem.height,
+        height: textHeight,
       };
-
+      
+      const newReplacements = [...(textReplacements.get(pageNum) || [])];
+      const replacementIndex = newReplacements.findIndex(r => 
+        r.originalText === textItem.str && 
+        Math.abs(r.originalX - x) < 1
+      );
+      
       if (replacementIndex >= 0) {
         newReplacements[replacementIndex] = replacement;
       } else {
         newReplacements.push(replacement);
       }
-
+      
       setTextReplacements(prev => new Map(prev).set(pageNum, newReplacements));
       setEditingTextIndex(null);
       toast.success("Text updated - will be saved on export");
@@ -693,7 +713,11 @@ export function LightPaperPDFEditor({
         
         // Step 1: Handle text replacements (overlaying new text)
         const replacements = textReplacements.get(i) || [];
+        const viewport = pageViewports.get(i);
+        
         for (const replacement of replacements) {
+          if (!viewport) continue;
+          
           try {
             // Parse color
             const color = replacement.color;
@@ -701,23 +725,20 @@ export function LightPaperPDFEditor({
             const g = parseInt(color.slice(3, 5), 16) / 255;
             const b = parseInt(color.slice(5, 7), 16) / 255;
             
-            // Convert PDF.js coordinates to pdf-lib coordinates
-            // PDF.js: top-left origin, pdf-lib: bottom-left origin
-            const pdfY = pageHeight - replacement.originalY - replacement.height;
-            
-            // Draw white rectangle to cover original text
+            // Cover original text with white rectangle
+            // Note: pdf-lib uses bottom-left origin like PDF.js
             page.drawRectangle({
               x: replacement.originalX,
-              y: pdfY,
+              y: replacement.originalY,
               width: replacement.width > 0 ? replacement.width : 200,
               height: replacement.height > 0 ? replacement.height : replacement.fontSize,
               color: rgb(1, 1, 1),
             });
             
-            // Draw new text
+            // Draw new text at the same position
             page.drawText(replacement.newText, {
               x: replacement.originalX,
-              y: pdfY,
+              y: replacement.originalY,
               size: replacement.fontSize,
               font: helveticaFont,
               color: rgb(r, g, b),
@@ -1208,9 +1229,9 @@ export function LightPaperPDFEditor({
               <div className="mx-auto" style={{
             width: pageWidth * zoom
           }}>
-                <Document file={pdfFile} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError} loading={null} className="flex flex-col items-center">
+                <Document file={pdfFile} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError} loading={null} className="flex flex-col gap-0">
                   {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
-                    <div key={pageNum} className="relative" style={{
+                    <div key={pageNum} className="relative border-b border-border last:border-b-0" style={{
                       width: pageWidth * zoom
                     }}>
                       <div ref={el => el && pageRefs.current.set(pageNum, el)} className="relative">
@@ -1220,45 +1241,49 @@ export function LightPaperPDFEditor({
                           onLoadSuccess={() => setupCanvas(pageNum)} 
                           renderTextLayer={true} 
                           renderAnnotationLayer={false}
-                          className="pointer-events-none"
                         />
                         
                         {/* Clickable text overlay layer */}
                         <div 
                           ref={el => el && textLayerRefs.current.set(pageNum, el)}
-                          className="absolute top-0 left-0 w-full h-full pointer-events-auto"
-                          style={{ zIndex: 1 }}
+                          className="absolute top-0 left-0 w-full h-full"
+                          style={{ zIndex: 3 }}
                         >
                           {pdfTextItems.get(pageNum)?.map((textItem, index) => {
+                            const viewport = pageViewports.get(pageNum);
+                            if (!viewport) return null;
+                            
                             const x = textItem.transform[4];
                             const y = textItem.transform[5];
-                            const fontSize = Math.sqrt(
-                              textItem.transform[0] * textItem.transform[0] + 
-                              textItem.transform[1] * textItem.transform[1]
-                            );
+                            const textHeight = textItem.height || Math.abs(textItem.transform[3]);
                             
-                            // Check if this text has been replaced
-                            const replacements = textReplacements.get(pageNum) || [];
-                            const isReplaced = replacements.some(r => 
+                            // Convert to percentage-based positioning
+                            const leftPercent = (x / viewport.width) * 100;
+                            const topPercent = ((viewport.height - y - textHeight) / viewport.height) * 100;
+                            const widthPercent = (textItem.width / viewport.width) * 100;
+                            const heightPercent = (textHeight / viewport.height) * 100;
+                            
+                            const isReplaced = textReplacements.get(pageNum)?.some(r => 
                               r.originalText === textItem.str && 
-                              Math.abs(r.originalX - x) < 1 &&
-                              Math.abs(r.originalY - y) < 1
+                              Math.abs(r.originalX - x) < 1
                             );
                             
                             return (
                               <div
                                 key={`${pageNum}-${index}`}
                                 onClick={() => handleTextClick(pageNum, index, textItem)}
-                                className={`absolute cursor-pointer transition-all hover:bg-blue-200/30 ${
-                                  isReplaced ? 'bg-green-200/20' : ''
+                                className={`absolute cursor-pointer transition-all ${
+                                  isReplaced 
+                                    ? 'bg-green-200/20 hover:bg-green-400/40' 
+                                    : 'hover:bg-blue-400/30'
                                 }`}
                                 style={{
-                                  left: `${(x / (pageWidth * zoom)) * 100}%`,
-                                  top: `${((1 - y / (pageRefs.current.get(pageNum)?.clientHeight || 1))) * 100}%`,
-                                  width: `${(textItem.width / (pageWidth * zoom)) * 100}%`,
-                                  height: `${(textItem.height / (pageRefs.current.get(pageNum)?.clientHeight || 1)) * 100}%`,
+                                  left: `${leftPercent}%`,
+                                  top: `${topPercent}%`,
+                                  width: `${widthPercent}%`,
+                                  height: `${heightPercent}%`,
                                 }}
-                                title="Click to edit this text"
+                                title="Click to edit text"
                               />
                             );
                           })}
@@ -1266,12 +1291,12 @@ export function LightPaperPDFEditor({
                         
                         <canvas 
                           ref={el => el && canvasRefs.current.set(pageNum, el)} 
-                          className="absolute top-0 left-0 pointer-events-auto cursor-default" 
+                          className="absolute top-0 left-0" 
                           style={{
                             width: "100%",
                             height: "100%",
-                            touchAction: "none",
                             zIndex: 2,
+                            pointerEvents: tool === "select" ? "auto" : "none",
                           }} 
                         />
                       </div>
