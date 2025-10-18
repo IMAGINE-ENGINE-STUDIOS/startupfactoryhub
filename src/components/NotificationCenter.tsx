@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
 
 interface Notification {
   id: string;
@@ -22,7 +23,11 @@ interface Notification {
   data?: any;
 }
 
-export default function NotificationCenter() {
+interface NotificationCenterProps {
+  className?: string;
+}
+
+export default function NotificationCenter({ className }: NotificationCenterProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -143,7 +148,7 @@ export default function NotificationCenter() {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className={cn("relative", className)}>
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <Badge 
