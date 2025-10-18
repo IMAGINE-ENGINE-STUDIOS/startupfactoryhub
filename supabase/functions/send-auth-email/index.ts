@@ -27,18 +27,9 @@ serve(async (req: Request) => {
 
   try {
     const payload = await req.text();
-    const headers = Object.fromEntries(req.headers);
     
-    let emailData: any;
-    
-    // If webhook secret is configured, verify the webhook
-    if (hookSecret) {
-      const wh = new Webhook(hookSecret);
-      emailData = wh.verify(payload, headers);
-    } else {
-      // For direct calls without webhook verification
-      emailData = JSON.parse(payload);
-    }
+    // Parse the payload directly - Supabase auth hooks don't use standardwebhooks format
+    const emailData = JSON.parse(payload);
 
     const {
       user,
