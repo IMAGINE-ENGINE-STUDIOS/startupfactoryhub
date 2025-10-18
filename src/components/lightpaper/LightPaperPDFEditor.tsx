@@ -901,30 +901,35 @@ export function LightPaperPDFEditor({
               <div className="mx-auto" style={{
             width: pageWidth * zoom
           }}>
-                <Document file={pdfFile} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError} loading={null} className="flex flex-col items-center gap-4">
-                  <div className="relative" style={{
-                width: pageWidth * zoom
-              }}>
-                    <div ref={el => el && pageRefs.current.set(currentPage, el)} className="relative">
-                      <Page 
-                        pageNumber={currentPage} 
-                        width={pageWidth * zoom} 
-                        onLoadSuccess={() => setupCanvas(currentPage)} 
-                        renderTextLayer={false} 
-                        renderAnnotationLayer={false}
-                        className="pointer-events-none"
-                      />
-                      <canvas 
-                        ref={el => el && canvasRefs.current.set(currentPage, el)} 
-                        className="absolute top-0 left-0 pointer-events-auto cursor-default" 
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          touchAction: "none"
-                        }} 
-                      />
+                <Document file={pdfFile} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError} loading={null} className="flex flex-col items-center gap-6">
+                  {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
+                    <div key={pageNum} className="relative flex flex-col items-center gap-2" style={{
+                      width: pageWidth * zoom
+                    }}>
+                      <div ref={el => el && pageRefs.current.set(pageNum, el)} className="relative shadow-lg">
+                        <Page 
+                          pageNumber={pageNum} 
+                          width={pageWidth * zoom} 
+                          onLoadSuccess={() => setupCanvas(pageNum)} 
+                          renderTextLayer={false} 
+                          renderAnnotationLayer={false}
+                          className="pointer-events-none"
+                        />
+                        <canvas 
+                          ref={el => el && canvasRefs.current.set(pageNum, el)} 
+                          className="absolute top-0 left-0 pointer-events-auto cursor-default" 
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            touchAction: "none"
+                          }} 
+                        />
+                      </div>
+                      <div className="text-sm text-muted-foreground font-medium">
+                        Page {pageNum} of {numPages}
+                      </div>
                     </div>
-                  </div>
+                  ))}
                 </Document>
               </div>
             </div> : <div className="flex flex-col items-center justify-center h-full text-center p-8">
