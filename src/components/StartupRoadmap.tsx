@@ -152,23 +152,53 @@ export default function StartupRoadmap() {
     if (!user) return;
 
     try {
-      const { error } = await supabase
+      // First check if record exists
+      const { data: existing } = await supabase
         .from('roadmap_progress')
-        .upsert({
-          user_id: user.id,
-          step_id: stepId,
-          completed: true,
-          completed_at: new Date().toISOString()
-        });
+        .select('id, completed')
+        .eq('user_id', user.id)
+        .eq('step_id', stepId)
+        .maybeSingle();
 
-      if (error) {
-        console.error('Error completing step:', error);
-        toast({
-          title: "Error",
-          description: "Failed to save progress. Please try again.",
-          variant: "destructive",
-        });
-        return;
+      if (existing) {
+        // Update existing record
+        const { error } = await supabase
+          .from('roadmap_progress')
+          .update({
+            completed: true,
+            completed_at: new Date().toISOString()
+          })
+          .eq('id', existing.id);
+
+        if (error) {
+          console.error('Error updating step:', error);
+          toast({
+            title: "Error",
+            description: "Failed to save progress. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
+      } else {
+        // Insert new record
+        const { error } = await supabase
+          .from('roadmap_progress')
+          .insert({
+            user_id: user.id,
+            step_id: stepId,
+            completed: true,
+            completed_at: new Date().toISOString()
+          });
+
+        if (error) {
+          console.error('Error inserting step:', error);
+          toast({
+            title: "Error",
+            description: "Failed to save progress. Please try again.",
+            variant: "destructive",
+          });
+          return;
+        }
       }
 
       const updatedSteps = steps.map(step => {
@@ -203,42 +233,52 @@ export default function StartupRoadmap() {
   const uncompleteStep = async (stepId: string) => {
     if (!user) return;
 
-    const currentIndex = steps.findIndex(step => step.id === stepId);
-    const subsequentStepIds = steps.slice(currentIndex).map(s => s.id);
+    try {
+      const currentIndex = steps.findIndex(step => step.id === stepId);
+      const subsequentStepIds = steps.slice(currentIndex).map(s => s.id);
 
-    // Update ALL affected steps in database
-    const { error } = await supabase
-      .from('roadmap_progress')
-      .update({
-        completed: false,
-        completed_at: null
-      })
-      .eq('user_id', user.id)
-      .in('step_id', subsequentStepIds);
+      // Update ALL affected steps in database
+      const { error } = await supabase
+        .from('roadmap_progress')
+        .update({
+          completed: false,
+          completed_at: null
+        })
+        .eq('user_id', user.id)
+        .in('step_id', subsequentStepIds);
 
-    if (error) {
+      if (error) {
+        console.error('Error uncompleting step:', error);
+        toast({
+          title: "Error",
+          description: "Failed to update progress. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Update local state
+      const updatedSteps = steps.map((step, i) => {
+        if (i >= currentIndex) {
+          return { ...step, completed: false, locked: i !== currentIndex };
+        }
+        return step;
+      });
+
+      setSteps(updatedSteps);
+
+      toast({
+        title: "Step Unmarked",
+        description: "Progress has been reset for this step and all subsequent steps.",
+      });
+    } catch (error) {
+      console.error('Unexpected error uncompleting step:', error);
       toast({
         title: "Error",
-        description: "Failed to update progress. Please try again.",
+        description: "An unexpected error occurred.",
         variant: "destructive",
       });
-      return;
     }
-
-    // Update local state
-    const updatedSteps = steps.map((step, i) => {
-      if (i >= currentIndex) {
-        return { ...step, completed: false, locked: i !== currentIndex };
-      }
-      return step;
-    });
-
-    setSteps(updatedSteps);
-
-    toast({
-      title: "Step Unmarked",
-      description: "Progress has been reset for this step and all subsequent steps.",
-    });
   };
 
   const addCustomStep = async () => {
@@ -251,45 +291,55 @@ export default function StartupRoadmap() {
       return;
     }
 
-    const customStepId = `custom-${Date.now()}`;
-    const newStep: RoadmapStep = {
-      id: customStepId,
-      title: newStepTitle,
-      description: newStepDescription || 'Custom step for your journey',
-      stage: 'growth',
-      completed: false,
-      locked: false,
-      resources: [],
-      icon: Circle
-    };
-
-    const { error } = await supabase
-      .from('roadmap_progress')
-      .insert({
-        user_id: user.id,
-        step_id: customStepId,
+    try {
+      const customStepId = `custom-${Date.now()}`;
+      const newStep: RoadmapStep = {
+        id: customStepId,
+        title: newStepTitle,
+        description: newStepDescription || 'Custom step for your journey',
+        stage: 'growth',
         completed: false,
-        notes: JSON.stringify({ title: newStepTitle, description: newStepDescription })
-      });
+        locked: false,
+        resources: [],
+        icon: Circle
+      };
 
-    if (error) {
+      const { error } = await supabase
+        .from('roadmap_progress')
+        .insert({
+          user_id: user.id,
+          step_id: customStepId,
+          completed: false,
+          notes: JSON.stringify({ title: newStepTitle, description: newStepDescription })
+        });
+
+      if (error) {
+        console.error('Error creating custom step:', error);
+        toast({
+          title: "Error",
+          description: "Failed to create custom step. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setSteps([...steps, newStep]);
+      setNewStepTitle('');
+      setNewStepDescription('');
+      setIsAddStepOpen(false);
+
+      toast({
+        title: "Custom Step Added!",
+        description: "Your custom step has been added to your journey.",
+      });
+    } catch (error) {
+      console.error('Unexpected error adding custom step:', error);
       toast({
         title: "Error",
-        description: "Failed to create custom step. Please try again.",
+        description: "An unexpected error occurred.",
         variant: "destructive",
       });
-      return;
     }
-
-    setSteps([...steps, newStep]);
-    setNewStepTitle('');
-    setNewStepDescription('');
-    setIsAddStepOpen(false);
-
-    toast({
-      title: "Custom Step Added!",
-      description: "Your custom step has been added to your journey.",
-    });
   };
 
   const getStageColor = (stage: string) => {
