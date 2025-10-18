@@ -151,7 +151,7 @@ export default function MatchingSystem() {
     }
   };
 
-  const sendConnectionRequest = async (targetId: string, targetName: string) => {
+  const sendConnectionRequest = async (targetId: string, targetName: string, onSuccess: () => void) => {
     if (!user) return;
 
     // Check if this is a mentorship request (connecting with a mentor/advisor)
@@ -191,8 +191,9 @@ export default function MatchingSystem() {
 
       toast({
         title: "Mentorship Request Sent!",
-        description: `Your mentorship request has been sent to ${targetName}`,
+        description: `Your mentorship request has been sent to ${targetName}. They'll be notified to respond.`,
       });
+      onSuccess();
     } else {
       // Send regular connection request
       const { error } = await supabase
@@ -214,8 +215,9 @@ export default function MatchingSystem() {
 
       toast({
         title: "Connection Request Sent!",
-        description: `Your connection request has been sent to ${targetName}`,
+        description: `Your connection request has been sent to ${targetName}. They'll be notified to respond.`,
       });
+      onSuccess();
     }
   };
 
@@ -328,7 +330,9 @@ export default function MatchingSystem() {
                     <MatchCard
                       key={mentor.id}
                       match={mentor}
-                      onConnect={() => sendConnectionRequest(mentor.id, mentor.name)}
+                      onConnect={() => sendConnectionRequest(mentor.id, mentor.name, () => {
+                        setMentorMatches(mentorMatches.filter(m => m.id !== mentor.id));
+                      })}
                       onPass={() => {
                         setMentorMatches(mentorMatches.filter(m => m.id !== mentor.id));
                         toast({ title: "Mentor passed", description: "We'll find better matches for you." });
@@ -362,7 +366,9 @@ export default function MatchingSystem() {
                     <MatchCard
                       key={investor.id}
                       match={investor}
-                      onConnect={() => sendConnectionRequest(investor.id, investor.name)}
+                      onConnect={() => sendConnectionRequest(investor.id, investor.name, () => {
+                        setInvestorMatches(investorMatches.filter(i => i.id !== investor.id));
+                      })}
                       onPass={() => {
                         setInvestorMatches(investorMatches.filter(i => i.id !== investor.id));
                         toast({ title: "Investor passed", description: "We'll find better matches for you." });
@@ -396,7 +402,9 @@ export default function MatchingSystem() {
                     <MatchCard
                       key={startup.id}
                       match={startup}
-                      onConnect={() => sendConnectionRequest(startup.id, startup.name)}
+                      onConnect={() => sendConnectionRequest(startup.id, startup.name, () => {
+                        setStartupMatches(startupMatches.filter(s => s.id !== startup.id));
+                      })}
                       onPass={() => {
                         setStartupMatches(startupMatches.filter(s => s.id !== startup.id));
                         toast({ title: "Startup passed", description: "We'll find better matches for you." });
