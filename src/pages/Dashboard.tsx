@@ -128,45 +128,35 @@ const Dashboard = () => {
         <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-thin">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap">
-              <TabsTrigger value="social" className="flex-shrink-0 gap-2" title="Social">
-                <MessageCircle className="h-4 w-4" />
-                <span className="hidden sm:inline">Social</span>
+              <TabsTrigger value="social" className="flex-shrink-0" title="Social">
+                <MessageCircle className="h-5 w-5" />
               </TabsTrigger>
-              <TabsTrigger value="network" className="flex-shrink-0 gap-2" title="Network">
-                <Network className="h-4 w-4" />
-                <span className="hidden sm:inline">Network</span>
+              <TabsTrigger value="network" className="flex-shrink-0" title="Network">
+                <Network className="h-5 w-5" />
               </TabsTrigger>
-              <TabsTrigger value="journey" className="flex-shrink-0 gap-2" title="Journey">
-                <Map className="h-4 w-4" />
-                <span className="hidden sm:inline">Journey</span>
+              <TabsTrigger value="journey" className="flex-shrink-0" title="Journey">
+                <Map className="h-5 w-5" />
               </TabsTrigger>
-              <TabsTrigger value="calendar" className="flex-shrink-0 gap-2" title="Calendar">
-                <CalendarIcon className="h-4 w-4" />
-                <span className="hidden sm:inline">Calendar</span>
+              <TabsTrigger value="calendar" className="flex-shrink-0" title="Calendar">
+                <CalendarIcon className="h-5 w-5" />
               </TabsTrigger>
-              <TabsTrigger value="profile" className="flex-shrink-0 gap-2" title="Profile">
-                <UserCircle className="h-4 w-4" />
-                <span className="hidden sm:inline">Profile</span>
+              <TabsTrigger value="profile" className="flex-shrink-0" title="Profile">
+                <UserCircle className="h-5 w-5" />
               </TabsTrigger>
-              <TabsTrigger value="jobs" className="flex-shrink-0 gap-2" title="Jobs">
-                <Briefcase className="h-4 w-4" />
-                <span className="hidden sm:inline">Jobs</span>
+              <TabsTrigger value="jobs" className="flex-shrink-0" title="Jobs">
+                <Briefcase className="h-5 w-5" />
               </TabsTrigger>
-              <TabsTrigger value="learn" className="flex-shrink-0 gap-2" title="Learn">
-                <GraduationCap className="h-4 w-4" />
-                <span className="hidden sm:inline">Learn</span>
+              <TabsTrigger value="learn" className="flex-shrink-0" title="Learn">
+                <GraduationCap className="h-5 w-5" />
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex-shrink-0 gap-2" title="Analytics">
-                <BarChart className="h-4 w-4" />
-                <span className="hidden sm:inline">Analytics</span>
+              <TabsTrigger value="analytics" className="flex-shrink-0" title="Analytics">
+                <BarChart className="h-5 w-5" />
               </TabsTrigger>
-              <TabsTrigger value="intelligence" className="flex-shrink-0 gap-2" title="Intelligence">
-                <Brain className="h-4 w-4" />
-                <span className="hidden sm:inline">Intelligence</span>
+              <TabsTrigger value="intelligence" className="flex-shrink-0" title="Intelligence">
+                <Brain className="h-5 w-5" />
               </TabsTrigger>
-              <TabsTrigger value="tools" className="flex-shrink-0 gap-2" title="Tools">
-                <Wrench className="h-4 w-4" />
-                <span className="hidden sm:inline">Tools</span>
+              <TabsTrigger value="tools" className="flex-shrink-0" title="Tools">
+                <Wrench className="h-5 w-5" />
               </TabsTrigger>
             </TabsList>
           </div>
