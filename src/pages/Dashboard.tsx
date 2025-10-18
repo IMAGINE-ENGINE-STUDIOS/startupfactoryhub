@@ -25,7 +25,7 @@ import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import JobTaskManager from '@/components/JobTaskManager';
-import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users } from "lucide-react";
+import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import GuestPrompt from '@/components/GuestPrompt';
@@ -128,16 +128,46 @@ const Dashboard = () => {
         <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0 scrollbar-thin">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap">
-              <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
-              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
-              <TabsTrigger value="journey" className="flex-shrink-0">Journey</TabsTrigger>
-              <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
-              <TabsTrigger value="profile" className="flex-shrink-0">Profile</TabsTrigger>
-              <TabsTrigger value="jobs" className="flex-shrink-0">Jobs</TabsTrigger>
-              <TabsTrigger value="learn" className="flex-shrink-0">Learn</TabsTrigger>
-              <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
-              <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
-              <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
+              <TabsTrigger value="social" className="flex-shrink-0 gap-2" title="Social">
+                <MessageCircle className="h-4 w-4" />
+                <span className="hidden sm:inline">Social</span>
+              </TabsTrigger>
+              <TabsTrigger value="network" className="flex-shrink-0 gap-2" title="Network">
+                <Network className="h-4 w-4" />
+                <span className="hidden sm:inline">Network</span>
+              </TabsTrigger>
+              <TabsTrigger value="journey" className="flex-shrink-0 gap-2" title="Journey">
+                <Map className="h-4 w-4" />
+                <span className="hidden sm:inline">Journey</span>
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="flex-shrink-0 gap-2" title="Calendar">
+                <CalendarIcon className="h-4 w-4" />
+                <span className="hidden sm:inline">Calendar</span>
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex-shrink-0 gap-2" title="Profile">
+                <UserCircle className="h-4 w-4" />
+                <span className="hidden sm:inline">Profile</span>
+              </TabsTrigger>
+              <TabsTrigger value="jobs" className="flex-shrink-0 gap-2" title="Jobs">
+                <Briefcase className="h-4 w-4" />
+                <span className="hidden sm:inline">Jobs</span>
+              </TabsTrigger>
+              <TabsTrigger value="learn" className="flex-shrink-0 gap-2" title="Learn">
+                <GraduationCap className="h-4 w-4" />
+                <span className="hidden sm:inline">Learn</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-shrink-0 gap-2" title="Analytics">
+                <BarChart className="h-4 w-4" />
+                <span className="hidden sm:inline">Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger value="intelligence" className="flex-shrink-0 gap-2" title="Intelligence">
+                <Brain className="h-4 w-4" />
+                <span className="hidden sm:inline">Intelligence</span>
+              </TabsTrigger>
+              <TabsTrigger value="tools" className="flex-shrink-0 gap-2" title="Tools">
+                <Wrench className="h-4 w-4" />
+                <span className="hidden sm:inline">Tools</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
