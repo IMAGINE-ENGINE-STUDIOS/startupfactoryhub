@@ -26,6 +26,7 @@ const Explore = lazy(() => import("./pages/Explore"));
 const MentoringSessions = lazy(() => import("./pages/MentoringSessions"));
 const Calendar = lazy(() => import("./pages/Calendar"));
 const Tools = lazy(() => import("./pages/Tools"));
+const LightPaper = lazy(() => import("./pages/LightPaper"));
 const PublicJobApplication = lazy(() => import("./pages/PublicJobApplication"));
 const PublicInternshipApplication = lazy(() => import("./pages/PublicInternshipApplication"));
 const PublicJobApplicationPage = lazy(() => import("./pages/PublicJobApplicationPage"));
@@ -77,6 +78,7 @@ const App = () => (
                   <Route path="/explore" element={<Explore />} />
                   <Route path="/profile" element={<StartupProfile />} />
                   <Route path="/tools" element={<Tools />} />
+                  <Route path="/lightpaper" element={<LightPaper />} />
                   <Route path="/jobs/:jobId/apply" element={<PublicJobApplicationPage />} />
                   <Route path="/internships/:internshipId/apply" element={<PublicInternshipApplication />} />
                   <Route path="/accept-invitation" element={<AcceptInvitation />} />

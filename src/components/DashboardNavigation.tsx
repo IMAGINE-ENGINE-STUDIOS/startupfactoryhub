@@ -26,7 +26,8 @@ import {
   BarChart3,
   Compass,
   Video,
-  Sparkles
+  Sparkles,
+  FileText
 } from "lucide-react";
 
 const DashboardNavigation = () => {
@@ -118,6 +119,15 @@ const DashboardNavigation = () => {
               >
                 <Sparkles className="w-4 h-4" />
                 <span>Intelligence</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="flex items-center space-x-2"
+                onClick={() => navigate("/lightpaper")}
+              >
+                <FileText className="w-4 h-4" />
+                <span>LightPaper</span>
               </Button>
             </div>
 
