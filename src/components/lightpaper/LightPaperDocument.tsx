@@ -52,13 +52,16 @@ export function LightPaperDocument({
 
   // Apply dark mode on initial load
   useEffect(() => {
-    if (editorRef.current && containerRef.current && wrapperRef.current) {
-      editorRef.current.style.backgroundColor = 'black';
-      editorRef.current.style.color = 'white';
-      containerRef.current.style.backgroundColor = 'black';
-      containerRef.current.style.color = 'white';
-      wrapperRef.current.style.backgroundColor = '#1a1a1a';
-    }
+    setTimeout(() => {
+      const pageElement = document.querySelector('.page') as HTMLElement;
+      if (pageElement) {
+        pageElement.style.backgroundColor = 'black';
+        pageElement.style.color = 'white';
+      }
+      if (editorRef.current) {
+        editorRef.current.style.color = 'white';
+      }
+    }, 100);
   }, []);
 
   // Load project and versions when selectedProject changes
@@ -261,25 +264,31 @@ export function LightPaperDocument({
     }
   };
   const toggleDarkMode = () => {
-    if (editorRef.current && containerRef.current && wrapperRef.current) {
-      const newDarkMode = !isDarkMode;
-      setIsDarkMode(newDarkMode);
-      
-      if (newDarkMode) {
-        editorRef.current.style.backgroundColor = 'black';
-        editorRef.current.style.color = 'white';
-        containerRef.current.style.backgroundColor = 'black';
-        containerRef.current.style.color = 'white';
-        wrapperRef.current.style.backgroundColor = '#1a1a1a';
-        toast.success("Dark mode enabled");
-      } else {
-        editorRef.current.style.backgroundColor = 'white';
-        editorRef.current.style.color = 'black';
-        containerRef.current.style.backgroundColor = 'white';
-        containerRef.current.style.color = 'black';
-        wrapperRef.current.style.backgroundColor = 'white';
-        toast.success("Light mode enabled");
+    const newDarkMode = !isDarkMode;
+    setIsDarkMode(newDarkMode);
+    
+    const pageElement = document.querySelector('.page') as HTMLElement;
+    
+    if (newDarkMode) {
+      // Dark mode: black background, white text
+      if (pageElement) {
+        pageElement.style.backgroundColor = 'black';
+        pageElement.style.color = 'white';
       }
+      if (editorRef.current) {
+        editorRef.current.style.color = 'white';
+      }
+      toast.success("Dark mode enabled");
+    } else {
+      // Light mode: white background, black text
+      if (pageElement) {
+        pageElement.style.backgroundColor = 'white';
+        pageElement.style.color = 'black';
+      }
+      if (editorRef.current) {
+        editorRef.current.style.color = 'black';
+      }
+      toast.success("Light mode enabled");
     }
   };
 
@@ -558,24 +567,6 @@ export function LightPaperDocument({
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("strikeThrough")} title="Strikethrough">
               <Strikethrough className="h-4 w-4" />
             </Button>
-          </div>
-
-          {/* Headings Dropdown */}
-          <div className="border-l pl-2">
-            <Select value="" onValueChange={applyHeading}>
-              <SelectTrigger className="w-24 h-8 text-xs">
-                <SelectValue placeholder="Style" />
-              </SelectTrigger>
-              <SelectContent className="bg-background z-50">
-                <SelectItem value="p">Normal</SelectItem>
-                <SelectItem value="h1">Heading 1</SelectItem>
-                <SelectItem value="h2">Heading 2</SelectItem>
-                <SelectItem value="h3">Heading 3</SelectItem>
-                <SelectItem value="h4">Heading 4</SelectItem>
-                <SelectItem value="h5">Heading 5</SelectItem>
-                <SelectItem value="h6">Heading 6</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Alignment */}
