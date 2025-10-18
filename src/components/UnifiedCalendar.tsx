@@ -322,6 +322,70 @@ export default function UnifiedCalendar({
         </Badge>
       </div>
 
+      {/* Upcoming Events Section */}
+      {upcomingItems.length > 0 && (
+        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-transparent">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <CalendarIcon className="h-5 w-5 text-primary" />
+              Upcoming Events
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[200px]">
+              <div className="space-y-3 pr-4">
+                {upcomingItems.map(item => (
+                  <div
+                    key={`${item.type}-${item.id}`}
+                    className="p-3 rounded-lg border bg-card hover:border-primary cursor-pointer transition-all"
+                    onClick={() => onItemClick?.(item)}
+                  >
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="font-semibold text-sm line-clamp-1">{item.title}</h3>
+                      <Badge variant="outline" className={`text-xs flex-shrink-0 ${getItemTypeColor(item.type)}`}>
+                        {getItemTypeIcon(item.type)}
+                      </Badge>
+                    </div>
+                    
+                    <div className="space-y-1 text-xs text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <CalendarIcon className="h-3 w-3" />
+                        {format(item.start_date, 'MMM d, yyyy')}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Clock className="h-3 w-3" />
+                        {format(item.start_date, 'h:mm a')} - {format(item.end_date, 'h:mm a')}
+                      </div>
+                      
+                      {item.type === 'event' && item.location && (
+                        <div className="flex items-center gap-2">
+                          <MapPin className="h-3 w-3" />
+                          <span className="line-clamp-1">{item.location}</span>
+                        </div>
+                      )}
+                      
+                      {item.type === 'session' && item.mentor_name && (
+                        <div className="flex items-center gap-2">
+                          <User className="h-3 w-3" />
+                          Mentor: {item.mentor_name}
+                        </div>
+                      )}
+
+                      {item.type === 'pitch' && item.description && (
+                        <div className="flex items-center gap-2">
+                          <Building className="h-3 w-3" />
+                          {item.description}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
         <Card className="lg:col-span-2">
