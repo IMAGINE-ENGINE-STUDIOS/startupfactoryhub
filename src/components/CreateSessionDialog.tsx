@@ -11,6 +11,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Loader2, Clock, Calendar, AlertCircle } from 'lucide-react';
 import { format, addDays, setHours, setMinutes, startOfWeek, parse } from 'date-fns';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface CreateSessionDialogProps {
   open: boolean;
@@ -49,6 +50,8 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
+  const [manualDateTime, setManualDateTime] = useState('');
+  const [useManualEntry, setUseManualEntry] = useState(false);
   
   const [formData, setFormData] = useState({
     mentor_id: '',
@@ -351,11 +354,27 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
                   <Loader2 className="h-6 w-6 animate-spin" />
                 </div>
               ) : availableTimeSlots.length === 0 ? (
-                <div className="p-4 border rounded-lg bg-muted/50 text-center">
-                  <AlertCircle className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                  <p className="text-sm text-muted-foreground">
-                    This mentor has no available time slots configured.
-                  </p>
+                <div>
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      This mentor hasn't set their availability yet. You can propose a meeting time manually.
+                    </AlertDescription>
+                  </Alert>
+                  
+                  <div className="mt-4 space-y-2">
+                    <Label htmlFor="manual-datetime">Proposed Date & Time</Label>
+                    <Input
+                      id="manual-datetime"
+                      type="datetime-local"
+                      value={manualDateTime}
+                      onChange={(e) => {
+                        setManualDateTime(e.target.value);
+                        setUseManualEntry(true);
+                      }}
+                      min={new Date().toISOString().slice(0, 16)}
+                    />
+                  </div>
                 </div>
               ) : (
                 <>

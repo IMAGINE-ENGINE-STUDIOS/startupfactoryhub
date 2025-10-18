@@ -11,10 +11,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useFollow } from '@/hooks/useFollow';
+import { useConnection } from '@/hooks/useConnection';
 import { useProfileViews } from '@/hooks/useProfileViews';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserPlus, UserMinus, MapPin, Globe, Briefcase } from 'lucide-react';
+import { UserPlus, UserMinus, MapPin, Globe, Briefcase, UserCheck, Clock } from 'lucide-react';
 
 interface UserProfile {
   user_id: string;
@@ -49,6 +50,13 @@ export default function UserProfileDialog({
     followUser,
     unfollowUser,
   } = useFollow(userId);
+
+  const {
+    status: connectionStatus,
+    sendConnectionRequest,
+    acceptConnection,
+    removeConnection,
+  } = useConnection(userId);
 
   // Track profile view when dialog opens
   useProfileViews(open ? userId : null);
@@ -132,24 +140,66 @@ export default function UserProfileDialog({
                 </div>
 
                 {!isOwnProfile && currentUser && (
-                  <Button
-                    onClick={handleFollowToggle}
-                    variant={isFollowing ? 'outline' : 'default'}
-                    size="sm"
-                    className="gap-2"
-                  >
-                    {isFollowing ? (
-                      <>
-                        <UserMinus className="h-4 w-4" />
-                        Following
-                      </>
-                    ) : (
-                      <>
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={handleFollowToggle}
+                      variant={isFollowing ? 'outline' : 'default'}
+                      size="sm"
+                      className="gap-2"
+                    >
+                      {isFollowing ? (
+                        <>
+                          <UserMinus className="h-4 w-4" />
+                          Following
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus className="h-4 w-4" />
+                          Follow
+                        </>
+                      )}
+                    </Button>
+                    
+                    {connectionStatus === 'none' && (
+                      <Button
+                        onClick={sendConnectionRequest}
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                      >
                         <UserPlus className="h-4 w-4" />
-                        Follow
-                      </>
+                        Connect
+                      </Button>
                     )}
-                  </Button>
+                    {connectionStatus === 'pending_sent' && (
+                      <Button variant="outline" size="sm" disabled className="gap-2">
+                        <Clock className="h-4 w-4" />
+                        Pending
+                      </Button>
+                    )}
+                    {connectionStatus === 'pending_received' && (
+                      <Button
+                        onClick={acceptConnection}
+                        variant="default"
+                        size="sm"
+                        className="gap-2"
+                      >
+                        <UserCheck className="h-4 w-4" />
+                        Accept
+                      </Button>
+                    )}
+                    {connectionStatus === 'connected' && (
+                      <Button
+                        onClick={removeConnection}
+                        variant="outline"
+                        size="sm"
+                        className="gap-2"
+                      >
+                        <UserCheck className="h-4 w-4" />
+                        Connected
+                      </Button>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

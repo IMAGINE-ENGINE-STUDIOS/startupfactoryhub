@@ -8,10 +8,11 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { DollarSign, TrendingUp, Building, PieChart, Target, Users } from 'lucide-react';
+import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Calendar, ExternalLink } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import { format } from 'date-fns';
 
 import StartupRecommendationsWidget from '@/components/StartupRecommendationsWidget';
 import StartupBrowser from '@/components/StartupBrowser';
@@ -41,6 +42,7 @@ export default function InvestorDashboard() {
   const [opportunities, setOpportunities] = useState<Investment[]>([]);
   const [investorProfile, setInvestorProfile] = useState<any>(null);
   const [currentTab, setCurrentTab] = useState('social');
+  const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
   const { profile: profileWithRole } = useProfileWithRole();
@@ -50,6 +52,7 @@ export default function InvestorDashboard() {
       fetchInvestorProfile();
       fetchInvestments();
       fetchOpportunities();
+      fetchPitchMeetings();
     }
   }, [user]);
 
@@ -64,6 +67,26 @@ export default function InvestorDashboard() {
 
     if (!error && data) {
       setInvestorProfile(data);
+    }
+  };
+
+  const fetchPitchMeetings = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('pitch_meetings')
+      .select(`
+        *,
+        company:companies(name, logo_url, pitch_deck_url),
+        startup:profiles!pitch_meetings_startup_id_fkey(full_name, avatar_url)
+      `)
+      .eq('investor_id', user.id)
+      .gte('scheduled_date', new Date().toISOString())
+      .order('scheduled_date', { ascending: true })
+      .limit(10);
+
+    if (!error && data) {
+      setPitchMeetings(data);
     }
   };
 
@@ -425,6 +448,66 @@ export default function InvestorDashboard() {
               showCreateButton={false}
               filterTypes={['event', 'session']}
             />
+          </TabsContent>
+
+          <TabsContent value="pitches" className="space-y-4">
+            <Card className="tech-card border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Calendar className="h-5 w-5 text-primary" />
+                  <span>Scheduled Pitch Meetings</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {pitchMeetings.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Calendar className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                    <p>No upcoming pitch meetings</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {pitchMeetings.map((meeting) => (
+                      <Card key={meeting.id} className="border-border/50">
+                        <CardContent className="p-4">
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-3 flex-1">
+                              <Avatar className="h-10 w-10">
+                                <AvatarImage src={meeting.company?.logo_url} />
+                                <AvatarFallback>{meeting.company?.name?.[0] || 'C'}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <h4 className="font-semibold">{meeting.company?.name}</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  with {meeting.startup?.full_name}
+                                </p>
+                                <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
+                                  <Calendar className="h-4 w-4" />
+                                  {format(new Date(meeting.scheduled_date), 'PPP p')}
+                                </div>
+                                <Badge variant="secondary" className="mt-2">
+                                  {meeting.duration_minutes} minutes
+                                </Badge>
+                              </div>
+                            </div>
+                            {meeting.company?.pitch_deck_url && (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => window.open(meeting.company.pitch_deck_url, '_blank')}
+                                className="gap-2"
+                              >
+                                <ExternalLink className="h-4 w-4" />
+                                View Deck
+                              </Button>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
