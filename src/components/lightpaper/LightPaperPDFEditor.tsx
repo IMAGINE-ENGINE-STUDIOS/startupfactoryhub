@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import type { PDFDocumentProxy, TextItem } from 'pdfjs-dist/types/src/display/api';
 import { Canvas as FabricCanvas, PencilBrush, IText, Rect, Circle, Textbox, util as fabricUtil, FabricImage } from "fabric";
@@ -133,9 +133,43 @@ export function LightPaperPDFEditor({
   const pdfInputRef = useRef<HTMLInputElement>(null);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [projectTitle, setProjectTitle] = useState<string>("Untitled PDF");
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const {
     saveProject
   } = useLightPaperProjects("pdf");
+
+  // Auto-save functionality
+  const autoSave = useCallback(async () => {
+    if (!currentProjectId || !pdfFile) return;
+    
+    try {
+      setIsSaving(true);
+      const content = {
+        currentPage,
+        signatures,
+        textReplacements: Array.from(textReplacements.entries()),
+        pdfUrl: pdfFile.name // This will need proper storage handling
+      };
+      await saveProject(projectTitle, "pdf", content, currentProjectId);
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [pdfFile, currentPage, signatures, textReplacements, projectTitle, currentProjectId, saveProject]);
+
+  // Debounced auto-save
+  useEffect(() => {
+    if (!currentProjectId || !pdfFile) return;
+    
+    const timer = setTimeout(() => {
+      autoSave();
+    }, 5000); // Auto-save after 5 seconds of inactivity
+
+    return () => clearTimeout(timer);
+  }, [canvasInstances, textReplacements, autoSave, currentProjectId, pdfFile]);
 
   // Load project when selectedProject changes
   useEffect(() => {
@@ -237,21 +271,35 @@ export function LightPaperPDFEditor({
   };
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      if (file.type === "application/pdf") {
-        setIsLoading(true);
-        setPdfFile(file);
-        setCurrentPage(1);
-        setCanvasInstances(new Map());
-        
-        // Load original PDF bytes for later modification
-        const arrayBuffer = await file.arrayBuffer();
-        setOriginalPdfBytes(new Uint8Array(arrayBuffer));
-        
-        toast.success("PDF loaded successfully!");
-      } else {
-        toast.error("Please upload a PDF file");
-      }
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== "application/pdf") {
+      toast.error("Please upload a PDF file");
+      return;
+    }
+
+    // Validate file size (max 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("PDF file size must be less than 20MB");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setPdfFile(file);
+      setCurrentPage(1);
+      setCanvasInstances(new Map());
+      
+      // Load original PDF bytes for later modification
+      const arrayBuffer = await file.arrayBuffer();
+      setOriginalPdfBytes(new Uint8Array(arrayBuffer));
+      
+      toast.success("PDF loaded successfully!");
+    } catch (error) {
+      console.error("Error loading PDF:", error);
+      toast.error("Failed to load PDF file");
+      setIsLoading(false);
     }
   };
   const onDocumentLoadSuccess = async (pdf: PDFDocumentProxy) => {

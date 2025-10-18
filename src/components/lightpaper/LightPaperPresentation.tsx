@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -40,7 +40,35 @@ export function LightPaperPresentation() {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [projectTitle, setProjectTitle] = useState("Untitled Presentation");
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const { saveProject, projects } = useLightPaperProjects("presentation");
+
+  // Auto-save functionality
+  const autoSave = useCallback(async () => {
+    if (!currentProjectId || slides.length === 0) return;
+    
+    try {
+      setIsSaving(true);
+      await saveProject(projectTitle, "presentation", { slides }, currentProjectId);
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error("Auto-save failed:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [slides, projectTitle, currentProjectId, saveProject]);
+
+  // Debounced auto-save
+  useEffect(() => {
+    if (!currentProjectId) return;
+    
+    const timer = setTimeout(() => {
+      autoSave();
+    }, 3000); // Auto-save after 3 seconds of inactivity
+
+    return () => clearTimeout(timer);
+  }, [slides, autoSave, currentProjectId]);
 
   const currentSlide = slides[currentSlideIndex];
 
@@ -101,10 +129,24 @@ export function LightPaperPresentation() {
   };
 
   const handleSaveToAccount = async () => {
-    const result = await saveProject(projectTitle, "presentation", { slides }, currentProjectId || undefined);
-    if (result) {
-      setCurrentProjectId(result.id);
-      setShowSaveDialog(false);
+    if (!projectTitle.trim()) {
+      toast.error("Please enter a presentation title");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      const result = await saveProject(projectTitle, "presentation", { slides }, currentProjectId || undefined);
+      if (result) {
+        setCurrentProjectId(result.id);
+        setLastSaved(new Date());
+        setShowSaveDialog(false);
+        toast.success("Presentation saved!");
+      }
+    } catch (error) {
+      toast.error("Failed to save presentation");
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -125,14 +167,29 @@ export function LightPaperPresentation() {
     input.accept = "image/*";
     input.onchange = (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          updateSlide({ imageUrl: e.target?.result as string });
-          toast.success("Image added!");
-        };
-        reader.readAsDataURL(file);
+      if (!file) return;
+
+      // Validate file size (max 20MB)
+      if (file.size > 20 * 1024 * 1024) {
+        toast.error("Image file size must be less than 20MB");
+        return;
       }
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        toast.error("Please upload a valid image file");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        updateSlide({ imageUrl: e.target?.result as string });
+        toast.success("Image added!");
+      };
+      reader.onerror = () => {
+        toast.error("Failed to load image");
+      };
+      reader.readAsDataURL(file);
     };
     input.click();
   };
@@ -144,10 +201,15 @@ export function LightPaperPresentation() {
           <Card className="p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => setShowSaveDialog(true)}>
+                <Button variant="outline" size="sm" onClick={() => setShowSaveDialog(true)} disabled={isSaving}>
                   <Save className="h-4 w-4 mr-1" />
-                  Save to Account
+                  {isSaving ? "Saving..." : "Save to Account"}
                 </Button>
+                {lastSaved && (
+                  <span className="text-xs text-muted-foreground">
+                    Saved {lastSaved.toLocaleTimeString()}
+                  </span>
+                )}
                 <Select value={currentProjectId || ""} onValueChange={handleLoadProject}>
                   <SelectTrigger className="w-[180px]">
                     <FileText className="h-4 w-4 mr-2" />

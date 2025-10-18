@@ -36,6 +36,10 @@ const INITIAL_ROWS = 100; // Start with 100 rows
 interface Cell {
   value: string;
   formula?: string;
+  bold?: boolean;
+  italic?: boolean;
+  underline?: boolean;
+  align?: 'left' | 'center' | 'right';
 }
 
 export function LightPaperSpreadsheet() {
@@ -54,8 +58,52 @@ export function LightPaperSpreadsheet() {
   const handleCellChange = (cellId: string, value: string) => {
     setData((prev) => ({
       ...prev,
-      [cellId]: { value, formula: value.startsWith("=") ? value : undefined }
+      [cellId]: { 
+        ...prev[cellId],
+        value, 
+        formula: value.startsWith("=") ? value : undefined 
+      }
     }));
+  };
+
+  const applyFormatting = (format: 'bold' | 'italic' | 'underline' | 'alignLeft' | 'alignCenter' | 'alignRight') => {
+    if (!selectedCell) {
+      toast.error("Please select a cell first");
+      return;
+    }
+
+    setData((prev) => {
+      const currentCell = prev[selectedCell] || { value: "" };
+      let updatedCell = { ...currentCell };
+
+      switch (format) {
+        case 'bold':
+          updatedCell.bold = !currentCell.bold;
+          break;
+        case 'italic':
+          updatedCell.italic = !currentCell.italic;
+          break;
+        case 'underline':
+          updatedCell.underline = !currentCell.underline;
+          break;
+        case 'alignLeft':
+          updatedCell.align = 'left';
+          break;
+        case 'alignCenter':
+          updatedCell.align = 'center';
+          break;
+        case 'alignRight':
+          updatedCell.align = 'right';
+          break;
+      }
+
+      return {
+        ...prev,
+        [selectedCell]: updatedCell
+      };
+    });
+
+    toast.success("Formatting applied");
   };
 
   useEffect(() => {
@@ -203,26 +251,62 @@ export function LightPaperSpreadsheet() {
           <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
             {/* Format Options */}
             <div className="flex gap-0.5 items-center">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Bold">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                title="Bold"
+                onClick={() => applyFormatting('bold')}
+              >
                 <Bold className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Italic">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                title="Italic"
+                onClick={() => applyFormatting('italic')}
+              >
                 <Italic className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Underline">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                title="Underline"
+                onClick={() => applyFormatting('underline')}
+              >
                 <Underline className="h-4 w-4" />
               </Button>
             </div>
 
             {/* Alignment */}
             <div className="flex gap-0.5 border-l pl-1">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Align Left">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                title="Align Left"
+                onClick={() => applyFormatting('alignLeft')}
+              >
                 <AlignLeft className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Align Center">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                title="Align Center"
+                onClick={() => applyFormatting('alignCenter')}
+              >
                 <AlignCenter className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Align Right">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                title="Align Right"
+                onClick={() => applyFormatting('alignRight')}
+              >
                 <AlignRight className="h-4 w-4" />
               </Button>
             </div>
@@ -303,6 +387,14 @@ export function LightPaperSpreadsheet() {
                     </td>
                     {COLUMNS.map((col) => {
                       const cellId = getCellId(col, row);
+                      const cellData = data[cellId];
+                      const cellStyle = {
+                        fontWeight: cellData?.bold ? 'bold' : 'normal',
+                        fontStyle: cellData?.italic ? 'italic' : 'normal',
+                        textDecoration: cellData?.underline ? 'underline' : 'none',
+                        textAlign: cellData?.align || 'left'
+                      };
+                      
                       return (
                         <td key={cellId} className="border p-0">
                           <Input
@@ -310,6 +402,7 @@ export function LightPaperSpreadsheet() {
                             onChange={(e) => handleCellChange(cellId, e.target.value)}
                             onFocus={() => setSelectedCell(cellId)}
                             className="border-0 rounded-none h-8 text-sm"
+                            style={cellStyle}
                           />
                         </td>
                       );

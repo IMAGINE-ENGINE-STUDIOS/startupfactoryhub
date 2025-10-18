@@ -48,6 +48,8 @@ export function LightPaperDocument({
   const signCanvasRef = useRef<HTMLCanvasElement>(null);
   const [draggingSignature, setDraggingSignature] = useState<{type: "draw" | "text", data: string, id: string} | null>(null);
   const [signaturePreviewPosition, setSignaturePreviewPosition] = useState<{x: number, y: number} | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const {
     saveProject
@@ -611,10 +613,19 @@ export function LightPaperDocument({
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error("Please select an image file");
       return;
     }
+
+    // Validate file size (max 20MB)
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error("Image file size must be less than 20MB");
+      return;
+    }
+
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) {
@@ -667,29 +678,42 @@ export function LightPaperDocument({
     }
   };
   const handleSaveToAccount = async () => {
-    const content = {
-      html: editorRef.current?.innerHTML || "",
-      font: selectedFont,
-      size: selectedSize,
-      darkMode: isDarkMode
-    };
-    const result = await saveProject(projectTitle, "document", content, currentProjectId || undefined);
-    if (result) {
-      setCurrentProjectId(result.id);
-      setShowSaveDialog(false);
+    if (!projectTitle.trim()) {
+      toast.error("Please enter a document title");
+      return;
+    }
 
-      // Clean up temporary versions on save
-      try {
-        const user = (await supabase.auth.getUser()).data.user;
-        if (user) {
-          await supabase.from('document_versions').delete().eq('user_id', user.id).eq('session_id', sessionId).eq('is_temporary', true);
-          setVersions([]);
-          setCurrentVersionIndex(-1);
-          toast.success("Document saved and temporary versions cleared");
+    try {
+      setIsSaving(true);
+      const content = {
+        html: editorRef.current?.innerHTML || "",
+        font: selectedFont,
+        size: selectedSize,
+        darkMode: isDarkMode
+      };
+      const result = await saveProject(projectTitle, "document", content, currentProjectId || undefined);
+      if (result) {
+        setCurrentProjectId(result.id);
+        setLastSaved(new Date());
+        setShowSaveDialog(false);
+
+        // Clean up temporary versions on save
+        try {
+          const user = (await supabase.auth.getUser()).data.user;
+          if (user) {
+            await supabase.from('document_versions').delete().eq('user_id', user.id).eq('session_id', sessionId).eq('is_temporary', true);
+            setVersions([]);
+            setCurrentVersionIndex(-1);
+            toast.success("Document saved and temporary versions cleared");
+          }
+        } catch (error) {
+          console.error('Error cleaning up versions:', error);
         }
-      } catch (error) {
-        console.error('Error cleaning up versions:', error);
       }
+    } catch (error) {
+      toast.error("Failed to save document");
+    } finally {
+      setIsSaving(false);
     }
   };
   const handlePrint = () => {
@@ -877,10 +901,27 @@ export function LightPaperDocument({
           </div>
 
           {/* Save Button */}
-          <div className="flex gap-0.5 border-l pl-1 ml-auto shrink-0">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSaveDialog(true)} title="Save Document (Ctrl+S)">
+          <div className="flex gap-2 items-center border-l pl-1 ml-auto shrink-0">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="h-8 w-8 p-0" 
+              onClick={() => setShowSaveDialog(true)} 
+              disabled={isSaving}
+              title="Save Document (Ctrl+S)"
+            >
               <Save className="h-4 w-4" />
             </Button>
+            {isSaving && (
+              <span className="text-xs text-muted-foreground">
+                Saving...
+              </span>
+            )}
+            {lastSaved && !isSaving && (
+              <span className="text-xs text-muted-foreground">
+                Saved {lastSaved.toLocaleTimeString()}
+              </span>
+            )}
           </div>
         </div>
       </CollapsibleToolbar>
