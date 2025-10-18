@@ -33,13 +33,50 @@ export default function LightPaper() {
                 Complete Productivity Suite
               </span>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
               <Button variant="outline" onClick={() => setShowFiles(true)} className="gap-2">
                 <FolderOpen className="h-4 w-4" />
                 My Files
               </Button>
               
-              
+              <div className="flex border rounded-lg p-1 bg-muted/30">
+                <Button 
+                  variant={activeTab === "document" ? "secondary" : "ghost"} 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => setActiveTab("document")}
+                  title="Document"
+                >
+                  <FileText className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant={activeTab === "spreadsheet" ? "secondary" : "ghost"} 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => setActiveTab("spreadsheet")}
+                  title="Spreadsheet"
+                >
+                  <Table className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant={activeTab === "presentation" ? "secondary" : "ghost"} 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => setActiveTab("presentation")}
+                  title="Presentation"
+                >
+                  <Presentation className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant={activeTab === "pdf-editor" ? "secondary" : "ghost"} 
+                  size="sm" 
+                  className="h-8 w-8 p-0"
+                  onClick={() => setActiveTab("pdf-editor")}
+                  title="PDF Editor & Sign"
+                >
+                  <FileSignature className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -47,25 +84,6 @@ export default function LightPaper() {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 mb-6">
-            <TabsTrigger value="document" className="gap-2">
-              <FileText className="h-4 w-4" />
-              Document
-            </TabsTrigger>
-            <TabsTrigger value="spreadsheet" className="gap-2">
-              <Table className="h-4 w-4" />
-              Spreadsheet
-            </TabsTrigger>
-            <TabsTrigger value="presentation" className="gap-2">
-              <Presentation className="h-4 w-4" />
-              Presentation
-            </TabsTrigger>
-            <TabsTrigger value="pdf-editor" className="gap-2">
-              <FileSignature className="h-4 w-4" />
-              PDF Editor & Sign
-            </TabsTrigger>
-          </TabsList>
-
           <TabsContent value="document" className="mt-0">
             <LightPaperDocument selectedProject={selectedProject} />
           </TabsContent>
