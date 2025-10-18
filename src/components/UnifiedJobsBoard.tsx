@@ -730,38 +730,6 @@ export default function UnifiedJobsBoard() {
                   </div>
                 </div>
 
-                {isCompanyUser && 
-                 job.companies?.id === userCompanyId && 
-                 job.external_application_url && (
-                  <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-md">
-                    <ExternalLink className="w-4 h-4 text-muted-foreground flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-muted-foreground mb-1">External Application Link:</p>
-                      <a 
-                        href={job.external_application_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm text-primary hover:underline truncate block"
-                      >
-                        {job.external_application_url}
-                      </a>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopyExternalLink(job.external_application_url!);
-                      }}
-                      className="h-8 px-2 gap-1 flex-shrink-0"
-                      title="Copy external application link"
-                    >
-                      <Copy className="w-3 h-3" />
-                      <span className="text-xs">Copy</span>
-                    </Button>
-                  </div>
-                )}
-
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-3 text-sm text-muted-foreground">
                     {job.is_task_based && (
@@ -771,15 +739,32 @@ export default function UnifiedJobsBoard() {
                       </Badge>
                     )}
                     {isCompanyUser && job.companies?.id === userCompanyId && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewApplications(job.id)}
-                        className="gap-1"
-                      >
-                        <Users className="w-4 h-4" />
-                        View Applications ({job.applications_count})
-                      </Button>
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleViewApplications(job.id)}
+                          className="gap-1"
+                        >
+                          <Users className="w-4 h-4" />
+                          View Applications ({job.applications_count})
+                        </Button>
+                        {job.external_application_url && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyExternalLink(job.external_application_url!);
+                            }}
+                            className="gap-1"
+                            title="Copy external application link"
+                          >
+                            <Copy className="w-3 h-3" />
+                            Copy Link
+                          </Button>
+                        )}
+                      </>
                     )}
                     {!isCompanyUser && (
                       <div className="flex items-center gap-1">
