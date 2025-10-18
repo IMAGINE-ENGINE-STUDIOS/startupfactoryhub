@@ -38,6 +38,41 @@ export default function NetworkBrowser() {
     }
   }, [user]);
 
+  // Real-time connection updates
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('connection-updates')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'connections',
+          filter: `requester_id=eq.${user.id}` 
+        },
+        () => {
+          fetchCurrentConnections();
+          fetchSuggestedUsers();
+        }
+      )
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'connections',
+          filter: `addressee_id=eq.${user.id}` 
+        },
+        () => {
+          fetchCurrentConnections();
+          fetchSuggestedUsers();
+        }
+      )
+      .subscribe();
+    
+    return () => { supabase.removeChannel(channel); };
+  }, [user]);
+
   useEffect(() => {
     if (searchQuery.length > 0) {
       searchUsers();
