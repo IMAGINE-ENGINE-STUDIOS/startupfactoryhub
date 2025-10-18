@@ -48,7 +48,7 @@ export function JobApplicationsViewer() {
         .from('companies')
         .select('id')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
 
       if (!company) {
         setApplications([]);
