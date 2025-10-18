@@ -14,6 +14,7 @@ import { LightPaperSpreadsheet } from "./lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "./lightpaper/LightPaperPresentation";
 import { LightPaperPDFEditor } from "./lightpaper/LightPaperPDFEditor";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
+import CRMBoard from "./CRMBoard";
 import { 
   FileText, 
   TrendingUp, 
@@ -86,41 +87,34 @@ export default function AIFeaturesHub() {
   return (
     <>
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-2 text-lg">
             <Sparkles className="h-5 w-5 text-primary" />
-            AI-Powered Features
+            AI-Powered Tools
           </CardTitle>
-          <CardDescription>
-            Enhance your workflow with intelligent automation and insights
-          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="flex flex-wrap gap-2">
             {features.map((feature) => (
-              <Card 
-                key={feature.id} 
-                className="hover:shadow-md transition-shadow cursor-pointer"
+              <Button
+                key={feature.id}
+                variant="outline"
+                size="sm"
+                className="gap-2"
                 onClick={() => openDialog(feature.id)}
               >
-                <CardHeader className="pb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-muted ${feature.color}`}>
-                      <feature.icon className="h-5 w-5" />
-                    </div>
-                    <CardTitle className="text-base">{feature.title}</CardTitle>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground">
-                    {feature.description}
-                  </p>
-                </CardContent>
-              </Card>
+                <feature.icon className={`h-4 w-4 ${feature.color}`} />
+                {feature.title}
+              </Button>
             ))}
           </div>
         </CardContent>
       </Card>
+
+      {/* CRM Board */}
+      <div className="mt-6">
+        <CRMBoard />
+      </div>
 
       {/* LightPaper Full Tool */}
       <Card className="mt-6">
