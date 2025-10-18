@@ -80,12 +80,17 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
         const content = selectedProject.content as any;
         if (content?.pdfUrl) {
           try {
+            toast.info("Loading PDF...");
+            
             // Fetch the PDF from storage
             const { data, error } = await supabase.storage
-              .from('documents')
+              .from('feed-media')
               .download(content.pdfUrl);
             
-            if (error) throw error;
+            if (error) {
+              console.error("Download error:", error);
+              throw new Error(error.message);
+            }
             
             // Convert blob to File
             const file = new File([data], selectedProject.title, { type: 'application/pdf' });
@@ -93,9 +98,9 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
             setCurrentPage(content.currentPage || 1);
             setSignatures(content.signatures || []);
             toast.success("PDF loaded from MyFiles");
-          } catch (error) {
+          } catch (error: any) {
             console.error("Error loading PDF:", error);
-            toast.error("Failed to load PDF file");
+            toast.error(error.message || "Failed to load PDF file");
           }
         }
       }
@@ -421,15 +426,26 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
     }
 
     try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) {
+        toast.error("Please sign in to save PDF");
+        return;
+      }
+
+      toast.info("Saving PDF...");
+
       // Upload PDF to storage
       const fileName = `${Date.now()}_${pdfFile.name}`;
-      const filePath = `${(await supabase.auth.getUser()).data.user?.id}/${fileName}`;
+      const filePath = `${user.id}/${fileName}`;
       
       const { error: uploadError } = await supabase.storage
-        .from('documents')
+        .from('feed-media')
         .upload(filePath, pdfFile);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw new Error(uploadError.message);
+      }
 
       // Save project metadata
       const projectData = {
@@ -445,9 +461,9 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
         setCurrentProjectId(result.id);
       }
       toast.success("PDF saved to MyFiles!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Save error:", error);
-      toast.error("Failed to save PDF");
+      toast.error(error.message || "Failed to save PDF");
     }
   };
 

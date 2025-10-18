@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -16,6 +16,58 @@ export function ScientificCalculator({ isOpen, onClose, onInsertResult }: Calcul
   const [memory, setMemory] = useState(0);
   const [angleMode, setAngleMode] = useState<"deg" | "rad">("deg");
   const [history, setHistory] = useState<string[]>([]);
+
+  // Keyboard support
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Numbers
+      if (e.key >= '0' && e.key <= '9') {
+        e.preventDefault();
+        handleNumber(e.key);
+      }
+      // Operators
+      else if (e.key === '+') {
+        e.preventDefault();
+        handleOperator('+');
+      }
+      else if (e.key === '-') {
+        e.preventDefault();
+        handleOperator('-');
+      }
+      else if (e.key === '*') {
+        e.preventDefault();
+        handleOperator('×');
+      }
+      else if (e.key === '/') {
+        e.preventDefault();
+        handleOperator('÷');
+      }
+      else if (e.key === '.') {
+        e.preventDefault();
+        handleNumber('.');
+      }
+      // Calculate
+      else if (e.key === 'Enter' || e.key === '=') {
+        e.preventDefault();
+        calculate();
+      }
+      // Clear
+      else if (e.key === 'Escape') {
+        e.preventDefault();
+        clear();
+      }
+      // Backspace
+      else if (e.key === 'Backspace') {
+        e.preventDefault();
+        clearEntry();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, display]);
 
   const handleNumber = (num: string) => {
     setDisplay(display === "0" ? num : display + num);

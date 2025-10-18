@@ -24,6 +24,8 @@ interface LightPaperDocumentProps {
 
 export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps = {}) {
   const editorRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFont, setSelectedFont] = useState("Arial");
   const [selectedSize, setSelectedSize] = useState("16");
@@ -109,7 +111,11 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
   const execCommand = (command: string, value?: string) => {
     if (editorRef.current) {
       editorRef.current.focus();
-      document.execCommand(command, false, value);
+      
+      // Ensure the editor maintains focus and execute command
+      setTimeout(() => {
+        document.execCommand(command, false, value);
+      }, 0);
     }
   };
 
@@ -145,9 +151,18 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
   };
 
   const resetColors = () => {
-    if (editorRef.current) {
+    if (editorRef.current && containerRef.current && wrapperRef.current) {
+      // Reset editor
       editorRef.current.style.backgroundColor = 'white';
       editorRef.current.style.color = 'black';
+      
+      // Reset container
+      containerRef.current.style.backgroundColor = 'white';
+      containerRef.current.style.color = 'black';
+      
+      // Reset wrapper
+      wrapperRef.current.style.backgroundColor = 'white';
+      
       toast.success("Colors reset to default");
     }
   };
@@ -156,21 +171,34 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
     const file = e.target.files?.[0];
     if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      toast.error("Please select an image file");
+      return;
+    }
+
     try {
       const user = (await supabase.auth.getUser()).data.user;
-      if (!user) throw new Error("Not authenticated");
+      if (!user) {
+        toast.error("Please sign in to upload images");
+        return;
+      }
+
+      toast.info("Uploading image...");
 
       const fileName = `${Date.now()}_${file.name}`;
       const filePath = `${user.id}/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('documents')
+        .from('feed-media')
         .upload(filePath, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error("Upload error:", uploadError);
+        throw new Error(uploadError.message);
+      }
 
       const { data } = supabase.storage
-        .from('documents')
+        .from('feed-media')
         .getPublicUrl(filePath);
 
       // Insert image at cursor
@@ -189,10 +217,10 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
         selection.addRange(range);
       }
 
-      toast.success("Image uploaded");
-    } catch (error) {
+      toast.success("Image uploaded successfully");
+    } catch (error: any) {
       console.error("Upload error:", error);
-      toast.error("Failed to upload image");
+      toast.error(error.message || "Failed to upload image");
     }
   };
 
@@ -421,8 +449,8 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
       </CollapsibleToolbar>
 
       {/* Main Editor Area - Takes Full Height */}
-      <div className="flex-1 overflow-auto p-8 bg-muted/30">
-        <div className="max-w-4xl mx-auto bg-background shadow-lg rounded-lg p-12 min-h-full">
+      <div ref={wrapperRef} className="flex-1 overflow-auto p-8 bg-muted/30">
+        <div ref={containerRef} className="max-w-4xl mx-auto bg-background shadow-lg rounded-lg p-12 min-h-full">
           <div
             ref={editorRef}
             contentEditable
