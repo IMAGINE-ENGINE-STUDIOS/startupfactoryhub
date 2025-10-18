@@ -85,6 +85,7 @@ export default function UnifiedCommunityFeed({
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [newShortForCarousel, setNewShortForCarousel] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -560,6 +561,12 @@ export default function UnifiedCommunityFeed({
     if (!user) return;
 
     try {
+      // Show uploading toast
+      toast({
+        title: 'Uploading...',
+        description: 'Creating your short video',
+      });
+
       let videoUrl = null;
 
       // Upload the video file if provided
@@ -574,16 +581,49 @@ export default function UnifiedCommunityFeed({
         ? '\n\n' + shortData.tags.map((tag: string) => `#${tag}`).join(' ') 
         : '';
 
-      const { error } = await supabase
+      const content = shortData.title + (shortData.description ? '\n\n' + shortData.description : '') + hashtagString;
+
+      const { data: newPost, error } = await supabase
         .from('feed_posts')
         .insert({
-          content: shortData.title + (shortData.description ? '\n\n' + shortData.description : '') + hashtagString,
+          content,
           user_id: user.id,
           post_type: 'short',
           media_urls: videoUrl ? [videoUrl] : null,
-        });
+        })
+        .select(`
+          id,
+          content,
+          user_id,
+          media_urls,
+          likes_count,
+          comments_count,
+          created_at,
+          profiles:user_id(full_name, avatar_url)
+        `)
+        .single();
 
       if (error) throw error;
+
+      // Immediately show the new short in the carousel
+      if (newPost && videoUrl) {
+        const newShort = {
+          id: newPost.id,
+          video_url: videoUrl,
+          content: newPost.content,
+          user_id: newPost.user_id,
+          profiles: Array.isArray(newPost.profiles) ? newPost.profiles[0] : newPost.profiles,
+          likes_count: newPost.likes_count || 0,
+          comments_count: newPost.comments_count || 0,
+          created_at: newPost.created_at
+        };
+        
+        // Trigger carousel update by setting state
+        setNewShortForCarousel(newShort);
+        
+        // Clear after a moment to allow for next short
+        setTimeout(() => setNewShortForCarousel(null), 1000);
+      }
 
       toast({
         title: 'Success',
@@ -685,7 +725,7 @@ export default function UnifiedCommunityFeed({
   return (
     <div className="space-y-4 sm:space-y-6">
       {/* Shorts Carousel */}
-      <ShortsCarousel onCreateShort={handleCreateShort} />
+      <ShortsCarousel onCreateShort={handleCreateShort} newShort={newShortForCarousel} />
 
       {/* Create Post */}
       {showCreatePost && (

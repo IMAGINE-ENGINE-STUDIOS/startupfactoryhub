@@ -22,6 +22,7 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -173,7 +174,7 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
     setTags(tags.filter(tag => tag !== tagToRemove));
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!selectedFile) {
       toast({
         title: "Video required",
@@ -192,15 +193,23 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
       return;
     }
 
-    onSave({
-      title,
-      description,
-      tags,
-      file: selectedFile,
-      postType: 'short'
-    });
+    setIsUploading(true);
+    
+    try {
+      await onSave({
+        title,
+        description,
+        tags,
+        file: selectedFile,
+        postType: 'short'
+      });
 
-    handleClose();
+      handleClose();
+    } catch (error) {
+      console.error('Error saving short:', error);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleClose = () => {
@@ -349,11 +358,18 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
           </div>
 
           <div className="flex justify-end gap-2 pt-4">
-            <Button type="button" variant="outline" onClick={handleClose}>
+            <Button type="button" variant="outline" onClick={handleClose} disabled={isUploading}>
               Cancel
             </Button>
-            <Button type="button" onClick={handleSave}>
-              Create Short
+            <Button type="button" onClick={handleSave} disabled={isUploading}>
+              {isUploading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                  Creating...
+                </>
+              ) : (
+                'Create Short'
+              )}
             </Button>
           </div>
         </div>

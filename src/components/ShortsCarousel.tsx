@@ -20,12 +20,14 @@ interface Short {
 
 interface ShortsCarouselProps {
   onCreateShort: () => void;
+  newShort?: Short | null;
 }
 
-const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
+const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
   const [shorts, setShorts] = useState<Short[]>([]);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchShorts();
@@ -52,8 +54,22 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
     };
   }, []);
 
+  // Handle new short from parent immediately
+  useEffect(() => {
+    if (newShort) {
+      console.log('[Shorts] New short received, prepending to list');
+      setShorts(prev => {
+        // Check if this short already exists to avoid duplicates
+        const exists = prev.some(s => s.id === newShort.id);
+        if (exists) return prev;
+        return [newShort, ...prev];
+      });
+    }
+  }, [newShort]);
+
   const fetchShorts = async () => {
     try {
+      setIsLoading(true);
       console.log('[Shorts] Fetching shorts with post_type=short...');
       const { data: postsData, error } = await supabase
         .from('feed_posts')
@@ -110,6 +126,8 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
       }
     } catch (error) {
       console.error('[Shorts] Error in fetchShorts:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -119,7 +137,7 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
   };
 
   // Don't render if no shorts and user hasn't created any yet
-  if (shorts.length === 0) {
+  if (shorts.length === 0 && !isLoading) {
     return (
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
@@ -156,6 +174,35 @@ const ShortsCarousel = ({ onCreateShort }: ShortsCarouselProps) => {
           <div className="flex items-center justify-center text-muted-foreground text-sm px-4">
             No shorts yet. Create your first one!
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading skeleton
+  if (isLoading) {
+    return (
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Shorts</h2>
+        </div>
+        <div className="flex gap-3 overflow-x-auto pb-4">
+          <Card className="flex-shrink-0 w-[120px] h-[180px] border-2 border-dashed border-primary/30">
+            <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                <Plus className="h-7 w-7 text-primary" />
+              </div>
+              <div className="text-center">
+                <h3 className="text-sm font-semibold">Create</h3>
+                <p className="text-xs text-muted-foreground">Short</p>
+              </div>
+            </CardContent>
+          </Card>
+          {[1, 2, 3].map((i) => (
+            <Card key={i} className="flex-shrink-0 w-[120px] h-[180px] animate-pulse">
+              <CardContent className="h-full p-0 bg-muted" />
+            </Card>
+          ))}
         </div>
       </div>
     );
