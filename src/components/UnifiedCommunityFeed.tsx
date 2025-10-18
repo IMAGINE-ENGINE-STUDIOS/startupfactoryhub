@@ -664,11 +664,6 @@ export default function UnifiedCommunityFeed({
         </Card>
       )}
 
-      {/* Shorts Section */}
-      <div className="mb-6">
-        <ShortsCarousel onCreateShort={handleCreateShort} />
-      </div>
-
       {/* Posts Grid */}
       <div className="space-y-4" style={{ maxHeight, overflowY: 'auto' }}>
         {posts.map((post) => (
