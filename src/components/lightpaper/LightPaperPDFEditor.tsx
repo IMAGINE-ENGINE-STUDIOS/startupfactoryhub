@@ -620,174 +620,165 @@ export function LightPaperPDFEditor({
       {/* Main Viewer */}
       <div className="flex-1 flex flex-col gap-4">
         <CollapsibleToolbar>
-          <div className="flex flex-col gap-3">
-            {/* First Row - File Upload & Text Formatting Controls */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => pdfInputRef.current?.click()}
-                title="Upload PDF"
-              >
-                <Upload className="h-4 w-4" />
-              </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* File Upload */}
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => pdfInputRef.current?.click()}
+              title="Upload PDF"
+            >
+              <Upload className="h-4 w-4" />
+            </Button>
 
-              <Separator orientation="vertical" className="h-6" />
+            <Separator orientation="vertical" className="h-6" />
 
-              <Select value={selectedFont} onValueChange={changeFontFamily}>
-                <SelectTrigger className="w-[140px] h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-background z-50">
-                  {FONTS.map(font => (
-                    <SelectItem key={font} value={font} style={{ fontFamily: font }}>
-                      {font}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            {/* Font Controls */}
+            <Select value={selectedFont} onValueChange={changeFontFamily}>
+              <SelectTrigger className="w-[140px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                {FONTS.map(font => (
+                  <SelectItem key={font} value={font} style={{ fontFamily: font }}>
+                    {font}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-              <Select value={selectedFontSize} onValueChange={changeFontSize}>
-                <SelectTrigger className="w-[70px] h-8">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-background z-50">
-                  {FONT_SIZES.map(size => (
-                    <SelectItem key={size} value={size}>
-                      {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <Select value={selectedFontSize} onValueChange={changeFontSize}>
+              <SelectTrigger className="w-[70px] h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                {FONT_SIZES.map(size => (
+                  <SelectItem key={size} value={size}>
+                    {size}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-              <Separator orientation="vertical" className="h-6" />
+            {/* Text Formatting */}
+            <Button variant="outline" size="sm" onClick={() => applyTextFormatting('bold')} title="Bold">
+              <Bold className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => applyTextFormatting('italic')} title="Italic">
+              <Italic className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => applyTextFormatting('underline')} title="Underline">
+              <Underline className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => applyTextFormatting('linethrough')} title="Strikethrough">
+              <Strikethrough className="h-4 w-4" />
+            </Button>
 
-              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('bold')} title="Bold">
-                <Bold className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('italic')} title="Italic">
-                <Italic className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('underline')} title="Underline">
-                <Underline className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('linethrough')} title="Strikethrough">
-                <Strikethrough className="h-4 w-4" />
-              </Button>
+            {/* Text Alignment */}
+            <Button variant="outline" size="sm" onClick={() => applyTextFormatting('alignLeft')} title="Align Left">
+              <AlignLeft className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => applyTextFormatting('alignCenter')} title="Align Center">
+              <AlignCenter className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={() => applyTextFormatting('alignRight')} title="Align Right">
+              <AlignRight className="h-4 w-4" />
+            </Button>
 
-              <Separator orientation="vertical" className="h-6" />
-
-              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('alignLeft')} title="Align Left">
-                <AlignLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('alignCenter')} title="Align Center">
-                <AlignCenter className="h-4 w-4" />
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => applyTextFormatting('alignRight')} title="Align Right">
-                <AlignRight className="h-4 w-4" />
-              </Button>
-
-              <Separator orientation="vertical" className="h-6" />
-
-              <div className="flex items-center gap-1">
-                <div className="relative">
-                  <span className="font-bold text-lg" style={{ color: color }}>A</span>
-                </div>
-                <Input 
-                  type="color" 
-                  value={color} 
-                  onChange={e => changeTextColor(e.target.value)} 
-                  className="h-8 w-10 p-1 cursor-pointer" 
-                  title="Text Color"
-                />
-              </div>
+            {/* Text Color */}
+            <div className="flex items-center gap-1">
+              <span className="font-bold text-lg" style={{ color: color }}>A</span>
+              <Input 
+                type="color" 
+                value={color} 
+                onChange={e => changeTextColor(e.target.value)} 
+                className="h-8 w-10 p-1 cursor-pointer" 
+                title="Text Color"
+              />
             </div>
 
-            {/* Second Row - Drawing Tools & Shapes */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <Button variant={tool === "select" ? "default" : "outline"} size="sm" onClick={() => setTool("select")} title="Select">
-                <Type className="h-4 w-4" />
-              </Button>
-              <Button variant={tool === "text" ? "default" : "outline"} size="sm" onClick={() => setTool("text")} title="Add Text">
-                <Type className="h-4 w-4" />
-              </Button>
-              <Button variant={tool === "draw" ? "default" : "outline"} size="sm" onClick={() => setTool("draw")} title="Draw">
-                <Pencil className="h-4 w-4" />
-              </Button>
-              <Button variant={tool === "rect" ? "default" : "outline"} size="sm" onClick={() => setTool("rect")} title="Rectangle">
-                <Square className="h-4 w-4" />
-              </Button>
-              <Button variant={tool === "circle" ? "default" : "outline"} size="sm" onClick={() => setTool("circle")} title="Circle">
-                <CircleIcon className="h-4 w-4" />
-              </Button>
-              <Button variant={tool === "erase" ? "default" : "outline"} size="sm" onClick={() => setTool("erase")} title="Erase">
-                <Eraser className="h-4 w-4" />
-              </Button>
+            <Separator orientation="vertical" className="h-6" />
 
-              <Separator orientation="vertical" className="h-6" />
+            {/* Drawing Tools */}
+            <Button variant={tool === "select" ? "default" : "outline"} size="sm" onClick={() => setTool("select")} title="Select">
+              <Type className="h-4 w-4" />
+            </Button>
+            <Button variant={tool === "text" ? "default" : "outline"} size="sm" onClick={() => setTool("text")} title="Add Text">
+              <Type className="h-4 w-4" />
+            </Button>
+            <Button variant={tool === "draw" ? "default" : "outline"} size="sm" onClick={() => setTool("draw")} title="Draw">
+              <Pencil className="h-4 w-4" />
+            </Button>
+            <Button variant={tool === "rect" ? "default" : "outline"} size="sm" onClick={() => setTool("rect")} title="Rectangle">
+              <Square className="h-4 w-4" />
+            </Button>
+            <Button variant={tool === "circle" ? "default" : "outline"} size="sm" onClick={() => setTool("circle")} title="Circle">
+              <CircleIcon className="h-4 w-4" />
+            </Button>
+            <Button variant={tool === "erase" ? "default" : "outline"} size="sm" onClick={() => setTool("erase")} title="Erase">
+              <Eraser className="h-4 w-4" />
+            </Button>
 
-              <Input type="color" value={color} onChange={e => setColor(e.target.value)} className="h-8 w-10 p-1 cursor-pointer" title="Draw Color" />
-              <Input type="color" value={backgroundColor} onChange={e => handleBackgroundColor(e.target.value)} className="h-8 w-10 p-1 cursor-pointer" title="Background Color" />
+            {/* Draw/Background Colors */}
+            <Input type="color" value={color} onChange={e => setColor(e.target.value)} className="h-8 w-10 p-1 cursor-pointer" title="Draw Color" />
+            <Input type="color" value={backgroundColor} onChange={e => handleBackgroundColor(e.target.value)} className="h-8 w-10 p-1 cursor-pointer" title="Background Color" />
 
-              <Separator orientation="vertical" className="h-6" />
+            <Separator orientation="vertical" className="h-6" />
 
-              <Button variant="outline" size="sm" onClick={() => imageInputRef.current?.click()} title="Add Image">
-                <ImageIcon className="h-4 w-4" />
-              </Button>
+            {/* Page Actions */}
+            <Button variant="outline" size="sm" onClick={() => imageInputRef.current?.click()} title="Add Image">
+              <ImageIcon className="h-4 w-4" />
+            </Button>
+            <Button variant="outline" size="sm" onClick={clearPage} title="Clear Page">
+              <Trash2 className="h-4 w-4" />
+            </Button>
 
-              <Button variant="outline" size="sm" onClick={clearPage} title="Clear Page">
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+            <Separator orientation="vertical" className="h-6" />
 
-            {/* Third Row - Page Navigation & Actions */}
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage <= 1} title="Previous Page">
-                  <ChevronLeft className="h-4 w-4" />
+            {/* Page Navigation */}
+            <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage <= 1} title="Previous Page">
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-sm whitespace-nowrap px-1">
+              {currentPage}/{numPages}
+            </span>
+            <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))} disabled={currentPage >= numPages} title="Next Page">
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+
+            {/* Zoom Controls */}
+            <Button variant="outline" size="sm" onClick={() => setZoom(Math.max(0.5, zoom - 0.1))} title="Zoom Out">
+              <ZoomOut className="h-4 w-4" />
+            </Button>
+            <span className="text-sm whitespace-nowrap">{Math.round(zoom * 100)}%</span>
+            <Button variant="outline" size="sm" onClick={() => setZoom(Math.min(2, zoom + 0.1))} title="Zoom In">
+              <ZoomIn className="h-4 w-4" />
+            </Button>
+
+            <Separator orientation="vertical" className="h-6" />
+
+            {/* Export & Share */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="sm" title="Export">
+                  <Download className="h-4 w-4" />
                 </Button>
-                <span className="text-sm whitespace-nowrap px-2">
-                  {currentPage} / {numPages}
-                </span>
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))} disabled={currentPage >= numPages} title="Next Page">
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-background z-50">
+                <DropdownMenuItem onClick={handleExport}>
+                  <FileText className="h-4 w-4 mr-2" />
+                  Export as PDF
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleExportJPG}>
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                  Export Page as JPG
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-                <Separator orientation="vertical" className="h-6 mx-2" />
-
-                <Button variant="outline" size="sm" onClick={() => setZoom(Math.max(0.5, zoom - 0.1))} title="Zoom Out">
-                  <ZoomOut className="h-4 w-4" />
-                </Button>
-                <span className="text-sm whitespace-nowrap">{Math.round(zoom * 100)}%</span>
-                <Button variant="outline" size="sm" onClick={() => setZoom(Math.min(2, zoom + 0.1))} title="Zoom In">
-                  <ZoomIn className="h-4 w-4" />
-                </Button>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" title="Export">
-                      <Download className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="bg-background z-50">
-                    <DropdownMenuItem onClick={handleExport}>
-                      <FileText className="h-4 w-4 mr-2" />
-                      Export as PDF
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleExportJPG}>
-                      <ImageIcon className="h-4 w-4 mr-2" />
-                      Export Page as JPG
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                <Button variant="outline" size="sm" onClick={handleShareDocument} title="Share">
-                  <Share2 className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
+            <Button variant="outline" size="sm" onClick={handleShareDocument} title="Share">
+              <Share2 className="h-4 w-4" />
+            </Button>
           </div>
         </CollapsibleToolbar>
 
