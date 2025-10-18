@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
 import { Canvas as FabricCanvas, PencilBrush, IText, Rect, Circle, Textbox, util as fabricUtil, FabricImage } from "fabric";
 import * as fabric from "fabric";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, degrees } from "pdf-lib";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,6 +33,39 @@ interface SavedSignature {
   data: string;
   preview: string;
 }
+
+// Interfaces for tracking modifications that will be embedded in PDF
+interface TextModification {
+  pageNum: number;
+  text: string;
+  x: number;
+  y: number;
+  fontSize: number;
+  fontFamily: string;
+  color: string;
+}
+
+interface ImageModification {
+  pageNum: number;
+  imageData: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface ShapeModification {
+  pageNum: number;
+  type: 'rect' | 'circle';
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  radius?: number;
+  strokeColor: string;
+  fillColor: string;
+  strokeWidth: number;
+}
 interface LightPaperPDFEditorProps {
   selectedProject?: LightPaperProject | null;
 }
@@ -60,6 +93,7 @@ export function LightPaperPDFEditor({
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareLink, setShareLink] = useState("");
   const [showSignaturePanel, setShowSignaturePanel] = useState(false);
+  const [originalPdfBytes, setOriginalPdfBytes] = useState<Uint8Array | null>(null);
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -170,7 +204,7 @@ export function LightPaperPDFEditor({
       ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
   };
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.type === "application/pdf") {
@@ -178,6 +212,11 @@ export function LightPaperPDFEditor({
         setPdfFile(file);
         setCurrentPage(1);
         setCanvasInstances(new Map());
+        
+        // Load original PDF bytes for later modification
+        const arrayBuffer = await file.arrayBuffer();
+        setOriginalPdfBytes(new Uint8Array(arrayBuffer));
+        
         toast.success("PDF loaded successfully!");
       } else {
         toast.error("Please upload a PDF file");
@@ -515,48 +554,160 @@ export function LightPaperPDFEditor({
     }
   };
   const handleExport = async () => {
-    if (!pdfFile) {
+    if (!pdfFile || !originalPdfBytes) {
       toast.error("No PDF loaded");
       return;
     }
     try {
-      toast.info("Exporting PDF with annotations...");
-      const arrayBuffer = await pdfFile.arrayBuffer();
-      const pdfDoc = await PDFDocument.load(arrayBuffer);
+      toast.info("Exporting PDF with embedded annotations...");
+      
+      // Load the original PDF
+      const pdfDoc = await PDFDocument.load(originalPdfBytes);
       const pages = pdfDoc.getPages();
+      const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica);
+      const helveticaBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+      
+      // Process each page
       for (let i = 1; i <= numPages; i++) {
         const canvas = canvasInstances.get(i);
         if (!canvas) continue;
+        
         const objects = canvas.getObjects();
         if (objects.length === 0) continue;
-        const dataUrl = canvas.toDataURL({
-          format: "png",
-          multiplier: 1
-        });
-        const pngImage = await pdfDoc.embedPng(dataUrl);
+        
         const page = pages[i - 1];
-        const {
-          width,
-          height
-        } = page.getSize();
-        page.drawImage(pngImage, {
-          x: 0,
-          y: 0,
-          width: width,
-          height: height
-        });
+        const { width: pageWidth, height: pageHeight } = page.getSize();
+        
+        // Process each object on the canvas
+        for (const obj of objects) {
+          try {
+            // Convert canvas coordinates to PDF coordinates (PDF has origin at bottom-left)
+            const pdfY = pageHeight - (obj.top || 0) - (obj.height || 0) * (obj.scaleY || 1);
+            const pdfX = obj.left || 0;
+            
+            if (obj.type === 'textbox' || obj.type === 'i-text') {
+              const textObj = obj as Textbox;
+              const text = textObj.text || '';
+              const fontSize = (textObj.fontSize || 16) * (textObj.scaleY || 1);
+              const color = textObj.fill as string || '#000000';
+              
+              // Convert hex color to RGB
+              const r = parseInt(color.slice(1, 3), 16) / 255;
+              const g = parseInt(color.slice(3, 5), 16) / 255;
+              const b = parseInt(color.slice(5, 7), 16) / 255;
+              
+              const font = textObj.fontWeight === 'bold' ? helveticaBold : helveticaFont;
+              
+              page.drawText(text, {
+                x: pdfX,
+                y: pdfY,
+                size: fontSize,
+                font: font,
+                color: rgb(r, g, b),
+              });
+            } else if (obj.type === 'rect') {
+              const rectObj = obj as Rect;
+              const width = (rectObj.width || 0) * (rectObj.scaleX || 1);
+              const height = (rectObj.height || 0) * (rectObj.scaleY || 1);
+              const strokeColor = rectObj.stroke as string || '#000000';
+              const fillColor = rectObj.fill as string;
+              
+              // Convert hex to RGB
+              const parseColor = (hex: string) => {
+                const r = parseInt(hex.slice(1, 3), 16) / 255;
+                const g = parseInt(hex.slice(3, 5), 16) / 255;
+                const b = parseInt(hex.slice(5, 7), 16) / 255;
+                return rgb(r, g, b);
+              };
+              
+              page.drawRectangle({
+                x: pdfX,
+                y: pdfY,
+                width: width,
+                height: height,
+                borderColor: parseColor(strokeColor),
+                borderWidth: rectObj.strokeWidth || 1,
+                color: fillColor && fillColor !== 'transparent' ? parseColor(fillColor) : undefined,
+              });
+            } else if (obj.type === 'circle') {
+              const circleObj = obj as Circle;
+              const radius = (circleObj.radius || 0) * (circleObj.scaleX || 1);
+              const strokeColor = circleObj.stroke as string || '#000000';
+              
+              const parseColor = (hex: string) => {
+                const r = parseInt(hex.slice(1, 3), 16) / 255;
+                const g = parseInt(hex.slice(3, 5), 16) / 255;
+                const b = parseInt(hex.slice(5, 7), 16) / 255;
+                return rgb(r, g, b);
+              };
+              
+              page.drawCircle({
+                x: pdfX + radius,
+                y: pdfY + radius,
+                size: radius,
+                borderColor: parseColor(strokeColor),
+                borderWidth: circleObj.strokeWidth || 1,
+              });
+            } else if (obj.type === 'image') {
+              const imgObj = obj as FabricImage;
+              const imgElement = imgObj.getElement() as HTMLImageElement | HTMLCanvasElement;
+              
+              // Convert image to data URL
+              let dataUrl: string;
+              if (imgElement instanceof HTMLImageElement) {
+                const canvas = document.createElement('canvas');
+                canvas.width = imgElement.naturalWidth || imgElement.width;
+                canvas.height = imgElement.naturalHeight || imgElement.height;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                  ctx.drawImage(imgElement, 0, 0);
+                  dataUrl = canvas.toDataURL('image/png');
+                } else {
+                  continue;
+                }
+              } else {
+                dataUrl = imgElement.toDataURL('image/png');
+              }
+              
+              // Embed the image
+              const imageBytes = dataUrl.split(',')[1];
+              const imageBuffer = Uint8Array.from(atob(imageBytes), c => c.charCodeAt(0));
+              
+              let embeddedImage;
+              if (dataUrl.includes('image/png')) {
+                embeddedImage = await pdfDoc.embedPng(imageBuffer);
+              } else {
+                embeddedImage = await pdfDoc.embedJpg(imageBuffer);
+              }
+              
+              const width = (imgObj.width || 0) * (imgObj.scaleX || 1);
+              const height = (imgObj.height || 0) * (imgObj.scaleY || 1);
+              
+              page.drawImage(embeddedImage, {
+                x: pdfX,
+                y: pdfY,
+                width: width,
+                height: height,
+              });
+            }
+          } catch (objError) {
+            console.error(`Error processing object on page ${i}:`, objError);
+            // Continue with next object
+          }
+        }
       }
+      
+      // Save the modified PDF
       const pdfBytes = await pdfDoc.save();
-      const blob = new Blob([new Uint8Array(pdfBytes)], {
-        type: "application/pdf"
-      });
+      const blob = new Blob([new Uint8Array(pdfBytes)], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "signed-document.pdf";
+      a.download = `${projectTitle || 'edited-document'}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
-      toast.success("PDF exported successfully!");
+      
+      toast.success("PDF exported with all changes embedded!");
     } catch (error) {
       console.error("Export error:", error);
       toast.error("Failed to export PDF");
@@ -913,8 +1064,8 @@ export function LightPaperPDFEditor({
                           pageNumber={pageNum} 
                           width={pageWidth * zoom} 
                           onLoadSuccess={() => setupCanvas(pageNum)} 
-                          renderTextLayer={false} 
-                          renderAnnotationLayer={false}
+                          renderTextLayer={true} 
+                          renderAnnotationLayer={true}
                           className="pointer-events-none"
                         />
                         <canvas 
