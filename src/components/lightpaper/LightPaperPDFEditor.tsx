@@ -203,35 +203,75 @@ export function LightPaperPDFEditor({
     const rect = pageEl.getBoundingClientRect();
     const canvas = new FabricCanvas(canvasEl, {
       width: rect.width,
-      height: rect.height
+      height: rect.height,
+      selection: true,
+      preserveObjectStacking: true
     });
+    
+    // Make all objects selectable and movable by default
+    canvas.on('object:added', (e) => {
+      if (e.target) {
+        e.target.set({
+          selectable: true,
+          hasControls: true,
+          hasBorders: true,
+          lockMovementX: false,
+          lockMovementY: false,
+        });
+      }
+    });
+    
     setCanvasInstances(prev => new Map(prev).set(pageNumber, canvas));
   };
   useEffect(() => {
     const canvas = canvasInstances.get(currentPage);
     if (!canvas) return;
+
+    // Remove all previous event listeners
+    canvas.off("mouse:down");
+    canvas.off("mouse:move");
+    canvas.off("mouse:up");
+
+    // Reset selection mode
+    canvas.selection = true;
+    canvas.isDrawingMode = false;
+
+    if (tool === "select") {
+      // Default selection mode - everything is draggable
+      canvas.defaultCursor = "default";
+      canvas.hoverCursor = "move";
+    }
+
     if (tool === "text") {
+      canvas.defaultCursor = "crosshair";
       canvas.on("mouse:down", e => {
-        if (!e.pointer) return;
-        const text = new Textbox("Click to edit", {
+        if (!e.pointer || e.target) return; // Don't add if clicking on existing object
+        const text = new Textbox("Double click to edit", {
           left: e.pointer.x,
           top: e.pointer.y,
           fill: color,
           fontSize: parseInt(selectedFontSize),
-          fontFamily: selectedFont
+          fontFamily: selectedFont,
+          width: 200,
+          editable: true,
+          selectable: true,
         });
         canvas.add(text);
         canvas.setActiveObject(text);
+        text.enterEditing();
+        text.selectAll();
         canvas.renderAll();
       });
     }
+
     if (tool === "rect") {
+      canvas.defaultCursor = "crosshair";
       let rect: Rect | null = null;
       let isDown = false;
       let origX = 0;
       let origY = 0;
       canvas.on("mouse:down", e => {
-        if (!e.pointer) return;
+        if (!e.pointer || e.target) return; // Don't draw if clicking on existing object
         isDown = true;
         origX = e.pointer.x;
         origY = e.pointer.y;
@@ -242,15 +282,18 @@ export function LightPaperPDFEditor({
           stroke: color,
           strokeWidth: strokeWidth,
           width: 0,
-          height: 0
+          height: 0,
+          selectable: true,
         });
         canvas.add(rect);
       });
       canvas.on("mouse:move", e => {
         if (!isDown || !rect || !e.pointer) return;
-        const width = e.pointer.x - origX;
-        const height = e.pointer.y - origY;
+        const width = Math.abs(e.pointer.x - origX);
+        const height = Math.abs(e.pointer.y - origY);
         rect.set({
+          left: Math.min(e.pointer.x, origX),
+          top: Math.min(e.pointer.y, origY),
           width,
           height
         });
@@ -258,15 +301,20 @@ export function LightPaperPDFEditor({
       });
       canvas.on("mouse:up", () => {
         isDown = false;
+        if (rect) {
+          canvas.setActiveObject(rect);
+        }
       });
     }
+
     if (tool === "circle") {
+      canvas.defaultCursor = "crosshair";
       let circle: Circle | null = null;
       let isDown = false;
       let origX = 0;
       let origY = 0;
       canvas.on("mouse:down", e => {
-        if (!e.pointer) return;
+        if (!e.pointer || e.target) return; // Don't draw if clicking on existing object
         isDown = true;
         origX = e.pointer.x;
         origY = e.pointer.y;
@@ -276,7 +324,8 @@ export function LightPaperPDFEditor({
           fill: "transparent",
           stroke: color,
           strokeWidth: strokeWidth,
-          radius: 0
+          radius: 0,
+          selectable: true,
         });
         canvas.add(circle);
       });
@@ -290,16 +339,24 @@ export function LightPaperPDFEditor({
       });
       canvas.on("mouse:up", () => {
         isDown = false;
-      });
-    }
-    if (tool === "erase") {
-      canvas.on("mouse:down", e => {
-        const target = canvas.findTarget(e.e);
-        if (target) {
-          canvas.remove(target);
+        if (circle) {
+          canvas.setActiveObject(circle);
         }
       });
     }
+
+    if (tool === "erase") {
+      canvas.defaultCursor = "not-allowed";
+      canvas.hoverCursor = "pointer";
+      canvas.on("mouse:down", e => {
+        if (e.target) {
+          canvas.remove(e.target);
+          canvas.renderAll();
+          toast.success("Object deleted");
+        }
+      });
+    }
+
     return () => {
       canvas.off("mouse:down");
       canvas.off("mouse:move");
@@ -419,16 +476,30 @@ export function LightPaperPDFEditor({
       toast.error("Please select a page first");
       return;
     }
-    const img = await fabric.FabricImage.fromURL(signature.preview);
-    img.scaleToWidth(200);
-    img.set({
-      left: canvas.width! / 2 - 100,
-      top: canvas.height! / 2 - 50
-    });
-    canvas.add(img);
-    canvas.setActiveObject(img);
-    canvas.renderAll();
-    toast.success("Signature placed on page " + currentPage);
+    
+    try {
+      const img = await fabric.FabricImage.fromURL(signature.preview);
+      img.scaleToWidth(200);
+      img.set({
+        left: canvas.width! / 2 - 100,
+        top: canvas.height! / 2 - 50,
+        selectable: true,
+        hasControls: true,
+        hasBorders: true,
+        lockMovementX: false,
+        lockMovementY: false,
+      });
+      canvas.add(img);
+      canvas.setActiveObject(img);
+      canvas.renderAll();
+      toast.success("Signature placed! Drag to reposition");
+      
+      // Switch to select tool for immediate dragging
+      setTool("select");
+    } catch (error) {
+      console.error("Error placing signature:", error);
+      toast.error("Failed to place signature");
+    }
   };
   const deleteSignature = (id: string) => {
     setSignatures(signatures.filter(sig => sig.id !== id));
@@ -502,12 +573,20 @@ export function LightPaperPDFEditor({
       img.scaleToWidth(200);
       img.set({
         left: canvas.width! / 2 - 100,
-        top: canvas.height! / 2 - 100
+        top: canvas.height! / 2 - 100,
+        selectable: true,
+        hasControls: true,
+        hasBorders: true,
+        lockMovementX: false,
+        lockMovementY: false,
       });
       canvas.add(img);
       canvas.setActiveObject(img);
       canvas.renderAll();
-      toast.success("Image added to page");
+      toast.success("Image added! Drag to reposition");
+      
+      // Switch to select tool for immediate dragging
+      setTool("select");
     } catch (error) {
       console.error("Error adding image:", error);
       toast.error("Failed to add image");
@@ -827,11 +906,23 @@ export function LightPaperPDFEditor({
                 width: pageWidth * zoom
               }}>
                     <div ref={el => el && pageRefs.current.set(currentPage, el)} className="relative">
-                      <Page pageNumber={currentPage} width={pageWidth * zoom} onLoadSuccess={() => setupCanvas(currentPage)} renderTextLayer={false} renderAnnotationLayer={false} />
-                      <canvas ref={el => el && canvasRefs.current.set(currentPage, el)} className="absolute top-0 left-0 pointer-events-auto" style={{
-                    width: "100%",
-                    height: "100%"
-                  }} />
+                      <Page 
+                        pageNumber={currentPage} 
+                        width={pageWidth * zoom} 
+                        onLoadSuccess={() => setupCanvas(currentPage)} 
+                        renderTextLayer={false} 
+                        renderAnnotationLayer={false}
+                        className="pointer-events-none"
+                      />
+                      <canvas 
+                        ref={el => el && canvasRefs.current.set(currentPage, el)} 
+                        className="absolute top-0 left-0 pointer-events-auto cursor-default" 
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          touchAction: "none"
+                        }} 
+                      />
                     </div>
                   </div>
                 </Document>
