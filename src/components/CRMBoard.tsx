@@ -583,22 +583,21 @@ export default function CRMBoard() {
         </Dialog>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         {stages.map((stage) => (
           <div
             key={stage.id}
-            className="flex-shrink-0 w-80"
             onDragOver={handleDragOver}
             onDrop={() => handleDrop(stage.id)}
           >
             <Card className="h-full">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{stage.name}</CardTitle>
+                  <CardTitle className="text-base sm:text-lg">{stage.name}</CardTitle>
                   <Badge variant="secondary">{stage.cards.length}</Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3 max-h-[70vh] overflow-y-auto">
+              <CardContent className="space-y-3 max-h-[50vh] overflow-y-auto">
                 {stage.cards.length === 0 ? (
                   <p className="text-sm text-muted-foreground text-center py-8">No clients yet</p>
                 ) : (
