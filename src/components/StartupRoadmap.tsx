@@ -357,17 +357,23 @@ export default function StartupRoadmap() {
   return (
     <div className="space-y-6">
       {/* Progress Overview */}
-      <Card className="tech-card border-0">
+      <Card className="tech-card border-0 animate-fade-in">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Progress Overview</span>
-            <Badge variant="secondary">{roadmapProgress.percentage}% Complete</Badge>
+            <Badge variant="secondary" className="animate-scale-in">
+              {roadmapProgress.percentage}% Complete
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Progress value={roadmapProgress.percentage} className="h-3 mb-4" />
+          <Progress 
+            value={roadmapProgress.percentage} 
+            className="h-3 mb-4 transition-all duration-700 ease-out" 
+          />
           <p className="text-sm text-muted-foreground">
-            Follow our proven algorithm to build your startup step by step. Each stage unlocks new resources and opportunities.
+            {roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps completed. 
+            Follow our proven algorithm to build your startup step by step.
           </p>
         </CardContent>
       </Card>
