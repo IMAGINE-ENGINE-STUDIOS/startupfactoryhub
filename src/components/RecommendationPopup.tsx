@@ -1,49 +1,46 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Lightbulb, X, Users, TrendingUp, GraduationCap, Sparkles } from 'lucide-react';
+import { Loader2, Lightbulb, Users, TrendingUp, GraduationCap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
-interface Recommendation {
+export interface Recommendation {
   type: 'connection' | 'investor' | 'course' | 'general';
   title: string;
   description: string;
   reference_id?: string;
 }
 
-export default function RecommendationPopup() {
+interface RecommendationPopupProps {
+  onRecommendationsLoad?: (count: number) => void;
+}
+
+export default function RecommendationPopup({ onRecommendationsLoad }: RecommendationPopupProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
 
   useEffect(() => {
     if (!user) return;
-
-    // Show popup 5 seconds after login
-    const timer = setTimeout(() => {
-      loadRecommendations();
-    }, 5000);
-
-    return () => clearTimeout(timer);
+    loadRecommendations();
   }, [user]);
 
   const loadRecommendations = async () => {
     if (!user) return;
 
     setIsLoading(true);
-    setIsOpen(true);
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-recommendations');
 
       if (error) throw error;
 
-      setRecommendations(data.recommendations || []);
+      const recs = data.recommendations || [];
+      setRecommendations(recs);
+      onRecommendationsLoad?.(recs.length);
     } catch (error) {
       console.error('Error loading recommendations:', error);
       toast({
@@ -51,7 +48,6 @@ export default function RecommendationPopup() {
         description: 'Failed to load recommendations. Please try again later.',
         variant: 'destructive',
       });
-      setIsOpen(false);
     } finally {
       setIsLoading(false);
     }
@@ -83,57 +79,37 @@ export default function RecommendationPopup() {
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl max-h-[85vh] shadow-2xl border-2 flex flex-col">
-        <CardHeader className="relative">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-4 top-4"
-            onClick={() => setIsOpen(false)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-6 w-6 text-primary" />
-            <CardTitle className="text-xl sm:text-2xl break-words">AI-Powered Recommendations</CardTitle>
-          </div>
-          <CardDescription>
-            Personalized suggestions to help you grow your startup
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="overflow-y-auto flex-1">
-          {isLoading ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-              <p className="text-muted-foreground text-sm sm:text-base">Generating personalized recommendations...</p>
+    <ScrollArea className="h-[400px] w-full">
+      {isLoading ? (
+        <div className="flex flex-col items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+          <p className="text-muted-foreground text-sm">Loading recommendations...</p>
+        </div>
+      ) : recommendations.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-12 px-4">
+          <Lightbulb className="h-12 w-12 text-muted-foreground mb-4" />
+          <p className="text-muted-foreground text-sm text-center">No recommendations available at the moment</p>
+        </div>
+      ) : (
+        <div className="space-y-3 p-4">
+          {recommendations.map((rec, index) => (
+            <div key={index} className="border rounded-lg p-3 hover:bg-muted/50 transition-colors">
+              <div className="flex items-start gap-3">
+                <Badge variant="outline" className={`${getTypeColor(rec.type)} mt-1 flex-shrink-0`}>
+                  {getIcon(rec.type)}
+                </Badge>
+                <div className="flex-1 min-w-0 space-y-1">
+                  <h4 className="font-semibold text-sm break-words">{rec.title}</h4>
+                  <p className="text-muted-foreground text-xs leading-relaxed break-words">
+                    {rec.description}
+                  </p>
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="space-y-4 pb-4">
-              {recommendations.map((rec, index) => (
-                <Card key={index} className="border-2 hover:border-primary/50 transition-colors">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3">
-                      <Badge variant="outline" className={`${getTypeColor(rec.type)} mt-1 flex-shrink-0`}>
-                        {getIcon(rec.type)}
-                      </Badge>
-                      <div className="flex-1 min-w-0 space-y-2">
-                        <h3 className="font-semibold text-base sm:text-lg break-words">{rec.title}</h3>
-                        <p className="text-muted-foreground text-sm leading-relaxed break-words">
-                          {rec.description}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-    </div>
+          ))}
+        </div>
+      )}
+    </ScrollArea>
   );
 }

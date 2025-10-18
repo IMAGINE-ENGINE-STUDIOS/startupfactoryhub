@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import logo from "@/assets/logo.png";
@@ -9,6 +10,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
@@ -29,11 +35,22 @@ import {
   Sparkles,
   FileText
 } from "lucide-react";
+import RecommendationPopup from "./RecommendationPopup";
 
 const DashboardNavigation = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const [recommendationCount, setRecommendationCount] = useState(0);
+  const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
+
+  const handleRecommendationsLoad = (count: number) => {
+    if (count > 0 && count !== recommendationCount) {
+      setHasNewRecommendations(true);
+      setRecommendationCount(count);
+      setTimeout(() => setHasNewRecommendations(false), 3000);
+    }
+  };
 
   const handleLogout = async () => {
     const { error } = await signOut();
@@ -138,11 +155,31 @@ const DashboardNavigation = () => {
                 <Search className="w-4 h-4" />
               </Button>
 
-              {/* Notifications */}
-              <Button variant="ghost" size="sm" className="relative">
-                <Bell className="w-4 h-4" />
-                <span className="absolute -top-1 -right-1 w-2 h-2 bg-ocean-primary rounded-full"></span>
-              </Button>
+              {/* Recommendations */}
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="ghost" size="sm" className="relative">
+                    <Bell className={`w-4 h-4 ${hasNewRecommendations ? 'animate-shake' : ''}`} />
+                    {recommendationCount > 0 && (
+                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[10px] flex items-center justify-center text-primary-foreground">
+                        {recommendationCount}
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-96 p-0" align="end">
+                  <div className="p-4 border-b">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      <h3 className="font-semibold">AI Recommendations</h3>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      Personalized suggestions for you
+                    </p>
+                  </div>
+                  <RecommendationPopup onRecommendationsLoad={handleRecommendationsLoad} />
+                </PopoverContent>
+              </Popover>
 
               {/* User Menu */}
               <DropdownMenu>
