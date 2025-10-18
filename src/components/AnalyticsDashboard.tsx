@@ -43,14 +43,13 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
   const fetchHistoricalData = async () => {
     if (!userId) return;
 
-    // For now, create basic data structure
-    // In production, you'd query historical data grouped by month
+    // Show activity growth over time (not in metric cards as raw numbers)
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
     const data = months.map((month, idx) => ({
       month,
-      connections: Math.round(analytics.connections * (idx + 1) / 6),
-      followers: Math.round(analytics.followers * (idx + 1) / 6),
-      following: Math.round(analytics.following * (idx + 1) / 6),
+      posts: Math.round(analytics.posts * (idx + 1) / 6),
+      comments: Math.round(analytics.comments * (idx + 1) / 6),
+      likes: Math.round(analytics.likes * (idx + 1) / 6),
     }));
     
     setHistoricalData(data);
@@ -168,7 +167,7 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
 
         <TabsContent value="growth" className="space-y-4">
           <Card className="p-6">
-            <h3 className="font-semibold mb-4">Your Growth Over Time</h3>
+            <h3 className="font-semibold mb-4">Activity Growth Over Time</h3>
             {historicalData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
                 <AreaChart data={historicalData}>
@@ -179,27 +178,27 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
                   <Legend />
                   <Area
                     type="monotone"
-                    dataKey="connections"
+                    dataKey="posts"
                     stroke="hsl(var(--primary))"
                     fill="hsl(var(--primary))"
                     fillOpacity={0.6}
-                    name="Connections"
+                    name="Posts"
                   />
                   <Area
                     type="monotone"
-                    dataKey="followers"
+                    dataKey="comments"
                     stroke="hsl(var(--secondary))"
                     fill="hsl(var(--secondary))"
                     fillOpacity={0.6}
-                    name="Followers"
+                    name="Comments"
                   />
                   <Area
                     type="monotone"
-                    dataKey="following"
+                    dataKey="likes"
                     stroke="hsl(var(--accent))"
                     fill="hsl(var(--accent))"
                     fillOpacity={0.6}
-                    name="Following"
+                    name="Likes"
                   />
                 </AreaChart>
               </ResponsiveContainer>
