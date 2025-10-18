@@ -29,7 +29,7 @@ interface Internship {
 export default function InternshipBoard() {
   const [internships, setInternships] = useState<Internship[]>([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [userProfile, setUserProfile] = useState<any>(null);
+  const [userRole, setUserRole] = useState<string | null>(null);
   const [newInternship, setNewInternship] = useState({
     title: '',
     description: '',
@@ -43,23 +43,19 @@ export default function InternshipBoard() {
 
   useEffect(() => {
     if (user) {
-      fetchUserProfile();
+      fetchUserRole();
       fetchInternships();
     }
   }, [user]);
 
-  const fetchUserProfile = async () => {
+  const fetchUserRole = async () => {
     if (!user) return;
-
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
+    const { data } = await supabase
+      .from('user_roles')
+      .select('role')
       .eq('user_id', user.id)
       .single();
-
-    if (!error && data) {
-      setUserProfile(data);
-    }
+    if (data) setUserRole(data.role);
   };
 
   const fetchInternships = async () => {
@@ -119,7 +115,7 @@ export default function InternshipBoard() {
   };
 
   const createInternship = async () => {
-    if (!user || !userProfile) return;
+    if (!user) return;
 
     // Get user's company
     const { data: company, error: companyError } = await supabase
@@ -223,8 +219,8 @@ export default function InternshipBoard() {
     fetchInternships();
   };
 
-  const canCreateInternships = userProfile?.role === 'startup';
-  const canApplyToInternships = userProfile?.role === 'student';
+  const canCreateInternships = userRole === 'startup';
+  const canApplyToInternships = userRole === 'student';
 
   return (
     <div className="space-y-6">

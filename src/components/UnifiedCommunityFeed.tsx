@@ -30,7 +30,6 @@ interface FeedPost {
   shared_post_id?: string | null;
   profiles?: {
     full_name: string;
-    role: string;
     avatar_url?: string;
   } | null;
   post_likes: { user_id: string }[];
@@ -188,7 +187,7 @@ export default function UnifiedCommunityFeed({
   const fetchComments = async (postId: string) => {
     const { data, error } = await supabase
       .from('post_comments')
-      .select('*, profiles:user_id(full_name, role, avatar_url)')
+      .select('*, profiles:user_id(full_name, avatar_url)')
       .eq('post_id', postId)
       .order('created_at', { ascending: true });
 
@@ -518,17 +517,6 @@ export default function UnifiedCommunityFeed({
     });
   };
 
-  const getRoleIcon = (role: string) => {
-    switch (role) {
-      case 'startup': return '🚀';
-      case 'investor': return '💰';
-      case 'mentor': return '🎯';
-      case 'advisor': return '🧠';
-      case 'student': return '🎓';
-      default: return '👤';
-    }
-  };
-
   if (!user) {
     return (
       <div className="space-y-6">
@@ -665,23 +653,19 @@ export default function UnifiedCommunityFeed({
                   </AvatarFallback>
                 </Avatar>
                 
-                <div className="flex-1 space-y-3 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                      <h3 
-                        className="font-semibold text-sm sm:text-base text-foreground truncate cursor-pointer hover:text-primary transition-colors"
-                        onClick={() => handleUserClick(post.user_id)}
-                      >
-                        {post.profiles?.full_name || 'Anonymous User'}
-                      </h3>
-                      <span className="text-base sm:text-lg">{getRoleIcon(post.profiles?.role || '')}</span>
-                      <Badge variant="outline" className="text-xs capitalize">
-                        {post.profiles?.role || 'Member'}
-                      </Badge>
-                      <span className="text-muted-foreground">•</span>
-                      <span className="text-xs sm:text-sm text-muted-foreground">{formatDate(post.created_at)}</span>
+                  <div className="flex-1 space-y-3 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                        <h3 
+                          className="font-semibold text-sm sm:text-base text-foreground truncate cursor-pointer hover:text-primary transition-colors"
+                          onClick={() => handleUserClick(post.user_id)}
+                        >
+                          {post.profiles?.full_name || 'Anonymous User'}
+                        </h3>
+                        <span className="text-muted-foreground">•</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">{formatDate(post.created_at)}</span>
+                      </div>
                     </div>
-                  </div>
                   
                   <p className="text-sm sm:text-base text-foreground leading-relaxed whitespace-pre-wrap break-words">{post.content}</p>
                   
@@ -775,14 +759,13 @@ export default function UnifiedCommunityFeed({
                                 {comment.profiles?.full_name?.charAt(0) || 'U'}
                               </AvatarFallback>
                             </Avatar>
-                            <div className="flex-1 space-y-1 min-w-0">
-                              <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                                <p className="text-xs sm:text-sm font-semibold truncate">{comment.profiles?.full_name || 'Anonymous'}</p>
-                                <span className="text-sm sm:text-lg">{getRoleIcon(comment.profiles?.role || '')}</span>
-                                <span className="text-xs text-muted-foreground">{formatDate(comment.created_at)}</span>
+                              <div className="flex-1 space-y-1 min-w-0">
+                                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+                                  <p className="text-xs sm:text-sm font-semibold truncate">{comment.profiles?.full_name || 'Anonymous'}</p>
+                                  <span className="text-xs text-muted-foreground">{formatDate(comment.created_at)}</span>
+                                </div>
+                                <p className="text-xs sm:text-sm break-words">{comment.content}</p>
                               </div>
-                              <p className="text-xs sm:text-sm break-words">{comment.content}</p>
-                            </div>
                           </div>
                         ))}
                       </div>
