@@ -300,7 +300,7 @@ export default function StartupRoadmap() {
       <Card className="tech-card border-0">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>Your Startup Journey</span>
+            <span>Progress Overview</span>
             <Badge variant="secondary">{roadmapProgress.percentage}% Complete</Badge>
           </CardTitle>
         </CardHeader>
