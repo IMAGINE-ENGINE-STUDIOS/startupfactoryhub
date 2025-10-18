@@ -262,7 +262,7 @@ export default function UserProfileDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden p-0">
+      <DialogContent className="max-w-2xl h-[90vh] overflow-hidden p-0 flex flex-col">
         {loading ? (
           <div className="flex items-center justify-center py-12">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -272,9 +272,9 @@ export default function UserProfileDialog({
             <p className="text-muted-foreground">Profile not found</p>
           </div>
         ) : (
-          <div className="overflow-y-auto max-h-[90vh]">
-            {/* Header Section */}
-            <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b p-6">
+          <div className="flex flex-col h-full overflow-hidden">
+            {/* Header Section - Fixed */}
+            <div className="flex-shrink-0 bg-background border-b p-6">
               <div className="flex items-start gap-4">
                 <Avatar className="h-20 w-20 border-2 border-primary/20">
                   <AvatarImage src={profile.avatar_url || undefined} />
@@ -373,8 +373,8 @@ export default function UserProfileDialog({
               </div>
             </div>
 
-            {/* Content Section */}
-            <div className="p-6 space-y-6">
+            {/* Content Section - Scrollable */}
+            <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Overview Section */}
               <div>
                 <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">

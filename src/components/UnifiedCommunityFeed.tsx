@@ -10,8 +10,19 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, 
   Bookmark, Repeat2, Send, Calendar, Image as ImageIcon, 
-  Video, Sparkles, X
+  Video, Sparkles, X, Trash2
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import ShortsCarousel from '@/components/ShortsCarousel';
@@ -112,6 +123,12 @@ export default function UnifiedCommunityFeed({
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'post_comments' },
         () => fetchPosts()
+      )
+      .on('postgres_changes', 
+        { event: 'DELETE', schema: 'public', table: 'feed_posts' },
+        (payload) => {
+          setPosts(posts => posts.filter(post => post.id !== payload.old.id));
+        }
       )
       .subscribe();
 
@@ -439,6 +456,33 @@ export default function UnifiedCommunityFeed({
         setBookmarkedPosts(prev => new Set([...prev, postId]));
         toast({ title: 'Post bookmarked!' });
       }
+    }
+  };
+
+  const deletePost = async (postId: string) => {
+    if (!user) return;
+
+    try {
+      const { error } = await supabase
+        .from('feed_posts')
+        .delete()
+        .eq('id', postId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setPosts(posts.filter(p => p.id !== postId));
+      toast({
+        title: 'Post deleted',
+        description: 'Your post has been deleted successfully',
+      });
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete post',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -845,6 +889,34 @@ export default function UnifiedCommunityFeed({
                         bookmarkedPosts.has(post.id) ? 'fill-current' : ''
                       }`} />
                     </Button>
+                    
+                    {user?.id === post.user_id && (
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="text-destructive hover:text-destructive px-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Delete post?</AlertDialogTitle>
+                            <AlertDialogDescription>
+                              This action cannot be undone. This will permanently delete your post.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogAction onClick={() => deletePost(post.id)} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                              Delete
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
+                    )}
                   </div>
 
                   {/* Comments Section - Always show first 2 comments */}
