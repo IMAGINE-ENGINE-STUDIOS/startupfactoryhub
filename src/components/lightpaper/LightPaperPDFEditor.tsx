@@ -61,6 +61,7 @@ export function LightPaperPDFEditor({
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const signatureDrawingCanvas = useRef<FabricCanvas | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [projectTitle, setProjectTitle] = useState<string>("Untitled PDF");
   const {
@@ -620,8 +621,19 @@ export function LightPaperPDFEditor({
       <div className="flex-1 flex flex-col gap-4">
         <CollapsibleToolbar>
           <div className="flex flex-col gap-3">
-            {/* First Row - Text Formatting Controls */}
+            {/* First Row - File Upload & Text Formatting Controls */}
             <div className="flex items-center gap-2 flex-wrap">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => pdfInputRef.current?.click()}
+                title="Upload PDF"
+              >
+                <Upload className="h-4 w-4" />
+              </Button>
+
+              <Separator orientation="vertical" className="h-6" />
+
               <Select value={selectedFont} onValueChange={changeFontFamily}>
                 <SelectTrigger className="w-[140px] h-8">
                   <SelectValue />
@@ -677,81 +689,77 @@ export function LightPaperPDFEditor({
 
               <Separator orientation="vertical" className="h-6" />
 
-              <div className="flex items-center gap-2">
-                <Label className="text-xs whitespace-nowrap">Text Color:</Label>
-                <Input type="color" value={color} onChange={e => changeTextColor(e.target.value)} className="h-8 w-12 p-1" />
+              <div className="flex items-center gap-1">
+                <div className="relative">
+                  <span className="font-bold text-lg" style={{ color: color }}>A</span>
+                </div>
+                <Input 
+                  type="color" 
+                  value={color} 
+                  onChange={e => changeTextColor(e.target.value)} 
+                  className="h-8 w-10 p-1 cursor-pointer" 
+                  title="Text Color"
+                />
               </div>
             </div>
 
             {/* Second Row - Drawing Tools & Shapes */}
             <div className="flex items-center gap-2 flex-wrap">
               <Button variant={tool === "select" ? "default" : "outline"} size="sm" onClick={() => setTool("select")} title="Select">
-                Select
+                <Type className="h-4 w-4" />
               </Button>
               <Button variant={tool === "text" ? "default" : "outline"} size="sm" onClick={() => setTool("text")} title="Add Text">
-                <Type className="h-4 w-4 mr-1" />
-                Text
+                <Type className="h-4 w-4" />
               </Button>
               <Button variant={tool === "draw" ? "default" : "outline"} size="sm" onClick={() => setTool("draw")} title="Draw">
-                <Pencil className="h-4 w-4 mr-1" />
-                Draw
+                <Pencil className="h-4 w-4" />
               </Button>
               <Button variant={tool === "rect" ? "default" : "outline"} size="sm" onClick={() => setTool("rect")} title="Rectangle">
-                <Square className="h-4 w-4 mr-1" />
-                Rect
+                <Square className="h-4 w-4" />
               </Button>
               <Button variant={tool === "circle" ? "default" : "outline"} size="sm" onClick={() => setTool("circle")} title="Circle">
-                <CircleIcon className="h-4 w-4 mr-1" />
-                Circle
+                <CircleIcon className="h-4 w-4" />
               </Button>
               <Button variant={tool === "erase" ? "default" : "outline"} size="sm" onClick={() => setTool("erase")} title="Erase">
-                <Eraser className="h-4 w-4 mr-1" />
-                Erase
+                <Eraser className="h-4 w-4" />
               </Button>
 
               <Separator orientation="vertical" className="h-6" />
 
-              <div className="flex items-center gap-2">
-                <Label className="text-xs whitespace-nowrap">Draw Color:</Label>
-                <Input type="color" value={color} onChange={e => setColor(e.target.value)} className="h-8 w-12 p-1" />
-              </div>
+              <Input type="color" value={color} onChange={e => setColor(e.target.value)} className="h-8 w-10 p-1 cursor-pointer" title="Draw Color" />
+              <Input type="color" value={backgroundColor} onChange={e => handleBackgroundColor(e.target.value)} className="h-8 w-10 p-1 cursor-pointer" title="Background Color" />
 
-              <div className="flex items-center gap-2">
-                <Label className="text-xs whitespace-nowrap">Background:</Label>
-                <Input type="color" value={backgroundColor} onChange={e => handleBackgroundColor(e.target.value)} className="h-8 w-12 p-1" />
-              </div>
+              <Separator orientation="vertical" className="h-6" />
 
               <Button variant="outline" size="sm" onClick={() => imageInputRef.current?.click()} title="Add Image">
-                <ImageIcon className="h-4 w-4 mr-1" />
-                Image
+                <ImageIcon className="h-4 w-4" />
               </Button>
 
               <Button variant="outline" size="sm" onClick={clearPage} title="Clear Page">
-                <Trash2 className="h-4 w-4 mr-1" />
-                Clear
+                <Trash2 className="h-4 w-4" />
               </Button>
             </div>
 
             {/* Third Row - Page Navigation & Actions */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage <= 1}>
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.max(1, currentPage - 1))} disabled={currentPage <= 1} title="Previous Page">
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
                 <span className="text-sm whitespace-nowrap px-2">
-                  Page {currentPage} / {numPages}
+                  {currentPage} / {numPages}
                 </span>
-                <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))} disabled={currentPage >= numPages}>
+                <Button variant="outline" size="sm" onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))} disabled={currentPage >= numPages} title="Next Page">
                   <ChevronRight className="h-4 w-4" />
                 </Button>
 
                 <Separator orientation="vertical" className="h-6 mx-2" />
 
-                <Button variant="outline" size="sm" onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}>
+                <Button variant="outline" size="sm" onClick={() => setZoom(Math.max(0.5, zoom - 0.1))} title="Zoom Out">
                   <ZoomOut className="h-4 w-4" />
                 </Button>
                 <span className="text-sm whitespace-nowrap">{Math.round(zoom * 100)}%</span>
-                <Button variant="outline" size="sm" onClick={() => setZoom(Math.min(2, zoom + 0.1))}>
+                <Button variant="outline" size="sm" onClick={() => setZoom(Math.min(2, zoom + 0.1))} title="Zoom In">
                   <ZoomIn className="h-4 w-4" />
                 </Button>
               </div>
@@ -759,9 +767,8 @@ export function LightPaperPDFEditor({
               <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Download className="h-4 w-4 mr-2" />
-                      Export
+                    <Button variant="outline" size="sm" title="Export">
+                      <Download className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="bg-background z-50">
@@ -776,14 +783,28 @@ export function LightPaperPDFEditor({
                   </DropdownMenuContent>
                 </DropdownMenu>
 
-                <Button variant="outline" size="sm" onClick={handleShareDocument}>
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
+                <Button variant="outline" size="sm" onClick={handleShareDocument} title="Share">
+                  <Share2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>
           </div>
         </CollapsibleToolbar>
+
+        <input
+          ref={pdfInputRef}
+          type="file"
+          accept="application/pdf"
+          onChange={handleFileUpload}
+          className="hidden"
+        />
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageUpload}
+          className="hidden"
+        />
 
         <Card className="flex-1 overflow-auto">
           {pdfFile ? <div className="p-4">
