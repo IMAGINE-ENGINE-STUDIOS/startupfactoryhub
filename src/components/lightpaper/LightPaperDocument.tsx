@@ -971,8 +971,8 @@ export function LightPaperDocument({
                   <div className="relative">
                     <canvas
                       ref={signCanvasRef}
-                      width={400}
-                      height={200}
+                      width={600}
+                      height={300}
                       className="border rounded cursor-crosshair w-full bg-transparent"
                       style={{ 
                         backgroundColor: 'transparent',
