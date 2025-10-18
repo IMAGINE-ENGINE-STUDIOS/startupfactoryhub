@@ -827,48 +827,132 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
       {/* Main Viewer */}
       <div className="flex-1 flex flex-col gap-4">
         <CollapsibleToolbar>
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-3">
+            {/* First Row - Navigation and Zoom */}
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  disabled={currentPage <= 1}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <span className="text-sm whitespace-nowrap">
+                  Page {currentPage} of {numPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))}
+                  disabled={currentPage >= numPages}
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+                <span className="text-sm whitespace-nowrap">{Math.round(zoom * 100)}%</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setZoom(Math.min(2, zoom + 0.1))}
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Second Row - Tools */}
+            <div className="flex items-center gap-2 flex-wrap">
               <Button
-                variant="outline"
+                variant={tool === "select" ? "default" : "outline"}
                 size="sm"
-                onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                disabled={currentPage <= 1}
+                onClick={() => setTool("select")}
               >
-                <ChevronLeft className="h-4 w-4" />
+                Select
               </Button>
-              <span className="text-sm whitespace-nowrap">
-                Page {currentPage} of {numPages}
-              </span>
+              <Button
+                variant={tool === "draw" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTool("draw")}
+              >
+                <Pencil className="h-4 w-4 mr-2" />
+                Draw
+              </Button>
+              <Button
+                variant={tool === "text" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTool("text")}
+              >
+                <Type className="h-4 w-4 mr-2" />
+                Text
+              </Button>
+              <Button
+                variant={tool === "rect" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTool("rect")}
+              >
+                <Square className="h-4 w-4 mr-2" />
+                Rectangle
+              </Button>
+              <Button
+                variant={tool === "circle" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTool("circle")}
+              >
+                <CircleIcon className="h-4 w-4 mr-2" />
+                Circle
+              </Button>
+              <Button
+                variant={tool === "erase" ? "default" : "outline"}
+                size="sm"
+                onClick={() => setTool("erase")}
+              >
+                <Eraser className="h-4 w-4 mr-2" />
+                Erase
+              </Button>
+
+              <div className="flex items-center gap-2 ml-4">
+                <Label className="text-sm whitespace-nowrap">Color:</Label>
+                <Input
+                  type="color"
+                  value={color}
+                  onChange={(e) => setColor(e.target.value)}
+                  className="h-8 w-16 p-1"
+                />
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Label className="text-sm whitespace-nowrap">Background:</Label>
+                <Input
+                  type="color"
+                  value={backgroundColor}
+                  onChange={(e) => handleBackgroundColor(e.target.value)}
+                  className="h-8 w-16 p-1"
+                />
+              </div>
+
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(Math.min(numPages, currentPage + 1))}
-                disabled={currentPage >= numPages}
+                onClick={() => imageInputRef.current?.click()}
               >
-                <ChevronRight className="h-4 w-4" />
+                <ImageIcon className="h-4 w-4 mr-2" />
+                Add Image
               </Button>
             </div>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setZoom(Math.max(0.5, zoom - 0.1))}
-              >
-                <ZoomOut className="h-4 w-4" />
-              </Button>
-              <span className="text-sm whitespace-nowrap">{Math.round(zoom * 100)}%</span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setZoom(Math.min(2, zoom + 0.1))}
-              >
-                <ZoomIn className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="flex items-center gap-2">
+            {/* Third Row - Actions */}
+            <div className="flex items-center gap-2 flex-wrap">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm">
@@ -876,7 +960,7 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
                     Export
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-background z-50">
+                <DropdownMenuContent align="start" className="bg-background z-50">
                   <DropdownMenuItem onClick={handleExport}>
                     <FileText className="h-4 w-4 mr-2" />
                     Export as PDF
@@ -894,10 +978,11 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
                 onClick={handleShareDocument}
               >
                 <Share2 className="h-4 w-4 mr-2" />
-                Share
+                Share for Signing
               </Button>
 
               <Button variant="outline" size="sm" onClick={clearPage}>
+                <Trash2 className="h-4 w-4 mr-2" />
                 Clear Page
               </Button>
             </div>
