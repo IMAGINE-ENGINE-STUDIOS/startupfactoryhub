@@ -155,10 +155,26 @@ export function LightPaperDocument() {
 
           {/* Undo/Redo */}
           <div className="flex gap-1 border-l pl-2">
-            <Button variant="ghost" size="icon" onClick={() => execCommand("undo")} title="Undo (Ctrl+Z)">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => {
+                document.execCommand("undo", false);
+                editorRef.current?.focus();
+              }} 
+              title="Undo (Ctrl+Z)"
+            >
               <Undo className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => execCommand("redo")} title="Redo (Ctrl+Y)">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => {
+                document.execCommand("redo", false);
+                editorRef.current?.focus();
+              }} 
+              title="Redo (Ctrl+Y)"
+            >
               <Redo className="h-4 w-4" />
             </Button>
           </div>
