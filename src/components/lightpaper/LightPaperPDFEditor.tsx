@@ -43,7 +43,8 @@ export function LightPaperPDFEditor({
   const [currentPage, setCurrentPage] = useState(1);
   const [zoom, setZoom] = useState(1);
   const [pageWidth, setPageWidth] = useState(800);
-  const [tool, setTool] = useState<"select" | "draw" | "text" | "rect" | "circle" | "erase">("select");
+  const [tool, setTool] = useState<"select" | "text" | "rect" | "circle" | "erase">("select");
+  const [showSignatureDialog, setShowSignatureDialog] = useState(false);
   const [color, setColor] = useState("#000000");
   const [strokeWidth, setStrokeWidth] = useState(2);
   const [selectedFont, setSelectedFont] = useState("Arial");
@@ -161,21 +162,11 @@ export function LightPaperPDFEditor({
       width: rect.width,
       height: rect.height
     });
-    canvas.isDrawingMode = tool === "draw";
-    if (canvas.freeDrawingBrush) {
-      canvas.freeDrawingBrush.color = color;
-      canvas.freeDrawingBrush.width = strokeWidth;
-    }
     setCanvasInstances(prev => new Map(prev).set(pageNumber, canvas));
   };
   useEffect(() => {
     const canvas = canvasInstances.get(currentPage);
     if (!canvas) return;
-    canvas.isDrawingMode = tool === "draw";
-    if (tool === "draw" && canvas.freeDrawingBrush) {
-      canvas.freeDrawingBrush.color = color;
-      canvas.freeDrawingBrush.width = strokeWidth;
-    }
     if (tool === "text") {
       canvas.on("mouse:down", e => {
         if (!e.pointer) return;
@@ -706,8 +697,8 @@ export function LightPaperPDFEditor({
             <Button variant={tool === "text" ? "default" : "outline"} size="sm" onClick={() => setTool("text")} title="Add Text">
               <Type className="h-4 w-4" />
             </Button>
-            <Button variant={tool === "draw" ? "default" : "outline"} size="sm" onClick={() => setTool("draw")} title="Draw">
-              <Pencil className="h-4 w-4" />
+            <Button variant="outline" size="sm" onClick={() => setShowSignatureDialog(true)} title="Add Signature">
+              <PenTool className="h-4 w-4" />
             </Button>
             <Button variant={tool === "rect" ? "default" : "outline"} size="sm" onClick={() => setTool("rect")} title="Rectangle">
               <Square className="h-4 w-4" />
@@ -833,6 +824,92 @@ export function LightPaperPDFEditor({
       </div>
 
       <FloatingActionMenu onSave={handleSaveToAccount} onPrint={handleExport} />
+
+      {/* Signature Dialog */}
+      <Dialog open={showSignatureDialog} onOpenChange={setShowSignatureDialog}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add Signature</DialogTitle>
+          </DialogHeader>
+          <Tabs defaultValue="draw" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="draw">Draw Signature</TabsTrigger>
+              <TabsTrigger value="type">Type Signature</TabsTrigger>
+            </TabsList>
+            <TabsContent value="draw" className="space-y-4">
+              <div className="border rounded-lg bg-white">
+                <canvas
+                  ref={signatureCanvasRef}
+                  className="w-full cursor-crosshair"
+                  onMouseEnter={() => setIsDrawingSignature(true)}
+                />
+              </div>
+              <div className="flex gap-2">
+                <Button onClick={saveDrawnSignature} className="flex-1">
+                  Save Signature
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => signatureDrawingCanvas.current?.clear()}
+                >
+                  Clear
+                </Button>
+              </div>
+            </TabsContent>
+            <TabsContent value="type" className="space-y-4">
+              <div>
+                <Label htmlFor="signature-text">Type your signature</Label>
+                <Input
+                  id="signature-text"
+                  value={signatureText}
+                  onChange={(e) => setSignatureText(e.target.value)}
+                  placeholder="Enter your name"
+                  className="text-2xl font-['Brush_Script_MT',cursive] text-center"
+                />
+              </div>
+              <Button onClick={saveTextSignature} className="w-full">
+                Save Signature
+              </Button>
+            </TabsContent>
+          </Tabs>
+
+          {signatures.length > 0 && (
+            <div className="space-y-2">
+              <Label>Saved Signatures</Label>
+              <ScrollArea className="h-32 rounded-md border p-2">
+                <div className="space-y-2">
+                  {signatures.map((sig) => (
+                    <div
+                      key={sig.id}
+                      className="flex items-center gap-2 p-2 border rounded hover:bg-accent cursor-pointer"
+                      onClick={() => {
+                        placeSignature(sig);
+                        setShowSignatureDialog(false);
+                      }}
+                    >
+                      <img
+                        src={sig.preview}
+                        alt="Signature"
+                        className="h-12 object-contain flex-1"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          deleteSignature(sig.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </ScrollArea>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Share Dialog */}
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
