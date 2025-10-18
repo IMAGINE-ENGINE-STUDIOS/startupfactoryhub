@@ -215,12 +215,17 @@ export default function UnifiedJobsBoard() {
         throw error;
       }
 
+      // Update the applications count optimistically
+      setJobs(prev => prev.map(job => 
+        job.id === jobId 
+          ? { ...job, applications_count: (job.applications_count || 0) + 1 }
+          : job
+      ));
+
       toast({
         title: 'Success!',
         description: 'Application submitted successfully',
       });
-
-      fetchJobs();
     } catch (error) {
       console.error('Error applying:', error);
       toast({

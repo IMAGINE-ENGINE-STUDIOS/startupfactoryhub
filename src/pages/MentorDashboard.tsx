@@ -35,12 +35,16 @@ import {
   Plus,
   Award,
   Clock,
-  Target
+  Target,
+  MapPin
 } from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
+import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { useState } from 'react';
+import { useEvents } from '@/hooks/useEvents';
+import { format, parseISO } from 'date-fns';
 
 const MentorDashboard = () => {
   const { user } = useAuth();
@@ -48,6 +52,9 @@ const MentorDashboard = () => {
   const { profile: profileWithRole } = useProfileWithRole();
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
+  const [showEventDetails, setShowEventDetails] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const { upcomingEvents } = useEvents();
 
   return (
     <div className="min-h-screen bg-background pb-20 lg:pb-6 relative">
@@ -153,7 +160,74 @@ const MentorDashboard = () => {
                 <span className="sm:inline">Create Event</span>
               </Button>
             </div>
-            <UnifiedCalendar />
+
+            {/* Upcoming Events with Banners */}
+            {upcomingEvents.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Upcoming Events</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {upcomingEvents.slice(0, 6).map((event) => (
+                      <div
+                        key={event.id}
+                        className="group cursor-pointer"
+                        onClick={() => {
+                          setSelectedEvent(event);
+                          setShowEventDetails(true);
+                        }}
+                      >
+                        <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
+                          {event.banner_url ? (
+                            <img
+                              src={event.banner_url}
+                              alt={event.title}
+                              className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                            />
+                          ) : (
+                            <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                              <CalendarIcon className="h-16 w-16 text-purple-500/30" />
+                            </div>
+                          )}
+                          <div className="p-4">
+                            <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
+                            <div className="space-y-1 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-3 w-3" />
+                                {format(parseISO(event.start_date), 'MMM d, h:mm a')}
+                              </div>
+                              {event.location && (
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-3 w-3" />
+                                  <span className="line-clamp-1">{event.location}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2">
+                                <Users className="h-3 w-3" />
+                                {event.attendees} attending
+                                {event.max_attendees && ` / ${event.max_attendees}`}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            <UnifiedCalendar
+              showCreateButton={false}
+              onItemClick={(item) => {
+                if (item.type === 'event') {
+                  setSelectedEvent(item);
+                  setShowEventDetails(true);
+                }
+              }}
+              filterTypes={['event', 'session', 'availability']}
+            />
           </TabsContent>
 
           <TabsContent value="endorsements" className="space-y-6">
@@ -225,13 +299,27 @@ const MentorDashboard = () => {
       <CreateSessionDialog 
         open={createSessionDialogOpen}
         onOpenChange={setCreateSessionDialogOpen}
-        onSessionCreated={() => {}}
+        onSessionCreated={() => {
+          setCreateSessionDialogOpen(false);
+        }}
       />
       <CreateEventDialog 
         open={createEventDialogOpen}
         onOpenChange={setCreateEventDialogOpen}
-        onEventCreated={() => {}}
+        onEventCreated={() => {
+          setCreateEventDialogOpen(false);
+        }}
       />
+      {selectedEvent && (
+        <EventDetailsDialog 
+          event={selectedEvent}
+          open={showEventDetails}
+          onOpenChange={setShowEventDetails}
+          onEventUpdated={() => {
+            setShowEventDetails(false);
+          }}
+        />
+      )}
     </div>
   );
 };
