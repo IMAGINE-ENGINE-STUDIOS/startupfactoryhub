@@ -1375,17 +1375,62 @@ export type Database = {
           },
         ]
       }
+      job_tasks: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          due_date: string | null
+          id: string
+          job_id: string
+          order_index: number | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          job_id: string
+          order_index?: number | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          job_id?: string
+          order_index?: number | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_tasks_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           applications_count: number | null
           benefits: string[] | null
+          category: Database["public"]["Enums"]["job_category"] | null
           company_id: string
           compensation_type: string
           created_at: string | null
           description: string
+          duration: string | null
           experience_level: string | null
+          external_application_url: string | null
           hourly_rate: number | null
           id: string
+          is_task_based: boolean | null
           job_type: string | null
           location: string | null
           requirements: string[] | null
@@ -1399,13 +1444,17 @@ export type Database = {
         Insert: {
           applications_count?: number | null
           benefits?: string[] | null
+          category?: Database["public"]["Enums"]["job_category"] | null
           company_id: string
           compensation_type?: string
           created_at?: string | null
           description: string
+          duration?: string | null
           experience_level?: string | null
+          external_application_url?: string | null
           hourly_rate?: number | null
           id?: string
+          is_task_based?: boolean | null
           job_type?: string | null
           location?: string | null
           requirements?: string[] | null
@@ -1419,13 +1468,17 @@ export type Database = {
         Update: {
           applications_count?: number | null
           benefits?: string[] | null
+          category?: Database["public"]["Enums"]["job_category"] | null
           company_id?: string
           compensation_type?: string
           created_at?: string | null
           description?: string
+          duration?: string | null
           experience_level?: string | null
+          external_application_url?: string | null
           hourly_rate?: number | null
           id?: string
+          is_task_based?: boolean | null
           job_type?: string | null
           location?: string | null
           requirements?: string[] | null
@@ -2376,6 +2429,60 @@ export type Database = {
           },
         ]
       }
+      student_job_tasks: {
+        Row: {
+          application_id: string
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          student_id: string
+          task_id: string
+          time_spent_hours: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          application_id: string
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          student_id: string
+          task_id: string
+          time_spent_hours?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          application_id?: string
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          student_id?: string
+          task_id?: string
+          time_spent_hours?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_job_tasks_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "job_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_job_tasks_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "job_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_profiles: {
         Row: {
           created_at: string | null
@@ -2536,6 +2643,7 @@ export type Database = {
     Enums: {
       app_role: "startup" | "investor" | "mentor" | "advisor" | "student"
       company_stage: "idea" | "prototype" | "mvp" | "growth" | "scale"
+      job_category: "full-time" | "part-time" | "contract" | "internship"
       post_type:
         | "update"
         | "milestone"
@@ -2671,6 +2779,7 @@ export const Constants = {
     Enums: {
       app_role: ["startup", "investor", "mentor", "advisor", "student"],
       company_stage: ["idea", "prototype", "mvp", "growth", "scale"],
+      job_category: ["full-time", "part-time", "contract", "internship"],
       post_type: [
         "update",
         "milestone",

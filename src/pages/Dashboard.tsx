@@ -21,10 +21,10 @@ import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import CompanyProfileManager from '@/components/CompanyProfileManager';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
-import OpportunitiesBoard from '@/components/OpportunitiesBoard';
+import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
-import InternshipTasksManager from '@/components/InternshipTasksManager';
+import JobTaskManager from '@/components/JobTaskManager';
 import {
   Plus,
   Target,
@@ -277,8 +277,8 @@ const Dashboard = () => {
 
           {/* Jobs Tab */}
           <TabsContent value="jobs" className="space-y-4">
-            <OpportunitiesBoard />
-            <InternshipTasksManager />
+            <UnifiedJobsBoard />
+            <JobTaskManager />
           </TabsContent>
 
           {/* Learn Tab */}

@@ -12,7 +12,7 @@ import { BookOpen, Users, Trophy, Target, Play, CheckCircle, Clock, Star } from 
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
-import OpportunitiesBoard from '@/components/OpportunitiesBoard';
+import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 
 import Leaderboard from '@/components/Leaderboard';
 import StudyGroups from '@/components/StudyGroups';
@@ -23,7 +23,7 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import NetworkBrowser from '@/components/NetworkBrowser';
 import { DashboardHeader } from '@/components/DashboardHeader';
-import StudentInternshipTasks from '@/components/StudentInternshipTasks';
+import StudentJobTasks from '@/components/StudentJobTasks';
 
 interface Course {
   id: string;
@@ -333,7 +333,7 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="assignments" className="space-y-4">
-            <StudentInternshipTasks />
+            <StudentJobTasks />
             
             <Card className="tech-card border-0">
               <CardHeader>
@@ -448,7 +448,7 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-4">
-            <OpportunitiesBoard />
+            <UnifiedJobsBoard />
           </TabsContent>
 
           <TabsContent value="tools" className="space-y-4">
