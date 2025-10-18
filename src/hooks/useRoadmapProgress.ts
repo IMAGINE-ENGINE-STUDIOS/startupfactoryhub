@@ -9,7 +9,7 @@ interface RoadmapProgressData {
   loading: boolean;
 }
 
-export const useRoadmapProgress = () => {
+export const useRoadmapProgress = (refreshTrigger?: number) => {
   const { user } = useAuth();
   const [progress, setProgress] = useState<RoadmapProgressData>({
     completedSteps: 0,
@@ -43,7 +43,7 @@ export const useRoadmapProgress = () => {
         supabase.removeChannel(channel);
       };
     }
-  }, [user]);
+  }, [user, refreshTrigger]);
 
   const fetchProgress = async () => {
     if (!user) return;

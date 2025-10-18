@@ -93,7 +93,8 @@ export default function StartupRoadmap() {
   const [isAddStepOpen, setIsAddStepOpen] = useState(false);
   const [newStepTitle, setNewStepTitle] = useState('');
   const [newStepDescription, setNewStepDescription] = useState('');
-  const roadmapProgress = useRoadmapProgress();
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const roadmapProgress = useRoadmapProgress(refreshTrigger);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -216,6 +217,9 @@ export default function StartupRoadmap() {
 
       setSteps(updatedSteps);
 
+      // Force progress refresh
+      setRefreshTrigger(prev => prev + 1);
+
       toast({
         title: "Step Completed!",
         description: "Great progress! You've unlocked the next step.",
@@ -265,12 +269,15 @@ export default function StartupRoadmap() {
         return step;
       });
 
-      setSteps(updatedSteps);
+    setSteps(updatedSteps);
 
-      toast({
-        title: "Step Unmarked",
-        description: "Progress has been reset for this step and all subsequent steps.",
-      });
+    // Force progress refresh
+    setRefreshTrigger(prev => prev + 1);
+
+    toast({
+      title: "Step Unmarked",
+      description: "Progress has been reset for this step and all subsequent steps.",
+    });
     } catch (error) {
       console.error('Unexpected error uncompleting step:', error);
       toast({
@@ -323,15 +330,18 @@ export default function StartupRoadmap() {
         return;
       }
 
-      setSteps([...steps, newStep]);
-      setNewStepTitle('');
-      setNewStepDescription('');
-      setIsAddStepOpen(false);
+    setSteps([...steps, newStep]);
+    setNewStepTitle('');
+    setNewStepDescription('');
+    setIsAddStepOpen(false);
 
-      toast({
-        title: "Custom Step Added!",
-        description: "Your custom step has been added to your journey.",
-      });
+    // Force progress refresh
+    setRefreshTrigger(prev => prev + 1);
+
+    toast({
+      title: "Custom Step Added!",
+      description: "Your custom step has been added to your journey.",
+    });
     } catch (error) {
       console.error('Unexpected error adding custom step:', error);
       toast({
