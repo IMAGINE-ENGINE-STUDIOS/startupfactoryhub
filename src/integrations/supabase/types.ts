@@ -2686,6 +2686,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      send_notification_email: {
+        Args: {
+          notification_message: string
+          notification_title: string
+          notification_type: string
+          user_email: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "startup" | "investor" | "mentor" | "advisor" | "student"
