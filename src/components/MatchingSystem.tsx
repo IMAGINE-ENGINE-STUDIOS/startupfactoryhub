@@ -8,6 +8,7 @@ import { Heart, X, Users, MessageSquare, Star, TrendingUp, Building, UserCheck }
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useNotifications } from '@/hooks/useNotifications';
 
 interface Match {
   id: string;
@@ -29,6 +30,7 @@ export default function MatchingSystem() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { notifyConnection } = useNotifications();
 
   useEffect(() => {
     if (user) {
@@ -154,70 +156,99 @@ export default function MatchingSystem() {
   const sendConnectionRequest = async (targetId: string, targetName: string, onSuccess: () => void) => {
     if (!user) return;
 
-    // Check if this is a mentorship request (connecting with a mentor/advisor)
-    // Check if target user is an advisor or mentor using secure function
-    const { data: isAdvisor } = await supabase
-      .rpc('has_role', { _user_id: targetId, _role: 'advisor' });
-    
-    const { data: isMentor } = await supabase
-      .rpc('has_role', { _user_id: targetId, _role: 'mentor' });
+    try {
+      // Get current user's name for notification
+      const senderName = userProfile?.full_name || 'Someone';
 
-    if (isAdvisor || isMentor) {
-      // Send mentorship request
-      const { error } = await supabase
-        .from('mentorship_relationships')
-        .insert({
-          mentor_id: targetId,
-          mentee_id: user.id,
-          status: 'pending'
-        });
+      // Check if this is a mentorship request (connecting with a mentor/advisor)
+      const { data: isAdvisor } = await supabase
+        .rpc('has_role', { _user_id: targetId, _role: 'advisor' });
+      
+      const { data: isMentor } = await supabase
+        .rpc('has_role', { _user_id: targetId, _role: 'mentor' });
 
-      if (error) {
-        if (error.code === '23505') {
-          toast({
-            title: "Request Already Sent",
-            description: "You've already requested mentorship from this person.",
-            variant: "destructive",
+      if (isAdvisor || isMentor) {
+        // Send mentorship request
+        const { error } = await supabase
+          .from('mentorship_relationships')
+          .insert({
+            mentor_id: targetId,
+            mentee_id: user.id,
+            status: 'pending'
           });
-        } else {
-          toast({
-            title: "Error",
-            description: "Failed to send mentorship request",
-            variant: "destructive",
-          });
+
+        if (error) {
+          if (error.code === '23505') {
+            toast({
+              title: "Request Already Sent",
+              description: "You've already requested mentorship from this person.",
+              variant: "destructive",
+            });
+          } else {
+            console.error('Mentorship request error:', error);
+            toast({
+              title: "Error",
+              description: "Failed to send mentorship request",
+              variant: "destructive",
+            });
+          }
+          return;
         }
-        return;
-      }
 
-      toast({
-        title: "Mentorship Request Sent!",
-        description: `Your mentorship request has been sent to ${targetName}. They'll be notified to respond.`,
-      });
-      onSuccess();
-    } else {
-      // Send regular connection request
-      const { error } = await supabase
-        .from('connections')
-        .insert({
-          requester_id: user.id,
-          addressee_id: targetId,
-          status: 'pending'
-        });
+        // Send notification to mentor
+        await notifyConnection(targetId, senderName);
 
-      if (error) {
         toast({
-          title: "Error",
-          description: "Failed to send connection request",
-          variant: "destructive",
+          title: "Mentorship Request Sent!",
+          description: `Your mentorship request has been sent to ${targetName}. They'll be notified to respond.`,
         });
-        return;
-      }
+        
+        onSuccess();
+      } else {
+        // Send regular connection request
+        const { error } = await supabase
+          .from('connections')
+          .insert({
+            requester_id: user.id,
+            addressee_id: targetId,
+            status: 'pending'
+          });
 
+        if (error) {
+          if (error.code === '23505') {
+            toast({
+              title: "Request Already Sent",
+              description: "You've already sent a connection request to this person.",
+              variant: "destructive",
+            });
+          } else {
+            console.error('Connection request error:', error);
+            toast({
+              title: "Error",
+              description: "Failed to send connection request",
+              variant: "destructive",
+            });
+          }
+          return;
+        }
+
+        // Send notification to recipient
+        await notifyConnection(targetId, senderName);
+
+        toast({
+          title: "Connection Request Sent!",
+          description: `Your connection request has been sent to ${targetName}. They'll be notified to respond.`,
+        });
+        
+        onSuccess();
+      }
+    } catch (error) {
+      console.error('Unexpected error sending connection:', error);
       toast({
-        title: "Connection Request Sent!",
-        description: `Your connection request has been sent to ${targetName}. They'll be notified to respond.`,
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
       });
-      onSuccess();
     }
   };
 
