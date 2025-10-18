@@ -61,6 +61,7 @@ export default function CRMBoard() {
   const [newCard, setNewCard] = useState({
     title: "",
     description: "",
+    company_name: "",
     contact_name: "",
     contact_email: "",
     contact_phone: "",
@@ -196,6 +197,7 @@ export default function CRMBoard() {
         user_id: user!.id,
         title: newCard.title,
         description: newCard.description || null,
+        company_name: newCard.company_name || null,
         contact_name: newCard.contact_name || null,
         contact_email: newCard.contact_email || null,
         contact_phone: newCard.contact_phone || null,
@@ -217,6 +219,7 @@ export default function CRMBoard() {
       setNewCard({
         title: "",
         description: "",
+        company_name: "",
         contact_name: "",
         contact_email: "",
         contact_phone: "",
@@ -248,6 +251,7 @@ export default function CRMBoard() {
         .update({
           title: editingCard.title,
           description: editingCard.description,
+          company_name: (editingCard as any).company_name,
           contact_name: editingCard.contact_name,
           contact_email: editingCard.contact_email,
           contact_phone: editingCard.contact_phone,
@@ -453,6 +457,14 @@ export default function CRMBoard() {
                     rows={3}
                   />
                 </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Company Name</label>
+                  <Input
+                    placeholder="e.g., Acme Corporation"
+                    value={newCard.company_name}
+                    onChange={(e) => setNewCard({ ...newCard, company_name: e.target.value })}
+                  />
+                </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label className="text-sm font-medium">Contact Name</label>
@@ -635,8 +647,15 @@ export default function CRMBoard() {
                         {card.description && (
                           <p className="text-sm text-muted-foreground line-clamp-2">{card.description}</p>
                         )}
+                        {(card as any).company_name && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <span className="text-xs text-muted-foreground">Company:</span>
+                            <span className="font-medium">{(card as any).company_name}</span>
+                          </div>
+                        )}
                         {card.contact_name && (
                           <div className="flex items-center gap-2 text-sm">
+                            <span className="text-xs text-muted-foreground">Contact:</span>
                             <span className="font-medium">{card.contact_name}</span>
                           </div>
                         )}
@@ -718,6 +737,14 @@ export default function CRMBoard() {
                     value={editingCard.description || ""}
                     onChange={(e) => setEditingCard({ ...editingCard, description: e.target.value })}
                     rows={3}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Company Name</label>
+                  <Input
+                    placeholder="e.g., Acme Corporation"
+                    value={(editingCard as any).company_name || ""}
+                    onChange={(e) => setEditingCard({ ...editingCard, company_name: e.target.value } as any)}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">

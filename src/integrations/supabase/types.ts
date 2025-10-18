@@ -711,6 +711,7 @@ export type Database = {
       }
       crm_cards: {
         Row: {
+          company_name: string | null
           contact_email: string | null
           contact_name: string | null
           contact_phone: string | null
@@ -731,6 +732,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          company_name?: string | null
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
@@ -751,6 +753,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          company_name?: string | null
           contact_email?: string | null
           contact_name?: string | null
           contact_phone?: string | null
