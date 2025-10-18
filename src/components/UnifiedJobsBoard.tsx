@@ -376,10 +376,6 @@ export default function UnifiedJobsBoard() {
           await createInvitation(applicationId, jobId);
         }
       }
-
-      // Refresh data
-      await fetchApplicationsForJob(jobId);
-      await fetchJobs();
     } catch (error) {
       console.error('Unexpected error:', error);
       // Revert optimistic update on error
@@ -701,13 +697,17 @@ export default function UnifiedJobsBoard() {
                            job.companies?.id === userCompanyId && 
                            job.external_application_url && (
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="sm"
-                              onClick={() => handleCopyExternalLink(job.external_application_url!)}
-                              className="h-7 px-2"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCopyExternalLink(job.external_application_url!);
+                              }}
+                              className="h-7 px-2 gap-1"
                               title="Copy external application link"
                             >
                               <Copy className="w-3 h-3" />
+                              <span className="text-xs">Copy</span>
                             </Button>
                           )}
                         </div>
@@ -810,8 +810,8 @@ export default function UnifiedJobsBoard() {
               No applications yet
             </div>
           ) : (
-            <ScrollArea className="max-h-[60vh] pr-4">
-              <div className="space-y-4 pb-4">
+              <div className="h-[60vh] overflow-y-auto pr-4">
+                <div className="space-y-4 pb-4">
                 {applications.map((app) => (
                   <Card key={app.id}>
                     <CardContent className="pt-6">
@@ -894,9 +894,9 @@ export default function UnifiedJobsBoard() {
                       </div>
                     </CardContent>
                   </Card>
-                ))}
+                  ))}
+                </div>
               </div>
-            </ScrollArea>
           )}
         </DialogContent>
       </Dialog>
