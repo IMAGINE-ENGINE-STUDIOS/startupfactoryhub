@@ -1,10 +1,9 @@
 import DashboardNavigation from '@/components/DashboardNavigation';
 import AdvancedMatchingFilters from '@/components/AdvancedMatchingFilters';
 import RoleBasedMatching from '@/components/RoleBasedMatching';
-import StartupRecommendationsWidget from '@/components/StartupRecommendationsWidget';
 import { Card } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Users, Building, TrendingUp } from 'lucide-react';
+import { Users, TrendingUp } from 'lucide-react';
 
 export default function Explore() {
   return (
@@ -29,14 +28,10 @@ export default function Explore() {
           {/* Main Content */}
           <div className="lg:col-span-3 space-y-6">
             <Tabs defaultValue="matches" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="matches">
                   <Users className="h-4 w-4 mr-2" />
                   Matches
-                </TabsTrigger>
-                <TabsTrigger value="startups">
-                  <Building className="h-4 w-4 mr-2" />
-                  Startups
                 </TabsTrigger>
                 <TabsTrigger value="trending">
                   <TrendingUp className="h-4 w-4 mr-2" />
@@ -46,10 +41,6 @@ export default function Explore() {
 
               <TabsContent value="matches" className="mt-6">
                 <RoleBasedMatching />
-              </TabsContent>
-
-              <TabsContent value="startups" className="mt-6">
-                <StartupRecommendationsWidget />
               </TabsContent>
 
               <TabsContent value="trending" className="mt-6">

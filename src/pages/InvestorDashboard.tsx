@@ -14,7 +14,6 @@ import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import { format } from 'date-fns';
 
-import StartupRecommendationsWidget from '@/components/StartupRecommendationsWidget';
 import StartupBrowser from '@/components/StartupBrowser';
 import NetworkBrowser from '@/components/NetworkBrowser';
 import FloatingChat from '@/components/FloatingChat';

@@ -10,7 +10,6 @@ import StartupRoadmap from '@/components/StartupRoadmap';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import CRMBoard from '@/components/CRMBoard';
 import FloatingChat from '@/components/FloatingChat';
-import StartupAIRecommendations from '@/components/StartupAIRecommendations';
 import MatchingSystem from '@/components/MatchingSystem';
 import NetworkBrowser from '@/components/NetworkBrowser';
 import EducationalResources from '@/components/EducationalResources';
