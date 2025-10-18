@@ -3,12 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify,
   List, ListOrdered, Undo, Redo, Download, Upload, Save, Type, Palette,
-  Link, Image as ImageIcon, Table, Heading1, Heading2, Heading3
+  Link, Image as ImageIcon, Table, Heading1, Heading2, Heading3, FileText, Highlighter, Strikethrough
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLightPaperProjects } from "@/hooks/useLightPaperProjects";
 
 const FONTS = [
   "Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Comic Sans MS",
@@ -16,7 +19,15 @@ const FONTS = [
   "Helvetica", "Tahoma", "Monaco", "Lucida Console", "Brush Script MT", "Copperplate",
   "Papyrus", "Century Gothic", "Franklin Gothic", "Gill Sans", "Lucida Sans",
   "Optima", "Perpetua", "Rockwell", "Baskerville", "Didot", "Bodoni",
-  "Futura", "Calibri", "Cambria", "Candara", "Consolas", "Constantia", "Corbel"
+  "Futura", "Calibri", "Cambria", "Candara", "Consolas", "Constantia", "Corbel",
+  // Google Fonts
+  "Roboto", "Open Sans", "Lato", "Montserrat", "Oswald", "Source Sans Pro",
+  "Raleway", "PT Sans", "Merriweather", "Nunito", "Poppins", "Ubuntu",
+  "Playfair Display", "Mukta", "Libre Baskerville", "Crimson Text", "Arvo",
+  "Josefin Sans", "Quicksand", "Bitter", "Pacifico", "Dancing Script",
+  "Indie Flower", "Bebas Neue", "Anton", "Archivo", "Barlow", "DM Sans",
+  "Inter", "Manrope", "Mulish", "Oxygen", "PT Serif", "Rubik", "Work Sans",
+  "Alegreya", "EB Garamond", "Fira Sans", "Karla", "Noto Sans", "Zilla Slab"
 ];
 
 const FONT_SIZES = ["8", "9", "10", "11", "12", "14", "16", "18", "20", "24", "28", "32", "36", "48", "72"];
@@ -26,6 +37,12 @@ export function LightPaperDocument() {
   const [selectedFont, setSelectedFont] = useState("Arial");
   const [selectedSize, setSelectedSize] = useState("16");
   const [selectedColor, setSelectedColor] = useState("#000000");
+  const [highlightColor, setHighlightColor] = useState("#ffff00");
+  const [bgColor, setBgColor] = useState("#ffffff");
+  const [showSaveDialog, setShowSaveDialog] = useState(false);
+  const [projectTitle, setProjectTitle] = useState("Untitled Document");
+  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
+  const { saveProject, projects } = useLightPaperProjects("document");
 
   useEffect(() => {
     if (editorRef.current) {

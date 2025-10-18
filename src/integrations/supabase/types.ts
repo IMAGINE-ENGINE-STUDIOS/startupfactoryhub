@@ -1579,6 +1579,42 @@ export type Database = {
         }
         Relationships: []
       }
+      lightpaper_projects: {
+        Row: {
+          content: Json
+          created_at: string | null
+          id: string
+          last_accessed_at: string | null
+          project_type: Database["public"]["Enums"]["lightpaper_project_type"]
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: Json
+          created_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          project_type: Database["public"]["Enums"]["lightpaper_project_type"]
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string | null
+          id?: string
+          last_accessed_at?: string | null
+          project_type?: Database["public"]["Enums"]["lightpaper_project_type"]
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       mentor_availability: {
         Row: {
           created_at: string | null
@@ -2700,6 +2736,12 @@ export type Database = {
       app_role: "startup" | "investor" | "mentor" | "advisor" | "student"
       company_stage: "idea" | "prototype" | "mvp" | "growth" | "scale"
       job_category: "full-time" | "part-time" | "contract" | "internship"
+      lightpaper_project_type:
+        | "document"
+        | "spreadsheet"
+        | "presentation"
+        | "pdf"
+        | "sign"
       post_type:
         | "update"
         | "milestone"
@@ -2836,6 +2878,13 @@ export const Constants = {
       app_role: ["startup", "investor", "mentor", "advisor", "student"],
       company_stage: ["idea", "prototype", "mvp", "growth", "scale"],
       job_category: ["full-time", "part-time", "contract", "internship"],
+      lightpaper_project_type: [
+        "document",
+        "spreadsheet",
+        "presentation",
+        "pdf",
+        "sign",
+      ],
       post_type: [
         "update",
         "milestone",
