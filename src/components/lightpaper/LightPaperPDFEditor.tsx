@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import { Canvas as FabricCanvas, PencilBrush, IText, Rect, Circle, Textbox, util as fabricUtil } from "fabric";
+import { Canvas as FabricCanvas, PencilBrush, IText, Rect, Circle, Textbox, util as fabricUtil, FabricImage } from "fabric";
 import * as fabric from "fabric";
 import { PDFDocument } from "pdf-lib";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import {
   Upload,
   ZoomIn,
@@ -26,6 +28,8 @@ import {
   Save,
   Trash2,
   PenTool,
+  Share2,
+  Image as ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import CollapsibleToolbar from "./CollapsibleToolbar";
@@ -61,11 +65,15 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
   const [signatures, setSignatures] = useState<SavedSignature[]>([]);
   const [canvasInstances, setCanvasInstances] = useState<Map<number, FabricCanvas>>(new Map());
   const [isLoading, setIsLoading] = useState(false);
+  const [backgroundColor, setBackgroundColor] = useState("#FFFFFF");
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [shareLink, setShareLink] = useState("");
   
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const signatureDrawingCanvas = useRef<FabricCanvas | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [projectTitle, setProjectTitle] = useState<string>("Untitled PDF");
 
@@ -429,6 +437,122 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const canvas = canvasInstances.get(currentPage);
+    if (!canvas) {
+      toast.error("Please select a page first");
+      return;
+    }
+
+    try {
+      const img = await FabricImage.fromURL(URL.createObjectURL(file));
+      img.scaleToWidth(200);
+      img.set({
+        left: canvas.width! / 2 - 100,
+        top: canvas.height! / 2 - 100,
+      });
+      canvas.add(img);
+      canvas.setActiveObject(img);
+      canvas.renderAll();
+      toast.success("Image added to page");
+    } catch (error) {
+      console.error("Error adding image:", error);
+      toast.error("Failed to add image");
+    }
+  };
+
+  const handleBackgroundColor = (color: string) => {
+    setBackgroundColor(color);
+    const canvas = canvasInstances.get(currentPage);
+    if (canvas) {
+      canvas.backgroundColor = color;
+      canvas.renderAll();
+      toast.success("Background color updated");
+    }
+  };
+
+  const handleExportJPG = async () => {
+    if (!pdfFile) {
+      toast.error("No PDF loaded");
+      return;
+    }
+
+    try {
+      toast.info("Exporting as JPG...");
+      const canvas = canvasInstances.get(currentPage);
+      if (!canvas) {
+        toast.error("Please select a page first");
+        return;
+      }
+
+      const dataUrl = canvas.toDataURL({
+        format: "jpeg",
+        quality: 0.9,
+        multiplier: 1,
+      });
+
+      const link = document.createElement("a");
+      link.href = dataUrl;
+      link.download = `${projectTitle}-page-${currentPage}.jpg`;
+      link.click();
+      toast.success("Exported as JPG!");
+    } catch (error) {
+      console.error("Export error:", error);
+      toast.error("Failed to export as JPG");
+    }
+  };
+
+  const handleShareDocument = async () => {
+    if (!pdfFile || !currentProjectId) {
+      toast.error("Please save the document first");
+      return;
+    }
+
+    try {
+      const user = (await supabase.auth.getUser()).data.user;
+      if (!user) {
+        toast.error("Please sign in to share documents");
+        return;
+      }
+
+      toast.info("Creating shareable link...");
+
+      const { data, error } = await supabase
+        .from("shared_pdf_documents")
+        .insert({
+          owner_id: user.id,
+          project_id: currentProjectId,
+          title: projectTitle,
+          pdf_content: {
+            pdfUrl: `${user.id}/${Date.now()}_${pdfFile.name}`,
+            numPages,
+          },
+          annotations: [],
+          signatures: [],
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const shareUrl = `${window.location.origin}/shared-pdf/${data.share_token}`;
+      setShareLink(shareUrl);
+      setShowShareDialog(true);
+      toast.success("Shareable link created!");
+    } catch (error: any) {
+      console.error("Share error:", error);
+      toast.error(error.message || "Failed to create shareable link");
+    }
+  };
+
+  const copyShareLink = () => {
+    navigator.clipboard.writeText(shareLink);
+    toast.success("Link copied to clipboard!");
+  };
+
   const handleSaveToAccount = async () => {
     if (!pdfFile) {
       toast.error("No PDF loaded");
@@ -566,6 +690,39 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
             value={strokeWidth}
             onChange={(e) => setStrokeWidth(Number(e.target.value))}
           />
+        </div>
+
+        <Separator />
+
+        <div className="flex flex-col gap-2">
+          <Label className="text-sm font-semibold">Background</Label>
+          <Input
+            type="color"
+            value={backgroundColor}
+            onChange={(e) => handleBackgroundColor(e.target.value)}
+            className="h-10"
+          />
+        </div>
+
+        <Separator />
+
+        <div className="flex flex-col gap-2">
+          <Label className="text-sm font-semibold">Insert Image</Label>
+          <Input
+            ref={imageInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleImageUpload}
+            className="hidden"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full"
+            onClick={() => imageInputRef.current?.click()}
+          >
+            Upload Image
+          </Button>
         </div>
 
         <Separator />
@@ -711,9 +868,39 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
               </Button>
             </div>
 
-            <Button variant="outline" size="sm" onClick={clearPage}>
-              Clear Page
-            </Button>
+            <div className="flex items-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Download className="h-4 w-4 mr-2" />
+                    Export
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background z-50">
+                  <DropdownMenuItem onClick={handleExport}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export as PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleExportJPG}>
+                    <ImageIcon className="h-4 w-4 mr-2" />
+                    Export Page as JPG
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleShareDocument}
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+
+              <Button variant="outline" size="sm" onClick={clearPage}>
+                Clear Page
+              </Button>
+            </div>
           </div>
         </CollapsibleToolbar>
 
@@ -774,6 +961,29 @@ export function LightPaperPDFEditor({ selectedProject }: LightPaperPDFEditorProp
         onSave={handleSaveToAccount}
         onPrint={handleExport}
       />
+
+      {/* Share Dialog */}
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share PDF Document</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Shareable Link</Label>
+              <div className="flex gap-2 mt-2">
+                <Input value={shareLink} readOnly className="flex-1" />
+                <Button onClick={copyShareLink} size="sm">
+                  Copy
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Anyone with this link can view and sign the document
+              </p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

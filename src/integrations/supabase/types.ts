@@ -2037,6 +2037,50 @@ export type Database = {
         }
         Relationships: []
       }
+      pdf_signatures: {
+        Row: {
+          document_id: string
+          id: string
+          page_number: number
+          position: Json
+          signature_data: string
+          signature_type: string
+          signed_at: string | null
+          signer_email: string | null
+          signer_name: string
+        }
+        Insert: {
+          document_id: string
+          id?: string
+          page_number: number
+          position: Json
+          signature_data: string
+          signature_type: string
+          signed_at?: string | null
+          signer_email?: string | null
+          signer_name: string
+        }
+        Update: {
+          document_id?: string
+          id?: string
+          page_number?: number
+          position?: Json
+          signature_data?: string
+          signature_type?: string
+          signed_at?: string | null
+          signer_email?: string | null
+          signer_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdf_signatures_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "shared_pdf_documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       pitch_meetings: {
         Row: {
           company_id: string
@@ -2574,6 +2618,59 @@ export type Database = {
             columns: ["session_id"]
             isOneToOne: false
             referencedRelation: "mentoring_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shared_pdf_documents: {
+        Row: {
+          annotations: Json | null
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          owner_id: string
+          pdf_content: Json
+          project_id: string | null
+          share_token: string
+          signatures: Json | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          annotations?: Json | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          owner_id: string
+          pdf_content: Json
+          project_id?: string | null
+          share_token?: string
+          signatures?: Json | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          annotations?: Json | null
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          owner_id?: string
+          pdf_content?: Json
+          project_id?: string | null
+          share_token?: string
+          signatures?: Json | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shared_pdf_documents_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "lightpaper_projects"
             referencedColumns: ["id"]
           },
         ]
