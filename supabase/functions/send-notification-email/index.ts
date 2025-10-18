@@ -26,49 +26,296 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending notification email to ${to}: ${title}`);
 
     const emailResponse = await resend.emails.send({
-      from: "Platform <onboarding@resend.dev>",
+      from: "Startup Factory Hub <notifications@resend.dev>",
       to: [to],
-      subject: `[Notification] ${title}`,
+      subject: `[Startup Factory Hub] ${title}`,
       html: `
         <!DOCTYPE html>
         <html>
           <head>
             <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <style>
-              body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; }
-              .container { max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-              .header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 32px 24px; text-align: center; }
-              .header h1 { margin: 0; font-size: 24px; font-weight: 600; }
-              .content { padding: 32px 24px; }
-              .notification-type { display: inline-block; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; text-transform: uppercase; margin-bottom: 16px; }
+              * { margin: 0; padding: 0; box-sizing: border-box; }
+              body { 
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
+                background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+                margin: 0; 
+                padding: 20px;
+                line-height: 1.6;
+              }
+              .email-wrapper { max-width: 600px; margin: 0 auto; }
+              .container { 
+                background-color: #ffffff; 
+                border-radius: 16px; 
+                overflow: hidden; 
+                box-shadow: 0 10px 40px rgba(16, 185, 129, 0.15);
+              }
+              .header { 
+                background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); 
+                color: white; 
+                padding: 40px 32px; 
+                text-align: center;
+                position: relative;
+                overflow: hidden;
+              }
+              .header::before {
+                content: '';
+                position: absolute;
+                top: -50%;
+                left: -50%;
+                width: 200%;
+                height: 200%;
+                background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+                animation: shimmer 3s infinite;
+              }
+              @keyframes shimmer {
+                0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+                100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+              }
+              .logo-container {
+                margin-bottom: 16px;
+                position: relative;
+                z-index: 1;
+              }
+              .logo {
+                width: 64px;
+                height: 64px;
+                background: white;
+                border-radius: 12px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 32px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+              }
+              .header h1 { 
+                margin: 0; 
+                font-size: 28px; 
+                font-weight: 700;
+                position: relative;
+                z-index: 1;
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+              }
+              .tagline {
+                margin-top: 8px;
+                font-size: 14px;
+                opacity: 0.95;
+                font-weight: 500;
+                position: relative;
+                z-index: 1;
+              }
+              .hero-section {
+                padding: 32px;
+                text-align: center;
+                background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 100%);
+              }
+              .hero-icon {
+                width: 80px;
+                height: 80px;
+                margin: 0 auto 20px;
+                background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 40px;
+                box-shadow: 0 8px 24px rgba(16, 185, 129, 0.25);
+              }
+              .content { padding: 0 32px 32px; }
+              .notification-card {
+                background: white;
+                border-radius: 12px;
+                padding: 24px;
+                border: 2px solid #ecfdf5;
+                box-shadow: 0 2px 8px rgba(16, 185, 129, 0.08);
+              }
+              .notification-type { 
+                display: inline-block; 
+                padding: 8px 16px; 
+                border-radius: 8px; 
+                font-size: 11px; 
+                font-weight: 700; 
+                text-transform: uppercase; 
+                letter-spacing: 0.5px;
+                margin-bottom: 16px;
+              }
               .type-info { background-color: #dbeafe; color: #1e40af; }
-              .type-success { background-color: #d1fae5; color: #065f46; }
+              .type-success { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; }
               .type-warning { background-color: #fef3c7; color: #92400e; }
               .type-error { background-color: #fee2e2; color: #991b1b; }
-              .type-message { background-color: #e0e7ff; color: #3730a3; }
-              .type-connection { background-color: #ddd6fe; color: #5b21b6; }
-              .type-event { background-color: #fbcfe8; color: #831843; }
-              .message { color: #374151; font-size: 16px; line-height: 1.6; margin: 16px 0; }
-              .footer { background-color: #f9fafb; padding: 24px; text-align: center; color: #6b7280; font-size: 14px; border-top: 1px solid #e5e7eb; }
-              .button { display: inline-block; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 6px; font-weight: 600; margin-top: 16px; }
+              .type-message { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color: #3730a3; }
+              .type-connection { background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); color: #5b21b6; }
+              .type-event { background: linear-gradient(135deg, #fbcfe8 0%, #f9a8d4 100%); color: #831843; }
+              .title {
+                margin: 0 0 16px 0; 
+                color: #064e3b; 
+                font-size: 22px;
+                font-weight: 700;
+                line-height: 1.3;
+              }
+              .message { 
+                color: #1f2937; 
+                font-size: 16px; 
+                line-height: 1.7; 
+                margin: 16px 0;
+              }
+              .button { 
+                display: inline-block; 
+                padding: 14px 32px; 
+                background: linear-gradient(135deg, #10b981 0%, #14b8a6 100%); 
+                color: white; 
+                text-decoration: none; 
+                border-radius: 10px; 
+                font-weight: 600;
+                font-size: 15px;
+                margin-top: 24px;
+                box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+                transition: all 0.3s ease;
+              }
+              .button:hover {
+                box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+                transform: translateY(-2px);
+              }
+              .tips-section {
+                margin-top: 32px;
+                padding: 20px;
+                background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+                border-radius: 12px;
+                border-left: 4px solid #10b981;
+              }
+              .tips-title {
+                color: #064e3b;
+                font-size: 14px;
+                font-weight: 700;
+                margin-bottom: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+              }
+              .tips-text {
+                color: #065f46;
+                font-size: 14px;
+                line-height: 1.6;
+              }
+              .footer { 
+                background: linear-gradient(135deg, #064e3b 0%, #065f46 100%);
+                padding: 32px 24px; 
+                text-align: center; 
+                color: #d1fae5;
+              }
+              .social-links {
+                margin: 20px 0;
+                display: flex;
+                justify-content: center;
+                gap: 16px;
+              }
+              .social-link {
+                width: 40px;
+                height: 40px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 50%;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+                transition: all 0.3s ease;
+              }
+              .social-link:hover {
+                background: rgba(255, 255, 255, 0.2);
+                transform: scale(1.1);
+              }
+              .footer-text {
+                font-size: 14px;
+                color: #a7f3d0;
+                margin: 8px 0;
+              }
+              .footer-links {
+                margin-top: 16px;
+                padding-top: 16px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+              }
+              .footer-link {
+                color: #a7f3d0;
+                text-decoration: none;
+                font-size: 13px;
+                margin: 0 12px;
+              }
+              .footer-link:hover {
+                color: #ffffff;
+              }
+              .copyright {
+                margin-top: 16px;
+                font-size: 12px;
+                color: #6ee7b7;
+              }
+              @media only screen and (max-width: 600px) {
+                body { padding: 10px; }
+                .header { padding: 32px 20px; }
+                .header h1 { font-size: 24px; }
+                .hero-section { padding: 24px 20px; }
+                .content { padding: 0 20px 24px; }
+                .notification-card { padding: 20px; }
+                .title { font-size: 20px; }
+                .button { padding: 12px 24px; font-size: 14px; }
+                .footer { padding: 24px 20px; }
+                .social-links { gap: 12px; }
+              }
             </style>
           </head>
           <body>
-            <div class="container">
-              <div class="header">
-                <h1>🔔 New Notification</h1>
-              </div>
-              <div class="content">
-                <span class="notification-type type-${type}">${type}</span>
-                <h2 style="margin: 0 0 16px 0; color: #111827; font-size: 20px;">${title}</h2>
-                <div class="message">${message}</div>
-                <a href="${Deno.env.get('SUPABASE_URL')?.replace('https://zqiihhmdsdgwdcwmryym.supabase.co', 'https://lovable.app')}/dashboard" class="button">
-                  View on Platform
-                </a>
-              </div>
-              <div class="footer">
-                <p>This is an automated notification from your platform.</p>
-                <p style="margin-top: 8px; font-size: 12px;">© 2025 Your Platform. All rights reserved.</p>
+            <div class="email-wrapper">
+              <div class="container">
+                <div class="header">
+                  <div class="logo-container">
+                    <div class="logo">🚀</div>
+                  </div>
+                  <h1>Startup Factory Hub</h1>
+                  <div class="tagline">AI-Powered Startup Accelerator Platform</div>
+                </div>
+                
+                <div class="hero-section">
+                  <div class="hero-icon">${type === 'connection' ? '🤝' : type === 'message' ? '💬' : type === 'event' ? '📅' : type === 'success' ? '✨' : type === 'error' ? '⚠️' : '🔔'}</div>
+                </div>
+
+                <div class="content">
+                  <div class="notification-card">
+                    <span class="notification-type type-${type}">${type}</span>
+                    <h2 class="title">${title}</h2>
+                    <div class="message">${message}</div>
+                    <a href="${Deno.env.get('SUPABASE_URL')?.replace('https://zqiihhmdsdgwdcwmryym.supabase.co', 'https://lovable.app')}/dashboard" class="button">
+                      🚀 View on Platform
+                    </a>
+                  </div>
+
+                  <div class="tips-section">
+                    <div class="tips-title">💡 Pro Tip</div>
+                    <div class="tips-text">
+                      ${type === 'connection' ? 'Building your network is key to startup success. Connect with mentors, investors, and fellow entrepreneurs!' :
+                        type === 'message' ? 'Quick responses help build stronger professional relationships. Check your messages regularly!' :
+                        type === 'event' ? 'Events are great opportunities to learn, network, and grow. Don\'t miss out!' :
+                        'Stay active on the platform to maximize your opportunities and connections!'}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="footer">
+                  <div class="footer-text">Connect with us on social media</div>
+                  <div class="social-links">
+                    <a href="#" class="social-link">𝕏</a>
+                    <a href="#" class="social-link">in</a>
+                    <a href="#" class="social-link">f</a>
+                    <a href="#" class="social-link">📧</a>
+                  </div>
+                  <div class="footer-links">
+                    <a href="#" class="footer-link">Help Center</a>
+                    <a href="#" class="footer-link">Privacy Policy</a>
+                    <a href="#" class="footer-link">Unsubscribe</a>
+                  </div>
+                  <div class="copyright">
+                    © 2025 Startup Factory Hub. All rights reserved.<br>
+                    Empowering startups with AI-driven innovation
+                  </div>
+                </div>
               </div>
             </div>
           </body>
