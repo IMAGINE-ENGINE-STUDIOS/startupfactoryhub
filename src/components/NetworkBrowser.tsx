@@ -7,9 +7,8 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
 import { Search, Users, MessageSquare, UserPlus, Eye } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import UserProfileDialog from '@/components/UserProfileDialog';
 
 interface Connection {
   user_id: string;
@@ -31,7 +30,6 @@ export default function NetworkBrowser() {
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   useEffect(() => {
     if (user) {
@@ -192,7 +190,9 @@ export default function NetworkBrowser() {
   };
 
   const handleMessage = (connectionUserId: string) => {
-    navigate(`/messages?user=${connectionUserId}`);
+    window.dispatchEvent(new CustomEvent('openFloatingChat', { 
+      detail: { userId: connectionUserId } 
+    }));
   };
 
   const fetchSuggestedUsers = async () => {
@@ -429,79 +429,11 @@ export default function NetworkBrowser() {
       )}
 
       {/* Profile Dialog */}
-      <Dialog open={profileDialogOpen} onOpenChange={setProfileDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle>Profile</DialogTitle>
-          </DialogHeader>
-          {selectedProfile && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <Avatar className="h-20 w-20">
-                  <AvatarImage src={selectedProfile.avatar_url || undefined} />
-                  <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
-                    {selectedProfile.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-xl font-bold">{selectedProfile.full_name || 'User'}</h3>
-                  <Badge className={getRoleBadgeColor(selectedProfile.role)}>
-                    {getRoleLabel(selectedProfile.role)}
-                  </Badge>
-                </div>
-              </div>
-
-              {selectedProfile.bio && (
-                <div>
-                  <h4 className="text-sm font-semibold mb-1">About</h4>
-                  <p className="text-sm text-muted-foreground">{selectedProfile.bio}</p>
-                </div>
-              )}
-
-              {selectedProfile.location && (
-                <div>
-                  <h4 className="text-sm font-semibold mb-1">Location</h4>
-                  <p className="text-sm text-muted-foreground">📍 {selectedProfile.location}</p>
-                </div>
-              )}
-
-              <div className="flex gap-2 pt-4">
-                {selectedProfile.status === 'accepted' ? (
-                  <Button 
-                    className="flex-1"
-                    onClick={() => {
-                      handleMessage(selectedProfile.user_id);
-                      setProfileDialogOpen(false);
-                    }}
-                  >
-                    <MessageSquare className="w-4 h-4 mr-2" />
-                    Send Message
-                  </Button>
-                ) : selectedProfile.status === 'pending' ? (
-                  <Button 
-                    variant="secondary"
-                    className="flex-1"
-                    disabled
-                  >
-                    Connection Pending
-                  </Button>
-                ) : (
-                  <Button 
-                    className="flex-1"
-                    onClick={() => {
-                      handleConnect(selectedProfile.user_id, selectedProfile.full_name || 'this user');
-                      setProfileDialogOpen(false);
-                    }}
-                  >
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Connect
-                  </Button>
-                )}
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <UserProfileDialog 
+        userId={selectedProfile?.user_id || null}
+        open={profileDialogOpen}
+        onOpenChange={setProfileDialogOpen}
+      />
     </div>
   );
 }

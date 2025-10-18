@@ -97,6 +97,24 @@ export default function FloatingChat() {
     }
   }, [user, selectedConversation]);
 
+  // Handle opening chat from Network tab
+  useEffect(() => {
+    const handleOpenChat = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      const { userId } = customEvent.detail;
+      setIsOpen(true);
+      setActiveTab('messages');
+      setSelectedConversation(userId);
+      fetchMessages(userId);
+    };
+
+    window.addEventListener('openFloatingChat', handleOpenChat);
+    
+    return () => {
+      window.removeEventListener('openFloatingChat', handleOpenChat);
+    };
+  }, []);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
