@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -6,18 +6,21 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify,
-  List, ListOrdered, Undo, Redo, Link, Image as ImageIcon, Table, 
-  Heading1, Heading2, Heading3, Highlighter, Strikethrough, Type, Palette
+  List, ListOrdered, Undo, Redo, Save, Strikethrough
 } from "lucide-react";
 import { toast } from "sonner";
-import { useLightPaperProjects } from "@/hooks/useLightPaperProjects";
+import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
 import FloatingActionMenu from "./FloatingActionMenu";
 
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
 const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
 
-export function LightPaperDocument() {
+interface LightPaperDocumentProps {
+  selectedProject?: LightPaperProject | null;
+}
+
+export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps = {}) {
   const editorRef = useRef<HTMLDivElement>(null);
   const [selectedFont, setSelectedFont] = useState("Arial");
   const [selectedSize, setSelectedSize] = useState("16");
@@ -25,6 +28,24 @@ export function LightPaperDocument() {
   const [projectTitle, setProjectTitle] = useState("Untitled Document");
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const { saveProject } = useLightPaperProjects("document");
+
+  // Load project when selectedProject changes
+  useEffect(() => {
+    if (selectedProject && selectedProject.project_type === "document") {
+      setCurrentProjectId(selectedProject.id);
+      setProjectTitle(selectedProject.title);
+      
+      const content = selectedProject.content as any;
+      if (content) {
+        if (content.html && editorRef.current) {
+          editorRef.current.innerHTML = content.html;
+        }
+        if (content.font) setSelectedFont(content.font);
+        if (content.size) setSelectedSize(content.size);
+      }
+      toast.success("Document loaded");
+    }
+  }, [selectedProject]);
 
   const execCommand = (command: string, value?: string) => {
     if (editorRef.current) {
@@ -178,6 +199,19 @@ export function LightPaperDocument() {
               title="Redo (Ctrl+Y)"
             >
               <Redo className="h-4 w-4" />
+            </Button>
+          </div>
+
+          {/* Save Button */}
+          <div className="flex gap-1 border-l pl-2">
+            <Button 
+              variant="ghost" 
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => setShowSaveDialog(true)} 
+              title="Save Document (Ctrl+S)"
+            >
+              <Save className="h-4 w-4" />
             </Button>
           </div>
         </div>

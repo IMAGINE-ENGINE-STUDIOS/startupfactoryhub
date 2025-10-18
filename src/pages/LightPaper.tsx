@@ -87,7 +87,7 @@ export default function LightPaper() {
           </TabsList>
 
           <TabsContent value="document" className="mt-0">
-            <LightPaperDocument />
+            <LightPaperDocument selectedProject={selectedProject} />
           </TabsContent>
 
           <TabsContent value="spreadsheet" className="mt-0">
