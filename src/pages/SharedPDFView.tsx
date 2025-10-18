@@ -41,10 +41,10 @@ export default function SharedPDFView() {
   }, [token]);
 
   useEffect(() => {
-    if (document) {
+    if (pdfDocument) {
       loadPDFFile();
     }
-  }, [document]);
+  }, [pdfDocument]);
 
   // Initialize signature canvas
   useEffect(() => {
@@ -73,10 +73,10 @@ export default function SharedPDFView() {
   }, [showSignDialog, signatureMode]);
 
   const loadPDFFile = async () => {
-    if (!document) return;
+    if (!pdfDocument) return;
 
     try {
-      const pdfContent = document.pdf_content as any;
+      const pdfContent = pdfDocument.pdf_content as any;
       if (pdfContent?.pdfUrl) {
         const { data: fileData } = await supabase.storage
           .from("feed-media")
@@ -137,7 +137,7 @@ export default function SharedPDFView() {
   };
 
   const saveDrawnSignature = async () => {
-    if (!signatureCanvas.current || !document) return;
+    if (!signatureCanvas.current || !pdfDocument) return;
 
     if (!signerName.trim()) {
       toast.error("Please enter your name");
@@ -150,7 +150,7 @@ export default function SharedPDFView() {
     });
 
     const success = await addSignature(
-      document.id,
+      pdfDocument.id,
       signerName,
       signerEmail || null,
       dataUrl,
@@ -176,7 +176,7 @@ export default function SharedPDFView() {
       return;
     }
 
-    if (!document) return;
+    if (!pdfDocument) return;
 
     // Create canvas for text signature
     const tempCanvas = window.document.createElement("canvas");
@@ -194,7 +194,7 @@ export default function SharedPDFView() {
     const dataUrl = tempCanvas.toDataURL("image/png");
 
     const success = await addSignature(
-      document.id,
+      pdfDocument.id,
       signerName,
       signerEmail || null,
       dataUrl,
@@ -220,7 +220,7 @@ export default function SharedPDFView() {
     );
   }
 
-  if (!document) {
+  if (!pdfDocument) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
@@ -237,7 +237,7 @@ export default function SharedPDFView() {
         <Card className="p-6 mb-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold">{document.title}</h1>
+              <h1 className="text-2xl font-bold">{pdfDocument.title}</h1>
               <p className="text-sm text-muted-foreground">Shared PDF Document - {signatures.length} signature(s)</p>
             </div>
             <Button onClick={() => setShowSignDialog(true)}>
