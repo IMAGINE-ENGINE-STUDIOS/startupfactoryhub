@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
+import type { PDFDocumentProxy } from "pdfjs-dist";
 import { Canvas as FabricCanvas, PencilBrush, IText, Rect, Circle, Textbox, util as fabricUtil, FabricImage } from "fabric";
 import * as fabric from "fabric";
 import { PDFDocument, rgb, StandardFonts, degrees } from "pdf-lib";
@@ -66,6 +67,26 @@ interface ShapeModification {
   fillColor: string;
   strokeWidth: number;
 }
+
+interface TextReplacement {
+  originalX: number;
+  originalY: number;
+  originalText: string;
+  newText: string;
+  fontSize: number;
+  fontFamily: string;
+  color: string;
+  width: number;
+  height: number;
+}
+
+interface PDFTextItem {
+  str: string;
+  transform: number[];
+  width: number;
+  height: number;
+  fontName: string;
+}
 interface LightPaperPDFEditorProps {
   selectedProject?: LightPaperProject | null;
 }
@@ -94,8 +115,13 @@ export function LightPaperPDFEditor({
   const [shareLink, setShareLink] = useState("");
   const [showSignaturePanel, setShowSignaturePanel] = useState(false);
   const [originalPdfBytes, setOriginalPdfBytes] = useState<Uint8Array | null>(null);
+  const [pdfTextItems, setPdfTextItems] = useState<Map<number, PDFTextItem[]>>(new Map());
+  const [textReplacements, setTextReplacements] = useState<Map<number, TextReplacement[]>>(new Map());
+  const [editingTextIndex, setEditingTextIndex] = useState<{pageNum: number, index: number} | null>(null);
+  const [pdfDocumentProxy, setPdfDocumentProxy] = useState<PDFDocumentProxy | null>(null);
   const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const canvasRefs = useRef<Map<number, HTMLCanvasElement>>(new Map());
+  const textLayerRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const signatureCanvasRef = useRef<HTMLCanvasElement>(null);
   const signatureDrawingCanvas = useRef<FabricCanvas | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -223,19 +249,112 @@ export function LightPaperPDFEditor({
       }
     }
   };
-  const onDocumentLoadSuccess = ({
-    numPages
-  }: {
-    numPages: number;
-  }) => {
-    setNumPages(numPages);
+  const onDocumentLoadSuccess = async (pdf: PDFDocumentProxy) => {
+    setNumPages(pdf.numPages);
+    setPdfDocumentProxy(pdf);
     setIsLoading(false);
-    toast.success(`PDF loaded with ${numPages} pages`);
+    toast.success(`PDF loaded with ${pdf.numPages} pages`);
+    
+    // Extract text from all pages
+    for (let i = 1; i <= pdf.numPages; i++) {
+      extractPageText(pdf, i);
+    }
   };
   const onDocumentLoadError = (error: Error) => {
     console.error("PDF load error:", error);
     setIsLoading(false);
     toast.error(`Failed to load PDF: ${error.message}`);
+  };
+
+  const extractPageText = async (pdf: PDFDocumentProxy, pageNum: number) => {
+    try {
+      const page = await pdf.getPage(pageNum);
+      const textContent = await page.getTextContent();
+      
+      const items: PDFTextItem[] = textContent.items
+        .filter((item: any) => 'str' in item)
+        .map((item: any) => ({
+          str: item.str,
+          transform: item.transform,
+          width: item.width,
+          height: item.height,
+          fontName: item.fontName,
+        }));
+      
+      setPdfTextItems(prev => new Map(prev).set(pageNum, items));
+    } catch (error) {
+      console.error(`Error extracting text from page ${pageNum}:`, error);
+    }
+  };
+
+  const handleTextClick = (pageNum: number, textIndex: number, textItem: PDFTextItem) => {
+    const canvas = canvasInstances.get(pageNum);
+    if (!canvas) return;
+
+    // Check if already replaced
+    const replacements = textReplacements.get(pageNum) || [];
+    const existingReplacement = replacements.find(r => 
+      r.originalText === textItem.str && 
+      Math.abs(r.originalX - textItem.transform[4]) < 1 &&
+      Math.abs(r.originalY - textItem.transform[5]) < 1
+    );
+
+    // Calculate position (PDF.js uses bottom-left origin)
+    const x = textItem.transform[4];
+    const y = canvas.height! - textItem.transform[5] - textItem.height;
+    const fontSize = Math.sqrt(textItem.transform[0] * textItem.transform[0] + textItem.transform[1] * textItem.transform[1]);
+
+    // Create editable textbox
+    const text = new Textbox(existingReplacement ? existingReplacement.newText : textItem.str, {
+      left: x,
+      top: y,
+      fill: existingReplacement ? existingReplacement.color : '#000000',
+      fontSize: existingReplacement ? existingReplacement.fontSize : fontSize,
+      fontFamily: existingReplacement ? existingReplacement.fontFamily : 'Arial',
+      width: textItem.width > 0 ? textItem.width : 200,
+      editable: true,
+      selectable: true,
+    });
+
+    canvas.add(text);
+    canvas.setActiveObject(text);
+    text.enterEditing();
+    text.selectAll();
+    canvas.renderAll();
+
+    setEditingTextIndex({ pageNum, index: textIndex });
+
+    // When editing is done, save the replacement
+    text.on('editing:exited', () => {
+      const newReplacements = [...(textReplacements.get(pageNum) || [])];
+      const replacementIndex = newReplacements.findIndex(r => 
+        r.originalText === textItem.str && 
+        Math.abs(r.originalX - textItem.transform[4]) < 1 &&
+        Math.abs(r.originalY - textItem.transform[5]) < 1
+      );
+
+      const replacement: TextReplacement = {
+        originalX: textItem.transform[4],
+        originalY: textItem.transform[5],
+        originalText: textItem.str,
+        newText: text.text || '',
+        fontSize: (text.fontSize || 16) * (text.scaleY || 1),
+        fontFamily: text.fontFamily || 'Arial',
+        color: text.fill as string || '#000000',
+        width: textItem.width,
+        height: textItem.height,
+      };
+
+      if (replacementIndex >= 0) {
+        newReplacements[replacementIndex] = replacement;
+      } else {
+        newReplacements.push(replacement);
+      }
+
+      setTextReplacements(prev => new Map(prev).set(pageNum, newReplacements));
+      setEditingTextIndex(null);
+      toast.success("Text updated - will be saved on export");
+    });
   };
   const setupCanvas = (pageNumber: number) => {
     const canvasEl = canvasRefs.current.get(pageNumber);
@@ -559,7 +678,7 @@ export function LightPaperPDFEditor({
       return;
     }
     try {
-      toast.info("Exporting PDF with embedded annotations...");
+      toast.info("Exporting PDF with embedded text edits and annotations...");
       
       // Load the original PDF
       const pdfDoc = await PDFDocument.load(originalPdfBytes);
@@ -569,130 +688,165 @@ export function LightPaperPDFEditor({
       
       // Process each page
       for (let i = 1; i <= numPages; i++) {
-        const canvas = canvasInstances.get(i);
-        if (!canvas) continue;
-        
-        const objects = canvas.getObjects();
-        if (objects.length === 0) continue;
-        
         const page = pages[i - 1];
         const { width: pageWidth, height: pageHeight } = page.getSize();
         
-        // Process each object on the canvas
-        for (const obj of objects) {
+        // Step 1: Handle text replacements (overlaying new text)
+        const replacements = textReplacements.get(i) || [];
+        for (const replacement of replacements) {
           try {
-            // Convert canvas coordinates to PDF coordinates (PDF has origin at bottom-left)
-            const pdfY = pageHeight - (obj.top || 0) - (obj.height || 0) * (obj.scaleY || 1);
-            const pdfX = obj.left || 0;
+            // Parse color
+            const color = replacement.color;
+            const r = parseInt(color.slice(1, 3), 16) / 255;
+            const g = parseInt(color.slice(3, 5), 16) / 255;
+            const b = parseInt(color.slice(5, 7), 16) / 255;
             
-            if (obj.type === 'textbox' || obj.type === 'i-text') {
-              const textObj = obj as Textbox;
-              const text = textObj.text || '';
-              const fontSize = (textObj.fontSize || 16) * (textObj.scaleY || 1);
-              const color = textObj.fill as string || '#000000';
+            // Convert PDF.js coordinates to pdf-lib coordinates
+            // PDF.js: top-left origin, pdf-lib: bottom-left origin
+            const pdfY = pageHeight - replacement.originalY - replacement.height;
+            
+            // Draw white rectangle to cover original text
+            page.drawRectangle({
+              x: replacement.originalX,
+              y: pdfY,
+              width: replacement.width > 0 ? replacement.width : 200,
+              height: replacement.height > 0 ? replacement.height : replacement.fontSize,
+              color: rgb(1, 1, 1),
+            });
+            
+            // Draw new text
+            page.drawText(replacement.newText, {
+              x: replacement.originalX,
+              y: pdfY,
+              size: replacement.fontSize,
+              font: helveticaFont,
+              color: rgb(r, g, b),
+            });
+          } catch (replError) {
+            console.error(`Error applying text replacement on page ${i}:`, replError);
+          }
+        }
+        
+        // Step 2: Process canvas annotations
+        const canvas = canvasInstances.get(i);
+        if (canvas) {
+          const objects = canvas.getObjects();
+          
+          for (const obj of objects) {
+            try {
+              // Convert canvas coordinates to PDF coordinates (PDF has origin at bottom-left)
+              const pdfY = pageHeight - (obj.top || 0) - (obj.height || 0) * (obj.scaleY || 1);
+              const pdfX = obj.left || 0;
               
-              // Convert hex color to RGB
-              const r = parseInt(color.slice(1, 3), 16) / 255;
-              const g = parseInt(color.slice(3, 5), 16) / 255;
-              const b = parseInt(color.slice(5, 7), 16) / 255;
-              
-              const font = textObj.fontWeight === 'bold' ? helveticaBold : helveticaFont;
-              
-              page.drawText(text, {
-                x: pdfX,
-                y: pdfY,
-                size: fontSize,
-                font: font,
-                color: rgb(r, g, b),
-              });
-            } else if (obj.type === 'rect') {
-              const rectObj = obj as Rect;
-              const width = (rectObj.width || 0) * (rectObj.scaleX || 1);
-              const height = (rectObj.height || 0) * (rectObj.scaleY || 1);
-              const strokeColor = rectObj.stroke as string || '#000000';
-              const fillColor = rectObj.fill as string;
-              
-              // Convert hex to RGB
-              const parseColor = (hex: string) => {
-                const r = parseInt(hex.slice(1, 3), 16) / 255;
-                const g = parseInt(hex.slice(3, 5), 16) / 255;
-                const b = parseInt(hex.slice(5, 7), 16) / 255;
-                return rgb(r, g, b);
-              };
-              
-              page.drawRectangle({
-                x: pdfX,
-                y: pdfY,
-                width: width,
-                height: height,
-                borderColor: parseColor(strokeColor),
-                borderWidth: rectObj.strokeWidth || 1,
-                color: fillColor && fillColor !== 'transparent' ? parseColor(fillColor) : undefined,
-              });
-            } else if (obj.type === 'circle') {
-              const circleObj = obj as Circle;
-              const radius = (circleObj.radius || 0) * (circleObj.scaleX || 1);
-              const strokeColor = circleObj.stroke as string || '#000000';
-              
-              const parseColor = (hex: string) => {
-                const r = parseInt(hex.slice(1, 3), 16) / 255;
-                const g = parseInt(hex.slice(3, 5), 16) / 255;
-                const b = parseInt(hex.slice(5, 7), 16) / 255;
-                return rgb(r, g, b);
-              };
-              
-              page.drawCircle({
-                x: pdfX + radius,
-                y: pdfY + radius,
-                size: radius,
-                borderColor: parseColor(strokeColor),
-                borderWidth: circleObj.strokeWidth || 1,
-              });
-            } else if (obj.type === 'image') {
-              const imgObj = obj as FabricImage;
-              const imgElement = imgObj.getElement() as HTMLImageElement | HTMLCanvasElement;
-              
-              // Convert image to data URL
-              let dataUrl: string;
-              if (imgElement instanceof HTMLImageElement) {
-                const canvas = document.createElement('canvas');
-                canvas.width = imgElement.naturalWidth || imgElement.width;
-                canvas.height = imgElement.naturalHeight || imgElement.height;
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                  ctx.drawImage(imgElement, 0, 0);
-                  dataUrl = canvas.toDataURL('image/png');
+              if (obj.type === 'textbox' || obj.type === 'i-text') {
+                const textObj = obj as Textbox;
+                const text = textObj.text || '';
+                const fontSize = (textObj.fontSize || 16) * (textObj.scaleY || 1);
+                const color = textObj.fill as string || '#000000';
+                
+                // Convert hex color to RGB
+                const r = parseInt(color.slice(1, 3), 16) / 255;
+                const g = parseInt(color.slice(3, 5), 16) / 255;
+                const b = parseInt(color.slice(5, 7), 16) / 255;
+                
+                const font = textObj.fontWeight === 'bold' ? helveticaBold : helveticaFont;
+                
+                page.drawText(text, {
+                  x: pdfX,
+                  y: pdfY,
+                  size: fontSize,
+                  font: font,
+                  color: rgb(r, g, b),
+                });
+              } else if (obj.type === 'rect') {
+                const rectObj = obj as Rect;
+                const width = (rectObj.width || 0) * (rectObj.scaleX || 1);
+                const height = (rectObj.height || 0) * (rectObj.scaleY || 1);
+                const strokeColor = rectObj.stroke as string || '#000000';
+                const fillColor = rectObj.fill as string;
+                
+                // Convert hex to RGB
+                const parseColor = (hex: string) => {
+                  const r = parseInt(hex.slice(1, 3), 16) / 255;
+                  const g = parseInt(hex.slice(3, 5), 16) / 255;
+                  const b = parseInt(hex.slice(5, 7), 16) / 255;
+                  return rgb(r, g, b);
+                };
+                
+                page.drawRectangle({
+                  x: pdfX,
+                  y: pdfY,
+                  width: width,
+                  height: height,
+                  borderColor: parseColor(strokeColor),
+                  borderWidth: rectObj.strokeWidth || 1,
+                  color: fillColor && fillColor !== 'transparent' ? parseColor(fillColor) : undefined,
+                });
+              } else if (obj.type === 'circle') {
+                const circleObj = obj as Circle;
+                const radius = (circleObj.radius || 0) * (circleObj.scaleX || 1);
+                const strokeColor = circleObj.stroke as string || '#000000';
+                
+                const parseColor = (hex: string) => {
+                  const r = parseInt(hex.slice(1, 3), 16) / 255;
+                  const g = parseInt(hex.slice(3, 5), 16) / 255;
+                  const b = parseInt(hex.slice(5, 7), 16) / 255;
+                  return rgb(r, g, b);
+                };
+                
+                page.drawCircle({
+                  x: pdfX + radius,
+                  y: pdfY + radius,
+                  size: radius,
+                  borderColor: parseColor(strokeColor),
+                  borderWidth: circleObj.strokeWidth || 1,
+                });
+              } else if (obj.type === 'image') {
+                const imgObj = obj as FabricImage;
+                const imgElement = imgObj.getElement() as HTMLImageElement | HTMLCanvasElement;
+                
+                // Convert image to data URL
+                let dataUrl: string;
+                if (imgElement instanceof HTMLImageElement) {
+                  const canvas = document.createElement('canvas');
+                  canvas.width = imgElement.naturalWidth || imgElement.width;
+                  canvas.height = imgElement.naturalHeight || imgElement.height;
+                  const ctx = canvas.getContext('2d');
+                  if (ctx) {
+                    ctx.drawImage(imgElement, 0, 0);
+                    dataUrl = canvas.toDataURL('image/png');
+                  } else {
+                    continue;
+                  }
                 } else {
-                  continue;
+                  dataUrl = imgElement.toDataURL('image/png');
                 }
-              } else {
-                dataUrl = imgElement.toDataURL('image/png');
+                
+                // Embed the image
+                const imageBytes = dataUrl.split(',')[1];
+                const imageBuffer = Uint8Array.from(atob(imageBytes), c => c.charCodeAt(0));
+                
+                let embeddedImage;
+                if (dataUrl.includes('image/png')) {
+                  embeddedImage = await pdfDoc.embedPng(imageBuffer);
+                } else {
+                  embeddedImage = await pdfDoc.embedJpg(imageBuffer);
+                }
+                
+                const width = (imgObj.width || 0) * (imgObj.scaleX || 1);
+                const height = (imgObj.height || 0) * (imgObj.scaleY || 1);
+                
+                page.drawImage(embeddedImage, {
+                  x: pdfX,
+                  y: pdfY,
+                  width: width,
+                  height: height,
+                });
               }
-              
-              // Embed the image
-              const imageBytes = dataUrl.split(',')[1];
-              const imageBuffer = Uint8Array.from(atob(imageBytes), c => c.charCodeAt(0));
-              
-              let embeddedImage;
-              if (dataUrl.includes('image/png')) {
-                embeddedImage = await pdfDoc.embedPng(imageBuffer);
-              } else {
-                embeddedImage = await pdfDoc.embedJpg(imageBuffer);
-              }
-              
-              const width = (imgObj.width || 0) * (imgObj.scaleX || 1);
-              const height = (imgObj.height || 0) * (imgObj.scaleY || 1);
-              
-              page.drawImage(embeddedImage, {
-                x: pdfX,
-                y: pdfY,
-                width: width,
-                height: height,
-              });
+            } catch (objError) {
+              console.error(`Error processing object on page ${i}:`, objError);
+              // Continue with next object
             }
-          } catch (objError) {
-            console.error(`Error processing object on page ${i}:`, objError);
-            // Continue with next object
           }
         }
       }
@@ -707,7 +861,7 @@ export function LightPaperPDFEditor({
       a.click();
       URL.revokeObjectURL(url);
       
-      toast.success("PDF exported with all changes embedded!");
+      toast.success("PDF exported with all text edits and annotations embedded!");
     } catch (error) {
       console.error("Export error:", error);
       toast.error("Failed to export PDF");
@@ -1064,17 +1218,60 @@ export function LightPaperPDFEditor({
                           pageNumber={pageNum} 
                           width={pageWidth * zoom} 
                           onLoadSuccess={() => setupCanvas(pageNum)} 
-                          renderTextLayer={false} 
+                          renderTextLayer={true} 
                           renderAnnotationLayer={false}
                           className="pointer-events-none"
                         />
+                        
+                        {/* Clickable text overlay layer */}
+                        <div 
+                          ref={el => el && textLayerRefs.current.set(pageNum, el)}
+                          className="absolute top-0 left-0 w-full h-full pointer-events-auto"
+                          style={{ zIndex: 1 }}
+                        >
+                          {pdfTextItems.get(pageNum)?.map((textItem, index) => {
+                            const x = textItem.transform[4];
+                            const y = textItem.transform[5];
+                            const fontSize = Math.sqrt(
+                              textItem.transform[0] * textItem.transform[0] + 
+                              textItem.transform[1] * textItem.transform[1]
+                            );
+                            
+                            // Check if this text has been replaced
+                            const replacements = textReplacements.get(pageNum) || [];
+                            const isReplaced = replacements.some(r => 
+                              r.originalText === textItem.str && 
+                              Math.abs(r.originalX - x) < 1 &&
+                              Math.abs(r.originalY - y) < 1
+                            );
+                            
+                            return (
+                              <div
+                                key={`${pageNum}-${index}`}
+                                onClick={() => handleTextClick(pageNum, index, textItem)}
+                                className={`absolute cursor-pointer transition-all hover:bg-blue-200/30 ${
+                                  isReplaced ? 'bg-green-200/20' : ''
+                                }`}
+                                style={{
+                                  left: `${(x / (pageWidth * zoom)) * 100}%`,
+                                  top: `${((1 - y / (pageRefs.current.get(pageNum)?.clientHeight || 1))) * 100}%`,
+                                  width: `${(textItem.width / (pageWidth * zoom)) * 100}%`,
+                                  height: `${(textItem.height / (pageRefs.current.get(pageNum)?.clientHeight || 1)) * 100}%`,
+                                }}
+                                title="Click to edit this text"
+                              />
+                            );
+                          })}
+                        </div>
+                        
                         <canvas 
                           ref={el => el && canvasRefs.current.set(pageNum, el)} 
                           className="absolute top-0 left-0 pointer-events-auto cursor-default" 
                           style={{
                             width: "100%",
                             height: "100%",
-                            touchAction: "none"
+                            touchAction: "none",
+                            zIndex: 2,
                           }} 
                         />
                       </div>
