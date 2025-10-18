@@ -103,17 +103,28 @@ export function LightPaperDocument() {
             </Button>
           </div>
 
-          {/* Headings */}
-          <div className="flex gap-1 border-l pl-2">
-            <Button variant="ghost" size="icon" onClick={() => execCommand("formatBlock", "h1")} title="Heading 1">
-              <Heading1 className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => execCommand("formatBlock", "h2")} title="Heading 2">
-              <Heading2 className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => execCommand("formatBlock", "h3")} title="Heading 3">
-              <Heading3 className="h-4 w-4" />
-            </Button>
+          {/* Headings Dropdown */}
+          <div className="border-l pl-2">
+            <Select value="" onValueChange={(value) => {
+              if (editorRef.current) {
+                editorRef.current.focus();
+                document.execCommand("formatBlock", false, `<${value}>`);
+                toast.success(`Applied ${value.toUpperCase()}`);
+              }
+            }}>
+              <SelectTrigger className="w-32 h-9">
+                <SelectValue placeholder="Heading" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="p">Normal</SelectItem>
+                <SelectItem value="h1" className="text-3xl font-bold">Heading 1</SelectItem>
+                <SelectItem value="h2" className="text-2xl font-bold">Heading 2</SelectItem>
+                <SelectItem value="h3" className="text-xl font-bold">Heading 3</SelectItem>
+                <SelectItem value="h4" className="text-lg font-bold">Heading 4</SelectItem>
+                <SelectItem value="h5" className="text-base font-bold">Heading 5</SelectItem>
+                <SelectItem value="h6" className="text-sm font-bold">Heading 6</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Alignment */}
