@@ -119,14 +119,14 @@ export default function MarketIntelligenceWidget() {
   return (
     <div className="space-y-6">
       {/* Modern Search Section */}
-      <Card className="p-6 bg-gradient-to-br from-primary/5 via-background to-background border-primary/10">
-        <div className="space-y-6">
+      <Card className="p-4 sm:p-6 bg-gradient-to-br from-primary/5 via-background to-background border-primary/10">
+        <div className="space-y-4 sm:space-y-6">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold">Market Intelligence</h2>
-            <p className="text-muted-foreground">AI-powered insights on startups, industries, and investors</p>
+            <h2 className="text-xl sm:text-2xl font-bold">Market Intelligence</h2>
+            <p className="text-sm sm:text-base text-muted-foreground">AI-powered insights on startups, industries, and investors</p>
           </div>
           
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <Input
               placeholder="Search startups, industries, or investors..."
               value={query}
@@ -134,7 +134,11 @@ export default function MarketIntelligenceWidget() {
               onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
               className="flex-1 h-12"
             />
-            <Button onClick={handleSearch} disabled={loading} size="lg" className="px-6">
+            <Button 
+              onClick={handleSearch} 
+              disabled={loading} 
+              className="w-full sm:w-auto sm:px-6 h-12"
+            >
               <Search className="h-4 w-4 mr-2" />
               Analyze
             </Button>
@@ -144,7 +148,7 @@ export default function MarketIntelligenceWidget() {
             <Badge
               variant={searchType === 'startup' ? 'default' : 'outline'}
               onClick={() => setSearchType('startup')}
-              className="cursor-pointer px-4 py-2"
+              className="cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
             >
               <Building2 className="h-3 w-3 mr-1" />
               Startups
@@ -152,7 +156,7 @@ export default function MarketIntelligenceWidget() {
             <Badge
               variant={searchType === 'industry' ? 'default' : 'outline'}
               onClick={() => setSearchType('industry')}
-              className="cursor-pointer px-4 py-2"
+              className="cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
             >
               <Globe className="h-3 w-3 mr-1" />
               Industries
@@ -160,7 +164,7 @@ export default function MarketIntelligenceWidget() {
             <Badge
               variant={searchType === 'investor' ? 'default' : 'outline'}
               onClick={() => setSearchType('investor')}
-              className="cursor-pointer px-4 py-2"
+              className="cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
             >
               <Briefcase className="h-3 w-3 mr-1" />
               Investors
@@ -168,8 +172,8 @@ export default function MarketIntelligenceWidget() {
           </div>
 
           {/* Trending Topics */}
-          <div className="space-y-3">
-            <p className="text-sm text-muted-foreground">Trending searches:</p>
+          <div className="space-y-2 sm:space-y-3">
+            <p className="text-xs sm:text-sm text-muted-foreground">Trending searches:</p>
             <div className="flex gap-2 flex-wrap">
               {trendingTopics.map((topic, idx) => {
                 const Icon = topic.icon;
@@ -182,7 +186,7 @@ export default function MarketIntelligenceWidget() {
                       setSearchType(topic.type as any);
                       setQuery(topic.name);
                     }}
-                    className="text-xs"
+                    className="text-xs h-8"
                   >
                     <Icon className="h-3 w-3 mr-1" />
                     {topic.name}
@@ -196,16 +200,16 @@ export default function MarketIntelligenceWidget() {
 
       {/* Loading State */}
       {loading && (
-        <div className="space-y-6">
-          <Card className="p-6">
-            <Skeleton className="h-8 w-64 mb-4" />
-            <Skeleton className="h-4 w-full mb-2" />
-            <Skeleton className="h-4 w-3/4" />
+        <div className="space-y-4 sm:space-y-6">
+          <Card className="p-4 sm:p-6">
+            <Skeleton className="h-6 sm:h-8 w-48 sm:w-64 mb-4" />
+            <Skeleton className="h-3 sm:h-4 w-full mb-2" />
+            <Skeleton className="h-3 sm:h-4 w-3/4" />
           </Card>
-          <div className="grid md:grid-cols-3 gap-4">
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
-            <Skeleton className="h-32" />
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+            <Skeleton className="h-24 sm:h-32" />
+            <Skeleton className="h-24 sm:h-32" />
+            <Skeleton className="h-24 sm:h-32" />
           </div>
         </div>
       )}
@@ -214,30 +218,30 @@ export default function MarketIntelligenceWidget() {
       {!loading && results && (
         <div className="space-y-6">
           {/* Overview Card */}
-          <Card className="p-6">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <h2 className="text-2xl font-bold">{results.name}</h2>
-                  <Badge>{results.type}</Badge>
+          <Card className="p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 mb-4">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2 flex-wrap">
+                  <h2 className="text-xl sm:text-2xl font-bold">{results.name}</h2>
+                  <Badge className="text-xs">{results.type}</Badge>
                 </div>
-                <p className="text-muted-foreground">{results.description}</p>
+                <p className="text-sm sm:text-base text-muted-foreground">{results.description}</p>
               </div>
-              <Activity className="h-8 w-8 text-primary" />
+              <Activity className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
             </div>
           </Card>
 
           {/* Key Metrics */}
-          <div className="grid md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             {Object.entries(results.metrics).slice(0, 4).map(([key, value]) => (
-              <Card key={key} className="p-4">
+              <Card key={key} className="p-3 sm:p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm text-muted-foreground capitalize">
+                  <span className="text-xs sm:text-sm text-muted-foreground capitalize">
                     {key.replace(/_/g, ' ')}
                   </span>
-                  <TrendingUp className="h-4 w-4 text-primary" />
+                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-primary" />
                 </div>
-                <p className="text-2xl font-bold">{value}</p>
+                <p className="text-xl sm:text-2xl font-bold">{value}</p>
               </Card>
             ))}
           </div>
@@ -260,12 +264,12 @@ export default function MarketIntelligenceWidget() {
             </TabsList>
 
             <TabsContent value="insights">
-              <div className="grid md:grid-cols-2 gap-4">
+              <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
                 {results.insights.map((insight, idx) => (
-                  <Card key={idx} className="p-4 bg-primary/5 border-primary/20">
-                    <div className="flex items-start gap-3">
-                      <Sparkles className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
-                      <p className="text-sm">{insight}</p>
+                  <Card key={idx} className="p-3 sm:p-4 bg-primary/5 border-primary/20">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
+                      <p className="text-xs sm:text-sm">{insight}</p>
                     </div>
                   </Card>
                 ))}
@@ -273,12 +277,12 @@ export default function MarketIntelligenceWidget() {
             </TabsContent>
 
             <TabsContent value="predictions">
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {results.predictions.map((prediction, idx) => (
-                  <Card key={idx} className="p-4 bg-blue-500/5 border-blue-500/20">
-                    <div className="flex items-start gap-3">
-                      <Target className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm">{prediction}</p>
+                  <Card key={idx} className="p-3 sm:p-4 bg-blue-500/5 border-blue-500/20">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <Target className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                      <p className="text-xs sm:text-sm">{prediction}</p>
                     </div>
                   </Card>
                 ))}
@@ -286,16 +290,16 @@ export default function MarketIntelligenceWidget() {
             </TabsContent>
 
             <TabsContent value="trends">
-              <div className="grid md:grid-cols-3 gap-4">
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                 {results.trends.map((trend, idx) => (
-                  <Card key={idx} className="p-4">
+                  <Card key={idx} className="p-3 sm:p-4">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium">{trend.label}</span>
-                      <Badge variant={trend.change >= 0 ? 'default' : 'secondary'}>
+                      <span className="text-xs sm:text-sm font-medium">{trend.label}</span>
+                      <Badge variant={trend.change >= 0 ? 'default' : 'secondary'} className="text-xs">
                         {trend.change >= 0 ? '+' : ''}{trend.change}%
                       </Badge>
                     </div>
-                    <p className="text-2xl font-bold mb-1">{trend.value}</p>
+                    <p className="text-xl sm:text-2xl font-bold mb-1">{trend.value}</p>
                     <div className="h-2 bg-muted rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-primary rounded-full transition-all"
@@ -312,32 +316,32 @@ export default function MarketIntelligenceWidget() {
 
       {/* Market Predictions - Always Visible */}
       {!loading && !results && (
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-lg font-semibold flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
+            <h3 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+              <Target className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               Market Predictions & Trends
             </h3>
           </div>
           
           {loadingPredictions ? (
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
               {[1, 2, 3].map((i) => (
-                <Skeleton key={i} className="h-32" />
+                <Skeleton key={i} className="h-28 sm:h-32" />
               ))}
             </div>
           ) : (
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
               {predictions.map((pred, idx) => (
-                <Card key={idx} className="p-5 hover:border-primary/50 transition-colors">
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between">
-                      <h4 className="font-semibold">{pred.title}</h4>
-                      <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20">
+                <Card key={idx} className="p-4 sm:p-5 hover:border-primary/50 transition-colors">
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex items-start justify-between gap-2">
+                      <h4 className="font-semibold text-sm sm:text-base">{pred.title}</h4>
+                      <Badge className="bg-green-500/10 text-green-500 hover:bg-green-500/20 text-xs flex-shrink-0">
                         {pred.trend}
                       </Badge>
                     </div>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
+                    <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                       {pred.prediction}
                     </p>
                     <div className="flex items-center gap-1 text-xs text-primary">

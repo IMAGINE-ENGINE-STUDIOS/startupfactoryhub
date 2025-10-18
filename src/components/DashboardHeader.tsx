@@ -25,40 +25,40 @@ export function DashboardHeader() {
   };
 
   return (
-    <div className="absolute top-4 right-4 flex items-center gap-2 z-10">
+    <div className="fixed top-16 sm:top-20 right-2 sm:right-4 flex items-center gap-1.5 sm:gap-2 z-40">
       <Button
         variant="ghost"
         size="icon"
         onClick={() => navigate("/")}
-        className="neon-glow hover:scale-110 transition-transform duration-300"
+        className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
         title="Home"
       >
-        <Home className="h-5 w-5" />
+        <Home className="h-4 w-4 sm:h-5 sm:w-5" />
       </Button>
       
-      <NotificationCenter className="neon-glow hover:scale-110 transition-transform duration-300" />
+      <NotificationCenter className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10" />
       
       <Popover>
         <PopoverTrigger asChild>
           <Button 
             variant="ghost" 
             size="icon" 
-            className="neon-glow hover:scale-110 transition-transform duration-300 relative"
+            className="neon-glow hover:scale-110 transition-transform duration-300 relative h-9 w-9 sm:h-10 sm:w-10"
             title="AI Recommendations"
           >
-            <Brain className={`h-5 w-5 ${hasNewRecommendations ? 'animate-pulse' : ''}`} />
+            <Brain className={`h-4 w-4 sm:h-5 sm:w-5 ${hasNewRecommendations ? 'animate-pulse' : ''}`} />
             {recommendationCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[10px] flex items-center justify-center text-primary-foreground">
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[9px] sm:text-[10px] flex items-center justify-center text-primary-foreground">
                 {recommendationCount}
               </span>
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-96 p-0" align="end">
-          <div className="p-4 border-b">
+        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-96 p-0" align="end">
+          <div className="p-3 sm:p-4 border-b">
             <div className="flex items-center gap-2">
-              <Brain className="h-5 w-5 text-primary" />
-              <h3 className="font-semibold">AI Recommendations</h3>
+              <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+              <h3 className="font-semibold text-sm sm:text-base">AI Recommendations</h3>
             </div>
             <p className="text-xs text-muted-foreground mt-1">
               Personalized suggestions based on your activity
@@ -68,7 +68,9 @@ export function DashboardHeader() {
         </PopoverContent>
       </Popover>
       
-      <ThemeToggle />
+      <div className="h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center">
+        <ThemeToggle />
+      </div>
     </div>
   );
 }

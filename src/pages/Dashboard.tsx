@@ -107,16 +107,16 @@ const Dashboard = () => {
   return <div className="min-h-screen bg-background pb-24 lg:pb-6 relative overflow-x-hidden">
       <DashboardHeader />
       
-      <div className="container mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-8">
+      <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-20 sm:pt-24 pb-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
-          <div className="flex items-center space-x-3 sm:space-x-4">
+          <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
             <RoleBasedAvatar avatarUrl={profile?.avatar_url} role={profileWithRole?.role || 'startup'} fallbackText={user?.email || 'U'} className="h-12 w-12 sm:h-16 sm:w-16" />
-            <div>
-              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
                 Welcome, {profile?.full_name || 'Startup'}
               </h1>
-              <p className="text-sm text-muted-foreground">Build, connect, and grow your startup</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">Build, connect, and grow your startup</p>
             </div>
           </div>
           
