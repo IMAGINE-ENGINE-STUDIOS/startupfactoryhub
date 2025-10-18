@@ -48,13 +48,11 @@ interface FeedPost {
 
 interface UnifiedCommunityFeedProps {
   showCreatePost?: boolean;
-  maxHeight?: string;
   limit?: number;
 }
 
 export default function UnifiedCommunityFeed({ 
   showCreatePost = true, 
-  maxHeight = "600px",
   limit = 10 
 }: UnifiedCommunityFeedProps) {
   const [posts, setPosts] = useState<FeedPost[]>([]);
@@ -75,6 +73,10 @@ export default function UnifiedCommunityFeed({
   const navigate = useNavigate();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoInputRef = useRef<HTMLInputElement>(null);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const handleUserClick = (userId: string) => {
     setSelectedUserId(userId);
@@ -114,7 +116,34 @@ export default function UnifiedCommunityFeed({
     };
   }, [user, limit]);
 
-  const fetchPosts = async () => {
+  useEffect(() => {
+    if (!loadMoreRef.current || !hasMore || loadingMore) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          fetchPosts(true);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(loadMoreRef.current);
+
+    return () => {
+      if (loadMoreRef.current) {
+        observer.unobserve(loadMoreRef.current);
+      }
+    };
+  }, [hasMore, loadingMore, offset]);
+
+  const fetchPosts = async (loadMore = false) => {
+    if (loadMore) {
+      setLoadingMore(true);
+    }
+    
+    const currentOffset = loadMore ? offset : 0;
+    
     const { data: postsData, error: postsError } = await supabase
       .from('feed_posts')
       .select(`
@@ -128,11 +157,17 @@ export default function UnifiedCommunityFeed({
         )
       `)
       .order('created_at', { ascending: false })
-      .limit(limit);
+      .range(currentOffset, currentOffset + limit - 1);
 
     if (postsError) {
       console.error('Error fetching posts:', postsError);
+      setLoadingMore(false);
       return;
+    }
+
+    // Check if there are more posts
+    if (!postsData || postsData.length < limit) {
+      setHasMore(false);
     }
 
     const userIds = [...new Set(postsData?.map(post => post.user_id).filter(Boolean) || [])];
@@ -168,7 +203,16 @@ export default function UnifiedCommunityFeed({
       }
     }));
     
-    setPosts(formattedPosts);
+    if (loadMore) {
+      setPosts(prev => [...prev, ...formattedPosts]);
+      setOffset(currentOffset + limit);
+    } else {
+      setPosts(formattedPosts);
+      setOffset(limit);
+      setHasMore(true);
+    }
+    
+    setLoadingMore(false);
   };
 
   const fetchUserLikes = async () => {
@@ -665,7 +709,7 @@ export default function UnifiedCommunityFeed({
       )}
 
       {/* Posts Grid */}
-      <div className="space-y-4" style={{ maxHeight, overflowY: 'auto' }}>
+      <div className="space-y-4">
         {posts.map((post) => (
           <Card key={post.id} className="tech-card border-0 hover:scale-[1.01] transition-all">
             <CardContent className="p-4 sm:p-6">
@@ -830,9 +874,27 @@ export default function UnifiedCommunityFeed({
             </CardContent>
           </Card>
         ))}
+        
+        {/* Infinite Scroll Trigger */}
+        {hasMore && posts.length > 0 && (
+          <div ref={loadMoreRef} className="py-8 flex justify-center">
+            {loadingMore && (
+              <div className="flex items-center gap-2 text-muted-foreground">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                <span>Loading more posts...</span>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {!hasMore && posts.length > 0 && (
+          <div className="text-center py-8 text-muted-foreground">
+            <p>You've reached the end of the feed</p>
+          </div>
+        )}
       </div>
 
-      {posts.length === 0 && (
+      {posts.length === 0 && !loading && (
         <Card className="tech-card border-0 text-center p-8 sm:p-12">
           <Zap className="h-12 w-12 sm:h-16 sm:w-16 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg sm:text-xl font-semibold mb-2">No posts yet</h3>

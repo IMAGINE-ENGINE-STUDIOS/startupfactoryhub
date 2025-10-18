@@ -98,7 +98,7 @@ const MentorDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
                 <MentorRoadmapWidget />
-                <UnifiedCommunityFeed showCreatePost={false} maxHeight="500px" limit={5} />
+                <UnifiedCommunityFeed showCreatePost={false} limit={5} />
               </div>
               
               <div className="space-y-6">
