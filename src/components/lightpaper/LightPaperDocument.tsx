@@ -37,6 +37,7 @@ export function LightPaperDocument({
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random()}`);
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedHighlight, setSelectedHighlight] = useState("#FFFF00");
+  const [isHighlighterActive, setIsHighlighterActive] = useState(false);
   const [showSignDialog, setShowSignDialog] = useState(false);
   const [signatures, setSignatures] = useState<Array<{type: "draw" | "text", data: string, id: string}>>([]);
   const [signatureMode, setSignatureMode] = useState<"draw" | "text">("draw");
@@ -192,16 +193,26 @@ export function LightPaperDocument({
       const text = e.clipboardData?.getData('text/plain') || '';
       document.execCommand('insertText', false, text);
     };
+    const handleMouseUp = () => {
+      if (isHighlighterActive) {
+        const selection = window.getSelection();
+        if (selection && selection.toString().length > 0) {
+          applyHighlight(selectedHighlight);
+        }
+      }
+    };
     editor.addEventListener('input', handleInput);
     editor.addEventListener('paste', handlePaste);
+    editor.addEventListener('mouseup', handleMouseUp);
     return () => {
       editor.removeEventListener('input', handleInput);
       editor.removeEventListener('paste', handlePaste);
+      editor.removeEventListener('mouseup', handleMouseUp);
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [versions, selectedFont, selectedSize]);
+  }, [versions, selectedFont, selectedSize, isHighlighterActive, selectedHighlight]);
 
   // Navigate version history from database
   const goToPreviousVersion = async () => {
@@ -296,7 +307,23 @@ export function LightPaperDocument({
     if (editorRef.current) {
       editorRef.current.focus();
       execCommand("hiliteColor", color);
-      toast.success(color === "transparent" ? "Highlight removed" : "Text highlighted");
+      if (color === "transparent") {
+        toast.success("Highlight removed");
+        setIsHighlighterActive(false);
+      } else {
+        toast.success("Text highlighted");
+      }
+    }
+  };
+
+  const activateHighlighter = (color: string) => {
+    setSelectedHighlight(color);
+    if (color === "transparent") {
+      setIsHighlighterActive(false);
+      toast.info("Highlighter deactivated");
+    } else {
+      setIsHighlighterActive(true);
+      toast.success("Highlighter active - select text to highlight");
     }
   };
 
@@ -619,11 +646,8 @@ export function LightPaperDocument({
 
           {/* Highlight */}
           <div className="flex gap-1 border-l pl-2">
-            <Select value={selectedHighlight} onValueChange={(color) => {
-              setSelectedHighlight(color);
-              applyHighlight(color);
-            }}>
-              <SelectTrigger className="w-28 h-8 text-xs">
+            <Select value={selectedHighlight} onValueChange={activateHighlighter}>
+              <SelectTrigger className={`w-28 h-8 text-xs ${isHighlighterActive ? 'bg-primary/20 border-primary' : ''}`}>
                 <Highlighter className="h-4 w-4 mr-1" />
                 <SelectValue />
               </SelectTrigger>
