@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Job {
@@ -336,6 +336,14 @@ export default function UnifiedJobsBoard() {
 
   const updateApplicationStatus = async (applicationId: string, newStatus: string, applicationType: 'internal' | 'external', jobId: string) => {
     setUpdatingApplicationId(applicationId);
+    
+    // Optimistic update - immediately update UI
+    setApplications(prev => prev.map(app => 
+      app.id === applicationId 
+        ? { ...app, status: newStatus }
+        : app
+    ));
+    
     try {
       const table = applicationType === 'internal' ? 'job_applications' : 'public_job_applications';
       
@@ -346,6 +354,8 @@ export default function UnifiedJobsBoard() {
 
       if (error) {
         console.error('Error updating application status:', error);
+        // Revert optimistic update on error
+        await fetchApplicationsForJob(jobId);
         toast({
           title: 'Error',
           description: 'Failed to update application status. Please try again.',
@@ -372,6 +382,8 @@ export default function UnifiedJobsBoard() {
       await fetchJobs();
     } catch (error) {
       console.error('Unexpected error:', error);
+      // Revert optimistic update on error
+      await fetchApplicationsForJob(jobId);
       toast({
         title: 'Error',
         description: 'An unexpected error occurred',
@@ -379,6 +391,23 @@ export default function UnifiedJobsBoard() {
       });
     } finally {
       setUpdatingApplicationId(null);
+    }
+  };
+
+  const handleCopyExternalLink = async (externalUrl: string) => {
+    try {
+      await navigator.clipboard.writeText(externalUrl);
+      toast({
+        title: 'Link Copied!',
+        description: 'External application link copied to clipboard',
+      });
+    } catch (error) {
+      console.error('Error copying link:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to copy link',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -665,8 +694,23 @@ export default function UnifiedJobsBoard() {
                   )}
                   <div className="flex-1">
                     <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <CardTitle className="text-lg">{job.title}</CardTitle>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <CardTitle className="text-lg">{job.title}</CardTitle>
+                          {isCompanyUser && 
+                           job.companies?.id === userCompanyId && 
+                           job.external_application_url && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleCopyExternalLink(job.external_application_url!)}
+                              className="h-7 px-2"
+                              title="Copy external application link"
+                            >
+                              <Copy className="w-3 h-3" />
+                            </Button>
+                          )}
+                        </div>
                         <CardDescription className="text-sm">{job.companies?.name}</CardDescription>
                       </div>
                       <Badge className={getCategoryColor(job.category)}>
@@ -834,7 +878,7 @@ export default function UnifiedJobsBoard() {
                                   onValueChange={(newStatus) => updateApplicationStatus(app.id, newStatus, app.application_type, selectedJobId)}
                                   disabled={updatingApplicationId === app.id}
                                 >
-                                  <SelectTrigger id={`status-${app.id}`} className="w-32 h-9">
+                                  <SelectTrigger id={`status-${app.id}`} className="w-32 h-9 transition-all duration-200">
                                     <SelectValue />
                                   </SelectTrigger>
                                   <SelectContent className="bg-background z-50">
