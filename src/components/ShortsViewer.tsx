@@ -12,8 +12,6 @@ import {
   Share2,
   Volume2,
   VolumeX,
-  ChevronUp,
-  ChevronDown,
   Zap
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -46,6 +44,8 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
   const [likeCounts, setLikeCounts] = useState<Record<string, number>>({});
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+  const [touchStartY, setTouchStartY] = useState<number>(0);
+  const [touchDeltaY, setTouchDeltaY] = useState<number>(0);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -210,6 +210,31 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
     }
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStartY(e.touches[0].clientY);
+    setTouchDeltaY(0);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const currentY = e.touches[0].clientY;
+    setTouchDeltaY(touchStartY - currentY);
+  };
+
+  const handleTouchEnd = () => {
+    const minSwipeDistance = 50;
+    
+    if (Math.abs(touchDeltaY) > minSwipeDistance) {
+      if (touchDeltaY > 0 && currentIndex < shorts.length - 1) {
+        handleNext();
+      } else if (touchDeltaY < 0 && currentIndex > 0) {
+        handlePrevious();
+      }
+    }
+    
+    setTouchStartY(0);
+    setTouchDeltaY(0);
+  };
+
   useEffect(() => {
     const container = containerRef.current;
     if (container && open) {
@@ -223,8 +248,11 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-full h-screen w-screen p-0 border-0 bg-black overflow-hidden"
+        className="max-w-full h-screen w-screen p-0 border-0 bg-black overflow-hidden [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
         ref={containerRef}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         {/* Space/Cosmic Background */}
         <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950" />
@@ -262,36 +290,6 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
             </div>
           </button>
 
-          {/* Navigation - Compact */}
-          {currentIndex > 0 && (
-            <button
-              onClick={handlePrevious}
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-50 group"
-            >
-              <div className="relative">
-                <div className="absolute -inset-0.5 bg-cyan-500/0 group-hover:bg-cyan-500/30 rounded blur-sm transition-all duration-300" />
-                
-                <div className="relative w-5 h-5 bg-slate-900/80 backdrop-blur-md rounded border border-slate-700/30 group-hover:border-cyan-400/40 flex items-center justify-center transition-all duration-300">
-                  <ChevronUp className="h-3 w-3 text-slate-400 group-hover:text-cyan-400 transition-colors" />
-                </div>
-              </div>
-            </button>
-          )}
-          
-          {currentIndex < shorts.length - 1 && (
-            <button
-              onClick={handleNext}
-              className="absolute left-3 bottom-24 z-50 group"
-            >
-              <div className="relative">
-                <div className="absolute -inset-0.5 bg-cyan-500/0 group-hover:bg-cyan-500/30 rounded blur-sm transition-all duration-300" />
-                
-                <div className="relative w-5 h-5 bg-slate-900/80 backdrop-blur-md rounded border border-slate-700/30 group-hover:border-cyan-400/40 flex items-center justify-center transition-all duration-300">
-                  <ChevronDown className="h-3 w-3 text-slate-400 group-hover:text-cyan-400 transition-colors" />
-                </div>
-              </div>
-            </button>
-          )}
 
           {/* Video Container */}
           <div className="relative w-full max-w-[500px] h-full">
