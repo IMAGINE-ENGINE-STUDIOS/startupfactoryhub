@@ -75,6 +75,16 @@ export function OpportunitiesBoard() {
         schema: 'public',
         table: 'internship_applications'
       }, () => fetchOpportunities())
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'public_job_applications'
+      }, () => fetchOpportunities())
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'public_internship_applications'
+      }, () => fetchOpportunities())
       .subscribe();
 
     return () => {
@@ -287,9 +297,9 @@ export function OpportunitiesBoard() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-3xl font-bold">Career Opportunities</h2>
+          <h2 className="text-3xl font-bold">Jobs & Internships</h2>
           <p className="text-muted-foreground">
-            {userCompanyId ? 'Manage your job postings and applications' : 'Explore jobs and internships'}
+            {userCompanyId ? 'Manage your postings and applications' : 'Browse available positions'}
           </p>
         </div>
         {userCompanyId && (

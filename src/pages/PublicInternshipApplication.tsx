@@ -72,7 +72,6 @@ export default function PublicInternshipApplication() {
     if (resumeFile) {
       const fileExt = resumeFile.name.split('.').pop();
       const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `public-resumes/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
         .from('public-resumes')

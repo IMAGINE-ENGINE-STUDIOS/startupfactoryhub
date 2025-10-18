@@ -4,11 +4,13 @@ import { Calendar } from '@/components/ui/calendar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
-import { Calendar as CalendarIcon, MapPin, Users, Clock, Video, User } from 'lucide-react';
+import { Calendar as CalendarIcon, MapPin, Users, Clock, Video, User, Building } from 'lucide-react';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { useMentoringSessions } from '@/hooks/useMentoringSessions';
 import { useMentorAvailability } from '@/hooks/useMentorAvailability';
+import { cn } from '@/lib/utils';
 
 type CalendarItemType = 'event' | 'session' | 'availability' | 'pitch';
 
@@ -29,6 +31,7 @@ interface CalendarItem {
   mentor_name?: string;
   mentee_name?: string;
   duration_minutes?: number;
+  company_name?: string;
 }
 
 interface UnifiedCalendarProps {
@@ -245,6 +248,11 @@ export default function UnifiedCalendar({
     return allItems.map(item => item.start_date);
   };
 
+  const upcomingItems = allItems
+    .filter(item => item.start_date >= new Date())
+    .sort((a, b) => a.start_date.getTime() - b.start_date.getTime())
+    .slice(0, 5);
+
   const getItemTypeColor = (type: CalendarItemType) => {
     switch (type) {
       case 'event':
@@ -313,6 +321,87 @@ export default function UnifiedCalendar({
           Pitch Meetings
         </Badge>
       </div>
+
+      {/* Upcoming Events Section */}
+      {upcomingItems.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Upcoming Events & Sessions</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[300px]">
+              <div className="space-y-3">
+                {upcomingItems.map((item) => (
+                  <div
+                    key={`${item.type}-${item.id}`}
+                    onClick={() => onItemClick?.(item)}
+                    className={cn(
+                      "p-4 rounded-lg border cursor-pointer hover:bg-accent/5 transition-colors",
+                      item.type === 'event' && "border-l-4 border-l-purple-500",
+                      item.type === 'session' && "border-l-4 border-l-blue-500",
+                      item.type === 'availability' && "border-l-4 border-l-green-500",
+                      item.type === 'pitch' && "border-l-4 border-l-amber-500"
+                    )}
+                  >
+                    {item.type === 'event' && item.banner_url && (
+                      <img
+                        src={item.banner_url}
+                        alt={item.title}
+                        className="w-full h-32 object-cover rounded-lg mb-3"
+                      />
+                    )}
+                    <div className="flex items-start gap-3">
+                      <div className={cn(
+                        "p-2 rounded-lg",
+                        item.type === 'event' && "bg-purple-500/10",
+                        item.type === 'session' && "bg-blue-500/10",
+                        item.type === 'availability' && "bg-green-500/10",
+                        item.type === 'pitch' && "bg-amber-500/10"
+                      )}>
+                        {getItemTypeIcon(item.type)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className={getItemTypeColor(item.type)}>
+                            {item.type}
+                          </Badge>
+                        </div>
+                        <h4 className="font-semibold mb-1">{item.title}</h4>
+                        <div className="space-y-1 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-3 w-3" />
+                            <span>
+                              {format(item.start_date, 'PPP')} at {format(item.start_date, 'p')}
+                            </span>
+                          </div>
+                          {item.location && (
+                            <div className="flex items-center gap-2">
+                              <MapPin className="h-3 w-3" />
+                              <span>{item.location}</span>
+                            </div>
+                          )}
+                          {item.mentor_name && (
+                            <div className="flex items-center gap-2">
+                              <Users className="h-3 w-3" />
+                              <span>Mentor: {item.mentor_name}</span>
+                            </div>
+                          )}
+                          {item.company_name && (
+                            <div className="flex items-center gap-2">
+                              <Building className="h-3 w-3" />
+                              <span>{item.company_name}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calendar */}
