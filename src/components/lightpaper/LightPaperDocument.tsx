@@ -660,6 +660,33 @@ export function LightPaperDocument({
           </div>
 
           {/* Version History Navigation */}
+          {versions.length > 0 && (
+            <div className="flex gap-1 border-l pl-2 items-center">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                onClick={goToPreviousVersion}
+                disabled={currentVersionIndex <= 0}
+                title="Previous Version"
+              >
+                <Undo className="h-4 w-4" />
+              </Button>
+              <span className="text-xs text-muted-foreground px-1 whitespace-nowrap">
+                {currentVersionIndex + 1}/{versions.length}
+              </span>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                onClick={goToNextVersion}
+                disabled={currentVersionIndex >= versions.length - 1}
+                title="Next Version"
+              >
+                <Redo className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
           
 
           {/* Image Upload */}
