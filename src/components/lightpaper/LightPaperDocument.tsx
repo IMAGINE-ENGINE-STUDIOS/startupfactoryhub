@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenTool } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
@@ -586,7 +586,14 @@ export function LightPaperDocument({
           </div>
 
           {/* Lists */}
-          
+          <div className="flex gap-1 border-l pl-2">
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertUnorderedList")} title="Bullet List">
+              <List className="h-4 w-4" />
+            </Button>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertOrderedList")} title="Numbered List">
+              <ListOrdered className="h-4 w-4" />
+            </Button>
+          </div>
 
           {/* Version History Navigation */}
           
@@ -632,7 +639,7 @@ export function LightPaperDocument({
           {/* Signature */}
           <div className="flex gap-1 border-l pl-2">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSignDialog(true)} title="Add Signature">
-              <PenTool className="h-4 w-4" />
+              <PenLine className="h-4 w-4" />
             </Button>
           </div>
 
