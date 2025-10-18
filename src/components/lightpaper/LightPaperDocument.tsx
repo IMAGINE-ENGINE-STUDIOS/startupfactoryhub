@@ -201,11 +201,15 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
         .from('feed-media')
         .getPublicUrl(filePath);
 
-      // Insert image at cursor
+      // Insert image at cursor with strict container constraints
       const img = document.createElement('img');
       img.src = data.publicUrl;
       img.style.maxWidth = '100%';
+      img.style.width = 'auto';
       img.style.height = 'auto';
+      img.style.objectFit = 'contain';
+      img.style.display = 'block';
+      img.style.margin = '10px 0';
       
       const selection = window.getSelection();
       if (selection && selection.rangeCount > 0) {
@@ -450,12 +454,17 @@ export function LightPaperDocument({ selectedProject }: LightPaperDocumentProps 
 
       {/* Main Editor Area - Takes Full Height */}
       <div ref={wrapperRef} className="flex-1 overflow-auto p-8 bg-muted/30">
-        <div ref={containerRef} className="max-w-4xl mx-auto bg-background shadow-lg rounded-lg p-12 min-h-full">
+        <div ref={containerRef} className="max-w-4xl mx-auto bg-background shadow-lg rounded-lg p-12 min-h-full overflow-hidden">
           <div
             ref={editorRef}
             contentEditable
-            className="outline-none min-h-[600px] prose prose-lg max-w-none"
-            style={{ fontFamily: selectedFont, fontSize: `${selectedSize}px` }}
+            className="outline-none min-h-[600px] prose prose-lg max-w-none overflow-hidden"
+            style={{ 
+              fontFamily: selectedFont, 
+              fontSize: `${selectedSize}px`,
+              wordWrap: 'break-word',
+              overflowWrap: 'break-word'
+            }}
             suppressContentEditableWarning
           >
             <p>Start typing your document here...</p>
