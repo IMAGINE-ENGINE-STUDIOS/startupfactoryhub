@@ -71,6 +71,7 @@ export default function UnifiedJobsBoard() {
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [showApplicationsDialog, setShowApplicationsDialog] = useState(false);
+  const [updatingApplicationId, setUpdatingApplicationId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -319,36 +320,38 @@ export default function UnifiedJobsBoard() {
     }
 
     try {
-      // Check if it's a Supabase storage URL
+      // If it's a Supabase storage URL, try to create signed URL or use public URL
       if (resumeUrl.includes('supabase.co/storage')) {
-        const pathMatch = resumeUrl.match(/public-resumes\/(.+)$/);
-        if (pathMatch) {
-          const filePath = pathMatch[1];
+        const urlParts = resumeUrl.split('public-resumes/');
+        if (urlParts.length > 1) {
+          const filePath = decodeURIComponent(urlParts[1]);
+          
+          // Try to create signed URL (for private buckets)
           const { data, error } = await supabase.storage
             .from('public-resumes')
-            .createSignedUrl(filePath, 3600); // 1 hour expiry
+            .createSignedUrl(filePath, 3600);
 
-          if (error) throw error;
-          if (data?.signedUrl) {
+          if (!error && data?.signedUrl) {
             window.open(data.signedUrl, '_blank');
             return;
           }
         }
       }
       
-      // Fallback to direct URL
+      // Fallback: open URL directly (works if bucket is public)
       window.open(resumeUrl, '_blank');
     } catch (error) {
       console.error('Error viewing resume:', error);
       toast({
         title: 'Error',
-        description: 'Failed to open resume',
+        description: 'Failed to open resume. Please try again.',
         variant: 'destructive',
       });
     }
   };
 
   const updateApplicationStatus = async (applicationId: string, newStatus: string, applicationType: 'internal' | 'external', jobId: string) => {
+    setUpdatingApplicationId(applicationId);
     try {
       const table = applicationType === 'internal' ? 'job_applications' : 'public_job_applications';
       
@@ -357,31 +360,33 @@ export default function UnifiedJobsBoard() {
         .update({ status: newStatus })
         .eq('id', applicationId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating application status:', error);
+        toast({
+          title: 'Error',
+          description: 'Failed to update application status. Please try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
 
-      // If accepted and it's an external application for a task-based job, send invitation
-      if (newStatus === 'accepted' && applicationType === 'external') {
+      toast({
+        title: 'Success',
+        description: `Application ${newStatus} successfully`,
+      });
+
+      // If it's an external application being accepted for a task-based job, create invitation
+      if (applicationType === 'external' && newStatus === 'accepted') {
         const job = jobs.find(j => j.id === jobId);
         if (job?.is_task_based) {
           await createInvitation(applicationId, jobId);
         }
       }
 
-      toast({
-        title: 'Success',
-        description: `Application ${newStatus}`,
-      });
-
-      // Refresh applications
       fetchApplicationsForJob(jobId);
-      fetchJobs(); // Refresh job list to update counts
-    } catch (error) {
-      console.error('Error updating application status:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to update application status',
-        variant: 'destructive',
-      });
+      fetchJobs();
+    } finally {
+      setUpdatingApplicationId(null);
     }
   };
 
@@ -777,26 +782,41 @@ export default function UnifiedJobsBoard() {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 space-y-3">
                           <div className="flex items-start justify-between">
-                            <div>
-                              <h4 className="font-semibold">{app.applicant_name || 'Anonymous'}</h4>
-                              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                                <Mail className="w-3 h-3" />
-                                {app.applicant_email}
+                            <div className="space-y-2">
+                              <div className="flex items-center gap-2">
+                                <h4 className="font-semibold">{app.applicant_name || 'Anonymous'}</h4>
+                                <Badge variant="outline" className="text-xs">
+                                  {app.application_type === 'internal' ? 'Platform User' : 'External Applicant'}
+                                </Badge>
                               </div>
+                              {app.applicant_email && (
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                  <Mail className="w-3 h-3" />
+                                  {app.applicant_email}
+                                </div>
+                              )}
                               {app.applicant_phone && (
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                   <Phone className="w-3 h-3" />
                                   {app.applicant_phone}
                                 </div>
                               )}
                             </div>
-                            <Badge variant={
-                              app.status === 'accepted' ? 'default' :
-                              app.status === 'rejected' ? 'destructive' :
-                              'secondary'
-                            }>
-                              {app.status}
-                            </Badge>
+                            <div className="flex flex-col items-end gap-2">
+                              <Badge variant={
+                                app.status === 'accepted' ? 'default' :
+                                app.status === 'rejected' ? 'destructive' :
+                                'secondary'
+                              }>
+                                {app.status}
+                              </Badge>
+                              {app.application_type === 'external' && app.status === 'accepted' && (
+                                <Badge variant="secondary" className="gap-1 text-xs">
+                                  <Mail className="w-3 h-3" />
+                                  Invitation Sent
+                                </Badge>
+                              )}
+                            </div>
                           </div>
 
                           {app.cover_letter && (
@@ -826,15 +846,17 @@ export default function UnifiedJobsBoard() {
                                 <Button
                                   size="sm"
                                   onClick={() => updateApplicationStatus(app.id, 'accepted', app.application_type, selectedJobId)}
+                                  disabled={updatingApplicationId === app.id}
                                 >
-                                  Accept
+                                  {updatingApplicationId === app.id ? 'Processing...' : 'Accept'}
                                 </Button>
                                 <Button
                                   size="sm"
                                   variant="destructive"
                                   onClick={() => updateApplicationStatus(app.id, 'rejected', app.application_type, selectedJobId)}
+                                  disabled={updatingApplicationId === app.id}
                                 >
-                                  Reject
+                                  {updatingApplicationId === app.id ? 'Processing...' : 'Reject'}
                                 </Button>
                               </>
                             )}

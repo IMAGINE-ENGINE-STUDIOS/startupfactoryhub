@@ -102,7 +102,7 @@ export default function PublicJobApplicationPage() {
       // Upload resume to storage
       const fileExt = resumeFile.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `${jobId}/${fileName}`;
+      const filePath = `${jobId}/${fileName}`.replace(/\/+/g, '/');
 
       const { error: uploadError } = await supabase.storage
         .from('public-resumes')
