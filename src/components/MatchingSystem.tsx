@@ -156,9 +156,6 @@ export default function MatchingSystem() {
   const sendConnectionRequest = async (targetId: string, targetName: string, onSuccess: () => void) => {
     if (!user) return;
 
-    // Remove card immediately for instant feedback
-    onSuccess();
-
     try {
       // Get current user's name for notification
       const senderName = userProfile?.full_name || 'Someone';
@@ -171,6 +168,25 @@ export default function MatchingSystem() {
         .rpc('has_role', { _user_id: targetId, _role: 'mentor' });
 
       if (isAdvisor || isMentor) {
+        // Check if mentorship request already exists
+        const { data: existingRequest } = await supabase
+          .from('mentorship_relationships')
+          .select('id')
+          .eq('mentor_id', targetId)
+          .eq('mentee_id', user.id)
+          .maybeSingle();
+
+        if (existingRequest) {
+          toast({
+            title: "Already Connected",
+            description: "You've already sent a request to this person.",
+          });
+          return;
+        }
+
+        // Remove card immediately for instant feedback
+        onSuccess();
+
         // Send mentorship request
         const { error } = await supabase
           .from('mentorship_relationships')
@@ -181,19 +197,7 @@ export default function MatchingSystem() {
           });
 
         if (error) {
-          if (error.code === '23505') {
-            toast({
-              title: "Request Already Sent",
-              description: "You've already requested mentorship from this person.",
-            });
-          } else {
-            console.error('Mentorship request error:', error);
-            toast({
-              title: "Error",
-              description: "Failed to send mentorship request",
-              variant: "destructive",
-            });
-          }
+          console.error('Mentorship request error:', error);
           return;
         }
 
@@ -205,6 +209,24 @@ export default function MatchingSystem() {
           description: `Your request has been sent to ${targetName}.`,
         });
       } else {
+        // Check if connection request already exists
+        const { data: existingConnection } = await supabase
+          .from('connections')
+          .select('id')
+          .or(`and(requester_id.eq.${user.id},addressee_id.eq.${targetId}),and(requester_id.eq.${targetId},addressee_id.eq.${user.id})`)
+          .maybeSingle();
+
+        if (existingConnection) {
+          toast({
+            title: "Already Connected",
+            description: "You've already sent a request to this person.",
+          });
+          return;
+        }
+
+        // Remove card immediately for instant feedback
+        onSuccess();
+
         // Send regular connection request
         const { error } = await supabase
           .from('connections')
@@ -215,19 +237,7 @@ export default function MatchingSystem() {
           });
 
         if (error) {
-          if (error.code === '23505') {
-            toast({
-              title: "Request Already Sent",
-              description: "You've already sent a connection request to this person.",
-            });
-          } else {
-            console.error('Connection request error:', error);
-            toast({
-              title: "Error",
-              description: "Failed to send connection request",
-              variant: "destructive",
-            });
-          }
+          console.error('Connection request error:', error);
           return;
         }
 
