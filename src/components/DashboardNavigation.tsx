@@ -33,7 +33,8 @@ import {
   Compass,
   Video,
   Sparkles,
-  FileText
+  FileText,
+  Brain
 } from "lucide-react";
 import RecommendationPopup from "./RecommendationPopup";
 
@@ -155,11 +156,11 @@ const DashboardNavigation = () => {
                 <Search className="w-4 h-4" />
               </Button>
 
-              {/* Recommendations */}
+              {/* AI Recommendations */}
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="sm" className="relative">
-                    <Bell className={`w-4 h-4 ${hasNewRecommendations ? 'animate-shake' : ''}`} />
+                    <Brain className={`w-4 h-4 ${hasNewRecommendations ? 'animate-shake' : ''}`} />
                     {recommendationCount > 0 && (
                       <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[10px] flex items-center justify-center text-primary-foreground">
                         {recommendationCount}
@@ -170,7 +171,7 @@ const DashboardNavigation = () => {
                 <PopoverContent className="w-96 p-0" align="end">
                   <div className="p-4 border-b">
                     <div className="flex items-center gap-2">
-                      <Sparkles className="h-5 w-5 text-primary" />
+                      <Brain className="h-5 w-5 text-primary" />
                       <h3 className="font-semibold">AI Recommendations</h3>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">

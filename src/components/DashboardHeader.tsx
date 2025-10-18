@@ -18,7 +18,9 @@ export function DashboardHeader() {
       >
         <Home className="h-5 w-5" />
       </Button>
-      <NotificationCenter />
+      <div className="neon-glow hover:scale-110 transition-transform duration-300">
+        <NotificationCenter />
+      </div>
       <ThemeToggle />
     </div>
   );

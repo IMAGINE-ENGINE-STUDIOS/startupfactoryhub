@@ -8,7 +8,6 @@ import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import FloatingChat from "./components/FloatingChat";
-import RecommendationPopup from "./components/RecommendationPopup";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
@@ -88,7 +87,6 @@ const App = () => (
                 </Routes>
               </Suspense>
               <FloatingChat />
-              <RecommendationPopup />
             </BrowserRouter>
           </TooltipProvider>
         </AuthProvider>
