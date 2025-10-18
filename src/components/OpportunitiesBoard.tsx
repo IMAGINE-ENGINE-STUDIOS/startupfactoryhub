@@ -45,9 +45,42 @@ export function OpportunitiesBoard() {
   const [userCompanyId, setUserCompanyId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchOpportunities();
-    fetchUserCompany();
+    if (user) {
+      fetchOpportunities();
+      fetchUserCompany();
+    }
   }, [user]);
+
+  // Real-time updates for opportunities and applications
+  useEffect(() => {
+    const channel = supabase
+      .channel('opportunities-changes')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'jobs'
+      }, () => fetchOpportunities())
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'internships'
+      }, () => fetchOpportunities())
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'job_applications'
+      }, () => fetchOpportunities())
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'internship_applications'
+      }, () => fetchOpportunities())
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
 
   const fetchUserCompany = async () => {
     if (!user) return;
@@ -647,3 +680,5 @@ export function OpportunitiesBoard() {
     </div>
   );
 }
+
+export default OpportunitiesBoard;

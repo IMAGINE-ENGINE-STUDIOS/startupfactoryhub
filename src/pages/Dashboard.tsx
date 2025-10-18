@@ -21,8 +21,7 @@ import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import CompanyProfileManager from '@/components/CompanyProfileManager';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
-import { JobsBoard } from '@/components/JobsBoard';
-import InternshipBoard from '@/components/InternshipBoard';
+import OpportunitiesBoard from '@/components/OpportunitiesBoard';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import {
@@ -274,8 +273,7 @@ const Dashboard = () => {
 
           {/* Jobs Tab */}
           <TabsContent value="jobs" className="space-y-4">
-            <JobsBoard />
-            <InternshipBoard />
+            <OpportunitiesBoard />
           </TabsContent>
 
           {/* Learn Tab */}

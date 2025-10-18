@@ -13,12 +13,16 @@ import { Mail, FileText, ExternalLink, CheckCircle, XCircle, Clock } from 'lucid
 interface InternshipApplication {
   id: string;
   internship_id: string;
-  user_id: string;
+  user_id?: string;
   status: 'pending' | 'accepted' | 'rejected';
   cover_letter?: string;
   resume_url?: string;
   created_at: string;
-  profiles: {
+  applicant_type: 'platform' | 'external';
+  applicant_name?: string;
+  applicant_email?: string;
+  applicant_phone?: string;
+  profiles?: {
     full_name: string;
     email: string;
     avatar_url?: string;
@@ -66,8 +70,8 @@ export function InternshipApplicationsViewer() {
 
       const internshipIds = companyInternships.map(i => i.id);
 
-      // Get all applications for those internships
-      const { data, error } = await supabase
+      // Get platform applications
+      const { data: platformApps, error: platformError } = await supabase
         .from('internship_applications')
         .select(`
           *,
@@ -83,8 +87,35 @@ export function InternshipApplicationsViewer() {
         .in('internship_id', internshipIds)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setApplications(data as any);
+      if (platformError) throw platformError;
+
+      // Get public applications
+      const { data: publicApps, error: publicError } = await supabase
+        .from('public_internship_applications')
+        .select(`
+          *,
+          internships (
+            title
+          )
+        `)
+        .in('internship_id', internshipIds)
+        .order('created_at', { ascending: false });
+
+      if (publicError) throw publicError;
+
+      // Merge and format all applications
+      const allApplications = [
+        ...(platformApps || []).map((app: any) => ({
+          ...app,
+          applicant_type: 'platform' as const,
+        })),
+        ...(publicApps || []).map((app: any) => ({
+          ...app,
+          applicant_type: 'external' as const,
+        })),
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+      setApplications(allApplications);
     } catch (error) {
       console.error('Error fetching applications:', error);
       toast({
@@ -107,13 +138,21 @@ export function InternshipApplicationsViewer() {
     onUpdate: fetchApplications,
   });
 
+  useRealtime({
+    table: 'public_internship_applications',
+    onInsert: fetchApplications,
+    onUpdate: fetchApplications,
+  });
+
   const updateApplicationStatus = async (
     applicationId: string,
-    newStatus: 'accepted' | 'rejected'
+    newStatus: 'accepted' | 'rejected',
+    applicationType: 'platform' | 'external'
   ) => {
     try {
+      const table = applicationType === 'platform' ? 'internship_applications' : 'public_internship_applications';
       const { error } = await supabase
-        .from('internship_applications')
+        .from(table)
         .update({ status: newStatus })
         .eq('id', applicationId);
 
@@ -190,13 +229,20 @@ export function InternshipApplicationsViewer() {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-4">
                       <Avatar className="h-12 w-12">
-                        <AvatarImage src={application.profiles.avatar_url} />
+                        <AvatarImage src={application.profiles?.avatar_url} />
                         <AvatarFallback>
-                          {application.profiles.full_name?.charAt(0) || 'U'}
+                          {(application.profiles?.full_name || application.applicant_name)?.charAt(0) || 'U'}
                         </AvatarFallback>
                       </Avatar>
                       <div>
-                        <CardTitle>{application.profiles.full_name}</CardTitle>
+                        <div className="flex items-center gap-2">
+                          <CardTitle>
+                            {application.profiles?.full_name || application.applicant_name}
+                          </CardTitle>
+                          <Badge variant="outline" className="text-xs">
+                            {application.applicant_type === 'platform' ? 'Platform User' : 'External Applicant'}
+                          </Badge>
+                        </div>
                         <CardDescription>
                           Applied to: <strong>{application.internships.title}</strong>
                         </CardDescription>
@@ -221,8 +267,13 @@ export function InternshipApplicationsViewer() {
                 <CardContent className="space-y-4">
                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <Mail className="h-4 w-4" />
-                    {application.profiles.email}
+                    {application.profiles?.email || application.applicant_email}
                   </div>
+                  {application.applicant_phone && (
+                    <div className="text-sm text-muted-foreground">
+                      Phone: {application.applicant_phone}
+                    </div>
+                  )}
                   <div className="text-sm text-muted-foreground">
                     Applied on {format(new Date(application.created_at), 'MMM d, yyyy')}
                   </div>
@@ -251,14 +302,14 @@ export function InternshipApplicationsViewer() {
                   {application.status === 'pending' && (
                     <div className="flex gap-2 pt-2">
                       <Button
-                        onClick={() => updateApplicationStatus(application.id, 'accepted')}
+                        onClick={() => updateApplicationStatus(application.id, 'accepted', application.applicant_type)}
                         className="flex-1"
                       >
                         <CheckCircle className="h-4 w-4 mr-2" />
                         Accept
                       </Button>
                       <Button
-                        onClick={() => updateApplicationStatus(application.id, 'rejected')}
+                        onClick={() => updateApplicationStatus(application.id, 'rejected', application.applicant_type)}
                         variant="destructive"
                         className="flex-1"
                       >

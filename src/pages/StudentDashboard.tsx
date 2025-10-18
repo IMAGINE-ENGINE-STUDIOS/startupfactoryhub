@@ -12,8 +12,7 @@ import { BookOpen, Users, Trophy, Target, Play, CheckCircle, Clock, Star } from 
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
-import InternshipBoard from '@/components/InternshipBoard';
-import { JobsBoard } from '@/components/JobsBoard';
+import OpportunitiesBoard from '@/components/OpportunitiesBoard';
 
 import Leaderboard from '@/components/Leaderboard';
 import StudyGroups from '@/components/StudyGroups';
@@ -254,8 +253,7 @@ export default function StudentDashboard() {
               <TabsTrigger value="groups" className="flex-shrink-0">Study Groups</TabsTrigger>
               <TabsTrigger value="assignments" className="flex-shrink-0">Assignments</TabsTrigger>
               <TabsTrigger value="startups" className="flex-shrink-0">Startups</TabsTrigger>
-              <TabsTrigger value="internships" className="flex-shrink-0">Internships</TabsTrigger>
-              <TabsTrigger value="jobs" className="flex-shrink-0">Jobs</TabsTrigger>
+              <TabsTrigger value="jobs" className="flex-shrink-0">Opportunities</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
               <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
@@ -444,12 +442,8 @@ export default function StudentDashboard() {
             <MarketIntelligenceWidget />
           </TabsContent>
 
-          <TabsContent value="internships" className="space-y-4">
-            <InternshipBoard />
-          </TabsContent>
-
           <TabsContent value="jobs" className="space-y-4">
-            <JobsBoard />
+            <OpportunitiesBoard />
           </TabsContent>
 
           <TabsContent value="tools" className="space-y-4">
