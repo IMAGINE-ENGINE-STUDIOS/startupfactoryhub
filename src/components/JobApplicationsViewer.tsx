@@ -1,132 +1,148 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from '@/hooks/use-toast';
+import { FileText, Mail, Phone, CheckCircle, XCircle } from 'lucide-react';
 import { useRealtime } from '@/hooks/useRealtime';
-import { format } from 'date-fns';
-import { Mail, FileText, ExternalLink, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 interface JobApplication {
   id: string;
   job_id: string;
-  user_id?: string;
-  status: 'pending' | 'accepted' | 'rejected';
+  applicant_name: string;
+  applicant_email: string;
+  applicant_phone?: string;
   cover_letter?: string;
   resume_url?: string;
+  status: string;
   created_at: string;
-  applicant_type: 'platform' | 'external';
-  applicant_name?: string;
-  applicant_email?: string;
-  applicant_phone?: string;
-  profiles?: {
-    full_name: string;
-    email: string;
-    avatar_url?: string;
-  };
-  jobs: {
+  applicationType: 'internal' | 'external';
+  job: {
     title: string;
+    is_task_based: boolean;
   };
 }
 
-export function JobApplicationsViewer() {
+export const JobApplicationsViewer = () => {
+  const { user } = useAuth();
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'all' | 'pending' | 'accepted' | 'rejected'>('all');
-  const { toast } = useToast();
 
   const fetchApplications = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
+    if (!user) return;
 
-      // Get user's company
-      const { data: company, error: companyError } = await supabase
+    try {
+      const { data: company } = await supabase
         .from('companies')
         .select('id')
         .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (companyError) {
-        console.error('Error fetching company:', companyError);
-        throw companyError;
-      }
+        .single();
 
       if (!company) {
-        setApplications([]);
         setLoading(false);
         return;
       }
 
-      // Get company's jobs first
-      const { data: companyJobs } = await supabase
+      const { data: jobs } = await supabase
         .from('jobs')
         .select('id')
         .eq('company_id', company.id);
 
-      if (!companyJobs || companyJobs.length === 0) {
-        setApplications([]);
+      if (!jobs || jobs.length === 0) {
         setLoading(false);
         return;
       }
 
-      const jobIds = companyJobs.map(j => j.id);
+      const jobIds = jobs.map(j => j.id);
 
-      // Get platform applications
-      const { data: platformApps, error: platformError } = await supabase
+      const { data: internalApps } = await supabase
         .from('job_applications')
         .select(`
-          *,
-          profiles (
-            full_name,
-            email,
-            avatar_url
-          ),
-          jobs (
-            title
-          )
+          id,
+          job_id,
+          user_id,
+          status,
+          cover_letter,
+          resume_url,
+          created_at,
+          jobs!inner(title, is_task_based)
         `)
         .in('job_id', jobIds)
         .order('created_at', { ascending: false });
 
-      if (platformError) throw platformError;
+      // For internal apps, get user profile data separately
+      const formattedInternal = await Promise.all(
+        (internalApps || []).map(async (app) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, email')
+            .eq('user_id', app.user_id)
+            .single();
 
-      // Get public applications
-      const { data: publicApps, error: publicError } = await supabase
+          return {
+            id: app.id,
+            job_id: app.job_id,
+            applicant_name: profile?.full_name || 'Unknown',
+            applicant_email: profile?.email || '',
+            applicant_phone: undefined,
+            cover_letter: app.cover_letter,
+            resume_url: app.resume_url,
+            status: app.status,
+            created_at: app.created_at,
+            applicationType: 'internal' as const,
+            job: {
+              title: app.jobs.title,
+              is_task_based: app.jobs.is_task_based
+            }
+          };
+        })
+      );
+
+      const { data: externalApps } = await supabase
         .from('public_job_applications')
         .select(`
-          *,
-          jobs (
-            title
-          )
+          id,
+          job_id,
+          applicant_name,
+          applicant_email,
+          applicant_phone,
+          status,
+          cover_letter,
+          resume_url,
+          created_at,
+          jobs!inner(title, is_task_based)
         `)
         .in('job_id', jobIds)
         .order('created_at', { ascending: false });
 
-      if (publicError) throw publicError;
+      const formattedExternal = (externalApps || []).map(app => ({
+        id: app.id,
+        job_id: app.job_id,
+        applicant_name: app.applicant_name,
+        applicant_email: app.applicant_email,
+        applicant_phone: app.applicant_phone,
+        cover_letter: app.cover_letter,
+        resume_url: app.resume_url,
+        status: app.status,
+        created_at: app.created_at,
+        applicationType: 'external' as const,
+        job: {
+          title: app.jobs.title,
+          is_task_based: app.jobs.is_task_based
+        }
+      }));
 
-      // Merge and format all applications
-      const allApplications = [
-        ...(platformApps || []).map((app: any) => ({
-          ...app,
-          applicant_type: 'platform' as const,
-        })),
-        ...(publicApps || []).map((app: any) => ({
-          ...app,
-          applicant_type: 'external' as const,
-        })),
-      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-
-      setApplications(allApplications);
+      setApplications([...formattedInternal, ...formattedExternal]);
     } catch (error) {
       console.error('Error fetching applications:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load applications',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to load applications",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
@@ -135,7 +151,7 @@ export function JobApplicationsViewer() {
 
   useEffect(() => {
     fetchApplications();
-  }, []);
+  }, [user]);
 
   useRealtime({
     table: 'job_applications',
@@ -149,42 +165,74 @@ export function JobApplicationsViewer() {
     onUpdate: fetchApplications,
   });
 
-  const updateApplicationStatus = async (
-    applicationId: string,
-    newStatus: 'accepted' | 'rejected',
-    applicationType: 'platform' | 'external'
-  ) => {
+  const updateApplicationStatus = async (appId: string, status: 'accepted' | 'rejected', applicationType: 'internal' | 'external') => {
     try {
-      const table = applicationType === 'platform' ? 'job_applications' : 'public_job_applications';
+      const table = applicationType === 'internal' ? 'job_applications' : 'public_job_applications';
+      
       const { error } = await supabase
         .from(table)
-        .update({ status: newStatus })
-        .eq('id', applicationId);
+        .update({ status })
+        .eq('id', appId);
 
       if (error) throw error;
 
+      if (status === 'accepted' && applicationType === 'external') {
+        const app = applications.find(a => a.id === appId);
+        if (app?.job.is_task_based) {
+          await createInvitation(appId, app.applicant_email);
+        }
+      }
+
       toast({
-        title: 'Success',
-        description: `Application ${newStatus}`,
+        title: "Success",
+        description: `Application ${status}`,
       });
 
       fetchApplications();
     } catch (error) {
       console.error('Error updating application:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to update application status',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to update application status",
+        variant: "destructive",
       });
     }
   };
 
-  const filteredApplications = applications.filter((app) => {
+  const createInvitation = async (applicationId: string, email: string) => {
+    try {
+      const token = crypto.randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 48);
+
+      const { error } = await supabase
+        .from('application_invitations')
+        .insert({
+          application_id: applicationId,
+          applicant_email: email,
+          invitation_token: token,
+          expires_at: expiresAt.toISOString(),
+        });
+
+      if (error) throw error;
+
+      await supabase.functions.invoke('send-application-invitation', {
+        body: { email, token, applicationId }
+      });
+
+      toast({
+        title: "Invitation Sent",
+        description: "An invitation email has been sent to the applicant.",
+      });
+    } catch (error) {
+      console.error('Error creating invitation:', error);
+    }
+  };
+
+  const filteredApplications = applications.filter(app => {
     if (filter === 'all') return true;
     return app.status === filter;
   });
-
-  const pendingCount = applications.filter((app) => app.status === 'pending').length;
 
   if (loading) {
     return <div className="text-center py-8">Loading applications...</div>;
@@ -194,29 +242,24 @@ export function JobApplicationsViewer() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Job Applications</h2>
+          <h2 className="text-3xl font-bold">Job Applications</h2>
           <p className="text-muted-foreground">
-            Manage applications for your job postings
+            {applications.filter(a => a.status === 'pending').length} pending applications
           </p>
         </div>
-        {pendingCount > 0 && (
-          <Badge variant="secondary" className="text-lg px-4 py-2">
-            {pendingCount} Pending
-          </Badge>
-        )}
       </div>
 
-      <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
+      <Tabs value={filter} onValueChange={(v) => setFilter(v as any)}>
         <TabsList>
           <TabsTrigger value="all">All ({applications.length})</TabsTrigger>
           <TabsTrigger value="pending">
-            Pending ({applications.filter((a) => a.status === 'pending').length})
+            Pending ({applications.filter(a => a.status === 'pending').length})
           </TabsTrigger>
           <TabsTrigger value="accepted">
-            Accepted ({applications.filter((a) => a.status === 'accepted').length})
+            Accepted ({applications.filter(a => a.status === 'accepted').length})
           </TabsTrigger>
           <TabsTrigger value="rejected">
-            Rejected ({applications.filter((a) => a.status === 'rejected').length})
+            Rejected ({applications.filter(a => a.status === 'rejected').length})
           </TabsTrigger>
         </TabsList>
 
@@ -224,105 +267,100 @@ export function JobApplicationsViewer() {
           {filteredApplications.length === 0 ? (
             <Card>
               <CardContent className="py-8 text-center text-muted-foreground">
-                No {filter !== 'all' && filter} applications yet
+                No applications found
               </CardContent>
             </Card>
           ) : (
-            filteredApplications.map((application) => (
-              <Card key={application.id}>
+            filteredApplications.map((app) => (
+              <Card key={app.id}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-12 w-12">
-                        <AvatarImage src={application.profiles?.avatar_url} />
-                        <AvatarFallback>
-                          {(application.profiles?.full_name || application.applicant_name)?.charAt(0) || 'U'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <CardTitle>
-                            {application.profiles?.full_name || application.applicant_name}
-                          </CardTitle>
-                          <Badge variant="outline" className="text-xs">
-                            {application.applicant_type === 'platform' ? 'Platform User' : 'External Applicant'}
-                          </Badge>
-                        </div>
-                        <CardDescription>
-                          Applied to: <strong>{application.jobs.title}</strong>
-                        </CardDescription>
-                      </div>
+                    <div className="space-y-1">
+                      <CardTitle className="flex items-center gap-2">
+                        {app.applicant_name}
+                        <Badge variant={app.applicationType === 'internal' ? 'default' : 'secondary'}>
+                          {app.applicationType}
+                        </Badge>
+                        {app.job.is_task_based && (
+                          <Badge variant="outline">Task-Based</Badge>
+                        )}
+                      </CardTitle>
+                      <CardDescription>Applied for: {app.job.title}</CardDescription>
                     </div>
                     <Badge
                       variant={
-                        application.status === 'accepted'
-                          ? 'default'
-                          : application.status === 'rejected'
-                          ? 'destructive'
-                          : 'secondary'
+                        app.status === 'accepted' ? 'default' :
+                        app.status === 'rejected' ? 'destructive' : 'secondary'
                       }
                     >
-                      {application.status === 'pending' && <Clock className="h-3 w-3 mr-1" />}
-                      {application.status === 'accepted' && <CheckCircle className="h-3 w-3 mr-1" />}
-                      {application.status === 'rejected' && <XCircle className="h-3 w-3 mr-1" />}
-                      {application.status}
+                      {app.status}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Mail className="h-4 w-4" />
-                    {application.profiles?.email || application.applicant_email}
-                  </div>
-                  {application.applicant_phone && (
-                    <div className="text-sm text-muted-foreground">
-                      Phone: {application.applicant_phone}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="flex items-center gap-2 text-sm">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                      <a href={`mailto:${app.applicant_email}`} className="hover:underline">
+                        {app.applicant_email}
+                      </a>
                     </div>
-                  )}
-                  <div className="text-sm text-muted-foreground">
-                    Applied on {format(new Date(application.created_at), 'MMM d, yyyy')}
+                    {app.applicant_phone && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <a href={`tel:${app.applicant_phone}`} className="hover:underline">
+                          {app.applicant_phone}
+                        </a>
+                      </div>
+                    )}
                   </div>
 
-                  {application.cover_letter && (
+                  {app.cover_letter && (
                     <div className="space-y-2">
-                      <div className="flex items-center gap-2 text-sm font-medium">
-                        <FileText className="h-4 w-4" />
-                        Cover Letter
-                      </div>
-                      <p className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
-                        {application.cover_letter}
+                      <h4 className="font-semibold text-sm">Cover Letter</h4>
+                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                        {app.cover_letter}
                       </p>
                     </div>
                   )}
 
-                  {application.resume_url && (
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={application.resume_url} target="_blank" rel="noopener noreferrer">
-                        <ExternalLink className="h-4 w-4 mr-2" />
+                  <div className="flex items-center gap-2">
+                    {app.resume_url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.open(app.resume_url, '_blank')}
+                      >
+                        <FileText className="h-4 w-4 mr-2" />
                         View Resume
-                      </a>
-                    </Button>
-                  )}
+                      </Button>
+                    )}
+                    
+                    {app.status === 'pending' && (
+                      <>
+                        <Button
+                          size="sm"
+                          variant="default"
+                          onClick={() => updateApplicationStatus(app.id, 'accepted', app.applicationType)}
+                        >
+                          <CheckCircle className="h-4 w-4 mr-2" />
+                          Accept
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          onClick={() => updateApplicationStatus(app.id, 'rejected', app.applicationType)}
+                        >
+                          <XCircle className="h-4 w-4 mr-2" />
+                          Reject
+                        </Button>
+                      </>
+                    )}
+                  </div>
 
-                  {application.status === 'pending' && (
-                    <div className="flex gap-2 pt-2">
-                      <Button
-                        onClick={() => updateApplicationStatus(application.id, 'accepted', application.applicant_type)}
-                        className="flex-1"
-                      >
-                        <CheckCircle className="h-4 w-4 mr-2" />
-                        Accept
-                      </Button>
-                      <Button
-                        onClick={() => updateApplicationStatus(application.id, 'rejected', application.applicant_type)}
-                        variant="destructive"
-                        className="flex-1"
-                      >
-                        <XCircle className="h-4 w-4 mr-2" />
-                        Reject
-                      </Button>
-                    </div>
-                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Applied {new Date(app.created_at).toLocaleDateString()}
+                  </p>
                 </CardContent>
               </Card>
             ))
@@ -331,4 +369,4 @@ export function JobApplicationsViewer() {
       </Tabs>
     </div>
   );
-}
+};

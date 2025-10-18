@@ -40,6 +40,7 @@ export default function PublicJobApplicationPage() {
   const [loading, setLoading] = useState(true);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [resumeFile, setResumeFile] = useState<File | null>(null);
 
   useEffect(() => {
     if (jobId) {
@@ -85,10 +86,39 @@ export default function PublicJobApplicationPage() {
     e.preventDefault();
     if (!jobId || submitting) return;
 
+    if (!resumeFile) {
+      toast({
+        title: 'Resume Required',
+        description: 'Please upload your resume/CV to continue.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     setSubmitting(true);
     const formData = new FormData(e.currentTarget);
 
     try {
+      // Upload resume to storage
+      const fileExt = resumeFile.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+      const filePath = `${jobId}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('public-resumes')
+        .upload(filePath, resumeFile, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('public-resumes')
+        .getPublicUrl(filePath);
+
+      // Submit application with resume URL
       const { error } = await supabase
         .from('public_job_applications')
         .insert({
@@ -97,6 +127,7 @@ export default function PublicJobApplicationPage() {
           applicant_email: formData.get('email') as string,
           applicant_phone: formData.get('phone') as string || null,
           cover_letter: formData.get('cover_letter') as string || null,
+          resume_url: publicUrl,
           status: 'pending',
         });
 
@@ -295,6 +326,35 @@ export default function PublicJobApplicationPage() {
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone Number</Label>
                 <Input id="phone" name="phone" type="tel" />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="resume">Resume/CV *</Label>
+                <Input
+                  id="resume"
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      // Validate file size (max 5MB)
+                      if (file.size > 5 * 1024 * 1024) {
+                        toast({
+                          title: 'File Too Large',
+                          description: 'Please upload a file smaller than 5MB.',
+                          variant: 'destructive',
+                        });
+                        e.target.value = '';
+                        return;
+                      }
+                      setResumeFile(file);
+                    }
+                  }}
+                  required
+                />
+                <p className="text-sm text-muted-foreground">
+                  Accepted formats: PDF, DOC, DOCX (Max 5MB)
+                </p>
               </div>
 
               <div className="space-y-2">

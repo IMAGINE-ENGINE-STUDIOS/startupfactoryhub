@@ -280,6 +280,53 @@ export type Database = {
         }
         Relationships: []
       }
+      application_invitations: {
+        Row: {
+          accepted_at: string | null
+          applicant_email: string
+          application_id: string
+          created_at: string | null
+          expires_at: string
+          id: string
+          invitation_token: string
+          invited_at: string | null
+          linked_user_id: string | null
+          status: string | null
+        }
+        Insert: {
+          accepted_at?: string | null
+          applicant_email: string
+          application_id: string
+          created_at?: string | null
+          expires_at: string
+          id?: string
+          invitation_token: string
+          invited_at?: string | null
+          linked_user_id?: string | null
+          status?: string | null
+        }
+        Update: {
+          accepted_at?: string | null
+          applicant_email?: string
+          application_id?: string
+          created_at?: string | null
+          expires_at?: string
+          id?: string
+          invitation_token?: string
+          invited_at?: string | null
+          linked_user_id?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_invitations_application_id_fkey"
+            columns: ["application_id"]
+            isOneToOne: false
+            referencedRelation: "public_job_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       certificates: {
         Row: {
           certificate_url: string | null
@@ -2437,7 +2484,7 @@ export type Database = {
           created_at: string | null
           id: string
           notes: string | null
-          student_id: string
+          student_id: string | null
           task_id: string
           time_spent_hours: number | null
           updated_at: string | null
@@ -2449,7 +2496,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           notes?: string | null
-          student_id: string
+          student_id?: string | null
           task_id: string
           time_spent_hours?: number | null
           updated_at?: string | null
@@ -2461,7 +2508,7 @@ export type Database = {
           created_at?: string | null
           id?: string
           notes?: string | null
-          student_id?: string
+          student_id?: string | null
           task_id?: string
           time_spent_hours?: number | null
           updated_at?: string | null

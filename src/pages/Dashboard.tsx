@@ -22,6 +22,7 @@ import CompanyProfileManager from '@/components/CompanyProfileManager';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
+import { JobApplicationsViewer } from '@/components/JobApplicationsViewer';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import JobTaskManager from '@/components/JobTaskManager';
@@ -155,6 +156,7 @@ const Dashboard = () => {
               <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
               <TabsTrigger value="profile" className="flex-shrink-0">Profile</TabsTrigger>
               <TabsTrigger value="jobs" className="flex-shrink-0">Jobs</TabsTrigger>
+              <TabsTrigger value="applications" className="flex-shrink-0">Applications</TabsTrigger>
               <TabsTrigger value="learn" className="flex-shrink-0">Learn</TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
@@ -279,6 +281,11 @@ const Dashboard = () => {
           <TabsContent value="jobs" className="space-y-4">
             <UnifiedJobsBoard />
             <JobTaskManager />
+          </TabsContent>
+
+          {/* Applications Tab */}
+          <TabsContent value="applications" className="space-y-4">
+            <JobApplicationsViewer />
           </TabsContent>
 
           {/* Learn Tab */}
