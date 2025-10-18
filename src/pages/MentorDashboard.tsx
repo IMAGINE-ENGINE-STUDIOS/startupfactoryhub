@@ -28,7 +28,7 @@ import { DashboardHeader } from "@/components/DashboardHeader";
 import { 
   Users, 
   TrendingUp, 
-  Calendar, 
+  Calendar as CalendarIcon,
   MessageSquare,
   Bell,
   Settings,
@@ -37,11 +37,17 @@ import {
   Clock,
   Target
 } from "lucide-react";
+import UnifiedCalendar from '@/components/UnifiedCalendar';
+import CreateSessionDialog from '@/components/CreateSessionDialog';
+import { CreateEventDialog } from '@/components/CreateEventDialog';
+import { useState } from 'react';
 
 const MentorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const { profile: profileWithRole } = useProfileWithRole();
+  const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
+  const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background pb-20 lg:pb-6 relative">
@@ -112,7 +118,7 @@ const MentorDashboard = () => {
                       Message Mentees
                     </Button>
                     <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/calendar")}>
-                      <Calendar className="w-4 h-4 mr-2" />
+                      <CalendarIcon className="w-4 h-4 mr-2" />
                       Schedule Session
                     </Button>
                     <Button variant="outline" className="w-full justify-start">
@@ -137,10 +143,17 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <MentorCalendarWidget />
-              <AvailabilityManager />
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
+              <Button onClick={() => setCreateSessionDialogOpen(true)} variant="outline" className="gap-2 w-full sm:w-auto">
+                <CalendarIcon className="h-4 w-4" />
+                <span className="sm:inline">Schedule Session</span>
+              </Button>
+              <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2 w-full sm:w-auto">
+                <Plus className="h-4 w-4" />
+                <span className="sm:inline">Create Event</span>
+              </Button>
             </div>
+            <UnifiedCalendar />
           </TabsContent>
 
           <TabsContent value="endorsements" className="space-y-6">
@@ -209,6 +222,16 @@ const MentorDashboard = () => {
 
       {/* Floating Chat with AI */}
       <FloatingChat />
+      <CreateSessionDialog 
+        open={createSessionDialogOpen}
+        onOpenChange={setCreateSessionDialogOpen}
+        onSessionCreated={() => {}}
+      />
+      <CreateEventDialog 
+        open={createEventDialogOpen}
+        onOpenChange={setCreateEventDialogOpen}
+        onEventCreated={() => {}}
+      />
     </div>
   );
 };

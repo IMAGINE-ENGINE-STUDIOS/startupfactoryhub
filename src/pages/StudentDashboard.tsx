@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
@@ -16,12 +16,16 @@ import UnifiedCalendar from '@/components/UnifiedCalendar';
 import EducationalResources from '@/components/EducationalResources';
 import StudentProfileView from '@/components/StudentProfileView';
 import FloatingChat from '@/components/FloatingChat';
-import { BookOpen } from 'lucide-react';
+import CreateSessionDialog from '@/components/CreateSessionDialog';
+import { CreateEventDialog } from '@/components/CreateEventDialog';
+import { Calendar as CalendarIcon, Plus } from 'lucide-react';
 
 export default function StudentDashboard() {
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [studentProfile, setStudentProfile] = useState<any>(null);
   const [certificates, setCertificates] = useState<any[]>([]);
+  const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
+  const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const { user } = useAuth();
   const { profile: profileWithRole } = useProfileWithRole();
 
@@ -111,12 +115,11 @@ export default function StudentDashboard() {
         </div>
 
         {/* Main Tabs Navigation */}
-        <Tabs defaultValue="overview" className="space-y-6">
+        <Tabs defaultValue="social" className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="profile">Profile</TabsTrigger>
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9">
               <TabsTrigger value="social">Social</TabsTrigger>
+              <TabsTrigger value="profile">Profile</TabsTrigger>
               <TabsTrigger value="network">Network</TabsTrigger>
               <TabsTrigger value="learning">Learning</TabsTrigger>
               <TabsTrigger value="jobs">Opportunities</TabsTrigger>
@@ -127,27 +130,12 @@ export default function StudentDashboard() {
             </TabsList>
           </div>
 
-          <TabsContent value="overview" className="space-y-4">
-            <Card className="tech-card border-0">
-              <CardContent className="p-8 text-center">
-                <div className="max-w-md mx-auto space-y-4">
-                  <BookOpen className="h-16 w-16 text-primary mx-auto" />
-                  <h2 className="text-2xl font-bold">Welcome to Your Student Dashboard</h2>
-                  <p className="text-muted-foreground">
-                    Your personalized learning hub. Navigate through the tabs to explore courses, 
-                    connect with mentors, find opportunities, and track your progress.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="social" className="space-y-4">
+            <UnifiedCommunityFeed />
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
             <StudentProfileView />
-          </TabsContent>
-
-          <TabsContent value="social" className="space-y-4">
-            <UnifiedCommunityFeed />
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
@@ -163,6 +151,16 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
+              <Button onClick={() => setCreateSessionDialogOpen(true)} variant="outline" className="gap-2 w-full sm:w-auto">
+                <CalendarIcon className="h-4 w-4" />
+                <span className="sm:inline">Schedule Session</span>
+              </Button>
+              <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2 w-full sm:w-auto">
+                <Plus className="h-4 w-4" />
+                <span className="sm:inline">Create Event</span>
+              </Button>
+            </div>
             <UnifiedCalendar />
           </TabsContent>
 
@@ -182,6 +180,16 @@ export default function StudentDashboard() {
 
       {/* Floating Chat with AI */}
       <FloatingChat />
+      <CreateSessionDialog 
+        open={createSessionDialogOpen}
+        onOpenChange={setCreateSessionDialogOpen}
+        onSessionCreated={() => {}}
+      />
+      <CreateEventDialog 
+        open={createEventDialogOpen}
+        onOpenChange={setCreateEventDialogOpen}
+        onEventCreated={() => {}}
+      />
     </div>
   );
 }

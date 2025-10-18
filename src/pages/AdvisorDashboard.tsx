@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, Users, MessageSquare, TrendingUp, Star, Clock, Award } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, MessageSquare, TrendingUp, Star, Clock, Award, Plus } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import MentorshipRequests from '@/components/MentorshipRequests';
@@ -23,6 +23,8 @@ import StartupProfileDialog from '@/components/StartupProfileDialog';
 import NetworkBrowser from '@/components/NetworkBrowser';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { DashboardHeader } from '@/components/DashboardHeader';
+import CreateSessionDialog from '@/components/CreateSessionDialog';
+import { CreateEventDialog } from '@/components/CreateEventDialog';
 
 interface Startup {
   id: string;
@@ -42,6 +44,8 @@ export default function AdvisorDashboard() {
   const [upcomingSessions, setUpcomingSessions] = useState<any[]>([]);
   const [selectedStartup, setSelectedStartup] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
+  const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -322,7 +326,7 @@ export default function AdvisorDashboard() {
     { 
       title: 'Sessions This Month', 
       value: mentorProfile?.total_sessions?.toString() || '0', 
-      icon: Calendar, 
+      icon: CalendarIcon, 
       color: 'text-accent' 
     },
     { 
@@ -494,6 +498,16 @@ export default function AdvisorDashboard() {
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
+              <Button onClick={() => setCreateSessionDialogOpen(true)} variant="outline" className="gap-2 w-full sm:w-auto">
+                <CalendarIcon className="h-4 w-4" />
+                <span className="sm:inline">Schedule Session</span>
+              </Button>
+              <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2 w-full sm:w-auto">
+                <Plus className="h-4 w-4" />
+                <span className="sm:inline">Create Event</span>
+              </Button>
+            </div>
             <UnifiedCalendar />
           </TabsContent>
 
@@ -620,6 +634,16 @@ export default function AdvisorDashboard() {
 
       {/* Floating Chat with AI */}
       <FloatingChat />
+      <CreateSessionDialog 
+        open={createSessionDialogOpen}
+        onOpenChange={setCreateSessionDialogOpen}
+        onSessionCreated={() => {}}
+      />
+      <CreateEventDialog 
+        open={createEventDialogOpen}
+        onOpenChange={setCreateEventDialogOpen}
+        onEventCreated={() => {}}
+      />
     </div>
   );
 }
