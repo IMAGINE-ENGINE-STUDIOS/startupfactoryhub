@@ -51,9 +51,9 @@ export function LightPaperDocument({
     saveProject
   } = useLightPaperProjects("document");
 
-  // Apply dark mode on initial load
+  // Apply dark mode only once on mount if no project loaded
   useEffect(() => {
-    setTimeout(() => {
+    if (!selectedProject) {
       const pageElement = document.querySelector('.page') as HTMLElement;
       if (pageElement) {
         pageElement.style.backgroundColor = 'black';
@@ -62,7 +62,7 @@ export function LightPaperDocument({
       if (editorRef.current) {
         editorRef.current.style.color = 'white';
       }
-    }, 100);
+    }
   }, []);
 
   // Initialize signature canvas with transparent background
@@ -79,26 +79,41 @@ export function LightPaperDocument({
 
   // Load project and versions when selectedProject changes
   useEffect(() => {
+    if (!selectedProject || selectedProject.project_type !== "document") return;
+    
     const loadProjectWithVersions = async () => {
-      if (selectedProject && selectedProject.project_type === "document") {
-        setCurrentProjectId(selectedProject.id);
-        setProjectTitle(selectedProject.title);
-        const content = selectedProject.content as any;
-        if (content) {
-          if (content.html && editorRef.current) {
-            editorRef.current.innerHTML = content.html;
-          }
-          if (content.font) setSelectedFont(content.font);
-          if (content.size) setSelectedSize(content.size);
+      setCurrentProjectId(selectedProject.id);
+      setProjectTitle(selectedProject.title);
+      const content = selectedProject.content as any;
+      
+      if (content) {
+        if (content.html && editorRef.current) {
+          editorRef.current.innerHTML = content.html;
         }
-
-        // Load version history for this session
-        await loadVersionHistory();
-        toast.success("Document loaded");
+        if (content.font) setSelectedFont(content.font);
+        if (content.size) setSelectedSize(content.size);
+        
+        // Restore dark mode state
+        if (content.darkMode !== undefined) {
+          setIsDarkMode(content.darkMode);
+          const pageElement = document.querySelector('.page') as HTMLElement;
+          if (pageElement) {
+            pageElement.style.backgroundColor = content.darkMode ? 'black' : 'white';
+            pageElement.style.color = content.darkMode ? 'white' : 'black';
+          }
+          if (editorRef.current) {
+            editorRef.current.style.color = content.darkMode ? 'white' : 'black';
+          }
+        }
       }
+
+      // Load version history for this session
+      await loadVersionHistory();
+      toast.success("Document loaded");
     };
+    
     loadProjectWithVersions();
-  }, [selectedProject]);
+  }, [selectedProject?.id]);
 
   // Cleanup temporary versions on logout or unmount
   useEffect(() => {
@@ -168,7 +183,8 @@ export function LightPaperDocument({
         content: {
           html,
           font: selectedFont,
-          size: selectedSize
+          size: selectedSize,
+          darkMode: isDarkMode
         },
         version_number: versionNumber,
         is_temporary: true
@@ -224,7 +240,7 @@ export function LightPaperDocument({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [versions, selectedFont, selectedSize, isHighlighterActive, selectedHighlight]);
+  }, [isHighlighterActive, selectedHighlight]);
 
   // Navigate version history from database
   const goToPreviousVersion = async () => {
@@ -235,6 +251,17 @@ export function LightPaperDocument({
         editorRef.current.innerHTML = version.content.html;
         if (version.content.font) setSelectedFont(version.content.font);
         if (version.content.size) setSelectedSize(version.content.size);
+        if (version.content.darkMode !== undefined) {
+          setIsDarkMode(version.content.darkMode);
+          const pageElement = document.querySelector('.page') as HTMLElement;
+          if (pageElement) {
+            pageElement.style.backgroundColor = version.content.darkMode ? 'black' : 'white';
+            pageElement.style.color = version.content.darkMode ? 'white' : 'black';
+          }
+          if (editorRef.current) {
+            editorRef.current.style.color = version.content.darkMode ? 'white' : 'black';
+          }
+        }
         setCurrentVersionIndex(newIndex);
         toast.success(`Restored version ${newIndex + 1}`);
       }
@@ -250,6 +277,17 @@ export function LightPaperDocument({
         editorRef.current.innerHTML = version.content.html;
         if (version.content.font) setSelectedFont(version.content.font);
         if (version.content.size) setSelectedSize(version.content.size);
+        if (version.content.darkMode !== undefined) {
+          setIsDarkMode(version.content.darkMode);
+          const pageElement = document.querySelector('.page') as HTMLElement;
+          if (pageElement) {
+            pageElement.style.backgroundColor = version.content.darkMode ? 'black' : 'white';
+            pageElement.style.color = version.content.darkMode ? 'white' : 'black';
+          }
+          if (editorRef.current) {
+            editorRef.current.style.color = version.content.darkMode ? 'white' : 'black';
+          }
+        }
         setCurrentVersionIndex(newIndex);
         toast.success(`Restored version ${newIndex + 1}`);
       }
@@ -592,7 +630,8 @@ export function LightPaperDocument({
     const content = {
       html: editorRef.current?.innerHTML || "",
       font: selectedFont,
-      size: selectedSize
+      size: selectedSize,
+      darkMode: isDarkMode
     };
     const result = await saveProject(projectTitle, "document", content, currentProjectId || undefined);
     if (result) {
