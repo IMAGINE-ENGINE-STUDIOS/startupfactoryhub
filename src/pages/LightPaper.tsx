@@ -40,16 +40,16 @@ export default function LightPaper() {
   }, []);
   return <div className="h-screen flex flex-col bg-background overflow-hidden">
       <div className="border-b bg-card flex-shrink-0">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3">
               <div className="flex items-center gap-2">
-                <FileText className="h-8 w-8 text-primary" />
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+                <FileText className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+                <h1 className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
                   LightPaper
                 </h1>
               </div>
-              <span className="text-sm text-muted-foreground">
+              <span className="hidden lg:inline-block text-sm text-muted-foreground">
                 Complete Productivity Suite
               </span>
             </div>
@@ -57,53 +57,57 @@ export default function LightPaper() {
               <Button 
                 variant="outline" 
                 onClick={() => setShowQuickNav(true)} 
-                className="gap-2"
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
                 title="Quick Navigation (Ctrl+K)"
               >
-                <Command className="h-4 w-4" />
-                Quick Nav
+                <Command className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Quick Nav</span>
               </Button>
-              <Button variant="outline" onClick={() => setShowFiles(true)} className="gap-2">
-                <FolderOpen className="h-4 w-4" />
-                My Files
+              <Button 
+                variant="outline" 
+                onClick={() => setShowFiles(true)} 
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+              >
+                <FolderOpen className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">My Files</span>
               </Button>
               
-              <div className="flex border rounded-lg p-1 bg-muted/30">
+              <div className="flex border rounded-lg p-0.5 sm:p-1 bg-muted/30">
                 <Button 
                   variant={activeTab === "document" ? "secondary" : "ghost"} 
                   size="sm" 
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                   onClick={() => setActiveTab("document")}
                   title="Document"
                 >
-                  <FileText className="h-4 w-4" />
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
                 <Button 
                   variant={activeTab === "spreadsheet" ? "secondary" : "ghost"} 
                   size="sm" 
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                   onClick={() => setActiveTab("spreadsheet")}
                   title="Spreadsheet"
                 >
-                  <Table className="h-4 w-4" />
+                  <Table className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
                 <Button 
                   variant={activeTab === "presentation" ? "secondary" : "ghost"} 
                   size="sm" 
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                   onClick={() => setActiveTab("presentation")}
                   title="Presentation"
                 >
-                  <Presentation className="h-4 w-4" />
+                  <Presentation className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
                 <Button 
                   variant={activeTab === "pdf-editor" ? "secondary" : "ghost"} 
                   size="sm" 
-                  className="h-8 w-8 p-0"
+                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
                   onClick={() => setActiveTab("pdf-editor")}
                   title="PDF Editor & Sign"
                 >
-                  <FileSignature className="h-4 w-4" />
+                  <FileSignature className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             </div>

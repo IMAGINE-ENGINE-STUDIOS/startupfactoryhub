@@ -29,6 +29,7 @@ import { TextFormatToolbar } from "./TextFormatToolbar";
 import { TextSearchDialog, SearchOptions } from "./TextSearchDialog";
 import { CollaborationPresence } from "./CollaborationPresence";
 import { PDFActivityPanel } from "./PDFActivityPanel";
+import { MobileToolbar } from "./MobileToolbar";
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -1408,11 +1409,12 @@ export function LightPaperPDFEditor({
       toast.error(error.message || "Failed to save PDF");
     }
   };
-  return <div className="flex flex-col gap-4 h-[calc(100vh-200px)] relative">
+  return <div className="flex flex-col gap-2 sm:gap-4 h-[calc(100vh-200px)] relative">
       {/* Main PDF Viewer */}
-      <div className="flex flex-col gap-4 flex-1">
-        <CollapsibleToolbar>
-          <div className="flex items-center gap-2 flex-wrap">
+      <div className="flex flex-col gap-2 sm:gap-4 flex-1">
+        <div className="hidden md:block">
+          <CollapsibleToolbar>
+            <div className="flex items-center gap-2 flex-wrap">
             {/* File Upload */}
             <Button 
               variant="outline" 
@@ -1589,7 +1591,144 @@ export function LightPaperPDFEditor({
               />
             )}
           </div>
-        </CollapsibleToolbar>
+          </CollapsibleToolbar>
+        </div>
+        
+        {/* Mobile Toolbar */}
+        <div className="md:hidden">
+          <MobileToolbar 
+            groups={[
+              {
+                label: "File",
+                actions: [
+                  {
+                    icon: Upload,
+                    label: "Upload PDF",
+                    onClick: () => pdfInputRef.current?.click(),
+                    priority: "high"
+                  },
+                  {
+                    icon: Download,
+                    label: "Export PDF",
+                    onClick: handleExport,
+                  },
+                  {
+                    icon: ImageIcon,
+                    label: "Export as JPG",
+                    onClick: handleExportJPG,
+                  },
+                ]
+              },
+              {
+                label: "Tools",
+                actions: [
+                  {
+                    icon: Type,
+                    label: "Select",
+                    onClick: () => setTool("select"),
+                    variant: tool === "select" ? "default" : "outline",
+                    priority: "high"
+                  },
+                  {
+                    icon: Type,
+                    label: "Add Text",
+                    onClick: () => setTool("text"),
+                    variant: tool === "text" ? "default" : "outline",
+                    priority: "high"
+                  },
+                  {
+                    icon: Square,
+                    label: "Rectangle",
+                    onClick: () => setTool("rect"),
+                    variant: tool === "rect" ? "default" : "outline",
+                  },
+                  {
+                    icon: CircleIcon,
+                    label: "Circle",
+                    onClick: () => setTool("circle"),
+                    variant: tool === "circle" ? "default" : "outline",
+                  },
+                  {
+                    icon: Eraser,
+                    label: "Erase",
+                    onClick: () => setTool("erase"),
+                    variant: tool === "erase" ? "default" : "outline",
+                  },
+                  {
+                    icon: Search,
+                    label: "Search",
+                    onClick: () => setShowSearchDialog(true),
+                    priority: "high"
+                  },
+                ]
+              },
+              {
+                label: "Page",
+                actions: [
+                  {
+                    icon: ChevronLeft,
+                    label: "Previous",
+                    onClick: () => setCurrentPage(Math.max(1, currentPage - 1)),
+                    disabled: currentPage <= 1,
+                    priority: "high"
+                  },
+                  {
+                    icon: ChevronRight,
+                    label: "Next",
+                    onClick: () => setCurrentPage(Math.min(numPages, currentPage + 1)),
+                    disabled: currentPage >= numPages,
+                    priority: "high"
+                  },
+                  {
+                    icon: Trash2,
+                    label: "Clear Page",
+                    onClick: clearPage,
+                  },
+                  {
+                    icon: ImageIcon,
+                    label: "Add Image",
+                    onClick: () => imageInputRef.current?.click(),
+                  },
+                ]
+              },
+              {
+                label: "View",
+                actions: [
+                  {
+                    icon: ZoomIn,
+                    label: "Zoom In",
+                    onClick: () => setZoom(Math.min(2, zoom + 0.1)),
+                    priority: "high"
+                  },
+                  {
+                    icon: ZoomOut,
+                    label: "Zoom Out",
+                    onClick: () => setZoom(Math.max(0.5, zoom - 0.1)),
+                    priority: "high"
+                  },
+                ]
+              },
+              {
+                label: "Share",
+                actions: [
+                  {
+                    icon: Share2,
+                    label: "Share",
+                    onClick: handleShareDocument,
+                  },
+                ]
+              }
+            ]}
+            rightActions={[
+              {
+                icon: FileText,
+                label: `${currentPage}/${numPages}`,
+                onClick: () => {},
+                disabled: true
+              }
+            ]}
+          />
+        </div>
 
         <input
           ref={pdfInputRef}
@@ -1606,8 +1745,8 @@ export function LightPaperPDFEditor({
           className="hidden"
         />
 
-        <div className="flex-1 flex gap-4 overflow-hidden">
-          <Card className="flex-1 overflow-auto">
+        <div className="flex-1 flex gap-2 sm:gap-4 overflow-hidden">
+          <Card className="flex-1 overflow-auto p-2 sm:p-4">
             {pdfFile ? <div className="p-4">
               {isLoading && <div className="flex items-center justify-center p-8">
                   <div className="text-center">
@@ -1733,13 +1872,13 @@ export function LightPaperPDFEditor({
       <Sheet open={showSignaturePanel} onOpenChange={setShowSignaturePanel}>
         <SheetTrigger asChild>
           <Button
-            className="fixed bottom-24 right-6 h-14 w-14 rounded-full shadow-lg z-50"
+            className="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg z-50"
             size="icon"
           >
-            <Pen className="h-6 w-6" />
+            <Pen className="h-5 w-5 sm:h-6 sm:w-6" />
           </Button>
         </SheetTrigger>
-        <SheetContent side="right" className="w-[400px] sm:w-[540px] overflow-y-auto">
+        <SheetContent side="right" className="w-[90vw] sm:w-[400px] md:w-[540px] overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Signature Tools</SheetTitle>
           </SheetHeader>

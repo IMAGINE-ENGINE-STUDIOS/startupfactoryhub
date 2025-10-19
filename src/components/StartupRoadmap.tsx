@@ -365,23 +365,23 @@ export default function StartupRoadmap() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 pb-20 md:pb-6">
       {/* Progress Overview */}
       <Card className="tech-card border-0 animate-fade-in">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Progress Overview</span>
-            <Badge variant="secondary" className="animate-scale-in">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+            <span className="text-base sm:text-lg">Progress Overview</span>
+            <Badge variant="secondary" className="animate-scale-in w-fit">
               {roadmapProgress.percentage}% Complete
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 sm:px-6">
           <Progress 
             value={roadmapProgress.percentage} 
-            className="h-3 mb-4 transition-all duration-700 ease-out" 
+            className="h-2 sm:h-3 mb-3 sm:mb-4 transition-all duration-700 ease-out" 
           />
-          <p className="text-sm text-muted-foreground">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps completed. 
             Follow our proven algorithm to build your startup step by step.
           </p>
@@ -389,45 +389,45 @@ export default function StartupRoadmap() {
       </Card>
 
       {/* Roadmap Steps */}
-      <div className="space-y-4">
+      <div className="space-y-3 md:space-y-4">
         {steps.map((step, index) => {
           const Icon = step.icon;
           return (
             <Card 
               key={step.id} 
               className={`tech-card border-0 ${step.completed ? 'ring-2 ring-primary/20' : ''} ${
-                step.locked ? 'opacity-60' : 'hover:scale-[1.02] transition-transform'
+                step.locked ? 'opacity-60' : 'md:hover:scale-[1.02] transition-transform'
               }`}
             >
-              <CardContent className="p-6">
-                <div className="flex items-start space-x-4">
-                  <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-start gap-3 sm:gap-4">
+                  <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${
                     step.completed ? 'bg-primary text-primary-foreground' : 
                     step.locked ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary'
                   }`}>
                     {step.completed ? (
-                      <CheckCircle className="w-6 h-6" />
+                      <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
                     ) : step.locked ? (
-                      <Lock className="w-6 h-6" />
+                      <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
                     ) : (
-                      <Icon className="w-6 h-6" />
+                      <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
                     )}
                   </div>
                   
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-semibold text-foreground">{step.title}</h3>
-                      <Badge className={getStageColor(step.stage)} variant="outline">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+                      <h3 className="text-base sm:text-lg font-semibold text-foreground">{step.title}</h3>
+                      <Badge className={`${getStageColor(step.stage)} w-fit`} variant="outline">
                         {step.stage.charAt(0).toUpperCase() + step.stage.slice(1)}
                       </Badge>
                     </div>
                     
-                    <p className="text-muted-foreground mb-4">{step.description}</p>
+                    <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">{step.description}</p>
                     
                     <div className="space-y-3">
                       <div>
-                        <h4 className="text-sm font-medium text-foreground mb-2">Resources Available:</h4>
-                        <div className="flex flex-wrap gap-2">
+                        <h4 className="text-xs sm:text-sm font-medium text-foreground mb-2">Resources Available:</h4>
+                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
                           {step.resources.map((resource, idx) => (
                             <Badge key={idx} variant="secondary" className="text-xs">
                               {resource}
@@ -436,11 +436,12 @@ export default function StartupRoadmap() {
                         </div>
                       </div>
                       
-                      <div className="flex space-x-2">
+                      <div className="flex flex-wrap gap-2">
                       <Button 
                         variant="outline" 
                         size="sm"
                         disabled={step.locked}
+                        className="text-xs sm:text-sm h-8 sm:h-9"
                         onClick={() => {
                           toast({
                             title: "Resource Access",
@@ -454,23 +455,23 @@ export default function StartupRoadmap() {
                           <Button 
                             size="sm" 
                             onClick={() => completeStep(step.id)}
-                            className="pulse-primary"
+                            className="pulse-primary text-xs sm:text-sm h-8 sm:h-9"
                           >
                             Mark Complete
                           </Button>
                         )}
                         {step.completed && (
                           <>
-                            <Badge variant="default" className="bg-green-500">
+                            <Badge variant="default" className="bg-green-500 h-8 sm:h-9 px-3">
                               ✓ Completed
                             </Badge>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => uncompleteStep(step.id)}
-                              className="text-muted-foreground hover:text-foreground"
+                              className="text-muted-foreground hover:text-foreground text-xs sm:text-sm h-8 sm:h-9"
                             >
-                              <RotateCcw className="w-4 h-4 mr-1" />
+                              <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                               Undo
                             </Button>
                           </>
