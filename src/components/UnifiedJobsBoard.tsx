@@ -72,13 +72,28 @@ export default function UnifiedJobsBoard() {
   const [loadingApplications, setLoadingApplications] = useState(false);
   const [showApplicationsDialog, setShowApplicationsDialog] = useState(false);
   const [updatingApplicationId, setUpdatingApplicationId] = useState<string | null>(null);
+  const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     if (user) {
       fetchUserCompany();
       fetchJobs();
+      fetchAppliedJobs();
     }
   }, [user, categoryFilter]);
+
+  const fetchAppliedJobs = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('job_applications')
+      .select('job_id')
+      .eq('user_id', user.id);
+    
+    if (!error && data) {
+      setAppliedJobs(new Set(data.map(app => app.job_id)));
+    }
+  };
 
   const fetchUserCompany = async () => {
     if (!user) return;
@@ -215,6 +230,9 @@ export default function UnifiedJobsBoard() {
         throw error;
       }
 
+      // Add to applied jobs set immediately (optimistic update)
+      setAppliedJobs(prev => new Set([...prev, jobId]));
+
       // Update the applications count optimistically
       setJobs(prev => prev.map(job => 
         job.id === jobId 
@@ -224,7 +242,7 @@ export default function UnifiedJobsBoard() {
 
       toast({
         title: 'Success!',
-        description: 'Application submitted successfully',
+        description: 'Application submitted successfully. The company will review your application.',
       });
     } catch (error) {
       console.error('Error applying:', error);
@@ -476,10 +494,12 @@ export default function UnifiedJobsBoard() {
     onInsert: () => {
       if (selectedJobId) fetchApplicationsForJob(selectedJobId);
       fetchJobs();
+      fetchAppliedJobs();
     },
     onUpdate: () => {
       if (selectedJobId) fetchApplicationsForJob(selectedJobId);
       fetchJobs();
+      fetchAppliedJobs();
     },
   });
 
@@ -789,22 +809,34 @@ export default function UnifiedJobsBoard() {
                   </div>
                   
                   {canApply && (
-                    <Button
-                      onClick={() => handleApply(job.id, job.external_application_url)}
-                      variant={job.external_application_url ? 'outline' : 'default'}
-                      size="sm"
-                      className="w-full sm:w-auto h-9 text-sm"
-                    >
-                      {job.external_application_url ? (
-                        <>
-                          <span className="hidden sm:inline">Apply Externally</span>
-                          <span className="sm:hidden">Apply</span>
-                          <ExternalLink className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
-                        </>
-                      ) : (
-                        'Apply Now'
-                      )}
-                    </Button>
+                    appliedJobs.has(job.id) ? (
+                      <Button
+                        disabled
+                        variant="secondary"
+                        size="sm"
+                        className="w-full sm:w-auto h-9 text-sm"
+                      >
+                        <CheckCircle className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                        Applied
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => handleApply(job.id, job.external_application_url)}
+                        variant={job.external_application_url ? 'outline' : 'default'}
+                        size="sm"
+                        className="w-full sm:w-auto h-9 text-sm"
+                      >
+                        {job.external_application_url ? (
+                          <>
+                            <span className="hidden sm:inline">Apply Externally</span>
+                            <span className="sm:hidden">Apply</span>
+                            <ExternalLink className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
+                          </>
+                        ) : (
+                          'Apply Now'
+                        )}
+                      </Button>
+                    )
                   )}
                 </div>
               </CardContent>

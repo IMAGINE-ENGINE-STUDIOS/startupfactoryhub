@@ -150,7 +150,7 @@ export default function StudentDashboard() {
               </TabsTrigger>
               <TabsTrigger value="jobs" className="gap-2">
                 <Briefcase className="h-4 w-4" />
-                <span className="hidden md:inline">Opportunities</span>
+                <span className="hidden md:inline">Jobs</span>
               </TabsTrigger>
               <TabsTrigger value="calendar" className="gap-2">
                 <CalendarIcon className="h-4 w-4" />
