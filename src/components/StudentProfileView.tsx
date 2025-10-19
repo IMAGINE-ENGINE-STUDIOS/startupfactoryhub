@@ -146,16 +146,42 @@ export default function StudentProfileView() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Profile Information */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Profile Information</CardTitle>
+    <div className="space-y-6 pb-8">
+      {/* Profile Header Card */}
+      <Card className="overflow-hidden border-0 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+        <div className="relative h-32 bg-gradient-to-r from-primary/20 to-accent/20" />
+        <CardContent className="relative -mt-16 space-y-6 pb-8">
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
+              <div className="relative">
+                <div className="p-1 rounded-full bg-gradient-to-br from-primary to-accent">
+                  <AvatarUpload />
+                </div>
+              </div>
+              <div className="text-center sm:text-left space-y-2">
+                <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                  {profile?.full_name || 'Student Profile'}
+                </h2>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1">
+                    <Mail className="h-4 w-4" />
+                    {user?.email}
+                  </div>
+                  {profile?.location && (
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4" />
+                      {profile.location}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
             {!isEditing ? (
-              <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+              <Button onClick={() => setIsEditing(true)} className="self-center md:self-auto">
+                Edit Profile
+              </Button>
             ) : (
-              <div className="flex gap-2">
+              <div className="flex gap-2 self-center md:self-auto">
                 <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
                 <Button onClick={handleSave} disabled={loading}>
                   {loading ? 'Saving...' : 'Save Changes'}
@@ -163,38 +189,61 @@ export default function StudentProfileView() {
               </div>
             )}
           </div>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {/* Avatar */}
-          <div className="flex items-center space-x-4">
-            <AvatarUpload />
-          </div>
+        </CardContent>
+      </Card>
 
-          {/* Basic Information */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* About Section */}
+      <Card className="border-0 shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            About Me
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {isEditing ? (
+            <Textarea
+              id="bio"
+              value={formData.bio}
+              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
+              placeholder="Tell us about yourself, your goals, interests, and what you're passionate about..."
+              rows={6}
+              className="resize-none"
+            />
+          ) : (
+            <p className="text-foreground leading-relaxed">
+              {profile?.bio || 'No bio added yet. Share something about yourself!'}
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Personal Information */}
+        <Card className="border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle>Personal Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="full_name">Full Name</Label>
+              <Label htmlFor="full_name" className="text-muted-foreground text-xs uppercase tracking-wide">
+                Full Name
+              </Label>
               {isEditing ? (
                 <Input
                   id="full_name"
                   value={formData.full_name}
                   onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+                  placeholder="Your full name"
                 />
               ) : (
-                <p className="text-foreground">{profile?.full_name || 'Not set'}</p>
+                <p className="text-foreground font-medium">{profile?.full_name || 'Not set'}</p>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <p className="text-foreground">{user?.email}</p>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+              <Label htmlFor="location" className="text-muted-foreground text-xs uppercase tracking-wide">
+                Location
+              </Label>
               {isEditing ? (
                 <Input
                   id="location"
@@ -203,15 +252,22 @@ export default function StudentProfileView() {
                   placeholder="City, Country"
                 />
               ) : (
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-foreground">{profile?.location || 'Not set'}</p>
-                </div>
+                <p className="text-foreground font-medium">{profile?.location || 'Not set'}</p>
               )}
             </div>
+          </CardContent>
+        </Card>
 
+        {/* Social Links */}
+        <Card className="border-0 shadow-lg">
+          <CardHeader>
+            <CardTitle>Social Links</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="website">Website</Label>
+              <Label htmlFor="website" className="text-muted-foreground text-xs uppercase tracking-wide">
+                Website
+              </Label>
               {isEditing ? (
                 <Input
                   id="website"
@@ -221,14 +277,16 @@ export default function StudentProfileView() {
                 />
               ) : (
                 <div className="flex items-center gap-2">
-                  <Globe className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-foreground">{profile?.website || 'Not set'}</p>
+                  <Globe className="h-4 w-4 text-primary" />
+                  <p className="text-foreground font-medium">{profile?.website || 'Not set'}</p>
                 </div>
               )}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="linkedin_url">LinkedIn</Label>
+              <Label htmlFor="linkedin_url" className="text-muted-foreground text-xs uppercase tracking-wide">
+                LinkedIn
+              </Label>
               {isEditing ? (
                 <Input
                   id="linkedin_url"
@@ -238,90 +296,99 @@ export default function StudentProfileView() {
                 />
               ) : (
                 <div className="flex items-center gap-2">
-                  <Linkedin className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-foreground">{profile?.linkedin_url || 'Not set'}</p>
+                  <Linkedin className="h-4 w-4 text-primary" />
+                  <p className="text-foreground font-medium">{profile?.linkedin_url || 'Not set'}</p>
                 </div>
               )}
             </div>
-          </div>
+          </CardContent>
+        </Card>
+      </div>
 
-          {/* Bio */}
-          <div className="space-y-2">
-            <Label htmlFor="bio">Bio</Label>
-            {isEditing ? (
-              <Textarea
-                id="bio"
-                value={formData.bio}
-                onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                placeholder="Tell us about yourself..."
-                rows={4}
-              />
-            ) : (
-              <p className="text-foreground">{profile?.bio || 'No bio added yet.'}</p>
-            )}
-          </div>
+      {/* Education Section */}
+      <Card className="border-0 shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            Education
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="university" className="text-muted-foreground text-xs uppercase tracking-wide">
+                University
+              </Label>
+              {isEditing ? (
+                <Input
+                  id="university"
+                  value={formData.university}
+                  onChange={(e) => setFormData({ ...formData, university: e.target.value })}
+                  placeholder="University name"
+                />
+              ) : (
+                <p className="text-foreground font-medium text-lg">{studentProfile?.university || 'Not set'}</p>
+              )}
+            </div>
 
-          {/* Education Details */}
-          <div className="space-y-4 pt-4 border-t">
-            <h3 className="text-lg font-semibold">Education</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="university">University</Label>
-                {isEditing ? (
-                  <Input
-                    id="university"
-                    value={formData.university}
-                    onChange={(e) => setFormData({ ...formData, university: e.target.value })}
-                    placeholder="University name"
-                  />
-                ) : (
-                  <p className="text-foreground">{studentProfile?.university || 'Not set'}</p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="major" className="text-muted-foreground text-xs uppercase tracking-wide">
+                Major / Field of Study
+              </Label>
+              {isEditing ? (
+                <Input
+                  id="major"
+                  value={formData.major}
+                  onChange={(e) => setFormData({ ...formData, major: e.target.value })}
+                  placeholder="Your major"
+                />
+              ) : (
+                <p className="text-foreground font-medium text-lg">{studentProfile?.major || 'Not set'}</p>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="major">Major</Label>
-                {isEditing ? (
-                  <Input
-                    id="major"
-                    value={formData.major}
-                    onChange={(e) => setFormData({ ...formData, major: e.target.value })}
-                    placeholder="Your major"
-                  />
-                ) : (
-                  <p className="text-foreground">{studentProfile?.major || 'Not set'}</p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="graduation_year">Graduation Year</Label>
-                {isEditing ? (
-                  <Input
-                    id="graduation_year"
-                    value={formData.graduation_year}
-                    onChange={(e) => setFormData({ ...formData, graduation_year: e.target.value })}
-                    placeholder="2025"
-                  />
-                ) : (
-                  <p className="text-foreground">{studentProfile?.graduation_year || 'Not set'}</p>
-                )}
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="graduation_year" className="text-muted-foreground text-xs uppercase tracking-wide">
+                Graduation Year
+              </Label>
+              {isEditing ? (
+                <Input
+                  id="graduation_year"
+                  value={formData.graduation_year}
+                  onChange={(e) => setFormData({ ...formData, graduation_year: e.target.value })}
+                  placeholder="2025"
+                  type="number"
+                />
+              ) : (
+                <p className="text-foreground font-medium text-lg">{studentProfile?.graduation_year || 'Not set'}</p>
+              )}
             </div>
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Interests */}
-          <div className="space-y-4 pt-4 border-t">
-            <h3 className="text-lg font-semibold">Interests</h3>
-            {studentProfile?.interests && studentProfile.interests.length > 0 ? (
-              <div className="flex flex-wrap gap-2">
-                {studentProfile.interests.map((interest: string, index: number) => (
-                  <Badge key={index} variant="secondary">{interest}</Badge>
-                ))}
-              </div>
-            ) : (
-              <p className="text-muted-foreground">No interests added yet.</p>
-            )}
-          </div>
+      {/* Interests Section */}
+      <Card className="border-0 shadow-lg">
+        <CardHeader>
+          <CardTitle>Interests & Skills</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {studentProfile?.interests && studentProfile.interests.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {studentProfile.interests.map((interest: string, index: number) => (
+                <Badge 
+                  key={index} 
+                  variant="secondary"
+                  className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 transition-all"
+                >
+                  {interest}
+                </Badge>
+              ))}
+            </div>
+          ) : (
+            <p className="text-muted-foreground text-center py-8">
+              No interests added yet. Add some to help others understand your passions!
+            </p>
+          )}
         </CardContent>
       </Card>
     </div>
