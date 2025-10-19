@@ -107,29 +107,43 @@ const Dashboard = () => {
         </div>
       </div>;
   }
-  return <div className="min-h-screen bg-background pb-28 md:pb-6 relative overflow-x-hidden">
+  return <div className="min-h-screen bg-background pb-6 relative overflow-x-hidden">
       <DashboardHeader />
       
-      <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-20 sm:pt-24 pb-4">
+      <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-16 sm:pt-20 pb-4">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
-          <div className="flex items-center space-x-3 sm:space-x-4 w-full sm:w-auto">
-            <RoleBasedAvatar avatarUrl={profile?.avatar_url} role={profileWithRole?.role || 'startup'} fallbackText={user?.email || 'U'} className="h-12 w-12 sm:h-16 sm:w-16" />
-            <div className="flex-1 min-w-0">
-              <h1 className="text-lg sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
-                Welcome, {profile?.full_name || 'Startup'}
-              </h1>
-              <p className="text-xs sm:text-sm text-muted-foreground">Build, connect, and grow your startup</p>
-            </div>
+        <div className="mb-6 sm:mb-8">
+          {/* Mobile: Only Avatar */}
+          <div className="md:hidden flex justify-start mb-4">
+            <RoleBasedAvatar 
+              avatarUrl={profile?.avatar_url} 
+              role={profileWithRole?.role || 'startup'} 
+              fallbackText={user?.email || 'U'} 
+              className="h-16 w-16" 
+            />
           </div>
           
-          <NotificationCenter />
+          {/* Desktop: Full Welcome Section */}
+          <div className="hidden md:flex items-center space-x-4">
+            <RoleBasedAvatar 
+              avatarUrl={profile?.avatar_url} 
+              role={profileWithRole?.role || 'startup'} 
+              fallbackText={user?.email || 'U'} 
+              className="h-16 w-16" 
+            />
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
+                Welcome, {profile?.full_name || 'Startup'}
+              </h1>
+              <p className="text-sm text-muted-foreground">Build, connect, and grow your startup</p>
+            </div>
+          </div>
         </div>
 
 
         {/* Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="overflow-x-auto scrollbar-thin">
+          <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />

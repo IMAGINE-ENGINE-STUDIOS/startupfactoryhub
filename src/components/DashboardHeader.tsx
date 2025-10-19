@@ -25,7 +25,7 @@ export function DashboardHeader() {
   };
 
   return (
-    <div className="fixed top-16 sm:top-20 right-2 sm:right-4 flex items-center gap-1.5 sm:gap-2 z-40">
+    <div className="fixed top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-1.5 sm:gap-2 z-40">
       <Button
         variant="ghost"
         size="icon"

@@ -310,22 +310,35 @@ export default function InvestorDashboard() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-hero pb-20 lg:pb-4 relative">
+    <div className="min-h-screen bg-gradient-hero pb-6 relative">
       <DashboardHeader />
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 pt-20 sm:pt-24 space-y-4 sm:space-y-6">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 pt-16 sm:pt-20 space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">
-          <RoleBasedAvatar 
-            avatarUrl={profileWithRole?.avatar_url} 
-            role="investor"
-            fallbackText={user?.email || 'I'}
-            className="h-12 w-12 sm:h-16 sm:w-16"
-          />
-          <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {profileWithRole?.full_name || 'Investor'} Dashboard
-            </h1>
-            <p className="text-sm text-muted-foreground">Discover and fund the next unicorns</p>
+        <div className="mb-6 sm:mb-8">
+          {/* Mobile: Only Avatar */}
+          <div className="md:hidden flex justify-start mb-4">
+            <RoleBasedAvatar 
+              avatarUrl={profileWithRole?.avatar_url} 
+              role="investor"
+              fallbackText={user?.email || 'I'}
+              className="h-16 w-16"
+            />
+          </div>
+          
+          {/* Desktop: Full Welcome Section */}
+          <div className="hidden md:flex items-center space-x-4">
+            <RoleBasedAvatar 
+              avatarUrl={profileWithRole?.avatar_url} 
+              role="investor"
+              fallbackText={user?.email || 'I'}
+              className="h-16 w-16"
+            />
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+                {profileWithRole?.full_name || 'Investor'} Dashboard
+              </h1>
+              <p className="text-sm text-muted-foreground">Discover and fund the next unicorns</p>
+            </div>
           </div>
         </div>
 
