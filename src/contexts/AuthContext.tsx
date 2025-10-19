@@ -28,7 +28,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   // Track online status for the current user
-  useOnlineStatus();
+  useOnlineStatus(user);
 
   useEffect(() => {
     // Set up auth state listener FIRST

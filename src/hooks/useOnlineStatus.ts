@@ -1,9 +1,8 @@
 import { useEffect, useRef } from 'react';
+import { User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 
-export const useOnlineStatus = () => {
-  const { user } = useAuth();
+export const useOnlineStatus = (user?: User | null) => {
   const intervalRef = useRef<NodeJS.Timeout>();
   const lastActivityRef = useRef<number>(Date.now());
 
