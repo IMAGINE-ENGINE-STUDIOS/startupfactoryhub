@@ -6,7 +6,6 @@ import MentorDashboard from "@/pages/MentorDashboard";
 import AdvisorDashboard from "@/pages/AdvisorDashboard";
 import InvestorDashboard from "@/pages/InvestorDashboard";
 import StudentDashboard from "@/pages/StudentDashboard";
-import FeedDashboard from "@/pages/FeedDashboard";
 import { useNavigate } from "react-router-dom";
 
 const DashboardRouter = () => {

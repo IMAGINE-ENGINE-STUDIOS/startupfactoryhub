@@ -15,15 +15,6 @@ import NotFound from "./pages/NotFound";
 // Code-split heavy pages
 const ProfileSetup = lazy(() => import("./pages/ProfileSetup"));
 const DashboardRouter = lazy(() => import("./components/DashboardRouter"));
-const StartupProfile = lazy(() => import("./pages/StartupProfile"));
-const CommunityFeed = lazy(() => import("./pages/CommunityFeed"));
-const Events = lazy(() => import("./pages/Events"));
-const Messages = lazy(() => import("./pages/Messages"));
-const Analytics = lazy(() => import("./pages/Analytics"));
-const MarketIntelligence = lazy(() => import("./pages/MarketIntelligence"));
-const Explore = lazy(() => import("./pages/Explore"));
-const MentoringSessions = lazy(() => import("./pages/MentoringSessions"));
-const Calendar = lazy(() => import("./pages/Calendar"));
 const Tools = lazy(() => import("./pages/Tools"));
 const LightPaper = lazy(() => import("./pages/LightPaper"));
 const PublicJobApplication = lazy(() => import("./pages/PublicJobApplication"));
@@ -68,15 +59,6 @@ const App = () => (
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/profile-setup" element={<ProfileSetup />} />
                   <Route path="/dashboard" element={<DashboardRouter />} />
-                  <Route path="/feed" element={<CommunityFeed />} />
-                  <Route path="/calendar" element={<Calendar />} />
-                  <Route path="/events" element={<Calendar />} />
-                  <Route path="/mentoring-sessions" element={<Calendar />} />
-                  <Route path="/messages" element={<Messages />} />
-                  <Route path="/analytics" element={<Analytics />} />
-                  <Route path="/market-intelligence" element={<MarketIntelligence />} />
-                  <Route path="/explore" element={<Explore />} />
-                  <Route path="/profile" element={<StartupProfile />} />
                   <Route path="/tools" element={<Tools />} />
                   <Route path="/lightpaper" element={<LightPaper />} />
                   <Route path="/jobs/:jobId/apply" element={<PublicJobApplicationPage />} />
