@@ -1,14 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Home, Bell, Loader2 } from 'lucide-react';
+import { Home, Loader2 } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
-import AIAssistantButton from '@/components/AIAssistantButton';
 import NotificationCenter from '@/components/NotificationCenter';
 
 // Configure PDF.js worker
@@ -95,17 +94,20 @@ export default function PitchDeckViewer() {
       <div className="border-b border-border bg-card">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-1">
               {company.logo_url && (
                 <img 
                   src={company.logo_url} 
                   alt={company.name} 
-                  className="h-10 w-10 rounded-lg object-cover"
+                  className="h-12 w-12 rounded-lg object-cover"
                 />
               )}
-              <div>
+              <div className="flex-1">
                 <h1 className="text-xl font-bold text-foreground">{company.name}</h1>
                 <p className="text-sm text-muted-foreground">{company.industry}</p>
+                {company.description && (
+                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{company.description}</p>
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2">
@@ -113,7 +115,6 @@ export default function PitchDeckViewer() {
                 <Home className="h-5 w-5" />
               </Button>
               <NotificationCenter />
-              <AIAssistantButton />
               <ThemeToggle />
             </div>
           </div>
