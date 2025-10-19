@@ -104,9 +104,9 @@ export default function StudentDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-hero p-2 sm:p-4 pb-20 lg:pb-4 relative">
+    <div className="min-h-screen bg-gradient-hero pb-20 lg:pb-4 relative">
       <DashboardHeader />
-      <div className="max-w-7xl mx-auto space-y-4 sm:space-y-6">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 pt-20 sm:pt-24 space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">
           <RoleBasedAvatar 
@@ -125,43 +125,43 @@ export default function StudentDashboard() {
 
         {/* Main Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="hidden md:block overflow-x-auto">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9">
+          <div className="overflow-x-auto scrollbar-thin">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl whitespace-nowrap">
               <TabsTrigger value="social" className="gap-2">
                 <MessageCircle className="h-4 w-4" />
-                <span>Social</span>
+                <span className="hidden md:inline">Social</span>
               </TabsTrigger>
               <TabsTrigger value="profile" className="gap-2">
                 <UserCircle className="h-4 w-4" />
-                <span>Profile</span>
+                <span className="hidden md:inline">Profile</span>
               </TabsTrigger>
               <TabsTrigger value="network" className="gap-2">
                 <Network className="h-4 w-4" />
-                <span>Network</span>
+                <span className="hidden md:inline">Network</span>
               </TabsTrigger>
               <TabsTrigger value="learning" className="gap-2">
                 <BookOpen className="h-4 w-4" />
-                <span>Learning</span>
+                <span className="hidden md:inline">Learning</span>
               </TabsTrigger>
               <TabsTrigger value="jobs" className="gap-2">
                 <Briefcase className="h-4 w-4" />
-                <span>Opportunities</span>
+                <span className="hidden md:inline">Opportunities</span>
               </TabsTrigger>
               <TabsTrigger value="calendar" className="gap-2">
                 <CalendarIcon className="h-4 w-4" />
-                <span>Calendar</span>
+                <span className="hidden md:inline">Calendar</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="gap-2">
                 <BarChart className="h-4 w-4" />
-                <span>Analytics</span>
+                <span className="hidden md:inline">Analytics</span>
               </TabsTrigger>
               <TabsTrigger value="intelligence" className="gap-2">
                 <Brain className="h-4 w-4" />
-                <span>Intelligence</span>
+                <span className="hidden md:inline">Intelligence</span>
               </TabsTrigger>
               <TabsTrigger value="tools" className="gap-2">
                 <Wrench className="h-4 w-4" />
-                <span>Tools</span>
+                <span className="hidden md:inline">Tools</span>
               </TabsTrigger>
             </TabsList>
           </div>

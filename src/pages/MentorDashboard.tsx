@@ -69,7 +69,7 @@ const MentorDashboard = () => {
       <DashboardHeader />
       <DashboardNavigation />
       
-      <div className="container mx-auto px-2 sm:px-4 md:px-6 py-4 sm:py-8">
+      <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-20 sm:pt-24 pb-4 sm:pb-8">
         {/* Welcome Header */}
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
