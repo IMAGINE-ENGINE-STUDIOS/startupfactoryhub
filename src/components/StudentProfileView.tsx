@@ -11,10 +11,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import AvatarUpload from '@/components/AvatarUpload';
 import { 
-  BookOpen, 
-  Trophy, 
-  Target, 
-  Calendar,
   Linkedin,
   Globe,
   MapPin,
@@ -28,8 +24,6 @@ export default function StudentProfileView() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [studentProfile, setStudentProfile] = useState<any>(null);
-  const [enrollments, setEnrollments] = useState<any[]>([]);
-  const [certificates, setCertificates] = useState<any[]>([]);
   
   const [formData, setFormData] = useState({
     full_name: '',
@@ -77,26 +71,6 @@ export default function StudentProfileView() {
 
     if (studentData) {
       setStudentProfile(studentData);
-    }
-
-    // Fetch enrollments
-    const { data: enrollmentData } = await supabase
-      .from('course_enrollments')
-      .select('*')
-      .eq('student_id', user.id);
-
-    if (enrollmentData) {
-      setEnrollments(enrollmentData);
-    }
-
-    // Fetch certificates
-    const { data: certData } = await supabase
-      .from('certificates')
-      .select('*')
-      .eq('student_id', user.id);
-
-    if (certData) {
-      setCertificates(certData);
     }
   };
 
@@ -171,52 +145,8 @@ export default function StudentProfileView() {
     }
   };
 
-  const stats = [
-    { 
-      title: 'Courses Enrolled', 
-      value: enrollments.length, 
-      icon: BookOpen, 
-      color: 'text-primary' 
-    },
-    { 
-      title: 'Learning Streak', 
-      value: `${studentProfile?.learning_streak_days || 0} days`, 
-      icon: Target, 
-      color: 'text-accent' 
-    },
-    { 
-      title: 'Certificates', 
-      value: certificates.length, 
-      icon: Trophy, 
-      color: 'text-yellow-500' 
-    },
-    { 
-      title: 'Member Since', 
-      value: profile?.created_at ? new Date(profile.created_at).getFullYear() : '2024', 
-      icon: Calendar, 
-      color: 'text-purple-500' 
-    },
-  ];
-
   return (
     <div className="space-y-6">
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {stats.map((stat) => (
-          <Card key={stat.title} className="tech-card border-0">
-            <CardContent className="p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                  <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                </div>
-                <stat.icon className={`h-8 w-8 ${stat.color}`} />
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
       {/* Profile Information */}
       <Card className="tech-card border-0">
         <CardHeader>
