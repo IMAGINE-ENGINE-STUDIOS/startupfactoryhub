@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft, Download, ExternalLink, Loader2 } from 'lucide-react';
+import { Home, Bell, Loader2 } from 'lucide-react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 import { useToast } from '@/hooks/use-toast';
+import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import AIAssistantButton from '@/components/AIAssistantButton';
+import NotificationCenter from '@/components/NotificationCenter';
 
 // Configure PDF.js worker
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
@@ -74,12 +77,6 @@ export default function PitchDeckViewer() {
     setNumPages(numPages);
   };
 
-  const handleDownload = () => {
-    if (company?.pitch_deck_url) {
-      window.open(company.pitch_deck_url, '_blank');
-    }
-  };
-
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -99,9 +96,6 @@ export default function PitchDeckViewer() {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
               {company.logo_url && (
                 <img 
                   src={company.logo_url} 
@@ -115,14 +109,12 @@ export default function PitchDeckViewer() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={handleDownload}>
-                <Download className="h-4 w-4 mr-2" />
-                Download
+              <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
+                <Home className="h-5 w-5" />
               </Button>
-              <Button onClick={handleDownload}>
-                <ExternalLink className="h-4 w-4 mr-2" />
-                Open Original
-              </Button>
+              <NotificationCenter />
+              <AIAssistantButton />
+              <ThemeToggle />
             </div>
           </div>
         </div>
