@@ -6,6 +6,7 @@ import {
   Printer,
   Plus,
   X,
+  Pen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,6 +14,7 @@ interface FloatingActionMenuProps {
   onSave?: () => void;
   onShare?: () => void;
   onPrint?: () => void;
+  onSignature?: () => void;
   position?: "left" | "right";
 }
 
@@ -20,11 +22,13 @@ export default function FloatingActionMenu({
   onSave,
   onShare,
   onPrint,
+  onSignature,
   position = "right",
 }: FloatingActionMenuProps) {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const actions = [
+    { icon: Pen, label: "Signature", onClick: onSignature, show: !!onSignature },
     { icon: Save, label: "Save", onClick: onSave, show: !!onSave },
     { icon: Share2, label: "Share", onClick: onShare, show: !!onShare },
     { icon: Printer, label: "Print", onClick: onPrint, show: !!onPrint },

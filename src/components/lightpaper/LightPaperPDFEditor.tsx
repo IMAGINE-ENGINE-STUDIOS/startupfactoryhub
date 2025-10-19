@@ -1866,18 +1866,14 @@ export function LightPaperPDFEditor({
         </div>
       </div>
 
-      <FloatingActionMenu onSave={handleSaveToAccount} onPrint={handleExport} />
+      <FloatingActionMenu 
+        onSave={handleSaveToAccount} 
+        onPrint={handleExport}
+        onSignature={() => setShowSignaturePanel(true)}
+      />
 
-      {/* Floating Signature Button */}
+      {/* Signature Panel */}
       <Sheet open={showSignaturePanel} onOpenChange={setShowSignaturePanel}>
-        <SheetTrigger asChild>
-          <Button
-            className="fixed bottom-[200px] md:bottom-[260px] right-4 sm:right-6 h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg z-50"
-            size="icon"
-          >
-            <Pen className="h-5 w-5 sm:h-6 sm:w-6" />
-          </Button>
-        </SheetTrigger>
         <SheetContent side="right" className="w-[90vw] sm:w-[400px] md:w-[540px] overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Signature Tools</SheetTitle>
