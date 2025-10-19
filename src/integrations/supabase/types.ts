@@ -47,6 +47,120 @@ export type Database = {
         }
         Relationships: []
       }
+      advisor_achievements: {
+        Row: {
+          created_at: string | null
+          date: string
+          description: string | null
+          icon: string | null
+          id: string
+          organization: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          organization?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          organization?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      advisor_education: {
+        Row: {
+          created_at: string | null
+          degree: string
+          description: string | null
+          end_date: string | null
+          field_of_study: string | null
+          id: string
+          institution: string
+          start_date: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          degree: string
+          description?: string | null
+          end_date?: string | null
+          field_of_study?: string | null
+          id?: string
+          institution: string
+          start_date: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          degree?: string
+          description?: string | null
+          end_date?: string | null
+          field_of_study?: string | null
+          id?: string
+          institution?: string
+          start_date?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      advisor_experiences: {
+        Row: {
+          company: string
+          created_at: string | null
+          description: string | null
+          end_date: string | null
+          id: string
+          is_current: boolean | null
+          location: string | null
+          start_date: string
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          company: string
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          location?: string | null
+          start_date: string
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          company?: string
+          created_at?: string | null
+          description?: string | null
+          end_date?: string | null
+          id?: string
+          is_current?: boolean | null
+          location?: string | null
+          start_date?: string
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       advisor_job_tasks: {
         Row: {
           advisor_id: string
@@ -84,6 +198,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      advisor_skills: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          endorsement_count: number | null
+          id: string
+          skill_name: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          endorsement_count?: number | null
+          id?: string
+          skill_name: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          endorsement_count?: number | null
+          id?: string
+          skill_name?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       ai_conversations: {
         Row: {

@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar as CalendarIcon, Users, MessageSquare, TrendingUp, Star, Clock, Award, Plus, MapPin, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Settings, CheckCircle, XCircle, ExternalLink, Video } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, MessageSquare, TrendingUp, Star, Clock, Award, Plus, MapPin, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Settings, CheckCircle, XCircle, ExternalLink, Video, User } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import FloatingChat from '@/components/FloatingChat';
@@ -28,6 +28,7 @@ import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import AdvisorSettings from '@/components/AdvisorSettings';
 import { useMentorDashboard } from '@/hooks/useMentorDashboard';
+import AdvisorProfileView from '@/components/AdvisorProfileView';
 
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
@@ -326,6 +327,10 @@ export default function AdvisorDashboard() {
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden md:inline">Social</span>
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex-shrink-0 gap-2">
+                <User className="h-4 w-4" />
+                <span className="hidden md:inline">Profile</span>
               </TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0 gap-2">
                 <Network className="h-4 w-4" />
@@ -687,6 +692,10 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="social" className="space-y-4">
             <UnifiedCommunityFeed />
+          </TabsContent>
+
+          <TabsContent value="profile" className="space-y-4">
+            <AdvisorProfileView />
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
