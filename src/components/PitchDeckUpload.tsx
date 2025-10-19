@@ -134,8 +134,8 @@ export default function PitchDeckUpload({ companyId, currentDeckUrl, onUploadCom
   };
 
   const openDeck = () => {
-    if (currentDeckUrl) {
-      window.open(currentDeckUrl, '_blank');
+    if (companyId) {
+      window.open(`/pitch-deck/${companyId}`, '_blank');
     }
   };
 
