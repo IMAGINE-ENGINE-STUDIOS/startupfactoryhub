@@ -399,12 +399,12 @@ export default function FloatingChat() {
             <>
               {/* Tab Navigation */}
               <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'messages' | 'ai')} className="flex-1 flex flex-col min-h-0">
-                <TabsList className="grid w-full grid-cols-2 mx-2 sm:mx-3 mt-2 mb-2 shrink-0">
-                  <TabsTrigger value="messages" className="gap-1 sm:gap-2 text-xs px-2 sm:px-3">
+                <TabsList className="grid w-full grid-cols-2 mt-2 mb-2 mx-2 shrink-0">
+                  <TabsTrigger value="messages" className="gap-1 text-xs px-1 sm:px-2 min-w-0">
                     <MessageSquare className="h-3.5 w-3.5 shrink-0" />
                     <span className="truncate">Messages</span>
                   </TabsTrigger>
-                  <TabsTrigger value="ai" className="gap-1 sm:gap-2 text-xs px-2 sm:px-3">
+                  <TabsTrigger value="ai" className="gap-1 text-xs px-1 sm:px-2 min-w-0">
                     <Bot className="h-3.5 w-3.5 shrink-0" />
                     <span className="truncate">AI Assistant</span>
                   </TabsTrigger>
