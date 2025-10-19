@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 
 interface AuthContextType {
   user: User | null;
@@ -25,6 +26,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Track online status for the current user
+  useOnlineStatus();
 
   useEffect(() => {
     // Set up auth state listener FIRST

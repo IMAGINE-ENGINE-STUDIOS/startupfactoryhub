@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Send, Search, MessageSquare, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { OnlineStatusIndicator } from './OnlineStatusIndicator';
 
 interface Message {
   id: string;
@@ -250,10 +251,17 @@ const MessagingInterface = memo(function MessagingInterface() {
                     className="flex items-center gap-3 p-2 hover:bg-muted rounded-lg cursor-pointer"
                     onClick={() => startNewConversation(user.user_id)}
                   >
-                    <Avatar className="h-10 w-10">
-                    {user.avatar_url && <AvatarImage src={user.avatar_url} />}
-                    <AvatarFallback>{user.full_name.charAt(0)}</AvatarFallback>
-                  </Avatar>
+                    <div className="relative">
+                      <Avatar className="h-10 w-10">
+                        {user.avatar_url && <AvatarImage src={user.avatar_url} />}
+                        <AvatarFallback>{user.full_name.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <OnlineStatusIndicator 
+                        userId={user.user_id} 
+                        size="sm" 
+                        className="absolute bottom-0 right-0" 
+                      />
+                    </div>
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{user.full_name}</p>
                   </div>
@@ -286,12 +294,21 @@ const MessagingInterface = memo(function MessagingInterface() {
                   }}
                 >
                   <div className="flex items-center gap-3">
-                    <Avatar>
-                      {conv.other_user?.avatar_url && <AvatarImage src={conv.other_user.avatar_url} />}
-                      <AvatarFallback>
-                        {conv.other_user?.full_name?.charAt(0) || 'U'}
-                      </AvatarFallback>
-                    </Avatar>
+                    <div className="relative">
+                      <Avatar>
+                        {conv.other_user?.avatar_url && <AvatarImage src={conv.other_user.avatar_url} />}
+                        <AvatarFallback>
+                          {conv.other_user?.full_name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      {conv.other_user?.user_id && (
+                        <OnlineStatusIndicator 
+                          userId={conv.other_user.user_id} 
+                          size="sm" 
+                          className="absolute bottom-0 right-0" 
+                        />
+                      )}
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <p className="font-medium truncate">
@@ -332,10 +349,17 @@ const MessagingInterface = memo(function MessagingInterface() {
                 >
                   ← Back
                 </Button>
-                <Avatar>
-                {selectedUser.avatar_url && <AvatarImage src={selectedUser.avatar_url} />}
-                <AvatarFallback>{selectedUser.full_name?.charAt(0) || 'U'}</AvatarFallback>
-              </Avatar>
+                <div className="relative">
+                  <Avatar>
+                    {selectedUser.avatar_url && <AvatarImage src={selectedUser.avatar_url} />}
+                    <AvatarFallback>{selectedUser.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                  </Avatar>
+                  <OnlineStatusIndicator 
+                    userId={selectedUser.user_id} 
+                    size="sm" 
+                    className="absolute bottom-0 right-0" 
+                  />
+                </div>
               <div>
                 <CardTitle className="text-lg">{selectedUser.full_name}</CardTitle>
               </div>

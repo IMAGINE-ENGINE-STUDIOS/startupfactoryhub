@@ -2503,7 +2503,9 @@ export type Database = {
           following_count: number | null
           full_name: string | null
           id: string
+          is_online: boolean | null
           last_profile_update: string | null
+          last_seen: string | null
           linkedin_url: string | null
           location: string | null
           profile_views_count: number | null
@@ -2521,7 +2523,9 @@ export type Database = {
           following_count?: number | null
           full_name?: string | null
           id?: string
+          is_online?: boolean | null
           last_profile_update?: string | null
+          last_seen?: string | null
           linkedin_url?: string | null
           location?: string | null
           profile_views_count?: number | null
@@ -2539,7 +2543,9 @@ export type Database = {
           following_count?: number | null
           full_name?: string | null
           id?: string
+          is_online?: boolean | null
           last_profile_update?: string | null
+          last_seen?: string | null
           linkedin_url?: string | null
           location?: string | null
           profile_views_count?: number | null
@@ -3170,6 +3176,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      cleanup_stale_online_status: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
+      }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
@@ -3207,6 +3217,10 @@ export type Database = {
           notification_type: string
           user_email: string
         }
+        Returns: undefined
+      }
+      update_user_online_status: {
+        Args: { p_is_online: boolean; p_user_id: string }
         Returns: undefined
       }
     }

@@ -28,6 +28,7 @@ import { useNavigate } from 'react-router-dom';
 import ShortsCarousel from '@/components/ShortsCarousel';
 import ShortsCreator from '@/components/ShortsCreator';
 import GuestPrompt from '@/components/GuestPrompt';
+import { OnlineStatusIndicator } from './OnlineStatusIndicator';
 import UserProfileDialog from '@/components/UserProfileDialog';
 
 interface FeedPost {
@@ -888,17 +889,24 @@ export default function UnifiedCommunityFeed({
           <Card key={post.id} className="tech-card border-0 hover:scale-[1.01] transition-all">
             <CardContent className="p-4 sm:p-6">
               <div className="flex space-x-3 sm:space-x-4">
-                <Avatar 
-                  className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:ring-2 ring-primary transition-all"
-                  onClick={() => handleUserClick(post.user_id)}
-                >
-                  {post.profiles?.avatar_url ? (
-                    <AvatarImage src={post.profiles.avatar_url} />
-                  ) : null}
-                  <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                    {post.profiles?.full_name?.charAt(0) || 'U'}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar 
+                    className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:ring-2 ring-primary transition-all"
+                    onClick={() => handleUserClick(post.user_id)}
+                  >
+                    {post.profiles?.avatar_url ? (
+                      <AvatarImage src={post.profiles.avatar_url} />
+                    ) : null}
+                    <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                      {post.profiles?.full_name?.charAt(0) || 'U'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <OnlineStatusIndicator 
+                    userId={post.user_id} 
+                    size="sm" 
+                    className="absolute bottom-0 right-0" 
+                  />
+                </div>
                 
                   <div className="flex-1 space-y-3 min-w-0">
                     <div className="flex items-start justify-between gap-2">
