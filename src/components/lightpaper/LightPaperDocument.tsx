@@ -88,6 +88,30 @@ export function LightPaperDocument({
     enabled: !!currentProjectId,
   });
 
+  // Throttled cursor position tracking
+  useEffect(() => {
+    const editor = editorRef.current;
+    if (!editor || !currentProjectId) return;
+
+    let lastUpdate = 0;
+    const THROTTLE_MS = 100; // Update max 10 times per second
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const now = Date.now();
+      if (now - lastUpdate < THROTTLE_MS) return;
+
+      const rect = editor.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+      updateCursor(x, y);
+      lastUpdate = now;
+    };
+
+    editor.addEventListener('mousemove', handleMouseMove);
+    return () => editor.removeEventListener('mousemove', handleMouseMove);
+  }, [currentProjectId, updateCursor]);
+
   // Remove hard-coded dark mode styles - use theme-aware classes instead
   // This effect now does nothing intentionally - theme is handled by CSS
   useEffect(() => {
@@ -1141,11 +1165,6 @@ export function LightPaperDocument({
                 overflowWrap: 'break-word'
               }}
               suppressContentEditableWarning
-              onMouseMove={(e) => {
-                if (currentProjectId) {
-                  updateCursor(e.clientX, e.clientY);
-                }
-              }}
               onClick={(e) => {
                 if (currentProjectId) {
                   updateCursor(e.clientX, e.clientY);

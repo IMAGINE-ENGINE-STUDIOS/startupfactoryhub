@@ -13,6 +13,8 @@ import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
 import { QuickNavigation } from "@/components/lightpaper/QuickNavigation";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
+import { DocumentLoadingSkeleton, SpreadsheetLoadingSkeleton, PresentationLoadingSkeleton, PDFLoadingSkeleton } from "@/components/lightpaper/LoadingSkeleton";
+
 export default function LightPaper() {
   const [activeTab, setActiveTab] = useState("document");
   const [showAI, setShowAI] = useState(false);
@@ -22,6 +24,7 @@ export default function LightPaper() {
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareData, setShareData] = useState<{shareUrl: string, shareToken: string, documentTitle: string} | null>(null);
   const [showQuickNav, setShowQuickNav] = useState(false);
+  const [isTabLoading, setIsTabLoading] = useState(false);
 
   // Keyboard shortcut for quick navigation (Ctrl+K or Cmd+K)
   useEffect(() => {
@@ -109,21 +112,46 @@ export default function LightPaper() {
       </div>
 
       <div className="flex-1 overflow-auto">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-col">
+        <Tabs 
+          value={activeTab} 
+          onValueChange={(value) => {
+            setIsTabLoading(true);
+            setActiveTab(value);
+            // Simulate loading delay for smooth transition
+            setTimeout(() => setIsTabLoading(false), 300);
+          }} 
+          className="h-full flex flex-col"
+        >
           <TabsContent value="document" className="flex-1 mt-0 overflow-hidden">
-            <LightPaperDocument selectedProject={selectedProject} />
+            {isTabLoading && activeTab === "document" ? (
+              <DocumentLoadingSkeleton />
+            ) : (
+              <LightPaperDocument selectedProject={selectedProject} />
+            )}
           </TabsContent>
 
           <TabsContent value="spreadsheet" className="flex-1 mt-0 overflow-hidden">
-            <LightPaperSpreadsheet />
+            {isTabLoading && activeTab === "spreadsheet" ? (
+              <SpreadsheetLoadingSkeleton />
+            ) : (
+              <LightPaperSpreadsheet />
+            )}
           </TabsContent>
 
           <TabsContent value="presentation" className="flex-1 mt-0 overflow-auto">
-            <LightPaperPresentation />
+            {isTabLoading && activeTab === "presentation" ? (
+              <PresentationLoadingSkeleton />
+            ) : (
+              <LightPaperPresentation />
+            )}
           </TabsContent>
 
           <TabsContent value="pdf-editor" className="flex-1 mt-0 overflow-auto">
-            <LightPaperPDFEditor selectedProject={selectedProject} />
+            {isTabLoading && activeTab === "pdf-editor" ? (
+              <PDFLoadingSkeleton />
+            ) : (
+              <LightPaperPDFEditor selectedProject={selectedProject} />
+            )}
           </TabsContent>
         </Tabs>
       </div>
