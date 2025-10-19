@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, FileSignature } from "lucide-react";
+import { FileText, Table, Presentation, FileSignature, Command } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FolderOpen } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
@@ -11,6 +11,7 @@ import AIAssistant from "@/components/AIAssistant";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
 import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
+import { QuickNavigation } from "@/components/lightpaper/QuickNavigation";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 export default function LightPaper() {
   const [activeTab, setActiveTab] = useState("document");
@@ -20,6 +21,20 @@ export default function LightPaper() {
   const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareData, setShareData] = useState<{shareUrl: string, shareToken: string, documentTitle: string} | null>(null);
+  const [showQuickNav, setShowQuickNav] = useState(false);
+
+  // Keyboard shortcut for quick navigation (Ctrl+K or Cmd+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowQuickNav(true);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
   return <div className="h-screen flex flex-col bg-background overflow-hidden">
       <div className="border-b bg-card flex-shrink-0">
         <div className="container mx-auto px-4 py-4">
@@ -36,6 +51,15 @@ export default function LightPaper() {
               </span>
             </div>
             <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowQuickNav(true)} 
+                className="gap-2"
+                title="Quick Navigation (Ctrl+K)"
+              >
+                <Command className="h-4 w-4" />
+                Quick Nav
+              </Button>
               <Button variant="outline" onClick={() => setShowFiles(true)} className="gap-2">
                 <FolderOpen className="h-4 w-4" />
                 My Files
@@ -166,6 +190,15 @@ export default function LightPaper() {
               accessLevel
             );
           }
+        }}
+      />
+
+      <QuickNavigation
+        isOpen={showQuickNav}
+        onClose={() => setShowQuickNav(false)}
+        onSelectProject={(project) => {
+          setSelectedProject(project);
+          setActiveTab(project.project_type);
         }}
       />
     </div>;

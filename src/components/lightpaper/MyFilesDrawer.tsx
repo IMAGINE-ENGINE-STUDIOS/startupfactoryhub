@@ -23,10 +23,13 @@ import {
   MoreVertical,
   Search,
   Clock,
+  Star,
 } from "lucide-react";
 import { useLightPaperProjects, LightPaperProject, ProjectType } from "@/hooks/useLightPaperProjects";
+import { useProjectFavorites } from "@/hooks/useProjectFavorites";
 import { formatDistanceToNow } from "date-fns";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface MyFilesDrawerProps {
   isOpen: boolean;
@@ -50,14 +53,27 @@ export default function MyFilesDrawer({
   onShareProject,
 }: MyFilesDrawerProps) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedType, setSelectedType] = useState<ProjectType | "recent">("recent");
+  const [selectedType, setSelectedType] = useState<ProjectType | "recent" | "favorites">("recent");
   const { projects, loading, deleteProject } = useLightPaperProjects(
-    selectedType === "recent" ? undefined : selectedType
+    selectedType === "recent" || selectedType === "favorites" ? undefined : selectedType
   );
+  const { isFavorite, toggleFavorite } = useProjectFavorites();
 
-  const filteredProjects = projects.filter((project) =>
+  let filteredProjects = projects.filter((project) =>
     project.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  // Filter by favorites if that tab is selected
+  if (selectedType === "favorites") {
+    filteredProjects = filteredProjects.filter(p => isFavorite(p.id));
+  }
+
+  // Sort by last_accessed_at for recent tab
+  if (selectedType === "recent") {
+    filteredProjects = [...filteredProjects].sort((a, b) => 
+      new Date(b.last_accessed_at).getTime() - new Date(a.last_accessed_at).getTime()
+    );
+  }
 
   const handleDelete = async (projectId: string) => {
     if (confirm("Are you sure you want to delete this file?")) {
@@ -96,9 +112,12 @@ export default function MyFilesDrawer({
           </div>
 
           <Tabs value={selectedType} onValueChange={(v) => setSelectedType(v as any)}>
-            <TabsList className="grid w-full grid-cols-6">
+            <TabsList className="grid w-full grid-cols-7">
               <TabsTrigger value="recent">
                 <Clock className="h-4 w-4" />
+              </TabsTrigger>
+              <TabsTrigger value="favorites">
+                <Star className="h-4 w-4" />
               </TabsTrigger>
               <TabsTrigger value="document">
                 <FileText className="h-4 w-4" />
@@ -150,6 +169,21 @@ export default function MyFilesDrawer({
                           Modified {formatDistanceToNow(new Date(project.updated_at), { addSuffix: true })}
                         </p>
                       </div>
+
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="flex-shrink-0"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleFavorite(project.id);
+                        }}
+                      >
+                        <Star className={cn(
+                          "h-4 w-4",
+                          isFavorite(project.id) ? "fill-yellow-400 text-yellow-400" : "text-muted-foreground"
+                        )} />
+                      </Button>
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>

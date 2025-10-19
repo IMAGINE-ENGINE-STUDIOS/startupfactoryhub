@@ -1794,6 +1794,7 @@ export type Database = {
           id: string
           last_accessed_at: string | null
           project_type: Database["public"]["Enums"]["lightpaper_project_type"]
+          search_vector: unknown | null
           thumbnail_url: string | null
           title: string
           updated_at: string | null
@@ -1805,6 +1806,7 @@ export type Database = {
           id?: string
           last_accessed_at?: string | null
           project_type: Database["public"]["Enums"]["lightpaper_project_type"]
+          search_vector?: unknown | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string | null
@@ -1816,6 +1818,7 @@ export type Database = {
           id?: string
           last_accessed_at?: string | null
           project_type?: Database["public"]["Enums"]["lightpaper_project_type"]
+          search_vector?: unknown | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string | null
@@ -2509,6 +2512,35 @@ export type Database = {
         }
         Relationships: []
       }
+      project_favorites: {
+        Row: {
+          created_at: string
+          id: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_favorites_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "lightpaper_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_internship_applications: {
         Row: {
           applicant_email: string
@@ -3110,6 +3142,18 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      search_lightpaper_projects: {
+        Args: { search_query: string; user_id_param: string }
+        Returns: {
+          content: Json
+          id: string
+          last_accessed_at: string
+          project_type: string
+          rank: number
+          title: string
+          updated_at: string
+        }[]
       }
       send_notification_email: {
         Args: {
