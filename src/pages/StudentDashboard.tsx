@@ -23,8 +23,6 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { Calendar as CalendarIcon, Plus, Clock, MapPin, Users, MessageCircle, UserCircle, Network, BookOpen, Briefcase, BarChart, Brain, Wrench } from 'lucide-react';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
-
-
 export default function StudentDashboard() {
   const [enrollments, setEnrollments] = useState<any[]>([]);
   const [studentProfile, setStudentProfile] = useState<any>(null);
@@ -34,10 +32,15 @@ export default function StudentDashboard() {
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("social");
-  const { user } = useAuth();
-  const { profile: profileWithRole } = useProfileWithRole();
-  const { upcomingEvents } = useEvents();
-
+  const {
+    user
+  } = useAuth();
+  const {
+    profile: profileWithRole
+  } = useProfileWithRole();
+  const {
+    upcomingEvents
+  } = useEvents();
   useEffect(() => {
     if (user) {
       fetchStudentProfile();
@@ -45,27 +48,22 @@ export default function StudentDashboard() {
       fetchCertificates();
     }
   }, [user]);
-
   const fetchStudentProfile = async () => {
     if (!user) return;
-
-    const { data, error } = await supabase
-      .from('student_profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
+    const {
+      data,
+      error
+    } = await supabase.from('student_profiles').select('*').eq('user_id', user.id).single();
     if (!error && data) {
       setStudentProfile(data);
     }
   };
-
   const fetchEnrollments = async () => {
     if (!user) return;
-
-    const { data, error } = await supabase
-      .from('course_enrollments')
-      .select(`
+    const {
+      data,
+      error
+    } = await supabase.from('course_enrollments').select(`
         *,
         course:course_id (
           id,
@@ -76,51 +74,35 @@ export default function StudentDashboard() {
           category,
           duration_hours
         )
-      `)
-      .eq('student_id', user.id)
-      .order('last_accessed_at', { ascending: false });
-
+      `).eq('student_id', user.id).order('last_accessed_at', {
+      ascending: false
+    });
     if (!error && data) {
       setEnrollments(data);
     }
   };
-
   const fetchCertificates = async () => {
     if (!user) return;
-
-    const { data, error } = await supabase
-      .from('certificates')
-      .select(`
+    const {
+      data,
+      error
+    } = await supabase.from('certificates').select(`
         *,
         course:course_id (
           title
         )
-      `)
-      .eq('student_id', user.id);
-
+      `).eq('student_id', user.id);
     if (!error && data) {
       setCertificates(data);
     }
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-hero pb-20 lg:pb-4 relative">
+  return <div className="min-h-screen bg-gradient-hero pb-20 lg:pb-4 relative">
       <DashboardHeader />
       <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 pt-20 sm:pt-24 space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="flex items-center space-x-3 sm:space-x-4 mb-6 sm:mb-8">
-          <RoleBasedAvatar 
-            avatarUrl={profileWithRole?.avatar_url} 
-            role="student"
-            fallbackText={user?.email || 'S'}
-            className="h-12 w-12 sm:h-16 sm:w-16"
-          />
-          <div>
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              {profileWithRole?.full_name || 'Student'} Dashboard
-            </h1>
-            <p className="text-sm text-muted-foreground">Learn, practice, and build your startup skills</p>
-          </div>
+          <RoleBasedAvatar avatarUrl={profileWithRole?.avatar_url} role="student" fallbackText={user?.email || 'S'} className="h-12 w-12 sm:h-16 sm:w-16" />
+          
         </div>
 
         {/* Main Tabs Navigation */}
@@ -199,34 +181,20 @@ export default function StudentDashboard() {
             </div>
 
             {/* Upcoming Events with Banners */}
-            {upcomingEvents.length > 0 && (
-              <Card>
+            {upcomingEvents.length > 0 && <Card>
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {upcomingEvents.slice(0, 6).map((event) => (
-                      <div
-                        key={event.id}
-                        className="group cursor-pointer"
-                        onClick={() => {
-                          setSelectedEvent(event);
-                          setShowEventDetails(true);
-                        }}
-                      >
+                    {upcomingEvents.slice(0, 6).map(event => <div key={event.id} className="group cursor-pointer" onClick={() => {
+                  setSelectedEvent(event);
+                  setShowEventDetails(true);
+                }}>
                         <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
-                          {event.banner_url ? (
-                            <img
-                              src={event.banner_url}
-                              alt={event.title}
-                              className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                            />
-                          ) : (
-                            <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                          {event.banner_url ? <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" /> : <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
                               <CalendarIcon className="h-16 w-16 text-purple-500/30" />
-                            </div>
-                          )}
+                            </div>}
                           <div className="p-4">
                             <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
                             <div className="space-y-1 text-sm text-muted-foreground">
@@ -234,12 +202,10 @@ export default function StudentDashboard() {
                                 <Clock className="h-3 w-3" />
                                 {format(parseISO(event.start_date), 'MMM d, h:mm a')}
                               </div>
-                              {event.location && (
-                                <div className="flex items-center gap-2">
+                              {event.location && <div className="flex items-center gap-2">
                                   <MapPin className="h-3 w-3" />
                                   <span className="line-clamp-1">{event.location}</span>
-                                </div>
-                              )}
+                                </div>}
                               <div className="flex items-center gap-2">
                                 <Users className="h-3 w-3" />
                                 {event.attendees} attending
@@ -248,23 +214,17 @@ export default function StudentDashboard() {
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
             
-            <UnifiedCalendar
-              showCreateButton={false}
-              onItemClick={(item) => {
-                if (item.type === 'event') {
-                  setSelectedEvent(item);
-                  setShowEventDetails(true);
-                }
-              }}
-              filterTypes={['event', 'session', 'availability']}
-            />
+            <UnifiedCalendar showCreateButton={false} onItemClick={item => {
+            if (item.type === 'event') {
+              setSelectedEvent(item);
+              setShowEventDetails(true);
+            }
+          }} filterTypes={['event', 'session', 'availability']} />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
@@ -283,28 +243,12 @@ export default function StudentDashboard() {
 
       {/* Floating Chat with AI */}
       <FloatingChat />
-      <CreateSessionDialog 
-        open={createSessionDialogOpen}
-        onOpenChange={setCreateSessionDialogOpen}
-        onSessionCreated={() => {}}
-      />
-      <CreateEventDialog 
-        open={createEventDialogOpen}
-        onOpenChange={setCreateEventDialogOpen}
-        onEventCreated={() => {
-          setCreateEventDialogOpen(false);
-        }}
-      />
-      {selectedEvent && (
-        <EventDetailsDialog 
-          event={selectedEvent}
-          open={showEventDetails}
-          onOpenChange={setShowEventDetails}
-          onEventUpdated={() => {
-            setShowEventDetails(false);
-          }}
-        />
-      )}
-    </div>
-  );
+      <CreateSessionDialog open={createSessionDialogOpen} onOpenChange={setCreateSessionDialogOpen} onSessionCreated={() => {}} />
+      <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {
+      setCreateEventDialogOpen(false);
+    }} />
+      {selectedEvent && <EventDetailsDialog event={selectedEvent} open={showEventDetails} onOpenChange={setShowEventDetails} onEventUpdated={() => {
+      setShowEventDetails(false);
+    }} />}
+    </div>;
 }
