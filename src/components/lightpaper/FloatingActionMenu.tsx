@@ -33,7 +33,7 @@ export default function FloatingActionMenu({
   return (
     <div
       className={cn(
-        "fixed bottom-6 z-50 flex flex-col gap-2",
+        "fixed bottom-24 md:bottom-[140px] z-50 flex flex-col gap-2",
         position === "right" ? "right-6" : "left-6"
       )}
     >

@@ -1872,7 +1872,7 @@ export function LightPaperPDFEditor({
       <Sheet open={showSignaturePanel} onOpenChange={setShowSignaturePanel}>
         <SheetTrigger asChild>
           <Button
-            className="fixed bottom-20 sm:bottom-24 right-4 sm:right-6 h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg z-50"
+            className="fixed bottom-[200px] md:bottom-[260px] right-4 sm:right-6 h-12 w-12 sm:h-14 sm:w-14 rounded-full shadow-lg z-50"
             size="icon"
           >
             <Pen className="h-5 w-5 sm:h-6 sm:w-6" />
