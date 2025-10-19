@@ -141,6 +141,15 @@ All colors MUST be HSL.
     min-height: 100vh;
     overflow-x: hidden;
     width: 100%;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Smooth transitions for theme changes */
+  .page,
+  .editor-content,
+  [role="textbox"],
+  [contenteditable="true"] {
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
 }
 

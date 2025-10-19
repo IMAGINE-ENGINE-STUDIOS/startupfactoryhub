@@ -163,7 +163,7 @@ export function useSharedPDF(shareToken?: string) {
 
       if (error) throw error;
       
-      const shareUrl = `${window.location.origin}/pdf-view/${data.share_token}`;
+      const shareUrl = `${window.location.origin}/shared-pdf/${data.share_token}`;
       toast.success("PDF shared successfully!");
       return { shareUrl, shareToken: data.share_token, documentId: data.id };
     } catch (error: any) {

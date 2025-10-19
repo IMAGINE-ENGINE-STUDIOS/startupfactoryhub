@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
@@ -22,6 +22,8 @@ import { LiveCursors } from "./LiveCursors";
 import { CommentsSidebar } from "./CommentsSidebar";
 import { CollaborationPresence } from "./CollaborationPresence";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNetworkStatus } from "@/hooks/useNetworkStatus";
+import { sanitizeHTML } from "@/utils/sanitize";
 
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
 const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
@@ -67,6 +69,7 @@ export function LightPaperDocument({
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const commandHistory = useRef(new CommandHistory());
   const { user } = useAuth();
+  const { isOnline } = useNetworkStatus();
   const {
     saveProject
   } = useLightPaperProjects("document");
@@ -82,21 +85,14 @@ export function LightPaperDocument({
     updateCursor,
   } = useDocumentCollaboration({
     projectId: currentProjectId,
-    enabled: true,
+    enabled: !!currentProjectId,
   });
 
-  // Apply dark mode only once on mount if no project loaded
+  // Remove hard-coded dark mode styles - use theme-aware classes instead
+  // This effect now does nothing intentionally - theme is handled by CSS
   useEffect(() => {
-    if (!selectedProject) {
-      const pageElement = document.querySelector('.page') as HTMLElement;
-      if (pageElement) {
-        pageElement.style.backgroundColor = 'black';
-        pageElement.style.color = 'white';
-      }
-      if (editorRef.current) {
-        editorRef.current.style.color = 'white';
-      }
-    }
+    // Removed hard-coded backgroundColor and color styles
+    // Theme is now properly handled by CSS variables
   }, []);
 
   // Initialize signature canvas with transparent background
@@ -641,7 +637,7 @@ export function LightPaperDocument({
         signatureElement.style.fontFamily = "cursive";
         signatureElement.style.fontSize = "24px";
         signatureElement.textContent = draggingSignature.data;
-        signatureElement.style.color = isDarkMode ? 'white' : 'black';
+        signatureElement.style.color = 'var(--foreground)'; // Use theme variable
       }
 
       // Add drag functionality to placed signature
