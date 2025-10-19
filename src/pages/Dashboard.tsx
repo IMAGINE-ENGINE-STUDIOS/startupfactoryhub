@@ -36,7 +36,7 @@ import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
-import MobileNavigationController from '@/components/MobileNavigationController';
+import MobileTabNavigation from '@/components/MobileTabNavigation';
 
 const Dashboard = () => {
   const {
@@ -306,8 +306,19 @@ const Dashboard = () => {
         </Tabs>
       </div>
 
-      {/* Mobile Navigation Controller */}
-      <MobileNavigationController activeTab={activeTab} onTabChange={setActiveTab} />
+      {/* Mobile Navigation */}
+      <MobileTabNavigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        tabs={[
+          { value: "social", icon: MessageCircle, label: "Social Feed" },
+          { value: "network", icon: Network, label: "Network" },
+          { value: "journey", icon: Map, label: "Journey" },
+          { value: "calendar", icon: CalendarIcon, label: "Calendar" },
+          { value: "analytics", icon: BarChart, label: "Analytics" },
+          { value: "tools", icon: Wrench, label: "Tools" },
+        ]}
+      />
 
       {/* Floating Buttons */}
       <FloatingChat />

@@ -20,9 +20,10 @@ import FloatingChat from '@/components/FloatingChat';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
-import { Calendar as CalendarIcon, Plus, Clock, MapPin, Users } from 'lucide-react';
+import { Calendar as CalendarIcon, Plus, Clock, MapPin, Users, MessageCircle, UserCircle, Network, BookOpen, Briefcase, BarChart, Brain, Wrench } from 'lucide-react';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
+import MobileTabNavigation from '@/components/MobileTabNavigation';
 
 export default function StudentDashboard() {
   const [enrollments, setEnrollments] = useState<any[]>([]);
@@ -32,6 +33,7 @@ export default function StudentDashboard() {
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("social");
   const { user } = useAuth();
   const { profile: profileWithRole } = useProfileWithRole();
   const { upcomingEvents } = useEvents();
@@ -122,18 +124,45 @@ export default function StudentDashboard() {
         </div>
 
         {/* Main Tabs Navigation */}
-        <Tabs defaultValue="social" className="space-y-6">
-          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="hidden md:block overflow-x-auto">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9">
-              <TabsTrigger value="social">Social</TabsTrigger>
-              <TabsTrigger value="profile">Profile</TabsTrigger>
-              <TabsTrigger value="network">Network</TabsTrigger>
-              <TabsTrigger value="learning">Learning</TabsTrigger>
-              <TabsTrigger value="jobs">Opportunities</TabsTrigger>
-              <TabsTrigger value="calendar">Calendar</TabsTrigger>
-              <TabsTrigger value="analytics">Analytics</TabsTrigger>
-              <TabsTrigger value="intelligence">Intelligence</TabsTrigger>
-              <TabsTrigger value="tools">Tools</TabsTrigger>
+              <TabsTrigger value="social" className="gap-2">
+                <MessageCircle className="h-4 w-4" />
+                <span>Social</span>
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="gap-2">
+                <UserCircle className="h-4 w-4" />
+                <span>Profile</span>
+              </TabsTrigger>
+              <TabsTrigger value="network" className="gap-2">
+                <Network className="h-4 w-4" />
+                <span>Network</span>
+              </TabsTrigger>
+              <TabsTrigger value="learning" className="gap-2">
+                <BookOpen className="h-4 w-4" />
+                <span>Learning</span>
+              </TabsTrigger>
+              <TabsTrigger value="jobs" className="gap-2">
+                <Briefcase className="h-4 w-4" />
+                <span>Opportunities</span>
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                <span>Calendar</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-2">
+                <BarChart className="h-4 w-4" />
+                <span>Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger value="intelligence" className="gap-2">
+                <Brain className="h-4 w-4" />
+                <span>Intelligence</span>
+              </TabsTrigger>
+              <TabsTrigger value="tools" className="gap-2">
+                <Wrench className="h-4 w-4" />
+                <span>Tools</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -251,6 +280,20 @@ export default function StudentDashboard() {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Mobile Navigation */}
+      <MobileTabNavigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        tabs={[
+          { value: "social", icon: MessageCircle, label: "Social" },
+          { value: "profile", icon: UserCircle, label: "Profile" },
+          { value: "learning", icon: BookOpen, label: "Learning" },
+          { value: "jobs", icon: Briefcase, label: "Opportunities" },
+          { value: "calendar", icon: CalendarIcon, label: "Calendar" },
+          { value: "tools", icon: Wrench, label: "Tools" },
+        ]}
+      />
 
       {/* Floating Chat with AI */}
       <FloatingChat />

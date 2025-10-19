@@ -8,11 +8,11 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Calendar, ExternalLink, Video } from 'lucide-react';
+import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Calendar as CalendarIcon, ExternalLink, Video, Plus, Bell, Clock, MapPin, MessageCircle, Network, UserCircle, BarChart, Brain, Wrench } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 import StartupBrowser from '@/components/StartupBrowser';
 import NetworkBrowser from '@/components/NetworkBrowser';
@@ -26,6 +26,11 @@ import InvestorAvailabilityManager from '@/components/InvestorAvailabilityManage
 import VideoConferencing from '@/components/VideoConferencing';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { DashboardHeader } from '@/components/DashboardHeader';
+import { CreateEventDialog } from '@/components/CreateEventDialog';
+import { EventDetailsDialog } from '@/components/EventDetailsDialog';
+import CreateSessionDialog from '@/components/CreateSessionDialog';
+import MobileTabNavigation from '@/components/MobileTabNavigation';
+import { useEvents } from '@/hooks/useEvents';
 
 interface Investment {
   id: string;
@@ -42,12 +47,17 @@ export default function InvestorDashboard() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [opportunities, setOpportunities] = useState<Investment[]>([]);
   const [investorProfile, setInvestorProfile] = useState<any>(null);
-  const [currentTab, setCurrentTab] = useState('social');
+  const [activeTab, setActiveTab] = useState('social');
   const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | undefined>();
+  const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
+  const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
+  const [showEventDetails, setShowEventDetails] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const { profile: profileWithRole } = useProfileWithRole();
+  const { upcomingEvents } = useEvents();
 
   useEffect(() => {
     if (user) {
@@ -320,7 +330,7 @@ export default function InvestorDashboard() {
         </div>
 
 
-        <Tabs value={currentTab} onValueChange={setCurrentTab} className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl">
               <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
@@ -462,14 +472,14 @@ export default function InvestorDashboard() {
             <Card className="tech-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Calendar className="h-5 w-5 text-primary" />
+                  <CalendarIcon className="h-5 w-5 text-primary" />
                   <span>Scheduled Pitch Meetings</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {pitchMeetings.length === 0 ? (
                   <div className="text-center py-8 text-muted-foreground">
-                    <Calendar className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                    <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />
                     <p>No upcoming pitch meetings</p>
                   </div>
                 ) : (
@@ -489,7 +499,7 @@ export default function InvestorDashboard() {
                                   with {meeting.startup?.full_name}
                                 </p>
                                 <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                                  <Calendar className="h-4 w-4" />
+                                  <CalendarIcon className="h-4 w-4" />
                                   {format(new Date(meeting.scheduled_date), 'PPP p')}
                                 </div>
                                 <Badge variant="secondary" className="mt-2">
@@ -576,6 +586,20 @@ export default function InvestorDashboard() {
           </div>
         )}
       </div>
+
+      {/* Mobile Navigation */}
+      <MobileTabNavigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        tabs={[
+          { value: "social", icon: MessageCircle, label: "Social" },
+          { value: "portfolio", icon: Building, label: "Portfolio" },
+          { value: "opportunities", icon: Target, label: "Opportunities" },
+          { value: "events", icon: CalendarIcon, label: "Events" },
+          { value: "analytics", icon: BarChart, label: "Analytics" },
+          { value: "tools", icon: Wrench, label: "Tools" },
+        ]}
+      />
 
       {/* Floating Chat with AI */}
       <FloatingChat />

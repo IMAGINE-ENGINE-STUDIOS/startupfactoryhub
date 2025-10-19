@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar as CalendarIcon, Users, MessageSquare, TrendingUp, Star, Clock, Award, Plus, MapPin } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, MessageSquare, TrendingUp, Star, Clock, Award, Plus, MapPin, MessageCircle, Network, FileText, BarChart, Brain, Wrench } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import MentorshipRequests from '@/components/MentorshipRequests';
@@ -26,6 +26,7 @@ import { DashboardHeader } from '@/components/DashboardHeader';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
+import MobileTabNavigation from '@/components/MobileTabNavigation';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
 
@@ -51,6 +52,7 @@ export default function AdvisorDashboard() {
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("social");
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -703,6 +705,20 @@ export default function AdvisorDashboard() {
         company={selectedStartup}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
+      />
+
+      {/* Mobile Navigation */}
+      <MobileTabNavigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        tabs={[
+          { value: "social", icon: MessageCircle, label: "Social" },
+          { value: "network", icon: Network, label: "Network" },
+          { value: "requests", icon: FileText, label: "Requests" },
+          { value: "mentees", icon: Users, label: "My Mentees" },
+          { value: "calendar", icon: CalendarIcon, label: "Calendar" },
+          { value: "analytics", icon: BarChart, label: "Analytics" },
+        ]}
       />
 
       {/* Floating Chat with AI */}

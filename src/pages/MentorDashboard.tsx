@@ -36,7 +36,13 @@ import {
   Award,
   Clock,
   Target,
-  MapPin
+  MapPin,
+  MessageCircle,
+  Network,
+  BarChart,
+  Brain,
+  Wrench,
+  BookOpen
 } from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
@@ -45,6 +51,7 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { useState } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
+import MobileTabNavigation from '@/components/MobileTabNavigation';
 
 const MentorDashboard = () => {
   const { user } = useAuth();
@@ -54,6 +61,7 @@ const MentorDashboard = () => {
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState("social");
   const { upcomingEvents } = useEvents();
 
   return (
@@ -92,18 +100,45 @@ const MentorDashboard = () => {
 
 
         {/* Tabbed Dashboard Content */}
-        <Tabs defaultValue="social" className="space-y-6">
-          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="hidden md:block overflow-x-auto">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
-              <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
-              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
-              <TabsTrigger value="mentees" className="flex-shrink-0">Mentees</TabsTrigger>
-              <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
-              <TabsTrigger value="endorsements" className="flex-shrink-0">Endorsements</TabsTrigger>
-              <TabsTrigger value="resources" className="flex-shrink-0">Resources</TabsTrigger>
-              <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
-              <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
-              <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
+              <TabsTrigger value="social" className="flex-shrink-0 gap-2">
+                <MessageCircle className="h-4 w-4" />
+                <span>Social</span>
+              </TabsTrigger>
+              <TabsTrigger value="network" className="flex-shrink-0 gap-2">
+                <Network className="h-4 w-4" />
+                <span>Network</span>
+              </TabsTrigger>
+              <TabsTrigger value="mentees" className="flex-shrink-0 gap-2">
+                <Users className="h-4 w-4" />
+                <span>Mentees</span>
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                <span>Calendar</span>
+              </TabsTrigger>
+              <TabsTrigger value="endorsements" className="flex-shrink-0 gap-2">
+                <Award className="h-4 w-4" />
+                <span>Endorsements</span>
+              </TabsTrigger>
+              <TabsTrigger value="resources" className="flex-shrink-0 gap-2">
+                <BookOpen className="h-4 w-4" />
+                <span>Resources</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-shrink-0 gap-2">
+                <BarChart className="h-4 w-4" />
+                <span>Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger value="intelligence" className="flex-shrink-0 gap-2">
+                <Brain className="h-4 w-4" />
+                <span>Intelligence</span>
+              </TabsTrigger>
+              <TabsTrigger value="tools" className="flex-shrink-0 gap-2">
+                <Wrench className="h-4 w-4" />
+                <span>Tools</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -293,6 +328,20 @@ const MentorDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
+
+      {/* Mobile Navigation */}
+      <MobileTabNavigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        tabs={[
+          { value: "social", icon: MessageCircle, label: "Social" },
+          { value: "network", icon: Network, label: "Network" },
+          { value: "mentees", icon: Users, label: "Mentees" },
+          { value: "calendar", icon: CalendarIcon, label: "Calendar" },
+          { value: "analytics", icon: BarChart, label: "Analytics" },
+          { value: "tools", icon: Wrench, label: "Tools" },
+        ]}
+      />
 
       {/* Floating Chat with AI */}
       <FloatingChat />
