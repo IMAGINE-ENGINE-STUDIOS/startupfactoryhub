@@ -39,13 +39,15 @@ interface UnifiedCalendarProps {
   onCreateEvent?: () => void;
   onItemClick?: (item: CalendarItem) => void;
   filterTypes?: CalendarItemType[];
+  userRole?: 'advisor' | 'mentor' | 'startup' | 'student' | 'investor';
 }
 
 export default function UnifiedCalendar({ 
   showCreateButton = true, 
   onCreateEvent,
   onItemClick,
-  filterTypes = ['event', 'session', 'availability', 'pitch']
+  filterTypes = ['event', 'session', 'availability', 'pitch'],
+  userRole
 }: UnifiedCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<any[]>([]);
@@ -75,10 +77,23 @@ export default function UnifiedCalendar({
   }, [user]);
 
   const fetchEvents = async () => {
-    const { data: eventsData, error } = await supabase
+    let query = supabase
       .from('events')
-      .select('*')
-      .order('start_date', { ascending: true });
+      .select('*');
+
+    // For advisors/mentors, only show events they're organizing or attending
+    if (user && (userRole === 'advisor' || userRole === 'mentor')) {
+      const { data: attendingEvents } = await supabase
+        .from('event_attendees')
+        .select('event_id')
+        .eq('user_id', user.id);
+      
+      const attendingIds = attendingEvents?.map(a => a.event_id) || [];
+      
+      query = query.or(`organizer_id.eq.${user.id},id.in.(${attendingIds.join(',')})`);
+    }
+
+    const { data: eventsData, error } = await query.order('start_date', { ascending: true });
 
     if (error) {
       console.error('Error fetching events:', error);
