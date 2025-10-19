@@ -36,7 +36,7 @@ import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
-import MobileTabNavigation from '@/components/MobileTabNavigation';
+
 
 const Dashboard = () => {
   const {
@@ -129,48 +129,47 @@ const Dashboard = () => {
 
         {/* Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          {/* Desktop Tabs - Hidden on Mobile */}
-          <div className="hidden md:block overflow-x-auto scrollbar-thin">
+          <div className="overflow-x-auto scrollbar-thin">
             <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
-                <span>Social</span>
+                <span className="hidden md:inline">Social</span>
               </TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0 gap-2">
                 <Network className="h-4 w-4" />
-                <span>Network</span>
+                <span className="hidden md:inline">Network</span>
               </TabsTrigger>
               <TabsTrigger value="journey" className="flex-shrink-0 gap-2">
                 <Map className="h-4 w-4" />
-                <span>Journey</span>
+                <span className="hidden md:inline">Journey</span>
               </TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
                 <CalendarIcon className="h-4 w-4" />
-                <span>Calendar</span>
+                <span className="hidden md:inline">Calendar</span>
               </TabsTrigger>
               <TabsTrigger value="profile" className="flex-shrink-0 gap-2">
                 <UserCircle className="h-4 w-4" />
-                <span>Profile</span>
+                <span className="hidden md:inline">Profile</span>
               </TabsTrigger>
               <TabsTrigger value="jobs" className="flex-shrink-0 gap-2">
                 <Briefcase className="h-4 w-4" />
-                <span>Jobs</span>
+                <span className="hidden md:inline">Jobs</span>
               </TabsTrigger>
               <TabsTrigger value="learn" className="flex-shrink-0 gap-2">
                 <GraduationCap className="h-4 w-4" />
-                <span>Learn</span>
+                <span className="hidden md:inline">Learn</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0 gap-2">
                 <BarChart className="h-4 w-4" />
-                <span>Analytics</span>
+                <span className="hidden md:inline">Analytics</span>
               </TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0 gap-2">
                 <Brain className="h-4 w-4" />
-                <span>Intelligence</span>
+                <span className="hidden md:inline">Intelligence</span>
               </TabsTrigger>
               <TabsTrigger value="tools" className="flex-shrink-0 gap-2">
                 <Wrench className="h-4 w-4" />
-                <span>Tools</span>
+                <span className="hidden md:inline">Tools</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -305,20 +304,6 @@ const Dashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
-
-      {/* Mobile Navigation */}
-      <MobileTabNavigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        tabs={[
-          { value: "social", icon: MessageCircle, label: "Social Feed" },
-          { value: "network", icon: Network, label: "Network" },
-          { value: "journey", icon: Map, label: "Journey" },
-          { value: "calendar", icon: CalendarIcon, label: "Calendar" },
-          { value: "analytics", icon: BarChart, label: "Analytics" },
-          { value: "tools", icon: Wrench, label: "Tools" },
-        ]}
-      />
 
       {/* Floating Buttons */}
       <FloatingChat />

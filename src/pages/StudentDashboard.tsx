@@ -23,7 +23,7 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { Calendar as CalendarIcon, Plus, Clock, MapPin, Users, MessageCircle, UserCircle, Network, BookOpen, Briefcase, BarChart, Brain, Wrench } from 'lucide-react';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
-import MobileTabNavigation from '@/components/MobileTabNavigation';
+
 
 export default function StudentDashboard() {
   const [enrollments, setEnrollments] = useState<any[]>([]);
@@ -280,20 +280,6 @@ export default function StudentDashboard() {
           </TabsContent>
         </Tabs>
       </div>
-
-      {/* Mobile Navigation */}
-      <MobileTabNavigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        tabs={[
-          { value: "social", icon: MessageCircle, label: "Social" },
-          { value: "profile", icon: UserCircle, label: "Profile" },
-          { value: "learning", icon: BookOpen, label: "Learning" },
-          { value: "jobs", icon: Briefcase, label: "Opportunities" },
-          { value: "calendar", icon: CalendarIcon, label: "Calendar" },
-          { value: "tools", icon: Wrench, label: "Tools" },
-        ]}
-      />
 
       {/* Floating Chat with AI */}
       <FloatingChat />

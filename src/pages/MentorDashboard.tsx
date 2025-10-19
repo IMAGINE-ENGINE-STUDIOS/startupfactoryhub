@@ -51,7 +51,7 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { useState } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
-import MobileTabNavigation from '@/components/MobileTabNavigation';
+
 
 const MentorDashboard = () => {
   const { user } = useAuth();
@@ -101,43 +101,43 @@ const MentorDashboard = () => {
 
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="hidden md:block overflow-x-auto">
+          <div className="overflow-x-auto">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
-                <span>Social</span>
+                <span className="hidden md:inline">Social</span>
               </TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0 gap-2">
                 <Network className="h-4 w-4" />
-                <span>Network</span>
+                <span className="hidden md:inline">Network</span>
               </TabsTrigger>
               <TabsTrigger value="mentees" className="flex-shrink-0 gap-2">
                 <Users className="h-4 w-4" />
-                <span>Mentees</span>
+                <span className="hidden md:inline">Mentees</span>
               </TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
                 <CalendarIcon className="h-4 w-4" />
-                <span>Calendar</span>
+                <span className="hidden md:inline">Calendar</span>
               </TabsTrigger>
               <TabsTrigger value="endorsements" className="flex-shrink-0 gap-2">
                 <Award className="h-4 w-4" />
-                <span>Endorsements</span>
+                <span className="hidden md:inline">Endorsements</span>
               </TabsTrigger>
               <TabsTrigger value="resources" className="flex-shrink-0 gap-2">
                 <BookOpen className="h-4 w-4" />
-                <span>Resources</span>
+                <span className="hidden md:inline">Resources</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0 gap-2">
                 <BarChart className="h-4 w-4" />
-                <span>Analytics</span>
+                <span className="hidden md:inline">Analytics</span>
               </TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-shrink-0 gap-2">
                 <Brain className="h-4 w-4" />
-                <span>Intelligence</span>
+                <span className="hidden md:inline">Intelligence</span>
               </TabsTrigger>
               <TabsTrigger value="tools" className="flex-shrink-0 gap-2">
                 <Wrench className="h-4 w-4" />
-                <span>Tools</span>
+                <span className="hidden md:inline">Tools</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -328,20 +328,6 @@ const MentorDashboard = () => {
           </TabsContent>
         </Tabs>
       </div>
-
-      {/* Mobile Navigation */}
-      <MobileTabNavigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        tabs={[
-          { value: "social", icon: MessageCircle, label: "Social" },
-          { value: "network", icon: Network, label: "Network" },
-          { value: "mentees", icon: Users, label: "Mentees" },
-          { value: "calendar", icon: CalendarIcon, label: "Calendar" },
-          { value: "analytics", icon: BarChart, label: "Analytics" },
-          { value: "tools", icon: Wrench, label: "Tools" },
-        ]}
-      />
 
       {/* Floating Chat with AI */}
       <FloatingChat />

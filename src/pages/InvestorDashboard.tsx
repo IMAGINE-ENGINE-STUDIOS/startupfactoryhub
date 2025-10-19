@@ -29,7 +29,7 @@ import { DashboardHeader } from '@/components/DashboardHeader';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
-import MobileTabNavigation from '@/components/MobileTabNavigation';
+
 import { useEvents } from '@/hooks/useEvents';
 
 interface Investment {
@@ -333,15 +333,42 @@ export default function InvestorDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl">
-              <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
-              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
-              <TabsTrigger value="portfolio" className="flex-shrink-0">Portfolio</TabsTrigger>
-              <TabsTrigger value="opportunities" className="flex-shrink-0">Opportunities</TabsTrigger>
-              <TabsTrigger value="events" className="flex-shrink-0">Events</TabsTrigger>
-              <TabsTrigger value="profile" className="flex-shrink-0">Profile</TabsTrigger>
-              <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
-              <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
-              <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
+              <TabsTrigger value="social" className="flex-shrink-0 gap-2">
+                <MessageCircle className="h-4 w-4" />
+                <span className="hidden md:inline">Social</span>
+              </TabsTrigger>
+              <TabsTrigger value="network" className="flex-shrink-0 gap-2">
+                <Network className="h-4 w-4" />
+                <span className="hidden md:inline">Network</span>
+              </TabsTrigger>
+              <TabsTrigger value="portfolio" className="flex-shrink-0 gap-2">
+                <Building className="h-4 w-4" />
+                <span className="hidden md:inline">Portfolio</span>
+              </TabsTrigger>
+              <TabsTrigger value="opportunities" className="flex-shrink-0 gap-2">
+                <Target className="h-4 w-4" />
+                <span className="hidden md:inline">Opportunities</span>
+              </TabsTrigger>
+              <TabsTrigger value="events" className="flex-shrink-0 gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                <span className="hidden md:inline">Events</span>
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex-shrink-0 gap-2">
+                <UserCircle className="h-4 w-4" />
+                <span className="hidden md:inline">Profile</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-shrink-0 gap-2">
+                <BarChart className="h-4 w-4" />
+                <span className="hidden md:inline">Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger value="intelligence" className="flex-shrink-0 gap-2">
+                <Brain className="h-4 w-4" />
+                <span className="hidden md:inline">Intelligence</span>
+              </TabsTrigger>
+              <TabsTrigger value="tools" className="flex-shrink-0 gap-2">
+                <Wrench className="h-4 w-4" />
+                <span className="hidden md:inline">Tools</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -587,19 +614,6 @@ export default function InvestorDashboard() {
         )}
       </div>
 
-      {/* Mobile Navigation */}
-      <MobileTabNavigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        tabs={[
-          { value: "social", icon: MessageCircle, label: "Social" },
-          { value: "portfolio", icon: Building, label: "Portfolio" },
-          { value: "opportunities", icon: Target, label: "Opportunities" },
-          { value: "events", icon: CalendarIcon, label: "Events" },
-          { value: "analytics", icon: BarChart, label: "Analytics" },
-          { value: "tools", icon: Wrench, label: "Tools" },
-        ]}
-      />
 
       {/* Floating Chat with AI */}
       <FloatingChat />

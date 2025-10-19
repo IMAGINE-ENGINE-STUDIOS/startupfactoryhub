@@ -26,7 +26,7 @@ import { DashboardHeader } from '@/components/DashboardHeader';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
-import MobileTabNavigation from '@/components/MobileTabNavigation';
+
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
 
@@ -380,18 +380,45 @@ export default function AdvisorDashboard() {
         </div>
 
 
-        <Tabs defaultValue="social" className="space-y-6">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
-              <TabsTrigger value="social" className="flex-shrink-0">Social</TabsTrigger>
-              <TabsTrigger value="network" className="flex-shrink-0">Network</TabsTrigger>
-              <TabsTrigger value="requests" className="flex-shrink-0">Requests</TabsTrigger>
-              <TabsTrigger value="mentees" className="flex-shrink-0">My Mentees</TabsTrigger>
-              <TabsTrigger value="calendar" className="flex-shrink-0">Calendar</TabsTrigger>
-              <TabsTrigger value="schedule" className="flex-shrink-0">Schedule</TabsTrigger>
-              <TabsTrigger value="analytics" className="flex-shrink-0">Analytics</TabsTrigger>
-              <TabsTrigger value="intelligence" className="flex-shrink-0">Intelligence</TabsTrigger>
-              <TabsTrigger value="tools" className="flex-shrink-0">Tools</TabsTrigger>
+              <TabsTrigger value="social" className="flex-shrink-0 gap-2">
+                <MessageCircle className="h-4 w-4" />
+                <span className="hidden md:inline">Social</span>
+              </TabsTrigger>
+              <TabsTrigger value="network" className="flex-shrink-0 gap-2">
+                <Network className="h-4 w-4" />
+                <span className="hidden md:inline">Network</span>
+              </TabsTrigger>
+              <TabsTrigger value="requests" className="flex-shrink-0 gap-2">
+                <FileText className="h-4 w-4" />
+                <span className="hidden md:inline">Requests</span>
+              </TabsTrigger>
+              <TabsTrigger value="mentees" className="flex-shrink-0 gap-2">
+                <Users className="h-4 w-4" />
+                <span className="hidden md:inline">My Mentees</span>
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                <span className="hidden md:inline">Calendar</span>
+              </TabsTrigger>
+              <TabsTrigger value="schedule" className="flex-shrink-0 gap-2">
+                <Clock className="h-4 w-4" />
+                <span className="hidden md:inline">Schedule</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-shrink-0 gap-2">
+                <BarChart className="h-4 w-4" />
+                <span className="hidden md:inline">Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger value="intelligence" className="flex-shrink-0 gap-2">
+                <Brain className="h-4 w-4" />
+                <span className="hidden md:inline">Intelligence</span>
+              </TabsTrigger>
+              <TabsTrigger value="tools" className="flex-shrink-0 gap-2">
+                <Wrench className="h-4 w-4" />
+                <span className="hidden md:inline">Tools</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -707,19 +734,6 @@ export default function AdvisorDashboard() {
         onOpenChange={setDialogOpen}
       />
 
-      {/* Mobile Navigation */}
-      <MobileTabNavigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        tabs={[
-          { value: "social", icon: MessageCircle, label: "Social" },
-          { value: "network", icon: Network, label: "Network" },
-          { value: "requests", icon: FileText, label: "Requests" },
-          { value: "mentees", icon: Users, label: "My Mentees" },
-          { value: "calendar", icon: CalendarIcon, label: "Calendar" },
-          { value: "analytics", icon: BarChart, label: "Analytics" },
-        ]}
-      />
 
       {/* Floating Chat with AI */}
       <FloatingChat />
