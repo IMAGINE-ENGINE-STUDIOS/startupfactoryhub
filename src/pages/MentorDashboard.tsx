@@ -69,7 +69,7 @@ const MentorDashboard = () => {
       <DashboardHeader />
       <DashboardNavigation />
       
-      <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-16 sm:pt-20 pb-4 sm:pb-8">
+      <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4 sm:pb-8">
         {/* Welcome Header */}
         <div className="mb-6 sm:mb-8">
           {/* Mobile: Only Avatar */}

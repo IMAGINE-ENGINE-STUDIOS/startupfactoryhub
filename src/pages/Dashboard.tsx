@@ -110,7 +110,7 @@ const Dashboard = () => {
   return <div className="min-h-screen bg-background pb-6 relative overflow-x-hidden">
       <DashboardHeader />
       
-      <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-16 sm:pt-20 pb-4">
+      <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           {/* Mobile: Only Avatar */}
