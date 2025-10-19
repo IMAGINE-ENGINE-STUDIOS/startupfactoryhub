@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar as CalendarIcon, Users, MessageSquare, TrendingUp, Star, Clock, Award, Plus, MapPin, MessageCircle, Network, FileText, BarChart, Brain, Wrench } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, MessageSquare, TrendingUp, Star, Clock, Award, Plus, MapPin, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import MentorshipRequests from '@/components/MentorshipRequests';
@@ -18,6 +18,8 @@ import FloatingChat from '@/components/FloatingChat';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
+import AdvisorJobTaskViewer from '@/components/AdvisorJobTaskViewer';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import StartupProfileDialog from '@/components/StartupProfileDialog';
 import NetworkBrowser from '@/components/NetworkBrowser';
@@ -395,7 +397,7 @@ export default function AdvisorDashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-5xl">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden md:inline">Social</span>
@@ -403,6 +405,10 @@ export default function AdvisorDashboard() {
               <TabsTrigger value="network" className="flex-shrink-0 gap-2">
                 <Network className="h-4 w-4" />
                 <span className="hidden md:inline">Network</span>
+              </TabsTrigger>
+              <TabsTrigger value="jobs" className="flex-shrink-0 gap-2">
+                <Briefcase className="h-4 w-4" />
+                <span className="hidden md:inline">Jobs</span>
               </TabsTrigger>
               <TabsTrigger value="requests" className="flex-shrink-0 gap-2">
                 <FileText className="h-4 w-4" />
@@ -434,6 +440,11 @@ export default function AdvisorDashboard() {
               </TabsTrigger>
             </TabsList>
           </div>
+
+          <TabsContent value="jobs" className="space-y-4">
+            <UnifiedJobsBoard />
+            <AdvisorJobTaskViewer />
+          </TabsContent>
 
           <TabsContent value="requests" className="space-y-4">
             <MentorshipRequests onRequestHandled={fetchStartups} />

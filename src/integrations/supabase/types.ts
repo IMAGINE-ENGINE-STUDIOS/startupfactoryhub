@@ -47,6 +47,44 @@ export type Database = {
         }
         Relationships: []
       }
+      advisor_job_tasks: {
+        Row: {
+          advisor_id: string
+          completed: boolean | null
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          task_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          advisor_id: string
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          task_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          advisor_id?: string
+          completed?: boolean | null
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          task_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "advisor_job_tasks_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "job_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_conversations: {
         Row: {
           context: Json | null
@@ -3135,6 +3173,13 @@ export type Database = {
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
+      }
+      get_user_roles_batch: {
+        Args: { user_ids: string[] }
+        Returns: {
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }[]
       }
       has_role: {
         Args: {

@@ -540,7 +540,7 @@ export default function UnifiedJobsBoard() {
   }
 
   const isCompanyUser = role === 'startup' && userCompanyId;
-  const canApply = role === 'student';
+  const canApply = (role === 'student' || role === 'advisor' || role === 'mentor') && !userCompanyId;
 
   return (
     <div className="space-y-6">

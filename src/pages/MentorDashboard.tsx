@@ -15,6 +15,8 @@ import ResourcesWidget from "@/components/ResourcesWidget";
 import MentorEndorsements from "@/components/MentorEndorsements";
 import AvailabilityManager from "@/components/AvailabilityManager";
 import FloatingChat from "@/components/FloatingChat";
+import UnifiedJobsBoard from "@/components/UnifiedJobsBoard";
+import AdvisorJobTaskViewer from "@/components/AdvisorJobTaskViewer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
@@ -42,7 +44,8 @@ import {
   BarChart,
   Brain,
   Wrench,
-  BookOpen
+  BookOpen,
+  Briefcase
 } from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
@@ -113,7 +116,7 @@ const MentorDashboard = () => {
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-5xl">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden md:inline">Social</span>
@@ -121,6 +124,10 @@ const MentorDashboard = () => {
               <TabsTrigger value="network" className="flex-shrink-0 gap-2">
                 <Network className="h-4 w-4" />
                 <span className="hidden md:inline">Network</span>
+              </TabsTrigger>
+              <TabsTrigger value="jobs" className="flex-shrink-0 gap-2">
+                <Briefcase className="h-4 w-4" />
+                <span className="hidden md:inline">Jobs</span>
               </TabsTrigger>
               <TabsTrigger value="mentees" className="flex-shrink-0 gap-2">
                 <Users className="h-4 w-4" />
@@ -188,6 +195,11 @@ const MentorDashboard = () => {
 
           <TabsContent value="network" className="space-y-4">
             <NetworkBrowser />
+          </TabsContent>
+
+          <TabsContent value="jobs" className="space-y-4">
+            <UnifiedJobsBoard />
+            <AdvisorJobTaskViewer />
           </TabsContent>
 
           <TabsContent value="mentees" className="space-y-6">
