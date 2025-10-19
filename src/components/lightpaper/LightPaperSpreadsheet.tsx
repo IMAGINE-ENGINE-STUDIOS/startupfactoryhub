@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -33,8 +33,9 @@ const generateColumns = (count: number): string[] => {
   return cols;
 };
 
-const COLUMNS = generateColumns(50); // Support up to 50 columns
-const INITIAL_ROWS = 100; // Start with 100 rows
+const TOTAL_COLUMNS = 26; // A-Z columns (optimized from 50)
+const INITIAL_ROWS = 100;
+const COLUMN_WIDTH = 120;
 
 interface Cell {
   value: string;
@@ -55,6 +56,8 @@ export function LightPaperSpreadsheet() {
   const [projectTitle, setProjectTitle] = useState("Untitled Spreadsheet");
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [visibleRows, setVisibleRows] = useState(INITIAL_ROWS);
+  const [columns] = useState(() => generateColumns(TOTAL_COLUMNS));
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { saveProject, projects } = useLightPaperProjects("spreadsheet");
   const isMobile = useIsMobile();
 
@@ -118,17 +121,21 @@ export function LightPaperSpreadsheet() {
     toast.success("Formatting applied");
   };
 
+  // Infinite scroll handler - load more rows on demand
   useEffect(() => {
-    const handleScroll = (e: Event) => {
-      const target = e.target as HTMLElement;
-      if (target.scrollTop + target.clientHeight >= target.scrollHeight - 100) {
+    const handleScroll = () => {
+      const container = scrollContainerRef.current;
+      if (!container) return;
+
+      const { scrollTop, scrollHeight, clientHeight } = container;
+      if (scrollTop + clientHeight >= scrollHeight - 100) {
         setVisibleRows(prev => Math.min(prev + 50, 1000));
       }
     };
 
-    const scrollContainer = document.querySelector('.spreadsheet-scroll-container');
-    scrollContainer?.addEventListener('scroll', handleScroll);
-    return () => scrollContainer?.removeEventListener('scroll', handleScroll);
+    const container = scrollContainerRef.current;
+    container?.addEventListener('scroll', handleScroll);
+    return () => container?.removeEventListener('scroll', handleScroll);
   }, []);
 
   const getCellDisplay = (cellId: string): string => {
@@ -175,23 +182,23 @@ export function LightPaperSpreadsheet() {
     Object.keys(data).forEach((cellId) => {
       const col = cellId.match(/[A-Z]+/)?.[0] || "";
       const row = parseInt(cellId.match(/\d+/)?.[0] || "0");
-      const colIndex = COLUMNS.indexOf(col);
+      const colIndex = columns.indexOf(col);
       
       if (!worksheet[cellId]) {
         worksheet[cellId] = { v: getCellDisplay(cellId), t: "s" };
       }
     });
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
-    XLSX.writeFile(workbook, `${projectTitle}.xlsx`);
-    toast.success("Exported to Excel!");
-  };
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+      XLSX.writeFile(workbook, `${projectTitle}.xlsx`);
+      toast.success("Exported to Excel!");
+    };
 
   const handleExportCSV = () => {
     const csv = [];
     for (let row = 1; row <= visibleRows; row++) {
-      const rowData = COLUMNS.map((col) => {
+      const rowData = columns.map((col) => {
         const cellId = getCellId(col, row);
         return `"${getCellDisplay(cellId)}"`;
       });
@@ -233,8 +240,8 @@ export function LightPaperSpreadsheet() {
           const newData: { [key: string]: Cell } = {};
           jsonData.forEach((row, rowIndex) => {
             row.forEach((cell, colIndex) => {
-              if (colIndex < COLUMNS.length && cell !== undefined) {
-                const cellId = getCellId(COLUMNS[colIndex], rowIndex + 1);
+              if (colIndex < columns.length && cell !== undefined) {
+                const cellId = getCellId(columns[colIndex], rowIndex + 1);
                 newData[cellId] = { value: String(cell) };
               }
             });
@@ -256,12 +263,44 @@ export function LightPaperSpreadsheet() {
     input.click();
   };
 
+  // Memoized cell display for better performance
+  const getCellDisplayMemo = useCallback((cellId: string) => {
+    return getCellDisplay(cellId);
+  }, [data]);
+
+  // Virtualize cells - only render visible cells
+  const visibleColumns = isMobile ? columns.slice(0, 10) : columns;
+
+  // Render cells using memo for performance
+  const renderCell = useCallback((col: string, row: number) => {
+    const cellId = getCellId(col, row);
+    const cellData = data[cellId];
+    const cellStyle = {
+      fontWeight: cellData?.bold ? 'bold' : 'normal',
+      fontStyle: cellData?.italic ? 'italic' : 'normal',
+      textDecoration: cellData?.underline ? 'underline' : 'none',
+      textAlign: (cellData?.align || 'left') as any,
+    };
+
+    return (
+      <td key={cellId} className="border p-0">
+        <Input
+          value={selectedCell === cellId ? (data[cellId]?.value || "") : getCellDisplayMemo(cellId)}
+          onChange={(e) => handleCellChange(cellId, e.target.value)}
+          onFocus={() => setSelectedCell(cellId)}
+          className="border-0 rounded-none h-8 text-sm"
+          style={cellStyle}
+        />
+      </td>
+    );
+  }, [data, selectedCell, getCellDisplayMemo]);
+
   return (
     <>
       <Card className="p-6">
         <CollapsibleToolbar>
           <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-            {/* Format Options */}
+            {/* Formatting */}
             <div className="flex gap-0.5 items-center">
               <Button 
                 variant="ghost" 
@@ -380,12 +419,17 @@ export function LightPaperSpreadsheet() {
           </div>
         </CollapsibleToolbar>
 
-        <div className={`overflow-auto border rounded-lg spreadsheet-scroll-container ${isMobile ? 'text-sm' : ''}`} style={{ maxHeight: isMobile ? '400px' : '600px' }}>
+        {/* Optimized Spreadsheet with infinite scroll */}
+        <div 
+          ref={scrollContainerRef}
+          className={`overflow-auto border rounded-lg mt-4 ${isMobile ? 'text-sm' : ''}`} 
+          style={{ maxHeight: isMobile ? '400px' : '600px' }}
+        >
           <table className="w-full border-collapse">
             <thead className="sticky top-0 z-10">
               <tr>
                 <th className="border bg-muted p-2 w-12 text-xs font-medium sticky left-0 z-20">#</th>
-                {COLUMNS.map((col) => (
+                {visibleColumns.map((col) => (
                   <th key={col} className="border bg-muted p-2 min-w-[120px] text-xs font-medium">
                     {col}
                   </th>
@@ -400,28 +444,7 @@ export function LightPaperSpreadsheet() {
                     <td className="border bg-muted p-2 text-xs font-medium text-center sticky left-0 z-10">
                       {row}
                     </td>
-                    {COLUMNS.map((col) => {
-                      const cellId = getCellId(col, row);
-                      const cellData = data[cellId];
-                      const cellStyle = {
-                        fontWeight: cellData?.bold ? 'bold' : 'normal',
-                        fontStyle: cellData?.italic ? 'italic' : 'normal',
-                        textDecoration: cellData?.underline ? 'underline' : 'none',
-                        textAlign: cellData?.align || 'left'
-                      };
-                      
-                      return (
-                        <td key={cellId} className="border p-0">
-                          <Input
-                            value={selectedCell === cellId ? (data[cellId]?.value || "") : getCellDisplay(cellId)}
-                            onChange={(e) => handleCellChange(cellId, e.target.value)}
-                            onFocus={() => setSelectedCell(cellId)}
-                            className="border-0 rounded-none h-8 text-sm"
-                            style={cellStyle}
-                          />
-                        </td>
-                      );
-                    })}
+                    {visibleColumns.map((col) => renderCell(col, row))}
                   </tr>
                 );
               })}

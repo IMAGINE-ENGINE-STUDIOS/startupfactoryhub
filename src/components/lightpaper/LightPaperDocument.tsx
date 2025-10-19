@@ -163,6 +163,16 @@ export function LightPaperDocument({
 
       // Load version history for this session
       await loadVersionHistory();
+      
+      // Clean up old versions on load
+      if (user?.id) {
+        const { cleanupOldVersions } = await import('@/utils/versionCleanup');
+        const result = await cleanupOldVersions(user.id);
+        if (result.success && result.deletedCount > 0) {
+          console.log(`Cleaned up ${result.deletedCount} old versions`);
+        }
+      }
+      
       toast.success("Document loaded");
     };
     
