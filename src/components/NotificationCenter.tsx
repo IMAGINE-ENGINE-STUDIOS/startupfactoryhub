@@ -160,7 +160,7 @@ export default function NotificationCenter({ className }: NotificationCenterProp
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
+      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-80 p-0" align="end">
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">Notifications</h3>
           <div className="flex items-center gap-2">
@@ -179,7 +179,7 @@ export default function NotificationCenter({ className }: NotificationCenterProp
             )}
           </div>
         </div>
-        <ScrollArea className="h-[400px]">
+        <ScrollArea className="h-[60vh] max-h-[400px]">
           {notifications.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">
               <Bell className="h-12 w-12 mx-auto mb-2 opacity-50" />

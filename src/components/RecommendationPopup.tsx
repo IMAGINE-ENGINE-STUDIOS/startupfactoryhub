@@ -79,7 +79,7 @@ export default function RecommendationPopup({
   };
 
   return (
-    <ScrollArea className="h-[400px] w-full">
+    <ScrollArea className="h-[60vh] max-h-[400px] w-full">
       {isLoading ? (
         <div className="flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
