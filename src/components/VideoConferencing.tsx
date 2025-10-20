@@ -12,7 +12,13 @@ import {
   Loader2,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import DailyIframe, { DailyCall } from '@daily-co/daily-js';
+
+// Jitsi External API types
+declare global {
+  interface Window {
+    JitsiMeetExternalAPI: any;
+  }
+}
 
 interface VideoConferencingProps {
   roomUrl?: string;
@@ -27,13 +33,13 @@ export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencin
   const [participantCount, setParticipantCount] = useState(1);
   const { toast } = useToast();
   
-  const callObjectRef = useRef<DailyCall | null>(null);
+  const jitsiApiRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     return () => {
-      if (callObjectRef.current) {
-        callObjectRef.current.destroy();
+      if (jitsiApiRef.current) {
+        jitsiApiRef.current.dispose();
       }
     };
   }, []);
@@ -57,24 +63,55 @@ export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencin
       return;
     }
 
+    if (!window.JitsiMeetExternalAPI) {
+      toast({
+        title: 'Error',
+        description: 'Jitsi Meet is not loaded yet. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       setIsLoading(true);
-      
-      // Create Daily iframe and attach to container
-      const callObject = DailyIframe.createFrame(containerRef.current, {
-        showLeaveButton: false,
-        iframeStyle: {
-          width: '100%',
-          height: '100%',
-          border: 'none',
-          borderRadius: '0.5rem',
-        },
-      });
-      
-      callObjectRef.current = callObject;
 
-      // Set up event listeners
-      callObject.on('joined-meeting', () => {
+      // Extract room name from URL
+      // Format: https://meet.jit.si/RoomName or just RoomName
+      const roomName = roomUrl.split('/').pop() || roomUrl;
+
+      // Initialize Jitsi Meet
+      const domain = 'meet.jit.si';
+      const options = {
+        roomName: roomName,
+        width: '100%',
+        height: '100%',
+        parentNode: containerRef.current,
+        configOverwrite: {
+          startWithAudioMuted: false,
+          startWithVideoMuted: false,
+          enableWelcomePage: false,
+          prejoinPageEnabled: false,
+          disableDeepLinking: true,
+        },
+        interfaceConfigOverwrite: {
+          SHOW_JITSI_WATERMARK: false,
+          SHOW_WATERMARK_FOR_GUESTS: false,
+          TOOLBAR_BUTTONS: [
+            'microphone', 'camera', 'closedcaptions', 'desktop',
+            'fullscreen', 'fodeviceselection', 'hangup', 'chat',
+            'recording', 'livestreaming', 'etherpad', 'sharedvideo',
+            'settings', 'raisehand', 'videoquality', 'filmstrip',
+            'feedback', 'stats', 'shortcuts', 'tileview', 'download',
+            'help', 'mute-everyone'
+          ],
+        },
+      };
+
+      const api = new window.JitsiMeetExternalAPI(domain, options);
+      jitsiApiRef.current = api;
+
+      // Event listeners
+      api.on('videoConferenceJoined', () => {
         setIsCallActive(true);
         setIsLoading(false);
         toast({
@@ -83,35 +120,30 @@ export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencin
         });
       });
 
-      callObject.on('participant-joined', () => {
-        const participants = callObject.participants();
-        setParticipantCount(Object.keys(participants).length);
+      api.on('participantJoined', () => {
+        const count = api.getNumberOfParticipants();
+        setParticipantCount(count);
       });
 
-      callObject.on('participant-left', () => {
-        const participants = callObject.participants();
-        setParticipantCount(Object.keys(participants).length);
+      api.on('participantLeft', () => {
+        const count = api.getNumberOfParticipants();
+        setParticipantCount(count);
       });
 
-      callObject.on('left-meeting', () => {
+      api.on('videoConferenceLeft', () => {
         setIsCallActive(false);
         onLeave?.();
       });
 
-      callObject.on('error', (error) => {
-        console.error('Daily.co error:', error);
-        toast({
-          title: 'Call error',
-          description: error.errorMsg || 'An error occurred during the call',
-          variant: 'destructive',
-        });
-        setIsLoading(false);
+      api.on('readyToClose', () => {
+        api.dispose();
+        jitsiApiRef.current = null;
+        setIsCallActive(false);
+        onLeave?.();
       });
 
-      // Join the meeting
-      await callObject.join({ url: roomUrl });
     } catch (error) {
-      console.error('Error starting call:', error);
+      console.error('Error starting Jitsi call:', error);
       toast({
         title: 'Failed to start call',
         description: 'Could not connect to the video call',
@@ -122,10 +154,10 @@ export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencin
   };
 
   const endCall = async () => {
-    if (callObjectRef.current) {
-      await callObjectRef.current.leave();
-      await callObjectRef.current.destroy();
-      callObjectRef.current = null;
+    if (jitsiApiRef.current) {
+      jitsiApiRef.current.executeCommand('hangup');
+      jitsiApiRef.current.dispose();
+      jitsiApiRef.current = null;
     }
     setIsCallActive(false);
     toast({
@@ -136,15 +168,15 @@ export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencin
   };
 
   const toggleCamera = () => {
-    if (callObjectRef.current) {
-      callObjectRef.current.setLocalVideo(!isCameraOn);
+    if (jitsiApiRef.current) {
+      jitsiApiRef.current.executeCommand('toggleVideo');
       setIsCameraOn(!isCameraOn);
     }
   };
 
   const toggleMic = () => {
-    if (callObjectRef.current) {
-      callObjectRef.current.setLocalAudio(!isMicOn);
+    if (jitsiApiRef.current) {
+      jitsiApiRef.current.executeCommand('toggleAudio');
       setIsMicOn(!isMicOn);
     }
   };
@@ -153,21 +185,18 @@ export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencin
     return (
       <Card className="p-6">
         <div className="space-y-4">
-          {/* Video Container */}
           <div className="relative">
             <div 
               ref={containerRef}
               className="aspect-video bg-accent rounded-lg overflow-hidden"
             />
             
-            {/* Participant Badge */}
             <Badge className="absolute top-4 left-4 z-10">
               <Users className="h-3 w-3 mr-1" />
               {participantCount} {participantCount === 1 ? 'participant' : 'participants'}
             </Badge>
           </div>
 
-          {/* Call Controls */}
           <div className="flex items-center justify-center gap-4">
             <Button
               variant={isCameraOn ? 'default' : 'destructive'}
@@ -175,11 +204,7 @@ export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencin
               className="h-12 w-12 rounded-full"
               onClick={toggleCamera}
             >
-              {isCameraOn ? (
-                <Video className="h-5 w-5" />
-              ) : (
-                <VideoOff className="h-5 w-5" />
-              )}
+              {isCameraOn ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
             </Button>
 
             <Button
@@ -188,11 +213,7 @@ export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencin
               className="h-12 w-12 rounded-full"
               onClick={toggleMic}
             >
-              {isMicOn ? (
-                <Mic className="h-5 w-5" />
-              ) : (
-                <MicOff className="h-5 w-5" />
-              )}
+              {isMicOn ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
             </Button>
 
             <Button

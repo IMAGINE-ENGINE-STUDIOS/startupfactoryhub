@@ -103,9 +103,9 @@ export default function BookPitchDialog({
       const scheduledDate = new Date(date);
       scheduledDate.setHours(hours, minutes, 0, 0);
 
-      // Generate Daily.co room URL for video conferencing
-      const meetingId = crypto.randomUUID();
-      const meetingLink = `https://startup-platform.daily.co/${meetingId}`;
+      // Generate Jitsi Meet room URL for video conferencing
+      const meetingId = `pitch-${crypto.randomUUID()}`;
+      const meetingLink = `https://meet.jit.si/${meetingId}`;
 
       // Create pitch meeting
       const { error: pitchError } = await supabase

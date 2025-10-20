@@ -245,9 +245,9 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
         throw new Error('Invalid time slot selected');
       }
 
-      // Generate Daily.co room URL
-      const sessionId = crypto.randomUUID();
-      const meetingLink = `https://startup-platform.daily.co/${sessionId}`;
+      // Generate Jitsi Meet room URL
+      const sessionId = `session-${crypto.randomUUID()}`;
+      const meetingLink = `https://meet.jit.si/${sessionId}`;
 
       const { error } = await supabase
         .from('mentoring_sessions')
