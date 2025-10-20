@@ -56,7 +56,9 @@ import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import VideoConferencing from '@/components/VideoConferencing';
+import { Video } from 'lucide-react';
 
 const MentorDashboard = () => {
   const { user } = useAuth();
@@ -69,6 +71,7 @@ const MentorDashboard = () => {
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("social");
+  const [activeVideoUrl, setActiveVideoUrl] = useState<string>();
   const { upcomingEvents } = useEvents();
 
   // Redirect if wrong role
@@ -212,7 +215,7 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="mentees" className="space-y-6">
-            <MenteeSessions />
+            <MenteeSessions onJoinMeeting={(link) => setActiveVideoUrl(link)} />
             <MentorshipRequests />
             <MentorOffersBoard />
           </TabsContent>
@@ -265,12 +268,26 @@ const MentorDashboard = () => {
                                 <Clock className="h-3 w-3" />
                                 {format(parseISO(event.start_date), 'MMM d, h:mm a')}
                               </div>
-                              {event.location && (
-                                <div className="flex items-center gap-2">
-                                  <MapPin className="h-3 w-3" />
-                                  <span className="line-clamp-1">{event.location}</span>
-                                </div>
-                              )}
+                               {event.location && (
+                                 <div className="flex items-center gap-2">
+                                   <MapPin className="h-3 w-3" />
+                                   <span className="line-clamp-1">{event.location}</span>
+                                 </div>
+                               )}
+                               {event.location?.startsWith('https://meet.jit.si/') && (
+                                 <Button
+                                   size="sm"
+                                   variant="outline"
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     setActiveVideoUrl(event.location);
+                                   }}
+                                   className="gap-2 mt-2 w-full"
+                                 >
+                                   <Video className="h-4 w-4" />
+                                   Join Event
+                                 </Button>
+                               )}
                               <div className="flex items-center gap-2">
                                 <Users className="h-3 w-3" />
                                 {event.attendees} attending
@@ -293,6 +310,8 @@ const MentorDashboard = () => {
                 if (item.type === 'event') {
                   setSelectedEvent(item);
                   setShowEventDetails(true);
+                } else if (item.type === 'session' && item.meeting_link) {
+                  setActiveVideoUrl(item.meeting_link);
                 }
               }}
               filterTypes={['event', 'session', 'availability']}
@@ -357,7 +376,25 @@ const MentorDashboard = () => {
 
       {/* Floating Chat with AI */}
       <FloatingChat />
-      <CreateSessionDialog 
+      
+      {/* Video Conferencing Dialog */}
+      <Dialog open={!!activeVideoUrl} onOpenChange={(open) => !open && setActiveVideoUrl(undefined)}>
+        <DialogContent className="max-w-5xl h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Video Conference</DialogTitle>
+          </DialogHeader>
+          <div className="h-full">
+            {activeVideoUrl && (
+              <VideoConferencing
+                roomUrl={activeVideoUrl}
+                onLeave={() => setActiveVideoUrl(undefined)}
+              />
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      <CreateSessionDialog
         open={createSessionDialogOpen}
         onOpenChange={setCreateSessionDialogOpen}
         onSessionCreated={() => {

@@ -20,6 +20,7 @@ interface CreateEventDialogProps {
 export function CreateEventDialog({ open, onOpenChange, onEventCreated }: CreateEventDialogProps) {
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [isOnlineEvent, setIsOnlineEvent] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -113,6 +114,7 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         banner_url: '',
         post_to_feed: true
       });
+      setIsOnlineEvent(false);
     } catch (error) {
       console.error('Error creating event:', error);
       toast({ title: 'Failed to create event', variant: 'destructive' });
@@ -191,12 +193,38 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
 
           {/* Location */}
           <div className="space-y-2">
-            <Label htmlFor="location">Location</Label>
+            <Label htmlFor="online_event" className="cursor-pointer flex items-center space-x-2">
+              <Checkbox
+                id="online_event"
+                checked={isOnlineEvent}
+                onCheckedChange={(checked) => {
+                  setIsOnlineEvent(checked as boolean);
+                  if (checked) {
+                    // Auto-generate Jitsi meeting link
+                    const eventId = `event-${crypto.randomUUID()}`;
+                    const meetingLink = `https://meet.jit.si/${eventId}`;
+                    setFormData(prev => ({ ...prev, location: meetingLink }));
+                  } else {
+                    // Clear location when unchecked
+                    setFormData(prev => ({ ...prev, location: '' }));
+                  }
+                }}
+              />
+              <span>Online Event (Generate video conference link)</span>
+            </Label>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="location">
+              {isOnlineEvent ? 'Meeting Link (Auto-generated)' : 'Location'}
+            </Label>
             <Input
               id="location"
               value={formData.location}
-              onChange={e => setFormData(prev => ({ ...prev, location: e.target.value }))}
-              placeholder="Event location or virtual link"
+              onChange={e => !isOnlineEvent && setFormData(prev => ({ ...prev, location: e.target.value }))}
+              placeholder={isOnlineEvent ? 'Jitsi meeting link will be generated' : 'Event location or virtual link'}
+              readOnly={isOnlineEvent}
+              className={isOnlineEvent ? 'bg-muted' : ''}
             />
           </div>
 

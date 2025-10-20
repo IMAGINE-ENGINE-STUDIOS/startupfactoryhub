@@ -16,7 +16,11 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 
-export default function MenteeSessions() {
+interface MenteeSessionsProps {
+  onJoinMeeting?: (meetingLink: string) => void;
+}
+
+export default function MenteeSessions({ onJoinMeeting }: MenteeSessionsProps = {}) {
   const { sessions, loading, updateSession } = useMentoringSessions();
   const { toast } = useToast();
   const [processingId, setProcessingId] = useState<string | null>(null);
@@ -88,7 +92,11 @@ export default function MenteeSessions() {
 
   const handleJoinMeeting = (meetingLink?: string) => {
     if (meetingLink) {
-      window.open(meetingLink, '_blank');
+      if (onJoinMeeting) {
+        onJoinMeeting(meetingLink);
+      } else {
+        window.open(meetingLink, '_blank');
+      }
     } else {
       toast({
         title: 'No Meeting Link',

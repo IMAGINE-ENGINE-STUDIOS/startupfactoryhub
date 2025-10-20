@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -490,12 +491,26 @@ export default function InvestorDashboard() {
                                 <Clock className="h-3 w-3" />
                                 {format(parseISO(event.start_date), 'MMM d, h:mm a')}
                               </div>
-                              {event.location && (
-                                <div className="flex items-center gap-2">
-                                  <MapPin className="h-3 w-3" />
-                                  <span className="line-clamp-1">{event.location}</span>
-                                </div>
-                              )}
+                               {event.location && (
+                                 <div className="flex items-center gap-2">
+                                   <MapPin className="h-3 w-3" />
+                                   <span className="line-clamp-1">{event.location}</span>
+                                 </div>
+                               )}
+                               {event.location?.startsWith('https://meet.jit.si/') && (
+                                 <Button
+                                   size="sm"
+                                   variant="outline"
+                                   onClick={(e) => {
+                                     e.stopPropagation();
+                                     setActiveVideoUrl(event.location);
+                                   }}
+                                   className="gap-2 mt-2 w-full"
+                                 >
+                                   <Video className="h-4 w-4" />
+                                   Join Event
+                                 </Button>
+                               )}
                               <div className="flex items-center gap-2">
                                 <Users className="h-3 w-3" />
                                 {event.attendees} attending
@@ -649,15 +664,22 @@ export default function InvestorDashboard() {
           </TabsContent>
         </Tabs>
 
-        {/* Centralized Video Conferencing - Outside Tabs */}
-        {activeVideoUrl && (
-          <div className="mt-6">
-            <VideoConferencing
-              roomUrl={activeVideoUrl}
-              onLeave={() => setActiveVideoUrl(undefined)}
-            />
-          </div>
-        )}
+        {/* Video Conferencing Dialog */}
+        <Dialog open={!!activeVideoUrl} onOpenChange={(open) => !open && setActiveVideoUrl(undefined)}>
+          <DialogContent className="max-w-5xl h-[80vh]">
+            <DialogHeader>
+              <DialogTitle>Video Conference</DialogTitle>
+            </DialogHeader>
+            <div className="h-full">
+              {activeVideoUrl && (
+                <VideoConferencing
+                  roomUrl={activeVideoUrl}
+                  onLeave={() => setActiveVideoUrl(undefined)}
+                />
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
 
