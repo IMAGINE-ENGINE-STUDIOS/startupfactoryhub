@@ -27,6 +27,7 @@ import { useProfileWithRole } from "@/hooks/useProfileWithRole";
 import StartupBrowser from "@/components/StartupBrowser";
 import NetworkBrowser from "@/components/NetworkBrowser";
 import MentorOffersBoard from "@/components/MentorOffersBoard";
+import MenteeSessions from "@/components/MenteeSessions";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { 
   Users, 
@@ -211,6 +212,7 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="mentees" className="space-y-6">
+            <MenteeSessions />
             <MentorshipRequests />
             <MentorOffersBoard />
           </TabsContent>

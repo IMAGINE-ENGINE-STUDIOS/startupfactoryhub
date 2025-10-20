@@ -30,6 +30,7 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 
 import { useMentorDashboard } from '@/hooks/useMentorDashboard';
 import AdvisorProfileView from '@/components/AdvisorProfileView';
+import MenteeSessions from '@/components/MenteeSessions';
 
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
@@ -425,6 +426,8 @@ export default function AdvisorDashboard() {
           </TabsContent>
 
           <TabsContent value="mentees" className="space-y-4">
+            <MenteeSessions />
+            
             {/* Today's Sessions */}
             {todaySessions.length > 0 && (
               <Card className="tech-card border-0">
