@@ -5,7 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
-import { UserCheck, Users, Star, MessageSquare, Calendar } from 'lucide-react';
+import UserProfileDialog from '@/components/UserProfileDialog';
+import { UserCheck, Users, Star, MessageSquare, Calendar, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 interface Mentor {
@@ -26,6 +27,8 @@ export default function MentorAdvisorNetwork() {
   const navigate = useNavigate();
   const [mentors, setMentors] = useState<Mentor[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedMentorId, setSelectedMentorId] = useState<string | null>(null);
+  const [profileDialogOpen, setProfileDialogOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -106,6 +109,11 @@ export default function MentorAdvisorNetwork() {
 
   const handleScheduleSession = (mentorId: string) => {
     navigate('/calendar', { state: { mentorId } });
+  };
+
+  const handleViewProfile = (mentorId: string) => {
+    setSelectedMentorId(mentorId);
+    setProfileDialogOpen(true);
   };
 
   if (loading) {
@@ -197,6 +205,15 @@ export default function MentorAdvisorNetwork() {
                         size="sm"
                         variant="outline"
                         className="flex-1"
+                        onClick={() => handleViewProfile(mentor.user_id)}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
                         onClick={() => handleMessageMentor(mentor.user_id)}
                       >
                         <MessageSquare className="h-3 w-3 mr-1" />
@@ -261,15 +278,26 @@ export default function MentorAdvisorNetwork() {
                       ))}
                     </div>
 
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => handleMessageMentor(mentor.user_id)}
-                    >
-                      <MessageSquare className="h-3 w-3 mr-1" />
-                      Message
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => handleViewProfile(mentor.user_id)}
+                      >
+                        <Eye className="h-3 w-3 mr-1" />
+                        View
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1"
+                        onClick={() => handleMessageMentor(mentor.user_id)}
+                      >
+                        <MessageSquare className="h-3 w-3 mr-1" />
+                        Message
+                      </Button>
+                    </div>
                   </CardContent>
                 </Card>
               ))}
@@ -277,6 +305,13 @@ export default function MentorAdvisorNetwork() {
           </CardContent>
         </Card>
       )}
+
+      {/* Profile Dialog */}
+      <UserProfileDialog 
+        userId={selectedMentorId}
+        open={profileDialogOpen}
+        onOpenChange={setProfileDialogOpen}
+      />
     </div>
   );
 }

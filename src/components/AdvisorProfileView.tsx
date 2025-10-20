@@ -4,10 +4,14 @@ import { useAdvisorProfile } from '@/hooks/useAdvisorProfile';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import AvailabilityManager from '@/components/AvailabilityManager';
 import { 
   Briefcase, 
   GraduationCap, 
@@ -22,7 +26,9 @@ import {
   Star,
   Users,
   Calendar,
-  TrendingUp
+  TrendingUp,
+  Settings as SettingsIcon,
+  ChevronDown
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -59,17 +65,46 @@ export default function AdvisorProfileView() {
   const [showSkillForm, setShowSkillForm] = useState(false);
 
   const [mentorProfile, setMentorProfile] = useState<any>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [updatingSettings, setUpdatingSettings] = useState(false);
 
   useEffect(() => {
-    if (profile?.user_id) {
-      supabase
+    const fetchMentorProfile = async () => {
+      if (!profile?.user_id) return;
+      
+      const { data } = await supabase
         .from('mentor_profiles')
         .select('*')
         .eq('user_id', profile.user_id)
-        .single()
-        .then(({ data }) => setMentorProfile(data));
-    }
+        .maybeSingle();
+      
+      setMentorProfile(data);
+    };
+
+    fetchMentorProfile();
   }, [profile?.user_id]);
+
+  const updateMentorSettings = async (field: string, value: any) => {
+    if (!profile?.user_id) return;
+    
+    setUpdatingSettings(true);
+    try {
+      const { error } = await supabase
+        .from('mentor_profiles')
+        .update({ [field]: value })
+        .eq('user_id', profile.user_id);
+
+      if (error) throw error;
+
+      setMentorProfile((prev: any) => ({ ...prev, [field]: value }));
+      toast({ description: 'Settings updated successfully' });
+    } catch (error) {
+      console.error('Error updating settings:', error);
+      toast({ description: 'Failed to update settings', variant: 'destructive' });
+    } finally {
+      setUpdatingSettings(false);
+    }
+  };
 
   const handleSaveProfile = async () => {
     if (!profile?.user_id) return;
@@ -227,6 +262,75 @@ export default function AdvisorProfileView() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Professional Settings */}
+      <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
+        <Card>
+          <CardHeader>
+            <CollapsibleTrigger asChild>
+              <Button variant="ghost" className="w-full justify-between p-0 hover:bg-transparent">
+                <CardTitle className="flex items-center gap-2">
+                  <SettingsIcon className="h-5 w-5" />
+                  Professional Settings
+                </CardTitle>
+                <ChevronDown className={`h-5 w-5 transition-transform ${settingsOpen ? 'rotate-180' : ''}`} />
+              </Button>
+            </CollapsibleTrigger>
+          </CardHeader>
+          <CollapsibleContent>
+            <CardContent className="space-y-6">
+              {/* Availability Manager */}
+              <div>
+                <h4 className="text-sm font-semibold mb-3">Availability Schedule</h4>
+                <AvailabilityManager />
+              </div>
+
+              <Separator />
+
+              {/* Mentor Settings */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold mb-3">Mentorship Settings</h4>
+                
+                <div className="flex items-center justify-between">
+                  <div>
+                    <Label>Accepting New Mentees</Label>
+                    <p className="text-xs text-muted-foreground">Allow new mentorship requests</p>
+                  </div>
+                  <Switch
+                    checked={mentorProfile?.is_accepting_mentees || false}
+                    onCheckedChange={(checked) => updateMentorSettings('is_accepting_mentees', checked)}
+                    disabled={updatingSettings}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Maximum Mentees</Label>
+                  <Input
+                    type="number"
+                    value={mentorProfile?.max_mentees || 5}
+                    onChange={(e) => updateMentorSettings('max_mentees', parseInt(e.target.value))}
+                    disabled={updatingSettings}
+                    min={1}
+                    max={50}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Hourly Rate (USD)</Label>
+                  <Input
+                    type="number"
+                    value={mentorProfile?.hourly_rate || 0}
+                    onChange={(e) => updateMentorSettings('hourly_rate', parseInt(e.target.value))}
+                    disabled={updatingSettings}
+                    min={0}
+                  />
+                  <p className="text-xs text-muted-foreground">Set to 0 for free mentorship</p>
+                </div>
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* About Section */}
       <Card>

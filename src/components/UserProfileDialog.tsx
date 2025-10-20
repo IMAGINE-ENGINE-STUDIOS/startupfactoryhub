@@ -11,6 +11,7 @@ import { useProfileViews } from '@/hooks/useProfileViews';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import AdvisorProfileViewPublic from '@/components/AdvisorProfileViewPublic';
 import { 
   UserPlus, UserMinus, MapPin, Globe, Briefcase, UserCheck, Clock,
   Building, TrendingUp, Users, DollarSign, FileText, ExternalLink,
@@ -408,6 +409,10 @@ export default function UserProfileDialog({
               <Separator />
 
               {/* Role-Specific Professional Info */}
+              {(profile.role === 'advisor' || profile.role === 'mentor') && (
+                <AdvisorProfileViewPublic userId={userId!} onMessage={() => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId } }))} />
+              )}
+
               {profile.role === 'startup' && roleData?.company && (
                 <div>
                   <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">

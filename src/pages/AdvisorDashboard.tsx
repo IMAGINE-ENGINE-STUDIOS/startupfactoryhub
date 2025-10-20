@@ -26,7 +26,7 @@ import { DashboardHeader } from '@/components/DashboardHeader';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
-import AdvisorSettings from '@/components/AdvisorSettings';
+
 import { useMentorDashboard } from '@/hooks/useMentorDashboard';
 import AdvisorProfileView from '@/components/AdvisorProfileView';
 
@@ -54,7 +54,6 @@ export default function AdvisorDashboard() {
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("social");
-  const [settingsOpen, setSettingsOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -313,10 +312,6 @@ export default function AdvisorDashboard() {
                 </div>
               </div>
             </div>
-            
-            <Button variant="outline" size="icon" onClick={() => setSettingsOpen(true)}>
-              <Settings className="h-5 w-5" />
-            </Button>
           </div>
         </div>
 
@@ -765,11 +760,6 @@ export default function AdvisorDashboard() {
           }}
         />
       )}
-
-      <AdvisorSettings
-        open={settingsOpen}
-        onOpenChange={setSettingsOpen}
-      />
 
       <FloatingChat />
     </div>
