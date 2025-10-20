@@ -5,7 +5,6 @@ import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import DashboardNavigation from "@/components/DashboardNavigation";
 import MentorRoadmapWidget from "@/components/MentorRoadmapWidget";
 import MentorCalendarWidget from "@/components/MentorCalendarWidget";
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
@@ -19,6 +18,7 @@ import AdvisorJobTaskViewer from "@/components/AdvisorJobTaskViewer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useMentorDashboard } from "@/hooks/useMentorDashboard";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import AdvisorProfileView from "@/components/AdvisorProfileView";
 import MarketIntelligenceWidget from "@/components/MarketIntelligenceWidget";
@@ -62,6 +62,7 @@ const MentorDashboard = () => {
   const navigate = useNavigate();
   const { role, loading: roleLoading } = useUserRole();
   const { profile: profileWithRole } = useProfileWithRole();
+  const { activeMentees, todaySessions } = useMentorDashboard();
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
@@ -79,7 +80,6 @@ const MentorDashboard = () => {
   return (
     <div className="min-h-screen bg-background pb-6 relative">
       <DashboardHeader />
-      <DashboardNavigation />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4 sm:pb-8">
         {/* Welcome Header */}
@@ -305,18 +305,18 @@ const MentorDashboard = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">Active Mentees</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">12</div>
-                  <p className="text-xs text-muted-foreground">+2 this month</p>
+                  <div className="text-2xl font-bold">{activeMentees.length}</div>
+                  <p className="text-xs text-muted-foreground">Currently mentoring</p>
                 </CardContent>
               </Card>
               
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Sessions This Month</CardTitle>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Sessions Today</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">28</div>
-                  <p className="text-xs text-muted-foreground">8 hours mentoring</p>
+                  <div className="text-2xl font-bold">{todaySessions.length}</div>
+                  <p className="text-xs text-muted-foreground">{todaySessions.reduce((sum, s) => sum + s.duration_minutes, 0)} min scheduled</p>
                 </CardContent>
               </Card>
               
@@ -325,8 +325,8 @@ const MentorDashboard = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">Success Stories</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold">5</div>
-                  <p className="text-xs text-muted-foreground">Startups funded</p>
+                  <div className="text-2xl font-bold">-</div>
+                  <p className="text-xs text-muted-foreground">Coming soon</p>
                 </CardContent>
               </Card>
               
@@ -335,8 +335,8 @@ const MentorDashboard = () => {
                   <CardTitle className="text-sm font-medium text-muted-foreground">Impact Score</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="text-2xl font-bold text-ocean-primary">98</div>
-                  <p className="text-xs text-muted-foreground">Top 5% mentors</p>
+                  <div className="text-2xl font-bold text-ocean-primary">-</div>
+                  <p className="text-xs text-muted-foreground">Coming soon</p>
                 </CardContent>
               </Card>
             </div>

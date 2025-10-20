@@ -4,9 +4,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
+import { useUserRole } from '@/hooks/useUserRole';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
@@ -24,78 +26,23 @@ import { Calendar as CalendarIcon, Plus, Clock, MapPin, Users, MessageCircle, Us
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
 export default function StudentDashboard() {
-  const [enrollments, setEnrollments] = useState<any[]>([]);
-  const [studentProfile, setStudentProfile] = useState<any>(null);
-  const [certificates, setCertificates] = useState<any[]>([]);
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("social");
-  const {
-    user
-  } = useAuth();
-  const {
-    profile: profileWithRole
-  } = useProfileWithRole();
-  const {
-    upcomingEvents
-  } = useEvents();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { role, loading: roleLoading } = useUserRole();
+  const { profile: profileWithRole } = useProfileWithRole();
+  const { upcomingEvents } = useEvents();
+
+  // Redirect if wrong role
   useEffect(() => {
-    if (user) {
-      fetchStudentProfile();
-      fetchEnrollments();
-      fetchCertificates();
+    if (!roleLoading && role && role !== 'student') {
+      navigate('/dashboard');
     }
-  }, [user]);
-  const fetchStudentProfile = async () => {
-    if (!user) return;
-    const {
-      data,
-      error
-    } = await supabase.from('student_profiles').select('*').eq('user_id', user.id).single();
-    if (!error && data) {
-      setStudentProfile(data);
-    }
-  };
-  const fetchEnrollments = async () => {
-    if (!user) return;
-    const {
-      data,
-      error
-    } = await supabase.from('course_enrollments').select(`
-        *,
-        course:course_id (
-          id,
-          title,
-          description,
-          instructor_name,
-          difficulty,
-          category,
-          duration_hours
-        )
-      `).eq('student_id', user.id).order('last_accessed_at', {
-      ascending: false
-    });
-    if (!error && data) {
-      setEnrollments(data);
-    }
-  };
-  const fetchCertificates = async () => {
-    if (!user) return;
-    const {
-      data,
-      error
-    } = await supabase.from('certificates').select(`
-        *,
-        course:course_id (
-          title
-        )
-      `).eq('student_id', user.id);
-    if (!error && data) {
-      setCertificates(data);
-    }
-  };
+  }, [role, roleLoading, navigate]);
   return <div className="min-h-screen bg-gradient-hero pb-6 relative">
       <DashboardHeader />
       <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 space-y-4 sm:space-y-6">
@@ -242,12 +189,17 @@ export default function StudentDashboard() {
                 </CardContent>
               </Card>}
             
-            <UnifiedCalendar showCreateButton={false} onItemClick={item => {
-            if (item.type === 'event') {
-              setSelectedEvent(item);
-              setShowEventDetails(true);
-            }
-          }} filterTypes={['event', 'session', 'availability']} />
+            <UnifiedCalendar 
+              showCreateButton={false} 
+              userRole="student"
+              onItemClick={item => {
+                if (item.type === 'event') {
+                  setSelectedEvent(item);
+                  setShowEventDetails(true);
+                }
+              }} 
+              filterTypes={['event', 'session', 'availability']} 
+            />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">

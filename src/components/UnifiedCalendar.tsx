@@ -39,7 +39,7 @@ interface UnifiedCalendarProps {
   onCreateEvent?: () => void;
   onItemClick?: (item: CalendarItem) => void;
   filterTypes?: CalendarItemType[];
-  userRole?: 'advisor' | 'mentor' | 'startup' | 'student' | 'investor';
+  userRole: 'advisor' | 'mentor' | 'startup' | 'student' | 'investor';
 }
 
 export default function UnifiedCalendar({ 

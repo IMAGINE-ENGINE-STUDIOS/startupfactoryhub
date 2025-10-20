@@ -35,6 +35,7 @@ import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
 import { useEvents } from '@/hooks/useEvents';
+import { useUserRole } from '@/hooks/useUserRole';
 import { format, parseISO } from 'date-fns';
 
 
@@ -43,7 +44,7 @@ const Dashboard = () => {
     user,
     loading
   } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
+  const { role, loading: roleLoading } = useUserRole();
   const [activeTab, setActiveTab] = useState("social");
   const {
     profile: profileWithRole
@@ -58,21 +59,13 @@ const Dashboard = () => {
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+
+  // Redirect if wrong role
   useEffect(() => {
-    if (user) {
-      fetchProfile();
+    if (!roleLoading && role && role !== 'startup') {
+      navigate('/dashboard');
     }
-  }, [user]);
-  const fetchProfile = async () => {
-    if (!user) return;
-    const {
-      data,
-      error
-    } = await supabase.from('profiles').select('*').eq('user_id', user.id).single();
-    if (!error && data) {
-      setProfile(data);
-    }
-  };
+  }, [role, roleLoading, navigate]);
   if (loading || analytics.loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -116,7 +109,7 @@ const Dashboard = () => {
           {/* Mobile: Only Avatar */}
           <div className="md:hidden flex justify-start mb-4">
             <RoleBasedAvatar 
-              avatarUrl={profile?.avatar_url} 
+              avatarUrl={profileWithRole?.avatar_url} 
               role={profileWithRole?.role || 'startup'} 
               fallbackText={user?.email || 'U'} 
               className="h-16 w-16" 
@@ -126,14 +119,14 @@ const Dashboard = () => {
           {/* Desktop: Full Welcome Section */}
           <div className="hidden md:flex items-center space-x-4">
             <RoleBasedAvatar 
-              avatarUrl={profile?.avatar_url} 
+              avatarUrl={profileWithRole?.avatar_url} 
               role={profileWithRole?.role || 'startup'} 
               fallbackText={user?.email || 'U'} 
               className="h-16 w-16" 
             />
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
-                Welcome, {profile?.full_name || 'Startup'}
+                Welcome, {profileWithRole?.full_name || 'Startup'}
               </h1>
               <p className="text-sm text-muted-foreground">Build, connect, and grow your startup</p>
             </div>
@@ -260,12 +253,17 @@ const Dashboard = () => {
                 </CardContent>
               </Card>}
             
-            <UnifiedCalendar showCreateButton={false} onItemClick={item => {
-            if (item.type === 'event') {
-              setSelectedEvent(item);
-              setShowEventDetails(true);
-            }
-          }} filterTypes={['event', 'session', 'availability']} />
+            <UnifiedCalendar 
+              showCreateButton={false} 
+              userRole="startup"
+              onItemClick={item => {
+                if (item.type === 'event') {
+                  setSelectedEvent(item);
+                  setShowEventDetails(true);
+                }
+              }} 
+              filterTypes={['event', 'session', 'availability', 'pitch']} 
+            />
           </TabsContent>
 
           {/* Network Tab */}
@@ -308,6 +306,7 @@ const Dashboard = () => {
 
           {/* Intelligence Tab */}
           <TabsContent value="intelligence" className="space-y-4">
+            <StartupAIRecommendations />
             <MarketIntelligenceWidget />
           </TabsContent>
 

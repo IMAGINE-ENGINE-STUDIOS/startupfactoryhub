@@ -305,7 +305,7 @@ export default function InvestorDashboard() {
       icon: Building, 
       color: 'text-primary' 
     },
-    { title: 'ROI', value: calculateROI(), icon: TrendingUp, color: 'text-accent' },
+    { title: 'ROI (Est.)', value: calculateROI(), icon: TrendingUp, color: 'text-accent' },
     { title: 'Opportunities', value: opportunities.length.toString(), icon: Target, color: 'text-yellow-500' },
   ];
 
@@ -344,8 +344,8 @@ export default function InvestorDashboard() {
 
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl">
+          <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden md:inline">Social</span>
@@ -361,6 +361,10 @@ export default function InvestorDashboard() {
               <TabsTrigger value="opportunities" className="flex-shrink-0 gap-2">
                 <Target className="h-4 w-4" />
                 <span className="hidden md:inline">Opportunities</span>
+              </TabsTrigger>
+              <TabsTrigger value="pitches" className="flex-shrink-0 gap-2">
+                <CalendarIcon className="h-4 w-4" />
+                <span className="hidden md:inline">Pitches</span>
               </TabsTrigger>
               <TabsTrigger value="events" className="flex-shrink-0 gap-2">
                 <CalendarIcon className="h-4 w-4" />
@@ -499,6 +503,7 @@ export default function InvestorDashboard() {
           <TabsContent value="events" className="space-y-4">
             <UnifiedCalendar 
               showCreateButton={false}
+              userRole="investor"
               filterTypes={['event', 'session', 'pitch']}
               onItemClick={(item) => {
                 if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
