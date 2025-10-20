@@ -440,18 +440,91 @@ export default function InvestorDashboard() {
 
           {/* Calendar Tab - Merged Events & Pitches */}
           <TabsContent value="calendar" className="space-y-6">
+            {/* Action buttons */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+              <Button onClick={() => setCreateSessionDialogOpen(true)} variant="outline" className="gap-2 w-full sm:w-auto">
+                <CalendarIcon className="h-4 w-4" />
+                <span className="sm:inline">Schedule Session</span>
+              </Button>
+              <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2 w-full sm:w-auto">
+                <Plus className="h-4 w-4" />
+                <span className="sm:inline">Create Event</span>
+              </Button>
+            </div>
+
+            {/* Upcoming Events with Banners - AT TOP */}
+            {upcomingEvents.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Upcoming Events</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {upcomingEvents.slice(0, 6).map(event => (
+                      <div 
+                        key={event.id} 
+                        className="group cursor-pointer" 
+                        onClick={() => {
+                          setSelectedEvent(event);
+                          setShowEventDetails(true);
+                        }}
+                      >
+                        <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
+                          {event.banner_url ? (
+                            <img 
+                              src={event.banner_url} 
+                              alt={event.title} 
+                              className="w-full h-48 object-cover group-hover:scale-105 transition-transform" 
+                            />
+                          ) : (
+                            <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                              <CalendarIcon className="h-16 w-16 text-purple-500/30" />
+                            </div>
+                          )}
+                          <div className="p-4">
+                            <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
+                            <div className="space-y-1 text-sm text-muted-foreground">
+                              <div className="flex items-center gap-2">
+                                <Clock className="h-3 w-3" />
+                                {format(parseISO(event.start_date), 'MMM d, h:mm a')}
+                              </div>
+                              {event.location && (
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-3 w-3" />
+                                  <span className="line-clamp-1">{event.location}</span>
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2">
+                                <Users className="h-3 w-3" />
+                                {event.attendees} attending
+                                {event.max_attendees && ` / ${event.max_attendees}`}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
+            {/* Unified Calendar - IN MIDDLE */}
             <UnifiedCalendar 
               showCreateButton={false}
               userRole="investor"
               filterTypes={['event', 'session', 'pitch']}
               onItemClick={(item) => {
-                if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
+                if (item.type === 'event') {
+                  setSelectedEvent(item);
+                  setShowEventDetails(true);
+                } else if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
                   setActiveVideoUrl(item.meeting_link);
                 }
               }}
             />
 
-            {/* Upcoming Pitch Meetings */}
+            {/* Upcoming Pitch Meetings - AT BOTTOM */}
             <Card className="tech-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -588,6 +661,32 @@ export default function InvestorDashboard() {
 
       {/* Floating Chat with AI */}
       <FloatingChat />
+
+      {/* Dialogs */}
+      <CreateEventDialog 
+        open={createEventDialogOpen} 
+        onOpenChange={setCreateEventDialogOpen} 
+        onEventCreated={() => {
+          setCreateEventDialogOpen(false);
+        }} 
+      />
+      <CreateSessionDialog 
+        open={createSessionDialogOpen} 
+        onOpenChange={setCreateSessionDialogOpen} 
+        onSessionCreated={() => {
+          setCreateSessionDialogOpen(false);
+        }} 
+      />
+      {selectedEvent && (
+        <EventDetailsDialog 
+          event={selectedEvent} 
+          open={showEventDetails} 
+          onOpenChange={setShowEventDetails} 
+          onEventUpdated={() => {
+            setShowEventDetails(false);
+          }} 
+        />
+      )}
     </div>
   );
 }
