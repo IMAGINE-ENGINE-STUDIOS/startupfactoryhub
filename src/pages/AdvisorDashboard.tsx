@@ -9,7 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar as CalendarIcon, Users, MessageSquare, TrendingUp, Star, Clock, Award, Plus, MapPin, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Settings, CheckCircle, XCircle, ExternalLink, Video, User } from 'lucide-react';
+import { useUserRole } from '@/hooks/useUserRole';
+import { Calendar as CalendarIcon, Users, MessageSquare, TrendingUp, Star, Clock, Award, Plus, MapPin, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Settings, CheckCircle, XCircle, ExternalLink, Video, User, BookOpen } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import FloatingChat from '@/components/FloatingChat';
@@ -45,7 +46,6 @@ interface Startup {
 
 export default function AdvisorDashboard() {
   const [startups, setStartups] = useState<Startup[]>([]);
-  const [profile, setProfile] = useState<any>(null);
   const [mentorProfile, setMentorProfile] = useState<any>(null);
   const [selectedStartup, setSelectedStartup] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -57,17 +57,82 @@ export default function AdvisorDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { role, loading: roleLoading } = useUserRole();
   const { profile: profileWithRole } = useProfileWithRole();
   const { upcomingEvents } = useEvents();
   const { pendingRequests, activeMentees, todaySessions, loading: dashboardLoading, refetch } = useMentorDashboard();
+  
+  const [mentorStats, setMentorStats] = useState({
+    activeMentees: 0,
+    totalSessions: 0,
+    sessionsThisMonth: 0,
+    pendingRequests: 0,
+    averageRating: 0
+  });
 
   useEffect(() => {
     if (user) {
-      fetchProfile();
       fetchMentorProfile();
       fetchStartups();
+      fetchMentorStats();
     }
   }, [user]);
+  
+  // Redirect if wrong role
+  useEffect(() => {
+    if (!roleLoading && role && role !== 'advisor' && role !== 'mentor') {
+      navigate('/dashboard');
+    }
+  }, [role, roleLoading, navigate]);
+  
+  const fetchMentorStats = async () => {
+    if (!user) return;
+
+    try {
+      // Get mentor profile
+      const { data: mentorProfile } = await supabase
+        .from('mentor_profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      // Get active mentorships count
+      const { count: activeMenteesCount } = await supabase
+        .from('mentorship_relationships')
+        .select('*', { count: 'exact', head: true })
+        .eq('mentor_id', user.id)
+        .eq('status', 'active');
+
+      // Get pending mentorship requests
+      const { count: pendingCount } = await supabase
+        .from('mentorship_relationships')
+        .select('*', { count: 'exact', head: true })
+        .eq('mentor_id', user.id)
+        .eq('status', 'pending');
+
+      // Get sessions this month
+      const startOfMonth = new Date();
+      startOfMonth.setDate(1);
+      startOfMonth.setHours(0, 0, 0, 0);
+      
+      const { count: sessionsThisMonth } = await supabase
+        .from('mentoring_sessions')
+        .select('*', { count: 'exact', head: true })
+        .eq('mentor_id', user.id)
+        .eq('status', 'completed')
+        .gte('scheduled_at', startOfMonth.toISOString());
+
+      setMentorStats({
+        activeMentees: activeMenteesCount || 0,
+        totalSessions: mentorProfile?.total_sessions || 0,
+        sessionsThisMonth: sessionsThisMonth || 0,
+        pendingRequests: pendingCount || 0,
+        averageRating: mentorProfile?.average_rating || 0
+      });
+    } catch (error) {
+      console.error('Error fetching mentor stats:', error);
+    }
+  };
 
   const fetchMentorProfile = async () => {
     if (!user) return;
@@ -110,23 +175,7 @@ export default function AdvisorDashboard() {
 
     refetch();
     fetchStartups();
-  };
-
-  const fetchProfile = async () => {
-    if (!user) return;
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
-    if (error) {
-      console.error('Error fetching profile:', error);
-      return;
-    }
-
-    setProfile(data);
+    fetchMentorStats();
   };
 
   const offerMentorship = async (companyId: string, menteeUserId: string, startupName: string) => {
@@ -246,25 +295,25 @@ export default function AdvisorDashboard() {
   const stats = [
     { 
       title: 'Active Mentees', 
-      value: activeMentees.length.toString(), 
+      value: mentorStats.activeMentees.toString(), 
       icon: Users, 
       color: 'text-primary' 
     },
     { 
       title: 'Sessions This Month', 
-      value: mentorProfile?.total_sessions?.toString() || '0', 
+      value: mentorStats.sessionsThisMonth.toString(), 
       icon: CalendarIcon, 
       color: 'text-accent' 
     },
     { 
       title: 'Total Sessions', 
-      value: mentorProfile?.total_sessions?.toString() || '0', 
+      value: mentorStats.totalSessions.toString(), 
       icon: TrendingUp, 
       color: 'text-green-500' 
     },
     { 
       title: 'Rating', 
-      value: mentorProfile?.average_rating?.toFixed(1) || '0.0', 
+      value: mentorStats.averageRating.toFixed(1), 
       icon: Star, 
       color: 'text-yellow-500' 
     },
@@ -342,6 +391,14 @@ export default function AdvisorDashboard() {
               <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
                 <CalendarIcon className="h-4 w-4" />
                 <span className="hidden md:inline">Calendar</span>
+              </TabsTrigger>
+              <TabsTrigger value="endorsements" className="flex-shrink-0 gap-2">
+                <Award className="h-4 w-4" />
+                <span className="hidden md:inline">Endorsements</span>
+              </TabsTrigger>
+              <TabsTrigger value="resources" className="flex-shrink-0 gap-2">
+                <BookOpen className="h-4 w-4" />
+                <span className="hidden md:inline">Resources</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0 gap-2">
                 <BarChart className="h-4 w-4" />

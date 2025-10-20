@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -19,7 +20,9 @@ import UnifiedJobsBoard from "@/components/UnifiedJobsBoard";
 import AdvisorJobTaskViewer from "@/components/AdvisorJobTaskViewer";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useUserRole } from "@/hooks/useUserRole";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
+import AdvisorProfileView from "@/components/AdvisorProfileView";
 import MarketIntelligenceWidget from "@/components/MarketIntelligenceWidget";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 import { useProfileWithRole } from "@/hooks/useProfileWithRole";
@@ -51,7 +54,6 @@ import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
-import { useState } from 'react';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
 
@@ -59,6 +61,7 @@ import { format, parseISO } from 'date-fns';
 const MentorDashboard = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { role, loading: roleLoading } = useUserRole();
   const { profile: profileWithRole } = useProfileWithRole();
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
@@ -66,6 +69,13 @@ const MentorDashboard = () => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("social");
   const { upcomingEvents } = useEvents();
+
+  // Redirect if wrong role
+  useEffect(() => {
+    if (!roleLoading && role && role !== 'mentor' && role !== 'advisor') {
+      navigate('/dashboard');
+    }
+  }, [role, roleLoading, navigate]);
 
   return (
     <div className="min-h-screen bg-background pb-6 relative">
@@ -116,7 +126,7 @@ const MentorDashboard = () => {
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-5xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-11 max-w-5xl">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden md:inline">Social</span>
@@ -136,6 +146,10 @@ const MentorDashboard = () => {
               <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
                 <CalendarIcon className="h-4 w-4" />
                 <span className="hidden md:inline">Calendar</span>
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex-shrink-0 gap-2">
+                <Users className="h-4 w-4" />
+                <span className="hidden md:inline">Profile</span>
               </TabsTrigger>
               <TabsTrigger value="endorsements" className="flex-shrink-0 gap-2">
                 <Award className="h-4 w-4" />
@@ -278,6 +292,7 @@ const MentorDashboard = () => {
             
             <UnifiedCalendar
               showCreateButton={false}
+              userRole={role || 'mentor'}
               onItemClick={(item) => {
                 if (item.type === 'event') {
                   setSelectedEvent(item);
@@ -286,6 +301,10 @@ const MentorDashboard = () => {
               }}
               filterTypes={['event', 'session', 'availability']}
             />
+          </TabsContent>
+
+          <TabsContent value="profile" className="space-y-6">
+            <AdvisorProfileView />
           </TabsContent>
 
           <TabsContent value="endorsements" className="space-y-6">

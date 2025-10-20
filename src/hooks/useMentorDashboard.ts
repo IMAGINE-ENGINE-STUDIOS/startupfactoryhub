@@ -77,7 +77,7 @@ export const useMentorDashboard = () => {
             .from('companies')
             .select('id, name, description, stage, industry')
             .eq('user_id', mentorship.mentee?.user_id)
-            .single();
+            .maybeSingle();
           
           return {
             ...mentorship,
@@ -126,7 +126,7 @@ export const useMentorDashboard = () => {
             .from('companies')
             .select('name')
             .eq('user_id', session.mentee?.user_id)
-            .single();
+            .maybeSingle();
           
           return {
             ...session,
