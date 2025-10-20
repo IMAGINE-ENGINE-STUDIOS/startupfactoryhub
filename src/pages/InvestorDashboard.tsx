@@ -16,6 +16,7 @@ import { format, parseISO } from 'date-fns';
 
 import StartupBrowser from '@/components/StartupBrowser';
 import NetworkBrowser from '@/components/NetworkBrowser';
+import MatchingSystem from '@/components/MatchingSystem';
 import FloatingChat from '@/components/FloatingChat';
 import InvestorProfileForm from '@/components/InvestorProfileForm';
 import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
@@ -435,6 +436,7 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
+            <MatchingSystem />
             <NetworkBrowser />
           </TabsContent>
 
