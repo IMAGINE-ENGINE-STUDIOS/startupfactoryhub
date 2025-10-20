@@ -367,7 +367,7 @@ export default function AdvisorDashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-5xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden md:inline">Social</span>
@@ -392,14 +392,6 @@ export default function AdvisorDashboard() {
                 <CalendarIcon className="h-4 w-4" />
                 <span className="hidden md:inline">Calendar</span>
               </TabsTrigger>
-              <TabsTrigger value="endorsements" className="flex-shrink-0 gap-2">
-                <Award className="h-4 w-4" />
-                <span className="hidden md:inline">Endorsements</span>
-              </TabsTrigger>
-              <TabsTrigger value="resources" className="flex-shrink-0 gap-2">
-                <BookOpen className="h-4 w-4" />
-                <span className="hidden md:inline">Resources</span>
-              </TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0 gap-2">
                 <BarChart className="h-4 w-4" />
                 <span className="hidden md:inline">Analytics</span>
@@ -414,6 +406,18 @@ export default function AdvisorDashboard() {
               </TabsTrigger>
             </TabsList>
           </div>
+
+          <TabsContent value="social" className="space-y-4">
+            <UnifiedCommunityFeed />
+          </TabsContent>
+
+          <TabsContent value="profile" className="space-y-4">
+            <AdvisorProfileView />
+          </TabsContent>
+
+          <TabsContent value="network" className="space-y-4">
+            <NetworkBrowser />
+          </TabsContent>
 
           <TabsContent value="jobs" className="space-y-4">
             <UnifiedJobsBoard />
@@ -742,18 +746,6 @@ export default function AdvisorDashboard() {
             />
           </TabsContent>
 
-          <TabsContent value="social" className="space-y-4">
-            <UnifiedCommunityFeed />
-          </TabsContent>
-
-          <TabsContent value="profile" className="space-y-4">
-            <AdvisorProfileView />
-          </TabsContent>
-
-          <TabsContent value="network" className="space-y-4">
-            <NetworkBrowser />
-          </TabsContent>
-
           <TabsContent value="analytics" className="space-y-4">
             {/* Advisor Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6">
@@ -817,8 +809,6 @@ export default function AdvisorDashboard() {
           }}
         />
       )}
-
-      <FloatingChat />
     </div>
   );
 }

@@ -12,8 +12,6 @@ import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
 import AIFeaturesHub from "@/components/AIFeaturesHub";
 import MentorshipRequests from "@/components/MentorshipRequests";
 import ConnectionsWidget from "@/components/ConnectionsWidget";
-import ResourcesWidget from "@/components/ResourcesWidget";
-import MentorEndorsements from "@/components/MentorEndorsements";
 import AvailabilityManager from "@/components/AvailabilityManager";
 import FloatingChat from "@/components/FloatingChat";
 import UnifiedJobsBoard from "@/components/UnifiedJobsBoard";
@@ -48,7 +46,8 @@ import {
   Brain,
   Wrench,
   BookOpen,
-  Briefcase
+  Briefcase,
+  User
 } from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
@@ -126,10 +125,14 @@ const MentorDashboard = () => {
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-11 max-w-5xl">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden md:inline">Social</span>
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex-shrink-0 gap-2">
+                <User className="h-4 w-4" />
+                <span className="hidden md:inline">Profile</span>
               </TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0 gap-2">
                 <Network className="h-4 w-4" />
@@ -146,18 +149,6 @@ const MentorDashboard = () => {
               <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
                 <CalendarIcon className="h-4 w-4" />
                 <span className="hidden md:inline">Calendar</span>
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="flex-shrink-0 gap-2">
-                <Users className="h-4 w-4" />
-                <span className="hidden md:inline">Profile</span>
-              </TabsTrigger>
-              <TabsTrigger value="endorsements" className="flex-shrink-0 gap-2">
-                <Award className="h-4 w-4" />
-                <span className="hidden md:inline">Endorsements</span>
-              </TabsTrigger>
-              <TabsTrigger value="resources" className="flex-shrink-0 gap-2">
-                <BookOpen className="h-4 w-4" />
-                <span className="hidden md:inline">Resources</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0 gap-2">
                 <BarChart className="h-4 w-4" />
@@ -202,9 +193,12 @@ const MentorDashboard = () => {
                   </CardContent>
                 </Card>
                 <ConnectionsWidget />
-                <ResourcesWidget />
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="profile" className="space-y-6">
+            <AdvisorProfileView />
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
@@ -301,18 +295,6 @@ const MentorDashboard = () => {
               }}
               filterTypes={['event', 'session', 'availability']}
             />
-          </TabsContent>
-
-          <TabsContent value="profile" className="space-y-6">
-            <AdvisorProfileView />
-          </TabsContent>
-
-          <TabsContent value="endorsements" className="space-y-6">
-            {user && <MentorEndorsements mentorId={user.id} isOwnProfile={true} />}
-          </TabsContent>
-
-          <TabsContent value="resources" className="space-y-6">
-            <ResourcesWidget />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
