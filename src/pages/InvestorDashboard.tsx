@@ -23,6 +23,7 @@ import UnifiedCalendar from '@/components/UnifiedCalendar';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import InvestorAvailabilityManager from '@/components/InvestorAvailabilityManager';
+import InvestorProfileView from '@/components/InvestorProfileView';
 import VideoConferencing from '@/components/VideoConferencing';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { DashboardHeader } from '@/components/DashboardHeader';
@@ -345,7 +346,7 @@ export default function InvestorDashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap">
+            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-8 max-w-7xl whitespace-nowrap">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden md:inline">Social</span>
@@ -358,17 +359,9 @@ export default function InvestorDashboard() {
                 <Building className="h-4 w-4" />
                 <span className="hidden md:inline">Portfolio</span>
               </TabsTrigger>
-              <TabsTrigger value="opportunities" className="flex-shrink-0 gap-2">
-                <Target className="h-4 w-4" />
-                <span className="hidden md:inline">Opportunities</span>
-              </TabsTrigger>
-              <TabsTrigger value="pitches" className="flex-shrink-0 gap-2">
+              <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
                 <CalendarIcon className="h-4 w-4" />
-                <span className="hidden md:inline">Pitches</span>
-              </TabsTrigger>
-              <TabsTrigger value="events" className="flex-shrink-0 gap-2">
-                <CalendarIcon className="h-4 w-4" />
-                <span className="hidden md:inline">Events</span>
+                <span className="hidden md:inline">Calendar</span>
               </TabsTrigger>
               <TabsTrigger value="profile" className="flex-shrink-0 gap-2">
                 <UserCircle className="h-4 w-4" />
@@ -441,66 +434,12 @@ export default function InvestorDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="opportunities" className="space-y-4">
-            <Card className="tech-card border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-primary" />
-                  <span>Investment Opportunities</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {opportunities.map((opportunity) => (
-                    <div key={opportunity.id} className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
-                      <div className="flex items-center space-x-4">
-                        <Avatar className="h-12 w-12">
-                          <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                            {opportunity.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <h3 className="font-semibold text-foreground">{opportunity.name}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2">{opportunity.description}</p>
-                          <div className="flex items-center space-x-3 mt-2">
-                            <Badge variant="secondary" className="text-xs">{opportunity.stage}</Badge>
-                            <Badge variant="outline" className="text-xs">{opportunity.industry}</Badge>
-                            {opportunity.funding_amount && (
-                              <span className="text-sm font-medium text-primary">
-                                Seeking: {formatCurrency(opportunity.funding_amount)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex space-x-2">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => startDueDiligence(opportunity.id, opportunity.name)}
-                        >
-                          Due Diligence
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          className="pulse-primary"
-                          onClick={() => expressInterest(opportunity.id, opportunity.name)}
-                        >
-                          Express Interest
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="network" className="space-y-4">
             <NetworkBrowser />
           </TabsContent>
 
-          <TabsContent value="events" className="space-y-4">
+          {/* Calendar Tab - Merged Events & Pitches */}
+          <TabsContent value="calendar" className="space-y-6">
             <UnifiedCalendar 
               showCreateButton={false}
               userRole="investor"
@@ -511,14 +450,13 @@ export default function InvestorDashboard() {
                 }
               }}
             />
-          </TabsContent>
 
-          <TabsContent value="pitches" className="space-y-4">
+            {/* Upcoming Pitch Meetings */}
             <Card className="tech-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
                   <CalendarIcon className="h-5 w-5 text-primary" />
-                  <span>Scheduled Pitch Meetings</span>
+                  <span>Upcoming Pitch Meetings</span>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -584,8 +522,23 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
-            <InvestorProfileForm />
-            <InvestorAvailabilityManager />
+            <InvestorProfileView />
+            <Card>
+              <CardHeader>
+                <CardTitle>Investment Preferences</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <InvestorProfileForm />
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader>
+                <CardTitle>Availability Schedule</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <InvestorAvailabilityManager />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="social" className="space-y-4">
