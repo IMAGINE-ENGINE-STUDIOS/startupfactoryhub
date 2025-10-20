@@ -139,14 +139,9 @@ export default function UnifiedCalendar({
   const fetchPitchMeetings = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
+    const { data: meetingsData, error } = await supabase
       .from('pitch_meetings')
-      .select(`
-        *,
-        company:companies(name, logo_url),
-        startup:profiles!pitch_meetings_startup_id_fkey(full_name),
-        investor:profiles!pitch_meetings_investor_id_fkey(full_name)
-      `)
+      .select('*, company:companies(name, logo_url)')
       .or(`startup_id.eq.${user.id},investor_id.eq.${user.id}`)
       .order('scheduled_date', { ascending: true });
 
@@ -155,7 +150,34 @@ export default function UnifiedCalendar({
       return;
     }
 
-    setPitchMeetings(data || []);
+    if (!meetingsData || meetingsData.length === 0) {
+      setPitchMeetings([]);
+      return;
+    }
+
+    // Fetch startup and investor profiles separately
+    const startupIds = [...new Set(meetingsData.map(m => m.startup_id))];
+    const investorIds = [...new Set(meetingsData.map(m => m.investor_id))];
+    const allUserIds = [...new Set([...startupIds, ...investorIds])];
+
+    const { data: profilesData } = await supabase
+      .from('profiles')
+      .select('user_id, full_name')
+      .in('user_id', allUserIds);
+
+    const profilesMap = (profilesData || []).reduce((acc, profile) => {
+      acc[profile.user_id] = profile;
+      return acc;
+    }, {} as Record<string, any>);
+
+    // Combine data
+    const enrichedMeetings = meetingsData.map(meeting => ({
+      ...meeting,
+      startup: profilesMap[meeting.startup_id] || null,
+      investor: profilesMap[meeting.investor_id] || null,
+    }));
+
+    setPitchMeetings(enrichedMeetings);
   };
 
   // Combine all calendar items
