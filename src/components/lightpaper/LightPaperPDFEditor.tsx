@@ -109,6 +109,8 @@ export function LightPaperPDFEditor({
   const [currentPage, setCurrentPage] = useState(1);
   const [zoom, setZoom] = useState(1);
   const [pageWidth, setPageWidth] = useState(800);
+  const [containerWidth, setContainerWidth] = useState(800);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [tool, setTool] = useState<"select" | "text" | "rect" | "circle" | "erase">("select");
   const [signatureMode, setSignatureMode] = useState<"draw" | "text">("draw");
   const [textSignature, setTextSignature] = useState("");
@@ -202,6 +204,19 @@ export function LightPaperPDFEditor({
       setIsSaving(false);
     }
   }, [pdfFile, currentPage, signatures, textReplacements, projectTitle, currentProjectId, saveProject]);
+
+  // Responsive container width tracking
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.clientWidth - 40); // padding
+      }
+    };
+    
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
 
   // Update collaboration status when tool changes
   useEffect(() => {
@@ -1747,30 +1762,56 @@ export function LightPaperPDFEditor({
 
         <div className="flex-1 flex gap-2 sm:gap-4 overflow-hidden">
           <Card className="flex-1 overflow-auto p-2 sm:p-4">
-            {pdfFile ? <div className="p-4">
-              {isLoading && <div className="flex items-center justify-center p-8">
-                  <div className="text-center">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                    <p className="text-sm text-muted-foreground">Loading PDF...</p>
+            {pdfFile ? (
+              <div className="pdf-viewer-container p-2 sm:p-4">
+                <style>{`
+                  .pdf-viewer-container {
+                    max-width: 100%;
+                    overflow-x: hidden;
+                  }
+                  .react-pdf__Page {
+                    max-width: 100% !important;
+                    height: auto !important;
+                  }
+                  .react-pdf__Page__canvas {
+                    max-width: 100% !important;
+                    height: auto !important;
+                  }
+                `}</style>
+                {isLoading && (
+                  <div className="flex items-center justify-center p-8">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                      <p className="text-sm text-muted-foreground">Loading PDF...</p>
+                    </div>
                   </div>
-                </div>}
-              <div className="mx-auto" style={{
-            width: pageWidth * zoom
-          }}>
-                <Document file={pdfFile} onLoadSuccess={onDocumentLoadSuccess} onLoadError={onDocumentLoadError} loading={null} className="flex flex-col gap-0">
-                  {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
-                    <div key={pageNum} className="relative border-b border-border last:border-b-0" style={{
-                      width: pageWidth * zoom
-                    }}>
-                      <div ref={el => el && pageRefs.current.set(pageNum, el)} className="relative">
-                        <Page 
-                          pageNumber={pageNum} 
-                          width={pageWidth * zoom} 
-                          onLoadSuccess={() => setupCanvas(pageNum)} 
-                          renderTextLayer={true} 
-                          renderAnnotationLayer={false}
-                        />
-                        
+                )}
+                <div ref={containerRef} className="flex justify-center">
+                  <Document 
+                    file={pdfFile} 
+                    onLoadSuccess={onDocumentLoadSuccess} 
+                    onLoadError={onDocumentLoadError} 
+                    loading={null} 
+                    className="flex flex-col gap-0"
+                  >
+                    {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
+                      <div 
+                        key={pageNum} 
+                        className="relative border-b border-border last:border-b-0"
+                        style={{ maxWidth: '100%' }}
+                      >
+                        <div ref={el => el && pageRefs.current.set(pageNum, el)} className="relative">
+                          <Page 
+                            pageNumber={pageNum} 
+                            width={Math.min(pageWidth * zoom, containerWidth)} 
+                            onLoadSuccess={(page) => {
+                              setPageWidth(page.width);
+                              setupCanvas(pageNum);
+                            }}
+                            renderTextLayer={true} 
+                            renderAnnotationLayer={false}
+                          />
+                         
                         {/* Clickable text overlay layer */}
                         <div 
                           ref={el => el && textLayerRefs.current.set(pageNum, el)}
@@ -1848,13 +1889,16 @@ export function LightPaperPDFEditor({
                   ))}
                 </Document>
               </div>
-            </div> : <div className="flex flex-col items-center justify-center h-full text-center p-8">
-              <FileText className="h-20 w-20 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No PDF Loaded</h3>
-              <p className="text-sm text-muted-foreground">
-                Upload a PDF file to view, annotate, and sign
-              </p>
-            </div>}
+            </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-center p-8">
+                <FileText className="h-20 w-20 text-muted-foreground mb-4" />
+                <h3 className="text-lg font-medium mb-2">No PDF Loaded</h3>
+                <p className="text-sm text-muted-foreground">
+                  Upload a PDF file to view, annotate, and sign
+                </p>
+              </div>
+            )}
           </Card>
 
           {/* Activity Panel - Collapsible Sidebar */}
@@ -2014,5 +2058,6 @@ export function LightPaperPDFEditor({
         onNextMatch={handleNextMatch}
         onPreviousMatch={handlePreviousMatch}
       />
-    </div>;
+    </div>
+  );
 }

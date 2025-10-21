@@ -24,6 +24,7 @@ import { CollaborationPresence } from "./CollaborationPresence";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { sanitizeHTML } from "@/utils/sanitize";
+import { MobileToolbar } from "./MobileToolbar";
 
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
 const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
@@ -861,231 +862,282 @@ export function LightPaperDocument({
   
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
-      <CollapsibleToolbar>
-        <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
-          {/* Font Controls */}
-          <Select value={selectedFont} onValueChange={font => {
-          setSelectedFont(font);
-          if (editorRef.current) editorRef.current.style.fontFamily = font;
-        }}>
-            <SelectTrigger className="w-28 h-8 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-background z-50">
-              {FONTS.map(font => <SelectItem key={font} value={font} style={{
-              fontFamily: font
-            }}>
-                  {font}
-                </SelectItem>)}
-            </SelectContent>
-          </Select>
-
-          <Select value={selectedSize} onValueChange={size => {
-          setSelectedSize(size);
-          if (editorRef.current) editorRef.current.style.fontSize = `${size}px`;
-        }}>
-            <SelectTrigger className="w-16 h-8 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent className="bg-background z-50">
-              {FONT_SIZES.map(size => <SelectItem key={size} value={size}>{size}</SelectItem>)}
-            </SelectContent>
-          </Select>
-
-          {/* Text Formatting */}
-          <div className="flex gap-0.5 border-l pl-1">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("bold")} title="Bold (Ctrl+B)">
-              <Bold className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("italic")} title="Italic (Ctrl+I)">
-              <Italic className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("underline")} title="Underline (Ctrl+U)">
-              <Underline className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("strikeThrough")} title="Strikethrough">
-              <Strikethrough className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Alignment */}
-          <div className="flex gap-0.5 border-l pl-1">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyLeft")} title="Align Left">
-              <AlignLeft className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyCenter")} title="Align Center">
-              <AlignCenter className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyRight")} title="Align Right">
-              <AlignRight className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyFull")} title="Justify">
-              <AlignJustify className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Lists */}
-          <div className="flex gap-0.5 border-l pl-1">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertUnorderedList")} title="Bullet List">
-              <List className="h-4 w-4" />
-            </Button>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertOrderedList")} title="Numbered List">
-              <ListOrdered className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Version History Navigation */}
-          {versions.length > 0 && (
-            <div className="flex gap-0.5 border-l pl-1 items-center">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0" 
-                onClick={goToPreviousVersion}
-                disabled={currentVersionIndex <= 0}
-                title="Previous Version"
-              >
-                <Undo className="h-4 w-4" />
-              </Button>
-              <span className="text-xs text-muted-foreground px-1 whitespace-nowrap">
-                {currentVersionIndex + 1}/{versions.length}
-              </span>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0" 
-                onClick={goToNextVersion}
-                disabled={currentVersionIndex >= versions.length - 1}
-                title="Next Version"
-              >
-                <Redo className="h-4 w-4" />
-              </Button>
-            </div>
-          )}
-          
-          
-          {/* Image Upload */}
-          <div className="flex gap-0.5 border-l pl-1">
-            <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => fileInputRef.current?.click()} title="Insert Image">
-              <Image className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Calculator */}
-          <div className="flex gap-0.5 border-l pl-1">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowCalculator(true)} title="Calculator">
-              <Calculator className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Highlight */}
-          <div className="flex gap-0.5 border-l pl-1">
-            <Select value={selectedHighlight} onValueChange={activateHighlighter}>
-              <SelectTrigger className={`w-28 h-8 text-xs ${isHighlighterActive ? 'bg-primary/20 border-primary' : ''}`}>
-                <Highlighter className="h-4 w-4 mr-1" />
+      {/* Desktop Toolbar */}
+      <div className="hidden md:block">
+        <CollapsibleToolbar>
+          <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+            {/* Font Controls */}
+            <Select value={selectedFont} onValueChange={font => {
+            setSelectedFont(font);
+            if (editorRef.current) editorRef.current.style.fontFamily = font;
+          }}>
+              <SelectTrigger className="w-28 h-8 text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-background z-50">
-                {HIGHLIGHT_COLORS.map(color => (
-                  <SelectItem key={color} value={color}>
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border" style={{ backgroundColor: color }} />
-                      {color === "transparent" ? "None" : color}
-                    </div>
-                  </SelectItem>
-                ))}
+                {FONTS.map(font => <SelectItem key={font} value={font} style={{
+                fontFamily: font
+              }}>
+                    {font}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
-          </div>
 
-          {/* Signature */}
-          <div className="flex gap-0.5 border-l pl-1">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSignDialog(true)} title="Add Signature">
-              <PenLine className="h-4 w-4" />
-            </Button>
-          </div>
+            <Select value={selectedSize} onValueChange={size => {
+            setSelectedSize(size);
+            if (editorRef.current) editorRef.current.style.fontSize = `${size}px`;
+          }}>
+              <SelectTrigger className="w-16 h-8 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                {FONT_SIZES.map(size => <SelectItem key={size} value={size}>{size}</SelectItem>)}
+              </SelectContent>
+            </Select>
 
-          {/* Dark/Light Mode Toggle */}
-          <div className="flex gap-0.5 border-l pl-1">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={toggleDarkMode} title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
-              {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-          </div>
+            {/* Text Formatting */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("bold")} title="Bold (Ctrl+B)">
+                <Bold className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("italic")} title="Italic (Ctrl+I)">
+                <Italic className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("underline")} title="Underline (Ctrl+U)">
+                <Underline className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("strikeThrough")} title="Strikethrough">
+                <Strikethrough className="h-4 w-4" />
+              </Button>
+            </div>
 
-          {/* Search */}
-          <div className="flex gap-0.5 border-l pl-1">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSearchDialog(true)} title="Find (Ctrl+F)">
-              <Search className="h-4 w-4" />
-            </Button>
-          </div>
+            {/* Alignment */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyLeft")} title="Align Left">
+                <AlignLeft className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyCenter")} title="Align Center">
+                <AlignCenter className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyRight")} title="Align Right">
+                <AlignRight className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyFull")} title="Justify">
+                <AlignJustify className="h-4 w-4" />
+              </Button>
+            </div>
 
-          {/* Keyboard Shortcuts */}
-          <div className="flex gap-0.5 border-l pl-1">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowShortcutsDialog(true)} title="Keyboard Shortcuts (Ctrl+/)">
-              <Keyboard className="h-4 w-4" />
-            </Button>
-          </div>
+            {/* Lists */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertUnorderedList")} title="Bullet List">
+                <List className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("insertOrderedList")} title="Numbered List">
+                <ListOrdered className="h-4 w-4" />
+              </Button>
+            </div>
 
-          {/* Collaboration - Comments */}
-          <div className="flex gap-0.5 border-l pl-1">
-            <Button 
-              variant={showComments ? "secondary" : "ghost"} 
-              size="sm" 
-              className="h-8 w-8 p-0" 
-              onClick={() => setShowComments(!showComments)} 
-              title="Toggle Comments"
-            >
-              <MessageSquare className="h-4 w-4" />
-            </Button>
-          </div>
-
-          {/* Export Options */}
-          <div className="flex gap-0.5 border-l pl-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Export">
-                  <Download className="h-4 w-4" />
+            {/* Version History Navigation */}
+            {versions.length > 0 && (
+              <div className="flex gap-0.5 border-l pl-1 items-center">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0" 
+                  onClick={goToPreviousVersion}
+                  disabled={currentVersionIndex <= 0}
+                  title="Previous Version"
+                >
+                  <Undo className="h-4 w-4" />
                 </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="bg-background z-50">
-                <DropdownMenuItem onClick={handleExportPDF}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  Export as PDF
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handlePrint}>
-                  <FileText className="h-4 w-4 mr-2" />
-                  Print Document
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                <span className="text-xs text-muted-foreground px-1 whitespace-nowrap">
+                  {currentVersionIndex + 1}/{versions.length}
+                </span>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0" 
+                  onClick={goToNextVersion}
+                  disabled={currentVersionIndex >= versions.length - 1}
+                  title="Next Version"
+                >
+                  <Redo className="h-4 w-4" />
+                </Button>
+              </div>
+            )}
+            
+            
+            {/* Image Upload */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={handleImageUpload} className="hidden" />
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => fileInputRef.current?.click()} title="Insert Image">
+                <Image className="h-4 w-4" />
+              </Button>
+            </div>
 
-          {/* Save Button */}
-          <div className="flex gap-2 items-center border-l pl-1 ml-auto shrink-0">
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              className="h-8 w-8 p-0" 
-              onClick={() => setShowSaveDialog(true)} 
-              disabled={isSaving}
-              title="Save Document (Ctrl+S)"
-            >
-              <Save className="h-4 w-4" />
-            </Button>
-            {isSaving && (
-              <span className="text-xs text-muted-foreground">
-                Saving...
-              </span>
-            )}
-            {lastSaved && !isSaving && (
-              <span className="text-xs text-muted-foreground">
-                Saved {lastSaved.toLocaleTimeString()}
-              </span>
-            )}
+            {/* Calculator */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowCalculator(true)} title="Calculator">
+                <Calculator className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Highlight */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Select value={selectedHighlight} onValueChange={activateHighlighter}>
+                <SelectTrigger className={`w-28 h-8 text-xs ${isHighlighterActive ? 'bg-primary/20 border-primary' : ''}`}>
+                  <Highlighter className="h-4 w-4 mr-1" />
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  {HIGHLIGHT_COLORS.map(color => (
+                    <SelectItem key={color} value={color}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border" style={{ backgroundColor: color }} />
+                        {color === "transparent" ? "None" : color}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Signature */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSignDialog(true)} title="Add Signature">
+                <PenLine className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Dark/Light Mode Toggle */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={toggleDarkMode} title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+              </Button>
+            </div>
+
+            {/* Search */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSearchDialog(true)} title="Find (Ctrl+F)">
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Keyboard Shortcuts */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowShortcutsDialog(true)} title="Keyboard Shortcuts (Ctrl+/)">
+                <Keyboard className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Collaboration - Comments */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button 
+                variant={showComments ? "secondary" : "ghost"} 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                onClick={() => setShowComments(!showComments)} 
+                title="Toggle Comments"
+              >
+                <MessageSquare className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Export Options */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Export">
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background z-50">
+                  <DropdownMenuItem onClick={handleExportPDF}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Export as PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handlePrint}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Print Document
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Save Button */}
+            <div className="flex gap-2 items-center border-l pl-1 ml-auto shrink-0">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                onClick={() => setShowSaveDialog(true)} 
+                disabled={isSaving}
+                title="Save Document (Ctrl+S)"
+              >
+                <Save className="h-4 w-4" />
+              </Button>
+              {isSaving && (
+                <span className="text-xs text-muted-foreground">
+                  Saving...
+                </span>
+              )}
+              {lastSaved && !isSaving && (
+                <span className="text-xs text-muted-foreground">
+                  Saved {lastSaved.toLocaleTimeString()}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
-      </CollapsibleToolbar>
+        </CollapsibleToolbar>
+      </div>
+
+      {/* Mobile Toolbar */}
+      <div className="md:hidden p-2 border-b bg-background">
+        <MobileToolbar
+          groups={[
+            {
+              label: "Format",
+              actions: [
+                { icon: Bold, label: "Bold", onClick: () => execCommand("bold"), priority: "high" },
+                { icon: Italic, label: "Italic", onClick: () => execCommand("italic"), priority: "high" },
+                { icon: Underline, label: "Underline", onClick: () => execCommand("underline"), priority: "medium" },
+                { icon: Strikethrough, label: "Strikethrough", onClick: () => execCommand("strikeThrough"), priority: "low" },
+              ]
+            },
+            {
+              label: "Align",
+              actions: [
+                { icon: AlignLeft, label: "Left", onClick: () => execCommand("justifyLeft"), priority: "medium" },
+                { icon: AlignCenter, label: "Center", onClick: () => execCommand("justifyCenter"), priority: "medium" },
+                { icon: AlignRight, label: "Right", onClick: () => execCommand("justifyRight"), priority: "medium" },
+              ]
+            },
+            {
+              label: "Insert",
+              actions: [
+                { icon: Image, label: "Image", onClick: () => fileInputRef.current?.click(), priority: "medium" },
+                { icon: PenLine, label: "Signature", onClick: () => setShowSignDialog(true), priority: "low" },
+                { icon: List, label: "Bullet List", onClick: () => execCommand("insertUnorderedList"), priority: "low" },
+                { icon: ListOrdered, label: "Numbered List", onClick: () => execCommand("insertOrderedList"), priority: "low" },
+              ]
+            },
+            {
+              label: "Tools",
+              actions: [
+                { icon: Calculator, label: "Calculator", onClick: () => setShowCalculator(true), priority: "low" },
+                { icon: Search, label: "Find", onClick: () => setShowSearchDialog(true), priority: "medium" },
+                { icon: Highlighter, label: "Highlight", onClick: () => activateHighlighter(selectedHighlight), priority: "low" },
+                { icon: Keyboard, label: "Shortcuts", onClick: () => setShowShortcutsDialog(true), priority: "low" },
+              ]
+            },
+          ]}
+          rightActions={[
+            { icon: Save, label: "Save", onClick: () => setShowSaveDialog(true), priority: "high", variant: "default", disabled: isSaving },
+            { icon: MessageSquare, label: "Comments", onClick: () => setShowComments(!showComments), priority: "high", variant: showComments ? "default" : "outline" },
+            { icon: Download, label: "Export", onClick: handleExportPDF, priority: "medium" },
+          ]}
+        />
+      </div>
 
       {/* Main Editor Area - Takes Full Height with Pages */}
       <div ref={wrapperRef} className="flex-1 overflow-auto p-4 bg-muted/30 flex gap-0">
