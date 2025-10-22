@@ -1424,7 +1424,8 @@ export function LightPaperPDFEditor({
       toast.error(error.message || "Failed to save PDF");
     }
   };
-  return <div className="flex flex-col gap-2 sm:gap-4 h-[calc(100vh-200px)] relative">
+  return (
+    <div className="flex flex-col gap-2 sm:gap-4 h-[calc(100vh-200px)] relative">
       {/* Main PDF Viewer */}
       <div className="flex flex-col gap-2 sm:gap-4 flex-1">
         <div className="hidden md:block">
