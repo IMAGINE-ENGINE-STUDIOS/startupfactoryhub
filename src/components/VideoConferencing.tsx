@@ -22,10 +22,14 @@ declare global {
 
 interface VideoConferencingProps {
   roomUrl?: string;
+  userId?: string;
+  hostId?: string;
+  userName?: string;
+  meetingTitle?: string;
   onLeave?: () => void;
 }
 
-export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencingProps) {
+export default function VideoConferencing({ roomUrl, userId, hostId, userName, meetingTitle, onLeave }: VideoConferencingProps) {
   const [isCallActive, setIsCallActive] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
@@ -79,30 +83,41 @@ export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencin
       // Format: https://meet.jit.si/RoomName or just RoomName
       const roomName = roomUrl.split('/').pop() || roomUrl;
 
-      // Initialize Jitsi Meet
+      // Initialize Jitsi Meet with host privileges
       const domain = 'meet.jit.si';
+      const isHost = userId && hostId && userId === hostId;
+      
       const options = {
         roomName: roomName,
         width: '100%',
         height: '100%',
         parentNode: containerRef.current,
+        userInfo: {
+          displayName: userName || 'User',
+          moderator: isHost, // Grant moderator role to host
+        },
         configOverwrite: {
-          startWithAudioMuted: false,
-          startWithVideoMuted: false,
+          startWithAudioMuted: !isHost, // Only host starts unmuted
+          startWithVideoMuted: !isHost,
           enableWelcomePage: false,
           prejoinPageEnabled: false,
           disableDeepLinking: true,
+          subject: meetingTitle || 'Startup Factory Hub Meeting',
+          defaultRemoteDisplayName: 'Participant',
         },
         interfaceConfigOverwrite: {
+          APP_NAME: 'Startup Factory Hub',
           SHOW_JITSI_WATERMARK: false,
           SHOW_WATERMARK_FOR_GUESTS: false,
+          SHOW_BRAND_WATERMARK: false,
+          BRAND_WATERMARK_LINK: '',
+          DEFAULT_BACKGROUND: '#1a1a2e',
           TOOLBAR_BUTTONS: [
             'microphone', 'camera', 'closedcaptions', 'desktop',
             'fullscreen', 'fodeviceselection', 'hangup', 'chat',
-            'recording', 'livestreaming', 'etherpad', 'sharedvideo',
-            'settings', 'raisehand', 'videoquality', 'filmstrip',
-            'feedback', 'stats', 'shortcuts', 'tileview', 'download',
-            'help', 'mute-everyone'
+            'recording', 'livestreaming', 'settings', 'raisehand', 
+            'videoquality', 'filmstrip', 'stats', 'shortcuts', 
+            'tileview', 'mute-everyone'
           ],
         },
       };
@@ -191,10 +206,17 @@ export default function VideoConferencing({ roomUrl, onLeave }: VideoConferencin
               className="aspect-video bg-accent rounded-lg overflow-hidden"
             />
             
-            <Badge className="absolute top-4 left-4 z-10">
-              <Users className="h-3 w-3 mr-1" />
-              {participantCount} {participantCount === 1 ? 'participant' : 'participants'}
-            </Badge>
+            <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
+              <Badge className="bg-background/80 backdrop-blur">
+                <Users className="h-3 w-3 mr-1" />
+                {participantCount} {participantCount === 1 ? 'participant' : 'participants'}
+              </Badge>
+              {userId && hostId && userId === hostId && (
+                <Badge variant="default" className="bg-primary">
+                  Host
+                </Badge>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center justify-center gap-4">

@@ -6,9 +6,10 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, Users, Clock, UserPlus, Check, X } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, UserPlus, Check, X, Video } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import VideoConferencing from './VideoConferencing';
 
 interface Event {
   id: string;
@@ -38,6 +39,8 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const [attendees, setAttendees] = useState<any[]>([]);
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [selectedUser, setSelectedUser] = useState<string>('');
+  const [showVideo, setShowVideo] = useState(false);
+  const [userProfile, setUserProfile] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -45,11 +48,22 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
     if (open) {
       fetchUserStatus();
       fetchAttendees();
+      fetchUserProfile();
       if (user?.id === event.organizer_id) {
         fetchAllUsers();
       }
     }
   }, [open, event.id]);
+
+  const fetchUserProfile = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('user_id', user.id)
+      .single();
+    setUserProfile(data);
+  };
 
   const fetchUserStatus = async () => {
     if (!user) return;
@@ -131,6 +145,42 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
 
   const isOrganizer = user?.id === event.organizer_id;
   const isFull = event.max_attendees && attendees.length >= event.max_attendees;
+  const isOnlineEvent = event.location?.includes('meet.jit.si');
+  const eventDate = new Date(event.start_date);
+  const now = new Date();
+  const isWithin15Min = eventDate.getTime() - now.getTime() < 15 * 60 * 1000 && eventDate.getTime() > now.getTime();
+  const hasStarted = eventDate.getTime() <= now.getTime();
+
+  const handleJoinEvent = () => {
+    if (isOnlineEvent && event.location) {
+      setShowVideo(true);
+    }
+  };
+
+  if (showVideo && isOnlineEvent && event.location) {
+    return (
+      <Dialog open={open} onOpenChange={(open) => {
+        if (!open) {
+          setShowVideo(false);
+          onOpenChange(false);
+        }
+      }}>
+        <DialogContent className="max-w-5xl h-[90vh]">
+          <VideoConferencing
+            roomUrl={event.location}
+            userId={user?.id}
+            hostId={event.organizer_id}
+            userName={userProfile?.full_name || 'User'}
+            meetingTitle={event.title}
+            onLeave={() => {
+              setShowVideo(false);
+              onOpenChange(false);
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -258,6 +308,29 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                   Invite
                 </Button>
               </div>
+            </div>
+          )}
+
+          {/* Online Event Join Button */}
+          {isOnlineEvent && user && (userStatus === 'going' || isOrganizer) && (
+            <div className="pt-4 border-t">
+              <Button
+                onClick={handleJoinEvent}
+                disabled={!isWithin15Min && !hasStarted && !isOrganizer}
+                className="w-full gap-2"
+                size="lg"
+                variant={isOrganizer ? 'default' : (isWithin15Min || hasStarted) ? 'default' : 'outline'}
+              >
+                <Video className="h-5 w-5" />
+                {isOrganizer 
+                  ? 'Start Meeting' 
+                  : hasStarted 
+                    ? 'Join Meeting' 
+                    : isWithin15Min 
+                      ? 'Join Meeting (Starting Soon)' 
+                      : `Meeting opens ${format(eventDate, 'h:mm a')}`
+                }
+              </Button>
             </div>
           )}
 

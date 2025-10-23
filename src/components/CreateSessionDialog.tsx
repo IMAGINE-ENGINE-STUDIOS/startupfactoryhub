@@ -260,6 +260,7 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
           description: formData.description,
           meeting_link: meetingLink,
           status: 'scheduled',
+          host_id: formData.mentor_id // Set mentor/advisor as host
         });
 
       if (error) throw error;

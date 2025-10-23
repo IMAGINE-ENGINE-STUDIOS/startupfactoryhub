@@ -82,7 +82,8 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         end_date: endDateTime.toISOString(),
         max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
         banner_url: formData.banner_url || null,
-        organizer_id: user.id
+        organizer_id: user.id,
+        host_id: user.id // Set event creator as host
       }).select().single();
 
       if (error) throw error;

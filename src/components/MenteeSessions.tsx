@@ -17,7 +17,7 @@ import {
 import { format } from 'date-fns';
 
 interface MenteeSessionsProps {
-  onJoinMeeting?: (meetingLink: string) => void;
+  onJoinMeeting?: (meetingLink: string, sessionData?: any) => void;
 }
 
 export default function MenteeSessions({ onJoinMeeting }: MenteeSessionsProps = {}) {
@@ -90,11 +90,13 @@ export default function MenteeSessions({ onJoinMeeting }: MenteeSessionsProps = 
     setProcessingId(null);
   };
 
-  const handleJoinMeeting = (meetingLink?: string) => {
+  const handleJoinMeeting = (meetingLink?: string, sessionData?: any) => {
     if (meetingLink) {
       if (onJoinMeeting) {
-        onJoinMeeting(meetingLink);
+        // Pass meeting link with session data for embedded video
+        onJoinMeeting(meetingLink, sessionData);
       } else {
+        // Fallback: open in new tab (should be replaced with embedded video)
         window.open(meetingLink, '_blank');
       }
     } else {
@@ -263,11 +265,12 @@ export default function MenteeSessions({ onJoinMeeting }: MenteeSessionsProps = 
                           {isWithin30Min && (
                             <Button
                               size="sm"
-                              onClick={() => handleJoinMeeting(session.meeting_link)}
+                              variant="default"
+                              onClick={() => handleJoinMeeting(session.meeting_link, session)}
                               className="flex-1 sm:flex-none gap-2"
                             >
                               <Video className="h-4 w-4" />
-                              Join Meeting
+                              Join Session
                             </Button>
                           )}
                           <Button

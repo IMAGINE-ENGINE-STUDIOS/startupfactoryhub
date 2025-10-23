@@ -71,7 +71,7 @@ const MentorDashboard = () => {
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [activeTab, setActiveTab] = useState("social");
-  const [activeVideoUrl, setActiveVideoUrl] = useState<string>();
+  const [activeVideoSession, setActiveVideoSession] = useState<any>(null);
   const { upcomingEvents } = useEvents();
 
   // Redirect if wrong role
@@ -215,7 +215,7 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="mentees" className="space-y-6">
-            <MenteeSessions onJoinMeeting={(link) => setActiveVideoUrl(link)} />
+            <MenteeSessions onJoinMeeting={(link, sessionData) => setActiveVideoSession(sessionData)} />
             <MentorshipRequests />
             <MentorOffersBoard />
           </TabsContent>
@@ -275,18 +275,22 @@ const MentorDashboard = () => {
                                  </div>
                                )}
                                {event.location?.startsWith('https://meet.jit.si/') && (
-                                 <Button
-                                   size="sm"
-                                   variant="outline"
-                                   onClick={(e) => {
-                                     e.stopPropagation();
-                                     setActiveVideoUrl(event.location);
-                                   }}
-                                   className="gap-2 mt-2 w-full"
-                                 >
-                                   <Video className="h-4 w-4" />
-                                   Join Event
-                                 </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setActiveVideoSession({ 
+                                        meeting_link: event.location,
+                                        host_id: event.organizer_id,
+                                        topic: event.title 
+                                      });
+                                    }}
+                                    className="gap-2 mt-2 w-full"
+                                  >
+                                    <Video className="h-4 w-4" />
+                                    Join Event
+                                  </Button>
                                )}
                               <div className="flex items-center gap-2">
                                 <Users className="h-3 w-3" />
@@ -311,7 +315,7 @@ const MentorDashboard = () => {
                   setSelectedEvent(item);
                   setShowEventDetails(true);
                 } else if (item.type === 'session' && item.meeting_link) {
-                  setActiveVideoUrl(item.meeting_link);
+                  setActiveVideoSession(item);
                 }
               }}
               filterTypes={['event', 'session', 'availability']}
@@ -378,19 +382,18 @@ const MentorDashboard = () => {
       <FloatingChat />
       
       {/* Video Conferencing Dialog */}
-      <Dialog open={!!activeVideoUrl} onOpenChange={(open) => !open && setActiveVideoUrl(undefined)}>
-        <DialogContent className="max-w-5xl h-[80vh]">
-          <DialogHeader>
-            <DialogTitle>Video Conference</DialogTitle>
-          </DialogHeader>
-          <div className="h-full">
-            {activeVideoUrl && (
-              <VideoConferencing
-                roomUrl={activeVideoUrl}
-                onLeave={() => setActiveVideoUrl(undefined)}
-              />
-            )}
-          </div>
+      <Dialog open={!!activeVideoSession} onOpenChange={(open) => !open && setActiveVideoSession(null)}>
+        <DialogContent className="max-w-6xl h-[90vh] p-0">
+          {activeVideoSession && (
+            <VideoConferencing
+              roomUrl={activeVideoSession.meeting_link}
+              userId={user?.id}
+              hostId={activeVideoSession.host_id || activeVideoSession.mentor_id}
+              userName={profileWithRole?.full_name || user?.email || 'User'}
+              meetingTitle={activeVideoSession.topic || 'Mentoring Session'}
+              onLeave={() => setActiveVideoSession(null)}
+            />
+          )}
         </DialogContent>
       </Dialog>
       

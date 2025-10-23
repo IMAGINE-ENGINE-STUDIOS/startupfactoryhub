@@ -1297,6 +1297,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           end_date: string
+          host_id: string | null
           id: string
           is_public: boolean | null
           location: string | null
@@ -1311,6 +1312,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           end_date: string
+          host_id?: string | null
           id?: string
           is_public?: boolean | null
           location?: string | null
@@ -1325,6 +1327,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           end_date?: string
+          host_id?: string | null
           id?: string
           is_public?: boolean | null
           location?: string | null
@@ -1973,7 +1976,7 @@ export type Database = {
           id: string
           last_accessed_at: string | null
           project_type: Database["public"]["Enums"]["lightpaper_project_type"]
-          search_vector: unknown | null
+          search_vector: unknown
           thumbnail_url: string | null
           title: string
           updated_at: string | null
@@ -1985,7 +1988,7 @@ export type Database = {
           id?: string
           last_accessed_at?: string | null
           project_type: Database["public"]["Enums"]["lightpaper_project_type"]
-          search_vector?: unknown | null
+          search_vector?: unknown
           thumbnail_url?: string | null
           title: string
           updated_at?: string | null
@@ -1997,7 +2000,7 @@ export type Database = {
           id?: string
           last_accessed_at?: string | null
           project_type?: Database["public"]["Enums"]["lightpaper_project_type"]
-          search_vector?: unknown | null
+          search_vector?: unknown
           thumbnail_url?: string | null
           title?: string
           updated_at?: string | null
@@ -2135,6 +2138,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           duration_minutes: number | null
+          host_id: string | null
           id: string
           meeting_link: string | null
           mentee_id: string
@@ -2150,6 +2154,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
+          host_id?: string | null
           id?: string
           meeting_link?: string | null
           mentee_id: string
@@ -2165,6 +2170,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           duration_minutes?: number | null
+          host_id?: string | null
           id?: string
           meeting_link?: string | null
           mentee_id?: string
@@ -2427,6 +2433,7 @@ export type Database = {
           company_id: string
           created_at: string
           duration_minutes: number
+          host_id: string | null
           id: string
           investor_id: string
           meeting_link: string | null
@@ -2440,6 +2447,7 @@ export type Database = {
           company_id: string
           created_at?: string
           duration_minutes?: number
+          host_id?: string | null
           id?: string
           investor_id: string
           meeting_link?: string | null
@@ -2453,6 +2461,7 @@ export type Database = {
           company_id?: string
           created_at?: string
           duration_minutes?: number
+          host_id?: string | null
           id?: string
           investor_id?: string
           meeting_link?: string | null
@@ -3313,14 +3322,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      cleanup_old_cursors: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
-      cleanup_stale_online_status: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
-      }
+      cleanup_old_cursors: { Args: never; Returns: undefined }
+      cleanup_stale_online_status: { Args: never; Returns: undefined }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]

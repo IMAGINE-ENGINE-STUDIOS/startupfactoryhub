@@ -6,7 +6,7 @@ import { useMentoringSessions } from "@/hooks/useMentoringSessions";
 import { format } from "date-fns";
 
 interface MentorCalendarWidgetProps {
-  onJoinMeeting?: (meetingLink: string) => void;
+  onJoinMeeting?: (meetingLink: string, sessionData?: any) => void;
 }
 
 export default function MentorCalendarWidget({ onJoinMeeting }: MentorCalendarWidgetProps = {}) {
@@ -17,11 +17,13 @@ export default function MentorCalendarWidget({ onJoinMeeting }: MentorCalendarWi
     .sort((a, b) => new Date(a.scheduled_at).getTime() - new Date(b.scheduled_at).getTime())
     .slice(0, 3);
 
-  const handleJoinMeeting = (meetingLink?: string) => {
+  const handleJoinMeeting = (meetingLink?: string, sessionData?: any) => {
     if (meetingLink) {
       if (onJoinMeeting) {
-        onJoinMeeting(meetingLink);
+        // Pass meeting link with session data for embedded video
+        onJoinMeeting(meetingLink, sessionData);
       } else {
+        // Fallback: open in new tab (should be replaced with embedded video)
         window.open(meetingLink, '_blank');
       }
     }
@@ -76,13 +78,13 @@ export default function MentorCalendarWidget({ onJoinMeeting }: MentorCalendarWi
                   </div>
                   {isWithin30Min && session.meeting_link && (
                     <Button 
-                      variant="outline" 
+                      variant="default" 
                       size="sm" 
                       className="w-full gap-2"
-                      onClick={() => handleJoinMeeting(session.meeting_link)}
+                      onClick={() => handleJoinMeeting(session.meeting_link, session)}
                     >
                       <Video className="h-3 w-3" />
-                      Join Session
+                      Start Session
                     </Button>
                   )}
                 </div>

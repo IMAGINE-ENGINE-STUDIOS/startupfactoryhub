@@ -117,7 +117,8 @@ export default function BookPitchDialog({
           scheduled_date: scheduledDate.toISOString(),
           duration_minutes: 30,
           status: 'scheduled',
-          meeting_link: meetingLink
+          meeting_link: meetingLink,
+          host_id: user.id // Set startup (pitcher) as host
         });
 
       if (pitchError) throw pitchError;
