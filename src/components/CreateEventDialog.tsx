@@ -93,6 +93,7 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         const feedContent = `📅 ${formData.title}\n\n${formData.description || ''}\n\n📍 ${formData.location || 'TBD'}\n⏰ ${format(startDateTime, 'PPP p')}`;
         
         await supabase.from('feed_posts').insert({
+          user_id: user.id,
           content: feedContent,
           post_type: 'event',
           media_urls: formData.banner_url ? [formData.banner_url] : null,

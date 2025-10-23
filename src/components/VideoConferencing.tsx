@@ -58,13 +58,20 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
       return;
     }
 
+    // Wait for container to be ready with retry mechanism
     if (!containerRef.current) {
-      toast({
-        title: 'Error',
-        description: 'Video container not ready',
-        variant: 'destructive',
-      });
-      return;
+      setIsLoading(true);
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      if (!containerRef.current) {
+        toast({
+          title: 'Error',
+          description: 'Video container not ready. Please try again.',
+          variant: 'destructive',
+        });
+        setIsLoading(false);
+        return;
+      }
     }
 
     if (!window.JitsiMeetExternalAPI) {
