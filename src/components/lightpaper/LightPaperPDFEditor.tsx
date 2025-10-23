@@ -1425,7 +1425,7 @@ export function LightPaperPDFEditor({
     }
   };
   return (
-    <div className="flex flex-col gap-2 sm:gap-4 h-[calc(100vh-200px)] relative">
+    <div className="flex flex-col gap-2 sm:gap-4 h-full relative">{/* Removed fixed height calc */}
       {/* Main PDF Viewer */}
       <div className="flex flex-col gap-2 sm:gap-4 flex-1">
         <div className="hidden md:block">
@@ -1761,22 +1761,32 @@ export function LightPaperPDFEditor({
           className="hidden"
         />
 
-        <div className="flex-1 flex gap-2 sm:gap-4 overflow-hidden">
-          <Card className="flex-1 overflow-auto p-2 sm:p-4">
+        <div className="flex-1 flex gap-2 sm:gap-4 overflow-hidden min-h-0">
+          <Card className="flex-1 overflow-y-auto p-2 sm:p-4 relative">
             {pdfFile ? (
-              <div className="pdf-viewer-container p-2 sm:p-4">
+              <div className="pdf-viewer-container p-2 sm:p-4 w-full">{/* Added w-full for proper width constraint */}
                 <style>{`
                   .pdf-viewer-container {
                     max-width: 100%;
                     overflow-x: hidden;
+                    display: flex;
+                    justify-content: center;
                   }
                   .react-pdf__Page {
                     max-width: 100% !important;
                     height: auto !important;
+                    margin-bottom: 0 !important;
                   }
                   .react-pdf__Page__canvas {
                     max-width: 100% !important;
                     height: auto !important;
+                    display: block;
+                  }
+                  .react-pdf__Document {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    width: 100%;
                   }
                 `}</style>
                 {isLoading && (
@@ -1787,13 +1797,12 @@ export function LightPaperPDFEditor({
                     </div>
                   </div>
                 )}
-                <div ref={containerRef} className="flex justify-center">
+                <div ref={containerRef} className="w-full">
                   <Document 
                     file={pdfFile} 
                     onLoadSuccess={onDocumentLoadSuccess} 
                     onLoadError={onDocumentLoadError} 
-                    loading={null} 
-                    className="flex flex-col gap-0"
+                    loading={null}
                   >
                     {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
                       <div 

@@ -150,7 +150,7 @@ export default function LightPaper() {
             )}
           </TabsContent>
 
-          <TabsContent value="pdf-editor" className="flex-1 mt-0 overflow-auto">
+          <TabsContent value="pdf-editor" className="flex-1 mt-0 overflow-hidden">{/* Changed to overflow-hidden to prevent breaking out */}
             {isTabLoading && activeTab === "pdf-editor" ? (
               <PDFLoadingSkeleton />
             ) : (
