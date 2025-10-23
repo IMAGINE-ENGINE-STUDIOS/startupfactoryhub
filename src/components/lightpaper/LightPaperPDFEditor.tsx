@@ -110,6 +110,7 @@ export function LightPaperPDFEditor({
   const [zoom, setZoom] = useState(1);
   const [pageWidth, setPageWidth] = useState(800);
   const [containerWidth, setContainerWidth] = useState(800);
+  const [containerHeight, setContainerHeight] = useState(600);
   const containerRef = useRef<HTMLDivElement>(null);
   const [tool, setTool] = useState<"select" | "text" | "rect" | "circle" | "erase">("select");
   const [signatureMode, setSignatureMode] = useState<"draw" | "text">("draw");
@@ -205,17 +206,18 @@ export function LightPaperPDFEditor({
     }
   }, [pdfFile, currentPage, signatures, textReplacements, projectTitle, currentProjectId, saveProject]);
 
-  // Responsive container width tracking
+  // Responsive container dimensions tracking
   useEffect(() => {
-    const updateWidth = () => {
+    const updateDimensions = () => {
       if (containerRef.current) {
-        setContainerWidth(containerRef.current.clientWidth); // full width
+        setContainerWidth(containerRef.current.clientWidth);
+        setContainerHeight(containerRef.current.clientHeight);
       }
     };
     
-    updateWidth();
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth);
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
+    return () => window.removeEventListener('resize', updateDimensions);
   }, []);
 
   // Update collaboration status when tool changes
@@ -1826,7 +1828,7 @@ export function LightPaperPDFEditor({
                 </div>
 
                 {/* PDF Document - Single Page */}
-                <div ref={containerRef} className="flex-1 overflow-auto bg-muted/10 p-2">
+                <div ref={containerRef} className="flex-1 overflow-hidden flex items-center justify-center bg-muted/10 p-4">
                   {isLoading && (
                     <div className="flex items-center justify-center h-full">
                       <div className="text-center">
@@ -1842,68 +1844,78 @@ export function LightPaperPDFEditor({
                     onLoadError={onDocumentLoadError} 
                     loading=""
                   >
-                    {currentPage && !isLoading && (
-                      <div 
-                        key={currentPage} 
-                        className="relative mx-auto shadow-lg bg-white w-fit"
-                      >
-                        <div ref={el => el && pageRefs.current.set(currentPage, el)} className="relative">
-                          <Page 
-                            pageNumber={currentPage} 
-                            width={Math.min(containerWidth - 16, 800)} 
-                            onLoadSuccess={(page) => {
-                              setPageWidth(page.width);
-                              setupCanvas(currentPage);
-                            }}
-                            renderTextLayer={false} 
-                            renderAnnotationLayer={false}
-                          />
+                    {currentPage && !isLoading && (() => {
+                      // Calculate scale to fit both width and height (letter size: 612x792 points)
+                      const scale = Math.min(
+                        (containerWidth - 48) / 612,
+                        (containerHeight - 48) / 792
+                      );
+                      
+                      return (
+                        <div 
+                          key={currentPage} 
+                          className="relative shadow-lg bg-white"
+                          style={{ maxWidth: '100%', maxHeight: '100%' }}
+                        >
+                          <div ref={el => el && pageRefs.current.set(currentPage, el)} className="relative">
+                            <Page 
+                              pageNumber={currentPage} 
+                              scale={scale}
+                              onLoadSuccess={(page) => {
+                                setPageWidth(page.width);
+                                setupCanvas(currentPage);
+                              }}
+                              renderTextLayer={false} 
+                              renderAnnotationLayer={false}
+                            />
                            
-                          {/* Clickable text overlay layer */}
-                          <div 
-                            ref={el => el && textLayerRefs.current.set(currentPage, el)}
-                            className="absolute top-0 left-0 w-full h-full"
-                            style={{ zIndex: 3 }}
-                          >
-                            {pdfTextItems.get(currentPage)?.map((textItem, index) => {
-                              const viewport = pageViewports.get(currentPage);
-                              if (!viewport) return null;
-                              
-                              const x = textItem.transform[4];
-                              const y = textItem.transform[5];
-                              const textHeight = textItem.height || Math.abs(textItem.transform[3]);
-                              
-                              // Convert to percentage-based positioning
-                              const leftPercent = (x / viewport.width) * 100;
-                              const topPercent = ((viewport.height - y - textHeight) / viewport.height) * 100;
-                              const widthPercent = (textItem.width / viewport.width) * 100;
-                              const heightPercent = (textHeight / viewport.height) * 100;
-                              
-                              const isReplaced = textReplacements.get(currentPage)?.some(r => 
-                                r.originalText === textItem.str && 
-                                Math.abs(r.originalX - x) < 1
-                              );
-                              
-                              return (
-                                <div
-                                  key={`${currentPage}-${index}`}
-                                  onClick={() => handleTextClick(currentPage, index, textItem)}
-                                  className={`absolute cursor-pointer transition-all ${
-                                    isReplaced 
-                                      ? 'bg-green-200/20 hover:bg-green-400/40' 
-                                      : 'hover:bg-blue-400/30'
-                                  }`}
-                                  style={{
-                                    left: `${leftPercent}%`,
-                                    top: `${topPercent}%`,
-                                    width: `${widthPercent}%`,
-                                    height: `${heightPercent}%`,
-                                  }}
-                                  title="Click to edit text"
-                                />
-                              );
-                            })}
-                          </div>
+                          {/* Clickable text overlay layer - only show in text edit mode */}
+                          {tool === 'text' && (
+                            <div 
+                              ref={el => el && textLayerRefs.current.set(currentPage, el)}
+                              className="absolute top-0 left-0 w-full h-full"
+                              style={{ zIndex: 3 }}
+                            >
+                              {pdfTextItems.get(currentPage)?.map((textItem, index) => {
+                                const viewport = pageViewports.get(currentPage);
+                                if (!viewport) return null;
+                                
+                                const x = textItem.transform[4];
+                                const y = textItem.transform[5];
+                                const textHeight = textItem.height || Math.abs(textItem.transform[3]);
+                                
+                                // Convert to percentage-based positioning
+                                const leftPercent = (x / viewport.width) * 100;
+                                const topPercent = ((viewport.height - y - textHeight) / viewport.height) * 100;
+                                const widthPercent = (textItem.width / viewport.width) * 100;
+                                const heightPercent = (textHeight / viewport.height) * 100;
+                                
+                                const isReplaced = textReplacements.get(currentPage)?.some(r => 
+                                  r.originalText === textItem.str && 
+                                  Math.abs(r.originalX - x) < 1
+                                );
+                                
+                                return (
+                                  <div
+                                    key={`${currentPage}-${index}`}
+                                    onClick={() => handleTextClick(currentPage, index, textItem)}
+                                    className={`absolute cursor-pointer transition-all ${
+                                      isReplaced 
+                                        ? 'bg-green-200/20 hover:bg-green-400/40' 
+                                        : 'hover:bg-blue-400/30'
+                                    }`}
+                                    style={{
+                                      left: `${leftPercent}%`,
+                                      top: `${topPercent}%`,
+                                      width: `${widthPercent}%`,
+                                      height: `${heightPercent}%`,
+                                    }}
+                                    title="Click to edit text"
+                                  />
+                                );
+                              })}
+                            </div>
+                          )}
                           
                           <canvas 
                             ref={el => el && canvasRefs.current.set(currentPage, el)} 
@@ -1933,7 +1945,8 @@ export function LightPaperPDFEditor({
                           )}
                         </div>
                       </div>
-                    )}
+                      );
+                    })()}
                   </Document>
                 </div>
               </div>
