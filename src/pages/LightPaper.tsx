@@ -100,6 +100,7 @@ export default function LightPaper() {
                 >
                   <Presentation className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
+                {/* PDF Editor temporarily hidden
                 <Button 
                   variant={activeTab === "pdf-editor" ? "secondary" : "ghost"} 
                   size="sm" 
@@ -109,6 +110,7 @@ export default function LightPaper() {
                 >
                   <FileSignature className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
+                */}
               </div>
             </div>
           </div>
@@ -150,13 +152,15 @@ export default function LightPaper() {
             )}
           </TabsContent>
 
-          <TabsContent value="pdf-editor" className="flex-1 mt-0 overflow-hidden">{/* Changed to overflow-hidden to prevent breaking out */}
+          {/* PDF Editor temporarily hidden
+          <TabsContent value="pdf-editor" className="flex-1 mt-0 overflow-hidden">
             {isTabLoading && activeTab === "pdf-editor" ? (
               <PDFLoadingSkeleton />
             ) : (
               <LightPaperPDFEditor selectedProject={selectedProject} />
             )}
           </TabsContent>
+          */}
         </Tabs>
       </div>
 
