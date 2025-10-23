@@ -12,7 +12,7 @@ import DocumentAnalyzer from "./DocumentAnalyzer";
 import { LightPaperDocument } from "./lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "./lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "./lightpaper/LightPaperPresentation";
-import { LightPaperPDFEditor } from "./lightpaper/LightPaperPDFEditor";
+
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CRMBoard from "./CRMBoard";
 import { 
@@ -23,8 +23,7 @@ import {
   Workflow,
   Sparkles,
   Table,
-  Presentation,
-  FileSignature
+  Presentation
 } from "lucide-react";
 
 export default function AIFeaturesHub() {
@@ -96,7 +95,7 @@ export default function AIFeaturesHub() {
                 LightPaper Professional Workspace
               </CardTitle>
               <CardDescription>
-                Enterprise-grade document creation, spreadsheet management, presentations, and digital signatures
+                Enterprise-grade document creation, spreadsheet management, and presentations
               </CardDescription>
             </div>
             <div className="flex border rounded-lg p-1 bg-muted/30">
@@ -127,15 +126,6 @@ export default function AIFeaturesHub() {
               >
                 <Presentation className="h-4 w-4" />
               </Button>
-              <Button 
-                variant={lightPaperTab === "pdf-editor" ? "secondary" : "ghost"} 
-                size="sm" 
-                className="h-8 w-8 p-0"
-                onClick={() => setLightPaperTab("pdf-editor")}
-                title="PDF Editor & Sign"
-              >
-                <FileSignature className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </CardHeader>
@@ -151,10 +141,6 @@ export default function AIFeaturesHub() {
 
             <TabsContent value="presentation" className="mt-0">
               <LightPaperPresentation />
-            </TabsContent>
-
-            <TabsContent value="pdf-editor" className="mt-0">
-              <LightPaperPDFEditor />
             </TabsContent>
           </Tabs>
         </CardContent>
