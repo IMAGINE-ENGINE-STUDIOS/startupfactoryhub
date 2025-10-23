@@ -1957,20 +1957,56 @@ export function LightPaperPDFEditor({
             )}
           </Card>
 
-          {/* Activity Panel - Collapsible Sidebar */}
-          {sharedDocumentId && (
-            <div className="w-80 flex-shrink-0">
-              <PDFActivityPanel documentId={sharedDocumentId} />
-            </div>
-          )}
+          {/* Right Side Panel - Actions */}
+          <div className="w-64 flex-shrink-0 flex flex-col gap-4">
+            {/* Quick Actions */}
+            <Card className="p-4">
+              <h3 className="font-medium mb-3">Quick Actions</h3>
+              <div className="flex flex-col gap-2">
+                <Button
+                  onClick={() => setShowSignaturePanel(true)}
+                  variant="outline"
+                  className="w-full justify-start"
+                >
+                  <Pen className="h-4 w-4 mr-2" />
+                  Add Signature
+                </Button>
+                <Button
+                  onClick={handleSaveToAccount}
+                  variant="outline"
+                  className="w-full justify-start"
+                >
+                  <Save className="h-4 w-4 mr-2" />
+                  Save
+                </Button>
+                <Button
+                  onClick={handleExport}
+                  variant="outline"
+                  className="w-full justify-start"
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export
+                </Button>
+                <Button
+                  onClick={() => setShowShareDialog(true)}
+                  variant="outline"
+                  className="w-full justify-start"
+                >
+                  <Share2 className="h-4 w-4 mr-2" />
+                  Share
+                </Button>
+              </div>
+            </Card>
+
+            {/* Activity Panel */}
+            {sharedDocumentId && (
+              <div className="flex-1 overflow-hidden">
+                <PDFActivityPanel documentId={sharedDocumentId} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
-
-      <FloatingActionMenu 
-        onSave={handleSaveToAccount} 
-        onPrint={handleExport}
-        onSignature={() => setShowSignaturePanel(true)}
-      />
 
       {/* Signature Panel */}
       <Sheet open={showSignaturePanel} onOpenChange={setShowSignaturePanel}>
