@@ -1,19 +1,19 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, FileSignature, Command } from "lucide-react";
+import { FileText, Table, Presentation, Command } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FolderOpen } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
-import { LightPaperPDFEditor } from "@/components/lightpaper/LightPaperPDFEditor";
+
 import AIAssistant from "@/components/AIAssistant";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
 import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
 import { QuickNavigation } from "@/components/lightpaper/QuickNavigation";
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
-import { DocumentLoadingSkeleton, SpreadsheetLoadingSkeleton, PresentationLoadingSkeleton, PDFLoadingSkeleton } from "@/components/lightpaper/LoadingSkeleton";
+import { DocumentLoadingSkeleton, SpreadsheetLoadingSkeleton, PresentationLoadingSkeleton } from "@/components/lightpaper/LoadingSkeleton";
 
 export default function LightPaper() {
   const [activeTab, setActiveTab] = useState("document");
@@ -100,17 +100,6 @@ export default function LightPaper() {
                 >
                   <Presentation className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
-                {/* PDF Editor temporarily hidden
-                <Button 
-                  variant={activeTab === "pdf-editor" ? "secondary" : "ghost"} 
-                  size="sm" 
-                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
-                  onClick={() => setActiveTab("pdf-editor")}
-                  title="PDF Editor & Sign"
-                >
-                  <FileSignature className="h-3 w-3 sm:h-4 sm:w-4" />
-                </Button>
-                */}
               </div>
             </div>
           </div>
@@ -151,16 +140,6 @@ export default function LightPaper() {
               <LightPaperPresentation />
             )}
           </TabsContent>
-
-          {/* PDF Editor temporarily hidden
-          <TabsContent value="pdf-editor" className="flex-1 mt-0 overflow-hidden">
-            {isTabLoading && activeTab === "pdf-editor" ? (
-              <PDFLoadingSkeleton />
-            ) : (
-              <LightPaperPDFEditor selectedProject={selectedProject} />
-            )}
-          </TabsContent>
-          */}
         </Tabs>
       </div>
 
@@ -168,42 +147,11 @@ export default function LightPaper() {
       <ScientificCalculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} />
 
       <MyFilesDrawer isOpen={showFiles} onClose={() => setShowFiles(false)} onOpenProject={project => {
+      if (project.project_type === 'pdf') return; // Skip PDF projects
       setSelectedProject(project);
       setActiveTab(project.project_type);
     }} onShareProject={async (project) => {
-      setSelectedProject(project);
-      
-      // For PDF projects, create shareable link
-      if (project.project_type === 'pdf' && project.content) {
-        try {
-          const content = project.content as any;
-          if (content.pdfUrl) {
-            // Generate shareable link
-            const { supabase } = await import("@/integrations/supabase/client");
-            const { data } = await supabase.storage
-              .from('feed-media')
-              .download(content.pdfUrl);
-            
-            if (data) {
-              const file = new File([data], project.title, { type: 'application/pdf' });
-              const { useSharedPDF } = await import("@/hooks/useSharedPDF");
-              const hook = useSharedPDF();
-              const result = await hook.createSharedDocument(project.id, project.title, file, 'sign');
-              
-              if (result) {
-                setShareData({
-                  shareUrl: result.shareUrl,
-                  shareToken: result.shareToken,
-                  documentTitle: project.title,
-                });
-                setShowShareDialog(true);
-              }
-            }
-          }
-        } catch (error) {
-          console.error('Error creating shareable link:', error);
-        }
-      }
+      // PDF sharing functionality removed
     }} />
 
       <ShareDialog 
