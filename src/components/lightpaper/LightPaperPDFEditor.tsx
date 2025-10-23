@@ -1761,26 +1761,17 @@ export function LightPaperPDFEditor({
           className="hidden"
         />
 
-        <div className="flex-1 flex gap-2 sm:gap-4 overflow-hidden min-h-0">
-          <Card className="flex-1 overflow-hidden p-0 relative flex flex-col">
+        <div className="flex-1 overflow-hidden">
+          <Card className="h-full overflow-hidden p-0 flex flex-col">
             {pdfFile ? (
-              <div className="pdf-viewer-container w-full h-full flex flex-col">
+              <div className="h-full flex flex-col">
                 <style>{`
-                  .pdf-viewer-container {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    flex-direction: column;
-                    overflow: hidden;
-                  }
                   .react-pdf__Page {
                     max-width: 100% !important;
-                    max-height: 100% !important;
                     height: auto !important;
                   }
                   .react-pdf__Page__canvas {
                     max-width: 100% !important;
-                    max-height: 100% !important;
                     height: auto !important;
                     display: block;
                     margin: 0 auto;
@@ -1790,28 +1781,18 @@ export function LightPaperPDFEditor({
                   }
                   .react-pdf__Document {
                     width: 100%;
-                    height: 100%;
                     display: flex;
-                    align-items: center;
+                    align-items: flex-start;
                     justify-content: center;
                   }
                 `}</style>
-                {isLoading && (
-                  <div className="flex items-center justify-center p-8">
-                    <div className="text-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
-                      <p className="text-sm text-muted-foreground">Loading PDF...</p>
-                    </div>
-                  </div>
-                )}
-                
                 {/* Page Navigation Controls */}
-                <div className="flex items-center justify-center gap-2 py-3 border-b bg-card flex-shrink-0">
+                <div className="flex items-center justify-center gap-2 py-2 border-b bg-card flex-shrink-0">
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1}
+                    disabled={currentPage === 1 || isLoading}
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
@@ -1826,40 +1807,50 @@ export function LightPaperPDFEditor({
                           setCurrentPage(page);
                         }
                       }}
-                      className="w-16 text-center h-8"
+                      className="w-14 text-center h-8 text-sm"
                       min={1}
                       max={numPages}
+                      disabled={isLoading}
                     />
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">of {numPages}</span>
+                    <span className="text-xs text-muted-foreground">/ {numPages}</span>
                   </div>
                   
                   <Button 
                     variant="outline" 
                     size="sm"
                     onClick={() => setCurrentPage(prev => Math.min(numPages, prev + 1))}
-                    disabled={currentPage === numPages}
+                    disabled={currentPage === numPages || isLoading}
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                 </div>
 
                 {/* PDF Document - Single Page */}
-                <div ref={containerRef} className="flex-1 overflow-hidden flex items-center justify-center bg-muted/20 p-4">
+                <div ref={containerRef} className="flex-1 overflow-auto bg-muted/10 p-2">
+                  {isLoading && (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                        <p className="text-sm text-muted-foreground">Loading PDF...</p>
+                      </div>
+                    </div>
+                  )}
+                  
                   <Document 
                     file={pdfFile} 
                     onLoadSuccess={onDocumentLoadSuccess} 
                     onLoadError={onDocumentLoadError} 
-                    loading={null}
+                    loading=""
                   >
-                    {currentPage && (
+                    {currentPage && !isLoading && (
                       <div 
                         key={currentPage} 
-                        className="relative shadow-lg"
+                        className="relative mx-auto shadow-lg bg-white w-fit"
                       >
-                        <div ref={el => el && pageRefs.current.set(currentPage, el)} className="relative bg-white">
+                        <div ref={el => el && pageRefs.current.set(currentPage, el)} className="relative">
                           <Page 
                             pageNumber={currentPage} 
-                            width={Math.min(containerWidth - 32, 850)} 
+                            width={Math.min(containerWidth - 16, 800)} 
                             onLoadSuccess={(page) => {
                               setPageWidth(page.width);
                               setupCanvas(currentPage);
@@ -1956,57 +1947,14 @@ export function LightPaperPDFEditor({
               </div>
             )}
           </Card>
-
-          {/* Right Side Panel - Actions */}
-          <div className="w-64 flex-shrink-0 flex flex-col gap-4">
-            {/* Quick Actions */}
-            <Card className="p-4">
-              <h3 className="font-medium mb-3">Quick Actions</h3>
-              <div className="flex flex-col gap-2">
-                <Button
-                  onClick={() => setShowSignaturePanel(true)}
-                  variant="outline"
-                  className="w-full justify-start"
-                >
-                  <Pen className="h-4 w-4 mr-2" />
-                  Add Signature
-                </Button>
-                <Button
-                  onClick={handleSaveToAccount}
-                  variant="outline"
-                  className="w-full justify-start"
-                >
-                  <Save className="h-4 w-4 mr-2" />
-                  Save
-                </Button>
-                <Button
-                  onClick={handleExport}
-                  variant="outline"
-                  className="w-full justify-start"
-                >
-                  <Download className="h-4 w-4 mr-2" />
-                  Export
-                </Button>
-                <Button
-                  onClick={() => setShowShareDialog(true)}
-                  variant="outline"
-                  className="w-full justify-start"
-                >
-                  <Share2 className="h-4 w-4 mr-2" />
-                  Share
-                </Button>
-              </div>
-            </Card>
-
-            {/* Activity Panel */}
-            {sharedDocumentId && (
-              <div className="flex-1 overflow-hidden">
-                <PDFActivityPanel documentId={sharedDocumentId} />
-              </div>
-            )}
-          </div>
         </div>
       </div>
+
+      <FloatingActionMenu 
+        onSave={handleSaveToAccount} 
+        onPrint={handleExport}
+        onSignature={() => setShowSignaturePanel(true)}
+      />
 
       {/* Signature Panel */}
       <Sheet open={showSignaturePanel} onOpenChange={setShowSignaturePanel}>
