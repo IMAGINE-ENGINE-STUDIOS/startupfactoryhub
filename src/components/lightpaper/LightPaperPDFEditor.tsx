@@ -209,7 +209,7 @@ export function LightPaperPDFEditor({
   useEffect(() => {
     const updateWidth = () => {
       if (containerRef.current) {
-        setContainerWidth(containerRef.current.clientWidth - 40); // padding
+        setContainerWidth(containerRef.current.clientWidth - 8); // minimal padding
       }
     };
     
@@ -1762,22 +1762,24 @@ export function LightPaperPDFEditor({
         />
 
         <div className="flex-1 flex gap-2 sm:gap-4 overflow-hidden min-h-0">
-          <Card className="flex-1 overflow-y-auto p-2 sm:p-4 relative">
+          <Card className="flex-1 overflow-y-auto p-1 sm:p-2 relative">
             {pdfFile ? (
-              <div className="pdf-viewer-container p-2 sm:p-4 w-full">{/* Added w-full for proper width constraint */}
+              <div className="pdf-viewer-container w-full">{/* Full width container */}
                 <style>{`
                   .pdf-viewer-container {
-                    max-width: 100%;
+                    width: 100%;
                     overflow-x: hidden;
                     display: flex;
                     justify-content: center;
                   }
                   .react-pdf__Page {
+                    width: 100% !important;
                     max-width: 100% !important;
                     height: auto !important;
                     margin-bottom: 0 !important;
                   }
                   .react-pdf__Page__canvas {
+                    width: 100% !important;
                     max-width: 100% !important;
                     height: auto !important;
                     display: block;
@@ -1785,7 +1787,7 @@ export function LightPaperPDFEditor({
                   .react-pdf__Document {
                     display: flex;
                     flex-direction: column;
-                    align-items: center;
+                    align-items: stretch;
                     width: 100%;
                   }
                 `}</style>
