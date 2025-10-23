@@ -1762,30 +1762,38 @@ export function LightPaperPDFEditor({
         />
 
         <div className="flex-1 flex gap-2 sm:gap-4 overflow-hidden min-h-0">
-          <Card className="flex-1 overflow-y-auto p-1 sm:p-2 relative">
+          <Card className="flex-1 overflow-hidden p-0 relative flex flex-col">
             {pdfFile ? (
-              <div className="pdf-viewer-container w-full h-full flex flex-col">{/* Full width container */}
+              <div className="pdf-viewer-container w-full h-full flex flex-col">
                 <style>{`
                   .pdf-viewer-container {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     flex-direction: column;
+                    overflow: hidden;
                   }
                   .react-pdf__Page {
                     max-width: 100% !important;
+                    max-height: 100% !important;
                     height: auto !important;
                   }
                   .react-pdf__Page__canvas {
                     max-width: 100% !important;
+                    max-height: 100% !important;
                     height: auto !important;
                     display: block;
+                    margin: 0 auto;
                   }
                   .react-pdf__Page__textContent {
-                    max-width: 100% !important;
+                    display: none !important;
                   }
                   .react-pdf__Document {
                     width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                   }
                 `}</style>
                 {isLoading && (
@@ -1796,69 +1804,69 @@ export function LightPaperPDFEditor({
                     </div>
                   </div>
                 )}
-                <div ref={containerRef} className="w-full h-full flex flex-col">
-                  {/* Page Navigation Controls */}
-                  <div className="flex items-center justify-center gap-2 py-3 border-b bg-card">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                      disabled={currentPage === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </Button>
-                    
-                    <div className="flex items-center gap-2">
-                      <Input
-                        type="number"
-                        value={currentPage}
-                        onChange={(e) => {
-                          const page = parseInt(e.target.value);
-                          if (page >= 1 && page <= numPages) {
-                            setCurrentPage(page);
-                          }
-                        }}
-                        className="w-16 text-center h-8"
-                        min={1}
-                        max={numPages}
-                      />
-                      <span className="text-sm text-muted-foreground whitespace-nowrap">of {numPages}</span>
-                    </div>
-                    
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => setCurrentPage(prev => Math.min(numPages, prev + 1))}
-                      disabled={currentPage === numPages}
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
+                
+                {/* Page Navigation Controls */}
+                <div className="flex items-center justify-center gap-2 py-3 border-b bg-card flex-shrink-0">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  
+                  <div className="flex items-center gap-2">
+                    <Input
+                      type="number"
+                      value={currentPage}
+                      onChange={(e) => {
+                        const page = parseInt(e.target.value);
+                        if (page >= 1 && page <= numPages) {
+                          setCurrentPage(page);
+                        }
+                      }}
+                      className="w-16 text-center h-8"
+                      min={1}
+                      max={numPages}
+                    />
+                    <span className="text-sm text-muted-foreground whitespace-nowrap">of {numPages}</span>
                   </div>
+                  
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(numPages, prev + 1))}
+                    disabled={currentPage === numPages}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
 
-                  {/* PDF Document - Single Page */}
-                  <div className="flex-1 overflow-y-auto flex items-start justify-center p-4">
-                    <Document 
-                      file={pdfFile} 
-                      onLoadSuccess={onDocumentLoadSuccess} 
-                      onLoadError={onDocumentLoadError} 
-                      loading={null}
-                    >
-                      {currentPage && (
-                        <div 
-                          key={currentPage} 
-                          className="relative w-full max-w-full"
-                        >
-                          <div ref={el => el && pageRefs.current.set(currentPage, el)} className="relative">
-                            <Page 
-                              pageNumber={currentPage} 
-                              width={containerWidth * zoom} 
-                              onLoadSuccess={(page) => {
-                                setPageWidth(page.width);
-                                setupCanvas(currentPage);
-                              }}
-                              renderTextLayer={true} 
-                              renderAnnotationLayer={false}
-                            />
+                {/* PDF Document - Single Page */}
+                <div ref={containerRef} className="flex-1 overflow-hidden flex items-center justify-center bg-muted/20 p-4">
+                  <Document 
+                    file={pdfFile} 
+                    onLoadSuccess={onDocumentLoadSuccess} 
+                    onLoadError={onDocumentLoadError} 
+                    loading={null}
+                  >
+                    {currentPage && (
+                      <div 
+                        key={currentPage} 
+                        className="relative shadow-lg"
+                      >
+                        <div ref={el => el && pageRefs.current.set(currentPage, el)} className="relative bg-white">
+                          <Page 
+                            pageNumber={currentPage} 
+                            width={Math.min(containerWidth - 32, 850)} 
+                            onLoadSuccess={(page) => {
+                              setPageWidth(page.width);
+                              setupCanvas(currentPage);
+                            }}
+                            renderTextLayer={false} 
+                            renderAnnotationLayer={false}
+                          />
                            
                           {/* Clickable text overlay layer */}
                           <div 
@@ -1934,11 +1942,10 @@ export function LightPaperPDFEditor({
                           )}
                         </div>
                       </div>
-                      )}
-                    </Document>
-                  </div>
+                    )}
+                  </Document>
                 </div>
-            </div>
+              </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center p-8">
                 <FileText className="h-20 w-20 text-muted-foreground mb-4" />
