@@ -1425,7 +1425,7 @@ export function LightPaperPDFEditor({
     }
   };
   return (
-    <div className="flex flex-col gap-2 sm:gap-4 h-full relative">{/* Removed fixed height calc */}
+    <div className="flex flex-col gap-2 sm:gap-4 h-[calc(100vh-8rem)] relative">
       {/* Main PDF Viewer */}
       <div className="flex flex-col gap-2 sm:gap-4 flex-1">
         <div className="hidden md:block">
