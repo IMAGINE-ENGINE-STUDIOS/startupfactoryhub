@@ -1799,108 +1799,149 @@ export function LightPaperPDFEditor({
                     </div>
                   </div>
                 )}
-                <div ref={containerRef} className="w-full">
-                  <Document 
-                    file={pdfFile} 
-                    onLoadSuccess={onDocumentLoadSuccess} 
-                    onLoadError={onDocumentLoadError} 
-                    loading={null}
-                  >
-                    {Array.from({ length: numPages }, (_, i) => i + 1).map((pageNum) => (
-                      <div 
-                        key={pageNum} 
-                        className="relative border-b border-border last:border-b-0"
-                        style={{ maxWidth: '100%' }}
-                      >
-                        <div ref={el => el && pageRefs.current.set(pageNum, el)} className="relative">
-                          <Page 
-                            pageNumber={pageNum} 
-                            width={Math.min(pageWidth * zoom, containerWidth)} 
-                            onLoadSuccess={(page) => {
-                              setPageWidth(page.width);
-                              setupCanvas(pageNum);
-                            }}
-                            renderTextLayer={true} 
-                            renderAnnotationLayer={false}
-                          />
-                         
-                        {/* Clickable text overlay layer */}
-                        <div 
-                          ref={el => el && textLayerRefs.current.set(pageNum, el)}
-                          className="absolute top-0 left-0 w-full h-full"
-                          style={{ zIndex: 3 }}
-                        >
-                          {pdfTextItems.get(pageNum)?.map((textItem, index) => {
-                            const viewport = pageViewports.get(pageNum);
-                            if (!viewport) return null;
-                            
-                            const x = textItem.transform[4];
-                            const y = textItem.transform[5];
-                            const textHeight = textItem.height || Math.abs(textItem.transform[3]);
-                            
-                            // Convert to percentage-based positioning
-                            const leftPercent = (x / viewport.width) * 100;
-                            const topPercent = ((viewport.height - y - textHeight) / viewport.height) * 100;
-                            const widthPercent = (textItem.width / viewport.width) * 100;
-                            const heightPercent = (textHeight / viewport.height) * 100;
-                            
-                            const isReplaced = textReplacements.get(pageNum)?.some(r => 
-                              r.originalText === textItem.str && 
-                              Math.abs(r.originalX - x) < 1
-                            );
-                            
-                            return (
-                              <div
-                                key={`${pageNum}-${index}`}
-                                onClick={() => handleTextClick(pageNum, index, textItem)}
-                                className={`absolute cursor-pointer transition-all ${
-                                  isReplaced 
-                                    ? 'bg-green-200/20 hover:bg-green-400/40' 
-                                    : 'hover:bg-blue-400/30'
-                                }`}
-                                style={{
-                                  left: `${leftPercent}%`,
-                                  top: `${topPercent}%`,
-                                  width: `${widthPercent}%`,
-                                  height: `${heightPercent}%`,
-                                }}
-                                title="Click to edit text"
-                              />
-                            );
-                          })}
-                        </div>
-                        
-                        <canvas 
-                          ref={el => el && canvasRefs.current.set(pageNum, el)} 
-                          className="absolute top-0 left-0" 
-                          style={{
-                            width: "100%",
-                            height: "100%",
-                            zIndex: 2,
-                            pointerEvents: tool === "select" || draggingSignature ? "auto" : "none",
-                          }} 
-                        />
-                        
-                        {/* Signature preview while dragging */}
-                        {draggingSignature && pageNum === currentPage && signaturePosition && (
-                          <img 
-                            src={draggingSignature.preview}
-                            alt="Signature preview"
-                            className="absolute pointer-events-none"
-                            style={{
-                              left: signaturePosition.x - 100,
-                              top: signaturePosition.y - 50,
-                              width: 200,
-                              zIndex: 10,
-                              opacity: 0.7,
-                            }}
-                          />
-                        )}
-                      </div>
+                <div ref={containerRef} className="w-full h-full flex flex-col">
+                  {/* Page Navigation Controls */}
+                  <div className="flex items-center justify-center gap-2 py-3 border-b bg-card">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                    
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="number"
+                        value={currentPage}
+                        onChange={(e) => {
+                          const page = parseInt(e.target.value);
+                          if (page >= 1 && page <= numPages) {
+                            setCurrentPage(page);
+                          }
+                        }}
+                        className="w-16 text-center h-8"
+                        min={1}
+                        max={numPages}
+                      />
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">of {numPages}</span>
                     </div>
-                  ))}
-                </Document>
-              </div>
+                    
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(numPages, prev + 1))}
+                      disabled={currentPage === numPages}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* PDF Document - Single Page */}
+                  <div className="flex-1 overflow-y-auto">
+                    <Document 
+                      file={pdfFile} 
+                      onLoadSuccess={onDocumentLoadSuccess} 
+                      onLoadError={onDocumentLoadError} 
+                      loading={null}
+                    >
+                      {currentPage && (
+                        <div 
+                          key={currentPage} 
+                          className="relative"
+                          style={{ maxWidth: '100%' }}
+                        >
+                          <div ref={el => el && pageRefs.current.set(currentPage, el)} className="relative">
+                            <Page 
+                              pageNumber={currentPage} 
+                              width={Math.min(pageWidth * zoom, containerWidth)} 
+                              onLoadSuccess={(page) => {
+                                setPageWidth(page.width);
+                                setupCanvas(currentPage);
+                              }}
+                              renderTextLayer={true} 
+                              renderAnnotationLayer={false}
+                            />
+                           
+                          {/* Clickable text overlay layer */}
+                          <div 
+                            ref={el => el && textLayerRefs.current.set(currentPage, el)}
+                            className="absolute top-0 left-0 w-full h-full"
+                            style={{ zIndex: 3 }}
+                          >
+                            {pdfTextItems.get(currentPage)?.map((textItem, index) => {
+                              const viewport = pageViewports.get(currentPage);
+                              if (!viewport) return null;
+                              
+                              const x = textItem.transform[4];
+                              const y = textItem.transform[5];
+                              const textHeight = textItem.height || Math.abs(textItem.transform[3]);
+                              
+                              // Convert to percentage-based positioning
+                              const leftPercent = (x / viewport.width) * 100;
+                              const topPercent = ((viewport.height - y - textHeight) / viewport.height) * 100;
+                              const widthPercent = (textItem.width / viewport.width) * 100;
+                              const heightPercent = (textHeight / viewport.height) * 100;
+                              
+                              const isReplaced = textReplacements.get(currentPage)?.some(r => 
+                                r.originalText === textItem.str && 
+                                Math.abs(r.originalX - x) < 1
+                              );
+                              
+                              return (
+                                <div
+                                  key={`${currentPage}-${index}`}
+                                  onClick={() => handleTextClick(currentPage, index, textItem)}
+                                  className={`absolute cursor-pointer transition-all ${
+                                    isReplaced 
+                                      ? 'bg-green-200/20 hover:bg-green-400/40' 
+                                      : 'hover:bg-blue-400/30'
+                                  }`}
+                                  style={{
+                                    left: `${leftPercent}%`,
+                                    top: `${topPercent}%`,
+                                    width: `${widthPercent}%`,
+                                    height: `${heightPercent}%`,
+                                  }}
+                                  title="Click to edit text"
+                                />
+                              );
+                            })}
+                          </div>
+                          
+                          <canvas 
+                            ref={el => el && canvasRefs.current.set(currentPage, el)} 
+                            className="absolute top-0 left-0" 
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              zIndex: 2,
+                              pointerEvents: tool === "select" || draggingSignature ? "auto" : "none",
+                            }} 
+                          />
+                          
+                          {/* Signature preview while dragging */}
+                          {draggingSignature && signaturePosition && (
+                            <img 
+                              src={draggingSignature.preview}
+                              alt="Signature preview"
+                              className="absolute pointer-events-none"
+                              style={{
+                                left: signaturePosition.x - 100,
+                                top: signaturePosition.y - 50,
+                                width: 200,
+                                zIndex: 10,
+                                opacity: 0.7,
+                              }}
+                            />
+                          )}
+                        </div>
+                      </div>
+                      )}
+                    </Document>
+                  </div>
+                </div>
             </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center p-8">
