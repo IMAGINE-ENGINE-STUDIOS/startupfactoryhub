@@ -151,9 +151,11 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const isWithin15Min = eventDate.getTime() - now.getTime() < 15 * 60 * 1000 && eventDate.getTime() > now.getTime();
   const hasStarted = eventDate.getTime() <= now.getTime();
 
-  const handleJoinEvent = () => {
+  const handleJoinEvent = async () => {
     if (isOnlineEvent && event.location) {
       setShowVideo(true);
+      // Wait for dialog to mount before auto-joining
+      await new Promise(resolve => setTimeout(resolve, 300));
     }
   };
 
@@ -172,6 +174,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
             hostId={event.organizer_id}
             userName={userProfile?.full_name || 'User'}
             meetingTitle={event.title}
+            autoJoin={true}
             onLeave={() => {
               setShowVideo(false);
               onOpenChange(false);

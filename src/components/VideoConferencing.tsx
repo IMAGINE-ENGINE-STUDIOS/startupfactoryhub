@@ -27,9 +27,10 @@ interface VideoConferencingProps {
   userName?: string;
   meetingTitle?: string;
   onLeave?: () => void;
+  autoJoin?: boolean;
 }
 
-export default function VideoConferencing({ roomUrl, userId, hostId, userName, meetingTitle, onLeave }: VideoConferencingProps) {
+export default function VideoConferencing({ roomUrl, userId, hostId, userName, meetingTitle, onLeave, autoJoin }: VideoConferencingProps) {
   const [isCallActive, setIsCallActive] = useState(false);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [isMicOn, setIsMicOn] = useState(true);
@@ -48,6 +49,17 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
     };
   }, []);
 
+  // Auto-join when autoJoin prop is true and container is ready
+  useEffect(() => {
+    if (autoJoin && roomUrl && containerRef.current && !isCallActive && !isLoading) {
+      const timer = setTimeout(() => {
+        startCall();
+      }, 500); // Give time for container to be fully rendered
+      
+      return () => clearTimeout(timer);
+    }
+  }, [autoJoin, roomUrl, isCallActive, isLoading]);
+
   const startCall = async () => {
     if (!roomUrl) {
       toast({
@@ -62,6 +74,30 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
       toast({
         title: 'Error',
         description: 'Jitsi Meet is not loaded yet. Please try again.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Check if container is ready
+    if (!containerRef.current) {
+      toast({
+        title: 'Container not ready',
+        description: 'Video container is still loading. Please try again in a moment.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Give container time to render with dimensions
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Validate container has dimensions
+    const containerRect = containerRef.current.getBoundingClientRect();
+    if (containerRect.width === 0 || containerRect.height === 0) {
+      toast({
+        title: 'Container has no dimensions',
+        description: 'Please ensure the dialog is fully loaded before joining.',
         variant: 'destructive',
       });
       return;
@@ -91,7 +127,7 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
           startWithAudioMuted: false, // Everyone starts with audio on
           startWithVideoMuted: false, // Everyone starts with video on
           enableWelcomePage: false,
-          prejoinPageEnabled: true, // Allow users to test camera/mic before joining
+          prejoinPageEnabled: false, // Skip prejoin when auto-joining from dialog
           disableDeepLinking: true,
           subject: meetingTitle || 'Startup Factory Hub Meeting',
           defaultRemoteDisplayName: 'Participant',
@@ -113,6 +149,14 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
         },
       };
 
+      console.log('Initializing Jitsi with:', {
+        roomName,
+        domain,
+        isHost,
+        containerReady: !!containerRef.current,
+        containerDimensions: containerRef.current?.getBoundingClientRect(),
+      });
+
       const api = new window.JitsiMeetExternalAPI(domain, options);
       jitsiApiRef.current = api;
 
@@ -124,6 +168,15 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
           title: 'Joined meeting',
           description: 'You are now in the video call',
         });
+      });
+
+      // Sync camera/mic state with Jitsi
+      api.on('videoMuteStatusChanged', (data: any) => {
+        setIsCameraOn(!data.muted);
+      });
+
+      api.on('audioMuteStatusChanged', (data: any) => {
+        setIsMicOn(!data.muted);
       });
 
       api.on('participantJoined', () => {
@@ -148,11 +201,26 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
         onLeave?.();
       });
 
-    } catch (error) {
+      api.on('errorOccurred', (error: any) => {
+        console.error('Jitsi error occurred:', error);
+        toast({
+          title: 'Video call error',
+          description: error.message || 'An error occurred in the video call',
+          variant: 'destructive',
+        });
+      });
+
+    } catch (error: any) {
       console.error('Error starting Jitsi call:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        containerRef: containerRef.current,
+        roomUrl,
+      });
       toast({
         title: 'Failed to start call',
-        description: 'Could not connect to the video call',
+        description: error.message || 'Could not connect to the video call. Check console for details.',
         variant: 'destructive',
       });
       setIsLoading(false);
@@ -176,14 +244,14 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
   const toggleCamera = () => {
     if (jitsiApiRef.current) {
       jitsiApiRef.current.executeCommand('toggleVideo');
-      setIsCameraOn(!isCameraOn);
+      // Don't immediately update state - wait for Jitsi event
     }
   };
 
   const toggleMic = () => {
     if (jitsiApiRef.current) {
       jitsiApiRef.current.executeCommand('toggleAudio');
-      setIsMicOn(!isMicOn);
+      // Don't immediately update state - wait for Jitsi event
     }
   };
 
@@ -205,9 +273,10 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
         <div className="relative">
           <div 
             ref={containerRef}
-            className={`aspect-video bg-accent rounded-lg overflow-hidden ${
-              isCallActive ? 'block' : 'hidden'
+            className={`aspect-video bg-accent rounded-lg overflow-hidden transition-opacity ${
+              isCallActive ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'
             }`}
+            style={{ minHeight: isCallActive ? 'auto' : '0' }}
           />
           
           {/* Show overlay badges when call is active */}
