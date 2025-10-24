@@ -89,17 +89,17 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
       return;
     }
 
-    // Give container time to render with dimensions
-    await new Promise(resolve => setTimeout(resolve, 100));
 
     // Validate container has dimensions
     const containerRect = containerRef.current.getBoundingClientRect();
     if (containerRect.width === 0 || containerRect.height === 0) {
+      console.error('Container dimensions invalid:', containerRect);
       toast({
         title: 'Container has no dimensions',
-        description: 'Please ensure the dialog is fully loaded before joining.',
+        description: `Container size: ${containerRect.width}x${containerRect.height}. This shouldn't happen - please report this bug.`,
         variant: 'destructive',
       });
+      setIsLoading(false);
       return;
     }
 
@@ -273,10 +273,13 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
         <div className="relative">
           <div 
             ref={containerRef}
-            className={`aspect-video bg-accent rounded-lg overflow-hidden transition-opacity ${
-              isCallActive ? 'opacity-100' : 'opacity-0 h-0 overflow-hidden'
-            }`}
-            style={{ minHeight: isCallActive ? 'auto' : '0' }}
+            className="aspect-video bg-accent rounded-lg overflow-hidden"
+            style={{
+              opacity: isCallActive ? 1 : 0,
+              visibility: isCallActive ? 'visible' : 'hidden',
+              position: isCallActive ? 'relative' : 'absolute',
+              pointerEvents: isCallActive ? 'auto' : 'none'
+            }}
           />
           
           {/* Show overlay badges when call is active */}
