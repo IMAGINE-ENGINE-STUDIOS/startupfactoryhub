@@ -88,10 +88,10 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
           moderator: isHost, // Grant moderator role to host
         },
         configOverwrite: {
-          startWithAudioMuted: !isHost, // Only host starts unmuted
-          startWithVideoMuted: !isHost,
+          startWithAudioMuted: false, // Everyone starts with audio on
+          startWithVideoMuted: false, // Everyone starts with video on
           enableWelcomePage: false,
-          prejoinPageEnabled: false,
+          prejoinPageEnabled: true, // Allow users to test camera/mic before joining
           disableDeepLinking: true,
           subject: meetingTitle || 'Startup Factory Hub Meeting',
           defaultRemoteDisplayName: 'Participant',

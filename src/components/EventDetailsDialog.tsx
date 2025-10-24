@@ -313,7 +313,15 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
 
           {/* Online Event Join Button */}
           {isOnlineEvent && user && (userStatus === 'going' || isOrganizer) && (
-            <div className="pt-4 border-t">
+            <div className="pt-4 border-t space-y-4">
+              {isOrganizer && (
+                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 text-sm">
+                  <p className="font-semibold text-yellow-600 dark:text-yellow-400">Host Tip:</p>
+                  <p className="text-muted-foreground">
+                    Join first to automatically become the meeting moderator. The first person to join gets moderator privileges.
+                  </p>
+                </div>
+              )}
               <Button
                 onClick={handleJoinEvent}
                 disabled={!isWithin15Min && !hasStarted && !isOrganizer}
