@@ -58,22 +58,6 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
       return;
     }
 
-    // Wait for container to be ready with retry mechanism
-    if (!containerRef.current) {
-      setIsLoading(true);
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      if (!containerRef.current) {
-        toast({
-          title: 'Error',
-          description: 'Video container not ready. Please try again.',
-          variant: 'destructive',
-        });
-        setIsLoading(false);
-        return;
-      }
-    }
-
     if (!window.JitsiMeetExternalAPI) {
       toast({
         title: 'Error',
@@ -203,16 +187,31 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
     }
   };
 
-  if (isCallActive) {
+  if (!roomUrl) {
     return (
       <Card className="p-6">
-        <div className="space-y-4">
-          <div className="relative">
-            <div 
-              ref={containerRef}
-              className="aspect-video bg-accent rounded-lg overflow-hidden"
-            />
-            
+        <div className="text-center text-muted-foreground">
+          <Video className="h-12 w-12 mx-auto mb-2 opacity-50" />
+          <p>No active meeting</p>
+        </div>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="p-6">
+      <div className="space-y-4">
+        {/* Always render container, toggle visibility */}
+        <div className="relative">
+          <div 
+            ref={containerRef}
+            className={`aspect-video bg-accent rounded-lg overflow-hidden ${
+              isCallActive ? 'block' : 'hidden'
+            }`}
+          />
+          
+          {/* Show overlay badges when call is active */}
+          {isCallActive && (
             <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
               <Badge className="bg-background/80 backdrop-blur">
                 <Users className="h-3 w-3 mr-1" />
@@ -224,8 +223,41 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
                 </Badge>
               )}
             </div>
-          </div>
+          )}
+        </div>
 
+        {/* Show join button when not active */}
+        {!isCallActive && (
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Video className="h-5 w-5" />
+              <h3 className="font-semibold">Video Conferencing</h3>
+            </div>
+            <Button 
+              className="w-full" 
+              onClick={startCall}
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Connecting...
+                </>
+              ) : (
+                <>
+                  <Video className="h-4 w-4 mr-2" />
+                  Join Video Call
+                </>
+              )}
+            </Button>
+            <p className="text-xs text-muted-foreground text-center">
+              Ready to join when you are
+            </p>
+          </div>
+        )}
+
+        {/* Show controls when call is active */}
+        {isCallActive && (
           <div className="flex items-center justify-center gap-4">
             <Button
               variant={isCameraOn ? 'default' : 'destructive'}
@@ -254,51 +286,7 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
               <Phone className="h-5 w-5" />
             </Button>
           </div>
-        </div>
-      </Card>
-    );
-  }
-
-  if (!roomUrl) {
-    return (
-      <Card className="p-6">
-        <div className="text-center text-muted-foreground">
-          <Video className="h-12 w-12 mx-auto mb-2 opacity-50" />
-          <p>No active meeting</p>
-        </div>
-      </Card>
-    );
-  }
-
-  return (
-    <Card className="p-6 space-y-4">
-      <div className="flex items-center gap-2">
-        <Video className="h-5 w-5" />
-        <h3 className="font-semibold">Video Conferencing</h3>
-      </div>
-
-      <div className="space-y-4">
-        <Button 
-          className="w-full" 
-          onClick={startCall}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <>
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-              Connecting...
-            </>
-          ) : (
-            <>
-              <Video className="h-4 w-4 mr-2" />
-              Join Video Call
-            </>
-          )}
-        </Button>
-        
-        <p className="text-xs text-muted-foreground text-center">
-          Ready to join when you are
-        </p>
+        )}
       </div>
     </Card>
   );
