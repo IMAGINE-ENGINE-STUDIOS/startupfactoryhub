@@ -201,7 +201,19 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
       if (error) throw error;
       
       setSession(data);
-      setPdfFile(data.current_version_url || data.pdf_url);
+      
+      // Generate fresh signed URL for the PDF (24 hours expiry)
+      const pdfPath = (data.current_version_url || data.pdf_url).split('/pdf-documents/')[1];
+      if (pdfPath) {
+        const { data: signedData, error: signedError } = await supabase.storage
+          .from('pdf-documents')
+          .createSignedUrl(pdfPath, 86400); // 24 hours
+        
+        if (signedError) throw signedError;
+        setPdfFile(signedData.signedUrl);
+      } else {
+        setPdfFile(data.current_version_url || data.pdf_url);
+      }
     } catch (error) {
       console.error('Error loading session:', error);
       toast({
@@ -229,16 +241,20 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
+      // Create signed URL (24 hours expiry)
+      const { data: signedData, error: signedError } = await supabase.storage
         .from('pdf-documents')
-        .getPublicUrl(fileName);
+        .createSignedUrl(fileName, 86400); // 24 hours
+
+      if (signedError) throw signedError;
+      const signedUrl = signedData.signedUrl;
 
       // Create session
       const { data: sessionData, error: sessionError } = await supabase
         .from('pdf_editing_sessions')
         .insert({
           user_id: user.id,
-          pdf_url: publicUrl,
+          pdf_url: fileName, // Store path, not URL
           title: file.name,
         })
         .select()
@@ -247,8 +263,8 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
       if (sessionError) throw sessionError;
 
       setSession(sessionData);
-      setPdfFile(publicUrl);
-      setPdfFileForShare(publicUrl); // Store for sharing
+      setPdfFile(signedUrl);
+      setPdfFileForShare(signedUrl); // Store signed URL for sharing
       
       // Initialize operation queue with auto-save
       operationQueueRef.current = new OperationQueue(async (operations) => {
@@ -444,8 +460,8 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
 
       if (response.error) throw response.error;
 
-      // Reload the PDF with new version
-      setPdfFile(response.data.pdfUrl);
+      // Reload the PDF with signed URL from response
+      setPdfFile(response.data.signedUrl);
       setSaveStatus('saved');
       setTimeout(() => setSaveStatus('saved'), 2000);
       

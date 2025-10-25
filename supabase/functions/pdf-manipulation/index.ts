@@ -37,9 +37,23 @@ serve(async (req) => {
 
     console.log(`Processing ${operations.length} operations for session ${sessionId}`);
 
-    // Download the PDF
-    const pdfResponse = await fetch(pdfUrl);
-    const pdfBytes = await pdfResponse.arrayBuffer();
+    // Handle both URL and path formats
+    let pdfBytes: ArrayBuffer;
+    if (pdfUrl.startsWith('http')) {
+      // Legacy: Direct URL
+      const pdfResponse = await fetch(pdfUrl);
+      pdfBytes = await pdfResponse.arrayBuffer();
+    } else {
+      // New: Storage path - create signed URL and download
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from('pdf-documents')
+        .createSignedUrl(pdfUrl, 3600); // 1 hour temp access
+      
+      if (signedError) throw signedError;
+      
+      const pdfResponse = await fetch(signedData.signedUrl);
+      pdfBytes = await pdfResponse.arrayBuffer();
+    }
     
     // Load PDF with pdf-lib
     const pdfDoc = await PDFDocument.load(pdfBytes);
@@ -178,15 +192,22 @@ serve(async (req) => {
       throw uploadError;
     }
 
-    // Get public URL
-    const { data: { publicUrl } } = supabase.storage
+    // Create signed URL (7 days expiry for edited PDFs)
+    const { data: signedData, error: signedError } = await supabase.storage
       .from('pdf-documents')
-      .getPublicUrl(fileName);
+      .createSignedUrl(fileName, 604800); // 7 days
 
-    // Update session with new version
+    if (signedError) {
+      console.error('Signed URL error:', signedError);
+      throw signedError;
+    }
+    
+    const signedUrl = signedData.signedUrl;
+
+    // Update session with new version (store path, not URL)
     const { error: updateError } = await supabase
       .from('pdf_editing_sessions')
-      .update({ current_version_url: publicUrl })
+      .update({ current_version_url: fileName })
       .eq('id', sessionId);
 
     if (updateError) {
@@ -212,7 +233,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        pdfUrl: publicUrl,
+        pdfUrl: fileName, // Return path for storage
+        signedUrl: signedUrl, // Return signed URL for immediate use
         message: `Applied ${operations.length} operations successfully` 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
