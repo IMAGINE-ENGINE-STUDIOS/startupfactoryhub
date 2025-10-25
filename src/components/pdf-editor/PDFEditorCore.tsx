@@ -193,6 +193,14 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     }
   }, [sessionId]);
 
+  // Cleanup: stop auto-save on unmount
+  useEffect(() => {
+    return () => {
+      operationQueueRef.current?.stopAutoSave();
+      console.log('🛑 Stopped auto-save on unmount');
+    };
+  }, []);
+
   const loadSession = async (id: string) => {
     try {
       const { data, error } = await supabase
@@ -220,6 +228,15 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
       
       if (signedError) throw signedError;
       setPdfFile(signedData.signedUrl);
+      
+      // Initialize operation queue for loaded sessions
+      if (!operationQueueRef.current) {
+        operationQueueRef.current = new OperationQueue(async (operations) => {
+          await applyOperations(operations);
+        });
+        operationQueueRef.current.startAutoSave(2000);
+        console.log('✅ Operation queue initialized for loaded session');
+      }
     } catch (error) {
       console.error('Error loading session:', error);
       toast({
@@ -277,6 +294,7 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
         await applyOperations(operations);
       });
       operationQueueRef.current.startAutoSave(2000);
+      console.log('✅ Operation queue initialized for new upload');
 
       onSessionCreated?.(sessionData);
 
@@ -548,7 +566,7 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
 
     setSaveStatus('saving');
     try {
-      console.log('Applying', operations.length, 'operations to PDF');
+      console.log('🔄 Applying', operations.length, 'operations to PDF for session:', session.id);
       
       const { data: { session: authSession } } = await supabase.auth.getSession();
       if (!authSession) throw new Error('Not authenticated');
@@ -571,7 +589,7 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
       // Reload the PDF with signed URL from response
       setPdfFile(response.data.signedUrl);
       
-      console.log('PDF operations applied successfully:', response.data);
+      console.log('✅ PDF operations applied successfully:', response.data);
       toast({
         title: 'Success',
         description: `Saved ${operations.length} changes to PDF`,
@@ -584,7 +602,7 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
       // Clear "saved" status after 3 seconds
       setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (error) {
-      console.error('Apply operations error:', error);
+      console.error('❌ Apply operations error:', error);
       setSaveStatus('error');
       toast({
         title: 'Error',

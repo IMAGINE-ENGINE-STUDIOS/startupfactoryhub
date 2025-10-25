@@ -35,7 +35,12 @@ serve(async (req) => {
 
     const { sessionId, operations, pdfUrl } = await req.json();
 
-    console.log(`Processing ${operations.length} operations for session ${sessionId}`);
+    console.log('📝 PDF Manipulation Request:', {
+      sessionId,
+      operationCount: operations.length,
+      pdfUrl: pdfUrl.substring(0, 50) + '...',
+      userId: user.id,
+    });
 
     // Handle both URL and path formats
     let pdfBytes: ArrayBuffer;
@@ -229,6 +234,11 @@ serve(async (req) => {
     if (historyError) {
       console.error('History error:', historyError);
     }
+
+    console.log('✅ PDF saved successfully:', {
+      fileName,
+      operationsApplied: operations.length,
+    });
 
     return new Response(
       JSON.stringify({ 
