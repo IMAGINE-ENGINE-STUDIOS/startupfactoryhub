@@ -14,7 +14,7 @@ import { PDFOperation, PDFEditingSession } from '@/types/pdf-editor';
 import { OperationQueue } from '@/lib/pdf/operationQueue';
 import { usePDFRealtime } from '@/hooks/usePDFRealtime';
 import { LiveCursors } from './LiveCursors';
-import { TextEditDialog } from './TextEditDialog';
+import { TextFormatToolbar } from './TextFormatToolbar';
 import { FormFieldEditor } from './FormFieldEditor';
 import { PDFSearchDialog, SearchResult } from './PDFSearchDialog';
 import { ShortcutsDialog } from '@/components/lightpaper/ShortcutsDialog';
@@ -53,11 +53,12 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
   const [textItems, setTextItems] = useState<TextItem[]>([]);
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [selectedText, setSelectedText] = useState<TextItem | null>(null);
-  const [showTextEditDialog, setShowTextEditDialog] = useState(false);
+  const [textToolbarPosition, setTextToolbarPosition] = useState<{ x: number; y: number } | null>(null);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [scale, setScale] = useState(1.0);
+  const [fitMode, setFitMode] = useState<'width' | 'page' | null>('width');
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
   const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -297,6 +298,14 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     setNumPages(numPages);
     setPdfError(null);
     
+    // Calculate optimal scale to fit width
+    if (containerRef.current && fitMode === 'width') {
+      const containerWidth = containerRef.current.offsetWidth;
+      // PDF default width is approximately 612 points (8.5 inches at 72 DPI)
+      const optimalScale = (containerWidth * 0.95) / 612;
+      setScale(Math.min(Math.max(optimalScale, 0.3), 3.0));
+    }
+    
     // Extract text and form fields from PDF
     if (pdfFile) {
       try {
@@ -356,11 +365,11 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
       return;
     }
 
-    // Check if clicking on existing text (for editing)
+    // Check if clicking on existing text (for editing) - works regardless of edit mode
     const clickedText = findTextAtPosition(textItems, x, y, currentPage - 1);
-    if (clickedText && editMode === 'text') {
+    if (clickedText) {
       setSelectedText(clickedText);
-      setShowTextEditDialog(true);
+      setTextToolbarPosition({ x: event.clientX, y: event.clientY });
       return;
     }
 
@@ -853,14 +862,72 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
                   <span className="text-xs sm:text-sm font-medium min-w-[50px] text-center">
                     {Math.round(scale * 100)}%
                   </span>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button size="sm" variant="outline" onClick={() => setScale(s => Math.min(3.0, s + 0.1))}>
-                        <ZoomIn className="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>Zoom in (Ctrl + +)</TooltipContent>
-                  </Tooltip>
+                   <Tooltip>
+                     <TooltipTrigger asChild>
+                       <Button size="sm" variant="outline" onClick={() => setScale(s => Math.min(3.0, s + 0.1))}>
+                         <ZoomIn className="w-4 h-4" />
+                       </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Zoom in (Ctrl + +)</TooltipContent>
+                   </Tooltip>
+
+                   {/* Fit buttons */}
+                   <Tooltip>
+                     <TooltipTrigger asChild>
+                       <Button 
+                         size="sm" 
+                         variant={fitMode === 'width' ? 'default' : 'outline'}
+                         onClick={() => {
+                           if (containerRef.current) {
+                             const containerWidth = containerRef.current.offsetWidth;
+                             const optimalScale = (containerWidth * 0.95) / 612;
+                             setScale(Math.min(Math.max(optimalScale, 0.3), 3.0));
+                             setFitMode('width');
+                           }
+                         }}
+                       >
+                         Fit Width
+                       </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Fit to width</TooltipContent>
+                   </Tooltip>
+
+                   <Tooltip>
+                     <TooltipTrigger asChild>
+                       <Button 
+                         size="sm" 
+                         variant={fitMode === 'page' ? 'default' : 'outline'}
+                         onClick={() => {
+                           if (containerRef.current) {
+                             const containerHeight = containerRef.current.offsetHeight;
+                             // PDF default height is approximately 792 points (11 inches at 72 DPI)
+                             const optimalScale = (containerHeight * 0.90) / 792;
+                             setScale(Math.min(Math.max(optimalScale, 0.3), 3.0));
+                             setFitMode('page');
+                           }
+                         }}
+                       >
+                         Fit Page
+                       </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Fit to page</TooltipContent>
+                   </Tooltip>
+
+                   <Tooltip>
+                     <TooltipTrigger asChild>
+                       <Button 
+                         size="sm" 
+                         variant={fitMode === null ? 'default' : 'outline'}
+                         onClick={() => {
+                           setScale(1.0);
+                           setFitMode(null);
+                         }}
+                       >
+                         100%
+                       </Button>
+                     </TooltipTrigger>
+                     <TooltipContent>Reset to 100%</TooltipContent>
+                   </Tooltip>
 
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -1070,16 +1137,24 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
           type="pdf"
         />
 
-        {/* Text Edit Dialog */}
-        <TextEditDialog
-          open={showTextEditDialog}
-          onClose={() => {
-            setShowTextEditDialog(false);
-            setSelectedText(null);
-          }}
-          textItem={selectedText}
-          onSave={handleTextEdit}
-        />
+        {/* Text Format Toolbar */}
+        {selectedText && textToolbarPosition && (
+          <TextFormatToolbar
+            position={textToolbarPosition}
+            text={selectedText.text}
+            fontSize={selectedText.height}
+            color={{ r: 0, g: 0, b: 0 }}
+            onSave={(newText, fontSize, color) => {
+              handleTextEdit(newText, fontSize, color);
+              setTextToolbarPosition(null);
+              setSelectedText(null);
+            }}
+            onClose={() => {
+              setTextToolbarPosition(null);
+              setSelectedText(null);
+            }}
+          />
+        )}
 
         {/* Signature Panel */}
         <SignaturePanel

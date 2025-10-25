@@ -68,6 +68,35 @@ export const SignaturePanel = ({ open, onOpenChange, onSignatureSelect }: Signat
     setIsDrawing(false);
   };
 
+  // Touch event handlers for mobile/tablet
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    setIsDrawing(true);
+    if (!ctxRef.current || !canvasRef.current) return;
+    
+    const rect = canvasRef.current.getBoundingClientRect();
+    const touch = e.touches[0];
+
+    ctxRef.current.beginPath();
+    ctxRef.current.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    if (!isDrawing || !ctxRef.current || !canvasRef.current) return;
+
+    const rect = canvasRef.current.getBoundingClientRect();
+    const touch = e.touches[0];
+
+    ctxRef.current.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    ctxRef.current.stroke();
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    stopDrawing();
+  };
+
   const clearCanvas = () => {
     if (!canvasRef.current || !ctxRef.current) return;
     ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
@@ -155,6 +184,9 @@ export const SignaturePanel = ({ open, onOpenChange, onSignatureSelect }: Signat
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}
                 onMouseLeave={stopDrawing}
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
               />
             </Card>
             <div className="flex gap-2">
