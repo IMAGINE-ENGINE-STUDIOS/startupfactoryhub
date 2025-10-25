@@ -25,7 +25,12 @@ serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const authHeader = req.headers.get('Authorization')!;
+    // Get and validate auth header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('Missing Authorization header');
+    }
+    
     const token = authHeader.replace('Bearer ', '');
     const { data: { user }, error: authError } = await supabase.auth.getUser(token);
 
@@ -33,12 +38,33 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    const { sessionId, operations, pdfUrl } = await req.json();
+    const body = await req.json();
+    
+    // Handle test requests
+    if (body.test) {
+      console.log('🧪 Test request received from user:', user.id);
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'Edge function is working!',
+          timestamp: new Date().toISOString(),
+          userId: user.id
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const { sessionId, operations, pdfUrl } = body;
+    
+    // Validate required fields
+    if (!sessionId || !operations || !pdfUrl) {
+      throw new Error(`Missing required fields: ${!sessionId ? 'sessionId' : ''} ${!operations ? 'operations' : ''} ${!pdfUrl ? 'pdfUrl' : ''}`);
+    }
 
     console.log('📝 PDF Manipulation Request [' + new Date().toISOString() + ']:', {
       sessionId,
-      operationCount: operations.length,
-      pdfUrl: pdfUrl.substring(0, 50) + '...',
+      operationCount: operations?.length || 0,
+      pdfUrl: pdfUrl?.substring(0, 50) + '...',
       userId: user.id,
       timestamp: Date.now(),
     });
@@ -184,8 +210,10 @@ serve(async (req) => {
     // Save the modified PDF
     const modifiedPdfBytes = await pdfDoc.save();
     
-    // Upload to storage
-    const fileName = `pdf-sessions/${sessionId}/${Date.now()}.pdf`;
+    // Upload to storage - CRITICAL: Must use user.id to match RLS policy at folder index [2]
+    const fileName = `pdf-sessions/${user.id}/${Date.now()}.pdf`;
+    console.log('📤 Uploading to:', fileName);
+    
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('pdf-documents')
       .upload(fileName, modifiedPdfBytes, {
@@ -194,9 +222,10 @@ serve(async (req) => {
       });
 
     if (uploadError) {
-      console.error('Upload error:', uploadError);
+      console.error('❌ Upload error:', uploadError);
       throw uploadError;
     }
+    console.log('✅ Upload successful:', uploadData);
 
     // Create signed URL (7 days expiry for edited PDFs)
     const { data: signedData, error: signedError } = await supabase.storage
