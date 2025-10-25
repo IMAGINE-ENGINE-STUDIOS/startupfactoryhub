@@ -251,28 +251,45 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     const file = event.target.files?.[0];
     if (!file) return;
 
+    console.log('📤 Starting PDF upload process...', { fileName: file.name, fileSize: file.size });
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('Not authenticated');
+      if (!user) {
+        console.error('❌ Authentication failed: No user found');
+        throw new Error('Not authenticated');
+      }
+      console.log('✅ User authenticated:', user.id);
 
       // Upload PDF to storage
       const fileName = `pdf-sessions/${user.id}/${Date.now()}_${file.name}`;
+      console.log('📂 Uploading to path:', fileName);
+      
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from('pdf-documents')
         .upload(fileName, file);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('❌ Storage upload failed:', uploadError);
+        throw uploadError;
+      }
+      console.log('✅ Storage upload successful:', uploadData);
 
       // Create signed URL (24 hours expiry)
+      console.log('🔗 Creating signed URL...');
       const { data: signedData, error: signedError } = await supabase.storage
         .from('pdf-documents')
         .createSignedUrl(fileName, 86400); // 24 hours
 
-      if (signedError) throw signedError;
+      if (signedError) {
+        console.error('❌ Signed URL creation failed:', signedError);
+        throw signedError;
+      }
+      console.log('✅ Signed URL created:', signedData.signedUrl.substring(0, 50) + '...');
       const signedUrl = signedData.signedUrl;
 
       // Create session
+      console.log('💾 Creating database session...');
       const { data: sessionData, error: sessionError } = await supabase
         .from('pdf_editing_sessions')
         .insert({
@@ -283,7 +300,11 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
         .select()
         .single();
 
-      if (sessionError) throw sessionError;
+      if (sessionError) {
+        console.error('❌ Session creation failed:', sessionError);
+        throw sessionError;
+      }
+      console.log('✅ Session created successfully:', sessionData.id);
 
       setSession(sessionData);
       setPdfFile(signedUrl);
@@ -298,19 +319,77 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
 
       onSessionCreated?.(sessionData);
 
+      console.log('🎉 PDF upload process completed successfully!');
       toast({
         title: 'Success',
         description: 'PDF uploaded successfully',
       });
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error('❌ Upload error:', error);
       toast({
         title: 'Error',
-        description: 'Failed to upload PDF',
+        description: error instanceof Error ? error.message : 'Failed to upload PDF',
         variant: 'destructive',
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Test storage access
+  const testStorageAccess = async () => {
+    console.log('🧪 === STORAGE ACCESS TEST START ===');
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        console.error('❌ Not authenticated');
+        toast({
+          title: 'Test Failed',
+          description: 'User not authenticated',
+          variant: 'destructive'
+        });
+        return;
+      }
+      console.log('✅ User authenticated:', user.id);
+      
+      // Try to upload a tiny test file
+      const testFile = new Blob(['test content'], { type: 'application/pdf' });
+      const testPath = `pdf-sessions/${user.id}/test-${Date.now()}.pdf`;
+      
+      console.log('📤 Attempting test upload to:', testPath);
+      const { data, error } = await supabase.storage
+        .from('pdf-documents')
+        .upload(testPath, testFile);
+      
+      if (error) {
+        console.error('❌ Storage upload test FAILED:', error);
+        toast({
+          title: 'Storage Access Failed',
+          description: `${error.message} - Check RLS policies`,
+          variant: 'destructive'
+        });
+        return;
+      }
+      
+      console.log('✅ Storage upload test PASSED:', data);
+      
+      // Clean up test file
+      console.log('🧹 Cleaning up test file...');
+      await supabase.storage.from('pdf-documents').remove([testPath]);
+      console.log('✅ Test file cleaned up');
+      
+      console.log('🧪 === STORAGE ACCESS TEST PASSED ===');
+      toast({
+        title: 'Storage Access OK',
+        description: 'PDF editor is ready to use',
+      });
+    } catch (err) {
+      console.error('❌ Test error:', err);
+      toast({
+        title: 'Test Error',
+        description: err instanceof Error ? err.message : 'Unknown error',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -929,10 +1008,24 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
                       });
                     }}
                   >
-                    🧪 Test
+                    🧪 Test Edge
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Test edge function deployment</TooltipContent>
+              </Tooltip>
+
+              {/* Test Storage Access Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={testStorageAccess}
+                  >
+                    🔐 Test Storage
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Test storage RLS policies</TooltipContent>
               </Tooltip>
             </>
 
