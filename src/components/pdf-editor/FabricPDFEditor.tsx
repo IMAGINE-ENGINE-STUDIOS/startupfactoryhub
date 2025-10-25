@@ -81,9 +81,16 @@ export const FabricPDFEditor = () => {
     const canvasEl = pageRefs.current.get(pageNumber);
     if (!canvasEl) return;
 
-    console.log('[FabricPDFEditor] Page rendered:', { pageNumber, width, height });
+    const scaledWidth = width * zoom;
+    const scaledHeight = height * zoom;
 
-    fabricManager.current.createCanvas(canvasEl, pageNumber, width, height);
+    console.log('[FabricPDFEditor] Page rendered:', { pageNumber, width, height, scaledWidth, scaledHeight, zoom });
+
+    // Set canvas element size attributes
+    canvasEl.width = scaledWidth;
+    canvasEl.height = scaledHeight;
+
+    fabricManager.current.createCanvas(canvasEl, pageNumber, scaledWidth, scaledHeight);
   };
 
   const handleCanvasClick = (pageNumber: number, e: React.MouseEvent<HTMLCanvasElement>) => {
@@ -221,7 +228,7 @@ export const FabricPDFEditor = () => {
       />
 
       <div className="flex-1 overflow-auto p-6 bg-muted/30">
-        <div className="max-w-4xl mx-auto">
+        <div className="mx-auto" style={{ width: 'fit-content' }}>
           <Document
             file={pdfFile}
             onLoadSuccess={onDocumentLoadSuccess}
@@ -233,7 +240,7 @@ export const FabricPDFEditor = () => {
                 <div
                   key={pageNum}
                   ref={(el) => el && containerRefs.current.set(pageNum, el)}
-                  className="relative mb-8 shadow-lg bg-white"
+                  className="relative mb-8 shadow-xl bg-white inline-block"
                 >
                   <Page
                     pageNumber={pageNum}
@@ -248,12 +255,11 @@ export const FabricPDFEditor = () => {
                     ref={(el) => el && pageRefs.current.set(pageNum, el)}
                     className="absolute top-0 left-0 pointer-events-auto"
                     style={{ 
-                      cursor: fabricManager.current.getActiveTool() === 'select' ? 'default' : 'crosshair',
-                      backgroundColor: 'rgba(255, 255, 0, 0.05)'
+                      cursor: fabricManager.current.getActiveTool() === 'select' ? 'default' : 'crosshair'
                     }}
                     onClick={(e) => handleCanvasClick(pageNum, e)}
                   />
-                  <div className="absolute top-2 right-2 bg-background/90 px-2 py-1 rounded text-sm">
+                  <div className="absolute top-2 right-2 bg-background/90 px-2 py-1 rounded text-sm pointer-events-none">
                     Page {pageNum}
                   </div>
                 </div>
