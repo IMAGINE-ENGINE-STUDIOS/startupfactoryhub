@@ -203,17 +203,20 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
       setSession(data);
       
       // Generate fresh signed URL for the PDF (24 hours expiry)
-      const pdfPath = (data.current_version_url || data.pdf_url).split('/pdf-documents/')[1];
-      if (pdfPath) {
-        const { data: signedData, error: signedError } = await supabase.storage
-          .from('pdf-documents')
-          .createSignedUrl(pdfPath, 86400); // 24 hours
-        
-        if (signedError) throw signedError;
-        setPdfFile(signedData.signedUrl);
-      } else {
-        setPdfFile(data.current_version_url || data.pdf_url);
+      const storedValue = data.current_version_url || data.pdf_url;
+      let pdfPath = storedValue;
+      
+      // Handle legacy URLs - extract path if it's a full URL
+      if (storedValue.includes('/pdf-documents/')) {
+        pdfPath = storedValue.split('/pdf-documents/')[1];
       }
+      
+      const { data: signedData, error: signedError } = await supabase.storage
+        .from('pdf-documents')
+        .createSignedUrl(pdfPath, 86400); // 24 hours
+      
+      if (signedError) throw signedError;
+      setPdfFile(signedData.signedUrl);
     } catch (error) {
       console.error('Error loading session:', error);
       toast({
