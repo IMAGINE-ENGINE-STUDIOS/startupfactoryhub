@@ -1,3 +1,7 @@
+/* Import react-pdf CSS from node_modules */
+@import '../node_modules/react-pdf/dist/esm/Page/AnnotationLayer.css';
+@import '../node_modules/react-pdf/dist/esm/Page/TextLayer.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
