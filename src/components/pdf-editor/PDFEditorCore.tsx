@@ -9,7 +9,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
-import { Upload, Download, Undo, Redo, Type, Square, Image as ImageIcon, Eraser, Users, FileText, ZoomIn, ZoomOut, Search, Keyboard, MoreVertical, Loader2, Check, AlertCircle } from 'lucide-react';
+import { Upload, Download, Undo, Redo, Type, Square, Image as ImageIcon, Eraser, Users, FileText, ZoomIn, ZoomOut, Search, Keyboard, MoreVertical, Loader2, Check, AlertCircle, PenTool, Share2 } from 'lucide-react';
 import { PDFOperation, PDFEditingSession } from '@/types/pdf-editor';
 import { OperationQueue } from '@/lib/pdf/operationQueue';
 import { usePDFRealtime } from '@/hooks/usePDFRealtime';
@@ -22,6 +22,8 @@ import { extractTextFromPDF, findTextAtPosition, TextItem } from '@/lib/pdf/text
 import { extractFormFields, FormField } from '@/lib/pdf/formExtractor';
 import { uploadImageToStorage, compressImage } from '@/lib/pdf/imageUploader';
 import { cn } from '@/lib/utils';
+import { SignaturePanel } from './SignaturePanel';
+import { PDFShareDialog } from './PDFShareDialog';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -34,12 +36,18 @@ interface PDFEditorCoreProps {
 
 export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProps) => {
   const [pdfFile, setPdfFile] = useState<string | null>(null);
+  const [pdfFileForShare, setPdfFileForShare] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [session, setSession] = useState<PDFEditingSession | null>(null);
   const [loading, setLoading] = useState(false);
   const [pdfError, setPdfError] = useState<string | null>(null);
-  const [editMode, setEditMode] = useState<'text' | 'rectangle' | 'delete' | 'image' | null>(null);
+  const [editMode, setEditMode] = useState<'text' | 'rectangle' | 'delete' | 'image' | 'signature' | null>(null);
+  const [showSignaturePanel, setShowSignaturePanel] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
+  const [currentSignature, setCurrentSignature] = useState<string | null>(null);
+  const [loadedPages, setLoadedPages] = useState<Set<number>>(new Set([1]));
+  const pageRefs = useRef<Map<number, HTMLDivElement>>(new Map());
   const [userId, setUserId] = useState<string | null>(null);
   const [textItems, setTextItems] = useState<TextItem[]>([]);
   const [formFields, setFormFields] = useState<FormField[]>([]);
@@ -144,6 +152,14 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
       description: 'Eraser tool'
     },
     {
+      key: 's',
+      handler: () => {
+        setEditMode('signature');
+        setShowSignaturePanel(true);
+      },
+      description: 'Signature tool'
+    },
+    {
       key: 'Escape',
       handler: () => setEditMode(null),
       description: 'Deselect tool'
@@ -230,6 +246,7 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
 
       setSession(sessionData);
       setPdfFile(publicUrl);
+      setPdfFileForShare(publicUrl); // Store for sharing
       
       // Initialize operation queue with auto-save
       operationQueueRef.current = new OperationQueue(async (operations) => {
@@ -291,6 +308,32 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
+
+    // Handle signature placement
+    if (editMode === 'signature' && currentSignature) {
+      const operation: PDFOperation = {
+        id: `op_${Date.now()}_${Math.random()}`,
+        type: 'add_image',
+        page: currentPage - 1,
+        x,
+        y,
+        data: { imageUrl: currentSignature, width: 150, height: 60 },
+        timestamp: Date.now(),
+        userId,
+      };
+
+      operationQueueRef.current?.addOperation(operation);
+      drawOperationOnCanvas(operation);
+      
+      toast({
+        title: 'Signature placed',
+        description: 'Signature added (auto-saving in 2s)',
+      });
+
+      setEditMode(null);
+      setCurrentSignature(null);
+      return;
+    }
 
     // Check if clicking on existing text (for editing)
     const clickedText = findTextAtPosition(textItems, x, y, currentPage - 1);
@@ -606,6 +649,42 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     setTouchStart(null);
   };
 
+  // Lazy loading with Intersection Observer
+  useEffect(() => {
+    if (!numPages) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const pageNum = parseInt(entry.target.getAttribute('data-page') || '0');
+            setLoadedPages((prev) => new Set([...prev, pageNum]));
+          }
+        });
+      },
+      {
+        rootMargin: '200px',
+      }
+    );
+
+    pageRefs.current.forEach((ref) => {
+      if (ref) observer.observe(ref);
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [numPages]);
+
+  const handleSignatureSelect = (signatureData: string, type: 'draw' | 'text') => {
+    setCurrentSignature(signatureData);
+    setEditMode('signature');
+    toast({
+      title: 'Signature selected',
+      description: 'Click on the PDF to place your signature',
+    });
+  };
+
   return (
     <TooltipProvider>
       <div className="flex flex-col h-full bg-background">
@@ -701,6 +780,23 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>Drag & drop images</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant={editMode === 'signature' ? 'default' : 'outline'}
+                      onClick={() => {
+                        setEditMode(editMode === 'signature' ? null : 'signature');
+                        setShowSignaturePanel(true);
+                      }}
+                    >
+                      <PenTool className="w-4 h-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Sign</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Add signature (S)</TooltipContent>
                 </Tooltip>
 
                 {formFields.length > 0 && (
@@ -805,6 +901,16 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
                       <TooltipContent>Unsaved changes</TooltipContent>
                     </Tooltip>
                   )}
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" variant="outline" onClick={() => setShowShareDialog(true)}>
+                        <Share2 className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Share</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Share PDF</TooltipContent>
+                  </Tooltip>
 
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -948,6 +1054,24 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
           textItem={selectedText}
           onSave={handleTextEdit}
         />
+
+        {/* Signature Panel */}
+        <SignaturePanel
+          open={showSignaturePanel}
+          onOpenChange={setShowSignaturePanel}
+          onSignatureSelect={handleSignatureSelect}
+        />
+
+        {/* Share Dialog */}
+        {session && pdfFileForShare && (
+          <PDFShareDialog
+            open={showShareDialog}
+            onOpenChange={setShowShareDialog}
+            sessionId={session.id}
+            sessionTitle={session.title}
+            pdfUrl={pdfFileForShare}
+          />
+        )}
 
         {/* Page Navigation */}
         {numPages > 0 && (

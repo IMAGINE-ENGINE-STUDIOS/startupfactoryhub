@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Document, Page, pdfjs } from "react-pdf";
-import { Canvas as FabricCanvas, FabricImage, PencilBrush } from "fabric";
+import { Canvas as FabricCanvas, FabricImage, PencilBrush, Text as FabricText } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -149,14 +149,30 @@ export default function SharedPDFView() {
     for (const sig of signatures) {
       if (sig.page_number === currentPage) {
         try {
-          const img = await FabricImage.fromURL(sig.signature_data);
-          img.scaleToWidth(200);
-          img.set({
-            left: sig.position.x || 100,
-            top: sig.position.y || 100,
-            selectable: false,
-          });
-          fabricCanvas.add(img);
+          // Handle both drawn and text signatures
+          if (sig.signature_type === 'text') {
+            // For text signatures, create a text object
+            const textObj = new FabricText(sig.signature_data, {
+              left: sig.position.x || 100,
+              top: sig.position.y || 100,
+              fontSize: 40,
+              fontFamily: 'Brush Script MT, cursive',
+              fontStyle: 'italic',
+              fill: '#000000',
+              selectable: false,
+            });
+            fabricCanvas.add(textObj);
+          } else {
+            // For drawn signatures, load as image
+            const img = await FabricImage.fromURL(sig.signature_data);
+            img.scaleToWidth(150);
+            img.set({
+              left: sig.position.x || 100,
+              top: sig.position.y || 100,
+              selectable: false,
+            });
+            fabricCanvas.add(img);
+          }
         } catch (error) {
           console.error("Error loading signature:", error);
         }
