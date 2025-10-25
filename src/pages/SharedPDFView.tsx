@@ -48,7 +48,22 @@ export default function SharedPDFView() {
 
   // Initialize signature canvas
   useEffect(() => {
-    if (signCanvasRef.current && showSignDialog && signatureMode === "draw") {
+    if (!showSignDialog || signatureMode !== "draw") {
+      // Clean up if switching away from draw mode
+      if (signatureCanvas.current) {
+        signatureCanvas.current.dispose();
+        signatureCanvas.current = null;
+      }
+      return;
+    }
+
+    // Wait for canvas element to be in DOM
+    const initCanvas = () => {
+      if (!signCanvasRef.current) {
+        setTimeout(initCanvas, 50);
+        return;
+      }
+
       if (signatureCanvas.current) {
         signatureCanvas.current.dispose();
       }
@@ -65,11 +80,16 @@ export default function SharedPDFView() {
       canvas.freeDrawingBrush.width = 2;
       
       signatureCanvas.current = canvas;
+    };
 
-      return () => {
-        canvas.dispose();
-      };
-    }
+    initCanvas();
+
+    return () => {
+      if (signatureCanvas.current) {
+        signatureCanvas.current.dispose();
+        signatureCanvas.current = null;
+      }
+    };
   }, [showSignDialog, signatureMode]);
 
   const loadPDFFile = async () => {
@@ -90,25 +110,37 @@ export default function SharedPDFView() {
   };
 
   const setupCanvas = () => {
-    if (!pageRef.current) return;
+    if (!pageRef.current) {
+      console.error("Page ref not ready");
+      return;
+    }
 
-    const canvasEl = document.createElement("canvas");
-    canvasEl.style.position = "absolute";
-    canvasEl.style.top = "0";
-    canvasEl.style.left = "0";
-    canvasEl.style.pointerEvents = "none";
-    pageRef.current.appendChild(canvasEl);
+    // Wait for PDF page to fully render
+    setTimeout(() => {
+      if (!pageRef.current) return;
+      
+      // Remove old canvas if exists
+      const oldCanvas = pageRef.current.querySelector('canvas.signature-overlay');
+      if (oldCanvas) oldCanvas.remove();
 
-    const rect = pageRef.current.getBoundingClientRect();
-    const fabricCanvas = new FabricCanvas(canvasEl, {
-      width: rect.width,
-      height: rect.height,
-    });
+      const canvasEl = document.createElement("canvas");
+      canvasEl.className = "signature-overlay";
+      canvasEl.style.position = "absolute";
+      canvasEl.style.top = "0";
+      canvasEl.style.left = "0";
+      canvasEl.style.pointerEvents = "none";
+      
+      pageRef.current.appendChild(canvasEl);
 
-    setCanvas(fabricCanvas);
+      const rect = pageRef.current.getBoundingClientRect();
+      const fabricCanvas = new FabricCanvas(canvasEl, {
+        width: rect.width,
+        height: rect.height,
+      });
 
-    // Load existing signatures on canvas
-    loadSignaturesOnCanvas(fabricCanvas);
+      setCanvas(fabricCanvas);
+      loadSignaturesOnCanvas(fabricCanvas);
+    }, 100); // Small delay to ensure page is rendered
   };
 
   const loadSignaturesOnCanvas = async (fabricCanvas: FabricCanvas) => {
@@ -157,8 +189,11 @@ export default function SharedPDFView() {
     );
 
     if (success) {
+      toast.success(`Signature added successfully! ${signatures.length + 1} total signatures`);
       setShowSignDialog(false);
       signatureCanvas.current.clear();
+      setSignerName("");
+      setSignerEmail("");
     }
   };
 
@@ -201,8 +236,11 @@ export default function SharedPDFView() {
     );
 
     if (success) {
+      toast.success(`Signature added successfully! ${signatures.length + 1} total signatures`);
       setShowSignDialog(false);
       setTextSignature("");
+      setSignerName("");
+      setSignerEmail("");
     }
   };
 
@@ -296,9 +334,11 @@ export default function SharedPDFView() {
             <div className="flex justify-center">
               <Document
                 file={pdfBlob}
-                onLoadSuccess={({ numPages }) => {
-                  setNumPages(numPages);
-                  toast.success(`PDF loaded with ${numPages} pages`);
+                onLoadSuccess={(pdf) => {
+                  setNumPages(pdf.numPages);
+                  toast.success(`PDF loaded with ${pdf.numPages} pages`);
+                  // Setup canvas after page is rendered
+                  setupCanvas();
                 }}
                 onLoadError={(error) => {
                   console.error("PDF load error:", error);
@@ -310,7 +350,6 @@ export default function SharedPDFView() {
                   <Page
                     pageNumber={currentPage}
                     width={800 * zoom}
-                    onLoadSuccess={setupCanvas}
                     renderTextLayer={false}
                     renderAnnotationLayer={false}
                   />

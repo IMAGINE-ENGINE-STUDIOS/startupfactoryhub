@@ -25,6 +25,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { SignatureLibrary } from "./SignatureLibrary";
 import ShareDialog from "./ShareDialog";
 import { supabase } from "@/integrations/supabase/client";
+import { useSharedPDF } from "@/hooks/useSharedPDF";
 import { TextFormatToolbar } from "./TextFormatToolbar";
 import { TextSearchDialog, SearchOptions } from "./TextSearchDialog";
 import { CollaborationPresence } from "./CollaborationPresence";
@@ -169,9 +170,11 @@ export function LightPaperPDFEditor({
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
+  const [isSharing, setIsSharing] = useState(false);
   const {
     saveProject
   } = useLightPaperProjects("pdf");
+  const { createSharedDocument, sendEmailInvitation } = useSharedPDF();
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
@@ -1303,11 +1306,17 @@ export function LightPaperPDFEditor({
     }
 
     try {
-      const { useSharedPDF } = await import("@/hooks/useSharedPDF");
-      const hook = useSharedPDF();
-      const result = await hook.createSharedDocument(currentProjectId, projectTitle, pdfFile, 'sign');
+      setIsSharing(true);
+      toast.info("Creating shareable link...");
+      const result = await createSharedDocument(
+        currentProjectId, 
+        projectTitle, 
+        pdfFile, 
+        'sign'
+      );
       
       if (result) {
+        setSharedDocumentId(result.documentId);
         setShareData({
           shareUrl: result.shareUrl,
           shareToken: result.shareToken,
@@ -1318,16 +1327,20 @@ export function LightPaperPDFEditor({
     } catch (error) {
       console.error("Error sharing:", error);
       toast.error("Failed to share document");
+    } finally {
+      setIsSharing(false);
     }
   };
 
-  const handleSendEmailInvitation = async (email: string, message: string, accessLevel: 'view' | 'sign' | 'edit') => {
+  const handleSendEmailInvitation = async (
+    email: string, 
+    message: string, 
+    accessLevel: 'view' | 'sign' | 'edit'
+  ) => {
     if (!shareData) return;
     
-    const { useSharedPDF } = await import("@/hooks/useSharedPDF");
-    const hook = useSharedPDF();
     const { data: { user } } = await supabase.auth.getUser();
-    await hook.sendEmailInvitation(
+    await sendEmailInvitation(
       shareData.shareToken,
       shareData.documentTitle,
       email,
@@ -1335,47 +1348,6 @@ export function LightPaperPDFEditor({
       message,
       accessLevel
     );
-  };
-
-  const oldHandleShareDocument = async () => {
-    if (!pdfFile || !currentProjectId) {
-      toast.error("Please save the document first");
-      return;
-    }
-    try {
-      const user = (await supabase.auth.getUser()).data.user;
-      if (!user) {
-        toast.error("Please sign in to share documents");
-        return;
-      }
-      toast.info("Creating shareable link...");
-      const {
-        data,
-        error
-      } = await supabase.from("shared_pdf_documents").insert({
-        owner_id: user.id,
-        project_id: currentProjectId,
-        title: projectTitle,
-        pdf_content: {
-          pdfUrl: `${user.id}/${Date.now()}_${pdfFile.name}`,
-          numPages
-        },
-        annotations: [],
-        signatures: []
-      }).select().single();
-      if (error) throw error;
-      const shareUrl = `${window.location.origin}/shared-pdf/${data.share_token}`;
-      setShareData({
-        shareUrl,
-        shareToken: data.share_token,
-        documentTitle: projectTitle
-      });
-      setShowShareDialog(true);
-      toast.success("Shareable link created!");
-    } catch (error: any) {
-      console.error("Share error:", error);
-      toast.error(error.message || "Failed to create shareable link");
-    }
   };
   const copyShareLink = () => {
     if (!shareData) return;
@@ -1597,8 +1569,21 @@ export function LightPaperPDFEditor({
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button variant="outline" size="sm" onClick={handleShareDocument} title="Share">
-              <Share2 className="h-4 w-4" />
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={handleShareDocument} 
+              disabled={isSharing || !pdfFile}
+              title="Share"
+            >
+              {isSharing ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
+                  Sharing...
+                </>
+              ) : (
+                <Share2 className="h-4 w-4" />
+              )}
             </Button>
             
             {/* Collaboration Presence */}

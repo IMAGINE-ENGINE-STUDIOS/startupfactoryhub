@@ -141,11 +141,29 @@ export function useSharedPDF(shareToken?: string) {
       const fileExt = pdfFile.name.split('.').pop();
       const fileName = `${user.id}/${Date.now()}.${fileExt}`;
       
+      console.log('Uploading PDF to storage:', fileName);
+      
       const { error: uploadError } = await supabase.storage
         .from('pdf-documents')
         .upload(fileName, pdfFile);
 
-      if (uploadError) throw uploadError;
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('PDF uploaded successfully to:', fileName);
+      
+      // Verify file was uploaded
+      const { data: fileCheck, error: checkError } = await supabase.storage
+        .from('pdf-documents')
+        .list(user.id);
+
+      if (checkError) {
+        console.error('File verification error:', checkError);
+      } else {
+        console.log('Files in user folder:', fileCheck?.map(f => f.name));
+      }
 
       // Create shared document record
       const { data, error } = await supabase
