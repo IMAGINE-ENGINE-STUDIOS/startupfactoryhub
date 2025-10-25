@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, Command } from "lucide-react";
+import { FileText, Table, Presentation, Command, FilePenLine } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FolderOpen } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
@@ -108,7 +108,7 @@ export default function LightPaper() {
                   onClick={() => setActiveTab("pdf")}
                   title="PDF Editor"
                 >
-                  <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+                  <FilePenLine className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
               </div>
             </div>
