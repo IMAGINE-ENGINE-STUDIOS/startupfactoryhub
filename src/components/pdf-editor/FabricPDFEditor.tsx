@@ -84,12 +84,12 @@ export const FabricPDFEditor = () => {
     const scaledWidth = width * zoom;
     const scaledHeight = height * zoom;
 
-    console.log('[FabricPDFEditor] Page rendered:', { pageNumber, width, height, scaledWidth, scaledHeight, zoom });
+    console.log('[FabricPDFEditor] Creating canvas:', { pageNumber, width, height, scaledWidth, scaledHeight, zoom });
 
-    // Set canvas element size attributes
-    canvasEl.width = scaledWidth;
-    canvasEl.height = scaledHeight;
-
+    // Dispose existing canvas first
+    fabricManager.current.disposeCanvas(pageNumber);
+    
+    // Create new canvas with scaled dimensions
     fabricManager.current.createCanvas(canvasEl, pageNumber, scaledWidth, scaledHeight);
   };
 
@@ -189,6 +189,14 @@ export const FabricPDFEditor = () => {
     }
   };
 
+  // Recreate canvases when zoom changes
+  useEffect(() => {
+    if (numPages > 0 && pdfFile) {
+      console.log('[FabricPDFEditor] Zoom changed, canvases will be recreated on next render');
+      // Canvases will be recreated automatically by onPageRenderSuccess
+    }
+  }, [zoom, numPages, pdfFile]);
+
   useEffect(() => {
     return () => {
       fabricManager.current.disposeAll();
@@ -228,7 +236,7 @@ export const FabricPDFEditor = () => {
       />
 
       <div className="flex-1 overflow-auto p-6 bg-muted/30">
-        <div className="mx-auto" style={{ width: 'fit-content' }}>
+        <div className="max-w-7xl mx-auto flex flex-col items-center">
           <Document
             file={pdfFile}
             onLoadSuccess={onDocumentLoadSuccess}
@@ -240,7 +248,8 @@ export const FabricPDFEditor = () => {
                 <div
                   key={pageNum}
                   ref={(el) => el && containerRefs.current.set(pageNum, el)}
-                  className="relative mb-8 shadow-xl bg-white inline-block"
+                  className="relative mb-8 shadow-xl bg-white"
+                  style={{ userSelect: 'none' }}
                 >
                   <Page
                     pageNumber={pageNum}
@@ -255,7 +264,12 @@ export const FabricPDFEditor = () => {
                     ref={(el) => el && pageRefs.current.set(pageNum, el)}
                     className="absolute top-0 left-0 pointer-events-auto"
                     style={{ 
-                      cursor: fabricManager.current.getActiveTool() === 'select' ? 'default' : 'crosshair'
+                      cursor: fabricManager.current.getActiveTool() === 'select' ? 'default' : 
+                             fabricManager.current.getActiveTool() === 'draw' ? 'crosshair' :
+                             fabricManager.current.getActiveTool() === 'text' ? 'text' : 'crosshair',
+                      zIndex: 10,
+                      border: '2px solid rgba(255, 0, 0, 0.3)',
+                      backgroundColor: 'rgba(0, 255, 0, 0.05)'
                     }}
                     onClick={(e) => handleCanvasClick(pageNum, e)}
                   />

@@ -61,15 +61,26 @@ export class PDFFabricManager {
   }
 
   setTool(tool: 'select' | 'text' | 'draw' | 'rect' | 'circle' | 'erase'): void {
+    console.log('[PDFFabricManager] Setting tool:', tool);
     this.activeTool = tool;
     this.canvases.forEach(({ canvas }) => {
+      // Enable drawing mode only for draw tool
       canvas.isDrawingMode = tool === 'draw';
-      canvas.selection = tool === 'select';
+      
+      // Enable selection for select and erase tools
+      canvas.selection = tool === 'select' || tool === 'erase';
+      
+      // Make objects selectable for select, erase, and text tools
+      canvas.forEachObject((obj) => {
+        obj.selectable = tool === 'select' || tool === 'erase';
+      });
       
       if (tool === 'draw' && canvas.freeDrawingBrush) {
         canvas.freeDrawingBrush.color = this.activeColor;
         canvas.freeDrawingBrush.width = 2;
       }
+      
+      canvas.renderAll();
     });
   }
 
@@ -123,17 +134,27 @@ export class PDFFabricManager {
     const canvas = this.getCanvas(pageNumber);
     if (!canvas) return;
 
+    console.log('[PDFFabricManager] Adding text at:', { x, y, fontSize: this.activeFontSize, color: this.activeColor });
+
     const text = new IText('Type here', {
-      left: x,
-      top: y,
+      left: x - 40, // Center the text around click point
+      top: y - 10,
       fontSize: this.activeFontSize,
       fill: this.activeColor,
       fontFamily: 'Arial',
+      selectable: true,
+      editable: true,
     });
 
     canvas.add(text);
     canvas.setActiveObject(text);
-    text.enterEditing();
+    canvas.renderAll();
+    
+    // Enter editing mode after a brief delay to ensure it's rendered
+    setTimeout(() => {
+      text.enterEditing();
+      text.selectAll();
+    }, 50);
   }
 
   addRectangle(pageNumber: number): void {
