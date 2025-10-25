@@ -2357,6 +2357,80 @@ export type Database = {
         }
         Relationships: []
       }
+      pdf_collaboration_cursors: {
+        Row: {
+          id: string
+          last_active: string
+          page_number: number
+          position: Json
+          session_id: string
+          user_color: string
+          user_id: string | null
+          user_name: string
+        }
+        Insert: {
+          id?: string
+          last_active?: string
+          page_number: number
+          position: Json
+          session_id: string
+          user_color: string
+          user_id?: string | null
+          user_name: string
+        }
+        Update: {
+          id?: string
+          last_active?: string
+          page_number?: number
+          position?: Json
+          session_id?: string
+          user_color?: string
+          user_id?: string | null
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdf_collaboration_cursors_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "pdf_editing_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdf_editing_sessions: {
+        Row: {
+          created_at: string
+          current_version_url: string | null
+          id: string
+          is_active: boolean | null
+          pdf_url: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_version_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          pdf_url: string
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_version_url?: string | null
+          id?: string
+          is_active?: boolean | null
+          pdf_url?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pdf_editor_signatures: {
         Row: {
           created_at: string | null
@@ -2383,6 +2457,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      pdf_operation_history: {
+        Row: {
+          applied_at: string
+          id: string
+          operation_data: Json
+          operation_type: string
+          session_id: string
+          user_id: string
+          version_number: number
+        }
+        Insert: {
+          applied_at?: string
+          id?: string
+          operation_data: Json
+          operation_type: string
+          session_id: string
+          user_id: string
+          version_number?: number
+        }
+        Update: {
+          applied_at?: string
+          id?: string
+          operation_data?: Json
+          operation_type?: string
+          session_id?: string
+          user_id?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdf_operation_history_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "pdf_editing_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       pdf_signatures: {
         Row: {

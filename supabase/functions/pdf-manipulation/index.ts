@@ -1,0 +1,183 @@
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { PDFDocument, rgb, StandardFonts } from "https://cdn.skypack.dev/pdf-lib@1.17.1";
+
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+};
+
+interface PDFOperation {
+  type: 'add_text' | 'add_rectangle' | 'delete_content' | 'add_image';
+  page: number;
+  x: number;
+  y: number;
+  data?: any;
+}
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders });
+  }
+
+  try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const authHeader = req.headers.get('Authorization')!;
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      throw new Error('Unauthorized');
+    }
+
+    const { sessionId, operations, pdfUrl } = await req.json();
+
+    console.log(`Processing ${operations.length} operations for session ${sessionId}`);
+
+    // Download the PDF
+    const pdfResponse = await fetch(pdfUrl);
+    const pdfBytes = await pdfResponse.arrayBuffer();
+    
+    // Load PDF with pdf-lib
+    const pdfDoc = await PDFDocument.load(pdfBytes);
+    const pages = pdfDoc.getPages();
+
+    // Apply operations
+    for (const op of operations as PDFOperation[]) {
+      const page = pages[op.page];
+      
+      switch (op.type) {
+        case 'add_text': {
+          const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+          const { text, fontSize = 12, color = { r: 0, g: 0, b: 0 } } = op.data;
+          page.drawText(text, {
+            x: op.x,
+            y: page.getHeight() - op.y,
+            size: fontSize,
+            font,
+            color: rgb(color.r, color.g, color.b),
+          });
+          break;
+        }
+        
+        case 'add_rectangle': {
+          const { width, height, color = { r: 0, g: 0, b: 1 }, borderColor, borderWidth = 1 } = op.data;
+          page.drawRectangle({
+            x: op.x,
+            y: page.getHeight() - op.y - height,
+            width,
+            height,
+            color: rgb(color.r, color.g, color.b),
+            borderColor: borderColor ? rgb(borderColor.r, borderColor.g, borderColor.b) : undefined,
+            borderWidth,
+          });
+          break;
+        }
+        
+        case 'add_image': {
+          const { imageUrl, width, height } = op.data;
+          const imageResponse = await fetch(imageUrl);
+          const imageBytes = await imageResponse.arrayBuffer();
+          
+          let embeddedImage;
+          if (imageUrl.endsWith('.png')) {
+            embeddedImage = await pdfDoc.embedPng(imageBytes);
+          } else {
+            embeddedImage = await pdfDoc.embedJpg(imageBytes);
+          }
+          
+          page.drawImage(embeddedImage, {
+            x: op.x,
+            y: page.getHeight() - op.y - height,
+            width,
+            height,
+          });
+          break;
+        }
+        
+        case 'delete_content': {
+          // For delete, we draw a white rectangle over the area
+          const { width, height } = op.data;
+          page.drawRectangle({
+            x: op.x,
+            y: page.getHeight() - op.y - height,
+            width,
+            height,
+            color: rgb(1, 1, 1),
+          });
+          break;
+        }
+      }
+    }
+
+    // Save the modified PDF
+    const modifiedPdfBytes = await pdfDoc.save();
+    
+    // Upload to storage
+    const fileName = `pdf-sessions/${sessionId}/${Date.now()}.pdf`;
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('pdf-documents')
+      .upload(fileName, modifiedPdfBytes, {
+        contentType: 'application/pdf',
+        upsert: false,
+      });
+
+    if (uploadError) {
+      console.error('Upload error:', uploadError);
+      throw uploadError;
+    }
+
+    // Get public URL
+    const { data: { publicUrl } } = supabase.storage
+      .from('pdf-documents')
+      .getPublicUrl(fileName);
+
+    // Update session with new version
+    const { error: updateError } = await supabase
+      .from('pdf_editing_sessions')
+      .update({ current_version_url: publicUrl })
+      .eq('id', sessionId);
+
+    if (updateError) {
+      console.error('Update error:', updateError);
+      throw updateError;
+    }
+
+    // Save operations to history
+    const { error: historyError } = await supabase
+      .from('pdf_operation_history')
+      .insert(operations.map((op: PDFOperation, index: number) => ({
+        session_id: sessionId,
+        user_id: user.id,
+        operation_type: op.type,
+        operation_data: op,
+        version_number: index + 1,
+      })));
+
+    if (historyError) {
+      console.error('History error:', historyError);
+    }
+
+    return new Response(
+      JSON.stringify({ 
+        success: true, 
+        pdfUrl: publicUrl,
+        message: `Applied ${operations.length} operations successfully` 
+      }),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    );
+
+  } catch (error) {
+    console.error('Error:', error);
+    return new Response(
+      JSON.stringify({ error: error.message }),
+      { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      }
+    );
+  }
+});

@@ -6,17 +6,18 @@ import { FolderOpen } from "lucide-react";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
+import { PDFEditorCore } from "@/components/pdf-editor/PDFEditorCore";
 
 import AIAssistant from "@/components/AIAssistant";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
 import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
 import { QuickNavigation } from "@/components/lightpaper/QuickNavigation";
-import { LightPaperProject } from "@/hooks/useLightPaperProjects";
+import { LightPaperProject, ProjectType } from "@/hooks/useLightPaperProjects";
 import { DocumentLoadingSkeleton, SpreadsheetLoadingSkeleton, PresentationLoadingSkeleton } from "@/components/lightpaper/LoadingSkeleton";
 
 export default function LightPaper() {
-  const [activeTab, setActiveTab] = useState("document");
+  const [activeTab, setActiveTab] = useState<ProjectType>('document');
   const [showAI, setShowAI] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
   const [showFiles, setShowFiles] = useState(false);
@@ -100,6 +101,15 @@ export default function LightPaper() {
                 >
                   <Presentation className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
+                <Button 
+                  variant={activeTab === "pdf" ? "secondary" : "ghost"} 
+                  size="sm" 
+                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
+                  onClick={() => setActiveTab("pdf")}
+                  title="PDF Editor"
+                >
+                  <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+                </Button>
               </div>
             </div>
           </div>
@@ -111,7 +121,7 @@ export default function LightPaper() {
           value={activeTab} 
           onValueChange={(value) => {
             setIsTabLoading(true);
-            setActiveTab(value);
+            setActiveTab(value as ProjectType);
             // Simulate loading delay for smooth transition
             setTimeout(() => setIsTabLoading(false), 300);
           }} 
@@ -138,6 +148,16 @@ export default function LightPaper() {
               <PresentationLoadingSkeleton />
             ) : (
               <LightPaperPresentation />
+            )}
+          </TabsContent>
+
+          <TabsContent value="pdf" className="flex-1 mt-0 overflow-hidden">
+            {activeTab === "pdf" && (
+              <PDFEditorCore
+                onSessionCreated={(session) => {
+                  console.log('PDF session created:', session);
+                }}
+              />
             )}
           </TabsContent>
         </Tabs>
