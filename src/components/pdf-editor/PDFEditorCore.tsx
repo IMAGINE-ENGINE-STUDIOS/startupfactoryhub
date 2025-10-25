@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Save, Download, Undo, Redo, Type, Square, Image, Eraser } from 'lucide-react';
+import { Upload, Save, Download, Undo, Redo, Type, Square, Image, Eraser, Users } from 'lucide-react';
 import { PDFOperation, PDFEditingSession } from '@/types/pdf-editor';
 import { OperationQueue } from '@/lib/pdf/operationQueue';
+import { usePDFRealtime } from '@/hooks/usePDFRealtime';
+import { LiveCursors } from './LiveCursors';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -25,9 +27,26 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
   const [session, setSession] = useState<PDFEditingSession | null>(null);
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState<'text' | 'rectangle' | 'delete' | 'image' | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const operationQueueRef = useRef<OperationQueue | null>(null);
   const { toast } = useToast();
+
+  // Initialize user ID
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    getUser();
+  }, []);
+
+  // Real-time collaboration hook
+  const { collaborators, remoteOperations, updateCursor, isConnected } = usePDFRealtime(
+    session?.id || null,
+    userId
+  );
 
   useEffect(() => {
     if (sessionId) {
@@ -123,7 +142,7 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
   };
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!editMode || !session) return;
+    if (!editMode || !session || !userId) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
@@ -139,6 +158,7 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
       y,
       data: getOperationData(editMode),
       timestamp: Date.now(),
+      userId,
     };
 
     operationQueueRef.current?.addOperation(operation);
@@ -148,6 +168,17 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
       title: 'Operation added',
       description: `${editMode} operation queued (auto-saving in 2s)`,
     });
+  };
+
+  // Handle mouse movement for cursor tracking
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current || !session || !userId) return;
+
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
+    
+    updateCursor(x, y, currentPage);
   };
 
   const getOperationData = (mode: string) => {
@@ -173,6 +204,17 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     ctx.fillStyle = 'rgba(0, 100, 255, 0.3)';
     ctx.fillRect(operation.x, operation.y, 100, 50);
   };
+
+  // Apply remote operations from collaborators
+  useEffect(() => {
+    if (remoteOperations.length === 0) return;
+
+    console.log('Processing remote operations:', remoteOperations.length);
+    remoteOperations.forEach((op) => {
+      operationQueueRef.current?.applyRemoteOperation(op);
+      drawOperationOnCanvas(op);
+    });
+  }, [remoteOperations]);
 
   const applyOperations = async (operations: PDFOperation[]) => {
     if (!session) return;
@@ -247,6 +289,15 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
             />
           </label>
 
+          {isConnected && collaborators.length > 0 && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-md">
+              <Users className="w-4 h-4 text-green-600 dark:text-green-400" />
+              <span className="text-sm font-medium text-green-700 dark:text-green-300">
+                {collaborators.length} {collaborators.length === 1 ? 'collaborator' : 'collaborators'}
+              </span>
+            </div>
+          )}
+
           {session && (
             <>
               <Button
@@ -305,7 +356,12 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
       {/* PDF Viewer */}
       <div className="flex-1 overflow-auto">
         {pdfFile ? (
-          <div className="relative" onClick={handleCanvasClick}>
+          <div
+            ref={containerRef}
+            className="relative"
+            onClick={handleCanvasClick}
+            onMouseMove={handleMouseMove}
+          >
             <Document
               file={pdfFile}
               onLoadSuccess={onDocumentLoadSuccess}
@@ -322,6 +378,7 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
               className="absolute top-0 left-0 pointer-events-none"
               style={{ width: '100%', height: '100%' }}
             />
+            <LiveCursors cursors={collaborators} containerRef={containerRef} />
           </div>
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">

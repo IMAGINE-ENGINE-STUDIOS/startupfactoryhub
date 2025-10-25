@@ -29,6 +29,41 @@ export class OperationQueue {
     this.commandHistory.execute(command);
   }
 
+  // Apply remote operation without adding to command history
+  applyRemoteOperation(operation: PDFOperation) {
+    // Check if operation already exists to prevent duplicates
+    const exists = this.operations.some(op => op.id === operation.id);
+    if (exists) {
+      console.log('Operation already exists, skipping:', operation.id);
+      return;
+    }
+
+    console.log('Applying remote operation:', operation);
+    this.operations.push(operation);
+  }
+
+  // Merge remote operations, handling conflicts by timestamp
+  mergeOperations(remoteOps: PDFOperation[]) {
+    remoteOps.forEach(remoteOp => {
+      const existingIndex = this.operations.findIndex(op => op.id === remoteOp.id);
+      
+      if (existingIndex === -1) {
+        // New operation, add it
+        this.operations.push(remoteOp);
+      } else {
+        // Operation exists, keep the one with latest timestamp
+        const existing = this.operations[existingIndex];
+        if (remoteOp.timestamp > existing.timestamp) {
+          this.operations[existingIndex] = remoteOp;
+          console.log('Replaced operation with newer version:', remoteOp.id);
+        }
+      }
+    });
+
+    // Sort operations by timestamp
+    this.operations.sort((a, b) => a.timestamp - b.timestamp);
+  }
+
   undo(): boolean {
     return this.commandHistory.undo();
   }
