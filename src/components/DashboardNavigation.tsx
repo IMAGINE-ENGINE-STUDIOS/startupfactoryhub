@@ -34,7 +34,8 @@ import {
   Video,
   Sparkles,
   FileText,
-  Brain
+  Brain,
+  BookOpen
 } from "lucide-react";
 import RecommendationPopup from "./RecommendationPopup";
 
@@ -146,6 +147,15 @@ const DashboardNavigation = () => {
               >
                 <FileText className="w-4 h-4" />
                 <span>LightPaper</span>
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm"
+                className="flex items-center space-x-2"
+                onClick={() => navigate("/guidelines")}
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>Help</span>
               </Button>
             </div>
 

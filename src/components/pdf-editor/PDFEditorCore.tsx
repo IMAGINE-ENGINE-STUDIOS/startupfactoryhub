@@ -24,6 +24,7 @@ import { uploadImageToStorage, compressImage } from '@/lib/pdf/imageUploader';
 import { cn } from '@/lib/utils';
 import { SignaturePanel } from './SignaturePanel';
 import { PDFShareDialog } from './PDFShareDialog';
+import { PDFEditorQuickReference } from '@/components/PDFEditorQuickReference';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -1111,6 +1112,8 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
           </Card>
         )}
       </div>
+
+      <PDFEditorQuickReference />
     </TooltipProvider>
   );
 };

@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, Command, FilePenLine } from "lucide-react";
+import { FileText, Table, Presentation, Command, FilePenLine, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FolderOpen } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
@@ -17,6 +18,7 @@ import { LightPaperProject, ProjectType } from "@/hooks/useLightPaperProjects";
 import { DocumentLoadingSkeleton, SpreadsheetLoadingSkeleton, PresentationLoadingSkeleton } from "@/components/lightpaper/LoadingSkeleton";
 
 export default function LightPaper() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<ProjectType>('document');
   const [showAI, setShowAI] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
@@ -55,6 +57,15 @@ export default function LightPaper() {
               </span>
             </div>
             <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => navigate("/guidelines")} 
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                title="User Guidelines & Help"
+              >
+                <HelpCircle className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Help</span>
+              </Button>
               <Button 
                 variant="outline" 
                 onClick={() => setShowQuickNav(true)} 
