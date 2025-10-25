@@ -7,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
-import SimplePDFEditor from "@/components/pdf-editor/SimplePDFEditor";
+import { FabricPDFEditor } from "@/components/pdf-editor/FabricPDFEditor";
 
 import AIAssistant from "@/components/AIAssistant";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
@@ -164,11 +164,7 @@ export default function LightPaper() {
 
           <TabsContent value="pdf" className="flex-1 mt-0 overflow-hidden">
             {activeTab === "pdf" && (
-              <SimplePDFEditor
-                onSessionCreated={(session) => {
-                  console.log('PDF session created:', session);
-                }}
-              />
+              <FabricPDFEditor />
             )}
           </TabsContent>
         </Tabs>
