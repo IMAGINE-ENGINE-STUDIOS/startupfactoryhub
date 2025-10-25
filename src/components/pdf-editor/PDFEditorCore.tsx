@@ -4,17 +4,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Save, Download, Undo, Redo, Type, Square, Image as ImageIcon, Eraser, Users, FileText } from 'lucide-react';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { Upload, Download, Undo, Redo, Type, Square, Image as ImageIcon, Eraser, Users, FileText, ZoomIn, ZoomOut, Search, Keyboard, MoreVertical, Loader2, Check, AlertCircle } from 'lucide-react';
 import { PDFOperation, PDFEditingSession } from '@/types/pdf-editor';
 import { OperationQueue } from '@/lib/pdf/operationQueue';
 import { usePDFRealtime } from '@/hooks/usePDFRealtime';
 import { LiveCursors } from './LiveCursors';
 import { TextEditDialog } from './TextEditDialog';
 import { FormFieldEditor } from './FormFieldEditor';
+import { PDFSearchDialog, SearchResult } from './PDFSearchDialog';
+import { ShortcutsDialog } from '@/components/lightpaper/ShortcutsDialog';
 import { extractTextFromPDF, findTextAtPosition, TextItem } from '@/lib/pdf/textExtractor';
 import { extractFormFields, FormField } from '@/lib/pdf/formExtractor';
 import { uploadImageToStorage, compressImage } from '@/lib/pdf/imageUploader';
+import { cn } from '@/lib/utils';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -31,16 +38,24 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [session, setSession] = useState<PDFEditingSession | null>(null);
   const [loading, setLoading] = useState(false);
+  const [pdfError, setPdfError] = useState<string | null>(null);
   const [editMode, setEditMode] = useState<'text' | 'rectangle' | 'delete' | 'image' | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
   const [textItems, setTextItems] = useState<TextItem[]>([]);
   const [formFields, setFormFields] = useState<FormField[]>([]);
   const [selectedText, setSelectedText] = useState<TextItem | null>(null);
   const [showTextEditDialog, setShowTextEditDialog] = useState(false);
+  const [showSearchDialog, setShowSearchDialog] = useState(false);
+  const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [scale, setScale] = useState(1.0);
+  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
+  const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const operationQueueRef = useRef<OperationQueue | null>(null);
+  const pendingDrawOps = useRef<PDFOperation[]>([]);
+  const drawFrameId = useRef<number | null>(null);
   const { toast } = useToast();
 
   // Initialize user ID
@@ -51,6 +66,99 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     };
     getUser();
   }, []);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: 'z',
+      ctrl: true,
+      handler: () => handleUndo(),
+      description: 'Undo last operation'
+    },
+    {
+      key: 'y',
+      ctrl: true,
+      handler: () => handleRedo(),
+      description: 'Redo operation'
+    },
+    {
+      key: 's',
+      ctrl: true,
+      handler: (e) => {
+        e.preventDefault();
+        const pendingOps = operationQueueRef.current?.getPendingOperations();
+        if (pendingOps && pendingOps.length > 0) {
+          applyOperations(operationQueueRef.current?.getOperations() || []);
+        } else {
+          toast({ title: 'Already saved', description: 'No pending changes' });
+        }
+      },
+      description: 'Save changes'
+    },
+    {
+      key: 'f',
+      ctrl: true,
+      handler: (e) => {
+        e.preventDefault();
+        setShowSearchDialog(true);
+      },
+      description: 'Search in PDF'
+    },
+    {
+      key: '/',
+      ctrl: true,
+      handler: () => setShowShortcutsDialog(true),
+      description: 'Show keyboard shortcuts'
+    },
+    {
+      key: '+',
+      ctrl: true,
+      handler: (e) => {
+        e.preventDefault();
+        setScale(prev => Math.min(prev + 0.1, 3.0));
+      },
+      description: 'Zoom in'
+    },
+    {
+      key: '-',
+      ctrl: true,
+      handler: (e) => {
+        e.preventDefault();
+        setScale(prev => Math.max(prev - 0.1, 0.3));
+      },
+      description: 'Zoom out'
+    },
+    {
+      key: 't',
+      handler: () => setEditMode('text'),
+      description: 'Text tool'
+    },
+    {
+      key: 'r',
+      handler: () => setEditMode('rectangle'),
+      description: 'Rectangle tool'
+    },
+    {
+      key: 'e',
+      handler: () => setEditMode('delete'),
+      description: 'Eraser tool'
+    },
+    {
+      key: 'Escape',
+      handler: () => setEditMode(null),
+      description: 'Deselect tool'
+    },
+    {
+      key: 'ArrowRight',
+      handler: () => setCurrentPage(prev => Math.min(numPages, prev + 1)),
+      description: 'Next page'
+    },
+    {
+      key: 'ArrowLeft',
+      handler: () => setCurrentPage(prev => Math.max(1, prev - 1)),
+      description: 'Previous page'
+    }
+  ], !!session);
 
   // Real-time collaboration hook
   const { collaborators, remoteOperations, updateCursor, isConnected } = usePDFRealtime(
@@ -149,6 +257,7 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
 
   const onDocumentLoadSuccess = async ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
+    setPdfError(null);
     
     // Extract text and form fields from PDF
     if (pdfFile) {
@@ -164,6 +273,16 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
         console.error('Error extracting PDF content:', error);
       }
     }
+  };
+
+  const onDocumentLoadError = (error: Error) => {
+    console.error('PDF load error:', error);
+    setPdfError(error.message);
+    toast({
+      title: 'PDF Load Error',
+      description: 'This PDF may be corrupted or password-protected',
+      variant: 'destructive',
+    });
   };
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -231,14 +350,24 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
   };
 
   const drawOperationOnCanvas = (operation: PDFOperation) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    ctx.fillStyle = 'rgba(0, 100, 255, 0.3)';
-    ctx.fillRect(operation.x, operation.y, 100, 50);
+    pendingDrawOps.current.push(operation);
+    
+    if (drawFrameId.current === null) {
+      drawFrameId.current = requestAnimationFrame(() => {
+        const canvas = canvasRef.current;
+        const ctx = canvas?.getContext('2d');
+        
+        if (ctx) {
+          pendingDrawOps.current.forEach(op => {
+            ctx.fillStyle = 'rgba(0, 100, 255, 0.3)';
+            ctx.fillRect(op.x, op.y, op.data?.width || 100, op.data?.height || 50);
+          });
+        }
+        
+        pendingDrawOps.current = [];
+        drawFrameId.current = null;
+      });
+    }
   };
 
   // Apply remote operations from collaborators
@@ -252,9 +381,10 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     });
   }, [remoteOperations]);
 
-  const applyOperations = async (operations: PDFOperation[]) => {
+  const applyOperations = async (operations: PDFOperation[], retryCount = 0) => {
     if (!session) return;
 
+    setSaveStatus('saving');
     try {
       const { data: { session: authSession } } = await supabase.auth.getSession();
       if (!authSession) throw new Error('Not authenticated');
@@ -271,6 +401,8 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
 
       // Reload the PDF with new version
       setPdfFile(response.data.pdfUrl);
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('saved'), 2000);
       
       toast({
         title: 'Success',
@@ -278,10 +410,23 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
       });
     } catch (error) {
       console.error('Apply operations error:', error);
+      setSaveStatus('unsaved');
+      
+      if (retryCount < 3) {
+        // Retry with exponential backoff
+        await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
+        return applyOperations(operations, retryCount + 1);
+      }
+      
       toast({
         title: 'Error',
         description: 'Failed to apply operations',
         variant: 'destructive',
+        action: (
+          <Button size="sm" onClick={() => applyOperations(operations)}>
+            Retry
+          </Button>
+        ),
       });
     }
   };
@@ -426,187 +571,422 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     operationQueueRef.current?.addOperation(operation);
   };
 
-  return (
-    <div className="flex flex-col h-full bg-background">
-      {/* Toolbar */}
-      <Card className="p-4 mb-4">
-        <div className="flex items-center gap-2 flex-wrap">
-          <label htmlFor="pdf-upload">
-            <Button asChild disabled={loading}>
-              <span>
-                <Upload className="w-4 h-4 mr-2" />
-                Upload PDF
-              </span>
-            </Button>
-            <Input
-              id="pdf-upload"
-              type="file"
-              accept=".pdf"
-              onChange={handleFileUpload}
-              className="hidden"
-            />
-          </label>
+  // Search result handler
+  const handleSearchResult = (result: SearchResult) => {
+    setCurrentPage(result.page + 1);
+  };
 
-          {isConnected && collaborators.length > 0 && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-md">
-              <Users className="w-4 h-4 text-green-600 dark:text-green-400" />
-              <span className="text-sm font-medium text-green-700 dark:text-green-300">
-                {collaborators.length} {collaborators.length === 1 ? 'collaborator' : 'collaborators'}
-              </span>
+  // Touch gesture handlers for mobile
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (!containerRef.current) return;
+    const touch = e.touches[0];
+    const rect = containerRef.current.getBoundingClientRect();
+    setTouchStart({ 
+      x: touch.clientX - rect.left, 
+      y: touch.clientY - rect.top 
+    });
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart && editMode && userId && session) {
+      const operation: PDFOperation = {
+        id: `op_${Date.now()}_${Math.random()}`,
+        type: editMode === 'text' ? 'add_text' : 
+              editMode === 'rectangle' ? 'add_rectangle' : 
+              editMode === 'delete' ? 'delete_content' : 'add_image',
+        page: currentPage - 1,
+        x: touchStart.x,
+        y: touchStart.y,
+        data: getOperationData(editMode),
+        timestamp: Date.now(),
+        userId,
+      };
+      operationQueueRef.current?.addOperation(operation);
+    }
+    setTouchStart(null);
+  };
+
+  return (
+    <TooltipProvider>
+      <div className="flex flex-col h-full bg-background">
+        {/* Toolbar */}
+        <Card className="p-2 sm:p-4 mb-4">
+          <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <label htmlFor="pdf-upload">
+                  <Button size="sm" disabled={loading}>
+                    <Upload className="w-4 h-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Upload PDF</span>
+                  </Button>
+                  <Input
+                    id="pdf-upload"
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
+              </TooltipTrigger>
+              <TooltipContent>Upload PDF file</TooltipContent>
+            </Tooltip>
+
+            {isConnected && collaborators.length > 0 && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex items-center gap-2 px-2 sm:px-3 py-2 bg-green-50 dark:bg-green-900/20 rounded-md">
+                    <Users className="w-4 h-4 text-green-600 dark:text-green-400" />
+                    <span className="text-xs sm:text-sm font-medium text-green-700 dark:text-green-300">
+                      {collaborators.length}
+                    </span>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>{collaborators.length} active collaborator{collaborators.length !== 1 ? 's' : ''}</TooltipContent>
+              </Tooltip>
+            )}
+
+            {session && (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant={editMode === 'text' ? 'default' : 'outline'}
+                      onClick={() => setEditMode(editMode === 'text' ? null : 'text')}
+                    >
+                      <Type className="w-4 h-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Text</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Text tool (T)</TooltipContent>
+                </Tooltip>
+                
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant={editMode === 'rectangle' ? 'default' : 'outline'}
+                      onClick={() => setEditMode(editMode === 'rectangle' ? null : 'rectangle')}
+                    >
+                      <Square className="w-4 h-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Shape</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Rectangle tool (R)</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant={editMode === 'delete' ? 'default' : 'outline'}
+                      onClick={() => setEditMode(editMode === 'delete' ? null : 'delete')}
+                    >
+                      <Eraser className="w-4 h-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Erase</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Eraser tool (E)</TooltipContent>
+                </Tooltip>
+
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant={editMode === 'image' ? 'default' : 'outline'}
+                      onClick={() => setEditMode(editMode === 'image' ? null : 'image')}
+                    >
+                      <ImageIcon className="w-4 h-4 sm:mr-2" />
+                      <span className="hidden sm:inline">Image</span>
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Drag & drop images</TooltipContent>
+                </Tooltip>
+
+                {formFields.length > 0 && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" variant="outline" disabled>
+                        <FileText className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">{formFields.length} Fields</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{formFields.length} form fields detected</TooltipContent>
+                  </Tooltip>
+                )}
+
+                <div className="hidden md:flex flex-1" />
+
+                {/* Desktop buttons */}
+                <div className="hidden md:flex items-center gap-1">
+                  {/* Zoom controls */}
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" variant="outline" onClick={() => setScale(s => Math.max(0.3, s - 0.1))}>
+                        <ZoomOut className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Zoom out (Ctrl + -)</TooltipContent>
+                  </Tooltip>
+                  <span className="text-xs sm:text-sm font-medium min-w-[50px] text-center">
+                    {Math.round(scale * 100)}%
+                  </span>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" variant="outline" onClick={() => setScale(s => Math.min(3.0, s + 0.1))}>
+                        <ZoomIn className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Zoom in (Ctrl + +)</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" variant="outline" onClick={() => setShowSearchDialog(true)}>
+                        <Search className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Search (Ctrl + F)</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" variant="outline" onClick={() => setShowShortcutsDialog(true)}>
+                        <Keyboard className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Keyboard shortcuts (Ctrl + /)</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleUndo}
+                        disabled={!operationQueueRef.current?.canUndo()}
+                      >
+                        <Undo className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Undo</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Undo (Ctrl + Z)</TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleRedo}
+                        disabled={!operationQueueRef.current?.canRedo()}
+                      >
+                        <Redo className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Redo</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Redo (Ctrl + Y)</TooltipContent>
+                  </Tooltip>
+
+                  {saveStatus === 'saving' && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+                  {saveStatus === 'saved' && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Check className="w-4 h-4 text-green-500" />
+                      </TooltipTrigger>
+                      <TooltipContent>All changes saved</TooltipContent>
+                    </Tooltip>
+                  )}
+                  {saveStatus === 'unsaved' && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <AlertCircle className="w-4 h-4 text-yellow-500" />
+                      </TooltipTrigger>
+                      <TooltipContent>Unsaved changes</TooltipContent>
+                    </Tooltip>
+                  )}
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button size="sm" onClick={handleDownload}>
+                        <Download className="w-4 h-4 sm:mr-2" />
+                        <span className="hidden sm:inline">Download</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>Download PDF</TooltipContent>
+                  </Tooltip>
+                </div>
+
+                {/* Mobile dropdown menu */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild className="md:hidden">
+                    <Button size="sm" variant="outline">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setShowSearchDialog(true)}>
+                      <Search className="w-4 h-4 mr-2" />
+                      Search
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setShowShortcutsDialog(true)}>
+                      <Keyboard className="w-4 h-4 mr-2" />
+                      Shortcuts
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleUndo} disabled={!operationQueueRef.current?.canUndo()}>
+                      <Undo className="w-4 h-4 mr-2" />
+                      Undo
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleRedo} disabled={!operationQueueRef.current?.canRedo()}>
+                      <Redo className="w-4 h-4 mr-2" />
+                      Redo
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleDownload}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
+          </div>
+        </Card>
+
+        {/* PDF Viewer */}
+        <div className="flex-1 overflow-auto">
+          {loading && (
+            <div className="flex flex-col gap-4 p-4">
+              <Skeleton className="h-10 w-full" />
+              <Skeleton className="h-[600px] w-full" />
             </div>
           )}
 
-          {session && (
-            <>
-              <Button
-                variant={editMode === 'text' ? 'default' : 'outline'}
-                onClick={() => setEditMode(editMode === 'text' ? null : 'text')}
-              >
-                <Type className="w-4 h-4 mr-2" />
-                Text
-              </Button>
-              
-              <Button
-                variant={editMode === 'rectangle' ? 'default' : 'outline'}
-                onClick={() => setEditMode(editMode === 'rectangle' ? null : 'rectangle')}
-              >
-                <Square className="w-4 h-4 mr-2" />
-                Shape
-              </Button>
-
-              <Button
-                variant={editMode === 'delete' ? 'default' : 'outline'}
-                onClick={() => setEditMode(editMode === 'delete' ? null : 'delete')}
-              >
-                <Eraser className="w-4 h-4 mr-2" />
-                Erase
-              </Button>
-
-              <Button
-                variant={editMode === 'image' ? 'default' : 'outline'}
-                onClick={() => setEditMode(editMode === 'image' ? null : 'image')}
-              >
-                <ImageIcon className="w-4 h-4 mr-2" />
-                Image
-              </Button>
-
-              {formFields.length > 0 && (
-                <Button variant="outline" disabled>
-                  <FileText className="w-4 h-4 mr-2" />
-                  {formFields.length} Fields
-                </Button>
+          {!loading && pdfFile && (
+            <div
+              ref={containerRef}
+              className={cn(
+                "relative",
+                isDragging && "ring-4 ring-primary ring-opacity-50"
               )}
-
-              <div className="flex-1" />
-
-              <Button
-                variant="outline"
-                onClick={handleUndo}
-                disabled={!operationQueueRef.current?.canUndo()}
+              onClick={handleCanvasClick}
+              onMouseMove={handleMouseMove}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+            >
+              <Document
+                file={pdfFile}
+                onLoadSuccess={onDocumentLoadSuccess}
+                onLoadError={onDocumentLoadError}
+                className="flex justify-center"
+                loading={<Skeleton className="h-[600px] w-full max-w-3xl mx-auto" />}
+                error={
+                  <div className="text-center p-8">
+                    <AlertCircle className="w-12 h-12 mx-auto text-destructive mb-4" />
+                    <h3 className="font-semibold text-lg mb-2">Failed to Load PDF</h3>
+                    <p className="text-sm text-muted-foreground">{pdfError || 'Unknown error'}</p>
+                  </div>
+                }
               >
-                <Undo className="w-4 h-4 mr-2" />
-                Undo
-              </Button>
-
-              <Button
-                variant="outline"
-                onClick={handleRedo}
-                disabled={!operationQueueRef.current?.canRedo()}
-              >
-                <Redo className="w-4 h-4 mr-2" />
-                Redo
-              </Button>
-
-              <Button onClick={handleDownload}>
-                <Download className="w-4 h-4 mr-2" />
-                Download
-              </Button>
-            </>
+                <Page
+                  pageNumber={currentPage}
+                  scale={scale}
+                  renderTextLayer={true}
+                  renderAnnotationLayer={true}
+                />
+              </Document>
+              <canvas
+                ref={canvasRef}
+                className="absolute top-0 left-0 pointer-events-none"
+                style={{ width: '100%', height: '100%' }}
+              />
+              <FormFieldEditor 
+                fields={formFields.filter(f => f.page === currentPage - 1)}
+                onFieldChange={handleFormFieldChange}
+                scale={scale}
+              />
+              <LiveCursors cursors={collaborators} containerRef={containerRef} />
+              {isDragging && (
+                <div className="absolute inset-0 bg-primary/10 border-4 border-dashed border-primary rounded-lg flex items-center justify-center pointer-events-none">
+                  <div className="text-lg sm:text-2xl font-bold text-primary">Drop image here</div>
+                </div>
+              )}
+            </div>
+          )}
+          
+          {!loading && !pdfFile && (
+            <div className="flex items-center justify-center h-full text-muted-foreground">
+              Upload a PDF to start editing
+            </div>
           )}
         </div>
-      </Card>
 
-      {/* PDF Viewer */}
-      <div className="flex-1 overflow-auto">
-        {pdfFile ? (
-          <div
-            ref={containerRef}
-            className={`relative ${isDragging ? 'ring-4 ring-primary ring-opacity-50' : ''}`}
-            onClick={handleCanvasClick}
-            onMouseMove={handleMouseMove}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <Document
-              file={pdfFile}
-              onLoadSuccess={onDocumentLoadSuccess}
-              className="flex justify-center"
-            >
-              <Page
-                pageNumber={currentPage}
-                renderTextLayer={true}
-                renderAnnotationLayer={true}
-              />
-            </Document>
-            <canvas
-              ref={canvasRef}
-              className="absolute top-0 left-0 pointer-events-none"
-              style={{ width: '100%', height: '100%' }}
-            />
-            <FormFieldEditor 
-              fields={formFields.filter(f => f.page === currentPage - 1)} 
-              onFieldChange={handleFormFieldChange}
-            />
-            <LiveCursors cursors={collaborators} containerRef={containerRef} />
-            {isDragging && (
-              <div className="absolute inset-0 bg-primary/10 border-4 border-dashed border-primary rounded-lg flex items-center justify-center pointer-events-none">
-                <div className="text-2xl font-bold text-primary">Drop image here</div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex items-center justify-center h-full text-muted-foreground">
-            Upload a PDF to start editing
-          </div>
+        {/* Search Dialog */}
+        <PDFSearchDialog
+          open={showSearchDialog}
+          onClose={() => setShowSearchDialog(false)}
+          textItems={textItems}
+          onResultSelect={handleSearchResult}
+        />
+
+        {/* Shortcuts Dialog */}
+        <ShortcutsDialog
+          open={showShortcutsDialog}
+          onOpenChange={setShowShortcutsDialog}
+          type="pdf"
+        />
+
+        {/* Text Edit Dialog */}
+        <TextEditDialog
+          open={showTextEditDialog}
+          onClose={() => {
+            setShowTextEditDialog(false);
+            setSelectedText(null);
+          }}
+          textItem={selectedText}
+          onSave={handleTextEdit}
+        />
+
+        {/* Page Navigation */}
+        {numPages > 0 && (
+          <Card className="p-2 sm:p-4 mt-4">
+            <div className="flex items-center justify-center gap-2 sm:gap-4">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage <= 1}
+                  >
+                    <span className="hidden sm:inline">Previous</span>
+                    <span className="sm:hidden">Prev</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Previous page (←)</TooltipContent>
+              </Tooltip>
+              <span className="text-xs sm:text-sm font-medium">
+                Page {currentPage} of {numPages}
+              </span>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setCurrentPage(prev => Math.min(numPages, prev + 1))}
+                    disabled={currentPage >= numPages}
+                  >
+                    Next
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Next page (→)</TooltipContent>
+              </Tooltip>
+            </div>
+          </Card>
         )}
       </div>
-
-      {/* Text Edit Dialog */}
-      <TextEditDialog
-        open={showTextEditDialog}
-        onClose={() => {
-          setShowTextEditDialog(false);
-          setSelectedText(null);
-        }}
-        textItem={selectedText}
-        onSave={handleTextEdit}
-      />
-
-      {/* Page Navigation */}
-      {numPages > 0 && (
-        <Card className="p-4 mt-4">
-          <div className="flex items-center justify-center gap-4">
-            <Button
-              variant="outline"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage <= 1}
-            >
-              Previous
-            </Button>
-            <span className="text-sm">
-              Page {currentPage} of {numPages}
-            </span>
-            <Button
-              variant="outline"
-              onClick={() => setCurrentPage(prev => Math.min(numPages, prev + 1))}
-              disabled={currentPage >= numPages}
-            >
-              Next
-            </Button>
-          </div>
-        </Card>
-      )}
-    </div>
+    </TooltipProvider>
   );
 };
