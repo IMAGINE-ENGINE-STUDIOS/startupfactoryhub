@@ -61,6 +61,7 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
   const [fitMode, setFitMode] = useState<'width' | 'page' | null>('width');
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
   const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
+  const [hoveredText, setHoveredText] = useState<TextItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -335,9 +336,21 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
   const handleCanvasClick = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!session || !userId) return;
 
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
+    const container = event.currentTarget;
+    
+    // Get the actual PDF page element to find its position
+    const pageElement = container.querySelector('.react-pdf__Page');
+    if (!pageElement) return;
+    
+    const pageRect = pageElement.getBoundingClientRect();
+    
+    // Calculate position relative to PDF page
+    const relativeX = event.clientX - pageRect.left;
+    const relativeY = event.clientY - pageRect.top;
+    
+    // Convert to PDF coordinates (accounting for scale)
+    const pdfX = relativeX / scale;
+    const pdfY = relativeY / scale;
 
     // Handle signature placement
     if (editMode === 'signature' && currentSignature) {
@@ -345,8 +358,8 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
         id: `op_${Date.now()}_${Math.random()}`,
         type: 'add_image',
         page: currentPage - 1,
-        x,
-        y,
+        x: pdfX,
+        y: pdfY,
         data: { imageUrl: currentSignature, width: 150, height: 60 },
         timestamp: Date.now(),
         userId,
@@ -366,10 +379,11 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     }
 
     // Check if clicking on existing text (for editing) - works regardless of edit mode
-    const clickedText = findTextAtPosition(textItems, x, y, currentPage - 1);
+    const clickedText = findTextAtPosition(textItems, pdfX, pdfY, currentPage - 1);
     if (clickedText) {
       setSelectedText(clickedText);
-      setTextToolbarPosition({ x: event.clientX, y: event.clientY });
+      // Position toolbar above the text
+      setTextToolbarPosition({ x: event.clientX, y: event.clientY - 60 });
       return;
     }
 
@@ -382,8 +396,8 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
             editMode === 'rectangle' ? 'add_rectangle' : 
             editMode === 'delete' ? 'delete_content' : 'add_image',
       page: currentPage - 1,
-      x,
-      y,
+      x: pdfX,
+      y: pdfY,
       data: getOperationData(editMode),
       timestamp: Date.now(),
       userId,
@@ -398,6 +412,24 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     });
   };
 
+  // Handle mouse movement for text hover
+  const handleCanvasMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!containerRef.current) return;
+    
+    const container = event.currentTarget;
+    const pageElement = container.querySelector('.react-pdf__Page');
+    if (!pageElement) return;
+    
+    const pageRect = pageElement.getBoundingClientRect();
+    const relativeX = event.clientX - pageRect.left;
+    const relativeY = event.clientY - pageRect.top;
+    const pdfX = relativeX / scale;
+    const pdfY = relativeY / scale;
+    
+    const textUnderCursor = findTextAtPosition(textItems, pdfX, pdfY, currentPage - 1);
+    setHoveredText(textUnderCursor);
+  };
+
   // Handle mouse movement for cursor tracking
   const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current || !session || !userId) return;
@@ -407,6 +439,9 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     const y = event.clientY - rect.top;
     
     updateCursor(x, y, currentPage);
+    
+    // Also update hover state for text cursor
+    handleCanvasMouseMove(event);
   };
 
   const getOperationData = (mode: string) => {
@@ -423,24 +458,77 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
   };
 
   const drawOperationOnCanvas = (operation: PDFOperation) => {
-    pendingDrawOps.current.push(operation);
-    
-    if (drawFrameId.current === null) {
-      drawFrameId.current = requestAnimationFrame(() => {
-        const canvas = canvasRef.current;
-        const ctx = canvas?.getContext('2d');
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!ctx) return;
+
+    // Apply scale transformation
+    ctx.save();
+    ctx.scale(scale, scale);
+
+    switch (operation.type) {
+      case 'edit_text': {
+        const { text, fontSize, color, width, height } = operation.data || {};
         
-        if (ctx) {
-          pendingDrawOps.current.forEach(op => {
-            ctx.fillStyle = 'rgba(0, 100, 255, 0.3)';
-            ctx.fillRect(op.x, op.y, op.data?.width || 100, op.data?.height || 50);
-          });
+        // Cover old text with white rectangle
+        if (width && height) {
+          ctx.fillStyle = 'white';
+          ctx.fillRect(operation.x, operation.y - height, width, height);
         }
         
-        pendingDrawOps.current = [];
-        drawFrameId.current = null;
-      });
+        // Draw new text
+        if (text && fontSize && color) {
+          ctx.font = `${fontSize}px Helvetica`;
+          ctx.fillStyle = `rgb(${color.r * 255}, ${color.g * 255}, ${color.b * 255})`;
+          ctx.fillText(text, operation.x, operation.y);
+        }
+        break;
+      }
+      
+      case 'add_text': {
+        const { text, fontSize, color } = operation.data || {};
+        if (text && fontSize && color) {
+          ctx.font = `${fontSize}px Helvetica`;
+          ctx.fillStyle = `rgb(${color.r * 255}, ${color.g * 255}, ${color.b * 255})`;
+          ctx.fillText(text, operation.x, operation.y);
+        }
+        break;
+      }
+      
+      case 'add_rectangle': {
+        const { width, height, color, borderColor, borderWidth } = operation.data || {};
+        if (borderColor && borderWidth) {
+          ctx.strokeStyle = `rgb(${borderColor.r * 255}, ${borderColor.g * 255}, ${borderColor.b * 255})`;
+          ctx.lineWidth = borderWidth;
+          ctx.strokeRect(operation.x, operation.y, width || 100, height || 50);
+        }
+        if (color) {
+          ctx.fillStyle = `rgba(${color.r * 255}, ${color.g * 255}, ${color.b * 255}, 0.3)`;
+          ctx.fillRect(operation.x, operation.y, width || 100, height || 50);
+        }
+        break;
+      }
+      
+      case 'add_image': {
+        // Show placeholder for images
+        ctx.fillStyle = 'rgba(0, 150, 255, 0.3)';
+        const { width, height } = operation.data || {};
+        ctx.fillRect(operation.x, operation.y, width || 100, height || 100);
+        ctx.strokeStyle = 'rgba(0, 100, 200, 0.8)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(operation.x, operation.y, width || 100, height || 100);
+        break;
+      }
+      
+      case 'delete_content': {
+        const { width, height } = operation.data || {};
+        ctx.fillStyle = 'white';
+        ctx.fillRect(operation.x, operation.y, width || 100, height || 50);
+        break;
+      }
     }
+    
+    ctx.restore();
   };
 
   // Apply remote operations from collaborators
@@ -678,6 +766,36 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     }
     setTouchStart(null);
   };
+
+  // Update canvas dimensions on scale change
+  useEffect(() => {
+    if (!canvasRef.current || !numPages || !containerRef.current) return;
+    
+    const updateCanvasSize = () => {
+      const pageElement = containerRef.current?.querySelector('.react-pdf__Page canvas');
+      if (pageElement && canvasRef.current) {
+        const pageCanvas = pageElement as HTMLCanvasElement;
+        canvasRef.current.width = pageCanvas.width;
+        canvasRef.current.height = pageCanvas.height;
+        
+        // Redraw all operations with new scale
+        const operations = operationQueueRef.current?.getOperations() || [];
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) {
+          ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+          operations.forEach(op => {
+            if (op.page === currentPage - 1) {
+              drawOperationOnCanvas(op);
+            }
+          });
+        }
+      }
+    };
+    
+    // Small delay to ensure PDF page is rendered
+    const timeoutId = setTimeout(updateCanvasSize, 100);
+    return () => clearTimeout(timeoutId);
+  }, [scale, numPages, currentPage]);
 
   // Lazy loading with Intersection Observer
   useEffect(() => {
@@ -1065,7 +1183,8 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
               ref={containerRef}
               className={cn(
                 "relative",
-                isDragging && "ring-4 ring-primary ring-opacity-50"
+                isDragging && "ring-4 ring-primary ring-opacity-50",
+                hoveredText && "cursor-text"
               )}
               onClick={handleCanvasClick}
               onMouseMove={handleMouseMove}

@@ -48,13 +48,37 @@ export function findTextAtPosition(
   x: number,
   y: number,
   page: number,
-  tolerance: number = 5
+  baseTolerance: number = 15
 ): TextItem | null {
-  return textItems.find(item => 
-    item.page === page &&
-    x >= item.x - tolerance &&
-    x <= item.x + item.width + tolerance &&
-    y >= item.y - tolerance &&
-    y <= item.y + item.height + tolerance
-  ) || null;
+  // Sort by proximity to click point
+  const itemsWithDistance = textItems
+    .filter(item => item.page === page)
+    .map(item => {
+      // Dynamic tolerance based on text size (smaller text = bigger tolerance)
+      const dynamicTolerance = Math.max(baseTolerance, item.height * 0.5);
+      
+      const isInBounds = 
+        x >= item.x - dynamicTolerance &&
+        x <= item.x + item.width + dynamicTolerance &&
+        y >= item.y - dynamicTolerance &&
+        y <= item.y + item.height + dynamicTolerance;
+      
+      if (!isInBounds) return null;
+      
+      // Calculate distance to center of text box
+      const centerX = item.x + item.width / 2;
+      const centerY = item.y + item.height / 2;
+      const distance = Math.sqrt(
+        Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2)
+      );
+      
+      return { item, distance };
+    })
+    .filter(Boolean) as { item: TextItem; distance: number }[];
+  
+  // Return closest item
+  if (itemsWithDistance.length === 0) return null;
+  
+  itemsWithDistance.sort((a, b) => a.distance - b.distance);
+  return itemsWithDistance[0].item;
 }
