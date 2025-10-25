@@ -1,6 +1,6 @@
 export interface PDFOperation {
   id: string;
-  type: 'add_text' | 'add_rectangle' | 'delete_content' | 'add_image';
+  type: 'add_text' | 'edit_text' | 'add_rectangle' | 'delete_content' | 'add_image' | 'fill_form';
   page: number;
   x: number;
   y: number;
@@ -13,6 +13,9 @@ export interface PDFOperation {
     borderColor?: { r: number; g: number; b: number };
     borderWidth?: number;
     imageUrl?: string;
+    fieldName?: string;
+    fieldValue?: string;
+    oldText?: string;
   };
   timestamp: number;
   userId?: string;

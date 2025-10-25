@@ -8,7 +8,7 @@ const corsHeaders = {
 };
 
 interface PDFOperation {
-  type: 'add_text' | 'add_rectangle' | 'delete_content' | 'add_image';
+  type: 'add_text' | 'edit_text' | 'add_rectangle' | 'delete_content' | 'add_image' | 'fill_form';
   page: number;
   x: number;
   y: number;
@@ -98,6 +98,32 @@ serve(async (req) => {
           break;
         }
         
+        case 'edit_text': {
+          const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+          const { text, fontSize = 12, color = { r: 0, g: 0, b: 0 }, oldText, width, height } = op.data;
+          
+          // Delete old text by drawing white rectangle
+          if (width && height) {
+            page.drawRectangle({
+              x: op.x,
+              y: page.getHeight() - op.y - height,
+              width,
+              height,
+              color: rgb(1, 1, 1),
+            });
+          }
+          
+          // Draw new text
+          page.drawText(text, {
+            x: op.x,
+            y: page.getHeight() - op.y,
+            size: fontSize,
+            font,
+            color: rgb(color.r, color.g, color.b),
+          });
+          break;
+        }
+        
         case 'delete_content': {
           // For delete, we draw a white rectangle over the area
           const { width, height } = op.data;
@@ -108,6 +134,28 @@ serve(async (req) => {
             height,
             color: rgb(1, 1, 1),
           });
+          break;
+        }
+        
+        case 'fill_form': {
+          const { fieldName, fieldValue } = op.data;
+          const form = pdfDoc.getForm();
+          
+          try {
+            const field = form.getTextField(fieldName);
+            field.setText(fieldValue);
+          } catch (e) {
+            try {
+              const checkbox = form.getCheckBox(fieldName);
+              if (fieldValue === 'true') {
+                checkbox.check();
+              } else {
+                checkbox.uncheck();
+              }
+            } catch (err) {
+              console.warn(`Field ${fieldName} not found or unsupported type`);
+            }
+          }
           break;
         }
       }

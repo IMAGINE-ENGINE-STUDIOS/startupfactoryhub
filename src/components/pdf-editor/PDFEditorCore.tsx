@@ -5,11 +5,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Save, Download, Undo, Redo, Type, Square, Image, Eraser, Users } from 'lucide-react';
+import { Upload, Save, Download, Undo, Redo, Type, Square, Image as ImageIcon, Eraser, Users, FileText } from 'lucide-react';
 import { PDFOperation, PDFEditingSession } from '@/types/pdf-editor';
 import { OperationQueue } from '@/lib/pdf/operationQueue';
 import { usePDFRealtime } from '@/hooks/usePDFRealtime';
 import { LiveCursors } from './LiveCursors';
+import { TextEditDialog } from './TextEditDialog';
+import { FormFieldEditor } from './FormFieldEditor';
+import { extractTextFromPDF, findTextAtPosition, TextItem } from '@/lib/pdf/textExtractor';
+import { extractFormFields, FormField } from '@/lib/pdf/formExtractor';
+import { uploadImageToStorage, compressImage } from '@/lib/pdf/imageUploader';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 import 'react-pdf/dist/Page/TextLayer.css';
 
@@ -28,6 +33,11 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
   const [loading, setLoading] = useState(false);
   const [editMode, setEditMode] = useState<'text' | 'rectangle' | 'delete' | 'image' | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [textItems, setTextItems] = useState<TextItem[]>([]);
+  const [formFields, setFormFields] = useState<FormField[]>([]);
+  const [selectedText, setSelectedText] = useState<TextItem | null>(null);
+  const [showTextEditDialog, setShowTextEditDialog] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const operationQueueRef = useRef<OperationQueue | null>(null);
@@ -137,16 +147,42 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     }
   };
 
-  const onDocumentLoadSuccess = ({ numPages }: { numPages: number }) => {
+  const onDocumentLoadSuccess = async ({ numPages }: { numPages: number }) => {
     setNumPages(numPages);
+    
+    // Extract text and form fields from PDF
+    if (pdfFile) {
+      try {
+        const [extractedText, extractedFields] = await Promise.all([
+          extractTextFromPDF(pdfFile),
+          extractFormFields(pdfFile)
+        ]);
+        setTextItems(extractedText);
+        setFormFields(extractedFields);
+        console.log(`Extracted ${extractedText.length} text items and ${extractedFields.length} form fields`);
+      } catch (error) {
+        console.error('Error extracting PDF content:', error);
+      }
+    }
   };
 
   const handleCanvasClick = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (!editMode || !session || !userId) return;
+    if (!session || !userId) return;
 
     const rect = event.currentTarget.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
+
+    // Check if clicking on existing text (for editing)
+    const clickedText = findTextAtPosition(textItems, x, y, currentPage - 1);
+    if (clickedText && editMode === 'text') {
+      setSelectedText(clickedText);
+      setShowTextEditDialog(true);
+      return;
+    }
+
+    // Continue with normal operation if in edit mode
+    if (!editMode) return;
 
     const operation: PDFOperation = {
       id: `op_${Date.now()}_${Math.random()}`,
@@ -268,6 +304,128 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
     }
   };
 
+  // Text editing handlers
+  const handleTextEdit = (newText: string, fontSize: number, color: { r: number; g: number; b: number }) => {
+    if (!selectedText || !userId) return;
+
+    const operation: PDFOperation = {
+      id: `op_${Date.now()}_${Math.random()}`,
+      type: 'edit_text',
+      page: selectedText.page,
+      x: selectedText.x,
+      y: selectedText.y,
+      data: {
+        text: newText,
+        fontSize,
+        color,
+        oldText: selectedText.text,
+        width: selectedText.width,
+        height: selectedText.height,
+      },
+      timestamp: Date.now(),
+      userId,
+    };
+
+    operationQueueRef.current?.addOperation(operation);
+    
+    toast({
+      title: 'Text edited',
+      description: 'Text changes will be saved automatically',
+    });
+  };
+
+  // Drag & drop handlers for images
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    if (!session || !userId || !containerRef.current) return;
+
+    const file = e.dataTransfer.files[0];
+    if (!file || !file.type.startsWith('image/')) {
+      toast({
+        title: 'Invalid file',
+        description: 'Please drop an image file (PNG, JPG)',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      // Compress image before upload
+      const compressedFile = await compressImage(file);
+      
+      // Upload to storage
+      const imageUrl = await uploadImageToStorage(compressedFile);
+
+      // Get drop position
+      const rect = containerRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+
+      // Create add_image operation
+      const operation: PDFOperation = {
+        id: `op_${Date.now()}_${Math.random()}`,
+        type: 'add_image',
+        page: currentPage - 1,
+        x,
+        y,
+        data: { imageUrl, width: 200, height: 200 },
+        timestamp: Date.now(),
+        userId,
+      };
+
+      operationQueueRef.current?.addOperation(operation);
+      
+      toast({
+        title: 'Image added',
+        description: 'Image will be embedded in PDF',
+      });
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast({
+        title: 'Upload failed',
+        description: 'Could not upload image',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Form field change handler
+  const handleFormFieldChange = (fieldName: string, value: string) => {
+    if (!userId || !session) return;
+
+    const field = formFields.find(f => f.name === fieldName);
+    if (!field) return;
+
+    const operation: PDFOperation = {
+      id: `op_${Date.now()}_${Math.random()}`,
+      type: 'fill_form',
+      page: field.page,
+      x: field.x,
+      y: field.y,
+      data: { fieldName, fieldValue: value },
+      timestamp: Date.now(),
+      userId,
+    };
+
+    operationQueueRef.current?.addOperation(operation);
+  };
+
   return (
     <div className="flex flex-col h-full bg-background">
       {/* Toolbar */}
@@ -324,6 +482,21 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
                 Erase
               </Button>
 
+              <Button
+                variant={editMode === 'image' ? 'default' : 'outline'}
+                onClick={() => setEditMode(editMode === 'image' ? null : 'image')}
+              >
+                <ImageIcon className="w-4 h-4 mr-2" />
+                Image
+              </Button>
+
+              {formFields.length > 0 && (
+                <Button variant="outline" disabled>
+                  <FileText className="w-4 h-4 mr-2" />
+                  {formFields.length} Fields
+                </Button>
+              )}
+
               <div className="flex-1" />
 
               <Button
@@ -358,9 +531,12 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
         {pdfFile ? (
           <div
             ref={containerRef}
-            className="relative"
+            className={`relative ${isDragging ? 'ring-4 ring-primary ring-opacity-50' : ''}`}
             onClick={handleCanvasClick}
             onMouseMove={handleMouseMove}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
           >
             <Document
               file={pdfFile}
@@ -378,7 +554,16 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
               className="absolute top-0 left-0 pointer-events-none"
               style={{ width: '100%', height: '100%' }}
             />
+            <FormFieldEditor 
+              fields={formFields.filter(f => f.page === currentPage - 1)} 
+              onFieldChange={handleFormFieldChange}
+            />
             <LiveCursors cursors={collaborators} containerRef={containerRef} />
+            {isDragging && (
+              <div className="absolute inset-0 bg-primary/10 border-4 border-dashed border-primary rounded-lg flex items-center justify-center pointer-events-none">
+                <div className="text-2xl font-bold text-primary">Drop image here</div>
+              </div>
+            )}
           </div>
         ) : (
           <div className="flex items-center justify-center h-full text-muted-foreground">
@@ -386,6 +571,17 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
           </div>
         )}
       </div>
+
+      {/* Text Edit Dialog */}
+      <TextEditDialog
+        open={showTextEditDialog}
+        onClose={() => {
+          setShowTextEditDialog(false);
+          setSelectedText(null);
+        }}
+        textItem={selectedText}
+        onSave={handleTextEdit}
+      />
 
       {/* Page Navigation */}
       {numPages > 0 && (
