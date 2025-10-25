@@ -60,6 +60,7 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
   const [scale, setScale] = useState(1.0);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
   const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const operationQueueRef = useRef<OperationQueue | null>(null);
@@ -692,24 +693,29 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
         {/* Toolbar */}
         <Card className="p-2 sm:p-4 mb-4">
           <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <label htmlFor="pdf-upload">
-                  <Button size="sm" disabled={loading}>
+            <>
+              <Input
+                ref={fileInputRef}
+                id="pdf-upload"
+                type="file"
+                accept=".pdf"
+                onChange={handleFileUpload}
+                className="hidden"
+              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button 
+                    size="sm" 
+                    disabled={loading}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
                     <Upload className="w-4 h-4 sm:mr-2" />
                     <span className="hidden sm:inline">Upload PDF</span>
                   </Button>
-                  <Input
-                    id="pdf-upload"
-                    type="file"
-                    accept=".pdf"
-                    onChange={handleFileUpload}
-                    className="hidden"
-                  />
-                </label>
-              </TooltipTrigger>
-              <TooltipContent>Upload PDF file</TooltipContent>
-            </Tooltip>
+                </TooltipTrigger>
+                <TooltipContent>Upload PDF file</TooltipContent>
+              </Tooltip>
+            </>
 
             {isConnected && collaborators.length > 0 && (
               <Tooltip>
