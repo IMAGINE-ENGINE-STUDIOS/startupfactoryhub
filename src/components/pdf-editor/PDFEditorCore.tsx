@@ -579,7 +579,16 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
         },
       });
 
-      if (response.error) throw response.error;
+      console.log('📡 Edge function response:', response);
+
+      if (response.error) {
+        console.error('❌ Edge function error:', {
+          error: response.error,
+          message: response.error.message,
+          context: response.error.context
+        });
+        throw response.error;
+      }
 
       // Mark operations as saved to backend
       operations.forEach(op => {
