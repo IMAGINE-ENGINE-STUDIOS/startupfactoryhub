@@ -85,7 +85,7 @@ export class OperationQueue {
   }
 
   getPendingOperations(): PDFOperation[] {
-    return this.operations.filter(op => !op.timestamp || Date.now() - op.timestamp < 2000);
+    return this.operations.filter(op => !op.savedToBackend);
   }
 
   clearOperations() {
@@ -102,11 +102,14 @@ export class OperationQueue {
       const pending = this.getPendingOperations();
       if (pending.length > 0 && this.onAutoSave) {
         try {
+          console.log('Processing', pending.length, 'pending operations...');
           await this.onAutoSave(pending);
-          // Mark operations as saved
+          // Mark operations as saved to backend
           pending.forEach(op => {
+            op.savedToBackend = true;
             op.timestamp = Date.now();
           });
+          console.log('Successfully saved operations to backend');
         } catch (error) {
           console.error('Auto-save failed:', error);
         }

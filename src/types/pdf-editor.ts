@@ -19,6 +19,7 @@ export interface PDFOperation {
   };
   timestamp: number;
   userId?: string;
+  savedToBackend?: boolean;
 }
 
 export interface PDFEditingSession {

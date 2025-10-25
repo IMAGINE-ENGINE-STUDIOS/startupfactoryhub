@@ -59,7 +59,8 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
   const [isDragging, setIsDragging] = useState(false);
   const [scale, setScale] = useState(1.0);
   const [fitMode, setFitMode] = useState<'width' | 'page' | null>('width');
-  const [saveStatus, setSaveStatus] = useState<'saved' | 'saving' | 'unsaved'>('saved');
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+  const [pendingOperationsCount, setPendingOperationsCount] = useState(0);
   const [touchStart, setTouchStart] = useState<{x: number, y: number} | null>(null);
   const [hoveredText, setHoveredText] = useState<TextItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -547,6 +548,8 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
 
     setSaveStatus('saving');
     try {
+      console.log('Applying', operations.length, 'operations to PDF');
+      
       const { data: { session: authSession } } = await supabase.auth.getSession();
       if (!authSession) throw new Error('Not authenticated');
 
@@ -560,21 +563,38 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
 
       if (response.error) throw response.error;
 
+      // Mark operations as saved to backend
+      operations.forEach(op => {
+        op.savedToBackend = true;
+      });
+
       // Reload the PDF with signed URL from response
       setPdfFile(response.data.signedUrl);
-      setSaveStatus('saved');
-      setTimeout(() => setSaveStatus('saved'), 2000);
       
+      console.log('PDF operations applied successfully:', response.data);
       toast({
         title: 'Success',
-        description: response.data.message,
+        description: `Saved ${operations.length} changes to PDF`,
       });
+      setSaveStatus('saved');
+      
+      // Update pending count
+      setPendingOperationsCount(operationQueueRef.current?.getPendingOperations().length || 0);
+      
+      // Clear "saved" status after 3 seconds
+      setTimeout(() => setSaveStatus('idle'), 3000);
     } catch (error) {
       console.error('Apply operations error:', error);
-      setSaveStatus('unsaved');
+      setSaveStatus('error');
+      toast({
+        title: 'Error',
+        description: 'Failed to save changes to PDF',
+        variant: 'destructive',
+      });
       
       if (retryCount < 3) {
         // Retry with exponential backoff
+        setTimeout(() => setSaveStatus('idle'), 3000);
         await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
         return applyOperations(operations, retryCount + 1);
       }
@@ -1095,21 +1115,43 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
                     <TooltipContent>Redo (Ctrl + Y)</TooltipContent>
                   </Tooltip>
 
-                  {saveStatus === 'saving' && <Loader2 className="w-4 h-4 animate-spin text-muted-foreground" />}
+                  {saveStatus === 'saving' && (
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span className="hidden sm:inline">Saving {pendingOperationsCount} changes...</span>
+                    </div>
+                  )}
                   {saveStatus === 'saved' && (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <Check className="w-4 h-4 text-green-500" />
+                        <div className="flex items-center gap-1.5">
+                          <Check className="h-4 w-4 text-green-500" />
+                          <span className="hidden sm:inline text-sm text-green-600">All changes saved</span>
+                        </div>
                       </TooltipTrigger>
-                      <TooltipContent>All changes saved</TooltipContent>
+                      <TooltipContent>All changes saved to PDF</TooltipContent>
                     </Tooltip>
                   )}
-                  {saveStatus === 'unsaved' && (
+                  {saveStatus === 'error' && (
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <AlertCircle className="w-4 h-4 text-yellow-500" />
+                        <div className="flex items-center gap-1.5">
+                          <AlertCircle className="h-4 w-4 text-destructive" />
+                          <span className="hidden sm:inline text-sm text-destructive">Save failed - retrying...</span>
+                        </div>
                       </TooltipTrigger>
-                      <TooltipContent>Unsaved changes</TooltipContent>
+                      <TooltipContent>Save failed - retrying...</TooltipContent>
+                    </Tooltip>
+                  )}
+                  {saveStatus === 'idle' && pendingOperationsCount > 0 && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center gap-1.5">
+                          <AlertCircle className="h-4 w-4 text-yellow-500" />
+                          <span className="hidden sm:inline text-sm text-yellow-600">{pendingOperationsCount} unsaved changes</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent>{pendingOperationsCount} unsaved changes</TooltipContent>
                     </Tooltip>
                   )}
 
