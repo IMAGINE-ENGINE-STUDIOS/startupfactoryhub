@@ -1,0 +1,228 @@
+import { Canvas as FabricCanvas, IText, PencilBrush, Rect, Circle, FabricImage } from 'fabric';
+
+export interface FabricCanvasManager {
+  canvas: FabricCanvas;
+  pageNumber: number;
+  isDirty: boolean;
+}
+
+export class PDFFabricManager {
+  private canvases: Map<number, FabricCanvasManager> = new Map();
+  private activeColor: string = '#000000';
+  private activeFontSize: number = 16;
+  private activeTool: 'select' | 'text' | 'draw' | 'rect' | 'circle' | 'erase' = 'select';
+
+  createCanvas(canvasElement: HTMLCanvasElement, pageNumber: number, width: number, height: number): FabricCanvas {
+    // Dispose existing canvas if any
+    this.disposeCanvas(pageNumber);
+
+    const canvas = new FabricCanvas(canvasElement, {
+      width,
+      height,
+      backgroundColor: 'transparent',
+      selection: true,
+      preserveObjectStacking: true,
+    });
+
+    // Initialize drawing brush
+    canvas.freeDrawingBrush = new PencilBrush(canvas);
+    canvas.freeDrawingBrush.color = this.activeColor;
+    canvas.freeDrawingBrush.width = 2;
+
+    // Track changes
+    canvas.on('object:added', () => this.markDirty(pageNumber));
+    canvas.on('object:modified', () => this.markDirty(pageNumber));
+    canvas.on('object:removed', () => this.markDirty(pageNumber));
+
+    this.canvases.set(pageNumber, {
+      canvas,
+      pageNumber,
+      isDirty: false,
+    });
+
+    return canvas;
+  }
+
+  getCanvas(pageNumber: number): FabricCanvas | undefined {
+    return this.canvases.get(pageNumber)?.canvas;
+  }
+
+  disposeCanvas(pageNumber: number): void {
+    const manager = this.canvases.get(pageNumber);
+    if (manager) {
+      manager.canvas.dispose();
+      this.canvases.delete(pageNumber);
+    }
+  }
+
+  disposeAll(): void {
+    this.canvases.forEach((manager) => manager.canvas.dispose());
+    this.canvases.clear();
+  }
+
+  setTool(tool: 'select' | 'text' | 'draw' | 'rect' | 'circle' | 'erase'): void {
+    this.activeTool = tool;
+    this.canvases.forEach(({ canvas }) => {
+      canvas.isDrawingMode = tool === 'draw';
+      if (tool === 'draw' && canvas.freeDrawingBrush) {
+        canvas.freeDrawingBrush.color = this.activeColor;
+        canvas.freeDrawingBrush.width = 2;
+      }
+    });
+  }
+
+  setColor(color: string): void {
+    this.activeColor = color;
+    this.canvases.forEach(({ canvas }) => {
+      if (canvas.freeDrawingBrush) {
+        canvas.freeDrawingBrush.color = color;
+      }
+    });
+  }
+
+  setFontSize(size: number): void {
+    this.activeFontSize = size;
+  }
+
+  addText(pageNumber: number, x: number, y: number): void {
+    const canvas = this.getCanvas(pageNumber);
+    if (!canvas) return;
+
+    const text = new IText('Type here', {
+      left: x,
+      top: y,
+      fontSize: this.activeFontSize,
+      fill: this.activeColor,
+      fontFamily: 'Arial',
+    });
+
+    canvas.add(text);
+    canvas.setActiveObject(text);
+    text.enterEditing();
+  }
+
+  addRectangle(pageNumber: number): void {
+    const canvas = this.getCanvas(pageNumber);
+    if (!canvas) return;
+
+    const rect = new Rect({
+      left: 100,
+      top: 100,
+      width: 150,
+      height: 100,
+      fill: 'transparent',
+      stroke: this.activeColor,
+      strokeWidth: 2,
+    });
+
+    canvas.add(rect);
+    canvas.setActiveObject(rect);
+  }
+
+  addCircle(pageNumber: number): void {
+    const canvas = this.getCanvas(pageNumber);
+    if (!canvas) return;
+
+    const circle = new Circle({
+      left: 100,
+      top: 100,
+      radius: 50,
+      fill: 'transparent',
+      stroke: this.activeColor,
+      strokeWidth: 2,
+    });
+
+    canvas.add(circle);
+    canvas.setActiveObject(circle);
+  }
+
+  async addImage(pageNumber: number, imageUrl: string): Promise<void> {
+    const canvas = this.getCanvas(pageNumber);
+    if (!canvas) return;
+
+    return new Promise((resolve, reject) => {
+      FabricImage.fromURL(imageUrl, {
+        crossOrigin: 'anonymous',
+      }).then((img) => {
+        img.scaleToWidth(200);
+        img.set({ left: 100, top: 100 });
+        canvas.add(img);
+        canvas.setActiveObject(img);
+        resolve();
+      }).catch(reject);
+    });
+  }
+
+  deleteSelected(pageNumber: number): void {
+    const canvas = this.getCanvas(pageNumber);
+    if (!canvas) return;
+
+    const activeObjects = canvas.getActiveObjects();
+    if (activeObjects.length > 0) {
+      activeObjects.forEach((obj) => canvas.remove(obj));
+      canvas.discardActiveObject();
+      canvas.renderAll();
+    }
+  }
+
+  clearPage(pageNumber: number): void {
+    const canvas = this.getCanvas(pageNumber);
+    if (!canvas) return;
+    canvas.clear();
+  }
+
+  exportToJSON(pageNumber: number): string | null {
+    const canvas = this.getCanvas(pageNumber);
+    if (!canvas) return null;
+    return JSON.stringify(canvas.toJSON());
+  }
+
+  exportAllToJSON(): Record<number, string> {
+    const result: Record<number, string> = {};
+    this.canvases.forEach((manager, pageNumber) => {
+      result[pageNumber] = JSON.stringify(manager.canvas.toJSON());
+    });
+    return result;
+  }
+
+  async loadFromJSON(pageNumber: number, json: string): Promise<void> {
+    const canvas = this.getCanvas(pageNumber);
+    if (!canvas) return;
+
+    return new Promise((resolve, reject) => {
+      canvas.loadFromJSON(json).then(() => {
+        canvas.renderAll();
+        resolve();
+      }).catch(reject);
+    });
+  }
+
+  async loadAllFromJSON(data: Record<number, string>): Promise<void> {
+    const promises = Object.entries(data).map(([pageStr, json]) => {
+      const pageNumber = parseInt(pageStr, 10);
+      return this.loadFromJSON(pageNumber, json);
+    });
+    await Promise.all(promises);
+  }
+
+  private markDirty(pageNumber: number): void {
+    const manager = this.canvases.get(pageNumber);
+    if (manager) {
+      manager.isDirty = true;
+    }
+  }
+
+  isDirtyPage(pageNumber: number): boolean {
+    return this.canvases.get(pageNumber)?.isDirty || false;
+  }
+
+  hasAnyDirtyPages(): boolean {
+    return Array.from(this.canvases.values()).some((manager) => manager.isDirty);
+  }
+
+  clearDirtyFlags(): void {
+    this.canvases.forEach((manager) => {
+      manager.isDirty = false;
+    });
+  }
+}
