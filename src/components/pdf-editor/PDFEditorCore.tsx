@@ -587,7 +587,8 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
           message: response.error.message,
           context: response.error.context
         });
-        throw response.error;
+        setSaveStatus('error');
+        throw new Error(`Edge function failed: ${response.error.message}`);
       }
 
       // Mark operations as saved to backend
@@ -907,6 +908,31 @@ export const PDFEditorCore = ({ sessionId, onSessionCreated }: PDFEditorCoreProp
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Upload PDF file</TooltipContent>
+              </Tooltip>
+
+              {/* Test Edge Function Button */}
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={async () => {
+                      console.log('🧪 Testing edge function deployment...');
+                      const { data, error } = await supabase.functions.invoke('pdf-manipulation', {
+                        body: { test: true }
+                      });
+                      console.log('🧪 Test result:', { data, error });
+                      toast({
+                        title: error ? 'Edge Function Error' : 'Edge Function Works!',
+                        description: error ? `Error: ${error.message}` : 'Function is deployed and responding',
+                        variant: error ? 'destructive' : 'default',
+                      });
+                    }}
+                  >
+                    🧪 Test
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Test edge function deployment</TooltipContent>
               </Tooltip>
             </>
 

@@ -35,11 +35,12 @@ serve(async (req) => {
 
     const { sessionId, operations, pdfUrl } = await req.json();
 
-    console.log('📝 PDF Manipulation Request:', {
+    console.log('📝 PDF Manipulation Request [' + new Date().toISOString() + ']:', {
       sessionId,
       operationCount: operations.length,
       pdfUrl: pdfUrl.substring(0, 50) + '...',
       userId: user.id,
+      timestamp: Date.now(),
     });
 
     // Handle both URL and path formats

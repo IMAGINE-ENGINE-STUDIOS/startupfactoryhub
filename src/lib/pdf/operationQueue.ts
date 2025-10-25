@@ -102,16 +102,17 @@ export class OperationQueue {
       const pending = this.getPendingOperations();
       if (pending.length > 0 && this.onAutoSave) {
         try {
-          console.log('Processing', pending.length, 'pending operations...');
+          console.log('🔄 Processing', pending.length, 'pending operations...');
           await this.onAutoSave(pending);
-          // Mark operations as saved to backend
+          // ✅ Only mark as saved if onAutoSave didn't throw
           pending.forEach(op => {
             op.savedToBackend = true;
             op.timestamp = Date.now();
           });
-          console.log('Successfully saved operations to backend');
+          console.log('✅ Successfully saved', pending.length, 'operations to backend');
         } catch (error) {
-          console.error('Auto-save failed:', error);
+          console.error('❌ Auto-save failed, operations still pending:', error);
+          // Don't mark as saved - they'll retry next interval
         }
       }
     }, intervalMs);
