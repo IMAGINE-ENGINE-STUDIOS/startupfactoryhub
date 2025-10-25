@@ -64,11 +64,46 @@ export class PDFFabricManager {
     this.activeTool = tool;
     this.canvases.forEach(({ canvas }) => {
       canvas.isDrawingMode = tool === 'draw';
+      canvas.selection = tool === 'select';
+      
       if (tool === 'draw' && canvas.freeDrawingBrush) {
         canvas.freeDrawingBrush.color = this.activeColor;
         canvas.freeDrawingBrush.width = 2;
       }
     });
+  }
+
+  getActiveTool(): string {
+    return this.activeTool;
+  }
+
+  handleCanvasClick(pageNumber: number, x: number, y: number): void {
+    console.log('[PDFFabricManager] Canvas click:', { pageNumber, x, y, tool: this.activeTool });
+    
+    const canvas = this.getCanvas(pageNumber);
+    if (!canvas) return;
+
+    switch (this.activeTool) {
+      case 'text':
+        this.addText(pageNumber, x, y);
+        break;
+      case 'select':
+        // Let Fabric handle selection naturally
+        break;
+      case 'draw':
+        // Drawing mode is already active, no action needed
+        break;
+      case 'erase':
+        // Eraser deletes on click - check if there's a selected object
+        const activeObject = canvas.getActiveObject();
+        if (activeObject) {
+          canvas.remove(activeObject);
+          canvas.discardActiveObject();
+          canvas.renderAll();
+        }
+        break;
+      // rect and circle are added via toolbar buttons, not clicks
+    }
   }
 
   setColor(color: string): void {

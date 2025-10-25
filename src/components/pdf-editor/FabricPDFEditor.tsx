@@ -81,11 +81,19 @@ export const FabricPDFEditor = () => {
     const canvasEl = pageRefs.current.get(pageNumber);
     if (!canvasEl) return;
 
-    const scale = zoom;
-    const scaledWidth = width * scale;
-    const scaledHeight = height * scale;
+    console.log('[FabricPDFEditor] Page rendered:', { pageNumber, width, height });
 
-    fabricManager.current.createCanvas(canvasEl, pageNumber, scaledWidth, scaledHeight);
+    fabricManager.current.createCanvas(canvasEl, pageNumber, width, height);
+  };
+
+  const handleCanvasClick = (pageNumber: number, e: React.MouseEvent<HTMLCanvasElement>) => {
+    setCurrentPage(pageNumber);
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = (e.clientX - rect.left);
+    const y = (e.clientY - rect.top);
+    
+    console.log('[FabricPDFEditor] Canvas clicked:', { pageNumber, x, y });
+    fabricManager.current.handleCanvasClick(pageNumber, x, y);
   };
 
   const handleSave = async () => {
@@ -225,8 +233,7 @@ export const FabricPDFEditor = () => {
                 <div
                   key={pageNum}
                   ref={(el) => el && containerRefs.current.set(pageNum, el)}
-                  className="relative mb-8 shadow-lg"
-                  style={{ transform: `scale(${zoom})`, transformOrigin: 'top center' }}
+                  className="relative mb-8 shadow-lg bg-white"
                 >
                   <Page
                     pageNumber={pageNum}
@@ -235,17 +242,16 @@ export const FabricPDFEditor = () => {
                     }}
                     renderTextLayer={false}
                     renderAnnotationLayer={false}
+                    scale={zoom}
                   />
                   <canvas
                     ref={(el) => el && pageRefs.current.set(pageNum, el)}
-                    className="absolute top-0 left-0 cursor-crosshair"
-                    onClick={(e) => {
-                      setCurrentPage(pageNum);
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      const x = e.clientX - rect.left;
-                      const y = e.clientY - rect.top;
-                      fabricManager.current.addText(pageNum, x, y);
+                    className="absolute top-0 left-0 pointer-events-auto"
+                    style={{ 
+                      cursor: fabricManager.current.getActiveTool() === 'select' ? 'default' : 'crosshair',
+                      backgroundColor: 'rgba(255, 255, 0, 0.05)'
                     }}
+                    onClick={(e) => handleCanvasClick(pageNum, e)}
                   />
                   <div className="absolute top-2 right-2 bg-background/90 px-2 py-1 rounded text-sm">
                     Page {pageNum}
