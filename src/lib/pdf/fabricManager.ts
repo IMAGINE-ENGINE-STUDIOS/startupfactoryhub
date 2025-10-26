@@ -29,6 +29,15 @@ export class PDFFabricManager {
     canvas.freeDrawingBrush.color = this.activeColor;
     canvas.freeDrawingBrush.width = 2;
 
+    // Add mouse event logging for debugging
+    canvas.on('mouse:down', (e) => {
+      console.log('[Fabric] Mouse down on page', pageNumber, '- Tool:', this.activeTool, '- Pointer:', e.pointer);
+    });
+
+    canvas.on('mouse:up', () => {
+      console.log('[Fabric] Mouse up on page', pageNumber);
+    });
+
     // Track changes
     canvas.on('object:added', () => this.markDirty(pageNumber));
     canvas.on('object:modified', () => this.markDirty(pageNumber));

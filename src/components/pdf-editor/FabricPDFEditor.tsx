@@ -6,8 +6,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
-import 'react-pdf/dist/Page/TextLayer.css';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
@@ -249,25 +247,33 @@ export const FabricPDFEditor = () => {
                   key={pageNum}
                   ref={(el) => el && containerRefs.current.set(pageNum, el)}
                   className="relative mb-8 shadow-xl bg-white"
-                  style={{ userSelect: 'none' }}
+                  style={{ 
+                    userSelect: 'none',
+                    position: 'relative',
+                    isolation: 'isolate'
+                  }}
                 >
-                  <Page
-                    pageNumber={pageNum}
-                    onRenderSuccess={(page) => {
-                      onPageRenderSuccess(pageNum, page.width, page.height);
-                    }}
-                    renderTextLayer={false}
-                    renderAnnotationLayer={false}
-                    scale={zoom}
-                  />
+                  <div style={{ pointerEvents: 'none' }}>
+                    <Page
+                      pageNumber={pageNum}
+                      onRenderSuccess={(page) => {
+                        onPageRenderSuccess(pageNum, page.width, page.height);
+                      }}
+                      renderTextLayer={false}
+                      renderAnnotationLayer={false}
+                      scale={zoom}
+                    />
+                  </div>
                   <canvas
                     ref={(el) => el && pageRefs.current.set(pageNum, el)}
-                    className="absolute top-0 left-0 pointer-events-auto"
+                    className="absolute top-0 left-0"
                     style={{ 
                       cursor: fabricManager.current.getActiveTool() === 'select' ? 'default' : 
                              fabricManager.current.getActiveTool() === 'draw' ? 'crosshair' :
                              fabricManager.current.getActiveTool() === 'text' ? 'text' : 'crosshair',
-                      zIndex: 10,
+                      zIndex: 100,
+                      pointerEvents: 'auto',
+                      touchAction: 'none',
                       border: '2px solid rgba(255, 0, 0, 0.3)',
                       backgroundColor: 'rgba(0, 255, 0, 0.05)'
                     }}
