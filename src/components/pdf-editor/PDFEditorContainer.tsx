@@ -6,6 +6,7 @@ import { PDFPropertiesPanel } from './PDFPropertiesPanel';
 import { PDFPageNavigator } from './PDFPageNavigator';
 import { PDFZoomControls } from './PDFZoomControls';
 import { CollaborationCursors } from './CollaborationCursors';
+import { CollaborationSidebar } from './CollaborationSidebar';
 import { ActiveUsersList } from './ActiveUsersList';
 import { ShareSessionDialog } from './ShareSessionDialog';
 import { PDFErrorBoundary } from './PDFErrorBoundary';
@@ -20,6 +21,9 @@ import { usePDFAutoSave } from '@/hooks/usePDFAutoSave';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import { usePDFRealtime } from '@/hooks/usePDFRealtime';
 import { useCollaboration } from '@/hooks/useCollaboration';
+import { useComments } from '@/hooks/useComments';
+import { useActivity } from '@/hooks/useActivity';
+import { useVersionHistory } from '@/hooks/useVersionHistory';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { FabricObject, IText } from 'fabric';
@@ -41,6 +45,7 @@ export const PDFEditorContainer = () => {
   const [showFormFieldEditor, setShowFormFieldEditor] = useState(false);
   const [showSignaturePanel, setShowSignaturePanel] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
+  const [showCollaborationSidebar, setShowCollaborationSidebar] = useState(true);
   const fabricManagerRef = useRef<FabricCanvasManager | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -60,6 +65,11 @@ export const PDFEditorContainer = () => {
   
   // New collaboration features
   const { cursors, activeUsers, trackCursor, currentUser, userColor } = useCollaboration(sessionId);
+  
+  // Comments, Activity, and Version History
+  const { comments } = useComments(sessionId);
+  const { activities, logActivity } = useActivity(sessionId);
+  const { versions, createVersion } = useVersionHistory(sessionId);
 
   // Track mouse movement for collaboration
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
@@ -70,6 +80,27 @@ export const PDFEditorContainer = () => {
       trackCursor(x, y);
     }
   }, [trackCursor]);
+
+  // Restore version from history
+  const handleRestoreVersion = useCallback(async (canvasData: any) => {
+    if (!fabricManagerRef.current) return;
+    
+    try {
+      // Save current state as backup before restoring
+      const currentData = fabricManagerRef.current.serializeCanvas();
+      await createVersion(currentData, 'Before restore', false);
+      
+      // Load the version
+      fabricManagerRef.current.loadFromJSON(JSON.stringify(canvasData));
+      toast.success('Version restored');
+      
+      // Log activity
+      await logActivity('restore_version', { version_data: canvasData }, currentPage);
+    } catch (error: any) {
+      console.error('Error restoring version:', error);
+      toast.error('Failed to restore version');
+    }
+  }, [createVersion, logActivity, currentPage]);
 
   const handleUpload = useCallback(() => {
     fileInputRef.current?.click();
@@ -216,7 +247,10 @@ export const PDFEditorContainer = () => {
     fabricManagerRef.current.getCanvas().renderAll();
 
     toast.success(`${field.type} field added`);
-  }, [canvasDimensions]);
+    
+    // Log activity
+    logActivity('add_form_field', { field_type: field.type, label: field.label }, currentPage);
+  }, [canvasDimensions, logActivity, currentPage]);
 
   const handleAddSignature = useCallback((signatureDataUrl: string) => {
     if (!fabricManagerRef.current) return;
@@ -227,7 +261,10 @@ export const PDFEditorContainer = () => {
     fabricManagerRef.current.addImage(signatureDataUrl, centerX, centerY, 300, 100);
     
     toast.success('Signature added');
-  }, [canvasDimensions]);
+    
+    // Log activity
+    logActivity('add_signature', { type: 'signature' }, currentPage);
+  }, [canvasDimensions, logActivity, currentPage]);
 
   const handleLoadSuccess = useCallback((numPages: number) => {
     setTotalPages(numPages);
@@ -441,6 +478,8 @@ export const PDFEditorContainer = () => {
           onAddFormField={() => setShowFormFieldEditor(true)}
           onAddSignature={() => setShowSignaturePanel(true)}
           onShare={() => setShowShareDialog(true)}
+          onToggleCollaborationSidebar={() => setShowCollaborationSidebar(!showCollaborationSidebar)}
+          showCollaborationSidebar={showCollaborationSidebar}
           isExporting={isExporting}
           isUploading={isUploading}
           hasSession={!!sessionId}
@@ -555,15 +594,27 @@ export const PDFEditorContainer = () => {
           )}
         </div>
 
-        {/* Right sidebar - Properties panel */}
+        {/* Right sidebar - Properties panel OR Collaboration sidebar */}
         {pdfUrl && !isLoadingSession && (
-          <div className="flex-shrink-0">
-            <PDFPropertiesPanel
-              selectedObject={selectedObject}
-              onUpdateProperty={handleUpdateProperty}
-              onDelete={handleDeleteSelected}
+          showCollaborationSidebar ? (
+            <CollaborationSidebar
+              sessionId={sessionId}
+              currentPage={currentPage}
+              currentCanvasData={fabricJSON}
+              onRestoreVersion={handleRestoreVersion}
+              commentsCount={comments.length}
+              activitiesCount={activities.length}
+              versionsCount={versions.length}
             />
-          </div>
+          ) : (
+            <div className="flex-shrink-0">
+              <PDFPropertiesPanel
+                selectedObject={selectedObject}
+                onUpdateProperty={handleUpdateProperty}
+                onDelete={handleDeleteSelected}
+              />
+            </div>
+          )
         )}
       </div>
 

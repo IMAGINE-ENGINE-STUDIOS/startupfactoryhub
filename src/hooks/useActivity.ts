@@ -30,19 +30,30 @@ export const useActivity = (sessionId: string | null) => {
     try {
       setIsLoading(true);
       
-      const { data, error } = await supabase
+      const { data: activitiesData, error } = await supabase
         .from('pdf_activities')
-        .select(`
-          *,
-          user:profiles!pdf_activities_user_id_fkey(full_name, email, avatar_url)
-        `)
+        .select('*')
         .eq('session_id', sessionId)
         .order('created_at', { ascending: false })
         .limit(50);
 
       if (error) throw error;
 
-      setActivities(data || []);
+      // Fetch user profiles
+      const userIds = [...new Set(activitiesData?.map(a => a.user_id) || [])];
+      const { data: usersData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email, avatar_url')
+        .in('user_id', userIds);
+
+      const usersMap = new Map(usersData?.map(u => [u.user_id, u]));
+
+      const activitiesWithUsers = (activitiesData || []).map(activity => ({
+        ...activity,
+        user: usersMap.get(activity.user_id),
+      }));
+
+      setActivities(activitiesWithUsers);
     } catch (error: any) {
       console.error('Error fetching activities:', error);
       toast.error('Failed to load activity feed');

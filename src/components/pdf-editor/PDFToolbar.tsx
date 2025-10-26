@@ -14,6 +14,7 @@ import {
   FileText,
   PenTool,
   Share2,
+  MessageSquare,
 } from 'lucide-react';
 import { usePDFEditorStore, ToolType } from '@/stores/pdfEditorStore';
 import { cn } from '@/lib/utils';
@@ -27,6 +28,8 @@ interface PDFToolbarProps {
   onAddFormField: () => void;
   onAddSignature: () => void;
   onShare: () => void;
+  onToggleCollaborationSidebar: () => void;
+  showCollaborationSidebar: boolean;
   isExporting?: boolean;
   isUploading?: boolean;
   hasSession?: boolean;
@@ -42,6 +45,8 @@ export const PDFToolbar = ({
   onAddFormField,
   onAddSignature,
   onShare,
+  onToggleCollaborationSidebar,
+  showCollaborationSidebar,
   isExporting = false, 
   isUploading = false,
   hasSession = false,
@@ -155,6 +160,17 @@ export const PDFToolbar = ({
       {hasSession && activeUsers && (
         <ActiveUsersList users={activeUsers} currentUserColor={userColor} />
       )}
+
+      <Button
+        variant={showCollaborationSidebar ? 'default' : 'outline'}
+        size="sm"
+        onClick={onToggleCollaborationSidebar}
+        title="Toggle Collaboration Panel"
+        className="shrink-0"
+      >
+        <MessageSquare className="w-4 h-4 md:mr-2" />
+        <span className="hidden md:inline">Collaborate</span>
+      </Button>
 
       <Button
         variant="ghost"

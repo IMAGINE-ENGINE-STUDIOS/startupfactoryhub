@@ -29,18 +29,29 @@ export const useVersionHistory = (sessionId: string | null) => {
     try {
       setIsLoading(true);
       
-      const { data, error } = await supabase
+      const { data: versionsData, error } = await supabase
         .from('pdf_versions')
-        .select(`
-          *,
-          user:profiles!pdf_versions_user_id_fkey(full_name, email, avatar_url)
-        `)
+        .select('*')
         .eq('session_id', sessionId)
         .order('version_number', { ascending: false });
 
       if (error) throw error;
 
-      setVersions(data || []);
+      // Fetch user profiles
+      const userIds = [...new Set(versionsData?.map(v => v.user_id) || [])];
+      const { data: usersData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email, avatar_url')
+        .in('user_id', userIds);
+
+      const usersMap = new Map(usersData?.map(u => [u.user_id, u]));
+
+      const versionsWithUsers = (versionsData || []).map(version => ({
+        ...version,
+        user: usersMap.get(version.user_id),
+      }));
+
+      setVersions(versionsWithUsers);
     } catch (error: any) {
       console.error('Error fetching versions:', error);
       toast.error('Failed to load version history');

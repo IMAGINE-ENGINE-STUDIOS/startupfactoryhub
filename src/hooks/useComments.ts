@@ -51,30 +51,46 @@ export const useComments = (sessionId: string | null) => {
       // Fetch comments with user info
       const { data: commentsData, error: commentsError } = await supabase
         .from('pdf_comments')
-        .select(`
-          *,
-          user:profiles!pdf_comments_user_id_fkey(full_name, email, avatar_url)
-        `)
+        .select('*')
         .eq('session_id', sessionId)
         .order('created_at', { ascending: true });
 
       if (commentsError) throw commentsError;
+
+      // Fetch user profiles for comments
+      const userIds = [...new Set(commentsData?.map(c => c.user_id) || [])];
+      const { data: usersData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email, avatar_url')
+        .in('user_id', userIds);
+
+      const usersMap = new Map(usersData?.map(u => [u.user_id, u]));
 
       // Fetch replies for each comment
       const commentsWithReplies = await Promise.all(
         (commentsData || []).map(async (comment) => {
           const { data: repliesData } = await supabase
             .from('pdf_comment_replies')
-            .select(`
-              *,
-              user:profiles!pdf_comment_replies_user_id_fkey(full_name, email, avatar_url)
-            `)
+            .select('*')
             .eq('comment_id', comment.id)
             .order('created_at', { ascending: true });
 
+          // Fetch user profiles for replies
+          const replyUserIds = [...new Set(repliesData?.map(r => r.user_id) || [])];
+          const { data: replyUsersData } = await supabase
+            .from('profiles')
+            .select('user_id, full_name, email, avatar_url')
+            .in('user_id', replyUserIds);
+
+          const replyUsersMap = new Map(replyUsersData?.map(u => [u.user_id, u]));
+
           return {
             ...comment,
-            replies: repliesData || [],
+            user: usersMap.get(comment.user_id),
+            replies: (repliesData || []).map(reply => ({
+              ...reply,
+              user: replyUsersMap.get(reply.user_id),
+            })),
           };
         })
       );
@@ -101,7 +117,7 @@ export const useComments = (sessionId: string | null) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase
+      const { data: commentsData, error } = await supabase
         .from('pdf_comments')
         .insert({
           session_id: sessionId,
@@ -111,16 +127,23 @@ export const useComments = (sessionId: string | null) => {
           y_position: y,
           content,
         })
-        .select(`
-          *,
-          user:profiles!pdf_comments_user_id_fkey(full_name, email, avatar_url)
-        `)
+        .select()
         .single();
 
       if (error) throw error;
 
+      // Fetch user profile
+      const { data: userData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email, avatar_url')
+        .eq('user_id', user.id)
+        .single();
+
       toast.success('Comment added');
-      return data;
+      return {
+        ...commentsData,
+        user: userData,
+      };
     } catch (error: any) {
       console.error('Error adding comment:', error);
       toast.error('Failed to add comment');
@@ -133,23 +156,30 @@ export const useComments = (sessionId: string | null) => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const { data, error } = await supabase
+      const { data: replyData, error } = await supabase
         .from('pdf_comment_replies')
         .insert({
           comment_id: commentId,
           user_id: user.id,
           content,
         })
-        .select(`
-          *,
-          user:profiles!pdf_comment_replies_user_id_fkey(full_name, email, avatar_url)
-        `)
+        .select()
         .single();
 
       if (error) throw error;
 
+      // Fetch user profile
+      const { data: userData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email, avatar_url')
+        .eq('user_id', user.id)
+        .single();
+
       toast.success('Reply added');
-      return data;
+      return {
+        ...replyData,
+        user: userData,
+      };
     } catch (error: any) {
       console.error('Error adding reply:', error);
       toast.error('Failed to add reply');
