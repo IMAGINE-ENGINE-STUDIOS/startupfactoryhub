@@ -143,6 +143,7 @@ export function LightPaperDocument({
   const [overlayTextBoxes, setOverlayTextBoxes] = useState<OverlayTextBoxData[]>([]);
   const [isColorPickerActive, setIsColorPickerActive] = useState(false);
   const [selectedTextBoxId, setSelectedTextBoxId] = useState<string | null>(null);
+  const [isEditingText, setIsEditingText] = useState(false);
   const {
     saveProject
   } = useLightPaperProjects("document");
@@ -1901,6 +1902,8 @@ export function LightPaperDocument({
                     userSelect: viewMode ? 'none' : 'auto'
                   }}
                   suppressContentEditableWarning
+                  onFocus={() => setIsEditingText(true)}
+                  onBlur={() => setIsEditingText(false)}
                   onClick={(e) => {
                     if (currentProjectId && !viewMode) {
                       updateCursor(e.clientX, e.clientY);
@@ -1925,6 +1928,7 @@ export function LightPaperDocument({
                 }
               }}
               isDarkMode={isDarkMode}
+              isEditMode={isEditingText && !viewMode}
             />
             
             {/* Overlay Text Boxes in View Mode */}
