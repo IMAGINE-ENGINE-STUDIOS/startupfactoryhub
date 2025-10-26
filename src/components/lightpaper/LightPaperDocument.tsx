@@ -65,7 +65,7 @@ export function LightPaperDocument({
   const [signatureMode, setSignatureMode] = useState<"draw" | "text">("draw");
   const [textSignature, setTextSignature] = useState("");
   const [isDrawingSignature, setIsDrawingSignature] = useState(false);
-  const [lastSignPos, setLastSignPos] = useState({ x: 0, y: 0 });
+  const lastSignPosRef = useRef({ x: 0, y: 0 });
   const signCanvasRef = useRef<HTMLCanvasElement>(null);
   const [draggingSignature, setDraggingSignature] = useState<{type: "draw" | "text", data: string, id: string} | null>(null);
   const [signaturePreviewPosition, setSignaturePreviewPosition] = useState<{x: number, y: number} | null>(null);
@@ -142,6 +142,23 @@ export function LightPaperDocument({
       if (ctx) {
         // Clear canvas with transparency
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+  }, [showSignDialog]);
+
+  // Initialize signature canvas when dialog opens
+  useEffect(() => {
+    if (showSignDialog && signCanvasRef.current) {
+      const canvas = signCanvasRef.current;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Set drawing properties
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
       }
     }
   }, [showSignDialog]);
@@ -627,9 +644,9 @@ export function LightPaperDocument({
   };
 
   // Signature functions
-  const startDrawingSignature = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const startDrawingSignature = (e: React.MouseEvent<HTMLCanvasElement> | React.Touch) => {
     if (signatureMode !== "draw") return;
-    e.preventDefault();
+    if ('preventDefault' in e) e.preventDefault();
     setIsDrawingSignature(true);
     const canvas = signCanvasRef.current;
     if (canvas) {
@@ -638,22 +655,13 @@ export function LightPaperDocument({
       const scaleY = canvas.height / rect.height;
       const x = (e.clientX - rect.left) * scaleX;
       const y = (e.clientY - rect.top) * scaleY;
-      setLastSignPos({ x, y });
-      
-      // Initialize drawing context
-      const ctx = canvas.getContext("2d");
-      if (ctx) {
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 3;
-        ctx.lineCap = "round";
-        ctx.lineJoin = "round";
-      }
+      lastSignPosRef.current = { x, y };
     }
   };
 
-  const drawSignature = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const drawSignature = (e: React.MouseEvent<HTMLCanvasElement> | React.Touch) => {
     if (!isDrawingSignature || signatureMode !== "draw") return;
-    e.preventDefault();
+    if ('preventDefault' in e) e.preventDefault();
     
     const canvas = signCanvasRef.current;
     const ctx = canvas?.getContext("2d");
@@ -665,15 +673,11 @@ export function LightPaperDocument({
       const y = (e.clientY - rect.top) * scaleY;
 
       ctx.beginPath();
-      ctx.moveTo(lastSignPos.x, lastSignPos.y);
+      ctx.moveTo(lastSignPosRef.current.x, lastSignPosRef.current.y);
       ctx.lineTo(x, y);
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 3;
-      ctx.lineCap = "round";
-      ctx.lineJoin = "round";
       ctx.stroke();
 
-      setLastSignPos({ x, y });
+      lastSignPosRef.current = { x, y };
     }
   };
 
@@ -700,6 +704,12 @@ export function LightPaperDocument({
     const ctx = canvas?.getContext("2d");
     if (ctx && canvas) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // Reinitialize drawing properties
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 3;
+      ctx.lineCap = "round";
+      ctx.lineJoin = "round";
+      toast.success("Canvas cleared");
     }
   };
 
@@ -1691,6 +1701,9 @@ export function LightPaperDocument({
                       onMouseMove={drawSignature}
                       onMouseUp={stopDrawingSignature}
                       onMouseLeave={stopDrawingSignature}
+                      onTouchStart={(e) => { e.preventDefault(); startDrawingSignature(e.touches[0]); }}
+                      onTouchMove={(e) => { e.preventDefault(); drawSignature(e.touches[0]); }}
+                      onTouchEnd={stopDrawingSignature}
                     />
                   </div>
                   <p className="text-xs text-muted-foreground">Draw your signature above. It will be saved with a transparent background.</p>
