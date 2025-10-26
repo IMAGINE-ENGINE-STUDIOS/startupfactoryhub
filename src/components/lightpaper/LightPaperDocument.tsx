@@ -859,18 +859,18 @@ export function LightPaperDocument({
       const x = e.clientX - pageRect.left;
       const y = e.clientY - pageRect.top;
 
-      // Calculate constrained position within page margins
+      // Calculate signature dimensions and constrain position
       const pageWidth = pageRect.width;
       const pageHeight = pageRect.height;
       const marginPx = MARGIN_CM * CM_TO_PX;
-      const sigWidth = 120;
-      const sigHeight = 30;
+      const sigWidth = 80;  // Smaller width for better mobile display
+      const sigHeight = 25; // Smaller height
       
-      // Constrain to margins
-      const constrainedX = Math.max(marginPx, Math.min(pageWidth - marginPx - sigWidth, x));
-      const constrainedY = Math.max(marginPx, Math.min(pageHeight - marginPx - sigHeight, y));
+      // Constrain to margins with extra padding
+      const constrainedX = Math.max(marginPx + 10, Math.min(pageWidth - marginPx - sigWidth - 10, x));
+      const constrainedY = Math.max(marginPx + 10, Math.min(pageHeight - marginPx - sigHeight - 10, y));
 
-      // Create and place the signature element
+      // Create signature element with drag and resize support
       const signatureElement = document.createElement('div');
       signatureElement.contentEditable = "false";
       signatureElement.id = `sig-${draggingSignature.id}`;
@@ -878,28 +878,40 @@ export function LightPaperDocument({
       signatureElement.style.cssText = `
         position: absolute;
         cursor: move;
-        padding: 4px;
-        border: 2px dashed transparent;
+        padding: 2px 4px;
+        border: 1px solid transparent;
         background: transparent;
         transition: border-color 0.2s ease;
         left: ${constrainedX}px;
         top: ${constrainedY}px;
-        transform: translate(-50%, -50%);
         z-index: 100;
         max-width: ${sigWidth}px;
+        min-width: 40px;
+        resize: both;
+        overflow: hidden;
       `;
       signatureElement.classList.add('signature-element');
+
+      // Hover effect for signature element
+      signatureElement.addEventListener('mouseenter', () => {
+        signatureElement.style.border = '1px dashed #3b82f6';
+      });
+      signatureElement.addEventListener('mouseleave', () => {
+        signatureElement.style.border = '1px solid transparent';
+      });
 
       if (draggingSignature.type === "draw") {
         const img = document.createElement('img');
         img.src = draggingSignature.data;
-        img.style.cssText = "height: 30px; width: auto; max-width: 120px; display: block; pointer-events: none;";
+        img.style.cssText = "height: 25px; width: auto; max-width: 80px; display: block; pointer-events: none;";
         signatureElement.appendChild(img);
       } else {
         signatureElement.style.fontFamily = "cursive";
-        signatureElement.style.fontSize = "16px";
+        signatureElement.style.fontSize = "14px";
+        signatureElement.style.lineHeight = "25px";
         signatureElement.textContent = draggingSignature.data;
         signatureElement.style.color = 'var(--foreground)';
+        signatureElement.style.whiteSpace = 'nowrap';
       }
 
       // Add drag functionality to placed signature
@@ -1615,9 +1627,9 @@ export function LightPaperDocument({
           </Button>
         </div>
 
-        {/* Page Navigation Controls */}
+      {/* Page Navigation Controls - Desktop Only */}
         {((viewMode && viewModeImages.length > 0) || (!viewMode && (totalPages > 0 || documentContent))) && (
-          <div className="flex items-center gap-2">
+          <div className="hidden md:flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -1648,8 +1660,8 @@ export function LightPaperDocument({
         )}
       </div>
 
-      {/* Main Editor Area - Takes Full Height with Single Page View */}
-      <div ref={wrapperRef} className="flex-1 overflow-auto scroll-smooth bg-muted/30 flex gap-0 items-start justify-center py-4" style={{
+      {/* Main Editor Area - Reduced padding for mobile */}
+      <div ref={wrapperRef} className="flex-1 overflow-auto scroll-smooth bg-muted/30 flex gap-0 items-start justify-center py-2 md:py-4" style={{
         scrollBehavior: 'smooth'
       }}>
         {/* Live Cursors */}
@@ -1902,9 +1914,9 @@ export function LightPaperDocument({
             }
           }
         `}</style>
-        <div ref={containerRef} className="mx-auto" style={{ 
+        <div ref={containerRef} className="mx-auto pb-2 md:pb-0" style={{ 
           width: 'fit-content',
-          minHeight: '100%',
+          minHeight: 'auto',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center'
@@ -1916,25 +1928,38 @@ export function LightPaperDocument({
           >
             <div className="page-content">
               {viewMode && viewModeImages.length > 0 ? (
-                // VIEW MODE: Display image
-                <img 
-                  key={`page-${currentPage}`}
-                  src={viewModeImages[currentPage - 1]} 
-                  alt={`Page ${currentPage} of ${viewModeImages.length}`}
-                  onLoad={() => console.log(`Image ${currentPage} loaded successfully`)}
-                  onError={(e) => {
-                    console.error(`Image ${currentPage} failed to load`, e);
-                    toast.error(`Failed to load page ${currentPage}`);
-                  }}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'contain',
-                    pointerEvents: 'none',
-                    userSelect: 'none',
-                    display: 'block'
-                  }}
-                />
+                // VIEW MODE: Display full page screenshot as JPG
+                <div style={{
+                  width: '100%',
+                  height: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  background: isDarkMode ? '#000' : '#fff',
+                  padding: 0,
+                  margin: 0
+                }}>
+                  <img 
+                    key={`page-${currentPage}`}
+                    src={viewModeImages[currentPage - 1]} 
+                    alt={`Page ${currentPage} of ${viewModeImages.length}`}
+                    onLoad={() => console.log(`✓ Page ${currentPage} loaded`)}
+                    onError={(e) => {
+                      console.error(`✗ Page ${currentPage} failed to load`, e);
+                      toast.error(`Failed to load page ${currentPage}`);
+                    }}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'contain',
+                      objectPosition: 'center',
+                      pointerEvents: 'none',
+                      userSelect: 'none',
+                      display: 'block',
+                      imageRendering: 'crisp-edges'
+                    }}
+                  />
+                </div>
               ) : (
                 // EDIT MODE: Editable content
                 <div
@@ -2201,8 +2226,40 @@ export function LightPaperDocument({
                       toast.success("Document loaded from file");
                     }
                     setShowUploadDialog(false);
-                  }}
+                   }}
       />
+
+      {/* Mobile Page Navigation - Fixed at Bottom */}
+      {((viewMode && viewModeImages.length > 0) || (!viewMode && (totalPages > 0 || documentContent))) && (
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-3 z-50">
+          <div className="flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage <= 1}
+              className="flex-1 max-w-[100px]"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <span className="text-xs font-medium px-3 py-2 bg-primary/10 border border-primary/20 rounded-md whitespace-nowrap">
+              {currentPage} / {viewMode ? viewModeImages.length : totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                const maxPage = viewMode ? viewModeImages.length : totalPages;
+                setCurrentPage(Math.min(maxPage, currentPage + 1));
+              }}
+              disabled={currentPage >= (viewMode ? viewModeImages.length : totalPages)}
+              className="flex-1 max-w-[100px]"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
