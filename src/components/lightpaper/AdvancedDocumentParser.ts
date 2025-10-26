@@ -285,28 +285,53 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
   canvas.width = viewport.width;
   canvas.height = viewport.height;
   
-  // Render PDF page WITHOUT text layer (only graphics, images, colors, tables, charts)
-  // This prevents double text - we'll add editable text overlay separately
+  // First, render the FULL page (including text) to get complete visual
   await page.render({
     canvasContext: context,
     viewport: viewport,
     canvas: canvas,
-    intent: 'print',
-    renderTextLayer: false,
-    renderAnnotationLayer: false,
-    renderInteractiveForms: false,
-  } as any).promise;
+  }).promise;
+  
+  // Extract text content to know which areas to clear
+  const textContent = await page.getTextContent();
+  
+  // Now REMOVE text areas from canvas by filling them with white
+  // This leaves only images, graphics, and colored backgrounds
+  context.fillStyle = 'white';
+  
+  for (const item of textContent.items) {
+    // Type guard for TextItem
+    if (!('str' in item) || !item.str || item.str.trim() === '') continue;
+    
+    const tx = (item as any).transform;
+    const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
+    const x = tx[4];
+    const y = tx[5];
+    
+    // Measure text width to know how much to erase
+    context.save();
+    context.font = `${fontHeight}px ${(item as any).fontName || 'sans-serif'}`;
+    const textWidth = context.measureText(item.str).width;
+    context.restore();
+    
+    // Erase text area (with small padding for clean edges)
+    const padding = 2;
+    context.fillRect(
+      x - padding, 
+      viewport.height - y - fontHeight - padding, 
+      textWidth + padding * 2, 
+      fontHeight + padding * 2
+    );
+  }
   
   // Convert canvas to high-quality JPEG (smaller file size, faster loading)
   const pageImageDataUrl = canvas.toDataURL('image/jpeg', 0.95);
   
-  // Extract text with positioning for editability
-  const textContent = await page.getTextContent();
-  
+  // We already extracted textContent above (for canvas clearing)
   // Detect tables in the document
   const tables = detectTables(textContent.items, viewport);
   
-  // Render text overlay (excluding text inside tables)
+  // Render text overlay (excluding text inside tables) with enhanced font recognition
   const textOverlay = renderTextOverlay(textContent, viewport, tables);
   
   // Render detected tables as HTML
@@ -390,15 +415,18 @@ async function extractImagesFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfj
         try {
           const imgName = args[0];
           
-          // Properly await image loading
-          const img = await new Promise<any>((resolve, reject) => {
-            (page as any).objs.get(imgName, (obj: any) => {
-              if (obj) resolve(obj);
-              else reject(new Error('Image not found'));
-            });
-          });
+          // Properly await image loading with timeout
+          const img = await Promise.race([
+            new Promise<any>((resolve, reject) => {
+              (page as any).objs.get(imgName, (obj: any) => {
+                if (obj) resolve(obj);
+                else reject(new Error('Image not found'));
+              });
+            }),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 5000))
+          ]).catch(() => null);
           
-          if (img && img.width && img.height) {
+          if (img && img.width && img.height && img.data) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             if (!ctx) continue;
@@ -406,10 +434,19 @@ async function extractImagesFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfj
             canvas.width = img.width;
             canvas.height = img.height;
             
-            // Create ImageData and render
-            const imageData = ctx.createImageData(img.width, img.height);
-            imageData.data.set(img.data);
-            ctx.putImageData(imageData, 0, 0);
+            // Create ImageData and render - check if data exists
+            try {
+              const imageData = ctx.createImageData(img.width, img.height);
+              if (imageData.data && img.data) {
+                imageData.data.set(new Uint8ClampedArray(img.data));
+                ctx.putImageData(imageData, 0, 0);
+              } else {
+                continue; // Skip if data is invalid
+              }
+            } catch (dataError) {
+              console.warn('Failed to set image data:', dataError);
+              continue;
+            }
             
             const imageDataUrl = canvas.toDataURL('image/png');
             
@@ -583,9 +620,11 @@ function renderTextOverlay(textContent: any, viewport: pdfjsLib.PageViewport, ta
     // Skip text that's part of a table (it will be rendered by table HTML)
     if (isTextInTable(x, y, tables)) continue;
     
-    // Extract font information
-    const fontName = item.fontName || 'sans-serif';
-    const font = `${fontSize}px ${fontName}`;
+    // Enhanced font recognition - map PDF fonts to web-safe/Google fonts
+    const rawFontName = item.fontName || 'sans-serif';
+    const { fontFamily, fontWeight, fontStyle } = recognizeFont(rawFontName);
+    
+    const font = `${fontWeight} ${fontStyle} ${fontSize}px ${fontFamily}`;
     ctx.font = font;
     
     // Measure actual text width
@@ -600,15 +639,6 @@ function renderTextOverlay(textContent: any, viewport: pdfjsLib.PageViewport, ta
       color = `rgb(${r}, ${g}, ${b})`;
     }
     
-    // Extract font weight and style for perfect matching
-    let fontWeight = 'normal';
-    let fontStyle = 'normal';
-    if (item.fontName) {
-      const fontNameLower = item.fontName.toLowerCase();
-      if (fontNameLower.includes('bold')) fontWeight = 'bold';
-      if (fontNameLower.includes('italic')) fontStyle = 'italic';
-    }
-    
     // Create properly positioned and sized text span with exact styling
     overlayHTML += `<span contenteditable="true" class="pdf-text-span" style="
       position: absolute; 
@@ -616,7 +646,7 @@ function renderTextOverlay(textContent: any, viewport: pdfjsLib.PageViewport, ta
       top: ${y}px; 
       width: ${textWidth}px;
       font-size: ${fontSize}px; 
-      font-family: ${fontName};
+      font-family: ${fontFamily};
       font-weight: ${fontWeight};
       font-style: ${fontStyle};
       color: ${color};
@@ -625,10 +655,62 @@ function renderTextOverlay(textContent: any, viewport: pdfjsLib.PageViewport, ta
       cursor: text;
       display: inline-block;
       pointer-events: auto;
+      background: transparent;
     ">${escapeHtml(item.str)}</span>`;
   }
   
   return overlayHTML;
+}
+
+/**
+ * Enhanced font recognition - maps PDF font names to web-safe or Google fonts
+ */
+function recognizeFont(pdfFontName: string): { fontFamily: string; fontWeight: string; fontStyle: string } {
+  const fontLower = pdfFontName.toLowerCase();
+  
+  // Default values
+  let fontFamily = 'Arial, sans-serif';
+  let fontWeight = 'normal';
+  let fontStyle = 'normal';
+  
+  // Detect weight
+  if (fontLower.includes('bold')) fontWeight = 'bold';
+  if (fontLower.includes('light')) fontWeight = '300';
+  if (fontLower.includes('medium')) fontWeight = '500';
+  if (fontLower.includes('semibold')) fontWeight = '600';
+  if (fontLower.includes('heavy') || fontLower.includes('black')) fontWeight = '900';
+  
+  // Detect style
+  if (fontLower.includes('italic') || fontLower.includes('oblique')) fontStyle = 'italic';
+  
+  // Map common PDF fonts to web fonts
+  if (fontLower.includes('times') || fontLower.includes('roman')) {
+    fontFamily = '"Times New Roman", Times, serif';
+  } else if (fontLower.includes('courier')) {
+    fontFamily = '"Courier New", Courier, monospace';
+  } else if (fontLower.includes('helvetica') || fontLower.includes('arial')) {
+    fontFamily = 'Arial, Helvetica, sans-serif';
+  } else if (fontLower.includes('verdana')) {
+    fontFamily = 'Verdana, sans-serif';
+  } else if (fontLower.includes('georgia')) {
+    fontFamily = 'Georgia, serif';
+  } else if (fontLower.includes('tahoma')) {
+    fontFamily = 'Tahoma, sans-serif';
+  } else if (fontLower.includes('trebuchet')) {
+    fontFamily = '"Trebuchet MS", sans-serif';
+  } else if (fontLower.includes('garamond')) {
+    fontFamily = 'Garamond, serif';
+  } else if (fontLower.includes('palatino')) {
+    fontFamily = '"Palatino Linotype", Palatino, serif';
+  } else if (fontLower.includes('calibri')) {
+    fontFamily = 'Calibri, sans-serif';
+  } else if (fontLower.includes('cambria')) {
+    fontFamily = 'Cambria, serif';
+  } else if (fontLower.includes('consolas')) {
+    fontFamily = 'Consolas, monospace';
+  }
+  
+  return { fontFamily, fontWeight, fontStyle };
 }
 
 /**
