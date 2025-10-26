@@ -1277,47 +1277,49 @@ export function LightPaperDocument({
             pointer-events: auto;
           }
 
-          /* PDF text overlay styles */
-          .page .text-overlay .pdf-text-span {
+          /* PDF Reconstructed Page Container - NO background image */
+          .pdf-page-reconstructed {
+            position: relative;
+            background: white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 20px auto;
+          }
+
+          /* PDF Text Spans - Clean and minimal */
+          .pdf-text-span {
             pointer-events: auto;
             cursor: text;
-            transition: background-color 0.15s, outline 0.15s;
-          }
-
-          .page.edit-mode .text-overlay .pdf-text-span:hover {
-            background: rgba(66, 153, 225, 0.1);
-            outline: 1px dashed rgba(66, 153, 225, 0.3);
-          }
-
-          .page.edit-mode .text-overlay .pdf-text-span:focus {
-            background: rgba(66, 153, 225, 0.15);
-            outline: 2px solid rgba(66, 153, 225, 0.5);
-          }
-
-          /* Background layer opacity control */
-          .page.view-mode .pdf-background-layer {
-            opacity: 1 !important;
-          }
-
-          .page.edit-mode .pdf-background-layer {
-            opacity: 1 !important; /* Keep full opacity - tables replace the content */
-          }
-
-          /* PDF reconstructed table styles */
-          .pdf-reconstructed-table {
-            pointer-events: auto;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-          }
-
-          .pdf-reconstructed-table table {
-            border-spacing: 0;
-          }
-
-          .pdf-reconstructed-table th,
-          .pdf-reconstructed-table td {
             transition: background-color 0.15s;
+          }
+
+          .page.edit-mode .pdf-text-span:hover {
+            background: rgba(66, 153, 225, 0.1) !important;
+          }
+
+          .page.edit-mode .pdf-text-span:focus {
+            background: rgba(66, 153, 225, 0.15) !important;
+            outline: 1px solid rgba(66, 153, 225, 0.5);
+          }
+
+          /* PDF Reconstructed Tables */
+          .pdf-reconstructed-table {
+            position: absolute;
+            border-collapse: collapse;
+            background: white;
+            pointer-events: auto;
+          }
+
+          .pdf-reconstructed-table td,
+          .pdf-reconstructed-table th {
+            border: 1px solid #ddd;
+            padding: 8px;
+            min-width: 50px;
+            transition: background-color 0.15s;
+          }
+
+          .pdf-reconstructed-table th {
+            background: #f5f5f5;
+            font-weight: 600;
           }
 
           .page.edit-mode .pdf-reconstructed-table th:hover,
@@ -1332,8 +1334,10 @@ export function LightPaperDocument({
             outline-offset: -2px;
           }
 
-          /* PDF image wrapper styles */
+          /* PDF Image Wrappers */
           .pdf-image-wrapper {
+            position: absolute;
+            cursor: move;
             border: 2px solid transparent;
             transition: border-color 0.2s;
           }

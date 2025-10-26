@@ -29,13 +29,10 @@ export interface TableStructure {
 }
 
 /**
- * Detect tables by analyzing text alignment and positioning
+ * Group text items into rows based on Y-position clustering
  */
-export function detectTables(textItems: any[], viewport: any): TableStructure[] {
-  if (!textItems || textItems.length < 6) return []; // Need minimum items for a table
-  
-  // Extract positioned text items with coordinates
-  const items = textItems
+function groupIntoRows(items: any[], viewport: any) {
+  const positioned = items
     .filter(item => item.str && item.str.trim())
     .map(item => {
       const tx = item.transform;
@@ -47,18 +44,19 @@ export function detectTables(textItems: any[], viewport: any): TableStructure[] 
         width: item.width || 0,
         height: fontHeight,
         fontSize: fontHeight,
+        fontName: item.fontName || '',
+        color: item.color,
         item: item,
       };
     })
-    .sort((a, b) => a.y - b.y || a.x - b.x); // Sort by Y then X
+    .sort((a, b) => a.y - b.y || a.x - b.x);
   
-  // Group items into rows based on Y-position clustering
-  const rows: typeof items[] = [];
-  let currentRow: typeof items = [];
+  const rows: typeof positioned[] = [];
+  let currentRow: typeof positioned = [];
   let lastY = -Infinity;
   const rowThreshold = 5; // Pixels tolerance for same row
   
-  for (const item of items) {
+  for (const item of positioned) {
     if (Math.abs(item.y - lastY) > rowThreshold) {
       if (currentRow.length > 0) {
         rows.push([...currentRow]);
@@ -72,32 +70,68 @@ export function detectTables(textItems: any[], viewport: any): TableStructure[] 
   }
   if (currentRow.length > 0) rows.push(currentRow);
   
-  // Detect tables: find consecutive rows with similar column count and alignment
-  const tables: TableStructure[] = [];
-  let potentialTable: typeof rows = [];
+  return rows;
+}
+
+/**
+ * Find sequences of rows that look like tables
+ */
+function findTableRanges(rows: any[][]) {
+  const ranges: { start: number; end: number }[] = [];
+  let start = -1;
   let lastColumnCount = 0;
   
   for (let i = 0; i < rows.length; i++) {
-    const row = rows[i];
-    const columnCount = row.length;
+    const colCount = rows[i].length;
     
-    // Check if this row aligns with previous rows (similar column count)
-    if (columnCount >= 2 && Math.abs(columnCount - lastColumnCount) <= 1) {
-      potentialTable.push(row);
-    } else {
-      // Potential table break
-      if (potentialTable.length >= 3) { // Minimum 3 rows for a table
-        const table = buildTableStructure(potentialTable, viewport);
-        if (table) tables.push(table);
+    if (colCount >= 2) { // Tables need at least 2 columns
+      if (start < 0) {
+        start = i;
+        lastColumnCount = colCount;
+      } else if (Math.abs(colCount - lastColumnCount) <= 2) {
+        // Similar column count (allow ±2 variation for merged cells)
+        continue;
+      } else {
+        // Column count changed significantly, end table
+        if (i - start >= 2) { // Need at least 2 rows
+          ranges.push({ start, end: i });
+        }
+        start = i;
+        lastColumnCount = colCount;
       }
-      potentialTable = columnCount >= 2 ? [row] : [];
+    } else {
+      // Not table-like, reset
+      if (start >= 0 && i - start >= 2) {
+        ranges.push({ start, end: i });
+      }
+      start = -1;
     }
-    lastColumnCount = columnCount;
   }
   
-  // Check last potential table
-  if (potentialTable.length >= 3) {
-    const table = buildTableStructure(potentialTable, viewport);
+  // Handle last range
+  if (start >= 0 && rows.length - start >= 2) {
+    ranges.push({ start, end: rows.length });
+  }
+  
+  return ranges;
+}
+
+/**
+ * Enhanced table detection with improved row grouping and range finding
+ */
+export function detectTables(textItems: any[], viewport: any): TableStructure[] {
+  if (!textItems || textItems.length < 6) return [];
+  
+  // Group items into rows
+  const rows = groupIntoRows(textItems, viewport);
+  
+  // Find sequences that look like tables
+  const tableRanges = findTableRanges(rows);
+  
+  // Build table structures with cell boundaries
+  const tables: TableStructure[] = [];
+  for (const range of tableRanges) {
+    const table = buildTableStructure(rows.slice(range.start, range.end), viewport);
     if (table) tables.push(table);
   }
   

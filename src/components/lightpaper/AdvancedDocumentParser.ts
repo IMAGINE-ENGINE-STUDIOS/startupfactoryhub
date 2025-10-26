@@ -271,74 +271,155 @@ export async function parsePDF(
 }
 
 /**
- * Render a single PDF page with dual-layer approach: background image + text overlay
+ * Extract shapes and lines from PDF (borders, underlines, etc.)
+ */
+async function extractShapesFromPage(
+  page: pdfjsLib.PDFPageProxy, 
+  viewport: pdfjsLib.PageViewport
+): Promise<string> {
+  try {
+    const operatorList = await page.getOperatorList();
+    const shapes: string[] = [];
+    
+    for (let i = 0; i < operatorList.fnArray.length; i++) {
+      const fn = operatorList.fnArray[i];
+      const args = operatorList.argsArray[i];
+      
+      // Detect lines (for borders, underlines, etc.)
+      if (fn === pdfjsLib.OPS.constructPath) {
+        const ops = args[0];
+        const coords = args[1];
+        
+        // Simple line detection (moveTo -> lineTo)
+        if (ops.length === 2 && ops[0] === pdfjsLib.OPS.moveTo && ops[1] === pdfjsLib.OPS.lineTo) {
+          const x1 = coords[0];
+          const y1 = viewport.height - coords[1];
+          const x2 = coords[2];
+          const y2 = viewport.height - coords[3];
+          
+          shapes.push(`
+            <svg style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none;">
+              <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" 
+                    stroke="black" stroke-width="1" />
+            </svg>
+          `);
+        }
+      }
+      
+      // Detect rectangles (for borders, boxes)
+      if (fn === pdfjsLib.OPS.rectangle) {
+        const x = args[0];
+        const y = viewport.height - args[1] - args[3];
+        const width = args[2];
+        const height = args[3];
+        
+        shapes.push(`
+          <svg style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none;">
+            <rect x="${x}" y="${y}" width="${width}" height="${height}" 
+                  fill="none" stroke="black" stroke-width="1" />
+          </svg>
+        `);
+      }
+    }
+    
+    return shapes.join('');
+  } catch (error) {
+    console.warn('Failed to extract shapes:', error);
+    return '';
+  }
+}
+
+/**
+ * Render text blocks with accurate positioning, font matching, and color extraction
+ */
+function renderTextBlocks(textContent: any, viewport: pdfjsLib.PageViewport, tables: TableStructure[]): string {
+  const textItems = textContent.items;
+  let textHTML = '';
+  
+  // Create canvas for text measurements
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d')!;
+  
+  for (const item of textItems) {
+    if (!('str' in item) || !item.str || item.str.trim() === '') continue;
+    
+    // Skip text that's part of a table
+    const tx = item.transform;
+    const x = tx[4];
+    const y = viewport.height - tx[5];
+    
+    if (isTextInTable(x, y, tables)) continue;
+    
+    // Calculate positioning
+    const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
+    const fontSize = fontHeight;
+    
+    // Enhanced font recognition
+    const { fontFamily, fontWeight, fontStyle } = recognizeFont(item.fontName || '');
+    
+    // Measure text width
+    ctx.font = `${fontWeight} ${fontStyle} ${fontSize}px ${fontFamily}`;
+    const textWidth = ctx.measureText(item.str).width;
+    
+    // Extract exact color from PDF
+    let color = 'rgb(0, 0, 0)';
+    if (item.color && Array.isArray(item.color)) {
+      const r = Math.round(item.color[0] * 255);
+      const g = Math.round(item.color[1] * 255);
+      const b = Math.round(item.color[2] * 255);
+      color = `rgb(${r}, ${g}, ${b})`;
+    }
+    
+    textHTML += `
+      <span contenteditable="true" class="pdf-text-span" style="
+        position: absolute;
+        left: ${x}px;
+        top: ${y - fontHeight}px;
+        width: ${textWidth}px;
+        height: ${fontHeight}px;
+        font-size: ${fontSize}px;
+        font-family: ${fontFamily};
+        font-weight: ${fontWeight};
+        font-style: ${fontStyle};
+        color: ${color};
+        line-height: ${fontHeight}px;
+        white-space: nowrap;
+        cursor: text;
+        background: transparent;
+        border: none;
+        outline: none;
+        pointer-events: auto;
+      ">${escapeHtml(item.str)}</span>
+    `;
+  }
+  
+  return textHTML;
+}
+
+/**
+ * Render a single PDF page with complete component-based reconstruction (NO background image)
  */
 async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: number, scale: number = 2.0): Promise<string> {
   const page = await pdf.getPage(pageNum);
   const viewport = page.getViewport({ scale });
   
-  // Render page to canvas for perfect visual representation (includes ALL elements)
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d');
-  if (!context) throw new Error('Failed to get canvas context');
-  
-  canvas.width = viewport.width;
-  canvas.height = viewport.height;
-  
-  // First, render the FULL page (including text) to get complete visual
-  await page.render({
-    canvasContext: context,
-    viewport: viewport,
-    canvas: canvas,
-  }).promise;
-  
-  // Extract text content to know which areas to clear
+  // Extract ALL components (no canvas rendering)
   const textContent = await page.getTextContent();
   
-  // Now REMOVE text areas from canvas by filling them with white
-  // This leaves only images, graphics, and colored backgrounds
-  context.fillStyle = 'white';
-  
-  for (const item of textContent.items) {
-    // Type guard for TextItem
-    if (!('str' in item) || !item.str || item.str.trim() === '') continue;
-    
-    const tx = (item as any).transform;
-    const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
-    const x = tx[4];
-    const y = tx[5];
-    
-    // Measure text width to know how much to erase
-    context.save();
-    context.font = `${fontHeight}px ${(item as any).fontName || 'sans-serif'}`;
-    const textWidth = context.measureText(item.str).width;
-    context.restore();
-    
-    // Erase text area (with small padding for clean edges)
-    const padding = 2;
-    context.fillRect(
-      x - padding, 
-      viewport.height - y - fontHeight - padding, 
-      textWidth + padding * 2, 
-      fontHeight + padding * 2
-    );
-  }
-  
-  // Convert canvas to high-quality JPEG (smaller file size, faster loading)
-  const pageImageDataUrl = canvas.toDataURL('image/jpeg', 0.95);
-  
-  // We already extracted textContent above (for canvas clearing)
-  // Detect tables in the document
+  // 1. Detect tables from text positioning
   const tables = detectTables(textContent.items, viewport);
   
-  // Render text overlay (excluding text inside tables) with enhanced font recognition
-  const textOverlay = renderTextOverlay(textContent, viewport, tables);
-  
-  // Render detected tables as HTML
-  const tablesHTML = tables.map(table => renderTableAsHTML(table, scale)).join('');
-  
-  // Extract images for interactivity
+  // 2. Extract images/logos
   const imagesHTML = await extractImagesFromPage(page, viewport);
+  
+  // 3. Extract lines/shapes (borders, underlines, etc.)
+  const shapesHTML = await extractShapesFromPage(page, viewport);
+  
+  // 4. Render text blocks (excluding table text)
+  const textHTML = renderTextBlocks(textContent, viewport, tables);
+  
+  // 5. Render tables as HTML
+  const tablesHTML = tables.map(table => renderTableAsHTML(table, scale)).join('');
   
   // Calculate scaling to fit canvas
   const pageScale = Math.min(
@@ -347,6 +428,7 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
     1.0
   );
   
+  // Return fully reconstructed page with ALL components
   return `
     <div class="pdf-page-wrapper" style="
       width: ${CANVAS_WIDTH_PX}px;
@@ -355,45 +437,26 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
       position: relative;
       margin: 1rem auto;
     ">
-      <div class="pdf-page" style="
+      <div class="pdf-page-reconstructed" style="
         position: relative;
         width: ${viewport.width}px;
         height: ${viewport.height}px;
         transform: scale(${pageScale});
         transform-origin: top left;
+        background: white;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       ">
-        <!-- Background layer: Perfect visual reproduction with ALL elements -->
-        <img src="${pageImageDataUrl}" 
-             class="pdf-background-layer"
-             style="
-               position: absolute; 
-               top: 0; 
-               left: 0; 
-               width: 100%; 
-               height: 100%;
-               pointer-events: none;
-               user-select: none;
-               opacity: 1;
-               transition: opacity 0.2s;
-             " 
-             alt="Page ${pageNum}" />
+        <!-- Shapes layer: Lines, rectangles, borders -->
+        ${shapesHTML}
         
-        <!-- Extracted images layer: Draggable and interactive -->
+        <!-- Images layer: Logos, graphics -->
         ${imagesHTML}
         
-        <!-- Text overlay: Editable and selectable -->
-        <div class="text-overlay" style="
-          position: absolute; 
-          top: 0; 
-          left: 0; 
-          width: 100%; 
-          height: 100%; 
-          pointer-events: none;
-          background: transparent;
-        ">
-          ${textOverlay}
-        </div>
+        <!-- Tables layer: Reconstructed HTML tables -->
+        ${tablesHTML}
+        
+        <!-- Text layer: Individual editable text spans -->
+        ${textHTML}
       </div>
     </div>
   `;
