@@ -2357,6 +2357,36 @@ export type Database = {
         }
         Relationships: []
       }
+      pdf_activities: {
+        Row: {
+          action_data: Json | null
+          action_type: string
+          created_at: string | null
+          id: string
+          page_number: number | null
+          session_id: string
+          user_id: string
+        }
+        Insert: {
+          action_data?: Json | null
+          action_type: string
+          created_at?: string | null
+          id?: string
+          page_number?: number | null
+          session_id: string
+          user_id: string
+        }
+        Update: {
+          action_data?: Json | null
+          action_type?: string
+          created_at?: string | null
+          id?: string
+          page_number?: number | null
+          session_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pdf_collaboration_cursors: {
         Row: {
           id: string
@@ -2397,6 +2427,80 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pdf_comment_replies: {
+        Row: {
+          comment_id: string | null
+          content: string
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          comment_id?: string | null
+          content: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          comment_id?: string | null
+          content?: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pdf_comment_replies_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "pdf_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pdf_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          page_number: number
+          resolved: boolean | null
+          session_id: string
+          updated_at: string | null
+          user_id: string
+          x_position: number
+          y_position: number
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          page_number: number
+          resolved?: boolean | null
+          session_id: string
+          updated_at?: string | null
+          user_id: string
+          x_position: number
+          y_position: number
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          page_number?: number
+          resolved?: boolean | null
+          session_id?: string
+          updated_at?: string | null
+          user_id?: string
+          x_position?: number
+          y_position?: number
+        }
+        Relationships: []
       }
       pdf_editing_sessions: {
         Row: {
@@ -2457,6 +2561,42 @@ export type Database = {
           is_default?: boolean | null
           signature_data?: string
           signature_type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      pdf_notifications: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_read: boolean | null
+          message: string | null
+          notification_type: string
+          reference_id: string | null
+          session_id: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string | null
+          notification_type: string
+          reference_id?: string | null
+          session_id: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_read?: boolean | null
+          message?: string | null
+          notification_type?: string
+          reference_id?: string | null
+          session_id?: string
+          title?: string
           user_id?: string
         }
         Relationships: []
@@ -2542,6 +2682,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      pdf_versions: {
+        Row: {
+          canvas_data: Json
+          created_at: string | null
+          id: string
+          is_auto_save: boolean | null
+          session_id: string
+          user_id: string
+          version_name: string | null
+          version_number: number
+        }
+        Insert: {
+          canvas_data: Json
+          created_at?: string | null
+          id?: string
+          is_auto_save?: boolean | null
+          session_id: string
+          user_id: string
+          version_name?: string | null
+          version_number: number
+        }
+        Update: {
+          canvas_data?: Json
+          created_at?: string | null
+          id?: string
+          is_auto_save?: boolean | null
+          session_id?: string
+          user_id?: string
+          version_name?: string | null
+          version_number?: number
+        }
+        Relationships: []
       }
       pitch_meetings: {
         Row: {
