@@ -22,8 +22,6 @@ const PublicJobApplication = lazy(() => import("./pages/PublicJobApplication"));
 const PublicInternshipApplication = lazy(() => import("./pages/PublicInternshipApplication"));
 const PublicJobApplicationPage = lazy(() => import("./pages/PublicJobApplicationPage"));
 const AcceptInvitation = lazy(() => import("./pages/AcceptInvitation"));
-const SharedPDFView = lazy(() => import("./pages/SharedPDFView"));
-const PitchDeckViewer = lazy(() => import("./pages/PitchDeckViewer"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -67,8 +65,6 @@ const App = () => (
                   <Route path="/jobs/:jobId/apply" element={<PublicJobApplicationPage />} />
                   <Route path="/internships/:internshipId/apply" element={<PublicInternshipApplication />} />
                   <Route path="/accept-invitation" element={<AcceptInvitation />} />
-                  <Route path="/shared-pdf/:token" element={<SharedPDFView />} />
-                  <Route path="/pitch-deck/:companyId" element={<PitchDeckViewer />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>

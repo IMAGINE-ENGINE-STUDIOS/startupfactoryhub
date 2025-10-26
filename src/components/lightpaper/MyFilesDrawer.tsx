@@ -42,8 +42,6 @@ const typeIcons: Record<ProjectType, any> = {
   document: FileText,
   spreadsheet: SheetIcon,
   presentation: Presentation,
-  pdf: FileType,
-  sign: PenTool,
 };
 
 export default function MyFilesDrawer({

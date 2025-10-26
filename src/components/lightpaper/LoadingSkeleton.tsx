@@ -55,18 +55,3 @@ export function PresentationLoadingSkeleton() {
     </div>
   );
 }
-
-export function PDFLoadingSkeleton() {
-  return (
-    <div className="container mx-auto p-4">
-      <Card className="p-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Skeleton className="h-8 w-24" />
-          <Skeleton className="h-8 w-24" />
-          <Skeleton className="h-8 w-32" />
-        </div>
-        <Skeleton className="h-[700px] w-full" />
-      </Card>
-    </div>
-  );
-}

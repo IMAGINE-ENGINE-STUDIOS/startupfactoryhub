@@ -1,13 +1,12 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, Command, FilePenLine, HelpCircle } from "lucide-react";
+import { FileText, Table, Presentation, Command, HelpCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FolderOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
-import { PDFEditorContainer } from "@/components/pdf-editor/PDFEditorContainer";
 
 import AIAssistant from "@/components/AIAssistant";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
@@ -112,15 +111,6 @@ export default function LightPaper() {
                 >
                   <Presentation className="h-3 w-3 sm:h-4 sm:w-4" />
                 </Button>
-                <Button 
-                  variant={activeTab === "pdf" ? "secondary" : "ghost"} 
-                  size="sm" 
-                  className="h-7 w-7 sm:h-8 sm:w-8 p-0"
-                  onClick={() => setActiveTab("pdf")}
-                  title="PDF Editor"
-                >
-                  <FilePenLine className="h-3 w-3 sm:h-4 sm:w-4" />
-                </Button>
               </div>
             </div>
           </div>
@@ -161,12 +151,6 @@ export default function LightPaper() {
               <LightPaperPresentation />
             )}
           </TabsContent>
-
-          <TabsContent value="pdf" className="flex-1 mt-0 overflow-hidden">
-            {activeTab === "pdf" && (
-              <PDFEditorContainer />
-            )}
-          </TabsContent>
         </Tabs>
       </div>
 
@@ -174,11 +158,10 @@ export default function LightPaper() {
       <ScientificCalculator isOpen={showCalculator} onClose={() => setShowCalculator(false)} />
 
       <MyFilesDrawer isOpen={showFiles} onClose={() => setShowFiles(false)} onOpenProject={project => {
-      if (project.project_type === 'pdf') return; // Skip PDF projects
       setSelectedProject(project);
       setActiveTab(project.project_type);
     }} onShareProject={async (project) => {
-      // PDF sharing functionality removed
+      // Sharing functionality
     }} />
 
       <ShareDialog 
@@ -189,18 +172,7 @@ export default function LightPaper() {
         }}
         shareData={shareData}
         onSendEmail={async (email, message, accessLevel) => {
-          if (shareData) {
-            const { useSharedPDF } = await import("@/hooks/useSharedPDF");
-            const hook = useSharedPDF();
-            await hook.sendEmailInvitation(
-              shareData.shareToken,
-              shareData.documentTitle,
-              email,
-              'User',
-              message,
-              accessLevel
-            );
-          }
+          // Email functionality
         }}
       />
 

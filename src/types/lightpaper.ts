@@ -1,13 +1,12 @@
 // Type definitions for LightPaper projects
 
-export type ProjectType = 'document' | 'spreadsheet' | 'presentation' | 'pdf';
+export type ProjectType = 'document' | 'spreadsheet' | 'presentation';
 
 // Discriminated union for project content
 export type ProjectContent = 
   | { type: 'document', html: string, text: string, font?: string, size?: string, darkMode?: boolean }
   | { type: 'spreadsheet', data: Record<string, any>, rows?: number, cols?: number }
-  | { type: 'presentation', slides: Slide[] }
-  | { type: 'pdf', currentPage: number, signatures: any[], pdfUrl?: string, annotations?: any[] };
+  | { type: 'presentation', slides: Slide[] };
 
 export interface Slide {
   id: string;

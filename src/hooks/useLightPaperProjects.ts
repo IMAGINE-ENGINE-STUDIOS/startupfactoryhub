@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
 
-export type ProjectType = "document" | "spreadsheet" | "presentation" | "pdf" | "sign";
+export type ProjectType = "document" | "spreadsheet" | "presentation";
 
 export interface LightPaperProject {
   id: string;
@@ -33,6 +33,7 @@ export function useLightPaperProjects(projectType?: ProjectType) {
       let query = supabase
         .from("lightpaper_projects")
         .select("*")
+        .in('project_type', ['document', 'spreadsheet', 'presentation'])
         .order("updated_at", { ascending: false });
 
       if (projectType) {
@@ -42,7 +43,8 @@ export function useLightPaperProjects(projectType?: ProjectType) {
       const { data, error } = await query;
 
       if (error) throw error;
-      setProjects(data || []);
+      // Cast to our project type (database already filtered by valid types)
+      setProjects((data || []) as LightPaperProject[]);
     } catch (error: any) {
       console.error("Error fetching projects:", error);
       toast.error("Failed to load projects");

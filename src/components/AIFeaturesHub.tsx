@@ -12,7 +12,6 @@ import DocumentAnalyzer from "./DocumentAnalyzer";
 import { LightPaperDocument } from "./lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "./lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "./lightpaper/LightPaperPresentation";
-import { SimplePDFEditor } from "./pdf-editor/SimplePDFEditor";
 
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CRMBoard from "./CRMBoard";
@@ -24,8 +23,7 @@ import {
   Workflow,
   Sparkles,
   Table,
-  Presentation,
-  FilePenLine
+  Presentation
 } from "lucide-react";
 
 export default function AIFeaturesHub() {
@@ -128,15 +126,6 @@ export default function AIFeaturesHub() {
               >
                 <Presentation className="h-4 w-4" />
               </Button>
-              <Button 
-                variant={lightPaperTab === "pdf" ? "secondary" : "ghost"} 
-                size="sm" 
-                className="h-8 w-8 p-0"
-                onClick={() => setLightPaperTab("pdf")}
-                title="PDF Editor"
-              >
-                <FilePenLine className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </CardHeader>
@@ -152,14 +141,6 @@ export default function AIFeaturesHub() {
 
             <TabsContent value="presentation" className="mt-0">
               <LightPaperPresentation />
-            </TabsContent>
-
-            <TabsContent value="pdf" className="mt-0">
-              <SimplePDFEditor 
-                onSessionCreated={(session) => {
-                  console.log('PDF session created:', session);
-                }}
-              />
             </TabsContent>
           </Tabs>
         </CardContent>
