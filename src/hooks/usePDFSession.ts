@@ -28,10 +28,12 @@ export const usePDFSession = (pdfUrl: string | null) => {
           .eq('is_active', true)
           .order('updated_at', { ascending: false })
           .limit(1)
-          .single();
+          .maybeSingle();
 
-        if (fetchError && fetchError.code !== 'PGRST116') {
+        if (fetchError) {
           console.error('Error fetching session:', fetchError);
+          toast.error('Failed to load session');
+          return null;
         }
 
         if (existingSession) {
