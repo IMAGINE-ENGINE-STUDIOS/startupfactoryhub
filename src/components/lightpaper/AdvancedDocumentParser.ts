@@ -212,7 +212,7 @@ export async function parsePDF(
   
   const scaleX = availableWidth / firstViewport.width;
   const scaleY = availableHeight / firstViewport.height;
-  const optimalScale = Math.min(scaleX, scaleY, 2.0); // Cap at 2.0 for quality
+  const optimalScale = Math.min(scaleX, scaleY, 6.0); // Cap at 6.0 for 4K quality
   
   onProgress?.(`Rendering at scale ${optimalScale.toFixed(2)}...`, 0, maxPages);
   
@@ -245,10 +245,7 @@ export async function parsePDF(
       }
     });
     
-    // Small delay between batches to prevent freezing
-    if (i + batchSize <= maxPages) {
-      await new Promise(resolve => setTimeout(resolve, 100));
-    }
+    // No delay needed - modern browsers handle this efficiently
   }
   
   // Extract text from all pages for search
@@ -287,15 +284,20 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
   canvas.width = viewport.width;
   canvas.height = viewport.height;
   
-  // Render the complete PDF page (includes all graphics, images, colors, tables, charts)
+  // Render PDF page WITHOUT text layer (only graphics, images, colors, tables, charts)
+  // This prevents double text - we'll add editable text overlay separately
   await page.render({
     canvasContext: context,
     viewport: viewport,
     canvas: canvas,
-  }).promise;
+    intent: 'print',
+    renderTextLayer: false,
+    renderAnnotationLayer: false,
+    renderInteractiveForms: false,
+  } as any).promise;
   
-  // Convert canvas to high-quality data URL
-  const pageImageDataUrl = canvas.toDataURL('image/png', 1.0);
+  // Convert canvas to high-quality JPEG (smaller file size, faster loading)
+  const pageImageDataUrl = canvas.toDataURL('image/jpeg', 0.95);
   
   // Extract text with positioning for editability
   const textContent = await page.getTextContent();
@@ -577,13 +579,25 @@ function renderTextOverlay(textContent: any, viewport: pdfjsLib.PageViewport): s
     const x = tx[4];
     const y = viewport.height - tx[5] - fontHeight;
     
-    // Extract text color if available
-    let color = 'rgba(0, 0, 0, 0.8)';
+    // Extract exact text color from PDF (full opacity for perfect match)
+    let color = 'rgb(0, 0, 0)';
     if (item.color && Array.isArray(item.color)) {
-      color = `rgba(${Math.round(item.color[0] * 255)}, ${Math.round(item.color[1] * 255)}, ${Math.round(item.color[2] * 255)}, 0.8)`;
+      const r = Math.round(item.color[0] * 255);
+      const g = Math.round(item.color[1] * 255);
+      const b = Math.round(item.color[2] * 255);
+      color = `rgb(${r}, ${g}, ${b})`;
     }
     
-    // Create properly positioned and sized text span
+    // Extract font weight and style for perfect matching
+    let fontWeight = 'normal';
+    let fontStyle = 'normal';
+    if (item.fontName) {
+      const fontNameLower = item.fontName.toLowerCase();
+      if (fontNameLower.includes('bold')) fontWeight = 'bold';
+      if (fontNameLower.includes('italic')) fontStyle = 'italic';
+    }
+    
+    // Create properly positioned and sized text span with exact styling
     overlayHTML += `<span contenteditable="true" class="pdf-text-span" style="
       position: absolute; 
       left: ${x}px; 
@@ -591,8 +605,10 @@ function renderTextOverlay(textContent: any, viewport: pdfjsLib.PageViewport): s
       width: ${textWidth}px;
       font-size: ${fontSize}px; 
       font-family: ${fontName};
+      font-weight: ${fontWeight};
+      font-style: ${fontStyle};
       color: ${color};
-      white-space: nowrap; 
+      white-space: nowrap;
       line-height: ${fontHeight}px;
       cursor: text;
       display: inline-block;
