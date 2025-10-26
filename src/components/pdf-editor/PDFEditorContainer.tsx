@@ -6,6 +6,9 @@ import { PDFPropertiesPanel } from './PDFPropertiesPanel';
 import { PDFPageNavigator } from './PDFPageNavigator';
 import { PDFZoomControls } from './PDFZoomControls';
 import { CollaborationCursors } from './CollaborationCursors';
+import { PDFErrorBoundary } from './PDFErrorBoundary';
+import { KeyboardShortcutsDialog } from './KeyboardShortcutsDialog';
+import { ExportOptionsDialog } from './ExportOptionsDialog';
 import { FabricCanvasManager } from '@/lib/pdf/FabricCanvasManager';
 import { usePDFEditorStore } from '@/stores/pdfEditorStore';
 import { usePDFSession } from '@/hooks/usePDFSession';
@@ -16,8 +19,10 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { FabricObject } from 'fabric';
 import { Button } from '@/components/ui/button';
-import { Download, Upload as UploadIcon } from 'lucide-react';
+import { Download, Upload as UploadIcon, Keyboard as KeyboardIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 export const PDFEditorContainer = () => {
   const { pdfUrl, setPdfUrl, setTotalPages, currentPage, setCurrentPage, zoom, totalPages, reset } = usePDFEditorStore();
@@ -25,6 +30,9 @@ export const PDFEditorContainer = () => {
   const [selectedObject, setSelectedObject] = useState<FabricObject | null>(null);
   const [fabricJSON, setFabricJSON] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const fabricManagerRef = useRef<FabricCanvasManager | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -51,40 +59,69 @@ export const PDFEditorContainer = () => {
     if (!file) return;
 
     if (file.type !== 'application/pdf') {
+      setUploadError('Please upload a PDF file');
       toast.error('Please upload a PDF file');
       return;
     }
 
+    // Validate file size (max 50MB)
+    const maxSize = 50 * 1024 * 1024; // 50MB
+    if (file.size > maxSize) {
+      setUploadError('PDF file is too large (max 50MB)');
+      toast.error('PDF file is too large. Maximum size is 50MB.');
+      return;
+    }
+
     setIsUploading(true);
+    setUploadError(null);
 
     try {
-      toast.loading('Uploading PDF...');
+      const toastId = toast.loading('Uploading PDF...');
       
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        toast.error('Please sign in to upload PDFs');
+        toast.error('Please sign in to upload PDFs', { id: toastId });
         return;
       }
 
-      // Upload to Supabase Storage
+      // Upload to Supabase Storage with retry logic
       const filePath = `${user.id}/${Date.now()}_${file.name}`;
-      const { data, error } = await supabase.storage
-        .from('pdf-documents')
-        .upload(filePath, file);
+      let uploadError;
+      let uploadData;
+      
+      // Retry upload up to 3 times
+      for (let attempt = 1; attempt <= 3; attempt++) {
+        const result = await supabase.storage
+          .from('pdf-documents')
+          .upload(filePath, file);
+        
+        if (!result.error) {
+          uploadData = result.data;
+          break;
+        }
+        
+        uploadError = result.error;
+        if (attempt < 3) {
+          console.log(`Upload attempt ${attempt} failed, retrying...`);
+          await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+        }
+      }
 
-      if (error) throw error;
+      if (uploadError) throw uploadError;
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('pdf-documents')
-        .getPublicUrl(data.path);
+        .getPublicUrl(uploadData!.path);
 
       reset();
       setPdfUrl(publicUrl);
-      toast.success('PDF uploaded successfully!');
+      toast.success('PDF uploaded successfully!', { id: toastId });
     } catch (error: any) {
       console.error('Upload error:', error);
-      toast.error('Failed to upload PDF: ' + error.message);
+      const errorMsg = error.message || 'Failed to upload PDF';
+      setUploadError(errorMsg);
+      toast.error(`Failed to upload PDF: ${errorMsg}`);
     } finally {
       setIsUploading(false);
     }
@@ -218,8 +255,10 @@ export const PDFEditorContainer = () => {
       // Save shortcut
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
         e.preventDefault();
-        if (fabricJSON) {
-          toast.success('Auto-saved');
+        if (fabricJSON && sessionId) {
+          toast.success('Changes auto-saved');
+        } else {
+          toast.info('Auto-save is active');
         }
         return;
       }
@@ -227,7 +266,18 @@ export const PDFEditorContainer = () => {
       // Export shortcut
       if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
         e.preventDefault();
-        handleExport();
+        if (sessionId) {
+          setShowExportDialog(true);
+        } else {
+          toast.error('Upload a PDF first');
+        }
+        return;
+      }
+
+      // Keyboard shortcuts dialog
+      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault();
+        setShowKeyboardShortcuts(true);
         return;
       }
 
@@ -270,7 +320,7 @@ export const PDFEditorContainer = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleExport = useCallback(async () => {
+  const handleExport = useCallback(async (filename?: string) => {
     if (!fabricManagerRef.current || !sessionId || !pdfUrl) {
       toast.error('No canvas to export');
       return;
@@ -280,54 +330,71 @@ export const PDFEditorContainer = () => {
     const objects = canvas.getObjects();
     
     if (objects.length === 0) {
-      toast.error('No objects to export');
+      toast.error('No changes to export. Add some annotations first!');
       return;
     }
 
-    const url = await exportPDF(
-      sessionId,
-      pdfUrl,
-      objects,
-      canvasDimensions.height,
-      currentPage
-    );
+    try {
+      const url = await exportPDF(
+        sessionId,
+        pdfUrl,
+        objects,
+        canvasDimensions.height,
+        currentPage
+      );
 
-    if (url) {
-      // Automatically download the file
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'edited-pdf.pdf';
-      link.click();
+      if (url) {
+        // Automatically download the file
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename || 'edited-pdf.pdf';
+        link.click();
+        
+        // Close export dialog if open
+        setShowExportDialog(false);
+      }
+    } catch (error: any) {
+      console.error('Export error:', error);
+      toast.error(`Export failed: ${error.message || 'Unknown error'}`);
     }
   }, [sessionId, pdfUrl, canvasDimensions.height, currentPage, exportPDF]);
 
   return (
-    <div className="flex flex-col h-full bg-muted/30">
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="application/pdf"
-        onChange={handleFileChange}
-        className="hidden"
-      />
+    <PDFErrorBoundary>
+      <div className="flex flex-col h-full bg-muted/30">
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="application/pdf"
+          onChange={handleFileChange}
+          className="hidden"
+        />
 
-      <input
-        ref={imageInputRef}
-        type="file"
-        accept="image/*"
-        onChange={handleImageChange}
-        className="hidden"
-      />
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          onChange={handleImageChange}
+          className="hidden"
+        />
 
-      <PDFToolbar 
-        onUpload={handleUpload} 
-        onExport={handleExport}
-        onImageUpload={handleImageUpload}
-        isExporting={isExporting}
-        isUploading={isUploading}
-        hasSession={!!sessionId}
-      />
+        <PDFToolbar 
+          onUpload={handleUpload} 
+          onExport={() => setShowExportDialog(true)}
+          onImageUpload={handleImageUpload}
+          onShowKeyboardShortcuts={() => setShowKeyboardShortcuts(true)}
+          isExporting={isExporting}
+          isUploading={isUploading}
+          hasSession={!!sessionId}
+        />
       
+      {uploadError && (
+        <Alert variant="destructive" className="mx-4 mt-2">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{uploadError}</AlertDescription>
+        </Alert>
+      )}
+
       {exportUrl && (
         <div className="px-4 py-2 bg-success/10 border-b border-success/20">
           <div className="flex items-center justify-between max-w-4xl mx-auto">
@@ -439,6 +506,20 @@ export const PDFEditorContainer = () => {
           </div>
         )}
       </div>
+
+      {/* Dialogs */}
+      <KeyboardShortcutsDialog
+        isOpen={showKeyboardShortcuts}
+        onClose={() => setShowKeyboardShortcuts(false)}
+      />
+
+      <ExportOptionsDialog
+        isOpen={showExportDialog}
+        onClose={() => setShowExportDialog(false)}
+        onExport={handleExport}
+        isExporting={isExporting}
+      />
     </div>
+    </PDFErrorBoundary>
   );
 };

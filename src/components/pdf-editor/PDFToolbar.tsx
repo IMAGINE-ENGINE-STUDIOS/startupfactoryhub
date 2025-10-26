@@ -9,7 +9,8 @@ import {
   Eraser,
   Download,
   Upload,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Keyboard
 } from 'lucide-react';
 import { usePDFEditorStore, ToolType } from '@/stores/pdfEditorStore';
 import { cn } from '@/lib/utils';
@@ -18,6 +19,7 @@ interface PDFToolbarProps {
   onUpload: () => void;
   onExport: () => void;
   onImageUpload: () => void;
+  onShowKeyboardShortcuts: () => void;
   isExporting?: boolean;
   isUploading?: boolean;
   hasSession?: boolean;
@@ -27,6 +29,7 @@ export const PDFToolbar = ({
   onUpload, 
   onExport, 
   onImageUpload,
+  onShowKeyboardShortcuts,
   isExporting = false, 
   isUploading = false,
   hasSession = false 
@@ -89,13 +92,25 @@ export const PDFToolbar = ({
         size="sm" 
         onClick={onExport}
         disabled={!hasSession || isExporting}
+        title="Export PDF (Ctrl+E)"
       >
         <Download className="w-4 h-4 mr-2" />
-        {isExporting ? 'Exporting...' : 'Export PDF'}
+        {isExporting ? 'Exporting...' : 'Export'}
       </Button>
 
-      <div className="ml-auto text-xs text-muted-foreground hidden lg:block">
-        <span className="font-medium">Shortcuts:</span> T=Text, R=Rectangle, C=Circle, D=Draw, E=Erase, V=Select, Ctrl+S=Save, Ctrl+E=Export
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={onShowKeyboardShortcuts}
+        title="Keyboard Shortcuts (Ctrl+/)"
+        className="hidden lg:flex"
+      >
+        <Keyboard className="w-4 h-4 mr-2" />
+        Shortcuts
+      </Button>
+
+      <div className="ml-auto text-xs text-muted-foreground hidden xl:block">
+        Press <kbd className="px-1 py-0.5 bg-muted rounded text-xs">Ctrl+/</kbd> for shortcuts
       </div>
     </div>
   );
