@@ -273,33 +273,44 @@ export async function parsePDF(
 }
 
 /**
- * Render a single PDF page with reconstructed objects (images, text, etc.)
- * Instead of background image, we extract and position actual elements
+ * Render a single PDF page with dual-layer approach: background image + text overlay
  */
 async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: number, scale: number = 2.0): Promise<string> {
   const page = await pdf.getPage(pageNum);
-  
-  // Get page dimensions at specified scale
   const viewport = page.getViewport({ scale });
   
-  // Extract images from PDF
-  const images = await extractImagesFromPage(page, viewport);
+  // Render page to canvas for perfect visual representation (includes ALL elements)
+  const canvas = document.createElement('canvas');
+  const context = canvas.getContext('2d');
+  if (!context) throw new Error('Failed to get canvas context');
   
-  // Extract text with positioning
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  
+  // Render the complete PDF page (includes all graphics, images, colors, tables, charts)
+  await page.render({
+    canvasContext: context,
+    viewport: viewport,
+    canvas: canvas,
+  }).promise;
+  
+  // Convert canvas to high-quality data URL
+  const pageImageDataUrl = canvas.toDataURL('image/png', 1.0);
+  
+  // Extract text with positioning for editability
   const textContent = await page.getTextContent();
   const textOverlay = renderTextOverlay(textContent, viewport);
   
-  // Extract vector graphics and shapes as SVG
-  const graphics = await extractGraphicsFromPage(page, viewport);
+  // Extract images for interactivity
+  const imagesHTML = await extractImagesFromPage(page, viewport);
   
-  // Calculate if page needs additional scaling to fit canvas
+  // Calculate scaling to fit canvas
   const pageScale = Math.min(
     (CANVAS_WIDTH_PX - 2 * PADDING_PX) / viewport.width,
     (CANVAS_HEIGHT_PX - 2 * PADDING_PX) / viewport.height,
     1.0
   );
   
-  // Combine layers into final HTML with proper containment
   return `
     <div class="pdf-page-wrapper" style="
       width: ${CANVAS_WIDTH_PX}px;
@@ -312,14 +323,39 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
         position: relative;
         width: ${viewport.width}px;
         height: ${viewport.height}px;
-        background: white;
         transform: scale(${pageScale});
         transform-origin: top left;
         box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       ">
-        ${graphics}
-        ${images}
-        <div class="text-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto;">
+        <!-- Background layer: Perfect visual reproduction with ALL elements -->
+        <img src="${pageImageDataUrl}" 
+             class="pdf-background-layer"
+             style="
+               position: absolute; 
+               top: 0; 
+               left: 0; 
+               width: 100%; 
+               height: 100%;
+               pointer-events: none;
+               user-select: none;
+               opacity: 1;
+               transition: opacity 0.2s;
+             " 
+             alt="Page ${pageNum}" />
+        
+        <!-- Extracted images layer: Draggable and interactive -->
+        ${imagesHTML}
+        
+        <!-- Text overlay: Editable and selectable -->
+        <div class="text-overlay" style="
+          position: absolute; 
+          top: 0; 
+          left: 0; 
+          width: 100%; 
+          height: 100%; 
+          pointer-events: none;
+          background: transparent;
+        ">
           ${textOverlay}
         </div>
       </div>
@@ -328,67 +364,86 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
 }
 
 /**
- * Extract images from PDF page
+ * Extract images from PDF page with enhanced handling
  */
 async function extractImagesFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfjsLib.PageViewport): Promise<string> {
   try {
     const operatorList = await page.getOperatorList();
-    let imagesHTML = '';
-    
-    // Canvas to render individual images
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d')!;
+    const imagesHTML: string[] = [];
     
     for (let i = 0; i < operatorList.fnArray.length; i++) {
       const fn = operatorList.fnArray[i];
       const args = operatorList.argsArray[i];
       
-      // Check for image painting operations
       if (fn === pdfjsLib.OPS.paintImageXObject || fn === pdfjsLib.OPS.paintInlineImageXObject) {
         try {
           const imgName = args[0];
           
-          // Get image from resources
-          const resources = await (page as any).objs.get(imgName);
+          // Properly await image loading
+          const img = await new Promise<any>((resolve, reject) => {
+            (page as any).objs.get(imgName, (obj: any) => {
+              if (obj) resolve(obj);
+              else reject(new Error('Image not found'));
+            });
+          });
           
-          if (resources && resources.width && resources.height) {
-            // Create canvas for this image
-            canvas.width = resources.width;
-            canvas.height = resources.height;
+          if (img && img.width && img.height) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) continue;
             
-            // Draw image data
-            const imgData = ctx.createImageData(resources.width, resources.height);
+            canvas.width = img.width;
+            canvas.height = img.height;
             
-            if (resources.data) {
-              // Copy image data
-              const data = resources.data;
-              for (let j = 0; j < data.length; j++) {
-                imgData.data[j] = data[j];
-              }
-              
-              ctx.putImageData(imgData, 0, 0);
-              const imageDataUrl = canvas.toDataURL('image/png');
-              
-              // Get transform matrix to calculate position
-              const transform = args[1] || [1, 0, 0, 1, 0, 0];
-              const x = transform[4];
-              const y = viewport.height - transform[5] - (resources.height * transform[3]);
-              const width = resources.width * transform[0];
-              const height = resources.height * transform[3];
-              
-              imagesHTML += `<img src="${imageDataUrl}" style="position: absolute; left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; object-fit: contain;" draggable="true" />`;
-            }
+            // Create ImageData and render
+            const imageData = ctx.createImageData(img.width, img.height);
+            imageData.data.set(img.data);
+            ctx.putImageData(imageData, 0, 0);
+            
+            const imageDataUrl = canvas.toDataURL('image/png');
+            
+            // Get transform to calculate position
+            const transform = args[1] || [1, 0, 0, 1, 0, 0];
+            const x = transform[4];
+            const y = viewport.height - transform[5] - (img.height * Math.abs(transform[3]));
+            const width = img.width * Math.abs(transform[0]);
+            const height = img.height * Math.abs(transform[3]);
+            
+            imagesHTML.push(`
+              <div class="pdf-image-wrapper" style="
+                position: absolute; 
+                left: ${x}px; 
+                top: ${y}px; 
+                width: ${width}px; 
+                height: ${height}px;
+                cursor: move;
+                border: 2px solid transparent;
+                transition: border-color 0.2s;
+              " 
+              onmouseover="this.style.borderColor='rgba(66, 153, 225, 0.5)'"
+              onmouseout="this.style.borderColor='transparent'">
+                <img src="${imageDataUrl}" 
+                     draggable="true" 
+                     style="
+                       width: 100%; 
+                       height: 100%; 
+                       object-fit: contain;
+                       pointer-events: auto;
+                     " 
+                     alt="Extracted image" />
+              </div>
+            `);
           }
         } catch (imgError) {
-          console.warn('Failed to extract image:', imgError);
+          console.warn('Failed to extract individual image:', imgError);
         }
       }
     }
     
-    return imagesHTML;
+    return imagesHTML.join('');
   } catch (error) {
     console.warn('Failed to extract images from page:', error);
-    return '';
+    return ''; // Fallback: images will still be visible in background layer
   }
 }
 
@@ -492,28 +547,57 @@ async function extractGraphicsFromPage(page: pdfjsLib.PDFPageProxy, viewport: pd
 }
 
 /**
- * Create invisible text overlay with exact positioning
+ * Create text overlay with proper positioning and spacing
  */
 function renderTextOverlay(textContent: any, viewport: pdfjsLib.PageViewport): string {
   const textItems = textContent.items;
   let overlayHTML = '';
   
+  // Create temporary canvas for text measurement
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return '';
+  
   for (const item of textItems) {
-    if (!item.str) continue;
+    if (!item.str || item.str.trim() === '') continue;
     
     const tx = item.transform;
     const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
     const fontSize = fontHeight;
     
+    // Extract font information
+    const fontName = item.fontName || 'sans-serif';
+    const font = `${fontSize}px ${fontName}`;
+    ctx.font = font;
+    
+    // Measure actual text width
+    const textWidth = ctx.measureText(item.str).width;
+    
     // Calculate position
     const x = tx[4];
-    const y = viewport.height - tx[5] - fontHeight; // Flip Y coordinate
+    const y = viewport.height - tx[5] - fontHeight;
     
-    // Extract text
-    const text = item.str;
+    // Extract text color if available
+    let color = 'rgba(0, 0, 0, 0.8)';
+    if (item.color && Array.isArray(item.color)) {
+      color = `rgba(${Math.round(item.color[0] * 255)}, ${Math.round(item.color[1] * 255)}, ${Math.round(item.color[2] * 255)}, 0.8)`;
+    }
     
-    // Create positioned text span
-    overlayHTML += `<span contenteditable="true" style="position: absolute; left: ${x}px; top: ${y}px; font-size: ${fontSize}px; opacity: 1; color: inherit; white-space: pre; line-height: 1; cursor: text;">${escapeHtml(text)}</span>`;
+    // Create properly positioned and sized text span
+    overlayHTML += `<span contenteditable="true" class="pdf-text-span" style="
+      position: absolute; 
+      left: ${x}px; 
+      top: ${y}px; 
+      width: ${textWidth}px;
+      font-size: ${fontSize}px; 
+      font-family: ${fontName};
+      color: ${color};
+      white-space: nowrap; 
+      line-height: ${fontHeight}px;
+      cursor: text;
+      display: inline-block;
+      pointer-events: auto;
+    ">${escapeHtml(item.str)}</span>`;
   }
   
   return overlayHTML;

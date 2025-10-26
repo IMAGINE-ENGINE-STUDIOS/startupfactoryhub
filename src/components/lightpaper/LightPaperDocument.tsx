@@ -77,6 +77,7 @@ export function LightPaperDocument({
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
   const [showComments, setShowComments] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [editMode, setEditMode] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const commandHistory = useRef(new CommandHistory());
   const { user } = useAuth();
@@ -1055,6 +1056,15 @@ export function LightPaperDocument({
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowCalculator(true)} title="Calculator">
                 <Calculator className="h-4 w-4" />
               </Button>
+              <Button 
+                variant={editMode ? "default" : "ghost"}
+                size="sm"
+                className="h-8 px-2 text-xs"
+                onClick={() => setEditMode(!editMode)}
+                title={editMode ? "Switch to View Mode (full visibility)" : "Switch to Edit Mode (text editing)"}
+              >
+                {editMode ? 'View' : 'Edit'}
+              </Button>
             </div>
 
             {/* Highlight */}
@@ -1264,11 +1274,43 @@ export function LightPaperDocument({
             max-width: 100%;
             height: auto;
             cursor: move;
-            user-select: none;
+            pointer-events: auto;
           }
-          
-          .page img:hover {
-            outline: 2px solid hsl(var(--primary) / 0.5);
+
+          /* PDF text overlay styles */
+          .page .text-overlay .pdf-text-span {
+            pointer-events: auto;
+            cursor: text;
+            transition: background-color 0.15s, outline 0.15s;
+          }
+
+          .page.edit-mode .text-overlay .pdf-text-span:hover {
+            background: rgba(66, 153, 225, 0.1);
+            outline: 1px dashed rgba(66, 153, 225, 0.3);
+          }
+
+          .page.edit-mode .text-overlay .pdf-text-span:focus {
+            background: rgba(66, 153, 225, 0.15);
+            outline: 2px solid rgba(66, 153, 225, 0.5);
+          }
+
+          /* Background layer opacity control */
+          .page.view-mode .pdf-background-layer {
+            opacity: 1 !important;
+          }
+
+          .page.edit-mode .pdf-background-layer {
+            opacity: 0.3 !important;
+          }
+
+          /* PDF image wrapper styles */
+          .pdf-image-wrapper {
+            border: 2px solid transparent;
+            transition: border-color 0.2s;
+          }
+
+          .page.edit-mode .pdf-image-wrapper:hover {
+            border-color: rgba(66, 153, 225, 0.5);
           }
           
           /* List Styles */
@@ -1323,7 +1365,7 @@ export function LightPaperDocument({
           }
         `}</style>
         <div ref={containerRef} className="max-w-[21cm] mx-auto">
-          <div className="page" style={{ position: 'relative' }}>
+          <div className={`page ${editMode ? 'edit-mode' : 'view-mode'}`} style={{ position: 'relative' }}>
             <div
               ref={editorRef} 
               contentEditable 
