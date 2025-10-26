@@ -189,40 +189,197 @@ export async function parsePDF(
 }
 
 /**
- * Render a single PDF page with dual-layer approach
+ * Render a single PDF page with reconstructed objects (images, text, etc.)
+ * Instead of background image, we extract and position actual elements
  */
 async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: number): Promise<string> {
   const page = await pdf.getPage(pageNum);
   
   // Get page dimensions
-  const viewport = page.getViewport({ scale: 1.5 });
+  const viewport = page.getViewport({ scale: 2.0 }); // Higher scale for better quality
   
-  // Layer 1: Render page as image
-  const canvas = document.createElement('canvas');
-  const context = canvas.getContext('2d')!;
-  canvas.height = viewport.height;
-  canvas.width = viewport.width;
+  // Extract images from PDF
+  const images = await extractImagesFromPage(page, viewport);
   
-  await page.render({
-    canvasContext: context,
-    viewport,
-    canvas,
-  }).promise;
-  
-  // Convert to JPEG for smaller size
-  const imageData = canvas.toDataURL('image/jpeg', 0.85);
-  
-  // Layer 2: Extract text with positioning
+  // Extract text with positioning
   const textContent = await page.getTextContent();
   const textOverlay = renderTextOverlay(textContent, viewport);
   
-  // Combine layers
-  return `<div class="pdf-page" style="position: relative; margin: 1rem 0; page-break-after: always; width: ${viewport.width}px; height: ${viewport.height}px; margin-left: auto; margin-right: auto;">
-    <img src="${imageData}" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; user-select: none; pointer-events: none;" alt="Page ${pageNum}" />
+  // Extract vector graphics and shapes as SVG
+  const graphics = await extractGraphicsFromPage(page, viewport);
+  
+  // Combine all layers with white background
+  return `<div class="pdf-page" style="position: relative; margin: 1rem 0; page-break-after: always; width: ${viewport.width}px; height: ${viewport.height}px; margin-left: auto; margin-right: auto; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+    ${graphics}
+    ${images}
     <div class="text-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto;">
       ${textOverlay}
     </div>
   </div>`;
+}
+
+/**
+ * Extract images from PDF page
+ */
+async function extractImagesFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfjsLib.PageViewport): Promise<string> {
+  try {
+    const operatorList = await page.getOperatorList();
+    let imagesHTML = '';
+    
+    // Canvas to render individual images
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d')!;
+    
+    for (let i = 0; i < operatorList.fnArray.length; i++) {
+      const fn = operatorList.fnArray[i];
+      const args = operatorList.argsArray[i];
+      
+      // Check for image painting operations
+      if (fn === pdfjsLib.OPS.paintImageXObject || fn === pdfjsLib.OPS.paintInlineImageXObject) {
+        try {
+          const imgName = args[0];
+          
+          // Get image from resources
+          const resources = await (page as any).objs.get(imgName);
+          
+          if (resources && resources.width && resources.height) {
+            // Create canvas for this image
+            canvas.width = resources.width;
+            canvas.height = resources.height;
+            
+            // Draw image data
+            const imgData = ctx.createImageData(resources.width, resources.height);
+            
+            if (resources.data) {
+              // Copy image data
+              const data = resources.data;
+              for (let j = 0; j < data.length; j++) {
+                imgData.data[j] = data[j];
+              }
+              
+              ctx.putImageData(imgData, 0, 0);
+              const imageDataUrl = canvas.toDataURL('image/png');
+              
+              // Get transform matrix to calculate position
+              const transform = args[1] || [1, 0, 0, 1, 0, 0];
+              const x = transform[4];
+              const y = viewport.height - transform[5] - (resources.height * transform[3]);
+              const width = resources.width * transform[0];
+              const height = resources.height * transform[3];
+              
+              imagesHTML += `<img src="${imageDataUrl}" style="position: absolute; left: ${x}px; top: ${y}px; width: ${width}px; height: ${height}px; object-fit: contain;" draggable="true" />`;
+            }
+          }
+        } catch (imgError) {
+          console.warn('Failed to extract image:', imgError);
+        }
+      }
+    }
+    
+    return imagesHTML;
+  } catch (error) {
+    console.warn('Failed to extract images from page:', error);
+    return '';
+  }
+}
+
+/**
+ * Extract vector graphics and shapes from PDF page
+ */
+async function extractGraphicsFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfjsLib.PageViewport): Promise<string> {
+  try {
+    const operatorList = await page.getOperatorList();
+    let svgPaths = '';
+    let currentPath = '';
+    let currentX = 0;
+    let currentY = 0;
+    let fillColor = 'black';
+    let strokeColor = 'black';
+    let lineWidth = 1;
+    
+    for (let i = 0; i < operatorList.fnArray.length; i++) {
+      const fn = operatorList.fnArray[i];
+      const args = operatorList.argsArray[i];
+      
+      switch (fn) {
+        case pdfjsLib.OPS.moveTo:
+          currentX = args[0];
+          currentY = viewport.height - args[1];
+          currentPath += `M ${currentX} ${currentY} `;
+          break;
+          
+        case pdfjsLib.OPS.lineTo:
+          const lineX = args[0];
+          const lineY = viewport.height - args[1];
+          currentPath += `L ${lineX} ${lineY} `;
+          break;
+          
+        case pdfjsLib.OPS.curveTo:
+          const cp1x = args[0];
+          const cp1y = viewport.height - args[1];
+          const cp2x = args[2];
+          const cp2y = viewport.height - args[3];
+          const x = args[4];
+          const y = viewport.height - args[5];
+          currentPath += `C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${x} ${y} `;
+          break;
+          
+        case pdfjsLib.OPS.rectangle:
+          const rectX = args[0];
+          const rectY = viewport.height - args[1] - args[3];
+          const rectW = args[2];
+          const rectH = args[3];
+          currentPath += `M ${rectX} ${rectY} L ${rectX + rectW} ${rectY} L ${rectX + rectW} ${rectY + rectH} L ${rectX} ${rectY + rectH} Z `;
+          break;
+          
+        case pdfjsLib.OPS.setStrokeRGBColor:
+          strokeColor = `rgb(${args[0] * 255}, ${args[1] * 255}, ${args[2] * 255})`;
+          break;
+          
+        case pdfjsLib.OPS.setFillRGBColor:
+          fillColor = `rgb(${args[0] * 255}, ${args[1] * 255}, ${args[2] * 255})`;
+          break;
+          
+        case pdfjsLib.OPS.setLineWidth:
+          lineWidth = args[0];
+          break;
+          
+        case pdfjsLib.OPS.fill:
+        case pdfjsLib.OPS.eoFill:
+          if (currentPath) {
+            svgPaths += `<path d="${currentPath}" fill="${fillColor}" fill-opacity="0.8" />`;
+            currentPath = '';
+          }
+          break;
+          
+        case pdfjsLib.OPS.stroke:
+          if (currentPath) {
+            svgPaths += `<path d="${currentPath}" fill="none" stroke="${strokeColor}" stroke-width="${lineWidth}" />`;
+            currentPath = '';
+          }
+          break;
+          
+        case pdfjsLib.OPS.fillStroke:
+        case pdfjsLib.OPS.eoFillStroke:
+          if (currentPath) {
+            svgPaths += `<path d="${currentPath}" fill="${fillColor}" fill-opacity="0.8" stroke="${strokeColor}" stroke-width="${lineWidth}" />`;
+            currentPath = '';
+          }
+          break;
+      }
+    }
+    
+    if (svgPaths) {
+      return `<svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;" viewBox="0 0 ${viewport.width} ${viewport.height}">
+        ${svgPaths}
+      </svg>`;
+    }
+    
+    return '';
+  } catch (error) {
+    console.warn('Failed to extract graphics from page:', error);
+    return '';
+  }
 }
 
 /**

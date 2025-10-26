@@ -25,9 +25,10 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // File size validation
-    if (file.size > 20 * 1024 * 1024) {
-      toast.error('File size must be less than 20MB');
+    // File size validation - 5GB limit
+    const maxSize = 5 * 1024 * 1024 * 1024; // 5GB
+    if (file.size > maxSize) {
+      toast.error('File size must be less than 5GB');
       return;
     }
 
@@ -170,7 +171,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
                   Click to upload or drag and drop
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  PDF or DOCX files (max 20MB)
+                  PDF or DOCX files (max 5GB)
                 </p>
               </>
             )}
@@ -191,10 +192,10 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
               <div className="text-sm">
                 <p className="font-medium mb-1">Advanced Features:</p>
                 <ul className="text-muted-foreground space-y-1 text-xs">
-                  <li>✓ <strong>PDF:</strong> Pixel-perfect rendering + editable text overlays</li>
+                  <li>✓ <strong>PDF:</strong> Extracts actual images, graphics & editable text</li>
                   <li>✓ <strong>DOCX:</strong> Full formatting, images, tables preserved</li>
                   <li>✓ Smart file detection with magic byte validation</li>
-                  <li>✓ Up to 50 pages supported (PDF)</li>
+                  <li>✓ Up to 50 pages supported, 5GB max file size</li>
                 </ul>
               </div>
             </div>
