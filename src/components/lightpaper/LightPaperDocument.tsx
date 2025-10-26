@@ -1300,7 +1300,36 @@ export function LightPaperDocument({
           }
 
           .page.edit-mode .pdf-background-layer {
-            opacity: 0.3 !important;
+            opacity: 1 !important; /* Keep full opacity - tables replace the content */
+          }
+
+          /* PDF reconstructed table styles */
+          .pdf-reconstructed-table {
+            pointer-events: auto;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+          }
+
+          .pdf-reconstructed-table table {
+            border-spacing: 0;
+          }
+
+          .pdf-reconstructed-table th,
+          .pdf-reconstructed-table td {
+            transition: background-color 0.15s;
+          }
+
+          .page.edit-mode .pdf-reconstructed-table th:hover,
+          .page.edit-mode .pdf-reconstructed-table td:hover {
+            background-color: rgba(66, 153, 225, 0.08) !important;
+          }
+
+          .page.edit-mode .pdf-reconstructed-table th:focus,
+          .page.edit-mode .pdf-reconstructed-table td:focus {
+            background-color: rgba(66, 153, 225, 0.12) !important;
+            outline: 2px solid rgba(66, 153, 225, 0.5);
+            outline-offset: -2px;
           }
 
           /* PDF image wrapper styles */

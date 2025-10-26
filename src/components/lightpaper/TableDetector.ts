@@ -1,0 +1,342 @@
+/**
+ * Table Detection and Reconstruction for PDF Documents
+ * Analyzes text positioning to detect tables and reconstructs them as HTML
+ */
+
+export interface TableCell {
+  text: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  color: string;
+  fontWeight: string;
+  fontSize: number;
+  rowIndex: number;
+  colIndex: number;
+}
+
+export interface TableStructure {
+  rows: TableCell[][];
+  bounds: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  };
+  columnCount: number;
+  rowCount: number;
+}
+
+/**
+ * Detect tables by analyzing text alignment and positioning
+ */
+export function detectTables(textItems: any[], viewport: any): TableStructure[] {
+  if (!textItems || textItems.length < 6) return []; // Need minimum items for a table
+  
+  // Extract positioned text items with coordinates
+  const items = textItems
+    .filter(item => item.str && item.str.trim())
+    .map(item => {
+      const tx = item.transform;
+      const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
+      return {
+        text: item.str.trim(),
+        x: tx[4],
+        y: viewport.height - tx[5] - fontHeight,
+        width: item.width || 0,
+        height: fontHeight,
+        fontSize: fontHeight,
+        item: item,
+      };
+    })
+    .sort((a, b) => a.y - b.y || a.x - b.x); // Sort by Y then X
+  
+  // Group items into rows based on Y-position clustering
+  const rows: typeof items[] = [];
+  let currentRow: typeof items = [];
+  let lastY = -Infinity;
+  const rowThreshold = 5; // Pixels tolerance for same row
+  
+  for (const item of items) {
+    if (Math.abs(item.y - lastY) > rowThreshold) {
+      if (currentRow.length > 0) {
+        rows.push([...currentRow]);
+      }
+      currentRow = [item];
+      lastY = item.y;
+    } else {
+      currentRow.push(item);
+      lastY = (lastY + item.y) / 2; // Average Y position
+    }
+  }
+  if (currentRow.length > 0) rows.push(currentRow);
+  
+  // Detect tables: find consecutive rows with similar column count and alignment
+  const tables: TableStructure[] = [];
+  let potentialTable: typeof rows = [];
+  let lastColumnCount = 0;
+  
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    const columnCount = row.length;
+    
+    // Check if this row aligns with previous rows (similar column count)
+    if (columnCount >= 2 && Math.abs(columnCount - lastColumnCount) <= 1) {
+      potentialTable.push(row);
+    } else {
+      // Potential table break
+      if (potentialTable.length >= 3) { // Minimum 3 rows for a table
+        const table = buildTableStructure(potentialTable, viewport);
+        if (table) tables.push(table);
+      }
+      potentialTable = columnCount >= 2 ? [row] : [];
+    }
+    lastColumnCount = columnCount;
+  }
+  
+  // Check last potential table
+  if (potentialTable.length >= 3) {
+    const table = buildTableStructure(potentialTable, viewport);
+    if (table) tables.push(table);
+  }
+  
+  return tables;
+}
+
+/**
+ * Build structured table from detected rows
+ */
+function buildTableStructure(rows: any[][], viewport: any): TableStructure | null {
+  if (rows.length < 2) return null;
+  
+  // Detect column boundaries by analyzing X positions across all rows
+  const allXPositions = rows.flatMap(row => row.map(item => item.x)).sort((a, b) => a - b);
+  const columnBoundaries = detectColumnBoundaries(allXPositions);
+  
+  if (columnBoundaries.length < 2) return null;
+  
+  // Assign each text item to a column
+  const gridCells: TableCell[][] = [];
+  
+  for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+    const row = rows[rowIndex];
+    const gridRow: TableCell[] = [];
+    
+    // Initialize all columns with empty cells
+    for (let colIndex = 0; colIndex < columnBoundaries.length; colIndex++) {
+      gridRow.push({
+        text: '',
+        x: columnBoundaries[colIndex],
+        y: row[0]?.y || 0,
+        width: 0,
+        height: row[0]?.height || 12,
+        color: 'rgb(0, 0, 0)',
+        fontWeight: 'normal',
+        fontSize: row[0]?.fontSize || 12,
+        rowIndex,
+        colIndex,
+      });
+    }
+    
+    // Fill in cells with actual content
+    for (const item of row) {
+      const colIndex = findColumnIndex(item.x, columnBoundaries);
+      if (colIndex >= 0 && colIndex < gridRow.length) {
+        const cell = gridRow[colIndex];
+        
+        // Extract styling from PDF item
+        let color = 'rgb(0, 0, 0)';
+        if (item.item.color && Array.isArray(item.item.color)) {
+          const r = Math.round(item.item.color[0] * 255);
+          const g = Math.round(item.item.color[1] * 255);
+          const b = Math.round(item.item.color[2] * 255);
+          color = `rgb(${r}, ${g}, ${b})`;
+        }
+        
+        let fontWeight = 'normal';
+        if (item.item.fontName) {
+          const fontNameLower = item.item.fontName.toLowerCase();
+          if (fontNameLower.includes('bold')) fontWeight = 'bold';
+        }
+        
+        cell.text = item.text;
+        cell.x = item.x;
+        cell.y = item.y;
+        cell.width = item.width;
+        cell.height = item.height;
+        cell.color = color;
+        cell.fontWeight = fontWeight;
+        cell.fontSize = item.fontSize;
+      }
+    }
+    
+    gridCells.push(gridRow);
+  }
+  
+  // Calculate table bounds
+  const allX = gridCells.flatMap(row => row.map(cell => cell.x));
+  const allY = gridCells.map(row => row[0].y);
+  const minX = Math.min(...allX);
+  const maxX = Math.max(...gridCells.flatMap(row => row.map(cell => cell.x + cell.width)));
+  const minY = Math.min(...allY);
+  const maxY = Math.max(...allY) + (gridCells[0][0]?.height || 12);
+  
+  return {
+    rows: gridCells,
+    bounds: {
+      x: minX,
+      y: minY,
+      width: maxX - minX,
+      height: maxY - minY,
+    },
+    columnCount: columnBoundaries.length,
+    rowCount: gridCells.length,
+  };
+}
+
+/**
+ * Detect column boundaries from X positions
+ */
+function detectColumnBoundaries(xPositions: number[]): number[] {
+  if (xPositions.length === 0) return [];
+  
+  const threshold = 20; // Pixels to consider same column
+  const boundaries: number[] = [xPositions[0]];
+  
+  for (let i = 1; i < xPositions.length; i++) {
+    const x = xPositions[i];
+    const lastBoundary = boundaries[boundaries.length - 1];
+    
+    if (Math.abs(x - lastBoundary) > threshold) {
+      boundaries.push(x);
+    }
+  }
+  
+  return boundaries;
+}
+
+/**
+ * Find which column an X position belongs to
+ */
+function findColumnIndex(x: number, boundaries: number[]): number {
+  const threshold = 30; // Tolerance for column assignment
+  
+  for (let i = 0; i < boundaries.length; i++) {
+    if (Math.abs(x - boundaries[i]) < threshold) {
+      return i;
+    }
+  }
+  
+  // If not found, find nearest column
+  let nearestIndex = 0;
+  let minDistance = Math.abs(x - boundaries[0]);
+  
+  for (let i = 1; i < boundaries.length; i++) {
+    const distance = Math.abs(x - boundaries[i]);
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestIndex = i;
+    }
+  }
+  
+  return nearestIndex;
+}
+
+/**
+ * Render table as HTML with editable cells
+ */
+export function renderTableAsHTML(table: TableStructure, scale: number = 1): string {
+  const cellPadding = 8;
+  const borderColor = '#cccccc';
+  
+  let html = `
+    <div class="pdf-reconstructed-table" style="
+      position: absolute;
+      left: ${table.bounds.x}px;
+      top: ${table.bounds.y}px;
+      width: ${table.bounds.width}px;
+      background: white;
+      z-index: 10;
+    ">
+      <table style="
+        width: 100%;
+        border-collapse: collapse;
+        font-family: Arial, sans-serif;
+        background: white;
+      ">
+  `;
+  
+  // Render header row (first row with bold styling)
+  const firstRow = table.rows[0];
+  const hasHeader = firstRow.some(cell => cell.fontWeight === 'bold');
+  
+  if (hasHeader) {
+    html += '<thead><tr>';
+    for (const cell of firstRow) {
+      html += `
+        <th contenteditable="true" style="
+          border: 1px solid ${borderColor};
+          padding: ${cellPadding}px;
+          text-align: left;
+          font-weight: bold;
+          font-size: ${cell.fontSize}px;
+          color: ${cell.color};
+          background: #f8f9fa;
+          cursor: text;
+        ">${escapeHtml(cell.text)}</th>
+      `;
+    }
+    html += '</tr></thead>';
+  }
+  
+  // Render body rows
+  html += '<tbody>';
+  const startRow = hasHeader ? 1 : 0;
+  
+  for (let i = startRow; i < table.rows.length; i++) {
+    const row = table.rows[i];
+    html += '<tr>';
+    
+    for (const cell of row) {
+      html += `
+        <td contenteditable="true" style="
+          border: 1px solid ${borderColor};
+          padding: ${cellPadding}px;
+          font-size: ${cell.fontSize}px;
+          font-weight: ${cell.fontWeight};
+          color: ${cell.color};
+          cursor: text;
+          white-space: nowrap;
+        ">${escapeHtml(cell.text)}</td>
+      `;
+    }
+    
+    html += '</tr>';
+  }
+  
+  html += '</tbody></table></div>';
+  
+  return html;
+}
+
+/**
+ * Escape HTML to prevent XSS
+ */
+function escapeHtml(text: string): string {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+/**
+ * Check if a text item is within a table boundary
+ */
+export function isTextInTable(x: number, y: number, tables: TableStructure[]): boolean {
+  return tables.some(table => {
+    return x >= table.bounds.x && 
+           x <= table.bounds.x + table.bounds.width &&
+           y >= table.bounds.y && 
+           y <= table.bounds.y + table.bounds.height;
+  });
+}

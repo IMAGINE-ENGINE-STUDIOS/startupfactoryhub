@@ -1,5 +1,6 @@
 import * as pdfjsLib from "pdfjs-dist";
 import { renderAsync } from "docx-preview";
+import { detectTables, renderTableAsHTML, isTextInTable, type TableStructure } from './TableDetector';
 
 // Canvas dimensions (A4 at 96dpi)
 const CANVAS_WIDTH_CM = 21;
@@ -301,7 +302,15 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
   
   // Extract text with positioning for editability
   const textContent = await page.getTextContent();
-  const textOverlay = renderTextOverlay(textContent, viewport);
+  
+  // Detect tables in the document
+  const tables = detectTables(textContent.items, viewport);
+  
+  // Render text overlay (excluding text inside tables)
+  const textOverlay = renderTextOverlay(textContent, viewport, tables);
+  
+  // Render detected tables as HTML
+  const tablesHTML = tables.map(table => renderTableAsHTML(table, scale)).join('');
   
   // Extract images for interactivity
   const imagesHTML = await extractImagesFromPage(page, viewport);
@@ -550,8 +559,9 @@ async function extractGraphicsFromPage(page: pdfjsLib.PDFPageProxy, viewport: pd
 
 /**
  * Create text overlay with proper positioning and spacing
+ * Excludes text that's part of detected tables
  */
-function renderTextOverlay(textContent: any, viewport: pdfjsLib.PageViewport): string {
+function renderTextOverlay(textContent: any, viewport: pdfjsLib.PageViewport, tables: TableStructure[] = []): string {
   const textItems = textContent.items;
   let overlayHTML = '';
   
@@ -563,9 +573,15 @@ function renderTextOverlay(textContent: any, viewport: pdfjsLib.PageViewport): s
   for (const item of textItems) {
     if (!item.str || item.str.trim() === '') continue;
     
+    // Calculate position to check if it's in a table
     const tx = item.transform;
     const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
     const fontSize = fontHeight;
+    const x = tx[4];
+    const y = viewport.height - tx[5] - fontHeight;
+    
+    // Skip text that's part of a table (it will be rendered by table HTML)
+    if (isTextInTable(x, y, tables)) continue;
     
     // Extract font information
     const fontName = item.fontName || 'sans-serif';
@@ -574,10 +590,6 @@ function renderTextOverlay(textContent: any, viewport: pdfjsLib.PageViewport): s
     
     // Measure actual text width
     const textWidth = ctx.measureText(item.str).width;
-    
-    // Calculate position
-    const x = tx[4];
-    const y = viewport.height - tx[5] - fontHeight;
     
     // Extract exact text color from PDF (full opacity for perfect match)
     let color = 'rgb(0, 0, 0)';
