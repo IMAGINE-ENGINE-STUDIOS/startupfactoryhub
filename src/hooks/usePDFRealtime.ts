@@ -15,7 +15,7 @@ interface UsePDFRealtimeReturn {
 
 export const usePDFRealtime = (
   sessionId: string | null,
-  userId: string | null
+  currentPage: number
 ): UsePDFRealtimeReturn => {
   const [collaborators, setCollaborators] = useState<PDFCollaborationCursor[]>([]);
   const [isConnected, setIsConnected] = useState(false);
@@ -29,7 +29,7 @@ export const usePDFRealtime = (
   // Update cursor position (throttled)
   const updateCursor = useCallback(
     async (x: number, y: number, pageNumber: number) => {
-      if (!sessionId || !userId) return;
+      if (!sessionId) return;
 
       if (cursorTimerRef.current) {
         clearTimeout(cursorTimerRef.current);
@@ -37,11 +37,14 @@ export const usePDFRealtime = (
 
       cursorTimerRef.current = setTimeout(async () => {
         try {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (!user) return;
+
           const { error } = await supabase
             .from('pdf_collaboration_cursors')
             .upsert({
               session_id: sessionId,
-              user_id: userId,
+              user_id: user.id,
               user_name: userName,
               user_color: userColor,
               position: { x, y },
@@ -55,45 +58,52 @@ export const usePDFRealtime = (
         } catch (err) {
           console.error('Error updating cursor position:', err);
         }
-      }, 50);
+      }, 100);
     },
-    [sessionId, userId, userName, userColor]
+    [sessionId, userName, userColor]
   );
 
   useEffect(() => {
-    if (!sessionId || !userId) return;
+    if (!sessionId) return;
 
-    const channel = supabase.channel(`pdf-session-${sessionId}`);
-    channelRef.current = channel;
+    const setupChannel = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
 
-    channel
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'pdf_collaboration_cursors',
-          filter: `session_id=eq.${sessionId}`,
-        },
-        (payload) => {
-          if (payload.eventType === 'DELETE') {
-            setCollaborators((prev) =>
-              prev.filter((c) => c.id !== (payload.old as any).id)
-            );
-          } else {
-            const cursor = (payload.new || payload.old) as PDFCollaborationCursor;
-            if (cursor.user_id === userId) return;
+      const channel = supabase.channel(`pdf-session-${sessionId}`);
+      channelRef.current = channel;
 
-            setCollaborators((prev) => {
-              const filtered = prev.filter((c) => c.id !== cursor.id);
-              return [...filtered, cursor];
-            });
+      channel
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'pdf_collaboration_cursors',
+            filter: `session_id=eq.${sessionId}`,
+          },
+          (payload) => {
+            if (payload.eventType === 'DELETE') {
+              setCollaborators((prev) =>
+                prev.filter((c) => c.id !== (payload.old as any).id)
+              );
+            } else {
+              const cursor = (payload.new || payload.old) as PDFCollaborationCursor;
+              if (cursor.user_id === user.id) return;
+
+              setCollaborators((prev) => {
+                const filtered = prev.filter((c) => c.id !== cursor.id);
+                return [...filtered, cursor];
+              });
+            }
           }
-        }
-      )
-      .subscribe((status) => {
-        setIsConnected(status === 'SUBSCRIBED');
-      });
+        )
+        .subscribe((status) => {
+          setIsConnected(status === 'SUBSCRIBED');
+        });
+    };
+
+    setupChannel();
 
     return () => {
       if (channelRef.current) {
@@ -103,15 +113,20 @@ export const usePDFRealtime = (
         clearTimeout(cursorTimerRef.current);
       }
       
-      if (userId && sessionId) {
-        supabase
+      const cleanup = async () => {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        await supabase
           .from('pdf_collaboration_cursors')
           .delete()
           .eq('session_id', sessionId)
-          .eq('user_id', userId);
-      }
+          .eq('user_id', user.id);
+      };
+
+      cleanup();
     };
-  }, [sessionId, userId]);
+  }, [sessionId]);
 
   return {
     collaborators,

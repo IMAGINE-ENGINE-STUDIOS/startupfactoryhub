@@ -5,11 +5,13 @@ import { PDFToolbar } from './PDFToolbar';
 import { PDFPropertiesPanel } from './PDFPropertiesPanel';
 import { PDFPageNavigator } from './PDFPageNavigator';
 import { PDFZoomControls } from './PDFZoomControls';
+import { CollaborationCursors } from './CollaborationCursors';
 import { FabricCanvasManager } from '@/lib/pdf/FabricCanvasManager';
 import { usePDFEditorStore } from '@/stores/pdfEditorStore';
 import { usePDFSession } from '@/hooks/usePDFSession';
 import { usePDFAutoSave } from '@/hooks/usePDFAutoSave';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import { usePDFRealtime } from '@/hooks/usePDFRealtime';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { FabricObject } from 'fabric';
@@ -26,6 +28,7 @@ export const PDFEditorContainer = () => {
   const fabricManagerRef = useRef<FabricCanvasManager | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   // Session management
   const { sessionId, isLoading: isLoadingSession } = usePDFSession(pdfUrl);
@@ -35,6 +38,9 @@ export const PDFEditorContainer = () => {
   
   // Export
   const { exportPDF, isExporting, exportUrl } = usePDFExport();
+
+  // Real-time collaboration
+  const { collaborators, updateCursor, isConnected } = usePDFRealtime(sessionId, currentPage);
 
   const handleUpload = useCallback(() => {
     fileInputRef.current?.click();
@@ -160,7 +166,13 @@ export const PDFEditorContainer = () => {
     manager.getCanvas().on('object:removed', () => {
       setFabricJSON(manager.serializeCanvas());
     });
-  }, []);
+
+    // Track mouse movement for collaboration cursors
+    manager.getCanvas().on('mouse:move', (event) => {
+      if (!sessionId || !event.pointer) return;
+      updateCursor(event.pointer.x, event.pointer.y, currentPage);
+    });
+  }, [sessionId, currentPage, updateCursor]);
 
   const handleUpdateProperty = useCallback((property: string, value: any) => {
     fabricManagerRef.current?.updateSelectedObjectProperty(property, value);
@@ -173,9 +185,15 @@ export const PDFEditorContainer = () => {
 
   const handlePageChange = useCallback((page: number) => {
     setCurrentPage(page);
-    // TODO: In full implementation, save current page state and load new page state
     toast.info(`Switched to page ${page}`);
   }, [setCurrentPage]);
+
+  // Show collaboration status
+  useEffect(() => {
+    if (isConnected && sessionId) {
+      console.log('Connected to collaboration session');
+    }
+  }, [isConnected, sessionId]);
 
   // Keyboard shortcuts for undo/redo and tools
   useEffect(() => {
@@ -372,6 +390,7 @@ export const PDFEditorContainer = () => {
 
               {/* PDF Canvas */}
               <div 
+                ref={canvasContainerRef}
                 className="relative bg-white shadow-2xl"
                 style={{
                   width: canvasDimensions.width || 'auto',
@@ -387,11 +406,22 @@ export const PDFEditorContainer = () => {
                 />
                 
                 {canvasDimensions.width > 0 && canvasDimensions.height > 0 && (
-                  <PDFFabricCanvas
-                    width={canvasDimensions.width}
-                    height={canvasDimensions.height}
-                    onManagerReady={handleManagerReady}
-                  />
+                  <>
+                    <PDFFabricCanvas
+                      width={canvasDimensions.width}
+                      height={canvasDimensions.height}
+                      onManagerReady={handleManagerReady}
+                    />
+                    
+                    {/* Collaboration cursors overlay */}
+                    {isConnected && collaborators.length > 0 && (
+                      <CollaborationCursors
+                        collaborators={collaborators}
+                        currentPage={currentPage}
+                        containerRef={canvasContainerRef}
+                      />
+                    )}
+                  </>
                 )}
               </div>
             </div>
