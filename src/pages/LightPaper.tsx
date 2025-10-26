@@ -51,12 +51,9 @@ export default function LightPaper() {
               <div className="flex items-center gap-2">
                 <FileText className="h-5 w-5 sm:h-6 sm:w-6 text-primary" />
                 <h1 className="text-base sm:text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                  LightPaper
+                  LightPaper Workspace
                 </h1>
               </div>
-              <span className="hidden lg:inline-block text-xs text-muted-foreground">
-                Complete Productivity Suite
-              </span>
             </div>
             <div className="flex items-center gap-2">
               <Button 

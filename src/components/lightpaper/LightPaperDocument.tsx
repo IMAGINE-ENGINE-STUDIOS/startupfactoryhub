@@ -41,6 +41,7 @@ const PAGE_FORMATS = {
 };
 
 const MARGIN_CM = 2.54; // 1 inch standard margin
+const CM_TO_PX = 37.795275591; // Conversion factor for cm to pixels at 96dpi
 
 type PageFormat = keyof typeof PAGE_FORMATS;
 type Orientation = "portrait" | "landscape";
@@ -75,7 +76,7 @@ export function LightPaperDocument({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFont, setSelectedFont] = useState("Arial");
-  const [selectedSize, setSelectedSize] = useState("16");
+  const [selectedSize, setSelectedSize] = useState("14");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [projectTitle, setProjectTitle] = useState("Untitled Document");
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
@@ -87,7 +88,20 @@ export function LightPaperDocument({
   const [selectedHighlight, setSelectedHighlight] = useState("#FFFF00");
   const [isHighlighterActive, setIsHighlighterActive] = useState(false);
   const [selectedTextColor, setSelectedTextColor] = useState("#000000");
-  const [documentContent, setDocumentContent] = useState("<p>Start typing your document here...</p>");
+  
+  // Get today's date for default content
+  const today = new Date();
+  const dateStr = today.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric' 
+  });
+  
+  const [documentContent, setDocumentContent] = useState(`
+    <h1 style="font-size: 14pt; font-weight: bold; margin-bottom: 0.5em; color: inherit;">Document Title</h1>
+    <p style="font-size: 14pt; margin-bottom: 1.5em; color: inherit; opacity: 0.7;">${dateStr}</p>
+    <p style="font-size: 14pt; color: inherit;">Start writing your document...</p>
+  `);
   const [showSignDialog, setShowSignDialog] = useState(false);
   const [signatures, setSignatures] = useState<Array<{type: "draw" | "text", data: string, id: string}>>([]);
   const [signatureMode, setSignatureMode] = useState<"draw" | "text">("draw");
@@ -106,7 +120,7 @@ export function LightPaperDocument({
   const [showComments, setShowComments] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(0.85);
+  const [zoomLevel, setZoomLevel] = useState(0.75);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
@@ -115,7 +129,7 @@ export function LightPaperDocument({
   const { isOnline } = useNetworkStatus();
   
   // Page format and view mode states
-  const [pageFormat, setPageFormat] = useState<PageFormat>("letter");
+  const [pageFormat, setPageFormat] = useState<PageFormat>("a4");
   const [orientation, setOrientation] = useState<Orientation>("portrait");
   const [viewMode, setViewMode] = useState(false);
   const [overlayTextBoxes, setOverlayTextBoxes] = useState<OverlayTextBoxData[]>([]);
@@ -1589,10 +1603,12 @@ export function LightPaperDocument({
             position: relative;
             box-sizing: border-box;
             transform: scale(${zoomLevel});
-            transform-origin: top center;
+            transform-origin: top left;
             transition: transform 0.2s ease;
-            margin: 0 auto;
+            margin: 0;
             flex-shrink: 0;
+            left: 50%;
+            margin-left: ${-(getPageDimensions().width * CM_TO_PX / 2)}px;
           }
           
           .page-content {

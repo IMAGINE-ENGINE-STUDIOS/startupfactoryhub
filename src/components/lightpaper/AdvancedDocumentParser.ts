@@ -186,12 +186,10 @@ export async function parsePDF(
   const pdf = await loadingTask.promise;
   const totalPages = pdf.numPages;
   
-  // Limit to first 50 pages for performance
-  const maxPages = Math.min(totalPages, 50);
+  // Process all pages
+  const maxPages = totalPages;
   
-  if (totalPages > 50) {
-    onProgress?.(`PDF has ${totalPages} pages. Processing first 50 pages only.`);
-  }
+  onProgress?.(`PDF has ${totalPages} pages. Processing all pages...`);
   
   // Get first page to calculate optimal scale
   const firstPage = await pdf.getPage(1);

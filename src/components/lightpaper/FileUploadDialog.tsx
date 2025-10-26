@@ -1,7 +1,7 @@
 import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Upload, FileText, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, FileText, Loader2, CheckCircle, AlertCircle, Eye } from "lucide-react";
 import { toast } from "sonner";
 import { parseDocument } from "./AdvancedDocumentParser";
 import { Progress } from "@/components/ui/progress";
@@ -17,6 +17,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
   const [uploadProgress, setUploadProgress] = useState<string>("Ready to upload...");
   const [progressValue, setProgressValue] = useState(0);
   const [isCancelled, setIsCancelled] = useState(false);
+  const [uploadMode, setUploadMode] = useState<"view" | "edit" | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const cancelRef = useRef<boolean>(false);
@@ -146,83 +147,151 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
         <DialogHeader>
           <DialogTitle>Upload Document</DialogTitle>
           <DialogDescription>
-            Upload a PDF or Word document to edit in LightPaper
+            Choose how to load your document
           </DialogDescription>
         </DialogHeader>
 
-        <div className="flex flex-col gap-4">
-          <div 
-            className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-all"
-            onClick={() => !isUploading && fileInputRef.current?.click()}
-          >
-            {isUploading ? (
-              <div className="flex flex-col items-center gap-3">
-                <Loader2 className="h-10 w-10 animate-spin text-primary" />
-                <div className="w-full max-w-xs space-y-2">
-                  <p className="text-sm font-medium">{uploadProgress}</p>
-                  <Progress value={progressValue} className="h-2" />
-                  <p className="text-xs text-muted-foreground">{progressValue}% complete</p>
+        {!uploadMode ? (
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-2 gap-3">
+              <Button
+                variant="outline"
+                className="h-32 flex flex-col gap-3 hover:border-primary hover:bg-primary/5"
+                onClick={() => setUploadMode("view")}
+              >
+                <Eye className="h-8 w-8 text-primary" />
+                <div className="text-center">
+                  <p className="font-semibold">View Mode</p>
+                  <p className="text-xs text-muted-foreground">Load as static image</p>
                 </div>
-              </div>
-            ) : (
-              <>
-                <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-sm font-medium mb-2">
-                  Click to upload or drag and drop
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  PDF or DOCX files (max 5GB)
-                </p>
-              </>
-            )}
-          </div>
-
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-            onChange={handleFileSelect}
-            className="hidden"
-            disabled={isUploading}
-          />
-
-          <div className="space-y-3">
-            <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg border border-border">
-              <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium mb-1">Advanced Features:</p>
-                <ul className="text-muted-foreground space-y-1 text-xs">
-                  <li>✓ <strong>PDF:</strong> Extracts actual images, graphics & editable text</li>
-                  <li>✓ <strong>DOCX:</strong> Full formatting, images, tables preserved</li>
-                  <li>✓ Smart file detection with magic byte validation</li>
-                  <li>✓ Up to 50 pages supported, 5GB max file size</li>
-                </ul>
+              </Button>
+              <Button
+                variant="outline"
+                className="h-32 flex flex-col gap-3 hover:border-primary hover:bg-primary/5"
+                onClick={() => setUploadMode("edit")}
+              >
+                <FileText className="h-8 w-8 text-primary" />
+                <div className="text-center">
+                  <p className="font-semibold">Edit Mode</p>
+                  <p className="text-xs text-muted-foreground">Extract text for editing</p>
+                </div>
+              </Button>
+            </div>
+            
+            <div className="space-y-3">
+              <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg border border-border">
+                <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium mb-1">Mode Comparison:</p>
+                  <ul className="text-muted-foreground space-y-1 text-xs">
+                    <li>✓ <strong>View Mode:</strong> Perfect for annotations & signatures</li>
+                    <li>✓ <strong>Edit Mode:</strong> Full text editing capabilities</li>
+                    <li>✓ Process all pages of PDF & DOCX files</li>
+                    <li>✓ Up to 5GB file size supported</li>
+                  </ul>
+                </div>
               </div>
             </div>
             
-            <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
-              <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-              <div className="text-sm">
-                <p className="font-medium mb-1 text-destructive">Important:</p>
-                <p className="text-xs text-muted-foreground">
-                  Legacy .doc format not supported. Convert to .docx first.
-                </p>
+            <Button variant="outline" onClick={onClose}>
+              Cancel
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-2 text-sm">
+              <span className="font-medium">Mode:</span>
+              <span className="px-2 py-1 bg-primary/10 text-primary rounded-md flex items-center gap-1">
+                {uploadMode === "view" ? <Eye className="h-3 w-3" /> : <FileText className="h-3 w-3" />}
+                {uploadMode === "view" ? "View Mode" : "Edit Mode"}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setUploadMode(null);
+                  setUploadProgress("Ready to upload...");
+                  setProgressValue(0);
+                }}
+                className="ml-auto"
+              >
+                Change Mode
+              </Button>
+            </div>
+            
+            <div 
+              className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-all"
+              onClick={() => !isUploading && fileInputRef.current?.click()}
+            >
+              {isUploading ? (
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                  <div className="w-full max-w-xs space-y-2">
+                    <p className="text-sm font-medium">{uploadProgress}</p>
+                    <Progress value={progressValue} className="h-2" />
+                    <p className="text-xs text-muted-foreground">{progressValue}% complete</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-sm font-medium mb-2">
+                    Click to upload or drag and drop
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    PDF or DOCX files (max 5GB)
+                  </p>
+                </>
+              )}
+            </div>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={handleFileSelect}
+              className="hidden"
+              disabled={isUploading}
+            />
+
+            <div className="space-y-3">
+              <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg border border-border">
+                <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium mb-1">Advanced Features:</p>
+                  <ul className="text-muted-foreground space-y-1 text-xs">
+                    <li>✓ <strong>View Mode:</strong> Load document as static image for viewing/annotation</li>
+                    <li>✓ <strong>Edit Mode:</strong> Extract all text for full editing capability</li>
+                    <li>✓ <strong>PDF:</strong> All pages processed with images & editable text</li>
+                    <li>✓ <strong>DOCX:</strong> Full formatting, images, tables preserved</li>
+                  </ul>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+                <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div className="text-sm">
+                  <p className="font-medium mb-1 text-destructive">Important:</p>
+                  <p className="text-xs text-muted-foreground">
+                    Legacy .doc format not supported. Convert to .docx first.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="flex justify-end gap-2">
-          {isUploading ? (
-            <Button variant="outline" onClick={handleCancel}>
-              Cancel Upload
-            </Button>
-          ) : (
-            <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
-          )}
-        </div>
+            <div className="flex justify-end gap-2">
+              {isUploading ? (
+                <Button variant="outline" onClick={handleCancel}>
+                  Cancel Upload
+                </Button>
+              ) : (
+                <Button variant="outline" onClick={onClose}>
+                  Close
+                </Button>
+              )}
+            </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
