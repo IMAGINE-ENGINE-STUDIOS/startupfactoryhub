@@ -3,6 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import * as pdfjsLib from 'pdfjs-dist';
+import mammoth from 'mammoth';
+
+// Configure PDF.js worker
+pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
 
 interface FileUploadDialogProps {
   isOpen: boolean;
@@ -55,15 +60,19 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
       const reader = new FileReader();
       
       reader.onload = async (e) => {
-        const arrayBuffer = e.target?.result as ArrayBuffer;
-        
-        // Here we would normally call the document parser
-        // For now, we'll just show a placeholder
-        const content = await parseDocument(file, arrayBuffer);
-        
-        onFileLoaded(content, file.name.replace(/\.[^/.]+$/, ''));
-        toast.success(`Successfully loaded ${file.name}`);
-        onClose();
+        try {
+          const arrayBuffer = e.target?.result as ArrayBuffer;
+          const content = await parseDocument(file, arrayBuffer);
+          
+          onFileLoaded(content, file.name.replace(/\.[^/.]+$/, ''));
+          toast.success(`Successfully loaded ${file.name}`);
+          setIsUploading(false);
+          onClose();
+        } catch (error) {
+          console.error('Error parsing document:', error);
+          toast.error('Failed to parse document');
+          setIsUploading(false);
+        }
       };
 
       reader.onerror = () => {
@@ -80,20 +89,47 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
   };
 
   const parseDocument = async (file: File, arrayBuffer: ArrayBuffer): Promise<string> => {
-    // This is a simplified parser
-    // In production, you would use proper PDF/DOCX parsing libraries
-    
-    if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-      // For PDF files, we'll show a message
-      return '<h1>PDF Document Loaded</h1><p>PDF content will be parsed and displayed here.</p><p>Note: PDF editing capabilities are available.</p>';
+    try {
+      // Parse PDF files
+      if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        let fullText = '';
+        
+        // Extract text from all pages
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const textContent = await page.getTextContent();
+          const pageText = textContent.items
+            .map((item: any) => item.str)
+            .join(' ');
+          
+          fullText += `<h2>Page ${i}</h2><p>${pageText}</p>`;
+        }
+        
+        return fullText || '<p>PDF loaded but no text content found.</p>';
+      }
+      
+      // Parse Word documents (.docx)
+      if (file.name.endsWith('.docx')) {
+        const result = await mammoth.convertToHtml({ arrayBuffer });
+        return result.value || '<p>Word document loaded but no content found.</p>';
+      }
+      
+      // For .doc files (older format), mammoth can still try
+      if (file.name.endsWith('.doc')) {
+        try {
+          const result = await mammoth.convertToHtml({ arrayBuffer });
+          return result.value || '<p>Word document loaded but no content found.</p>';
+        } catch (err) {
+          return '<p>Unable to parse .doc file. Please save as .docx and try again.</p>';
+        }
+      }
+      
+      return '<p>Document loaded successfully.</p>';
+    } catch (error) {
+      console.error('Error parsing document:', error);
+      throw error;
     }
-    
-    if (file.name.endsWith('.docx') || file.name.endsWith('.doc')) {
-      // For Word documents
-      return '<h1>Word Document Loaded</h1><p>Document content will be parsed and displayed here.</p><p>All formatting will be preserved.</p>';
-    }
-    
-    return '<p>Document loaded successfully. Content will appear here.</p>';
   };
 
   return (
