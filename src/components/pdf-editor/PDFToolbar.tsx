@@ -12,10 +12,12 @@ import {
   Image as ImageIcon,
   Keyboard,
   FileText,
-  PenTool
+  PenTool,
+  Share2,
 } from 'lucide-react';
 import { usePDFEditorStore, ToolType } from '@/stores/pdfEditorStore';
 import { cn } from '@/lib/utils';
+import { ActiveUsersList } from './ActiveUsersList';
 
 interface PDFToolbarProps {
   onUpload: () => void;
@@ -24,9 +26,12 @@ interface PDFToolbarProps {
   onShowKeyboardShortcuts: () => void;
   onAddFormField: () => void;
   onAddSignature: () => void;
+  onShare: () => void;
   isExporting?: boolean;
   isUploading?: boolean;
   hasSession?: boolean;
+  activeUsers?: any[];
+  userColor?: string;
 }
 
 export const PDFToolbar = ({ 
@@ -36,9 +41,12 @@ export const PDFToolbar = ({
   onShowKeyboardShortcuts,
   onAddFormField,
   onAddSignature,
+  onShare,
   isExporting = false, 
   isUploading = false,
-  hasSession = false 
+  hasSession = false,
+  activeUsers = [],
+  userColor = '#3B82F6',
 }: PDFToolbarProps) => {
   const { activeTool, setActiveTool } = usePDFEditorStore();
 
@@ -129,6 +137,24 @@ export const PDFToolbar = ({
         <Download className="w-4 h-4 md:mr-2" />
         <span className="hidden md:inline">{isExporting ? 'Exporting...' : 'Export'}</span>
       </Button>
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={onShare}
+        disabled={!hasSession}
+        title="Share Session"
+        className="shrink-0"
+      >
+        <Share2 className="w-4 h-4 md:mr-2" />
+        <span className="hidden md:inline">Share</span>
+      </Button>
+
+      <Separator orientation="vertical" className="h-6 md:h-8 shrink-0" />
+
+      {hasSession && activeUsers && (
+        <ActiveUsersList users={activeUsers} currentUserColor={userColor} />
+      )}
 
       <Button
         variant="ghost"

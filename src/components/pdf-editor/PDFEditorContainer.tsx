@@ -6,6 +6,8 @@ import { PDFPropertiesPanel } from './PDFPropertiesPanel';
 import { PDFPageNavigator } from './PDFPageNavigator';
 import { PDFZoomControls } from './PDFZoomControls';
 import { CollaborationCursors } from './CollaborationCursors';
+import { ActiveUsersList } from './ActiveUsersList';
+import { ShareSessionDialog } from './ShareSessionDialog';
 import { PDFErrorBoundary } from './PDFErrorBoundary';
 import { KeyboardShortcutsDialog } from './KeyboardShortcutsDialog';
 import { ExportOptionsDialog } from './ExportOptionsDialog';
@@ -17,6 +19,7 @@ import { usePDFSession } from '@/hooks/usePDFSession';
 import { usePDFAutoSave } from '@/hooks/usePDFAutoSave';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import { usePDFRealtime } from '@/hooks/usePDFRealtime';
+import { useCollaboration } from '@/hooks/useCollaboration';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { FabricObject, IText } from 'fabric';
@@ -37,6 +40,7 @@ export const PDFEditorContainer = () => {
   const [showExportDialog, setShowExportDialog] = useState(false);
   const [showFormFieldEditor, setShowFormFieldEditor] = useState(false);
   const [showSignaturePanel, setShowSignaturePanel] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const fabricManagerRef = useRef<FabricCanvasManager | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -53,6 +57,19 @@ export const PDFEditorContainer = () => {
 
   // Real-time collaboration
   const { collaborators, updateCursor, isConnected } = usePDFRealtime(sessionId, currentPage);
+  
+  // New collaboration features
+  const { cursors, activeUsers, trackCursor, currentUser, userColor } = useCollaboration(sessionId);
+
+  // Track mouse movement for collaboration
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (canvasContainerRef.current) {
+      const rect = canvasContainerRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      trackCursor(x, y);
+    }
+  }, [trackCursor]);
 
   const handleUpload = useCallback(() => {
     fileInputRef.current?.click();
@@ -423,9 +440,12 @@ export const PDFEditorContainer = () => {
           onShowKeyboardShortcuts={() => setShowKeyboardShortcuts(true)}
           onAddFormField={() => setShowFormFieldEditor(true)}
           onAddSignature={() => setShowSignaturePanel(true)}
+          onShare={() => setShowShareDialog(true)}
           isExporting={isExporting}
           isUploading={isUploading}
           hasSession={!!sessionId}
+          activeUsers={activeUsers}
+          userColor={userColor}
         />
       
       {uploadError && (
@@ -570,6 +590,12 @@ export const PDFEditorContainer = () => {
         open={showSignaturePanel}
         onClose={() => setShowSignaturePanel(false)}
         onSignatureCreated={handleAddSignature}
+      />
+
+      <ShareSessionDialog
+        open={showShareDialog}
+        onClose={() => setShowShareDialog(false)}
+        sessionId={sessionId}
       />
     </div>
     </PDFErrorBoundary>
