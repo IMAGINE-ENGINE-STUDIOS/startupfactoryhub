@@ -1,6 +1,9 @@
-import { Document, Page } from 'react-pdf';
+import { Document, Page, pdfjs } from 'react-pdf';
 import { useState } from 'react';
 import { Loader2 } from 'lucide-react';
+
+// Configure PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 interface PDFBackgroundLayerProps {
   pdfUrl: string;

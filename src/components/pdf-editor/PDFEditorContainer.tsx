@@ -167,6 +167,7 @@ export const PDFEditorContainer = () => {
         .getPublicUrl(uploadData!.path);
 
       reset();
+      setUploadError(null); // Clear any previous errors
       setPdfUrl(publicUrl);
       toast.success('PDF uploaded successfully!', { id: toastId });
     } catch (error: any) {
