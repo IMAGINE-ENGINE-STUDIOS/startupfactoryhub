@@ -417,6 +417,9 @@ export function renderTableAsHTML(table: TableStructure, scale: number = 1, zInd
   const cellPadding = 6;
   const borderColor = '#999999';
   const borderWidth = 1;
+  const MARGIN_CM = 2.54;
+  const CM_TO_PX = 37.7952755906;
+  const marginPx = MARGIN_CM * CM_TO_PX;
   
   // Calculate exact column widths from cell positions
   const columnWidths: number[] = [];
@@ -440,17 +443,24 @@ export function renderTableAsHTML(table: TableStructure, scale: number = 1, zInd
     rowHeights.push(maxHeight + cellPadding * 2);
   }
   
+  // Constrain table position within margins
+  const constrainedX = Math.max(marginPx, table.bounds.x);
+  const constrainedY = Math.max(marginPx, table.bounds.y);
+  
   let html = `
     <div class="pdf-reconstructed-table" style="
       position: absolute;
-      left: ${table.bounds.x}px;
-      top: ${table.bounds.y}px;
+      left: ${constrainedX}px;
+      top: ${constrainedY}px;
       width: ${table.bounds.width}px;
       height: ${table.bounds.height}px;
+      max-width: calc(100% - ${marginPx * 2}px);
+      max-height: calc(100% - ${marginPx * 2}px);
       background: white;
       z-index: 10;
       border: ${borderWidth}px solid ${borderColor};
       box-sizing: border-box;
+      overflow: auto;
     ">
       <table style="
         width: 100%;

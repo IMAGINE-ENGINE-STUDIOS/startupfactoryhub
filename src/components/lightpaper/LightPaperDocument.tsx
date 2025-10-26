@@ -859,6 +859,17 @@ export function LightPaperDocument({
       const x = e.clientX - pageRect.left;
       const y = e.clientY - pageRect.top;
 
+      // Calculate constrained position within page margins
+      const pageWidth = pageRect.width;
+      const pageHeight = pageRect.height;
+      const marginPx = MARGIN_CM * CM_TO_PX;
+      const sigWidth = 120;
+      const sigHeight = 30;
+      
+      // Constrain to margins
+      const constrainedX = Math.max(marginPx, Math.min(pageWidth - marginPx - sigWidth, x));
+      const constrainedY = Math.max(marginPx, Math.min(pageHeight - marginPx - sigHeight, y));
+
       // Create and place the signature element
       const signatureElement = document.createElement('div');
       signatureElement.contentEditable = "false";
@@ -867,27 +878,28 @@ export function LightPaperDocument({
       signatureElement.style.cssText = `
         position: absolute;
         cursor: move;
-        padding: 8px;
+        padding: 4px;
         border: 2px dashed transparent;
         background: transparent;
         transition: border-color 0.2s ease;
-        left: ${x}px;
-        top: ${y}px;
+        left: ${constrainedX}px;
+        top: ${constrainedY}px;
         transform: translate(-50%, -50%);
         z-index: 100;
+        max-width: ${sigWidth}px;
       `;
       signatureElement.classList.add('signature-element');
 
       if (draggingSignature.type === "draw") {
         const img = document.createElement('img');
         img.src = draggingSignature.data;
-        img.style.cssText = "height: 60px; display: block; pointer-events: none;";
+        img.style.cssText = "height: 30px; width: auto; max-width: 120px; display: block; pointer-events: none;";
         signatureElement.appendChild(img);
       } else {
         signatureElement.style.fontFamily = "cursive";
-        signatureElement.style.fontSize = "24px";
+        signatureElement.style.fontSize = "16px";
         signatureElement.textContent = draggingSignature.data;
-        signatureElement.style.color = 'var(--foreground)'; // Use theme variable
+        signatureElement.style.color = 'var(--foreground)';
       }
 
       // Add drag functionality to placed signature
@@ -1604,7 +1616,7 @@ export function LightPaperDocument({
         </div>
 
         {/* Page Navigation Controls */}
-        {((viewMode && viewModeImages.length > 1) || (!viewMode && totalPages > 1)) && (
+        {((viewMode && viewModeImages.length > 0) || (!viewMode && (totalPages > 0 || documentContent))) && (
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
