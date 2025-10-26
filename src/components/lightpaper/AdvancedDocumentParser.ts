@@ -1,6 +1,14 @@
 import * as pdfjsLib from "pdfjs-dist";
 import { renderAsync } from "docx-preview";
 
+// Canvas dimensions (A4 at 96dpi)
+const CANVAS_WIDTH_CM = 21;
+const CANVAS_HEIGHT_CM = 29.7;
+const CM_TO_PX = 37.795275591;
+const CANVAS_WIDTH_PX = CANVAS_WIDTH_CM * CM_TO_PX; // ~793px
+const CANVAS_HEIGHT_PX = CANVAS_HEIGHT_CM * CM_TO_PX; // ~1122px
+const PADDING_PX = 2 * CM_TO_PX; // 2cm padding = ~75px
+
 // Configure PDF.js worker with local fallback
 const configureWorker = () => {
   try {
@@ -48,6 +56,7 @@ export interface ParsedContent {
     hasImages: boolean;
     fileType: 'pdf' | 'docx';
   };
+  pages?: string[]; // Multiple page HTML strings
 }
 
 /**
@@ -64,15 +73,18 @@ export async function parseDOCX(
   const container = document.createElement('div');
   container.style.position = 'absolute';
   container.style.left = '-9999px';
-  container.style.width = '210mm'; // A4 width
-  container.style.minHeight = '297mm'; // A4 height
+  container.style.width = `${CANVAS_WIDTH_CM}cm`;
+  container.style.maxWidth = `${CANVAS_WIDTH_CM}cm`;
+  container.style.minHeight = `${CANVAS_HEIGHT_CM}cm`;
+  container.style.padding = '2cm';
+  container.style.boxSizing = 'border-box';
   document.body.appendChild(container);
 
   try {
     // Render DOCX with full formatting preservation
     await renderAsync(file, container, undefined, {
       className: 'docx-content',
-      inWrapper: true,
+      inWrapper: false,
       ignoreWidth: false,
       ignoreHeight: false,
       ignoreFonts: false,
@@ -87,17 +99,64 @@ export async function parseDOCX(
 
     onProgress?.('Processing document structure...');
 
+    // Measure actual content dimensions
+    const contentWidth = container.scrollWidth;
+    const contentHeight = container.scrollHeight;
+    
+    // Calculate scale to fit within canvas (with padding)
+    const availableWidth = CANVAS_WIDTH_PX - (2 * PADDING_PX);
+    const availableHeight = CANVAS_HEIGHT_PX - (2 * PADDING_PX);
+    
+    let scale = 1.0;
+    if (contentWidth > availableWidth || contentHeight > availableHeight) {
+      const scaleX = availableWidth / contentWidth;
+      const scaleY = availableHeight / contentHeight;
+      scale = Math.min(scaleX, scaleY);
+    }
+    
     // Extract rendered HTML
     let html = container.innerHTML;
     
-    // Enhance HTML with better structure
-    html = `<div class="document-content docx-document" style="font-family: Arial, sans-serif; line-height: 1.6; max-width: 210mm; margin: 0 auto; padding: 20mm;">
-      ${html}
-    </div>`;
+    // Wrap content with scaling container
+    if (scale < 1.0) {
+      html = `
+        <div class="docx-page-wrapper" style="
+          width: ${CANVAS_WIDTH_PX}px;
+          height: ${CANVAS_HEIGHT_PX}px;
+          overflow: hidden;
+          position: relative;
+        ">
+          <div class="docx-page" style="
+            transform: scale(${scale});
+            transform-origin: top left;
+            width: ${contentWidth}px;
+            height: ${contentHeight}px;
+          ">
+            ${html}
+          </div>
+        </div>
+      `;
+    } else {
+      html = `
+        <div class="docx-page-wrapper" style="
+          width: 100%;
+          max-width: ${CANVAS_WIDTH_CM}cm;
+          margin: 0 auto;
+        ">
+          ${html}
+        </div>
+      `;
+    }
     
-    // Analyze content
-    const hasImages = html.includes('<img') || html.includes('base64');
-    const hasEditableText = true; // DOCX always has editable text
+    // Check if content has images
+    const hasImages = container.innerHTML.includes('<img') || container.innerHTML.includes('base64');
+    
+    // Check if content is editable (has text content)
+    const textContent = container.textContent || '';
+    const isEditable = textContent.trim().length > 0;
+    
+    // Estimate page count
+    const estimatedPages = Math.max(1, Math.ceil(contentHeight / CANVAS_HEIGHT_PX));
     
     // Clean up
     document.body.removeChild(container);
@@ -107,7 +166,8 @@ export async function parseDOCX(
     return {
       html,
       metadata: {
-        hasEditableText,
+        pageCount: estimatedPages,
+        hasEditableText: isEditable,
         hasImages,
         fileType: 'docx',
       }
@@ -142,7 +202,23 @@ export async function parsePDF(
     onProgress?.(`PDF has ${totalPages} pages. Processing first 50 pages only.`);
   }
   
+  // Get first page to calculate optimal scale
+  const firstPage = await pdf.getPage(1);
+  const firstViewport = firstPage.getViewport({ scale: 1.0 });
+  
+  // Calculate scale to fit within canvas (with padding)
+  const availableWidth = CANVAS_WIDTH_PX - (2 * PADDING_PX);
+  const availableHeight = CANVAS_HEIGHT_PX - (2 * PADDING_PX);
+  
+  const scaleX = availableWidth / firstViewport.width;
+  const scaleY = availableHeight / firstViewport.height;
+  const optimalScale = Math.min(scaleX, scaleY, 2.0); // Cap at 2.0 for quality
+  
+  onProgress?.(`Rendering at scale ${optimalScale.toFixed(2)}...`, 0, maxPages);
+  
   let htmlPages: string[] = [];
+  let hasImages = false;
+  let totalText = '';
   
   // Process pages in batches
   const batchSize = 3;
@@ -156,11 +232,18 @@ export async function parsePDF(
       
       onProgress?.(`Rendering page ${pageNum}/${maxPages}...`, pageNum, maxPages);
       
-      batchPromises.push(renderPDFPageWithText(pdf, pageNum));
+      batchPromises.push(renderPDFPageWithText(pdf, pageNum, optimalScale));
     }
     
     const batchResults = await Promise.all(batchPromises);
     htmlPages.push(...batchResults);
+    
+    // Check if any page has images
+    batchResults.forEach(pageHtml => {
+      if (pageHtml.includes('<img') || pageHtml.includes('<svg')) {
+        hasImages = true;
+      }
+    });
     
     // Small delay between batches to prevent freezing
     if (i + batchSize <= maxPages) {
@@ -168,23 +251,24 @@ export async function parsePDF(
     }
   }
   
-  onProgress?.('Assembling PDF document...');
+  // Extract text from all pages for search
+  for (let i = 1; i <= maxPages; i++) {
+    const page = await pdf.getPage(i);
+    const textContent = await page.getTextContent();
+    totalText += textContent.items.map((item: any) => item.str).join(' ') + '\n';
+  }
   
-  // Combine all pages into a single document
-  const html = `<div class="document-content pdf-document" style="max-width: 100%; margin: 0 auto;">
-    ${htmlPages.join('\n')}
-  </div>`;
-  
-  onProgress?.('PDF processing complete!');
+  onProgress?.('PDF processing complete!', maxPages, maxPages);
   
   return {
-    html,
+    html: htmlPages.join('\n\n'),
     metadata: {
       pageCount: maxPages,
       hasEditableText: true,
-      hasImages: true,
+      hasImages,
       fileType: 'pdf',
-    }
+    },
+    pages: htmlPages, // Individual page HTML strings
   };
 }
 
@@ -192,11 +276,11 @@ export async function parsePDF(
  * Render a single PDF page with reconstructed objects (images, text, etc.)
  * Instead of background image, we extract and position actual elements
  */
-async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: number): Promise<string> {
+async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: number, scale: number = 2.0): Promise<string> {
   const page = await pdf.getPage(pageNum);
   
-  // Get page dimensions
-  const viewport = page.getViewport({ scale: 2.0 }); // Higher scale for better quality
+  // Get page dimensions at specified scale
+  const viewport = page.getViewport({ scale });
   
   // Extract images from PDF
   const images = await extractImagesFromPage(page, viewport);
@@ -208,14 +292,39 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
   // Extract vector graphics and shapes as SVG
   const graphics = await extractGraphicsFromPage(page, viewport);
   
-  // Combine all layers with white background
-  return `<div class="pdf-page" style="position: relative; margin: 1rem 0; page-break-after: always; width: ${viewport.width}px; height: ${viewport.height}px; margin-left: auto; margin-right: auto; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-    ${graphics}
-    ${images}
-    <div class="text-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto;">
-      ${textOverlay}
+  // Calculate if page needs additional scaling to fit canvas
+  const pageScale = Math.min(
+    (CANVAS_WIDTH_PX - 2 * PADDING_PX) / viewport.width,
+    (CANVAS_HEIGHT_PX - 2 * PADDING_PX) / viewport.height,
+    1.0
+  );
+  
+  // Combine layers into final HTML with proper containment
+  return `
+    <div class="pdf-page-wrapper" style="
+      width: ${CANVAS_WIDTH_PX}px;
+      height: ${CANVAS_HEIGHT_PX}px;
+      overflow: hidden;
+      position: relative;
+      margin: 1rem auto;
+    ">
+      <div class="pdf-page" style="
+        position: relative;
+        width: ${viewport.width}px;
+        height: ${viewport.height}px;
+        background: white;
+        transform: scale(${pageScale});
+        transform-origin: top left;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      ">
+        ${graphics}
+        ${images}
+        <div class="text-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: auto;">
+          ${textOverlay}
+        </div>
+      </div>
     </div>
-  </div>`;
+  `;
 }
 
 /**

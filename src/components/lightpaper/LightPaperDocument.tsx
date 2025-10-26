@@ -1237,6 +1237,38 @@ export function LightPaperDocument({
             background: white;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             page-break-after: always;
+            overflow: hidden;
+            position: relative;
+            box-sizing: border-box;
+          }
+          
+          .page .uploaded-content {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+          }
+          
+          .page .pdf-page-wrapper,
+          .page .docx-page-wrapper {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+          }
+          
+          .page .pdf-page,
+          .page .docx-page {
+            pointer-events: auto;
+          }
+          
+          .page img {
+            max-width: 100%;
+            height: auto;
+            cursor: move;
+            user-select: none;
+          }
+          
+          .page img:hover {
+            outline: 2px solid hsl(var(--primary) / 0.5);
           }
           
           /* List Styles */
@@ -1496,14 +1528,29 @@ export function LightPaperDocument({
       <FileUploadDialog
         isOpen={showUploadDialog}
         onClose={() => setShowUploadDialog(false)}
-        onFileLoaded={(content, title) => {
-          if (editorRef.current) {
-            editorRef.current.innerHTML = content;
-            setProjectTitle(title);
-            toast.success("Document loaded from file");
-          }
-          setShowUploadDialog(false);
-        }}
+                  onFileLoaded={(content, title) => {
+                    if (editorRef.current) {
+                      // Wrap uploaded content properly
+                      const wrapper = document.createElement('div');
+                      wrapper.className = 'uploaded-content';
+                      wrapper.innerHTML = content;
+                      
+                      // Make images draggable
+                      const images = wrapper.querySelectorAll('img');
+                      images.forEach(img => {
+                        (img as HTMLImageElement).draggable = true;
+                        img.addEventListener('dragstart', (e) => {
+                          e.dataTransfer?.setData('text/plain', '');
+                        });
+                      });
+                      
+                      editorRef.current.innerHTML = '';
+                      editorRef.current.appendChild(wrapper);
+                      setProjectTitle(title);
+                      toast.success("Document loaded from file");
+                    }
+                    setShowUploadDialog(false);
+                  }}
       />
     </div>
   );
