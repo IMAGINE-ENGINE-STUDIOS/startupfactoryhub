@@ -212,35 +212,6 @@ export const PDFEditorContainer = () => {
     toast.success('Signature added');
   }, [canvasDimensions]);
 
-  const handleAddFormField = useCallback((field: FormFieldConfig) => {
-    if (!fabricManagerRef.current) return;
-
-    // Add form field as a text element with special styling
-    const centerX = canvasDimensions.width / 2 - 100;
-    const centerY = canvasDimensions.height / 2;
-    
-    fabricManagerRef.current.addText(
-      centerX,
-      centerY,
-      `[${field.type.toUpperCase()}] ${field.label}${field.required ? ' *' : ''}`,
-      16,
-      '#0066cc'
-    );
-
-    toast.success(`${field.type} field added to canvas`);
-  }, [canvasDimensions]);
-
-  const handleAddSignature = useCallback((signatureDataUrl: string) => {
-    if (!fabricManagerRef.current) return;
-
-    const centerX = canvasDimensions.width / 2 - 150;
-    const centerY = canvasDimensions.height / 2 - 50;
-    
-    fabricManagerRef.current.addImage(signatureDataUrl, centerX, centerY, 300, 100);
-    
-    toast.success('Signature added to PDF');
-  }, [canvasDimensions]);
-
   const handleLoadSuccess = useCallback((numPages: number) => {
     setTotalPages(numPages);
     toast.success(`PDF loaded with ${numPages} pages`);
@@ -583,20 +554,20 @@ export const PDFEditorContainer = () => {
       />
 
       <ExportOptionsDialog
-        isOpen={showExportDialog}
+        open={showExportDialog}
         onClose={() => setShowExportDialog(false)}
         onExport={handleExport}
         isExporting={isExporting}
       />
 
       <FormFieldEditor
-        isOpen={showFormFieldEditor}
+        open={showFormFieldEditor}
         onClose={() => setShowFormFieldEditor(false)}
         onAddField={handleAddFormField}
       />
 
       <SignaturePanel
-        isOpen={showSignaturePanel}
+        open={showSignaturePanel}
         onClose={() => setShowSignaturePanel(false)}
         onSignatureCreated={handleAddSignature}
       />

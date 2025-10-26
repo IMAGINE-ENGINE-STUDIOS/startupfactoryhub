@@ -13,14 +13,14 @@ import { Download, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 interface ExportOptionsDialogProps {
-  isOpen: boolean;
+  open: boolean;
   onClose: () => void;
   onExport: (filename: string) => Promise<void>;
   isExporting: boolean;
 }
 
 export const ExportOptionsDialog = ({
-  isOpen,
+  open,
   onClose,
   onExport,
   isExporting,
@@ -33,7 +33,7 @@ export const ExportOptionsDialog = ({
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
