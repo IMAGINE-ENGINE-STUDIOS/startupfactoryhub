@@ -12,7 +12,7 @@ export default function CollapsibleToolbar({
 }: CollapsibleToolbarProps) {
   return (
     <div className={cn("border-b bg-background shadow-sm", className)}>
-      <div className="p-3 bg-muted/30">
+      <div className="p-1.5 bg-muted/30">
         {children}
       </div>
     </div>

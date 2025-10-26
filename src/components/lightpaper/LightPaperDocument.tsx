@@ -106,7 +106,7 @@ export function LightPaperDocument({
   const [showComments, setShowComments] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
-  const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [zoomLevel, setZoomLevel] = useState(0.85);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
@@ -115,7 +115,7 @@ export function LightPaperDocument({
   const { isOnline } = useNetworkStatus();
   
   // Page format and view mode states
-  const [pageFormat, setPageFormat] = useState<PageFormat>("legal");
+  const [pageFormat, setPageFormat] = useState<PageFormat>("letter");
   const [orientation, setOrientation] = useState<Orientation>("portrait");
   const [viewMode, setViewMode] = useState(false);
   const [overlayTextBoxes, setOverlayTextBoxes] = useState<OverlayTextBoxData[]>([]);
@@ -1088,9 +1088,9 @@ export function LightPaperDocument({
   };
   
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
+    <div className="flex flex-col h-screen">
       {/* Desktop Toolbar */}
-      <div className="hidden md:block">
+      <div className="hidden md:block border-b bg-background">
         <CollapsibleToolbar>
           <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
             {/* Font Controls */}
@@ -1420,7 +1420,7 @@ export function LightPaperDocument({
       </div>
 
       {/* Mobile Toolbar */}
-      <div className="md:hidden p-2 border-b bg-background">
+      <div className="md:hidden p-1 border-b bg-background shrink-0">
         <MobileToolbar
           groups={[
             {
@@ -1492,7 +1492,7 @@ export function LightPaperDocument({
       </div>
 
       {/* Zoom and Page Navigation Controls */}
-      <div className="flex items-center justify-between gap-4 px-4 py-2 border-b bg-background">
+      <div className="flex items-center justify-between gap-4 px-4 py-1 border-b bg-background shrink-0">
         {/* Status Info */}
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
@@ -1570,7 +1570,9 @@ export function LightPaperDocument({
       </div>
 
       {/* Main Editor Area - Takes Full Height with Single Page View */}
-      <div ref={wrapperRef} className="flex-1 overflow-auto scroll-smooth bg-muted/30 flex gap-0 items-start justify-center pt-8">
+      <div ref={wrapperRef} className="flex-1 overflow-auto scroll-smooth bg-muted/30 flex gap-0 items-start justify-center py-4" style={{
+        scrollBehavior: 'smooth'
+      }}>
         {/* Live Cursors */}
         {currentProjectId && (
           <LiveCursors cursors={cursors} containerRef={containerRef} />
@@ -1587,9 +1589,10 @@ export function LightPaperDocument({
             position: relative;
             box-sizing: border-box;
             transform: scale(${zoomLevel});
-            transform-origin: center center;
+            transform-origin: top center;
             transition: transform 0.2s ease;
-            margin: 20px auto;
+            margin: 0 auto;
+            flex-shrink: 0;
           }
           
           .page-content {
@@ -1787,7 +1790,13 @@ export function LightPaperDocument({
             }
           }
         `}</style>
-        <div ref={containerRef} className="max-w-[21cm] mx-auto">
+        <div ref={containerRef} className="mx-auto" style={{ 
+          width: 'fit-content',
+          minHeight: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center'
+        }}>
           <div 
             className={`page ${editMode ? 'edit-mode' : 'view-mode'} ${viewMode ? 'view-mode' : ''}`} 
             style={{ position: 'relative' }}
@@ -1917,7 +1926,7 @@ export function LightPaperDocument({
 
       {/* Signature Dialog */}
       <Dialog open={showSignDialog} onOpenChange={setShowSignDialog}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl bg-background">
           <DialogHeader>
             <DialogTitle>Add Signature</DialogTitle>
           </DialogHeader>
@@ -1930,15 +1939,15 @@ export function LightPaperDocument({
                 </TabsList>
                 
                 <TabsContent value="draw" className="space-y-3">
-                  <div className="relative">
+                  <div className="relative bg-white rounded p-2">
                     <canvas
                       ref={signCanvasRef}
                       width={600}
                       height={300}
-                      className="border rounded cursor-crosshair w-full bg-transparent"
+                      className="border border-gray-300 rounded cursor-crosshair w-full"
                       style={{ 
-                        backgroundColor: 'transparent',
-                        backgroundImage: 'repeating-conic-gradient(#d1d5db 0% 25%, transparent 0% 50%) 50% / 20px 20px'
+                        backgroundColor: '#ffffff',
+                        backgroundImage: 'repeating-conic-gradient(#f3f4f6 0% 25%, #ffffff 0% 50%) 50% / 20px 20px'
                       }}
                       onMouseDown={startDrawingSignature}
                       onMouseMove={drawSignature}
@@ -1949,7 +1958,7 @@ export function LightPaperDocument({
                       onTouchEnd={stopDrawingSignature}
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">Draw your signature above. It will be saved with a transparent background.</p>
+                  <p className="text-xs text-gray-600 dark:text-gray-400">Draw your signature above on the white canvas. It will be saved with a white background.</p>
                   <div className="flex gap-2">
                     <Button size="sm" onClick={clearSignCanvas} variant="outline" className="flex-1">
                       Clear
@@ -1980,12 +1989,12 @@ export function LightPaperDocument({
               <h3 className="font-medium mb-3">Saved Signatures ({signatures.length})</h3>
               <div className="space-y-2 max-h-[300px] overflow-auto">
                 {signatures.map((sig) => (
-                  <div key={sig.id} className="flex items-center justify-between p-2 border rounded">
+                  <div key={sig.id} className="flex items-center justify-between p-2 border rounded bg-white">
                     <div className="flex-1 cursor-pointer" onClick={() => insertSignature(sig)}>
                       {sig.type === "draw" ? (
-                        <img src={sig.data} alt="Signature" className="h-12" />
+                        <img src={sig.data} alt="Signature" className="h-12 bg-white" />
                       ) : (
-                        <span className="text-xl" style={{ fontFamily: "cursive" }}>
+                        <span className="text-xl text-black" style={{ fontFamily: "cursive" }}>
                           {sig.data}
                         </span>
                       )}
