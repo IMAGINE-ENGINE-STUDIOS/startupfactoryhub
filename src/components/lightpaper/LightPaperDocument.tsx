@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
@@ -226,56 +226,67 @@ export function LightPaperDocument({
   useEffect(() => {
     if (!uploadedContent || !editorRef.current) return;
     
-    console.log('Loading uploaded content');
+    console.log('Loading uploaded content', uploadedContent.content.substring(0, 100));
     
     try {
       // TRY TO PARSE AS JSON (View Mode)
       const parsed = JSON.parse(uploadedContent.content);
       
-      if (parsed.mode === 'view' && parsed.images) {
+      if (parsed.mode === 'view' && parsed.images && Array.isArray(parsed.images)) {
         // VIEW MODE: Render as images
-        console.log(`View Mode: ${parsed.images.length} pages`);
+        console.log(`View Mode: ${parsed.images.length} pages detected`);
+        
+        // CRITICAL: Set state in correct order
         setViewMode(true);
         setViewModeImages(parsed.images);
         setTotalPages(parsed.images.length);
         setCurrentPage(1);
         
         // Set format if detected
-        if (parsed.detectedFormat) {
+        if (parsed.metadata?.detectedFormat) {
+          setPageFormat(parsed.metadata.detectedFormat);
+          toast.info(`Format: ${parsed.metadata.detectedFormat.toUpperCase()}`);
+        } else if (parsed.detectedFormat) {
           setPageFormat(parsed.detectedFormat);
-          toast.info(`Format detected: ${parsed.detectedFormat.toUpperCase()}`);
+          toast.info(`Format: ${parsed.detectedFormat.toUpperCase()}`);
         }
         
-        // Clear editor content in view mode
+        // CRITICAL: Clear editor completely and set empty content
         editorRef.current.innerHTML = '';
-        setDocumentContent('');
+        setDocumentContent(''); // Prevent HTML from being stored
         
         toast.success(`Document loaded in View Mode: ${parsed.images.length} pages`);
+        setProjectTitle(uploadedContent.title);
+        setCurrentProjectId(null);
+        onContentLoaded?.();
+        return; // EXIT EARLY - don't run Edit Mode logic
       }
     } catch (e) {
       // NOT JSON: Regular HTML content (Edit Mode)
       console.log('Edit Mode: Loading HTML content');
-      setViewMode(false);
-      setViewModeImages([]);
-      
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(uploadedContent.content, 'text/html');
-      const pages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
-      const pageCount = pages.length > 0 ? pages.length : 1;
-      
-      setDocumentContent(uploadedContent.content);
-      setTotalPages(pageCount);
-      setCurrentPage(1);
-      
-      if (pages.length > 0) {
-        editorRef.current.innerHTML = pages[0].outerHTML;
-      } else {
-        editorRef.current.innerHTML = uploadedContent.content;
-      }
-      
-      toast.success(`Document loaded: ${pageCount} pages`);
     }
     
+    // EDIT MODE LOGIC (only runs if JSON parse failed or not view mode)
+    setViewMode(false);
+    setViewModeImages([]);
+    
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(uploadedContent.content, 'text/html');
+    const pages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
+    const pageCount = pages.length > 0 ? pages.length : 1;
+    
+    setDocumentContent(uploadedContent.content);
+    setTotalPages(pageCount);
+    setCurrentPage(1);
+    
+    // Load first page or full content
+    if (pages.length > 0) {
+      editorRef.current.innerHTML = pages[0].outerHTML;
+    } else {
+      editorRef.current.innerHTML = uploadedContent.content;
+    }
+    
+    toast.success(`Document loaded in Edit Mode: ${pageCount} pages`);
     setProjectTitle(uploadedContent.title);
     setCurrentProjectId(null);
     onContentLoaded?.();
@@ -1593,26 +1604,33 @@ export function LightPaperDocument({
         </div>
 
         {/* Page Navigation Controls */}
-        {(totalPages > 1 || (viewMode && viewModeImages.length > 1)) && (
+        {((viewMode && viewModeImages.length > 1) || (!viewMode && totalPages > 1)) && (
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
               disabled={currentPage <= 1}
+              className="min-w-[90px]"
             >
+              <ChevronLeft className="h-4 w-4 mr-1" />
               Previous
             </Button>
-            <span className="text-sm font-medium px-3 py-1 bg-muted rounded-md min-w-[100px] text-center">
-              Page {currentPage} of {totalPages}
+            <span className="text-sm font-medium px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-md min-w-[120px] text-center">
+              Page <strong>{currentPage}</strong> of <strong>{viewMode ? viewModeImages.length : totalPages}</strong>
             </span>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-              disabled={currentPage >= totalPages}
+              onClick={() => {
+                const maxPage = viewMode ? viewModeImages.length : totalPages;
+                setCurrentPage(Math.min(maxPage, currentPage + 1));
+              }}
+              disabled={currentPage >= (viewMode ? viewModeImages.length : totalPages)}
+              className="min-w-[90px]"
             >
               Next
+              <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
           </div>
         )}
@@ -1651,6 +1669,13 @@ export function LightPaperDocument({
             box-sizing: border-box;
             overflow: auto;
             position: relative;
+            display: block;
+          }
+          
+          /* Ensure all children respect boundaries */
+          .page-content > * {
+            max-width: 100%;
+            box-sizing: border-box;
           }
           
           /* Custom scrollbar for page content */
@@ -1766,6 +1791,10 @@ export function LightPaperDocument({
             background: white;
             pointer-events: auto;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            
+            /* CRITICAL: Ensure tables never exceed page boundaries */
+            max-width: calc(100% - ${MARGIN_CM * 2}cm) !important;
+            max-height: calc(100% - ${MARGIN_CM * 2}cm) !important;
           }
 
           .pdf-reconstructed-table td,
@@ -1774,7 +1803,10 @@ export function LightPaperDocument({
             padding: 6px;
             min-width: 40px;
             vertical-align: top;
-          }
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-wrap: break-word;
             transition: background-color 0.15s;
           }
 
@@ -1874,15 +1906,21 @@ export function LightPaperDocument({
               {viewMode && viewModeImages.length > 0 ? (
                 // VIEW MODE: Display image
                 <img 
-                  key={currentPage}
+                  key={`page-${currentPage}`}
                   src={viewModeImages[currentPage - 1]} 
-                  alt={`Page ${currentPage}`}
+                  alt={`Page ${currentPage} of ${viewModeImages.length}`}
+                  onLoad={() => console.log(`Image ${currentPage} loaded successfully`)}
+                  onError={(e) => {
+                    console.error(`Image ${currentPage} failed to load`, e);
+                    toast.error(`Failed to load page ${currentPage}`);
+                  }}
                   style={{
                     width: '100%',
                     height: '100%',
                     objectFit: 'contain',
                     pointerEvents: 'none',
-                    userSelect: 'none'
+                    userSelect: 'none',
+                    display: 'block'
                   }}
                 />
               ) : (

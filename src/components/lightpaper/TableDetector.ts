@@ -361,7 +361,7 @@ function findColumnIndex(x: number, boundaries: number[]): number {
 }
 
 /**
- * Scale table to fit within page boundaries
+ * Scale table to fit within page boundaries with proper margin enforcement
  */
 export function scaleTableToFit(
   table: TableStructure, 
@@ -369,37 +369,43 @@ export function scaleTableToFit(
   pageHeight: number, 
   padding: number = 40
 ): TableStructure {
-  const availableWidth = pageWidth - (2 * padding);
-  const availableHeight = pageHeight - (2 * padding);
+  // Convert cm padding to px if needed (assuming padding is in px)
+  const paddingPx = padding;
+  const pageWidthPx = pageWidth;
+  const pageHeightPx = pageHeight;
   
-  // Calculate scale factor
+  // Calculate available space (page size minus margins on both sides)
+  const availableWidth = pageWidthPx - (2 * paddingPx);
+  const availableHeight = pageHeightPx - (2 * paddingPx);
+  
+  // Calculate scale factors
   const scaleX = availableWidth / table.bounds.width;
   const scaleY = availableHeight / table.bounds.height;
-  const scale = Math.min(scaleX, scaleY, 1.0); // Don't upscale
   
-  // Only scale if table exceeds boundaries
-  if (scale >= 1.0) return table;
+  // Use the smaller scale to ensure table fits (never upscale, only downscale)
+  const scale = Math.min(scaleX, scaleY, 1.0);
   
   // Scale all cell positions and sizes
   const scaledRows = table.rows.map(row => 
     row.map(cell => ({
       ...cell,
-      x: cell.x * scale + padding,
-      y: cell.y * scale + padding,
+      x: Math.max(paddingPx, cell.x * scale),
+      y: Math.max(paddingPx, cell.y * scale),
       width: cell.width * scale,
       height: cell.height * scale,
       fontSize: cell.fontSize * scale
     }))
   );
   
+  // Apply scale and ensure table starts after margin
   return {
     ...table,
     rows: scaledRows,
     bounds: {
-      x: table.bounds.x * scale + padding,
-      y: table.bounds.y * scale + padding,
-      width: table.bounds.width * scale,
-      height: table.bounds.height * scale
+      x: Math.max(paddingPx, table.bounds.x * scale),
+      y: Math.max(paddingPx, table.bounds.y * scale),
+      width: Math.min(table.bounds.width * scale, availableWidth),
+      height: Math.min(table.bounds.height * scale, availableHeight)
     }
   };
 }
