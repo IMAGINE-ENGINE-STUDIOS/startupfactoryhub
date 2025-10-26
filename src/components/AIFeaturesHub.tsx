@@ -12,7 +12,7 @@ import DocumentAnalyzer from "./DocumentAnalyzer";
 import { LightPaperDocument } from "./lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "./lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "./lightpaper/LightPaperPresentation";
-import { PDFEditorCore } from "./pdf-editor/PDFEditorCore";
+import { SimplePDFEditor } from "./pdf-editor/SimplePDFEditor";
 
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CRMBoard from "./CRMBoard";
@@ -155,7 +155,7 @@ export default function AIFeaturesHub() {
             </TabsContent>
 
             <TabsContent value="pdf" className="mt-0">
-              <PDFEditorCore 
+              <SimplePDFEditor 
                 onSessionCreated={(session) => {
                   console.log('PDF session created:', session);
                 }}
