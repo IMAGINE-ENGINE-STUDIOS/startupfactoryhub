@@ -272,7 +272,7 @@ export async function parsePDF(
 }
 
 /**
- * Extract shapes and lines from PDF (borders, underlines, etc.)
+ * Extract shapes, graphics, and colors from PDF with pixel-perfect rendering
  * Returns both HTML for rendering and structured data for table validation
  */
 async function extractShapesFromPage(
@@ -281,67 +281,150 @@ async function extractShapesFromPage(
 ): Promise<{ html: string; shapes: ShapeData[] }> {
   try {
     const operatorList = await page.getOperatorList();
-    const shapesHTML: string[] = [];
     const shapesData: ShapeData[] = [];
+    
+    // Track current graphics state
+    let currentPath = '';
+    let currentX = 0;
+    let currentY = 0;
+    let fillColor = 'rgb(0, 0, 0)';
+    let strokeColor = 'rgb(0, 0, 0)';
+    let lineWidth = 1;
+    const svgElements: string[] = [];
     
     for (let i = 0; i < operatorList.fnArray.length; i++) {
       const fn = operatorList.fnArray[i];
       const args = operatorList.argsArray[i];
       
-      // Detect lines (for borders, underlines, etc.)
-      if (fn === pdfjsLib.OPS.constructPath) {
-        const ops = args[0];
-        const coords = args[1];
-        
-        // Simple line detection (moveTo -> lineTo)
-        if (ops.length === 2 && ops[0] === pdfjsLib.OPS.moveTo && ops[1] === pdfjsLib.OPS.lineTo) {
-          const x1 = coords[0];
-          const y1 = viewport.height - coords[1];
-          const x2 = coords[2];
-          const y2 = viewport.height - coords[3];
+      switch (fn) {
+        // Color operations
+        case pdfjsLib.OPS.setStrokeRGBColor:
+          strokeColor = `rgb(${Math.round(args[0] * 255)}, ${Math.round(args[1] * 255)}, ${Math.round(args[2] * 255)})`;
+          break;
           
-          shapesHTML.push(`
-            <svg style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none;">
-              <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" 
-                    stroke="black" stroke-width="1" />
-            </svg>
-          `);
+        case pdfjsLib.OPS.setFillRGBColor:
+          fillColor = `rgb(${Math.round(args[0] * 255)}, ${Math.round(args[1] * 255)}, ${Math.round(args[2] * 255)})`;
+          break;
           
+        case pdfjsLib.OPS.setStrokeGray:
+          const grayStroke = Math.round(args[0] * 255);
+          strokeColor = `rgb(${grayStroke}, ${grayStroke}, ${grayStroke})`;
+          break;
+          
+        case pdfjsLib.OPS.setFillGray:
+          const grayFill = Math.round(args[0] * 255);
+          fillColor = `rgb(${grayFill}, ${grayFill}, ${grayFill})`;
+          break;
+          
+        case pdfjsLib.OPS.setLineWidth:
+          lineWidth = args[0];
+          break;
+          
+        // Path construction
+        case pdfjsLib.OPS.moveTo:
+          currentX = args[0];
+          currentY = viewport.height - args[1];
+          currentPath += `M ${currentX} ${currentY} `;
+          break;
+          
+        case pdfjsLib.OPS.lineTo:
+          const lineX = args[0];
+          const lineY = viewport.height - args[1];
+          currentPath += `L ${lineX} ${lineY} `;
+          break;
+          
+        case pdfjsLib.OPS.curveTo:
+          const cp1x = args[0];
+          const cp1y = viewport.height - args[1];
+          const cp2x = args[2];
+          const cp2y = viewport.height - args[3];
+          const cx = args[4];
+          const cy = viewport.height - args[5];
+          currentPath += `C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${cx} ${cy} `;
+          break;
+          
+        case pdfjsLib.OPS.rectangle:
+          const rectX = args[0];
+          const rectY = viewport.height - args[1] - args[3];
+          const rectW = args[2];
+          const rectH = args[3];
+          currentPath += `M ${rectX} ${rectY} L ${rectX + rectW} ${rectY} L ${rectX + rectW} ${rectY + rectH} L ${rectX} ${rectY + rectH} Z `;
+          
+          // Store for table detection
           shapesData.push({
-            type: 'line',
-            x: x1,
-            y: y1,
-            x2: x2,
-            y2: y2,
+            type: 'rectangle',
+            x: rectX,
+            y: rectY,
+            width: rectW,
+            height: rectH,
           });
-        }
-      }
-      
-      // Detect rectangles (for borders, boxes)
-      if (fn === pdfjsLib.OPS.rectangle) {
-        const x = args[0];
-        const y = viewport.height - args[1] - args[3];
-        const width = args[2];
-        const height = args[3];
-        
-        shapesHTML.push(`
-          <svg style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none;">
-            <rect x="${x}" y="${y}" width="${width}" height="${height}" 
-                  fill="none" stroke="black" stroke-width="1" />
-          </svg>
-        `);
-        
-        shapesData.push({
-          type: 'rectangle',
-          x,
-          y,
-          width,
-          height,
-        });
+          break;
+          
+        case pdfjsLib.OPS.constructPath:
+          const ops = args[0];
+          const coords = args[1];
+          
+          // Simple line detection (moveTo -> lineTo)
+          if (ops.length === 2 && ops[0] === pdfjsLib.OPS.moveTo && ops[1] === pdfjsLib.OPS.lineTo) {
+            const x1 = coords[0];
+            const y1 = viewport.height - coords[1];
+            const x2 = coords[2];
+            const y2 = viewport.height - coords[3];
+            
+            shapesData.push({
+              type: 'line',
+              x: x1,
+              y: y1,
+              x2: x2,
+              y2: y2,
+            });
+          }
+          break;
+          
+        // Rendering operations
+        case pdfjsLib.OPS.fill:
+        case pdfjsLib.OPS.eoFill:
+          if (currentPath) {
+            svgElements.push(`<path d="${currentPath}" fill="${fillColor}" fill-opacity="1" />`);
+            currentPath = '';
+          }
+          break;
+          
+        case pdfjsLib.OPS.stroke:
+          if (currentPath) {
+            svgElements.push(`<path d="${currentPath}" fill="none" stroke="${strokeColor}" stroke-width="${lineWidth}" />`);
+            currentPath = '';
+          }
+          break;
+          
+        case pdfjsLib.OPS.fillStroke:
+        case pdfjsLib.OPS.eoFillStroke:
+          if (currentPath) {
+            svgElements.push(`<path d="${currentPath}" fill="${fillColor}" fill-opacity="1" stroke="${strokeColor}" stroke-width="${lineWidth}" />`);
+            currentPath = '';
+          }
+          break;
+          
+        case pdfjsLib.OPS.closePath:
+          if (currentPath) {
+            currentPath += 'Z ';
+          }
+          break;
       }
     }
     
-    return { html: shapesHTML.join(''), shapes: shapesData };
+    // Generate SVG HTML if there are elements
+    let html = '';
+    if (svgElements.length > 0) {
+      html = `
+        <svg style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1;" 
+             viewBox="0 0 ${viewport.width} ${viewport.height}">
+          ${svgElements.join('\n')}
+        </svg>
+      `;
+    }
+    
+    return { html, shapes: shapesData };
   } catch (error) {
     console.warn('Failed to extract shapes:', error);
     return { html: '', shapes: [] };
@@ -416,31 +499,33 @@ function renderTextBlocks(textContent: any, viewport: pdfjsLib.PageViewport, tab
 }
 
 /**
- * Render a single PDF page with complete component-based reconstruction (NO background image)
+ * Render a single PDF page with complete component-based reconstruction
  */
 async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: number, scale: number = 2.0): Promise<string> {
   const page = await pdf.getPage(pageNum);
   const viewport = page.getViewport({ scale });
   
-  // Extract ALL components (no canvas rendering)
-  const textContent = await page.getTextContent();
+  // Extract ALL components in parallel for efficiency
+  const [
+    textContent,
+    { html: shapesHTML, shapes: shapesData },
+    imagesHTML
+  ] = await Promise.all([
+    page.getTextContent(),
+    extractShapesFromPage(page, viewport),
+    extractImagesFromPage(page, viewport)
+  ]);
   
-  // 1. Extract shapes first (for table border validation)
-  const { html: shapesHTML, shapes: shapesData } = await extractShapesFromPage(page, viewport);
-  
-  // 2. Detect tables with strict validation using shape data
+  // Detect tables with strict validation using shape data
   const tables = detectTables(textContent.items, viewport, shapesData);
   
-  // 3. Extract images/logos
-  const imagesHTML = await extractImagesFromPage(page, viewport);
-  
-  // 4. Render text blocks (excluding table text)
+  // Render text blocks (excluding table text)
   const textHTML = renderTextBlocks(textContent, viewport, tables);
   
-  // 5. Render tables as HTML with pixel-perfect dimensions
+  // Render tables as HTML with pixel-perfect dimensions
   const tablesHTML = tables.map(table => renderTableAsHTML(table, scale)).join('');
   
-  // Return fully reconstructed page with ALL components (no wrapper, just the content)
+  // Return fully reconstructed page with ALL visual components
   return `
     <div class="pdf-page-reconstructed" style="
       position: relative;
@@ -451,24 +536,23 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
       margin: 1rem auto;
       overflow: visible;
     ">
-      <!-- Shapes layer: Lines, rectangles, borders -->
+      <!-- Shapes layer: Vector graphics with colors, fills, strokes -->
       ${shapesHTML}
-        
-        <!-- Images layer: Logos, graphics -->
-        ${imagesHTML}
-        
-        <!-- Tables layer: Reconstructed HTML tables -->
-        ${tablesHTML}
-        
-        <!-- Text layer: Individual editable text spans -->
-        ${textHTML}
-      </div>
+      
+      <!-- Images layer: Embedded images with pixel-perfect positioning -->
+      ${imagesHTML}
+      
+      <!-- Tables layer: Reconstructed HTML tables with exact dimensions -->
+      ${tablesHTML}
+      
+      <!-- Text layer: Individual editable text spans with colors -->
+      ${textHTML}
     </div>
   `;
 }
 
 /**
- * Extract images from PDF page with enhanced handling
+ * Extract images from PDF page with pixel-perfect positioning
  */
 async function extractImagesFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfjsLib.PageViewport): Promise<string> {
   try {
@@ -483,7 +567,7 @@ async function extractImagesFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfj
         try {
           const imgName = args[0];
           
-          // Properly await image loading with timeout
+          // Get image with timeout
           const img = await Promise.race([
             new Promise<any>((resolve, reject) => {
               (page as any).objs.get(imgName, (obj: any) => {
@@ -518,19 +602,20 @@ async function extractImagesFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfj
             
             const imageDataUrl = canvas.toDataURL('image/png');
             
-            // Get transform to calculate position
+            // Calculate exact pixel-perfect position from PDF transform matrix
             const transform = args[1] || [1, 0, 0, 1, 0, 0];
+            const scaleX = Math.abs(transform[0]);
+            const scaleY = Math.abs(transform[3]);
             const x = transform[4];
-            const y = viewport.height - transform[5] - (img.height * Math.abs(transform[3]));
-            const width = img.width * Math.abs(transform[0]);
-            const height = img.height * Math.abs(transform[3]);
+            const y = viewport.height - transform[5] - (img.height * scaleY);
+            const width = img.width * scaleX;
+            const height = img.height * scaleY;
             
             // Detect if this is likely a logo (small image at top of page)
             const isLikelyLogo = (y < viewport.height * 0.2) && (width < viewport.width * 0.3) && (height < viewport.height * 0.15);
-            const imageClass = isLikelyLogo ? 'pdf-image-wrapper pdf-logo' : 'pdf-image-wrapper';
             
             imagesHTML.push(`
-              <div class="${imageClass}" style="
+              <div class="pdf-image-wrapper${isLikelyLogo ? ' pdf-logo' : ''}" style="
                 position: absolute; 
                 left: ${x}px; 
                 top: ${y}px; 
@@ -551,7 +636,7 @@ async function extractImagesFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfj
                        object-fit: contain;
                        pointer-events: auto;
                      " 
-                     alt="${isLikelyLogo ? 'Logo' : 'Extracted image'}" />
+                     alt="${isLikelyLogo ? 'Logo' : 'PDF Image'}" />
               </div>
             `);
           }
@@ -565,105 +650,6 @@ async function extractImagesFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfj
   } catch (error) {
     console.warn('Failed to extract images from page:', error);
     return ''; // Fallback: images will still be visible in background layer
-  }
-}
-
-/**
- * Extract vector graphics and shapes from PDF page
- */
-async function extractGraphicsFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfjsLib.PageViewport): Promise<string> {
-  try {
-    const operatorList = await page.getOperatorList();
-    let svgPaths = '';
-    let currentPath = '';
-    let currentX = 0;
-    let currentY = 0;
-    let fillColor = 'black';
-    let strokeColor = 'black';
-    let lineWidth = 1;
-    
-    for (let i = 0; i < operatorList.fnArray.length; i++) {
-      const fn = operatorList.fnArray[i];
-      const args = operatorList.argsArray[i];
-      
-      switch (fn) {
-        case pdfjsLib.OPS.moveTo:
-          currentX = args[0];
-          currentY = viewport.height - args[1];
-          currentPath += `M ${currentX} ${currentY} `;
-          break;
-          
-        case pdfjsLib.OPS.lineTo:
-          const lineX = args[0];
-          const lineY = viewport.height - args[1];
-          currentPath += `L ${lineX} ${lineY} `;
-          break;
-          
-        case pdfjsLib.OPS.curveTo:
-          const cp1x = args[0];
-          const cp1y = viewport.height - args[1];
-          const cp2x = args[2];
-          const cp2y = viewport.height - args[3];
-          const x = args[4];
-          const y = viewport.height - args[5];
-          currentPath += `C ${cp1x} ${cp1y} ${cp2x} ${cp2y} ${x} ${y} `;
-          break;
-          
-        case pdfjsLib.OPS.rectangle:
-          const rectX = args[0];
-          const rectY = viewport.height - args[1] - args[3];
-          const rectW = args[2];
-          const rectH = args[3];
-          currentPath += `M ${rectX} ${rectY} L ${rectX + rectW} ${rectY} L ${rectX + rectW} ${rectY + rectH} L ${rectX} ${rectY + rectH} Z `;
-          break;
-          
-        case pdfjsLib.OPS.setStrokeRGBColor:
-          strokeColor = `rgb(${args[0] * 255}, ${args[1] * 255}, ${args[2] * 255})`;
-          break;
-          
-        case pdfjsLib.OPS.setFillRGBColor:
-          fillColor = `rgb(${args[0] * 255}, ${args[1] * 255}, ${args[2] * 255})`;
-          break;
-          
-        case pdfjsLib.OPS.setLineWidth:
-          lineWidth = args[0];
-          break;
-          
-        case pdfjsLib.OPS.fill:
-        case pdfjsLib.OPS.eoFill:
-          if (currentPath) {
-            svgPaths += `<path d="${currentPath}" fill="${fillColor}" fill-opacity="0.8" />`;
-            currentPath = '';
-          }
-          break;
-          
-        case pdfjsLib.OPS.stroke:
-          if (currentPath) {
-            svgPaths += `<path d="${currentPath}" fill="none" stroke="${strokeColor}" stroke-width="${lineWidth}" />`;
-            currentPath = '';
-          }
-          break;
-          
-        case pdfjsLib.OPS.fillStroke:
-        case pdfjsLib.OPS.eoFillStroke:
-          if (currentPath) {
-            svgPaths += `<path d="${currentPath}" fill="${fillColor}" fill-opacity="0.8" stroke="${strokeColor}" stroke-width="${lineWidth}" />`;
-            currentPath = '';
-          }
-          break;
-      }
-    }
-    
-    if (svgPaths) {
-      return `<svg style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none;" viewBox="0 0 ${viewport.width} ${viewport.height}">
-        ${svgPaths}
-      </svg>`;
-    }
-    
-    return '';
-  } catch (error) {
-    console.warn('Failed to extract graphics from page:', error);
-    return '';
   }
 }
 
