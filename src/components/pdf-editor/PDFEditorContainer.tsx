@@ -9,6 +9,8 @@ import { CollaborationCursors } from './CollaborationCursors';
 import { PDFErrorBoundary } from './PDFErrorBoundary';
 import { KeyboardShortcutsDialog } from './KeyboardShortcutsDialog';
 import { ExportOptionsDialog } from './ExportOptionsDialog';
+import { FormFieldEditor, FormFieldConfig } from './FormFieldEditor';
+import { SignaturePanel } from './SignaturePanel';
 import { FabricCanvasManager } from '@/lib/pdf/FabricCanvasManager';
 import { usePDFEditorStore } from '@/stores/pdfEditorStore';
 import { usePDFSession } from '@/hooks/usePDFSession';
@@ -17,7 +19,7 @@ import { usePDFExport } from '@/hooks/usePDFExport';
 import { usePDFRealtime } from '@/hooks/usePDFRealtime';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { FabricObject } from 'fabric';
+import { FabricObject, IText } from 'fabric';
 import { Button } from '@/components/ui/button';
 import { Download, Upload as UploadIcon, Keyboard as KeyboardIcon } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -33,6 +35,8 @@ export const PDFEditorContainer = () => {
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [showExportDialog, setShowExportDialog] = useState(false);
+  const [showFormFieldEditor, setShowFormFieldEditor] = useState(false);
+  const [showSignaturePanel, setShowSignaturePanel] = useState(false);
   const fabricManagerRef = useRef<FabricCanvasManager | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -173,6 +177,69 @@ export const PDFEditorContainer = () => {
       toast.error('Failed to upload image: ' + error.message);
     }
   };
+
+  const handleAddFormField = useCallback((field: FormFieldConfig) => {
+    if (!fabricManagerRef.current) return;
+
+    const centerX = canvasDimensions.width / 2 - 100;
+    const centerY = canvasDimensions.height / 2;
+    
+    const text = `[${field.type.toUpperCase()}] ${field.label}${field.required ? ' *' : ''}`;
+    const textObj = new IText(text, {
+      left: centerX,
+      top: centerY,
+      fontSize: 16,
+      fill: '#0066cc',
+      fontFamily: 'Arial',
+      selectable: true,
+    });
+
+    fabricManagerRef.current.getCanvas().add(textObj);
+    fabricManagerRef.current.getCanvas().setActiveObject(textObj);
+    fabricManagerRef.current.getCanvas().renderAll();
+
+    toast.success(`${field.type} field added`);
+  }, [canvasDimensions]);
+
+  const handleAddSignature = useCallback((signatureDataUrl: string) => {
+    if (!fabricManagerRef.current) return;
+
+    const centerX = canvasDimensions.width / 2 - 150;
+    const centerY = canvasDimensions.height / 2 - 50;
+    
+    fabricManagerRef.current.addImage(signatureDataUrl, centerX, centerY, 300, 100);
+    
+    toast.success('Signature added');
+  }, [canvasDimensions]);
+
+  const handleAddFormField = useCallback((field: FormFieldConfig) => {
+    if (!fabricManagerRef.current) return;
+
+    // Add form field as a text element with special styling
+    const centerX = canvasDimensions.width / 2 - 100;
+    const centerY = canvasDimensions.height / 2;
+    
+    fabricManagerRef.current.addText(
+      centerX,
+      centerY,
+      `[${field.type.toUpperCase()}] ${field.label}${field.required ? ' *' : ''}`,
+      16,
+      '#0066cc'
+    );
+
+    toast.success(`${field.type} field added to canvas`);
+  }, [canvasDimensions]);
+
+  const handleAddSignature = useCallback((signatureDataUrl: string) => {
+    if (!fabricManagerRef.current) return;
+
+    const centerX = canvasDimensions.width / 2 - 150;
+    const centerY = canvasDimensions.height / 2 - 50;
+    
+    fabricManagerRef.current.addImage(signatureDataUrl, centerX, centerY, 300, 100);
+    
+    toast.success('Signature added to PDF');
+  }, [canvasDimensions]);
 
   const handleLoadSuccess = useCallback((numPages: number) => {
     setTotalPages(numPages);
@@ -383,6 +450,8 @@ export const PDFEditorContainer = () => {
           onExport={() => setShowExportDialog(true)}
           onImageUpload={handleImageUpload}
           onShowKeyboardShortcuts={() => setShowKeyboardShortcuts(true)}
+          onAddFormField={() => setShowFormFieldEditor(true)}
+          onAddSignature={() => setShowSignaturePanel(true)}
           isExporting={isExporting}
           isUploading={isUploading}
           hasSession={!!sessionId}
@@ -518,6 +587,18 @@ export const PDFEditorContainer = () => {
         onClose={() => setShowExportDialog(false)}
         onExport={handleExport}
         isExporting={isExporting}
+      />
+
+      <FormFieldEditor
+        isOpen={showFormFieldEditor}
+        onClose={() => setShowFormFieldEditor(false)}
+        onAddField={handleAddFormField}
+      />
+
+      <SignaturePanel
+        isOpen={showSignaturePanel}
+        onClose={() => setShowSignaturePanel(false)}
+        onSignatureCreated={handleAddSignature}
       />
     </div>
     </PDFErrorBoundary>

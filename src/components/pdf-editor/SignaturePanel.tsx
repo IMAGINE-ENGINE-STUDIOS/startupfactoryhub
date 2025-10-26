@@ -1,233 +1,289 @@
-import { useState, useRef, useEffect } from 'react';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useRef, useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
-import { PenTool, Type } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { Pen, Type, Upload, Trash2, Save } from 'lucide-react';
 import { toast } from 'sonner';
-import { SignatureLibrary } from '@/components/lightpaper/SignatureLibrary';
 
 interface SignaturePanelProps {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSignatureSelect: (signatureData: string, type: 'draw' | 'text') => void;
+  onClose: () => void;
+  onSignatureCreated: (signatureDataUrl: string) => void;
 }
 
-export const SignaturePanel = ({ open, onOpenChange, onSignatureSelect }: SignaturePanelProps) => {
-  const [activeTab, setActiveTab] = useState<'draw' | 'type' | 'library'>('draw');
-  const [isDrawing, setIsDrawing] = useState(false);
-  const [textSignature, setTextSignature] = useState('');
+export const SignaturePanel = ({ open, onClose, onSignatureCreated }: SignaturePanelProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [typedSignature, setTypedSignature] = useState('');
+  const [savedSignatures, setSavedSignatures] = useState<string[]>([]);
+  const [signatureMode, setSignatureMode] = useState<'draw' | 'type' | 'upload' | 'saved'>('draw');
 
-  // Initialize canvas
   useEffect(() => {
-    if (!canvasRef.current || activeTab !== 'draw') return;
+    const saved = localStorage.getItem('pdfEditorSignatures');
+    if (saved) {
+      setSavedSignatures(JSON.parse(saved));
+    }
+  }, []);
 
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Set canvas size
-    canvas.width = 500;
-    canvas.height = 200;
-
-    // Configure drawing
-    ctx.lineWidth = 2;
-    ctx.lineCap = 'round';
-    ctx.strokeStyle = '#000000';
-
-    ctxRef.current = ctx;
-  }, [activeTab]);
-
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    ctx.beginPath();
+    ctx.moveTo(x, y);
     setIsDrawing(true);
-    if (!ctxRef.current) return;
-    
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
-
-    ctxRef.current.beginPath();
-    ctxRef.current.moveTo(e.clientX - rect.left, e.clientY - rect.top);
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !ctxRef.current) return;
+    if (!isDrawing) return;
 
-    const rect = canvasRef.current?.getBoundingClientRect();
-    if (!rect) return;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    ctxRef.current.lineTo(e.clientX - rect.left, e.clientY - rect.top);
-    ctxRef.current.stroke();
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.stroke();
   };
 
   const stopDrawing = () => {
     setIsDrawing(false);
   };
 
-  // Touch event handlers for mobile/tablet
-  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    setIsDrawing(true);
-    if (!ctxRef.current || !canvasRef.current) return;
-    
-    const rect = canvasRef.current.getBoundingClientRect();
-    const touch = e.touches[0];
-
-    ctxRef.current.beginPath();
-    ctxRef.current.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    if (!isDrawing || !ctxRef.current || !canvasRef.current) return;
-
-    const rect = canvasRef.current.getBoundingClientRect();
-    const touch = e.touches[0];
-
-    ctxRef.current.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
-    ctxRef.current.stroke();
-  };
-
-  const handleTouchEnd = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    e.preventDefault();
-    stopDrawing();
-  };
-
   const clearCanvas = () => {
-    if (!canvasRef.current || !ctxRef.current) return;
-    ctxRef.current.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
 
-  const saveDrawnSignature = async () => {
-    if (!canvasRef.current) return;
+  const saveDrawnSignature = () => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
 
-    const dataURL = canvasRef.current.toDataURL('image/png');
+    const dataUrl = canvas.toDataURL('image/png');
     
-    // Save to library
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from('pdf_editor_signatures').insert({
-        user_id: user.id,
-        signature_type: 'draw',
-        signature_data: dataURL,
-      });
-    }
-
-    onSignatureSelect(dataURL, 'draw');
-    toast.success('Signature saved');
-    clearCanvas();
-    onOpenChange(false);
-  };
-
-  const saveTextSignature = async () => {
-    if (!textSignature.trim()) {
-      toast.error('Please enter your signature');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const isEmpty = imageData.data.every(pixel => pixel === 0);
+    
+    if (isEmpty) {
+      toast.error('Please draw your signature first');
       return;
     }
 
-    // Create canvas for text signature
+    onSignatureCreated(dataUrl);
+    
+    const newSavedSignatures = [...savedSignatures, dataUrl];
+    setSavedSignatures(newSavedSignatures);
+    localStorage.setItem('pdfEditorSignatures', JSON.stringify(newSavedSignatures));
+    
+    toast.success('Signature added to PDF');
+    onClose();
+  };
+
+  const generateTypedSignature = () => {
+    if (!typedSignature.trim()) {
+      toast.error('Please enter your name');
+      return;
+    }
+
     const canvas = document.createElement('canvas');
     canvas.width = 400;
     canvas.height = 100;
     const ctx = canvas.getContext('2d');
+    
     if (!ctx) return;
 
-    ctx.font = "italic 40px 'Brush Script MT', cursive";
-    ctx.fillStyle = '#000000';
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '36px cursive';
+    ctx.fillStyle = '#000';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(textSignature, 200, 50);
+    ctx.fillText(typedSignature, canvas.width / 2, canvas.height / 2);
 
-    const dataURL = canvas.toDataURL('image/png');
+    const dataUrl = canvas.toDataURL('image/png');
+    onSignatureCreated(dataUrl);
+    
+    const newSavedSignatures = [...savedSignatures, dataUrl];
+    setSavedSignatures(newSavedSignatures);
+    localStorage.setItem('pdfEditorSignatures', JSON.stringify(newSavedSignatures));
+    
+    toast.success('Signature added to PDF');
+    onClose();
+  };
 
-    // Save to library
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from('pdf_editor_signatures').insert({
-        user_id: user.id,
-        signature_type: 'text',
-        signature_data: dataURL,
-      });
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
     }
 
-    onSignatureSelect(dataURL, 'text');
-    toast.success('Signature saved');
-    setTextSignature('');
-    onOpenChange(false);
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      onSignatureCreated(dataUrl);
+      toast.success('Signature image added to PDF');
+      onClose();
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const useSavedSignature = (signatureUrl: string) => {
+    onSignatureCreated(signatureUrl);
+    toast.success('Signature added to PDF');
+    onClose();
+  };
+
+  const deleteSavedSignature = (index: number) => {
+    const newSavedSignatures = savedSignatures.filter((_, i) => i !== index);
+    setSavedSignatures(newSavedSignatures);
+    localStorage.setItem('pdfEditorSignatures', JSON.stringify(newSavedSignatures));
+    toast.success('Signature deleted');
   };
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>Add Signature</SheetTitle>
-        </SheetHeader>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle>Add Signature</DialogTitle>
+        </DialogHeader>
 
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="mt-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="draw">Draw</TabsTrigger>
-            <TabsTrigger value="type">Type</TabsTrigger>
-            <TabsTrigger value="library">Library</TabsTrigger>
+        <Tabs value={signatureMode} onValueChange={(value: any) => setSignatureMode(value)}>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="draw" className="gap-2">
+              <Pen className="w-4 h-4" />
+              Draw
+            </TabsTrigger>
+            <TabsTrigger value="type" className="gap-2">
+              <Type className="w-4 h-4" />
+              Type
+            </TabsTrigger>
+            <TabsTrigger value="upload" className="gap-2">
+              <Upload className="w-4 h-4" />
+              Upload
+            </TabsTrigger>
+            <TabsTrigger value="saved" className="gap-2">
+              <Save className="w-4 h-4" />
+              ({savedSignatures.length})
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="draw" className="space-y-4">
-            <Card className="p-4">
-              <Label className="mb-2 block">Draw your signature</Label>
+            <div className="border-2 border-dashed rounded-lg bg-white">
               <canvas
                 ref={canvasRef}
-                className="border border-border rounded-md w-full cursor-crosshair bg-white"
+                width={550}
+                height={200}
+                className="cursor-crosshair"
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}
                 onMouseLeave={stopDrawing}
-                onTouchStart={handleTouchStart}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
               />
-            </Card>
-            <div className="flex gap-2">
-              <Button onClick={saveDrawnSignature} className="flex-1">
-                <PenTool className="h-4 w-4 mr-2" />
-                Save & Use Signature
-              </Button>
+            </div>
+            <div className="flex justify-between">
               <Button variant="outline" onClick={clearCanvas}>
+                <Trash2 className="w-4 h-4 mr-2" />
                 Clear
+              </Button>
+              <Button onClick={saveDrawnSignature}>
+                Add to PDF
               </Button>
             </div>
           </TabsContent>
 
           <TabsContent value="type" className="space-y-4">
-            <Card className="p-4">
-              <Label className="mb-2 block">Type your signature</Label>
-              <div className="border border-border rounded-md p-6 bg-white min-h-[150px] flex items-center justify-center">
-                <Input
-                  value={textSignature}
-                  onChange={(e) => setTextSignature(e.target.value)}
-                  placeholder="Type your name"
-                  className="text-4xl font-serif italic text-center border-0 focus-visible:ring-0"
-                />
+            <div className="space-y-2">
+              <Label>Type your name</Label>
+              <Input
+                value={typedSignature}
+                onChange={(e) => setTypedSignature(e.target.value)}
+                placeholder="Your full name"
+                className="text-2xl font-['cursive']"
+              />
+            </div>
+            {typedSignature && (
+              <div className="p-4 border rounded-lg bg-white">
+                <p className="text-4xl font-['cursive'] text-center">
+                  {typedSignature}
+                </p>
               </div>
-            </Card>
-            <Button onClick={saveTextSignature} className="w-full">
-              <Type className="h-4 w-4 mr-2" />
-              Save & Use Signature
-            </Button>
+            )}
+            <div className="flex justify-end">
+              <Button onClick={generateTypedSignature}>
+                Add to PDF
+              </Button>
+            </div>
           </TabsContent>
 
-          <TabsContent value="library" className="space-y-4">
-            <SignatureLibrary
-              onSelectSignature={(data) => {
-                onSignatureSelect(data, 'draw');
-                onOpenChange(false);
-              }}
+          <TabsContent value="upload" className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Upload an image of your signature (PNG, JPG, or GIF)
+            </div>
+            <Input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
             />
           </TabsContent>
+
+          <TabsContent value="saved" className="space-y-4">
+            {savedSignatures.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No saved signatures. Create one using Draw or Type tabs.
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4 max-h-[400px] overflow-y-auto">
+                {savedSignatures.map((sig, index) => (
+                  <div key={index} className="relative border rounded-lg p-2 bg-white group">
+                    <img 
+                      src={sig} 
+                      alt={`Saved signature ${index + 1}`}
+                      className="w-full h-24 object-contain cursor-pointer"
+                      onClick={() => useSavedSignature(sig)}
+                    />
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                      onClick={() => deleteSavedSignature(index)}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   );
 };

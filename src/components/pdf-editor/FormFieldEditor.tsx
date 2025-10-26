@@ -1,67 +1,156 @@
-import { useState, useEffect } from 'react';
-import { FormField } from '@/lib/pdf/formExtractor';
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Card } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { toast } from 'sonner';
 
-interface FormFieldEditorProps {
-  fields: FormField[];
-  onFieldChange: (fieldName: string, value: string) => void;
-  scale?: number;
+export interface FormFieldConfig {
+  type: 'text' | 'checkbox' | 'radio' | 'dropdown' | 'signature';
+  name: string;
+  label: string;
+  required: boolean;
+  placeholder?: string;
+  options?: string[];
 }
 
-export function FormFieldEditor({ fields, onFieldChange, scale = 1 }: FormFieldEditorProps) {
-  const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
+interface FormFieldEditorProps {
+  open: boolean;
+  onClose: () => void;
+  onAddField: (field: FormFieldConfig) => void;
+}
 
-  useEffect(() => {
-    const initialValues: Record<string, string> = {};
-    fields.forEach(field => {
-      initialValues[field.name] = field.value;
-    });
-    setFieldValues(initialValues);
-  }, [fields]);
+export const FormFieldEditor = ({ open, onClose, onAddField }: FormFieldEditorProps) => {
+  const [fieldType, setFieldType] = useState<FormFieldConfig['type']>('text');
+  const [fieldName, setFieldName] = useState('');
+  const [fieldLabel, setFieldLabel] = useState('');
+  const [required, setRequired] = useState(false);
+  const [placeholder, setPlaceholder] = useState('');
+  const [options, setOptions] = useState('');
 
-  const handleChange = (fieldName: string, value: string) => {
-    setFieldValues(prev => ({ ...prev, [fieldName]: value }));
-    onFieldChange(fieldName, value);
+  const handleSubmit = () => {
+    if (!fieldName || !fieldLabel) {
+      toast.error('Field name and label are required');
+      return;
+    }
+
+    const field: FormFieldConfig = {
+      type: fieldType,
+      name: fieldName,
+      label: fieldLabel,
+      required,
+      placeholder: placeholder || undefined,
+      options: fieldType === 'dropdown' || fieldType === 'radio' 
+        ? options.split(',').map(opt => opt.trim()).filter(Boolean)
+        : undefined,
+    };
+
+    onAddField(field);
+    resetForm();
+    onClose();
+    toast.success('Form field added to canvas');
   };
 
-  if (fields.length === 0) {
-    return null;
-  }
+  const resetForm = () => {
+    setFieldType('text');
+    setFieldName('');
+    setFieldLabel('');
+    setRequired(false);
+    setPlaceholder('');
+    setOptions('');
+  };
 
   return (
-    <div className="absolute inset-0 pointer-events-none">
-      {fields.map((field, idx) => (
-        <div
-          key={idx}
-          className="absolute pointer-events-auto"
-          style={{
-            left: field.x * scale,
-            top: field.y * scale,
-            width: field.width * scale,
-            height: field.height * scale,
-          }}
-        >
-          {field.type === 'text' && (
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>Add Form Field</DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="fieldType">Field Type</Label>
+            <Select value={fieldType} onValueChange={(value: any) => setFieldType(value)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="text">Text Input</SelectItem>
+                <SelectItem value="checkbox">Checkbox</SelectItem>
+                <SelectItem value="radio">Radio Button</SelectItem>
+                <SelectItem value="dropdown">Dropdown</SelectItem>
+                <SelectItem value="signature">Signature Field</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="fieldName">Field Name (ID)</Label>
             <Input
-              value={fieldValues[field.name] || ''}
-              onChange={(e) => handleChange(field.name, e.target.value)}
-              className="h-full w-full bg-blue-50/50 border-blue-300 text-sm"
-              placeholder={field.name}
+              id="fieldName"
+              value={fieldName}
+              onChange={(e) => setFieldName(e.target.value)}
+              placeholder="e.g., fullName, email"
             />
-          )}
-          {field.type === 'checkbox' && (
-            <div className="flex items-center justify-center h-full bg-blue-50/50 border border-blue-300 rounded">
-              <Checkbox
-                checked={fieldValues[field.name] === 'true'}
-                onCheckedChange={(checked) => handleChange(field.name, checked ? 'true' : 'false')}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="fieldLabel">Field Label</Label>
+            <Input
+              id="fieldLabel"
+              value={fieldLabel}
+              onChange={(e) => setFieldLabel(e.target.value)}
+              placeholder="e.g., Full Name, Email Address"
+            />
+          </div>
+
+          {fieldType === 'text' && (
+            <div className="space-y-2">
+              <Label htmlFor="placeholder">Placeholder Text</Label>
+              <Input
+                id="placeholder"
+                value={placeholder}
+                onChange={(e) => setPlaceholder(e.target.value)}
+                placeholder="Enter placeholder..."
               />
             </div>
           )}
+
+          {(fieldType === 'dropdown' || fieldType === 'radio') && (
+            <div className="space-y-2">
+              <Label htmlFor="options">Options (comma-separated)</Label>
+              <Input
+                id="options"
+                value={options}
+                onChange={(e) => setOptions(e.target.value)}
+                placeholder="Option 1, Option 2, Option 3"
+              />
+            </div>
+          )}
+
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="required"
+              checked={required}
+              onCheckedChange={(checked) => setRequired(checked as boolean)}
+            />
+            <Label htmlFor="required" className="cursor-pointer">
+              Required field
+            </Label>
+          </div>
         </div>
-      ))}
-    </div>
+
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSubmit}>
+            Add Field
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
-}
+};

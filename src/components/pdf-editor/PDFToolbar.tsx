@@ -10,7 +10,9 @@ import {
   Download,
   Upload,
   Image as ImageIcon,
-  Keyboard
+  Keyboard,
+  FileText,
+  PenTool
 } from 'lucide-react';
 import { usePDFEditorStore, ToolType } from '@/stores/pdfEditorStore';
 import { cn } from '@/lib/utils';
@@ -20,6 +22,8 @@ interface PDFToolbarProps {
   onExport: () => void;
   onImageUpload: () => void;
   onShowKeyboardShortcuts: () => void;
+  onAddFormField: () => void;
+  onAddSignature: () => void;
   isExporting?: boolean;
   isUploading?: boolean;
   hasSession?: boolean;
@@ -30,6 +34,8 @@ export const PDFToolbar = ({
   onExport, 
   onImageUpload,
   onShowKeyboardShortcuts,
+  onAddFormField,
+  onAddSignature,
   isExporting = false, 
   isUploading = false,
   hasSession = false 
@@ -83,6 +89,28 @@ export const PDFToolbar = ({
       >
         <ImageIcon className="w-4 h-4 mr-2" />
         Image
+      </Button>
+
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={onAddFormField}
+        disabled={!hasSession}
+        title="Add Form Field"
+      >
+        <FileText className="w-4 h-4 mr-2" />
+        Form
+      </Button>
+
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={onAddSignature}
+        disabled={!hasSession}
+        title="Add Signature"
+      >
+        <PenTool className="w-4 h-4 mr-2" />
+        Sign
       </Button>
 
       <Separator orientation="vertical" className="h-8" />
