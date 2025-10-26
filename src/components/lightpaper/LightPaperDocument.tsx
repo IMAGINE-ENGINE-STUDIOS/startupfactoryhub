@@ -1324,9 +1324,9 @@ export function LightPaperDocument({
         )}
         <style>{`
           .page {
-            width: 100%;
-            height: 100%;
-            max-width: 21cm;
+            width: 21.59cm;
+            height: 27.94cm;
+            max-width: 21.59cm;
             padding: 2cm;
             background: white;
             box-shadow: 0 0 20px rgba(0,0,0,0.2);

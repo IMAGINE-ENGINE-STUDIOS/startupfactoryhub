@@ -10,6 +10,7 @@ export interface TableCell {
   width: number;
   height: number;
   color: string;
+  backgroundColor?: string;
   fontWeight: string;
   fontSize: number;
   rowIndex: number;
@@ -247,6 +248,7 @@ function buildTableStructure(rows: any[][], viewport: any): TableStructure | nul
         width: 0,
         height: row[0]?.height || 12,
         color: 'rgb(0, 0, 0)',
+        backgroundColor: 'transparent',
         fontWeight: 'normal',
         fontSize: row[0]?.fontSize || 12,
         rowIndex,
@@ -432,7 +434,7 @@ export function renderTableAsHTML(table: TableStructure, scale: number = 1): str
           font-weight: ${cell.fontWeight};
           font-size: ${cell.fontSize}px;
           color: ${cell.color};
-          background: #f8f9fa;
+          background: ${cell.backgroundColor || '#f8f9fa'};
           cursor: text;
           width: ${columnWidths[col]}px;
           height: ${rowHeights[0]}px;
@@ -461,6 +463,7 @@ export function renderTableAsHTML(table: TableStructure, scale: number = 1): str
           font-size: ${cell.fontSize}px;
           font-weight: ${cell.fontWeight};
           color: ${cell.color};
+          background: ${cell.backgroundColor || 'white'};
           cursor: text;
           white-space: pre-wrap;
           vertical-align: top;

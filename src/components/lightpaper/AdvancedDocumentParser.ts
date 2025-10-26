@@ -2,12 +2,12 @@ import * as pdfjsLib from "pdfjs-dist";
 import { renderAsync } from "docx-preview";
 import { detectTables, renderTableAsHTML, isTextInTable, type TableStructure, type ShapeData } from './TableDetector';
 
-// Canvas dimensions (A4 at 96dpi)
-const CANVAS_WIDTH_CM = 21;
-const CANVAS_HEIGHT_CM = 29.7;
+// Canvas dimensions (US Letter at 96dpi)
+const CANVAS_WIDTH_CM = 21.59; // 8.5 inches
+const CANVAS_HEIGHT_CM = 27.94; // 11 inches
 const CM_TO_PX = 37.795275591;
-const CANVAS_WIDTH_PX = CANVAS_WIDTH_CM * CM_TO_PX; // ~793px
-const CANVAS_HEIGHT_PX = CANVAS_HEIGHT_CM * CM_TO_PX; // ~1122px
+const CANVAS_WIDTH_PX = CANVAS_WIDTH_CM * CM_TO_PX; // ~816px
+const CANVAS_HEIGHT_PX = CANVAS_HEIGHT_CM * CM_TO_PX; // ~1056px
 const PADDING_PX = 2 * CM_TO_PX; // 2cm padding = ~75px
 
 // Configure PDF.js worker with local fallback
