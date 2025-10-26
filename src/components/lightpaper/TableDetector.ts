@@ -361,9 +361,53 @@ function findColumnIndex(x: number, boundaries: number[]): number {
 }
 
 /**
+ * Scale table to fit within page boundaries
+ */
+export function scaleTableToFit(
+  table: TableStructure, 
+  pageWidth: number, 
+  pageHeight: number, 
+  padding: number = 40
+): TableStructure {
+  const availableWidth = pageWidth - (2 * padding);
+  const availableHeight = pageHeight - (2 * padding);
+  
+  // Calculate scale factor
+  const scaleX = availableWidth / table.bounds.width;
+  const scaleY = availableHeight / table.bounds.height;
+  const scale = Math.min(scaleX, scaleY, 1.0); // Don't upscale
+  
+  // Only scale if table exceeds boundaries
+  if (scale >= 1.0) return table;
+  
+  // Scale all cell positions and sizes
+  const scaledRows = table.rows.map(row => 
+    row.map(cell => ({
+      ...cell,
+      x: cell.x * scale + padding,
+      y: cell.y * scale + padding,
+      width: cell.width * scale,
+      height: cell.height * scale,
+      fontSize: cell.fontSize * scale
+    }))
+  );
+  
+  return {
+    ...table,
+    rows: scaledRows,
+    bounds: {
+      x: table.bounds.x * scale + padding,
+      y: table.bounds.y * scale + padding,
+      width: table.bounds.width * scale,
+      height: table.bounds.height * scale
+    }
+  };
+}
+
+/**
  * Render table as HTML with pixel-perfect cell dimensions
  */
-export function renderTableAsHTML(table: TableStructure, scale: number = 1): string {
+export function renderTableAsHTML(table: TableStructure, scale: number = 1, zIndex: number = 10): string {
   const cellPadding = 6;
   const borderColor = '#999999';
   const borderWidth = 1;

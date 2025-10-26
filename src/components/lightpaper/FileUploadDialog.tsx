@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, Loader2, CheckCircle, AlertCircle, Eye } from "lucide-react";
 import { toast } from "sonner";
-import { parseDocument } from "./AdvancedDocumentParser";
+import { parseDocument, parseDocumentAsImages } from "./AdvancedDocumentParser";
 import { Progress } from "@/components/ui/progress";
 
 interface FileUploadDialogProps {
@@ -63,20 +63,37 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
       
       setProgressValue(20);
       
-      // Use advanced parser with progress callback
-      const result = await parseDocument(file, (message, current, total) => {
-        if (cancelRef.current) {
-          throw new Error('Upload cancelled by user');
-        }
-        
-        setUploadProgress(message);
-        
-        // Calculate progress
-        if (current && total) {
-          const percent = 20 + Math.floor((current / total) * 70); // 20% to 90%
-          setProgressValue(percent);
-        }
-      });
+      // Use appropriate parser based on mode
+      let result;
+      if (uploadMode === "view") {
+        result = await parseDocumentAsImages(file, (message, current, total) => {
+          if (cancelRef.current) {
+            throw new Error('Upload cancelled by user');
+          }
+          
+          setUploadProgress(message);
+          
+          if (current && total) {
+            const percent = 20 + Math.floor((current / total) * 70);
+            setProgressValue(percent);
+          }
+        });
+      } else {
+        // Edit mode - use advanced parser with progress callback
+        result = await parseDocument(file, (message, current, total) => {
+          if (cancelRef.current) {
+            throw new Error('Upload cancelled by user');
+          }
+          
+          setUploadProgress(message);
+          
+          // Calculate progress
+          if (current && total) {
+            const percent = 20 + Math.floor((current / total) * 70); // 20% to 90%
+            setProgressValue(percent);
+          }
+        });
+      }
 
       if (cancelRef.current) {
         throw new Error('Upload cancelled by user');
@@ -85,8 +102,18 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
       setUploadProgress("Loading into editor...");
       setProgressValue(95);
       
-      // Pass the HTML content to parent
-      onFileLoaded(result.html, title);
+      // Pass the content to parent based on mode
+      if (uploadMode === "view" && result.images) {
+        // View Mode: Pass images as JSON
+        onFileLoaded(JSON.stringify({
+          mode: 'view',
+          images: result.images,
+          metadata: result.metadata
+        }), title);
+      } else {
+        // Edit Mode: Pass HTML content
+        onFileLoaded(result.html, title);
+      }
       
       setProgressValue(100);
       

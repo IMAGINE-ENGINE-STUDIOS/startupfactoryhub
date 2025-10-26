@@ -1,6 +1,6 @@
 import * as pdfjsLib from "pdfjs-dist";
 import { renderAsync } from "docx-preview";
-import { detectTables, renderTableAsHTML, isTextInTable, type TableStructure, type ShapeData } from './TableDetector';
+import { detectTables, renderTableAsHTML, scaleTableToFit, isTextInTable, type TableStructure, type ShapeData } from './TableDetector';
 
 // Canvas dimensions (US Letter at 96dpi)
 const CANVAS_WIDTH_CM = 21.59; // 8.5 inches
@@ -49,6 +49,97 @@ export async function detectFileType(file: File): Promise<'pdf' | 'docx' | 'unkn
   return 'unknown';
 }
 
+/**
+ * Detect page format from dimensions (in pixels)
+ */
+export function detectPageFormat(widthPx: number, heightPx: number): 'letter' | 'legal' | 'a4' | 'a5' | 'custom' {
+  // Convert to mm for comparison (assuming 72 DPI)
+  const widthMm = (widthPx / 72) * 25.4;
+  const heightMm = (heightPx / 72) * 25.4;
+  
+  const formats = {
+    letter: { w: 215.9, h: 279.4 },
+    legal: { w: 215.9, h: 355.6 },
+    a4: { w: 210, h: 297 },
+    a5: { w: 148, h: 210 }
+  };
+  
+  for (const [name, dims] of Object.entries(formats)) {
+    if (Math.abs(widthMm - dims.w) < 10 && Math.abs(heightMm - dims.h) < 10) {
+      return name as 'letter' | 'legal' | 'a4' | 'a5';
+    }
+  }
+  return 'custom';
+}
+
+/**
+ * Parse document as static images (View Mode)
+ * Returns high-resolution page images for viewing only
+ */
+export async function parseDocumentAsImages(
+  file: File,
+  onProgress?: (message: string, current?: number, total?: number) => void
+): Promise<ParsedContent> {
+  const fileType = await detectFileType(file);
+  
+  if (fileType === 'pdf') {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pageCount = pdf.numPages;
+    const images: string[] = [];
+    
+    // Get first page for format detection
+    const firstPage = await pdf.getPage(1);
+    const firstViewport = firstPage.getViewport({ scale: 1.0 });
+    const detectedFormat = detectPageFormat(firstViewport.width, firstViewport.height);
+    
+    onProgress?.(`Rendering ${pageCount} pages as images...`, 0, pageCount);
+    
+    for (let i = 1; i <= pageCount; i++) {
+      onProgress?.(`Rendering page ${i}/${pageCount}...`, i, pageCount);
+      
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 2.0 }); // High resolution for viewing
+      
+      const canvas = document.createElement('canvas');
+      canvas.width = viewport.width;
+      canvas.height = viewport.height;
+      const ctx = canvas.getContext('2d')!;
+      
+      // White background
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      await page.render({
+        canvasContext: ctx,
+        viewport: viewport,
+        canvas: canvas
+      }).promise;
+      
+      // Convert to base64 JPEG
+      images.push(canvas.toDataURL('image/jpeg', 0.95));
+    }
+    
+    onProgress?.('View Mode rendering complete!', pageCount, pageCount);
+    
+    return {
+      html: '', // No HTML in view mode
+      metadata: {
+        pageCount,
+        hasEditableText: false,
+        hasImages: true,
+        fileType: 'pdf',
+        detectedFormat,
+        dimensions: { width: firstViewport.width, height: firstViewport.height }
+      },
+      images,
+      pages: []
+    };
+  }
+  
+  throw new Error('View Mode currently only supports PDF files. Please use Edit Mode for DOCX files.');
+}
+
 export interface ParsedContent {
   html: string;
   metadata: {
@@ -56,8 +147,11 @@ export interface ParsedContent {
     hasEditableText: boolean;
     hasImages: boolean;
     fileType: 'pdf' | 'docx';
+    detectedFormat?: 'letter' | 'legal' | 'a4' | 'a5' | 'custom';
+    dimensions?: { width: number; height: number };
   };
   pages?: string[]; // Multiple page HTML strings
+  images?: string[]; // For View Mode - array of page images
 }
 
 /**
@@ -247,6 +341,9 @@ export async function parsePDF(
   
   onProgress?.('PDF processing complete!', maxPages, maxPages);
   
+  // Detect format from first page
+  const detectedFormat = detectPageFormat(firstViewport.width, firstViewport.height);
+  
   return {
     html: htmlPages.join('\n\n'),
     metadata: {
@@ -254,6 +351,8 @@ export async function parsePDF(
       hasEditableText: true,
       hasImages,
       fileType: 'pdf',
+      detectedFormat,
+      dimensions: { width: firstViewport.width, height: firstViewport.height }
     },
     pages: htmlPages, // Individual page HTML strings
   };
@@ -513,13 +612,21 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
   ]);
   
   // Detect tables with strict validation using shape data
-  const tables = detectTables(textContent.items, viewport, shapesData);
+  let tables = detectTables(textContent.items, viewport, shapesData);
+  
+  // Scale tables to fit within page boundaries
+  tables = tables.map((table, index) => {
+    const scaled = scaleTableToFit(table, viewport.width, viewport.height, 40);
+    return scaled;
+  });
   
   // Render text blocks (excluding table text)
   const textHTML = renderTextBlocks(textContent, viewport, tables);
   
-  // Render tables as HTML with pixel-perfect dimensions
-  const tablesHTML = tables.map(table => renderTableAsHTML(table, scale)).join('');
+  // Render tables as HTML with proper z-index stacking
+  const tablesHTML = tables.map((table, index) => 
+    renderTableAsHTML(table, scale, 10 + index)
+  ).join('');
   
   // Return fully reconstructed page scaled to fit Letter size
   return `
