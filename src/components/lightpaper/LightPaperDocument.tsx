@@ -140,6 +140,7 @@ export function LightPaperDocument({
   const [orientation, setOrientation] = useState<Orientation>("portrait");
   const [viewMode, setViewMode] = useState(false);
   const [viewModeImages, setViewModeImages] = useState<string[]>([]);
+  const [visiblePage, setVisiblePage] = useState(1); // Track currently visible page in scrollable view
   const [overlayTextBoxes, setOverlayTextBoxes] = useState<OverlayTextBoxData[]>([]);
   const [isColorPickerActive, setIsColorPickerActive] = useState(false);
   const [selectedTextBoxId, setSelectedTextBoxId] = useState<string | null>(null);
@@ -233,14 +234,29 @@ export function LightPaperDocument({
       const parsed = JSON.parse(uploadedContent.content);
       
       if (parsed.mode === 'view' && parsed.images && Array.isArray(parsed.images)) {
-        // VIEW MODE: Render as images
-        console.log(`View Mode: ${parsed.images.length} pages detected`);
+        console.log(`✓ View Mode: ${parsed.images.length} pages with images`);
         
-        // CRITICAL: Set state in correct order
+        // Validate that images array contains valid base64 data
+        const validImages = parsed.images.filter((img: string) => {
+          return typeof img === 'string' && 
+                 (img.startsWith('data:image/jpeg;base64,') || 
+                  img.startsWith('data:image/png;base64,'));
+        });
+        
+        if (validImages.length === 0) {
+          console.error('✗ No valid images found in View Mode data');
+          toast.error('No valid images found in document');
+          throw new Error('No valid images found in View Mode data');
+        }
+        
+        console.log(`✓ Validated ${validImages.length} images`);
+        
+        // Set state
         setViewMode(true);
-        setViewModeImages(parsed.images);
-        setTotalPages(parsed.images.length);
+        setViewModeImages(validImages);
+        setTotalPages(validImages.length);
         setCurrentPage(1);
+        setVisiblePage(1);
         
         // Set format if detected
         if (parsed.metadata?.detectedFormat) {
@@ -251,15 +267,17 @@ export function LightPaperDocument({
           toast.info(`Format: ${parsed.detectedFormat.toUpperCase()}`);
         }
         
-        // CRITICAL: Clear editor completely and set empty content
-        editorRef.current.innerHTML = '';
-        setDocumentContent(''); // Prevent HTML from being stored
+        // Clear editor to prevent JSON from showing
+        if (editorRef.current) {
+          editorRef.current.innerHTML = '';
+        }
+        setDocumentContent('');
         
-        toast.success(`Document loaded in View Mode: ${parsed.images.length} pages`);
+        toast.success(`View Mode: ${validImages.length} pages loaded`);
         setProjectTitle(uploadedContent.title);
         setCurrentProjectId(null);
         onContentLoaded?.();
-        return; // EXIT EARLY - don't run Edit Mode logic
+        return; // EXIT - don't run Edit Mode logic
       }
     } catch (e) {
       // NOT JSON: Regular HTML content (Edit Mode)
@@ -291,6 +309,42 @@ export function LightPaperDocument({
     setCurrentProjectId(null);
     onContentLoaded?.();
   }, [uploadedContent, onContentLoaded]);
+
+  // Intersection Observer to track visible page in View Mode
+  useEffect(() => {
+    if (!viewMode || viewModeImages.length === 0) return;
+    
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const pageNum = parseInt(entry.target.id.replace('page-', ''));
+            if (!isNaN(pageNum)) {
+              setVisiblePage(pageNum);
+              setCurrentPage(pageNum); // Keep currentPage in sync for navigation
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.5, // Page is considered visible when 50% is in view
+        rootMargin: '0px'
+      }
+    );
+    
+    // Small delay to ensure DOM is ready
+    const timeoutId = setTimeout(() => {
+      viewModeImages.forEach((_, index) => {
+        const pageEl = document.getElementById(`page-${index + 1}`);
+        if (pageEl) observer.observe(pageEl);
+      });
+    }, 100);
+    
+    return () => {
+      clearTimeout(timeoutId);
+      observer.disconnect();
+    };
+  }, [viewMode, viewModeImages]);
 
   // Sync documentContent to editor when it changes (but not during user input)
   const isUserTyping = useRef(false);
@@ -1641,7 +1695,7 @@ export function LightPaperDocument({
               Previous
             </Button>
             <span className="text-sm font-medium px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-md min-w-[120px] text-center">
-              Page <strong>{currentPage}</strong> of <strong>{viewMode ? viewModeImages.length : totalPages}</strong>
+              Page <strong>{viewMode ? visiblePage : currentPage}</strong> of <strong>{viewMode ? viewModeImages.length : totalPages}</strong>
             </span>
             <Button
               variant="outline"
@@ -1928,37 +1982,61 @@ export function LightPaperDocument({
           >
             <div className="page-content">
               {viewMode && viewModeImages.length > 0 ? (
-                // VIEW MODE: Display full page screenshot as JPG
+                // VIEW MODE: Display ALL pages as scrollable document
                 <div style={{
                   width: '100%',
-                  height: '100%',
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: isDarkMode ? '#000' : '#fff',
-                  padding: 0,
-                  margin: 0
+                  flexDirection: 'column',
+                  gap: '20px',
+                  padding: '20px 0',
+                  background: isDarkMode ? '#1a1a1a' : '#f5f5f5'
                 }}>
-                  <img 
-                    key={`page-${currentPage}`}
-                    src={viewModeImages[currentPage - 1]} 
-                    alt={`Page ${currentPage} of ${viewModeImages.length}`}
-                    onLoad={() => console.log(`✓ Page ${currentPage} loaded`)}
-                    onError={(e) => {
-                      console.error(`✗ Page ${currentPage} failed to load`, e);
-                      toast.error(`Failed to load page ${currentPage}`);
-                    }}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      objectFit: 'contain',
-                      objectPosition: 'center',
-                      pointerEvents: 'none',
-                      userSelect: 'none',
-                      display: 'block',
-                      imageRendering: 'crisp-edges'
-                    }}
-                  />
+                  {viewModeImages.map((imageSrc, index) => (
+                    <div 
+                      key={`page-${index + 1}`}
+                      id={`page-${index + 1}`}
+                      style={{
+                        width: '100%',
+                        background: '#fff',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                        borderRadius: '4px',
+                        overflow: 'hidden',
+                        position: 'relative'
+                      }}
+                    >
+                      {/* Page number overlay */}
+                      <div style={{
+                        position: 'absolute',
+                        top: '10px',
+                        right: '10px',
+                        background: 'rgba(0,0,0,0.7)',
+                        color: '#fff',
+                        padding: '4px 12px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        zIndex: 10
+                      }}>
+                        Page {index + 1} of {viewModeImages.length}
+                      </div>
+                      
+                      <img 
+                        src={imageSrc}
+                        alt={`Page ${index + 1}`}
+                        onLoad={() => console.log(`✓ Page ${index + 1} loaded`)}
+                        onError={(e) => {
+                          console.error(`✗ Page ${index + 1} failed`, e);
+                          toast.error(`Failed to load page ${index + 1}`);
+                        }}
+                        style={{
+                          width: '100%',
+                          height: 'auto',
+                          display: 'block',
+                          imageRendering: 'crisp-edges'
+                        }}
+                      />
+                    </div>
+                  ))}
                 </div>
               ) : (
                 // EDIT MODE: Editable content
@@ -2243,7 +2321,7 @@ export function LightPaperDocument({
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-xs font-medium px-3 py-2 bg-primary/10 border border-primary/20 rounded-md whitespace-nowrap">
-              {currentPage} / {viewMode ? viewModeImages.length : totalPages}
+              {viewMode ? visiblePage : currentPage} / {viewMode ? viewModeImages.length : totalPages}
             </span>
             <Button
               variant="outline"

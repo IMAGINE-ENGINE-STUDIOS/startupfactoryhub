@@ -130,8 +130,8 @@ export async function parseDocumentAsImages(
         canvas: canvas
       }).promise;
       
-      // Convert to base64 JPEG
-      images.push(canvas.toDataURL('image/jpeg', 0.95));
+      // Convert to base64 PNG for lossless quality
+      images.push(canvas.toDataURL('image/png'));
     }
     
     onProgress?.('View Mode rendering complete!', pageCount, pageCount);
