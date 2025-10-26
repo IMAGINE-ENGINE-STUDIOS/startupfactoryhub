@@ -16,9 +16,11 @@ import { cn } from '@/lib/utils';
 interface PDFToolbarProps {
   onUpload: () => void;
   onExport: () => void;
+  isExporting?: boolean;
+  hasSession?: boolean;
 }
 
-export const PDFToolbar = ({ onUpload, onExport }: PDFToolbarProps) => {
+export const PDFToolbar = ({ onUpload, onExport, isExporting = false, hasSession = false }: PDFToolbarProps) => {
   const { activeTool, setActiveTool } = usePDFEditorStore();
 
   const tools: { type: ToolType; icon: any; label: string }[] = [
@@ -59,9 +61,14 @@ export const PDFToolbar = ({ onUpload, onExport }: PDFToolbarProps) => {
 
       <Separator orientation="vertical" className="h-8" />
 
-      <Button variant="outline" size="sm" onClick={onExport}>
+      <Button 
+        variant="outline" 
+        size="sm" 
+        onClick={onExport}
+        disabled={!hasSession || isExporting}
+      >
         <Download className="w-4 h-4 mr-2" />
-        Export PDF
+        {isExporting ? 'Exporting...' : 'Export PDF'}
       </Button>
     </div>
   );

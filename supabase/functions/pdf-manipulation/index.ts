@@ -8,11 +8,23 @@ const corsHeaders = {
 };
 
 interface PDFOperation {
-  type: 'add_text' | 'edit_text' | 'add_rectangle' | 'delete_content' | 'add_image' | 'fill_form';
+  type: 'add_text' | 'edit_text' | 'add_rectangle' | 'add_circle' | 'delete_content' | 'add_image' | 'fill_form';
   page: number;
   x: number;
   y: number;
-  data?: any;
+  width?: number;
+  height?: number;
+  radius?: number;
+  text?: string;
+  fontSize?: number;
+  fontFamily?: string;
+  fontWeight?: string;
+  fontStyle?: string;
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: number;
+  opacity?: number;
+  data?: any; // Legacy support
 }
 
 serve(async (req) => {
@@ -97,28 +109,100 @@ serve(async (req) => {
       
       switch (op.type) {
         case 'add_text': {
-          const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-          const { text, fontSize = 12, color = { r: 0, g: 0, b: 0 } } = op.data;
+          // Support both new format (op.text) and legacy format (op.data.text)
+          const text = op.text || op.data?.text || '';
+          const fontSize = op.fontSize || op.data?.fontSize || 12;
+          const fillColor = op.fill || op.data?.color || '#000000';
+          const opacity = op.opacity !== undefined ? op.opacity : (op.data?.opacity !== undefined ? op.data.opacity : 1);
+          
+          // Choose font based on fontWeight and fontStyle
+          let fontType = StandardFonts.Helvetica;
+          if (op.fontWeight === 'bold' && op.fontStyle === 'italic') {
+            fontType = StandardFonts.HelveticaBoldOblique;
+          } else if (op.fontWeight === 'bold') {
+            fontType = StandardFonts.HelveticaBold;
+          } else if (op.fontStyle === 'italic') {
+            fontType = StandardFonts.HelveticaOblique;
+          }
+          
+          const font = await pdfDoc.embedFont(fontType);
+          
+          // Convert hex color to RGB
+          const rgb_color = rgb(
+            parseInt(fillColor.slice(1, 3), 16) / 255,
+            parseInt(fillColor.slice(3, 5), 16) / 255,
+            parseInt(fillColor.slice(5, 7), 16) / 255
+          );
+          
           page.drawText(text, {
             x: op.x,
-            y: page.getHeight() - op.y,
+            y: op.y, // Already converted from Fabric to PDF coordinates
             size: fontSize,
-            font,
-            color: rgb(color.r, color.g, color.b),
+            font: font,
+            color: rgb_color,
+            opacity: opacity,
           });
           break;
         }
         
         case 'add_rectangle': {
-          const { width, height, color = { r: 0, g: 0, b: 1 }, borderColor, borderWidth = 1 } = op.data;
+          // Support both new format and legacy format
+          const width = op.width || op.data?.width || 100;
+          const height = op.height || op.data?.height || 100;
+          const fillColor = op.fill || op.data?.color || '#000000';
+          const strokeColor = op.stroke || op.data?.borderColor || '#000000';
+          const strokeWidth = op.strokeWidth !== undefined ? op.strokeWidth : (op.data?.borderWidth || 0);
+          const opacity = op.opacity !== undefined ? op.opacity : (op.data?.opacity !== undefined ? op.data.opacity : 1);
+          
+          const fill_rgb = rgb(
+            parseInt(fillColor.slice(1, 3), 16) / 255,
+            parseInt(fillColor.slice(3, 5), 16) / 255,
+            parseInt(fillColor.slice(5, 7), 16) / 255
+          );
+          
           page.drawRectangle({
             x: op.x,
-            y: page.getHeight() - op.y - height,
-            width,
-            height,
-            color: rgb(color.r, color.g, color.b),
-            borderColor: borderColor ? rgb(borderColor.r, borderColor.g, borderColor.b) : undefined,
-            borderWidth,
+            y: op.y - height, // Adjust Y for bottom-left origin
+            width: width,
+            height: height,
+            color: fill_rgb,
+            opacity: opacity,
+            borderWidth: strokeWidth,
+            borderColor: strokeWidth > 0 ? rgb(
+              parseInt(strokeColor.slice(1, 3), 16) / 255,
+              parseInt(strokeColor.slice(3, 5), 16) / 255,
+              parseInt(strokeColor.slice(5, 7), 16) / 255
+            ) : undefined,
+          });
+          break;
+        }
+        
+        case 'add_circle': {
+          // Support both new format and legacy format
+          const radius = op.radius || op.data?.radius || 50;
+          const fillColor = op.fill || op.data?.color || '#000000';
+          const strokeColor = op.stroke || op.data?.borderColor || '#000000';
+          const strokeWidth = op.strokeWidth !== undefined ? op.strokeWidth : (op.data?.borderWidth || 0);
+          const opacity = op.opacity !== undefined ? op.opacity : (op.data?.opacity !== undefined ? op.data.opacity : 1);
+          
+          const fill_rgb = rgb(
+            parseInt(fillColor.slice(1, 3), 16) / 255,
+            parseInt(fillColor.slice(3, 5), 16) / 255,
+            parseInt(fillColor.slice(5, 7), 16) / 255
+          );
+          
+          page.drawCircle({
+            x: op.x + radius, // Adjust for center
+            y: op.y - radius, // Adjust for center and bottom-left origin
+            size: radius,
+            color: fill_rgb,
+            opacity: opacity,
+            borderWidth: strokeWidth,
+            borderColor: strokeWidth > 0 ? rgb(
+              parseInt(strokeColor.slice(1, 3), 16) / 255,
+              parseInt(strokeColor.slice(3, 5), 16) / 255,
+              parseInt(strokeColor.slice(5, 7), 16) / 255
+            ) : undefined,
           });
           break;
         }
@@ -273,8 +357,8 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ 
         success: true, 
-        pdfUrl: fileName, // Return path for storage
-        signedUrl: signedUrl, // Return signed URL for immediate use
+        path: fileName,
+        url: signedUrl, // Return signed URL for download
         message: `Applied ${operations.length} operations successfully` 
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }

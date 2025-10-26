@@ -5,16 +5,31 @@ import { PDFToolbar } from './PDFToolbar';
 import { PDFPropertiesPanel } from './PDFPropertiesPanel';
 import { FabricCanvasManager } from '@/lib/pdf/FabricCanvasManager';
 import { usePDFEditorStore } from '@/stores/pdfEditorStore';
+import { usePDFSession } from '@/hooks/usePDFSession';
+import { usePDFAutoSave } from '@/hooks/usePDFAutoSave';
+import { usePDFExport } from '@/hooks/usePDFExport';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { FabricObject } from 'fabric';
+import { Button } from '@/components/ui/button';
+import { Download } from 'lucide-react';
 
 export const PDFEditorContainer = () => {
   const { pdfUrl, setPdfUrl, setTotalPages, currentPage, reset } = usePDFEditorStore();
   const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
   const [selectedObject, setSelectedObject] = useState<FabricObject | null>(null);
+  const [fabricJSON, setFabricJSON] = useState<string | null>(null);
   const fabricManagerRef = useRef<FabricCanvasManager | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Session management
+  const { sessionId, isLoading: isLoadingSession } = usePDFSession(pdfUrl);
+  
+  // Auto-save
+  usePDFAutoSave(sessionId, fabricJSON, currentPage);
+  
+  // Export
+  const { exportPDF, isExporting, exportUrl } = usePDFExport();
 
   const handleUpload = useCallback(() => {
     fileInputRef.current?.click();
@@ -76,6 +91,19 @@ export const PDFEditorContainer = () => {
     manager.setSelectionChangeCallback((obj) => {
       setSelectedObject(obj);
     });
+
+    // Set up auto-save on canvas changes
+    manager.getCanvas().on('object:modified', () => {
+      setFabricJSON(manager.serializeCanvas());
+    });
+    
+    manager.getCanvas().on('object:added', () => {
+      setFabricJSON(manager.serializeCanvas());
+    });
+    
+    manager.getCanvas().on('object:removed', () => {
+      setFabricJSON(manager.serializeCanvas());
+    });
   }, []);
 
   const handleUpdateProperty = useCallback((property: string, value: any) => {
@@ -111,15 +139,36 @@ export const PDFEditorContainer = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const handleExport = useCallback(() => {
-    if (!fabricManagerRef.current) {
+  const handleExport = useCallback(async () => {
+    if (!fabricManagerRef.current || !sessionId || !pdfUrl) {
       toast.error('No canvas to export');
       return;
     }
 
-    // TODO: Implement export in Phase 3
-    toast.info('Export functionality coming in Phase 3');
-  }, []);
+    const canvas = fabricManagerRef.current.getCanvas();
+    const objects = canvas.getObjects();
+    
+    if (objects.length === 0) {
+      toast.error('No objects to export');
+      return;
+    }
+
+    const url = await exportPDF(
+      sessionId,
+      pdfUrl,
+      objects,
+      canvasDimensions.height,
+      currentPage
+    );
+
+    if (url) {
+      // Automatically download the file
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'edited-pdf.pdf';
+      link.click();
+    }
+  }, [sessionId, pdfUrl, canvasDimensions.height, currentPage, exportPDF]);
 
   return (
     <div className="flex flex-col h-full bg-muted/30">
@@ -131,7 +180,31 @@ export const PDFEditorContainer = () => {
         className="hidden"
       />
 
-      <PDFToolbar onUpload={handleUpload} onExport={handleExport} />
+      <PDFToolbar 
+        onUpload={handleUpload} 
+        onExport={handleExport}
+        isExporting={isExporting}
+        hasSession={!!sessionId}
+      />
+      
+      {exportUrl && (
+        <div className="px-4 py-2 bg-success/10 border-b border-success/20">
+          <div className="flex items-center justify-between max-w-4xl mx-auto">
+            <span className="text-sm text-success-foreground">
+              PDF exported successfully!
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => window.open(exportUrl, '_blank')}
+              className="gap-2"
+            >
+              <Download className="w-4 h-4" />
+              Download
+            </Button>
+          </div>
+        </div>
+      )}
 
       <div className="flex-1 overflow-auto flex gap-4 p-4">
         <div className="flex-1 overflow-auto">
