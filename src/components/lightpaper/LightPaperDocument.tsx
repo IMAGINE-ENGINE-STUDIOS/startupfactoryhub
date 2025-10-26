@@ -148,23 +148,30 @@ export function LightPaperDocument({
 
   // Load uploaded content
   useEffect(() => {
-    if (!uploadedContent) return;
+    if (!uploadedContent || !editorRef.current) return;
     
     console.log('Loading uploaded content into state');
     console.log('Content length:', uploadedContent.content.length);
     console.log('Title:', uploadedContent.title);
-    
-    setDocumentContent(uploadedContent.content);
-    setProjectTitle(uploadedContent.title);
-    setCurrentProjectId(null); // Clear any existing project
     
     // Count pages in uploaded content
     const parser = new DOMParser();
     const doc = parser.parseFromString(uploadedContent.content, 'text/html');
     const pages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
     const pageCount = pages.length > 0 ? pages.length : 1;
+    
+    setDocumentContent(uploadedContent.content);
+    setProjectTitle(uploadedContent.title);
+    setCurrentProjectId(null);
     setTotalPages(pageCount);
     setCurrentPage(1);
+    
+    // Load first page into editor
+    if (pages.length > 0) {
+      editorRef.current.innerHTML = pages[0].outerHTML;
+    } else {
+      editorRef.current.innerHTML = uploadedContent.content;
+    }
     
     toast.success(`Document loaded: ${uploadedContent.title} (${pageCount} pages)`);
     
@@ -197,15 +204,31 @@ export function LightPaperDocument({
   // Load project and versions when selectedProject changes
   useEffect(() => {
     if (!selectedProject || selectedProject.project_type !== "document") return;
-    
     const loadProjectWithVersions = async () => {
       setCurrentProjectId(selectedProject.id);
       setProjectTitle(selectedProject.title);
       const content = selectedProject.content as any;
       
       if (content) {
-        if (content.html && editorRef.current) {
-          editorRef.current.innerHTML = content.html;
+        if (content.html) {
+          setDocumentContent(content.html);
+          
+          // Count pages
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(content.html, 'text/html');
+          const pages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
+          const pageCount = pages.length > 0 ? pages.length : 1;
+          
+          setTotalPages(content.totalPages || pageCount);
+          setCurrentPage(content.currentPage || 1);
+          
+          // Load the appropriate page
+          if (pages.length > 0 && editorRef.current) {
+            const pageIndex = (content.currentPage || 1) - 1;
+            editorRef.current.innerHTML = pages[pageIndex]?.outerHTML || pages[0].outerHTML;
+          } else if (editorRef.current) {
+            editorRef.current.innerHTML = content.html;
+          }
         }
         if (content.font) setSelectedFont(content.font);
         if (content.size) setSelectedSize(content.size);
@@ -606,6 +629,7 @@ export function LightPaperDocument({
   // Signature functions
   const startDrawingSignature = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (signatureMode !== "draw") return;
+    e.preventDefault();
     setIsDrawingSignature(true);
     const canvas = signCanvasRef.current;
     if (canvas) {
@@ -615,11 +639,22 @@ export function LightPaperDocument({
       const x = (e.clientX - rect.left) * scaleX;
       const y = (e.clientY - rect.top) * scaleY;
       setLastSignPos({ x, y });
+      
+      // Initialize drawing context
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 3;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
+      }
     }
   };
 
   const drawSignature = (e: React.MouseEvent<HTMLCanvasElement>) => {
     if (!isDrawingSignature || signatureMode !== "draw") return;
+    e.preventDefault();
+    
     const canvas = signCanvasRef.current;
     const ctx = canvas?.getContext("2d");
     if (ctx && canvas) {
@@ -633,7 +668,7 @@ export function LightPaperDocument({
       ctx.moveTo(lastSignPos.x, lastSignPos.y);
       ctx.lineTo(x, y);
       ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 3;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
       ctx.stroke();
@@ -888,11 +923,14 @@ export function LightPaperDocument({
 
     try {
       setIsSaving(true);
+      // Save full document content including all pages
       const content = {
-        html: editorRef.current?.innerHTML || "",
+        html: documentContent || editorRef.current?.innerHTML || "",
         font: selectedFont,
         size: selectedSize,
-        darkMode: isDarkMode
+        darkMode: isDarkMode,
+        currentPage,
+        totalPages
       };
       const result = await saveProject(projectTitle, "document", content, currentProjectId || undefined);
       if (result) {
@@ -1327,50 +1365,72 @@ export function LightPaperDocument({
             width: 21.59cm;
             height: 27.94cm;
             max-width: 21.59cm;
-            padding: 2cm;
+            padding: 0;
             background: white;
             box-shadow: 0 0 20px rgba(0,0,0,0.2);
-            overflow: auto;
+            overflow: hidden;
             position: relative;
             box-sizing: border-box;
             transform: scale(${zoomLevel});
             transform-origin: center center;
             transition: transform 0.2s ease;
+            margin: 20px auto;
           }
           
-          .page .uploaded-content {
+          .page .uploaded-content,
+          .page > div {
             width: 100%;
             height: 100%;
+            max-width: 100%;
+            max-height: 100%;
             overflow: hidden;
+            box-sizing: border-box;
           }
           
           .page .pdf-page-wrapper,
           .page .docx-page-wrapper {
-            max-width: 100%;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
             margin: 0;
-            padding: 0;
+            padding: 2cm;
+            box-sizing: border-box;
+            overflow: hidden;
           }
           
           .page .pdf-page,
           .page .docx-page {
+            max-width: 100% !important;
+            max-height: 100% !important;
             pointer-events: auto;
           }
           
           .page img {
             max-width: 100%;
             height: auto;
+            object-fit: contain;
             cursor: move;
             pointer-events: auto;
           }
 
-          /* PDF Reconstructed Page Container - Full screen single page */
+          /* PDF Reconstructed Page - Constrained to page dimensions */
           .pdf-page-reconstructed {
             position: relative;
             background: white;
             margin: 0;
-            width: 100%;
-            height: 100%;
-            min-height: 100%;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            overflow: hidden;
+            padding: 2cm;
+            box-sizing: border-box;
+          }
+          
+          .pdf-page-reconstructed > * {
+            max-width: 100%;
+            overflow: visible;
           }
 
           /* PDF Logo images - higher z-index */

@@ -118,36 +118,26 @@ export async function parseDOCX(
     // Extract rendered HTML
     let html = container.innerHTML;
     
-    // Wrap content with scaling container
-    if (scale < 1.0) {
-      html = `
-        <div class="docx-page-wrapper" style="
-          width: ${CANVAS_WIDTH_PX}px;
-          height: ${CANVAS_HEIGHT_PX}px;
-          overflow: hidden;
-          position: relative;
-        ">
-          <div class="docx-page" style="
-            transform: scale(${scale});
-            transform-origin: top left;
-            width: ${contentWidth}px;
-            height: ${contentHeight}px;
-          ">
-            ${html}
-          </div>
-        </div>
-      `;
-    } else {
-      html = `
-        <div class="docx-page-wrapper" style="
-          width: 100%;
-          max-width: ${CANVAS_WIDTH_CM}cm;
-          margin: 0 auto;
+    // Always wrap with proper scaling
+    html = `
+      <div class="docx-page-wrapper" style="
+        width: 100%;
+        height: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        overflow: hidden;
+        position: relative;
+      ">
+        <div class="docx-page" style="
+          transform: scale(${scale});
+          transform-origin: top left;
+          width: ${contentWidth}px;
+          max-width: 100%;
         ">
           ${html}
         </div>
-      `;
-    }
+      </div>
+    `;
     
     // Check if content has images
     const hasImages = container.innerHTML.includes('<img') || container.innerHTML.includes('base64');
@@ -501,9 +491,17 @@ function renderTextBlocks(textContent: any, viewport: pdfjsLib.PageViewport, tab
 /**
  * Render a single PDF page with complete component-based reconstruction
  */
-async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: number, scale: number = 2.0): Promise<string> {
+async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: number, scale: number = 1.5): Promise<string> {
   const page = await pdf.getPage(pageNum);
   const viewport = page.getViewport({ scale });
+  
+  // Calculate scale to fit US Letter (21.59cm x 27.94cm)
+  const targetWidth = CANVAS_WIDTH_PX - (2 * PADDING_PX); // Available width with padding
+  const targetHeight = CANVAS_HEIGHT_PX - (2 * PADDING_PX); // Available height with padding
+  
+  const scaleX = targetWidth / viewport.width;
+  const scaleY = targetHeight / viewport.height;
+  const contentScale = Math.min(scaleX, scaleY, 1.0); // Don't upscale
   
   // Extract ALL components in parallel for efficiency
   const [
@@ -525,28 +523,34 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
   // Render tables as HTML with pixel-perfect dimensions
   const tablesHTML = tables.map(table => renderTableAsHTML(table, scale)).join('');
   
-  // Return fully reconstructed page with ALL visual components
+  // Return fully reconstructed page scaled to fit Letter size
   return `
     <div class="pdf-page-reconstructed" style="
       position: relative;
-      width: ${viewport.width}px;
-      height: ${viewport.height}px;
+      width: 100%;
+      height: 100%;
       background: white;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      margin: 1rem auto;
-      overflow: visible;
+      overflow: hidden;
     ">
-      <!-- Shapes layer: Vector graphics with colors, fills, strokes -->
-      ${shapesHTML}
-      
-      <!-- Images layer: Embedded images with pixel-perfect positioning -->
-      ${imagesHTML}
-      
-      <!-- Tables layer: Reconstructed HTML tables with exact dimensions -->
-      ${tablesHTML}
-      
-      <!-- Text layer: Individual editable text spans with colors -->
-      ${textHTML}
+      <div style="
+        transform: scale(${contentScale});
+        transform-origin: top left;
+        width: ${viewport.width}px;
+        height: ${viewport.height}px;
+        position: relative;
+      ">
+        <!-- Shapes layer: Vector graphics with colors, fills, strokes -->
+        ${shapesHTML}
+        
+        <!-- Images layer: Embedded images with pixel-perfect positioning -->
+        ${imagesHTML}
+        
+        <!-- Tables layer: Reconstructed HTML tables with exact dimensions -->
+        ${tablesHTML}
+        
+        <!-- Text layer: Individual editable text spans with colors -->
+        ${textHTML}
+      </div>
     </div>
   `;
 }
