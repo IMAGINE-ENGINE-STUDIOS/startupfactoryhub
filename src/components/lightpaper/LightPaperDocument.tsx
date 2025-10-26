@@ -146,10 +146,15 @@ export function LightPaperDocument({
   useEffect(() => {
     if (!uploadedContent) return;
     
+    console.log('Loading uploaded content into editor');
+    console.log('Content length:', uploadedContent.content.length);
+    console.log('Title:', uploadedContent.title);
+    
     if (editorRef.current) {
       editorRef.current.innerHTML = uploadedContent.content;
       setProjectTitle(uploadedContent.title);
-      toast.success("Document loaded from file");
+      setCurrentProjectId(null); // Clear any existing project
+      toast.success(`Document loaded: ${uploadedContent.title}`);
     }
     
     // Clear uploaded content after loading

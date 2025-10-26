@@ -62,7 +62,10 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
       reader.onload = async (e) => {
         try {
           const arrayBuffer = e.target?.result as ArrayBuffer;
+          console.log('Starting to parse document:', file.name);
           const content = await parseDocument(file, arrayBuffer);
+          console.log('Parsed content length:', content.length);
+          console.log('Content preview:', content.substring(0, 200));
           
           onFileLoaded(content, file.name.replace(/\.[^/.]+$/, ''));
           toast.success(`Successfully loaded ${file.name}`);
@@ -70,7 +73,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
           onClose();
         } catch (error) {
           console.error('Error parsing document:', error);
-          toast.error('Failed to parse document');
+          toast.error(`Failed to parse document: ${error instanceof Error ? error.message : 'Unknown error'}`);
           setIsUploading(false);
         }
       };
