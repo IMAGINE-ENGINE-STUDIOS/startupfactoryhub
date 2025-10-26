@@ -21,11 +21,11 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
     if (!file) return;
 
     // Validation
-    const validExtensions = ['pdf', 'doc', 'docx'];
+    const validExtensions = ['pdf', 'docx'];
     const fileExtension = file.name.split('.').pop()?.toLowerCase();
 
     if (!fileExtension || !validExtensions.includes(fileExtension)) {
-      toast.error('Please upload a PDF or Word document (.pdf, .doc, .docx)');
+      toast.error('Please upload a PDF or modern Word document (.pdf, .docx). Legacy .doc format is not supported.');
       return;
     }
 
@@ -114,7 +114,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
                   Click to upload or drag and drop
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  PDF, DOC, DOCX (max 20MB)
+                  PDF, DOCX (max 20MB)
                 </p>
               </>
             )}
@@ -123,7 +123,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
           <input
             ref={fileInputRef}
             type="file"
-            accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
             onChange={handleFileSelect}
             className="hidden"
             disabled={isUploading}
@@ -134,12 +134,11 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
             <div className="text-sm">
               <p className="font-medium mb-1">Supported formats:</p>
               <ul className="text-muted-foreground space-y-1">
-                <li>✓ PDF files with text extraction</li>
-                <li>✓ Word documents (.docx, .doc)</li>
-                <li>✓ Fully editable after upload</li>
+                <li>✓ PDF files (.pdf)</li>
+                <li>✓ Modern Word documents (.docx)</li>
               </ul>
-              <p className="text-xs text-yellow-600 dark:text-yellow-500 mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
-                <strong>Note:</strong> .docx files work best. Legacy .doc files may have limited parsing quality.
+              <p className="text-xs text-red-600 dark:text-red-400 mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800">
+                <strong>Note:</strong> Legacy .doc format is not supported. Please convert to .docx first using Microsoft Word.
               </p>
             </div>
           </div>

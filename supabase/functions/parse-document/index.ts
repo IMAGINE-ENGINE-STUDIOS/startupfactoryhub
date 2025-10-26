@@ -90,13 +90,14 @@ serve(async (req) => {
   }
 });
 
-// PDF Parser using pdf-parse (lighter alternative)
+// PDF Parser using pdf-parse (Deno-compatible)
 async function parsePDF(arrayBuffer: ArrayBuffer): Promise<string> {
   try {
-    // Import pdf-parse which works better in Deno
-    const pdfParse = (await import('https://esm.sh/pdf-parse@1.1.1')).default;
+    // Use the specific subpath that works in Deno
+    const pdfParse = (await import('npm:pdf-parse@1.1.1/lib/pdf-parse.js')).default;
     
-    const data = await pdfParse(Buffer.from(arrayBuffer));
+    console.log('Parsing PDF with pdf-parse...');
+    const data = await pdfParse(arrayBuffer);
     
     if (data.text && data.text.trim().length > 0) {
       console.log('PDF parsed successfully, text length:', data.text.length);
@@ -112,14 +113,18 @@ async function parsePDF(arrayBuffer: ArrayBuffer): Promise<string> {
       return `<div class="pdf-document">${paragraphs}</div>`;
     }
   } catch (err) {
-    console.error('pdf-parse failed:', err);
+    console.error('PDF parsing failed:', err);
+    console.error('Error details:', err.message);
   }
   
   return `
     <div style="padding: 2rem; background: #fef3c7; border-left: 4px solid #f59e0b; margin: 1rem 0; border-radius: 0.5rem;">
       <h3 style="color: #92400e; margin-bottom: 0.5rem; font-weight: bold;">⚠️ Unable to Parse PDF</h3>
+      <p style="color: #78350f; margin-bottom: 1rem;">
+        This PDF could not be parsed. It may be image-based, scanned, or use an unsupported format.
+      </p>
       <p style="color: #78350f;">
-        This PDF could not be parsed. It may be image-based or use an unsupported format.
+        <strong>Tip:</strong> If this is a scanned PDF, try using OCR software to convert it to a searchable PDF first.
       </p>
     </div>
   `;
@@ -156,67 +161,33 @@ async function parseDOCX(arrayBuffer: ArrayBuffer): Promise<string> {
   return '<p>Unable to parse Word document.</p>';
 }
 
-// DOC Parser with text extraction fallback
+// DOC Parser - legacy format not supported, show clear message
 async function parseDOC(arrayBuffer: ArrayBuffer): Promise<string> {
-  try {
-    console.log('Attempting to parse .doc with mammoth (may work for some .doc files)...');
-    const mammoth = await import('https://esm.sh/mammoth@1.8.0');
-    const result = await mammoth.convertToHtml({ arrayBuffer });
-    
-    if (result.value && result.value.trim().length > 50) {
-      console.log('.doc parsed with mammoth, content length:', result.value.length);
-      return result.value;
-    }
-  } catch (err) {
-    console.error('Mammoth failed for .doc file:', err);
-  }
-
-  // Improved text extraction for legacy .doc files
-  console.log('Using text extraction fallback for .doc...');
-  const decoder = new TextDecoder('utf-8', { fatal: false });
-  const rawText = decoder.decode(arrayBuffer);
+  console.log('Legacy .doc file detected - cannot parse binary format properly');
   
-  // Extract readable text sequences
-  const textPattern = /[\x20-\x7E\u00A0-\uFFFF]{10,}/g;
-  const textMatches = rawText.match(textPattern) || [];
+  // .doc files use Microsoft's proprietary binary format (OLE2/Compound File)
+  // Parsing them correctly requires Windows COM libraries or complex binary parsers
+  // that don't work in Deno edge runtime
   
-  // Filter out metadata and binary noise
-  const filteredText = textMatches
-    .filter(text => {
-      // Remove XML and Office metadata
-      if (text.includes('<?xml') || text.includes('xmlns:') || text.includes('schemas.')) return false;
-      if (text.includes('FormTemplates') || text.includes('mso-')) return false;
-      // Keep meaningful text
-      return text.trim().length >= 15;
-    })
-    .map(text => text.trim())
-    .filter((text, index, arr) => arr.indexOf(text) === index); // Remove duplicates
-  
-  if (filteredText.length > 3) {
-    const htmlContent = filteredText
-      .map(text => `<p style="margin: 0.5rem 0;">${escapeHtml(text)}</p>`)
-      .join('');
-    
-    console.log('.doc text extraction succeeded, fragments:', filteredText.length);
-    return `<div class="doc-content">${htmlContent}</div>`;
-  }
-
-  // Show helpful message if extraction failed
+  // Show clear message to convert to .docx
   return `
     <div style="padding: 2rem; background: #fef3c7; border-left: 4px solid #f59e0b; margin: 1rem 0; border-radius: 0.5rem;">
-      <h3 style="color: #92400e; margin-bottom: 0.5rem; font-weight: bold;">⚠️ Legacy Document Format</h3>
+      <h3 style="color: #92400e; margin-bottom: 0.5rem; font-weight: bold;">⚠️ Legacy .doc Format Not Supported</h3>
       <p style="color: #78350f; margin-bottom: 1rem;">
-        This .doc file uses an older format that's difficult to parse accurately.
+        Legacy .doc files use a proprietary binary format that cannot be reliably parsed in web environments.
       </p>
       <p style="color: #78350f; margin-bottom: 0.5rem;">
-        <strong>To edit this document, please:</strong>
+        <strong>Please convert to .docx format:</strong>
       </p>
-      <ol style="color: #78350f; padding-left: 1.5rem; margin-bottom: 0;">
-        <li>Open the file in Microsoft Word</li>
+      <ol style="color: #78350f; padding-left: 1.5rem; margin-bottom: 1rem;">
+        <li>Open this file in Microsoft Word</li>
         <li>Click "File" → "Save As"</li>
-        <li>Choose format: "Word Document (.docx)"</li>
-        <li>Upload the new .docx file here</li>
+        <li>Choose "Word Document (.docx)" format</li>
+        <li>Upload the converted .docx file here</li>
       </ol>
+      <p style="color: #78350f; font-size: 0.875rem;">
+        <strong>Why?</strong> Modern .docx files use XML-based format that's easy to parse, while old .doc files use binary format that requires specialized libraries.
+      </p>
     </div>
   `;
 }
