@@ -1,8 +1,5 @@
 project_id = "zqiihhmdsdgwdcwmryym"
 
-[functions.pdf-manipulation]
-verify_jwt = true
-
 [functions.generate-recommendations]
 verify_jwt = true
 
