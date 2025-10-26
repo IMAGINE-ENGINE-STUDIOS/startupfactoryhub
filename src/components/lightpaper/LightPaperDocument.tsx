@@ -1317,7 +1317,7 @@ export function LightPaperDocument({
       </div>
 
       {/* Main Editor Area - Takes Full Height with Single Page View */}
-      <div ref={wrapperRef} className="flex-1 overflow-hidden bg-muted/30 flex gap-0 items-center justify-center">
+      <div ref={wrapperRef} className="flex-1 overflow-auto scroll-smooth bg-muted/30 flex gap-0 items-start justify-center pt-8">
         {/* Live Cursors */}
         {currentProjectId && (
           <LiveCursors cursors={cursors} containerRef={containerRef} />
