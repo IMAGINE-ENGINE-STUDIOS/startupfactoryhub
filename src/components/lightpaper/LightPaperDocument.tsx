@@ -55,10 +55,11 @@ export function LightPaperDocument({
   const [versions, setVersions] = useState<any[]>([]);
   const [currentVersionIndex, setCurrentVersionIndex] = useState(-1);
   const [sessionId] = useState(() => `session_${Date.now()}_${Math.random()}`);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false); // Default to light mode
   const [selectedHighlight, setSelectedHighlight] = useState("#FFFF00");
   const [isHighlighterActive, setIsHighlighterActive] = useState(false);
   const [selectedTextColor, setSelectedTextColor] = useState("#000000");
+  const [documentContent, setDocumentContent] = useState("<p>Start typing your document here...</p>");
   const [showSignDialog, setShowSignDialog] = useState(false);
   const [signatures, setSignatures] = useState<Array<{type: "draw" | "text", data: string, id: string}>>([]);
   const [signatureMode, setSignatureMode] = useState<"draw" | "text">("draw");
@@ -145,20 +146,26 @@ export function LightPaperDocument({
   useEffect(() => {
     if (!uploadedContent) return;
     
-    console.log('Loading uploaded content into editor');
+    console.log('Loading uploaded content into state');
     console.log('Content length:', uploadedContent.content.length);
     console.log('Title:', uploadedContent.title);
     
-    if (editorRef.current) {
-      editorRef.current.innerHTML = uploadedContent.content;
-      setProjectTitle(uploadedContent.title);
-      setCurrentProjectId(null); // Clear any existing project
-      toast.success(`Document loaded: ${uploadedContent.title}`);
-    }
+    setDocumentContent(uploadedContent.content);
+    setProjectTitle(uploadedContent.title);
+    setCurrentProjectId(null); // Clear any existing project
+    toast.success(`Document loaded: ${uploadedContent.title}`);
     
     // Clear uploaded content after loading
     onContentLoaded?.();
   }, [uploadedContent, onContentLoaded]);
+
+  // Sync documentContent to editor when it changes (but not during user input)
+  const isUserTyping = useRef(false);
+  useEffect(() => {
+    if (editorRef.current && documentContent && !isUserTyping.current) {
+      editorRef.current.innerHTML = documentContent;
+    }
+  }, [documentContent]);
 
   // Load project and versions when selectedProject changes
   useEffect(() => {
@@ -307,7 +314,13 @@ export function LightPaperDocument({
     const editor = editorRef.current;
     if (!editor) return;
     const handleInput = () => {
-      autoSaveVersion(editor.innerHTML);
+      isUserTyping.current = true;
+      const html = editor.innerHTML;
+      setDocumentContent(html); // Update state
+      autoSaveVersion(html);
+      setTimeout(() => {
+        isUserTyping.current = false;
+      }, 100);
     };
     const handlePaste = (e: ClipboardEvent) => {
       e.preventDefault();
@@ -1287,7 +1300,9 @@ export function LightPaperDocument({
                 fontFamily: selectedFont,
                 fontSize: `${selectedSize}px`,
                 wordWrap: 'break-word',
-                overflowWrap: 'break-word'
+                overflowWrap: 'break-word',
+                backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
+                color: isDarkMode ? "#ffffff" : "#000000"
               }}
               suppressContentEditableWarning
               onClick={(e) => {
@@ -1295,9 +1310,7 @@ export function LightPaperDocument({
                   updateCursor(e.clientX, e.clientY);
                 }
               }}
-            >
-              <p>Start typing your document here...</p>
-            </div>
+            />
             
             {/* Signature preview while dragging */}
             {draggingSignature && signaturePreviewPosition && (
