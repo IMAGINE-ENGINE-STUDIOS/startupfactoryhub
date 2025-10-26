@@ -284,16 +284,31 @@ export const PDFEditorContainer = () => {
     });
 
     // Set up auto-save on canvas changes
-    manager.getCanvas().on('object:modified', () => {
+    manager.getCanvas().on('object:modified', (e) => {
       setFabricJSON(manager.serializeCanvas());
+      // Log activity
+      if (e.target) {
+        const objType = e.target.type || 'object';
+        logActivity(`modify_${objType}`, { type: objType }, currentPage);
+      }
     });
     
-    manager.getCanvas().on('object:added', () => {
+    manager.getCanvas().on('object:added', (e) => {
       setFabricJSON(manager.serializeCanvas());
+      // Log activity
+      if (e.target) {
+        const objType = e.target.type || 'object';
+        logActivity(`add_${objType}`, { type: objType }, currentPage);
+      }
     });
     
-    manager.getCanvas().on('object:removed', () => {
+    manager.getCanvas().on('object:removed', (e) => {
       setFabricJSON(manager.serializeCanvas());
+      // Log activity
+      if (e.target) {
+        const objType = e.target.type || 'object';
+        logActivity(`delete_${objType}`, { type: objType }, currentPage);
+      }
     });
 
     // Track mouse movement for collaboration cursors
@@ -478,7 +493,10 @@ export const PDFEditorContainer = () => {
           onAddFormField={() => setShowFormFieldEditor(true)}
           onAddSignature={() => setShowSignaturePanel(true)}
           onShare={() => setShowShareDialog(true)}
-          onToggleCollaborationSidebar={() => setShowCollaborationSidebar(!showCollaborationSidebar)}
+          onToggleCollaborationSidebar={() => {
+            setShowCollaborationSidebar(!showCollaborationSidebar);
+            logActivity(showCollaborationSidebar ? 'close_collaboration' : 'open_collaboration', {}, currentPage);
+          }}
           showCollaborationSidebar={showCollaborationSidebar}
           isExporting={isExporting}
           isUploading={isUploading}

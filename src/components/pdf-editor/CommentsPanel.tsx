@@ -15,9 +15,11 @@ interface CommentsPanelProps {
 }
 
 export const CommentsPanel = ({ sessionId, currentPage }: CommentsPanelProps) => {
-  const { comments, isLoading, addReply, toggleResolved, deleteComment } = useComments(sessionId);
+  const { comments, isLoading, addComment, addReply, toggleResolved, deleteComment } = useComments(sessionId);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [showNewComment, setShowNewComment] = useState(false);
+  const [newCommentText, setNewCommentText] = useState('');
 
   const filteredComments = comments.filter(c => c.page_number === currentPage);
 
@@ -26,6 +28,14 @@ export const CommentsPanel = ({ sessionId, currentPage }: CommentsPanelProps) =>
     await addReply(commentId, replyText);
     setReplyText('');
     setReplyingTo(null);
+  };
+
+  const handleAddComment = async () => {
+    if (!newCommentText.trim()) return;
+    // Add comment at center of current page view
+    await addComment(currentPage, 100, 100, newCommentText);
+    setNewCommentText('');
+    setShowNewComment(false);
   };
 
   if (isLoading) {
@@ -39,7 +49,7 @@ export const CommentsPanel = ({ sessionId, currentPage }: CommentsPanelProps) =>
 
   return (
     <div className="h-full flex flex-col bg-background">
-      <div className="p-4 border-b">
+      <div className="p-4 border-b space-y-3">
         <div className="flex items-center gap-2">
           <MessageSquare className="w-5 h-5" />
           <h3 className="font-semibold">Comments</h3>
@@ -47,9 +57,56 @@ export const CommentsPanel = ({ sessionId, currentPage }: CommentsPanelProps) =>
             {filteredComments.length}
           </Badge>
         </div>
-        <p className="text-xs text-muted-foreground mt-1">
+        <p className="text-xs text-muted-foreground">
           Page {currentPage}
         </p>
+        
+        {/* Add Comment Button */}
+        <Button
+          size="sm"
+          className="w-full"
+          onClick={() => setShowNewComment(!showNewComment)}
+          disabled={!sessionId}
+        >
+          <MessageSquare className="w-4 h-4 mr-2" />
+          Add Comment
+        </Button>
+
+        {/* New Comment Form */}
+        {showNewComment && (
+          <div className="space-y-2 p-3 rounded-lg border bg-card animate-fade-in">
+            <Textarea
+              placeholder="Write a comment..."
+              value={newCommentText}
+              onChange={(e) => setNewCommentText(e.target.value)}
+              className="min-h-[80px] text-sm"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                  handleAddComment();
+                }
+              }}
+            />
+            <div className="flex gap-2">
+              <Button size="sm" onClick={handleAddComment} disabled={!newCommentText.trim()}>
+                <Send className="w-3 h-3 mr-1" />
+                Post
+              </Button>
+              <Button 
+                size="sm" 
+                variant="ghost" 
+                onClick={() => {
+                  setShowNewComment(false);
+                  setNewCommentText('');
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Tip: Press Ctrl+Enter to post
+            </p>
+          </div>
+        )}
       </div>
 
       <ScrollArea className="flex-1">
