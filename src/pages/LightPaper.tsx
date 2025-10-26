@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, Command, HelpCircle } from "lucide-react";
+import { FileText, Table, Presentation, Command, HelpCircle, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FolderOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -13,6 +13,7 @@ import { ScientificCalculator } from "@/components/ScientificCalculator";
 import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
 import { QuickNavigation } from "@/components/lightpaper/QuickNavigation";
+import { FileUploadDialog } from "@/components/lightpaper/FileUploadDialog";
 import { LightPaperProject, ProjectType } from "@/hooks/useLightPaperProjects";
 import { DocumentLoadingSkeleton, SpreadsheetLoadingSkeleton, PresentationLoadingSkeleton } from "@/components/lightpaper/LoadingSkeleton";
 
@@ -27,6 +28,8 @@ export default function LightPaper() {
   const [shareData, setShareData] = useState<{shareUrl: string, shareToken: string, documentTitle: string} | null>(null);
   const [showQuickNav, setShowQuickNav] = useState(false);
   const [isTabLoading, setIsTabLoading] = useState(false);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [uploadedContent, setUploadedContent] = useState<{content: string, title: string} | null>(null);
 
   // Keyboard shortcut for quick navigation (Ctrl+K or Cmd+K)
   useEffect(() => {
@@ -56,6 +59,15 @@ export default function LightPaper() {
               </span>
             </div>
             <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowUploadDialog(true)} 
+                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
+                title="Upload Document"
+              >
+                <Upload className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Upload</span>
+              </Button>
               <Button 
                 variant="outline" 
                 onClick={() => navigate("/guidelines")} 
@@ -132,7 +144,11 @@ export default function LightPaper() {
             {isTabLoading && activeTab === "document" ? (
               <DocumentLoadingSkeleton />
             ) : (
-              <LightPaperDocument selectedProject={selectedProject} />
+              <LightPaperDocument 
+                selectedProject={selectedProject} 
+                uploadedContent={uploadedContent}
+                onContentLoaded={() => setUploadedContent(null)}
+              />
             )}
           </TabsContent>
 
@@ -182,6 +198,15 @@ export default function LightPaper() {
         onSelectProject={(project) => {
           setSelectedProject(project);
           setActiveTab(project.project_type);
+        }}
+      />
+
+      <FileUploadDialog
+        isOpen={showUploadDialog}
+        onClose={() => setShowUploadDialog(false)}
+        onFileLoaded={(content, title) => {
+          setUploadedContent({ content, title });
+          setActiveTab('document');
         }}
       />
     </div>;

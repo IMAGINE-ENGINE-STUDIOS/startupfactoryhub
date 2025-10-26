@@ -20,7 +20,6 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useDocumentCollaboration } from "@/hooks/useDocumentCollaboration";
 import { LiveCursors } from "./LiveCursors";
 import { CommentsSidebar } from "./CommentsSidebar";
-import { CollaborationPresence } from "./CollaborationPresence";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { sanitizeHTML } from "@/utils/sanitize";
@@ -31,9 +30,13 @@ const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
 const HIGHLIGHT_COLORS = ["#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "transparent"];
 interface LightPaperDocumentProps {
   selectedProject?: LightPaperProject | null;
+  uploadedContent?: { content: string; title: string } | null;
+  onContentLoaded?: () => void;
 }
 export function LightPaperDocument({
-  selectedProject
+  selectedProject,
+  uploadedContent,
+  onContentLoaded
 }: LightPaperDocumentProps = {}) {
   const editorRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -131,6 +134,20 @@ export function LightPaperDocument({
       }
     }
   }, [showSignDialog]);
+
+  // Load uploaded content
+  useEffect(() => {
+    if (!uploadedContent) return;
+    
+    if (editorRef.current) {
+      editorRef.current.innerHTML = uploadedContent.content;
+      setProjectTitle(uploadedContent.title);
+      toast.success("Document loaded from file");
+    }
+    
+    // Clear uploaded content after loading
+    onContentLoaded?.();
+  }, [uploadedContent, onContentLoaded]);
 
   // Load project and versions when selectedProject changes
   useEffect(() => {
@@ -1141,13 +1158,6 @@ export function LightPaperDocument({
 
       {/* Main Editor Area - Takes Full Height with Pages */}
       <div ref={wrapperRef} className="flex-1 overflow-auto p-4 bg-muted/30 flex gap-0">
-        {/* Collaboration Presence */}
-        {currentProjectId && (
-          <div className="fixed top-20 right-4 z-40">
-            <CollaborationPresence documentId={currentProjectId} currentStatus="editing" />
-          </div>
-        )}
-
         {/* Live Cursors */}
         {currentProjectId && (
           <LiveCursors cursors={cursors} containerRef={containerRef} />
