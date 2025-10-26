@@ -1,6 +1,6 @@
 import * as pdfjsLib from "pdfjs-dist";
 import { renderAsync } from "docx-preview";
-import { detectTables, renderTableAsHTML, isTextInTable, type TableStructure } from './TableDetector';
+import { detectTables, renderTableAsHTML, isTextInTable, type TableStructure, type ShapeData } from './TableDetector';
 
 // Canvas dimensions (A4 at 96dpi)
 const CANVAS_WIDTH_CM = 21;
@@ -273,14 +273,16 @@ export async function parsePDF(
 
 /**
  * Extract shapes and lines from PDF (borders, underlines, etc.)
+ * Returns both HTML for rendering and structured data for table validation
  */
 async function extractShapesFromPage(
   page: pdfjsLib.PDFPageProxy, 
   viewport: pdfjsLib.PageViewport
-): Promise<string> {
+): Promise<{ html: string; shapes: ShapeData[] }> {
   try {
     const operatorList = await page.getOperatorList();
-    const shapes: string[] = [];
+    const shapesHTML: string[] = [];
+    const shapesData: ShapeData[] = [];
     
     for (let i = 0; i < operatorList.fnArray.length; i++) {
       const fn = operatorList.fnArray[i];
@@ -298,12 +300,20 @@ async function extractShapesFromPage(
           const x2 = coords[2];
           const y2 = viewport.height - coords[3];
           
-          shapes.push(`
+          shapesHTML.push(`
             <svg style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none;">
               <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" 
                     stroke="black" stroke-width="1" />
             </svg>
           `);
+          
+          shapesData.push({
+            type: 'line',
+            x: x1,
+            y: y1,
+            x2: x2,
+            y2: y2,
+          });
         }
       }
       
@@ -314,19 +324,27 @@ async function extractShapesFromPage(
         const width = args[2];
         const height = args[3];
         
-        shapes.push(`
+        shapesHTML.push(`
           <svg style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; pointer-events: none;">
             <rect x="${x}" y="${y}" width="${width}" height="${height}" 
                   fill="none" stroke="black" stroke-width="1" />
           </svg>
         `);
+        
+        shapesData.push({
+          type: 'rectangle',
+          x,
+          y,
+          width,
+          height,
+        });
       }
     }
     
-    return shapes.join('');
+    return { html: shapesHTML.join(''), shapes: shapesData };
   } catch (error) {
     console.warn('Failed to extract shapes:', error);
-    return '';
+    return { html: '', shapes: [] };
   }
 }
 
@@ -407,19 +425,19 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
   // Extract ALL components (no canvas rendering)
   const textContent = await page.getTextContent();
   
-  // 1. Detect tables from text positioning
-  const tables = detectTables(textContent.items, viewport);
+  // 1. Extract shapes first (for table border validation)
+  const { html: shapesHTML, shapes: shapesData } = await extractShapesFromPage(page, viewport);
   
-  // 2. Extract images/logos
+  // 2. Detect tables with strict validation using shape data
+  const tables = detectTables(textContent.items, viewport, shapesData);
+  
+  // 3. Extract images/logos
   const imagesHTML = await extractImagesFromPage(page, viewport);
-  
-  // 3. Extract lines/shapes (borders, underlines, etc.)
-  const shapesHTML = await extractShapesFromPage(page, viewport);
   
   // 4. Render text blocks (excluding table text)
   const textHTML = renderTextBlocks(textContent, viewport, tables);
   
-  // 5. Render tables as HTML
+  // 5. Render tables as HTML with pixel-perfect dimensions
   const tablesHTML = tables.map(table => renderTableAsHTML(table, scale)).join('');
   
   // Return fully reconstructed page with ALL components (no wrapper, just the content)

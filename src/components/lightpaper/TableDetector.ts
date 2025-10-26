@@ -28,6 +28,16 @@ export interface TableStructure {
   rowCount: number;
 }
 
+export interface ShapeData {
+  type: 'line' | 'rectangle';
+  x: number;
+  y: number;
+  width?: number;
+  height?: number;
+  x2?: number;
+  y2?: number;
+}
+
 /**
  * Group text items into rows based on Y-position clustering
  */
@@ -117,10 +127,66 @@ function findTableRanges(rows: any[][]) {
 }
 
 /**
- * Enhanced table detection with improved row grouping and range finding
+ * Validate if detected table candidate has table-like characteristics
  */
-export function detectTables(textItems: any[], viewport: any): TableStructure[] {
-  if (!textItems || textItems.length < 6) return [];
+function validateTableCandidate(rows: any[][], viewport: any): boolean {
+  // Must have at least 3 rows (header + 2 data rows minimum)
+  if (rows.length < 3) return false;
+  
+  // Must have at least 2 columns consistently
+  if (rows[0].length < 2) return false;
+  
+  // Check column consistency (at least 70% of rows should have similar column count)
+  const colCounts = rows.map(r => r.length);
+  const avgColCount = colCounts.reduce((a, b) => a + b, 0) / colCounts.length;
+  const consistentRows = colCounts.filter(c => Math.abs(c - avgColCount) <= 1).length;
+  if (consistentRows / rows.length < 0.7) return false;
+  
+  // Check for grid-like alignment (X positions should align vertically)
+  const allXPositions = rows.flatMap(row => row.map(item => item.x));
+  const uniqueXPositions = [...new Set(allXPositions.map(x => Math.round(x / 10) * 10))];
+  if (uniqueXPositions.length < 2) return false;
+  
+  // Check for consistent row heights (table rows are usually similar height)
+  const rowHeights = rows.map(row => row[0]?.height || 0).filter(h => h > 0);
+  if (rowHeights.length === 0) return false;
+  const avgHeight = rowHeights.reduce((a, b) => a + b, 0) / rowHeights.length;
+  const heightVariance = rowHeights.every(h => Math.abs(h - avgHeight) < avgHeight * 0.5);
+  if (!heightVariance) return false;
+  
+  return true;
+}
+
+/**
+ * Check if table area has visible borders from PDF shapes
+ */
+export function hasTableBorders(
+  tableBounds: { x: number; y: number; width: number; height: number },
+  shapes: ShapeData[]
+): boolean {
+  if (!shapes || shapes.length === 0) return false;
+  
+  const tolerance = 15; // Pixels tolerance for border matching
+  
+  // Look for rectangles that overlap with table bounds
+  return shapes.some(shape => {
+    if (shape.type === 'rectangle' && shape.width && shape.height) {
+      const overlapsX = Math.abs(shape.x - tableBounds.x) < tolerance;
+      const overlapsY = Math.abs(shape.y - tableBounds.y) < tolerance;
+      const overlapsWidth = Math.abs(shape.width - tableBounds.width) < tolerance * 2;
+      const overlapsHeight = Math.abs(shape.height - tableBounds.height) < tolerance * 2;
+      
+      return overlapsX && overlapsY && overlapsWidth && overlapsHeight;
+    }
+    return false;
+  });
+}
+
+/**
+ * Enhanced table detection with strict validation and border checking
+ */
+export function detectTables(textItems: any[], viewport: any, shapes: ShapeData[] = []): TableStructure[] {
+  if (!textItems || textItems.length < 9) return []; // Minimum 3x3 table
   
   // Group items into rows
   const rows = groupIntoRows(textItems, viewport);
@@ -128,11 +194,26 @@ export function detectTables(textItems: any[], viewport: any): TableStructure[] 
   // Find sequences that look like tables
   const tableRanges = findTableRanges(rows);
   
-  // Build table structures with cell boundaries
+  // Build table structures with strict validation
   const tables: TableStructure[] = [];
   for (const range of tableRanges) {
-    const table = buildTableStructure(rows.slice(range.start, range.end), viewport);
-    if (table) tables.push(table);
+    const rowsSlice = rows.slice(range.start, range.end);
+    
+    // Validate table characteristics before building
+    if (!validateTableCandidate(rowsSlice, viewport)) continue;
+    
+    const table = buildTableStructure(rowsSlice, viewport);
+    if (!table) continue;
+    
+    // If shapes data is available, validate borders
+    if (shapes.length > 0) {
+      if (hasTableBorders(table.bounds, shapes)) {
+        tables.push(table);
+      }
+    } else {
+      // No shape data available, use validated table
+      tables.push(table);
+    }
   }
   
   return tables;
@@ -278,12 +359,34 @@ function findColumnIndex(x: number, boundaries: number[]): number {
 }
 
 /**
- * Render table as HTML with editable cells and proper borders
+ * Render table as HTML with pixel-perfect cell dimensions
  */
 export function renderTableAsHTML(table: TableStructure, scale: number = 1): string {
   const cellPadding = 6;
   const borderColor = '#999999';
   const borderWidth = 1;
+  
+  // Calculate exact column widths from cell positions
+  const columnWidths: number[] = [];
+  const firstRow = table.rows[0];
+  
+  for (let col = 0; col < firstRow.length; col++) {
+    let maxWidth = 0;
+    for (const row of table.rows) {
+      if (row[col] && row[col].width > maxWidth) {
+        maxWidth = row[col].width;
+      }
+    }
+    // Add padding for exact sizing
+    columnWidths.push(maxWidth + cellPadding * 2);
+  }
+  
+  // Calculate exact row heights
+  const rowHeights: number[] = [];
+  for (const row of table.rows) {
+    const maxHeight = Math.max(...row.map(cell => cell.height || 12));
+    rowHeights.push(maxHeight + cellPadding * 2);
+  }
   
   let html = `
     <div class="pdf-reconstructed-table" style="
@@ -291,12 +394,15 @@ export function renderTableAsHTML(table: TableStructure, scale: number = 1): str
       left: ${table.bounds.x}px;
       top: ${table.bounds.y}px;
       width: ${table.bounds.width}px;
+      height: ${table.bounds.height}px;
       background: white;
       z-index: 10;
       border: ${borderWidth}px solid ${borderColor};
+      box-sizing: border-box;
     ">
       <table style="
         width: 100%;
+        height: 100%;
         border-collapse: collapse;
         font-family: Arial, sans-serif;
         background: white;
@@ -304,38 +410,50 @@ export function renderTableAsHTML(table: TableStructure, scale: number = 1): str
       ">
   `;
   
+  // Set column widths using colgroup for pixel-perfect layout
+  html += '<colgroup>';
+  for (const width of columnWidths) {
+    html += `<col style="width: ${width}px;">`;
+  }
+  html += '</colgroup>';
+  
   // Render header row (first row with bold styling)
-  const firstRow = table.rows[0];
   const hasHeader = firstRow.some(cell => cell.fontWeight === 'bold');
   
   if (hasHeader) {
-    html += '<thead><tr>';
-    for (const cell of firstRow) {
+    html += `<thead><tr style="height: ${rowHeights[0]}px;">`;
+    for (let col = 0; col < firstRow.length; col++) {
+      const cell = firstRow[col];
       html += `
         <th contenteditable="true" style="
           border: ${borderWidth}px solid ${borderColor};
           padding: ${cellPadding}px;
           text-align: left;
-          font-weight: bold;
+          font-weight: ${cell.fontWeight};
           font-size: ${cell.fontSize}px;
           color: ${cell.color};
           background: #f8f9fa;
           cursor: text;
+          width: ${columnWidths[col]}px;
+          height: ${rowHeights[0]}px;
+          box-sizing: border-box;
+          vertical-align: top;
         ">${escapeHtml(cell.text)}</th>
       `;
     }
     html += '</tr></thead>';
   }
   
-  // Render body rows
+  // Render body rows with exact heights
   html += '<tbody>';
   const startRow = hasHeader ? 1 : 0;
   
   for (let i = startRow; i < table.rows.length; i++) {
     const row = table.rows[i];
-    html += '<tr>';
+    html += `<tr style="height: ${rowHeights[i]}px;">`;
     
-    for (const cell of row) {
+    for (let col = 0; col < row.length; col++) {
+      const cell = row[col];
       html += `
         <td contenteditable="true" style="
           border: ${borderWidth}px solid ${borderColor};
@@ -346,6 +464,9 @@ export function renderTableAsHTML(table: TableStructure, scale: number = 1): str
           cursor: text;
           white-space: pre-wrap;
           vertical-align: top;
+          width: ${columnWidths[col]}px;
+          height: ${rowHeights[i]}px;
+          box-sizing: border-box;
         ">${escapeHtml(cell.text)}</td>
       `;
     }
