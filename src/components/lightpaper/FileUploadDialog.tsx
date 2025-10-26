@@ -19,8 +19,12 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  console.log('FileUploadDialog rendered, isOpen:', isOpen);
+
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log('handleFileSelect called');
     const file = event.target.files?.[0];
+    console.log('File selected:', file?.name, file?.type, file?.size);
     if (!file) return;
 
     // Check file type

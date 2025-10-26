@@ -29,6 +29,7 @@ import { FileUploadDialog } from "./FileUploadDialog";
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
 const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
 const HIGHLIGHT_COLORS = ["#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "transparent"];
+const TEXT_COLORS = ["#000000", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500", "#800080", "#FFFFFF"];
 
 interface LightPaperDocumentProps {
   selectedProject?: LightPaperProject | null;
@@ -57,6 +58,7 @@ export function LightPaperDocument({
   const [isDarkMode, setIsDarkMode] = useState(true);
   const [selectedHighlight, setSelectedHighlight] = useState("#FFFF00");
   const [isHighlighterActive, setIsHighlighterActive] = useState(false);
+  const [selectedTextColor, setSelectedTextColor] = useState("#000000");
   const [showSignDialog, setShowSignDialog] = useState(false);
   const [signatures, setSignatures] = useState<Array<{type: "draw" | "text", data: string, id: string}>>([]);
   const [signatureMode, setSignatureMode] = useState<"draw" | "text">("draw");
@@ -935,6 +937,37 @@ export function LightPaperDocument({
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("strikeThrough")} title="Strikethrough">
                 <Strikethrough className="h-4 w-4" />
               </Button>
+              
+              {/* Text Color Picker */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Text Color">
+                    <div className="relative">
+                      <Palette className="h-4 w-4" />
+                      <div 
+                        className="absolute bottom-0 left-0 right-0 h-1 rounded-full"
+                        style={{ backgroundColor: selectedTextColor }}
+                      />
+                    </div>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-40">
+                  <div className="grid grid-cols-5 gap-2 p-2">
+                    {TEXT_COLORS.map(color => (
+                      <button
+                        key={color}
+                        className="w-7 h-7 rounded border-2 border-border hover:scale-110 transition-transform"
+                        style={{ backgroundColor: color }}
+                        onClick={() => {
+                          setSelectedTextColor(color);
+                          execCommand("foreColor", color);
+                        }}
+                        title={color}
+                      />
+                    ))}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Alignment */}
@@ -1131,6 +1164,13 @@ export function LightPaperDocument({
                 { icon: Italic, label: "Italic", onClick: () => execCommand("italic"), priority: "high" },
                 { icon: Underline, label: "Underline", onClick: () => execCommand("underline"), priority: "medium" },
                 { icon: Strikethrough, label: "Strikethrough", onClick: () => execCommand("strikeThrough"), priority: "low" },
+                { icon: Palette, label: "Text Color", onClick: () => {
+                  // Cycle through common colors
+                  const currentIndex = TEXT_COLORS.indexOf(selectedTextColor);
+                  const nextColor = TEXT_COLORS[(currentIndex + 1) % TEXT_COLORS.length];
+                  setSelectedTextColor(nextColor);
+                  execCommand("foreColor", nextColor);
+                }, priority: "medium" },
               ]
             },
             {
