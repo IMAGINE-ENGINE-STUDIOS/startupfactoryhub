@@ -15,7 +15,9 @@ interface FileUploadDialogProps {
 export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDialogProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>("Preparing...");
+  const [isCancelled, setIsCancelled] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const processDOCX = async (file: File): Promise<string> => {
     // Create temporary container for rendering
@@ -54,36 +56,76 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
   };
 
   const processPDF = async (file: File): Promise<string> => {
-    // Configure PDF.js worker
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    // Configure PDF.js worker with fallback
+    try {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+    } catch (error) {
+      console.error('Failed to set PDF.js worker:', error);
+      throw new Error('Failed to initialize PDF processor');
+    }
 
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
     
+    const pdf = await loadingTask.promise;
+    
+    // Warn if PDF is too large
+    if (pdf.numPages > 50) {
+      toast.error(`PDF has ${pdf.numPages} pages. Processing first 50 pages only.`);
+    }
+    
+    const maxPages = Math.min(pdf.numPages, 50);
     let html = '<div class="pdf-document" style="max-width: 100%;">';
     
-    // Render each page as high-resolution image
-    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-      setUploadProgress(`Rendering page ${pageNum} of ${pdf.numPages}...`);
+    // Render pages in batches to prevent freezing
+    const batchSize = 3;
+    for (let i = 1; i <= maxPages; i += batchSize) {
+      if (isCancelled) {
+        throw new Error('Upload cancelled by user');
+      }
       
-      const page = await pdf.getPage(pageNum);
-      const viewport = page.getViewport({ scale: 2.0 }); // 2x for high quality
+      const batch = Math.min(batchSize, maxPages - i + 1);
+      const batchPromises = [];
       
-      const canvas = document.createElement('canvas');
-      const context = canvas.getContext('2d')!;
-      canvas.height = viewport.height;
-      canvas.width = viewport.width;
+      for (let j = 0; j < batch; j++) {
+        const pageNum = i + j;
+        if (pageNum > maxPages) break;
+        
+        setUploadProgress(`Rendering page ${pageNum} of ${maxPages}...`);
+        
+        batchPromises.push((async () => {
+          const page = await pdf.getPage(pageNum);
+          const viewport = page.getViewport({ scale: 1.5 }); // Reduced from 2.0 for better performance
+          
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d')!;
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+          
+          await page.render({ 
+            canvasContext: context,
+            viewport,
+            canvas
+          }).promise;
+          
+          // Use JPEG with 85% quality for smaller file size
+          const imageData = canvas.toDataURL('image/jpeg', 0.85);
+          return { pageNum, imageData };
+        })());
+      }
       
-      await page.render({ 
-        canvasContext: context,
-        viewport,
-        canvas
-      }).promise;
+      const results = await Promise.all(batchPromises);
       
-      const imageData = canvas.toDataURL('image/png');
-      html += `<div style="margin: 1rem 0; page-break-after: always;">
-        <img src="${imageData}" style="max-width: 100%; height: auto; display: block;" alt="Page ${pageNum}" />
-      </div>`;
+      for (const { pageNum, imageData } of results) {
+        html += `<div style="margin: 1rem 0; page-break-after: always;">
+          <img src="${imageData}" style="max-width: 100%; height: auto; display: block;" alt="Page ${pageNum}" />
+        </div>`;
+      }
+      
+      // Add small delay between batches to prevent freezing
+      if (i + batchSize <= maxPages) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
     }
     
     html += '</div>';
@@ -109,7 +151,15 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
     }
 
     setIsUploading(true);
+    setIsCancelled(false);
     setUploadProgress("Processing document...");
+
+    // Set 60-second timeout
+    timeoutRef.current = setTimeout(() => {
+      setIsUploading(false);
+      setUploadProgress("Preparing...");
+      toast.error('Upload timed out. Please try a smaller file or contact support.');
+    }, 60000);
 
     try {
       let content: string;
@@ -131,15 +181,32 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
       setUploadProgress("Loading into editor...");
       onFileLoaded(content, title);
       
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       setIsUploading(false);
       onClose();
 
     } catch (error) {
       console.error('Error processing document:', error);
       toast.error(error instanceof Error ? error.message : 'Failed to process document');
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       setIsUploading(false);
+      setIsCancelled(false);
       setUploadProgress("Preparing...");
     }
+  };
+
+  const handleCancel = () => {
+    setIsCancelled(true);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    setIsUploading(false);
+    setUploadProgress("Preparing...");
+    toast.info('Upload cancelled');
   };
 
   return (
@@ -201,9 +268,15 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button variant="outline" onClick={onClose} disabled={isUploading}>
-            Cancel
-          </Button>
+          {isUploading ? (
+            <Button variant="outline" onClick={handleCancel}>
+              Cancel Upload
+            </Button>
+          ) : (
+            <Button variant="outline" onClick={onClose}>
+              Close
+            </Button>
+          )}
         </div>
       </DialogContent>
     </Dialog>
