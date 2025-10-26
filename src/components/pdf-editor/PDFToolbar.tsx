@@ -52,15 +52,15 @@ export const PDFToolbar = ({
   ];
 
   return (
-    <div className="flex items-center gap-2 p-2 bg-background border-b">
-      <Button variant="outline" size="sm" onClick={onUpload} disabled={isUploading}>
-        <Upload className="w-4 h-4 mr-2" />
-        {isUploading ? 'Uploading...' : 'Upload PDF'}
+    <div className="flex items-center gap-1 md:gap-2 p-1.5 md:p-2 bg-background border-b overflow-x-auto">
+      <Button variant="outline" size="sm" onClick={onUpload} disabled={isUploading} className="shrink-0">
+        <Upload className="w-4 h-4 md:mr-2" />
+        <span className="hidden md:inline">{isUploading ? 'Uploading...' : 'Upload PDF'}</span>
       </Button>
 
-      <Separator orientation="vertical" className="h-8" />
+      <Separator orientation="vertical" className="h-6 md:h-8 shrink-0" />
 
-      <div className="flex gap-1">
+      <div className="flex gap-0.5 md:gap-1">
         {tools.map(({ type, icon: Icon, label }) => (
           <Button
             key={type}
@@ -69,16 +69,16 @@ export const PDFToolbar = ({
             onClick={() => setActiveTool(type)}
             title={`${label} (${type === 'select' ? 'V' : type.charAt(0).toUpperCase()})`}
             className={cn(
-              'w-9 h-9 p-0',
+              'w-8 h-8 md:w-9 md:h-9 p-0 shrink-0',
               activeTool === type && 'bg-primary text-primary-foreground'
             )}
           >
-            <Icon className="w-4 h-4" />
+            <Icon className="w-3.5 h-3.5 md:w-4 md:h-4" />
           </Button>
         ))}
       </div>
 
-      <Separator orientation="vertical" className="h-8" />
+      <Separator orientation="vertical" className="h-6 md:h-8 shrink-0" />
 
       <Button 
         variant="outline" 
@@ -86,9 +86,10 @@ export const PDFToolbar = ({
         onClick={onImageUpload}
         disabled={!hasSession}
         title="Upload Image"
+        className="shrink-0"
       >
-        <ImageIcon className="w-4 h-4 mr-2" />
-        Image
+        <ImageIcon className="w-4 h-4 md:mr-2" />
+        <span className="hidden md:inline">Image</span>
       </Button>
 
       <Button 
@@ -97,9 +98,10 @@ export const PDFToolbar = ({
         onClick={onAddFormField}
         disabled={!hasSession}
         title="Add Form Field"
+        className="shrink-0"
       >
-        <FileText className="w-4 h-4 mr-2" />
-        Form
+        <FileText className="w-4 h-4 md:mr-2" />
+        <span className="hidden md:inline">Form</span>
       </Button>
 
       <Button 
@@ -108,12 +110,13 @@ export const PDFToolbar = ({
         onClick={onAddSignature}
         disabled={!hasSession}
         title="Add Signature"
+        className="shrink-0"
       >
-        <PenTool className="w-4 h-4 mr-2" />
-        Sign
+        <PenTool className="w-4 h-4 md:mr-2" />
+        <span className="hidden md:inline">Sign</span>
       </Button>
 
-      <Separator orientation="vertical" className="h-8" />
+      <Separator orientation="vertical" className="h-6 md:h-8 shrink-0" />
 
       <Button 
         variant="outline" 
@@ -121,9 +124,10 @@ export const PDFToolbar = ({
         onClick={onExport}
         disabled={!hasSession || isExporting}
         title="Export PDF (Ctrl+E)"
+        className="shrink-0"
       >
-        <Download className="w-4 h-4 mr-2" />
-        {isExporting ? 'Exporting...' : 'Export'}
+        <Download className="w-4 h-4 md:mr-2" />
+        <span className="hidden md:inline">{isExporting ? 'Exporting...' : 'Export'}</span>
       </Button>
 
       <Button
@@ -131,10 +135,10 @@ export const PDFToolbar = ({
         size="sm"
         onClick={onShowKeyboardShortcuts}
         title="Keyboard Shortcuts (Ctrl+/)"
-        className="hidden lg:flex"
+        className="hidden lg:flex shrink-0"
       >
-        <Keyboard className="w-4 h-4 mr-2" />
-        Shortcuts
+        <Keyboard className="w-4 h-4 md:mr-2" />
+        <span className="hidden md:inline">Shortcuts</span>
       </Button>
 
       <div className="ml-auto text-xs text-muted-foreground hidden xl:block">
