@@ -211,9 +211,10 @@ export async function parsePDF(
   const availableWidth = CANVAS_WIDTH_PX - (2 * PADDING_PX);
   const availableHeight = CANVAS_HEIGHT_PX - (2 * PADDING_PX);
   
+  // Calculate scale to fit within container (not fixed canvas)
   const scaleX = availableWidth / firstViewport.width;
   const scaleY = availableHeight / firstViewport.height;
-  const optimalScale = Math.min(scaleX, scaleY, 6.0); // Cap at 6.0 for 4K quality
+  const optimalScale = Math.min(scaleX, scaleY, 2.5); // Reduce from 6.0 to 2.5 for better fit
   
   onProgress?.(`Rendering at scale ${optimalScale.toFixed(2)}...`, 0, maxPages);
   
@@ -421,33 +422,19 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
   // 5. Render tables as HTML
   const tablesHTML = tables.map(table => renderTableAsHTML(table, scale)).join('');
   
-  // Calculate scaling to fit canvas
-  const pageScale = Math.min(
-    (CANVAS_WIDTH_PX - 2 * PADDING_PX) / viewport.width,
-    (CANVAS_HEIGHT_PX - 2 * PADDING_PX) / viewport.height,
-    1.0
-  );
-  
-  // Return fully reconstructed page with ALL components
+  // Return fully reconstructed page with ALL components (no wrapper, just the content)
   return `
-    <div class="pdf-page-wrapper" style="
-      width: ${CANVAS_WIDTH_PX}px;
-      height: ${CANVAS_HEIGHT_PX}px;
-      overflow: hidden;
+    <div class="pdf-page-reconstructed" style="
       position: relative;
+      width: ${viewport.width}px;
+      height: ${viewport.height}px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
       margin: 1rem auto;
+      overflow: visible;
     ">
-      <div class="pdf-page-reconstructed" style="
-        position: relative;
-        width: ${viewport.width}px;
-        height: ${viewport.height}px;
-        transform: scale(${pageScale});
-        transform-origin: top left;
-        background: white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      ">
-        <!-- Shapes layer: Lines, rectangles, borders -->
-        ${shapesHTML}
+      <!-- Shapes layer: Lines, rectangles, borders -->
+      ${shapesHTML}
         
         <!-- Images layer: Logos, graphics -->
         ${imagesHTML}
@@ -520,8 +507,12 @@ async function extractImagesFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfj
             const width = img.width * Math.abs(transform[0]);
             const height = img.height * Math.abs(transform[3]);
             
+            // Detect if this is likely a logo (small image at top of page)
+            const isLikelyLogo = (y < viewport.height * 0.2) && (width < viewport.width * 0.3) && (height < viewport.height * 0.15);
+            const imageClass = isLikelyLogo ? 'pdf-image-wrapper pdf-logo' : 'pdf-image-wrapper';
+            
             imagesHTML.push(`
-              <div class="pdf-image-wrapper" style="
+              <div class="${imageClass}" style="
                 position: absolute; 
                 left: ${x}px; 
                 top: ${y}px; 
@@ -530,6 +521,7 @@ async function extractImagesFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfj
                 cursor: move;
                 border: 2px solid transparent;
                 transition: border-color 0.2s;
+                z-index: ${isLikelyLogo ? '20' : '5'};
               " 
               onmouseover="this.style.borderColor='rgba(66, 153, 225, 0.5)'"
               onmouseout="this.style.borderColor='transparent'">
@@ -541,7 +533,7 @@ async function extractImagesFromPage(page: pdfjsLib.PDFPageProxy, viewport: pdfj
                        object-fit: contain;
                        pointer-events: auto;
                      " 
-                     alt="Extracted image" />
+                     alt="${isLikelyLogo ? 'Logo' : 'Extracted image'}" />
               </div>
             `);
           }

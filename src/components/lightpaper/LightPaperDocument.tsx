@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
@@ -78,6 +78,7 @@ export function LightPaperDocument({
   const [showComments, setShowComments] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
+  const [zoomLevel, setZoomLevel] = useState(1.0);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const commandHistory = useRef(new CommandHistory());
   const { user } = useAuth();
@@ -1232,6 +1233,36 @@ export function LightPaperDocument({
         />
       </div>
 
+      {/* Zoom Controls */}
+      <div className="flex items-center gap-2 px-4 py-2 border-b bg-background">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setZoomLevel(Math.max(0.25, zoomLevel - 0.25))}
+          disabled={zoomLevel <= 0.25}
+        >
+          <ZoomOut className="h-4 w-4" />
+        </Button>
+        <span className="text-sm font-medium min-w-[60px] text-center">
+          {Math.round(zoomLevel * 100)}%
+        </span>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setZoomLevel(Math.min(3.0, zoomLevel + 0.25))}
+          disabled={zoomLevel >= 3.0}
+        >
+          <ZoomIn className="h-4 w-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setZoomLevel(1.0)}
+        >
+          <Maximize2 className="h-4 w-4" />
+        </Button>
+      </div>
+
       {/* Main Editor Area - Takes Full Height with Pages */}
       <div ref={wrapperRef} className="flex-1 overflow-auto p-4 bg-muted/30 flex gap-0">
         {/* Live Cursors */}
@@ -1250,6 +1281,9 @@ export function LightPaperDocument({
             overflow: hidden;
             position: relative;
             box-sizing: border-box;
+            transform: scale(${zoomLevel});
+            transform-origin: top center;
+            transition: transform 0.2s ease;
           }
           
           .page .uploaded-content {
@@ -1283,6 +1317,13 @@ export function LightPaperDocument({
             background: white;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             margin: 20px auto;
+            max-width: 100%;
+            height: auto;
+          }
+
+          /* PDF Logo images - higher z-index */
+          .pdf-logo {
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
           }
 
           /* PDF Text Spans - Clean and minimal */
@@ -1307,13 +1348,16 @@ export function LightPaperDocument({
             border-collapse: collapse;
             background: white;
             pointer-events: auto;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
           }
 
           .pdf-reconstructed-table td,
           .pdf-reconstructed-table th {
-            border: 1px solid #ddd;
-            padding: 8px;
-            min-width: 50px;
+            border: 1px solid #999;
+            padding: 6px;
+            min-width: 40px;
+            vertical-align: top;
+          }
             transition: background-color 0.15s;
           }
 

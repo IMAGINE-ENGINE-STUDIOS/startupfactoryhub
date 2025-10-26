@@ -278,11 +278,12 @@ function findColumnIndex(x: number, boundaries: number[]): number {
 }
 
 /**
- * Render table as HTML with editable cells
+ * Render table as HTML with editable cells and proper borders
  */
 export function renderTableAsHTML(table: TableStructure, scale: number = 1): string {
-  const cellPadding = 8;
-  const borderColor = '#cccccc';
+  const cellPadding = 6;
+  const borderColor = '#999999';
+  const borderWidth = 1;
   
   let html = `
     <div class="pdf-reconstructed-table" style="
@@ -292,12 +293,14 @@ export function renderTableAsHTML(table: TableStructure, scale: number = 1): str
       width: ${table.bounds.width}px;
       background: white;
       z-index: 10;
+      border: ${borderWidth}px solid ${borderColor};
     ">
       <table style="
         width: 100%;
         border-collapse: collapse;
         font-family: Arial, sans-serif;
         background: white;
+        table-layout: fixed;
       ">
   `;
   
@@ -310,7 +313,7 @@ export function renderTableAsHTML(table: TableStructure, scale: number = 1): str
     for (const cell of firstRow) {
       html += `
         <th contenteditable="true" style="
-          border: 1px solid ${borderColor};
+          border: ${borderWidth}px solid ${borderColor};
           padding: ${cellPadding}px;
           text-align: left;
           font-weight: bold;
@@ -335,13 +338,14 @@ export function renderTableAsHTML(table: TableStructure, scale: number = 1): str
     for (const cell of row) {
       html += `
         <td contenteditable="true" style="
-          border: 1px solid ${borderColor};
+          border: ${borderWidth}px solid ${borderColor};
           padding: ${cellPadding}px;
           font-size: ${cell.fontSize}px;
           font-weight: ${cell.fontWeight};
           color: ${cell.color};
           cursor: text;
-          white-space: nowrap;
+          white-space: pre-wrap;
+          vertical-align: top;
         ">${escapeHtml(cell.text)}</td>
       `;
     }
