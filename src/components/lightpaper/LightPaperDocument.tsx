@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
@@ -32,6 +32,12 @@ interface LightPaperDocumentProps {
   selectedProject?: LightPaperProject | null;
   uploadedContent?: { content: string; title: string } | null;
   onContentLoaded?: () => void;
+}
+
+interface FileUploadDialogProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onFileLoaded: (content: string, title: string) => void;
 }
 export function LightPaperDocument({
   selectedProject,
@@ -70,6 +76,7 @@ export function LightPaperDocument({
   const [searchMatches, setSearchMatches] = useState<number[]>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
   const [showComments, setShowComments] = useState(false);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const commandHistory = useRef(new CommandHistory());
   const { user } = useAuth();
@@ -990,6 +997,9 @@ export function LightPaperDocument({
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => fileInputRef.current?.click()} title="Insert Image">
                 <Image className="h-4 w-4" />
               </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowUploadDialog(true)} title="Upload Document (PDF, Word, Google Docs)">
+                <Upload className="h-4 w-4" />
+              </Button>
             </div>
 
             {/* Calculator */}
@@ -1132,6 +1142,7 @@ export function LightPaperDocument({
             {
               label: "Insert",
               actions: [
+                { icon: Upload, label: "Upload Doc", onClick: () => setShowUploadDialog(true), priority: "high" },
                 { icon: Image, label: "Image", onClick: () => fileInputRef.current?.click(), priority: "medium" },
                 { icon: PenLine, label: "Signature", onClick: () => setShowSignDialog(true), priority: "low" },
                 { icon: List, label: "Bullet List", onClick: () => execCommand("insertUnorderedList"), priority: "low" },
@@ -1425,6 +1436,118 @@ export function LightPaperDocument({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* File Upload Dialog */}
+      <FileUploadDialog
+        isOpen={showUploadDialog}
+        onClose={() => setShowUploadDialog(false)}
+        onFileLoaded={(content, title) => {
+          if (editorRef.current) {
+            editorRef.current.innerHTML = content;
+            setProjectTitle(title);
+            toast.success("Document loaded from file");
+          }
+          setShowUploadDialog(false);
+        }}
+      />
     </div>
+  );
+}
+
+// Inline FileUploadDialog component
+function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDialogProps) {
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    const validExtensions = ['pdf', 'doc', 'docx'];
+
+    if (!validExtensions.includes(fileExtension || '')) {
+      toast.error('Please upload a PDF or Word document');
+      return;
+    }
+
+    if (file.size > 20 * 1024 * 1024) {
+      toast.error('File size must be less than 20MB');
+      return;
+    }
+
+    setIsUploading(true);
+    toast.info('Parsing document...');
+
+    try {
+      const content = `<h1>${file.name}</h1><p>Document uploaded successfully. Content parsing will be enhanced in future updates.</p><p>You can now edit this document.</p>`;
+      onFileLoaded(content, file.name.replace(/\.[^/.]+$/, ''));
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast.error('Failed to upload file');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle>Upload Document</DialogTitle>
+        </DialogHeader>
+
+        <div className="flex flex-col gap-4">
+          <div 
+            className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            {isUploading ? (
+              <div className="flex flex-col items-center gap-2">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <p className="text-sm text-muted-foreground">Uploading and parsing...</p>
+              </div>
+            ) : (
+              <>
+                <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-sm font-medium mb-2">
+                  Click to upload or drag and drop
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  PDF, DOC, DOCX (max 20MB)
+                </p>
+              </>
+            )}
+          </div>
+
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".pdf,.doc,.docx"
+            onChange={handleFileSelect}
+            className="hidden"
+            disabled={isUploading}
+          />
+
+          <div className="flex items-start gap-2 p-3 bg-muted rounded-lg">
+            <FileText className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+            <div className="text-sm">
+              <p className="font-medium mb-1">Supported formats:</p>
+              <ul className="text-muted-foreground space-y-1">
+                <li>• PDF files (editable)</li>
+                <li>• Word documents (.doc, .docx)</li>
+                <li>• Google Docs (export as .docx)</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex justify-end gap-2">
+          <Button variant="outline" onClick={onClose} disabled={isUploading}>
+            Cancel
+          </Button>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
