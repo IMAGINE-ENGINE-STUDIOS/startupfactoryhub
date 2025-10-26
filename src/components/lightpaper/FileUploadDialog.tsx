@@ -17,6 +17,7 @@ interface FileUploadDialogProps {
 
 export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDialogProps) {
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<string>("Preparing...");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   console.log('FileUploadDialog rendered, isOpen:', isOpen);

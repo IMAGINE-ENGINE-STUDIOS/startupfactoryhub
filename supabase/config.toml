@@ -41,3 +41,6 @@ verify_jwt = false
 
 [functions.market-predictions]
 verify_jwt = true
+
+[functions.parse-document]
+verify_jwt = true
