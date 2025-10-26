@@ -20,6 +20,20 @@ export default defineConfig(({ mode }) => ({
     },
   },
   optimizeDeps: {
-    include: ['react-pdf'],
+    include: ['react-pdf', 'pdfjs-dist'],
+  },
+  publicDir: 'public',
+  build: {
+    rollupOptions: {
+      output: {
+        assetFileNames: (assetInfo) => {
+          // Keep PDF worker in root for easy access
+          if (assetInfo.name === 'pdf.worker.min.js') {
+            return '[name][extname]';
+          }
+          return 'assets/[name]-[hash][extname]';
+        }
+      }
+    }
   },
 }));

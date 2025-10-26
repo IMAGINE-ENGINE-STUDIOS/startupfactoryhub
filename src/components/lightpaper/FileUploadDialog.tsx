@@ -1,10 +1,10 @@
 import { useState, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Upload, FileText, Loader2 } from "lucide-react";
+import { Upload, FileText, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { renderAsync } from "docx-preview";
-import * as pdfjsLib from "pdfjs-dist";
+import { parseDocument } from "./AdvancedDocumentParser";
+import { Progress } from "@/components/ui/progress";
 
 interface FileUploadDialogProps {
   isOpen: boolean;
@@ -14,199 +14,129 @@ interface FileUploadDialogProps {
 
 export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDialogProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState<string>("Preparing...");
+  const [uploadProgress, setUploadProgress] = useState<string>("Ready to upload...");
+  const [progressValue, setProgressValue] = useState(0);
   const [isCancelled, setIsCancelled] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const processDOCX = async (file: File): Promise<string> => {
-    // Create temporary container for rendering
-    const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.left = '-9999px';
-    container.style.width = '210mm'; // A4 width
-    document.body.appendChild(container);
-
-    try {
-      // Render DOCX with full formatting preservation
-      await renderAsync(file, container, undefined, {
-        className: 'docx-content',
-        inWrapper: true,
-        ignoreWidth: false,
-        ignoreHeight: false,
-        ignoreFonts: false,
-        breakPages: true,
-        renderHeaders: true,
-        renderFooters: true,
-        useBase64URL: true, // Embed images as base64
-        debug: false,
-      });
-
-      // Extract rendered HTML
-      const html = container.innerHTML;
-      
-      // Clean up
-      document.body.removeChild(container);
-      
-      return html;
-    } catch (error) {
-      document.body.removeChild(container);
-      throw error;
-    }
-  };
-
-  const processPDF = async (file: File): Promise<string> => {
-    // Configure PDF.js worker with fallback
-    try {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
-    } catch (error) {
-      console.error('Failed to set PDF.js worker:', error);
-      throw new Error('Failed to initialize PDF processor');
-    }
-
-    const arrayBuffer = await file.arrayBuffer();
-    const loadingTask = pdfjsLib.getDocument({ data: arrayBuffer });
-    
-    const pdf = await loadingTask.promise;
-    
-    // Warn if PDF is too large
-    if (pdf.numPages > 50) {
-      toast.error(`PDF has ${pdf.numPages} pages. Processing first 50 pages only.`);
-    }
-    
-    const maxPages = Math.min(pdf.numPages, 50);
-    let html = '<div class="pdf-document" style="max-width: 100%;">';
-    
-    // Render pages in batches to prevent freezing
-    const batchSize = 3;
-    for (let i = 1; i <= maxPages; i += batchSize) {
-      if (isCancelled) {
-        throw new Error('Upload cancelled by user');
-      }
-      
-      const batch = Math.min(batchSize, maxPages - i + 1);
-      const batchPromises = [];
-      
-      for (let j = 0; j < batch; j++) {
-        const pageNum = i + j;
-        if (pageNum > maxPages) break;
-        
-        setUploadProgress(`Rendering page ${pageNum} of ${maxPages}...`);
-        
-        batchPromises.push((async () => {
-          const page = await pdf.getPage(pageNum);
-          const viewport = page.getViewport({ scale: 1.5 }); // Reduced from 2.0 for better performance
-          
-          const canvas = document.createElement('canvas');
-          const context = canvas.getContext('2d')!;
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-          
-          await page.render({ 
-            canvasContext: context,
-            viewport,
-            canvas
-          }).promise;
-          
-          // Use JPEG with 85% quality for smaller file size
-          const imageData = canvas.toDataURL('image/jpeg', 0.85);
-          return { pageNum, imageData };
-        })());
-      }
-      
-      const results = await Promise.all(batchPromises);
-      
-      for (const { pageNum, imageData } of results) {
-        html += `<div style="margin: 1rem 0; page-break-after: always;">
-          <img src="${imageData}" style="max-width: 100%; height: auto; display: block;" alt="Page ${pageNum}" />
-        </div>`;
-      }
-      
-      // Add small delay between batches to prevent freezing
-      if (i + batchSize <= maxPages) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
-    }
-    
-    html += '</div>';
-    return html;
-  };
+  const cancelRef = useRef<boolean>(false);
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Validation
-    const validExtensions = ['pdf', 'docx'];
-    const fileExtension = file.name.split('.').pop()?.toLowerCase();
-
-    if (!fileExtension || !validExtensions.includes(fileExtension)) {
-      toast.error('Please upload a PDF or modern Word document (.pdf, .docx). Legacy .doc format is not supported.');
-      return;
-    }
-
+    // File size validation
     if (file.size > 20 * 1024 * 1024) {
       toast.error('File size must be less than 20MB');
       return;
     }
 
+    // Extension check (basic validation)
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    if (!fileExtension || !['pdf', 'docx'].includes(fileExtension)) {
+      toast.error('Please upload a PDF or DOCX file. Legacy .doc format is not supported.');
+      return;
+    }
+
+    // Reset states
     setIsUploading(true);
     setIsCancelled(false);
-    setUploadProgress("Processing document...");
+    cancelRef.current = false;
+    setUploadProgress("Validating file...");
+    setProgressValue(10);
 
-    // Set 60-second timeout
+    // Set 120-second timeout for large files
     timeoutRef.current = setTimeout(() => {
-      setIsUploading(false);
-      setUploadProgress("Preparing...");
-      toast.error('Upload timed out. Please try a smaller file or contact support.');
-    }, 60000);
+      if (!cancelRef.current) {
+        cancelRef.current = true;
+        setIsUploading(false);
+        setUploadProgress("Ready to upload...");
+        setProgressValue(0);
+        toast.error('Upload timed out. Please try a smaller file.');
+      }
+    }, 120000);
 
     try {
-      let content: string;
       const title = file.name.replace(/\.[^/.]+$/, '');
+      
+      setProgressValue(20);
+      
+      // Use advanced parser with progress callback
+      const result = await parseDocument(file, (message, current, total) => {
+        if (cancelRef.current) {
+          throw new Error('Upload cancelled by user');
+        }
+        
+        setUploadProgress(message);
+        
+        // Calculate progress
+        if (current && total) {
+          const percent = 20 + Math.floor((current / total) * 70); // 20% to 90%
+          setProgressValue(percent);
+        }
+      });
 
-      // Process based on file type - all client-side, no APIs
-      if (fileExtension === 'docx') {
-        setUploadProgress("Rendering Word document...");
-        content = await processDOCX(file);
-        toast.success(`Successfully loaded ${file.name} with full formatting!`);
-      } else if (fileExtension === 'pdf') {
-        setUploadProgress("Converting PDF pages...");
-        content = await processPDF(file);
-        toast.success(`Successfully loaded ${file.name} as images!`);
-      } else {
-        throw new Error('Unsupported file type');
+      if (cancelRef.current) {
+        throw new Error('Upload cancelled by user');
       }
-
+      
       setUploadProgress("Loading into editor...");
-      onFileLoaded(content, title);
+      setProgressValue(95);
+      
+      // Pass the HTML content to parent
+      onFileLoaded(result.html, title);
+      
+      setProgressValue(100);
+      
+      // Clear timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      // Success notification with metadata
+      const fileTypeLabel = result.metadata.fileType.toUpperCase();
+      const features = [];
+      if (result.metadata.hasEditableText) features.push('editable text');
+      if (result.metadata.hasImages) features.push('images');
+      if (result.metadata.pageCount) features.push(`${result.metadata.pageCount} pages`);
+      
+      toast.success(
+        `${fileTypeLabel} loaded successfully! ${features.join(', ')}`,
+        { duration: 5000 }
+      );
+      
+      setIsUploading(false);
+      onClose();
+
+    } catch (error) {
+      console.error('[Upload] Error processing document:', error);
+      
+      if (cancelRef.current) {
+        toast.info('Upload cancelled');
+      } else {
+        const errorMessage = error instanceof Error ? error.message : 'Failed to process document';
+        toast.error(errorMessage, { duration: 6000 });
+      }
       
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
       setIsUploading(false);
-      onClose();
-
-    } catch (error) {
-      console.error('Error processing document:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to process document');
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      setIsUploading(false);
       setIsCancelled(false);
-      setUploadProgress("Preparing...");
+      setUploadProgress("Ready to upload...");
+      setProgressValue(0);
     }
   };
 
   const handleCancel = () => {
+    cancelRef.current = true;
     setIsCancelled(true);
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
     setIsUploading(false);
-    setUploadProgress("Preparing...");
-    toast.info('Upload cancelled');
+    setUploadProgress("Ready to upload...");
+    setProgressValue(0);
   };
 
   return (
@@ -221,14 +151,17 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
 
         <div className="flex flex-col gap-4">
           <div 
-            className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
+            className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-all"
             onClick={() => !isUploading && fileInputRef.current?.click()}
           >
             {isUploading ? (
-              <div className="flex flex-col items-center gap-2">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm font-medium">{uploadProgress}</p>
-                <p className="text-xs text-muted-foreground">Please wait...</p>
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
+                <div className="w-full max-w-xs space-y-2">
+                  <p className="text-sm font-medium">{uploadProgress}</p>
+                  <Progress value={progressValue} className="h-2" />
+                  <p className="text-xs text-muted-foreground">{progressValue}% complete</p>
+                </div>
               </div>
             ) : (
               <>
@@ -237,7 +170,7 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
                   Click to upload or drag and drop
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  PDF, DOCX (max 20MB)
+                  PDF or DOCX files (max 20MB)
                 </p>
               </>
             )}
@@ -252,17 +185,28 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
             disabled={isUploading}
           />
 
-          <div className="flex items-start gap-2 p-3 bg-muted rounded-lg">
-            <FileText className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
-            <div className="text-sm">
-              <p className="font-medium mb-1">Supported formats:</p>
-              <ul className="text-muted-foreground space-y-1">
-                <li>✓ PDF files (.pdf)</li>
-                <li>✓ Modern Word documents (.docx)</li>
-              </ul>
-              <p className="text-xs text-red-600 dark:text-red-400 mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded border border-red-200 dark:border-red-800">
-                <strong>Note:</strong> Legacy .doc format is not supported. Please convert to .docx first using Microsoft Word.
-              </p>
+          <div className="space-y-3">
+            <div className="flex items-start gap-2 p-3 bg-muted/50 rounded-lg border border-border">
+              <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-medium mb-1">Advanced Features:</p>
+                <ul className="text-muted-foreground space-y-1 text-xs">
+                  <li>✓ <strong>PDF:</strong> Pixel-perfect rendering + editable text overlays</li>
+                  <li>✓ <strong>DOCX:</strong> Full formatting, images, tables preserved</li>
+                  <li>✓ Smart file detection with magic byte validation</li>
+                  <li>✓ Up to 50 pages supported (PDF)</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-2 p-3 bg-destructive/10 rounded-lg border border-destructive/20">
+              <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+              <div className="text-sm">
+                <p className="font-medium mb-1 text-destructive">Important:</p>
+                <p className="text-xs text-muted-foreground">
+                  Legacy .doc format not supported. Convert to .docx first.
+                </p>
+              </div>
             </div>
           </div>
         </div>
