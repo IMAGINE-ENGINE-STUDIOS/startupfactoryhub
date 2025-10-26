@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2 } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
@@ -25,11 +25,39 @@ import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { sanitizeHTML } from "@/utils/sanitize";
 import { MobileToolbar } from "./MobileToolbar";
 import { FileUploadDialog } from "./FileUploadDialog";
+import { OverlayTextBox } from "./OverlayTextBox";
 
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
 const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
 const HIGHLIGHT_COLORS = ["#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "transparent"];
 const TEXT_COLORS = ["#000000", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500", "#800080", "#FFFFFF"];
+
+// Page format configurations (dimensions in cm)
+const PAGE_FORMATS = {
+  letter: { width: 21.59, height: 27.94, name: "Letter (8.5\" × 11\")" },
+  legal: { width: 21.59, height: 35.56, name: "Legal (8.5\" × 14\")" },
+  a4: { width: 21.0, height: 29.7, name: "A4" },
+  a5: { width: 14.8, height: 21.0, name: "A5" }
+};
+
+const MARGIN_CM = 2.54; // 1 inch standard margin
+
+type PageFormat = keyof typeof PAGE_FORMATS;
+type Orientation = "portrait" | "landscape";
+
+interface OverlayTextBoxData {
+  id: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  text: string;
+  fontSize: number;
+  fontFamily: string;
+  color: string;
+  backgroundColor: string;
+  borderVisible: boolean;
+}
 
 interface LightPaperDocumentProps {
   selectedProject?: LightPaperProject | null;
@@ -85,6 +113,14 @@ export function LightPaperDocument({
   const commandHistory = useRef(new CommandHistory());
   const { user } = useAuth();
   const { isOnline } = useNetworkStatus();
+  
+  // Page format and view mode states
+  const [pageFormat, setPageFormat] = useState<PageFormat>("legal");
+  const [orientation, setOrientation] = useState<Orientation>("portrait");
+  const [viewMode, setViewMode] = useState(false);
+  const [overlayTextBoxes, setOverlayTextBoxes] = useState<OverlayTextBoxData[]>([]);
+  const [isColorPickerActive, setIsColorPickerActive] = useState(false);
+  const [selectedTextBoxId, setSelectedTextBoxId] = useState<string | null>(null);
   const {
     saveProject
   } = useLightPaperProjects("document");
@@ -262,6 +298,12 @@ export function LightPaperDocument({
             editorRef.current.style.color = content.darkMode ? 'white' : 'black';
           }
         }
+        
+        // Restore page format and view mode states
+        if (content.pageFormat) setPageFormat(content.pageFormat);
+        if (content.orientation) setOrientation(content.orientation);
+        if (content.viewMode !== undefined) setViewMode(content.viewMode);
+        if (content.overlayTextBoxes) setOverlayTextBoxes(content.overlayTextBoxes);
       }
 
       // Load version history for this session
@@ -940,7 +982,11 @@ export function LightPaperDocument({
         size: selectedSize,
         darkMode: isDarkMode,
         currentPage,
-        totalPages
+        totalPages,
+        pageFormat,
+        orientation,
+        viewMode,
+        overlayTextBoxes
       };
       const result = await saveProject(projectTitle, "document", content, currentProjectId || undefined);
       if (result) {
@@ -974,6 +1020,71 @@ export function LightPaperDocument({
   const handleExportPDF = () => {
     window.print(); // Uses browser's print to PDF functionality
     toast.success("Print dialog opened - select 'Save as PDF'");
+  };
+
+  // Helper function to get current page dimensions based on format and orientation
+  const getPageDimensions = () => {
+    const format = PAGE_FORMATS[pageFormat];
+    const width = orientation === "portrait" ? format.width : format.height;
+    const height = orientation === "portrait" ? format.height : format.width;
+    return { width, height };
+  };
+
+  // Text box management functions
+  const addTextBox = () => {
+    const newBox: OverlayTextBoxData = {
+      id: `textbox_${Date.now()}`,
+      x: 100,
+      y: 100,
+      width: 200,
+      height: 100,
+      text: "New text box",
+      fontSize: 14,
+      fontFamily: "Arial",
+      color: "#000000",
+      backgroundColor: "transparent",
+      borderVisible: true
+    };
+    setOverlayTextBoxes([...overlayTextBoxes, newBox]);
+    toast.success("Text box added");
+  };
+
+  const updateTextBox = (id: string, updates: Partial<Omit<OverlayTextBoxData, 'id'>>) => {
+    setOverlayTextBoxes(boxes =>
+      boxes.map(box => box.id === id ? { ...box, ...updates } : box)
+    );
+  };
+
+  const deleteTextBox = (id: string) => {
+    setOverlayTextBoxes(boxes => boxes.filter(box => box.id !== id));
+    toast.success("Text box deleted");
+  };
+
+  // Color picker function
+  const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isColorPickerActive || !editorRef.current || !selectedTextBoxId) return;
+
+    // Create a temporary canvas to capture the color
+    const target = e.target as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // Use html2canvas or similar approach - for now, we'll use a simple approach
+    // In a real implementation, you'd want to use html2canvas to capture the exact pixel
+    const tempCanvas = document.createElement('canvas');
+    const ctx = tempCanvas.getContext('2d');
+    
+    if (ctx) {
+      // Get computed background color of clicked element
+      const computedStyle = window.getComputedStyle(target);
+      const bgColor = computedStyle.backgroundColor;
+      
+      updateTextBox(selectedTextBoxId, { backgroundColor: bgColor });
+      toast.success(`Color picked: ${bgColor}`);
+      setIsColorPickerActive(false);
+      setSelectedTextBoxId(null);
+    }
   };
   
   return (
@@ -1168,6 +1279,64 @@ export function LightPaperDocument({
               </Button>
             </div>
 
+            {/* Page Format */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Select value={pageFormat} onValueChange={(val) => setPageFormat(val as PageFormat)}>
+                <SelectTrigger className="w-32 h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  {Object.entries(PAGE_FORMATS).map(([key, format]) => (
+                    <SelectItem key={key} value={key}>{format.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                onClick={() => setOrientation(orientation === "portrait" ? "landscape" : "portrait")}
+                title={`Orientation: ${orientation}`}
+              >
+                <FlipHorizontal className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* View Mode */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button 
+                variant={viewMode ? "secondary" : "ghost"}
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                onClick={() => setViewMode(!viewMode)}
+                title={viewMode ? "Switch to Edit Mode" : "Switch to View Mode"}
+              >
+                {viewMode ? <Edit3 className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </Button>
+              {viewMode && (
+                <>
+                  <Button 
+                    variant="ghost"
+                    size="sm" 
+                    className="h-8 w-8 p-0" 
+                    onClick={addTextBox}
+                    title="Add Text Box"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant={isColorPickerActive ? "secondary" : "ghost"}
+                    size="sm" 
+                    className="h-8 w-8 p-0" 
+                    onClick={() => setIsColorPickerActive(!isColorPickerActive)}
+                    title="Color Picker (click element to pick color)"
+                  >
+                    <Pipette className="h-4 w-4" />
+                  </Button>
+                </>
+              )}
+            </div>
+
             {/* Dark/Light Mode Toggle */}
             <div className="flex gap-0.5 border-l pl-1">
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={toggleDarkMode} title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
@@ -1279,6 +1448,18 @@ export function LightPaperDocument({
               ]
             },
             {
+              label: "Page",
+              actions: [
+                { icon: FileType, label: "Format", onClick: () => {
+                  const formats: PageFormat[] = ["letter", "legal", "a4", "a5"];
+                  const currentIndex = formats.indexOf(pageFormat);
+                  setPageFormat(formats[(currentIndex + 1) % formats.length]);
+                }, priority: "low" },
+                { icon: FlipHorizontal, label: "Rotate", onClick: () => setOrientation(orientation === "portrait" ? "landscape" : "portrait"), priority: "low" },
+                { icon: viewMode ? Edit3 : Eye, label: viewMode ? "Edit" : "View", onClick: () => setViewMode(!viewMode), priority: "medium" },
+              ]
+            },
+            {
               label: "Insert",
               actions: [
                 { icon: Upload, label: "Upload Doc", onClick: () => setShowUploadDialog(true), priority: "high" },
@@ -1299,15 +1480,39 @@ export function LightPaperDocument({
             },
           ]}
           rightActions={[
-            { icon: Save, label: "Save", onClick: () => setShowSaveDialog(true), priority: "high", variant: "default", disabled: isSaving },
-            { icon: MessageSquare, label: "Comments", onClick: () => setShowComments(!showComments), priority: "high", variant: showComments ? "default" : "outline" },
-            { icon: Download, label: "Export", onClick: handleExportPDF, priority: "medium" },
+            { icon: Save, label: "Save", onClick: () => setShowSaveDialog(true), priority: "high" as const, variant: "default" as const, disabled: isSaving },
+            { icon: MessageSquare, label: "Comments", onClick: () => setShowComments(!showComments), priority: "high" as const, variant: showComments ? ("default" as const) : ("outline" as const) },
+            ...(viewMode ? [
+              { icon: Plus, label: "Add Box", onClick: addTextBox, priority: "high" as const },
+              { icon: Pipette, label: "Pick Color", onClick: () => setIsColorPickerActive(!isColorPickerActive), priority: "medium" as const, variant: isColorPickerActive ? ("default" as const) : ("outline" as const) },
+            ] : []),
+            { icon: Download, label: "Export", onClick: handleExportPDF, priority: "medium" as const },
           ]}
         />
       </div>
 
       {/* Zoom and Page Navigation Controls */}
       <div className="flex items-center justify-between gap-4 px-4 py-2 border-b bg-background">
+        {/* Status Info */}
+        <div className="flex items-center gap-4 text-xs text-muted-foreground">
+          <span className="flex items-center gap-1">
+            <FileType className="h-3 w-3" />
+            {PAGE_FORMATS[pageFormat].name} - {orientation === "portrait" ? "Portrait" : "Landscape"}
+          </span>
+          {viewMode && (
+            <span className="flex items-center gap-1 text-primary font-medium">
+              <Eye className="h-3 w-3" />
+              View Mode
+            </span>
+          )}
+          {isColorPickerActive && (
+            <span className="flex items-center gap-1 text-accent font-medium animate-pulse">
+              <Pipette className="h-3 w-3" />
+              Click element to pick color
+            </span>
+          )}
+        </div>
+        
         {/* Zoom Controls */}
         <div className="flex items-center gap-2">
           <Button
@@ -1372,11 +1577,11 @@ export function LightPaperDocument({
         )}
         <style>{`
           .page {
-            width: 21.59cm;
-            height: 27.94cm;
-            max-width: 21.59cm;
+            width: ${getPageDimensions().width}cm;
+            height: ${getPageDimensions().height}cm;
+            max-width: ${getPageDimensions().width}cm;
             padding: 0;
-            background: white;
+            background: ${isDarkMode ? 'black' : 'white'};
             box-shadow: 0 0 20px rgba(0,0,0,0.2);
             overflow: hidden;
             position: relative;
@@ -1385,6 +1590,25 @@ export function LightPaperDocument({
             transform-origin: center center;
             transition: transform 0.2s ease;
             margin: 20px auto;
+          }
+          
+          .page-content {
+            width: 100%;
+            height: 100%;
+            padding: ${MARGIN_CM}cm;
+            box-sizing: border-box;
+            overflow: hidden;
+            position: relative;
+          }
+          
+          /* View mode visual indicator */
+          .page.view-mode {
+            border: 3px solid hsl(var(--primary) / 0.3);
+          }
+          
+          /* Disable text selection cursor in view mode */
+          .page.view-mode .page-content > div {
+            cursor: default;
           }
           
           .page .uploaded-content,
@@ -1404,7 +1628,7 @@ export function LightPaperDocument({
             max-width: 100% !important;
             max-height: 100% !important;
             margin: 0;
-            padding: 2cm;
+            padding: 0;
             box-sizing: border-box;
             overflow: hidden;
           }
@@ -1434,7 +1658,7 @@ export function LightPaperDocument({
             max-width: 100% !important;
             max-height: 100% !important;
             overflow: hidden;
-            padding: 2cm;
+            padding: 0;
             box-sizing: border-box;
           }
           
@@ -1564,26 +1788,45 @@ export function LightPaperDocument({
           }
         `}</style>
         <div ref={containerRef} className="max-w-[21cm] mx-auto">
-          <div className={`page ${editMode ? 'edit-mode' : 'view-mode'}`} style={{ position: 'relative' }}>
-            <div
-              ref={editorRef} 
-              contentEditable 
-              className="outline-none min-h-full prose prose-lg max-w-none" 
-              style={{
-                fontFamily: selectedFont,
-                fontSize: `${selectedSize}px`,
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word',
-                backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
-                color: isDarkMode ? "#ffffff" : "#000000"
-              }}
-              suppressContentEditableWarning
-              onClick={(e) => {
-                if (currentProjectId) {
-                  updateCursor(e.clientX, e.clientY);
-                }
-              }}
-            />
+          <div 
+            className={`page ${editMode ? 'edit-mode' : 'view-mode'} ${viewMode ? 'view-mode' : ''}`} 
+            style={{ position: 'relative' }}
+            onClick={handleCanvasClick}
+          >
+            <div className="page-content">
+              <div
+                ref={editorRef} 
+                contentEditable={!viewMode}
+                className="outline-none min-h-full prose prose-lg max-w-none" 
+                style={{
+                  fontFamily: selectedFont,
+                  fontSize: `${selectedSize}px`,
+                  wordWrap: 'break-word',
+                  overflowWrap: 'break-word',
+                  backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
+                  color: isDarkMode ? "#ffffff" : "#000000",
+                  pointerEvents: viewMode ? 'none' : 'auto',
+                  userSelect: viewMode ? 'none' : 'auto'
+                }}
+                suppressContentEditableWarning
+                onClick={(e) => {
+                  if (currentProjectId && !viewMode) {
+                    updateCursor(e.clientX, e.clientY);
+                  }
+                }}
+              />
+            </div>
+            
+            {/* Overlay Text Boxes in View Mode */}
+            {viewMode && overlayTextBoxes.map(box => (
+              <OverlayTextBox
+                key={box.id}
+                {...box}
+                onUpdate={updateTextBox}
+                onDelete={deleteTextBox}
+                zoomLevel={zoomLevel}
+              />
+            ))}
             
             {/* Signature preview while dragging */}
             {draggingSignature && signaturePreviewPosition && (
