@@ -3,11 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import * as pdfjsLib from 'pdfjs-dist';
-import mammoth from 'mammoth';
-
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+import { supabase } from "@/integrations/supabase/client";
 
 interface FileUploadDialogProps {
   isOpen: boolean;
@@ -20,123 +16,73 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
   const [uploadProgress, setUploadProgress] = useState<string>("Preparing...");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  console.log('FileUploadDialog rendered, isOpen:', isOpen);
-
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    console.log('handleFileSelect called');
     const file = event.target.files?.[0];
-    console.log('File selected:', file?.name, file?.type, file?.size);
     if (!file) return;
 
-    // Check file type
-    const validTypes = [
-      'application/pdf',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
-      'application/msword', // .doc
-      'application/vnd.google-apps.document', // Google Docs
-    ];
-    
-    const fileExtension = file.name.split('.').pop()?.toLowerCase();
+    // Validation
     const validExtensions = ['pdf', 'doc', 'docx'];
+    const fileExtension = file.name.split('.').pop()?.toLowerCase();
 
-    if (!validTypes.includes(file.type) && !validExtensions.includes(fileExtension || '')) {
-      toast.error('Please upload a PDF, Word document, or Google Doc file');
+    if (!fileExtension || !validExtensions.includes(fileExtension)) {
+      toast.error('Please upload a PDF or Word document (.pdf, .doc, .docx)');
       return;
     }
 
-    // Check file size (20MB limit)
     if (file.size > 20 * 1024 * 1024) {
       toast.error('File size must be less than 20MB');
       return;
     }
 
     setIsUploading(true);
+    setUploadProgress("Uploading file...");
 
     try {
-      // Save file to temporary location
-      const formData = new FormData();
-      formData.append('file', file);
+      // Step 1: Upload to temp storage
+      const fileName = `${Date.now()}_${file.name}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('temp-uploads')
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
-      // Create a temporary file path
-      const tempPath = `user-uploads://${file.name}`;
+      if (uploadError) {
+        throw new Error(`Upload failed: ${uploadError.message}`);
+      }
+
+      console.log('File uploaded to storage:', fileName);
+      setUploadProgress("Parsing document...");
+
+      // Step 2: Call edge function to parse
+      const { data: parseData, error: parseError } = await supabase.functions.invoke('parse-document', {
+        body: { filePath: fileName }
+      });
+
+      if (parseError) {
+        throw new Error(`Parsing failed: ${parseError.message}`);
+      }
+
+      if (!parseData.success) {
+        throw new Error(parseData.error || 'Failed to parse document');
+      }
+
+      console.log('Document parsed successfully');
+      setUploadProgress("Loading into editor...");
+
+      // Step 3: Load into editor
+      const title = file.name.replace(/\.[^/.]+$/, '');
+      onFileLoaded(parseData.content, title);
       
-      // For now, we'll use FileReader to read the file content
-      // In a real implementation, you would use the document parser
-      const reader = new FileReader();
-      
-      reader.onload = async (e) => {
-        try {
-          const arrayBuffer = e.target?.result as ArrayBuffer;
-          console.log('Starting to parse document:', file.name);
-          const content = await parseDocument(file, arrayBuffer);
-          console.log('Parsed content length:', content.length);
-          console.log('Content preview:', content.substring(0, 200));
-          
-          onFileLoaded(content, file.name.replace(/\.[^/.]+$/, ''));
-          toast.success(`Successfully loaded ${file.name}`);
-          setIsUploading(false);
-          onClose();
-        } catch (error) {
-          console.error('Error parsing document:', error);
-          toast.error(`Failed to parse document: ${error instanceof Error ? error.message : 'Unknown error'}`);
-          setIsUploading(false);
-        }
-      };
-
-      reader.onerror = () => {
-        toast.error('Error reading file');
-        setIsUploading(false);
-      };
-
-      reader.readAsArrayBuffer(file);
-    } catch (error) {
-      console.error('Error uploading file:', error);
-      toast.error('Failed to upload file');
+      toast.success(`Successfully loaded ${file.name}`);
       setIsUploading(false);
-    }
-  };
+      onClose();
 
-  const parseDocument = async (file: File, arrayBuffer: ArrayBuffer): Promise<string> => {
-    try {
-      // Parse PDF files
-      if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) {
-        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-        let fullText = '';
-        
-        // Extract text from all pages
-        for (let i = 1; i <= pdf.numPages; i++) {
-          const page = await pdf.getPage(i);
-          const textContent = await page.getTextContent();
-          const pageText = textContent.items
-            .map((item: any) => item.str)
-            .join(' ');
-          
-          fullText += `<h2>Page ${i}</h2><p>${pageText}</p>`;
-        }
-        
-        return fullText || '<p>PDF loaded but no text content found.</p>';
-      }
-      
-      // Parse Word documents (.docx)
-      if (file.name.endsWith('.docx')) {
-        const result = await mammoth.convertToHtml({ arrayBuffer });
-        return result.value || '<p>Word document loaded but no content found.</p>';
-      }
-      
-      // For .doc files (older format), mammoth can still try
-      if (file.name.endsWith('.doc')) {
-        try {
-          const result = await mammoth.convertToHtml({ arrayBuffer });
-          return result.value || '<p>Word document loaded but no content found.</p>';
-        } catch (err) {
-          return '<p>Unable to parse .doc file. Please save as .docx and try again.</p>';
-        }
-      }
-      
-      return '<p>Document loaded successfully.</p>';
     } catch (error) {
-      console.error('Error parsing document:', error);
-      throw error;
+      console.error('Error processing document:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to process document');
+      setIsUploading(false);
+      setUploadProgress("Preparing...");
     }
   };
 
@@ -146,19 +92,20 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
         <DialogHeader>
           <DialogTitle>Upload Document</DialogTitle>
           <DialogDescription>
-            Upload a PDF, Word document, or Google Doc to edit
+            Upload a PDF or Word document to edit in LightPaper
           </DialogDescription>
         </DialogHeader>
 
         <div className="flex flex-col gap-4">
           <div 
             className="border-2 border-dashed border-border rounded-lg p-8 text-center cursor-pointer hover:border-primary transition-colors"
-            onClick={() => fileInputRef.current?.click()}
+            onClick={() => !isUploading && fileInputRef.current?.click()}
           >
             {isUploading ? (
               <div className="flex flex-col items-center gap-2">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                <p className="text-sm text-muted-foreground">Uploading and parsing...</p>
+                <p className="text-sm font-medium">{uploadProgress}</p>
+                <p className="text-xs text-muted-foreground">Please wait...</p>
               </div>
             ) : (
               <>
@@ -187,9 +134,9 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
             <div className="text-sm">
               <p className="font-medium mb-1">Supported formats:</p>
               <ul className="text-muted-foreground space-y-1">
-                <li>• PDF files (can be edited)</li>
-                <li>• Word documents (.doc, .docx)</li>
-                <li>• Google Docs (exported format)</li>
+                <li>✓ PDF files with text extraction</li>
+                <li>✓ Word documents (.docx, .doc)</li>
+                <li>✓ Fully editable after upload</li>
               </ul>
             </div>
           </div>
