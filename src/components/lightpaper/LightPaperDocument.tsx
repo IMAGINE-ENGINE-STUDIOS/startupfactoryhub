@@ -26,18 +26,25 @@ import { sanitizeHTML } from "@/utils/sanitize";
 import { MobileToolbar } from "./MobileToolbar";
 import { FileUploadDialog } from "./FileUploadDialog";
 import { OverlayTextBox } from "./OverlayTextBox";
+import { AIToolbar } from "./AIToolbar";
 
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
 const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
 const HIGHLIGHT_COLORS = ["#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "transparent"];
 const TEXT_COLORS = ["#000000", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500", "#800080", "#FFFFFF"];
 
-// Page format configurations (dimensions in cm)
+// Page format configurations (dimensions in cm) - EXPANDED
 const PAGE_FORMATS = {
   letter: { width: 21.59, height: 27.94, name: "Letter (8.5\" × 11\")" },
   legal: { width: 21.59, height: 35.56, name: "Legal (8.5\" × 14\")" },
+  tabloid: { width: 27.94, height: 43.18, name: "Tabloid (11\" × 17\")" },
+  a3: { width: 29.7, height: 42.0, name: "A3" },
   a4: { width: 21.0, height: 29.7, name: "A4" },
-  a5: { width: 14.8, height: 21.0, name: "A5" }
+  a5: { width: 14.8, height: 21.0, name: "A5" },
+  b4: { width: 25.0, height: 35.3, name: "B4" },
+  b5: { width: 17.6, height: 25.0, name: "B5" },
+  executive: { width: 18.4, height: 26.7, name: "Executive (7.25\" × 10.5\")" },
+  folio: { width: 21.0, height: 33.0, name: "Folio (8.27\" × 13\")" }
 };
 
 const MARGIN_CM = 2.54; // 1 inch standard margin
@@ -132,6 +139,7 @@ export function LightPaperDocument({
   const [pageFormat, setPageFormat] = useState<PageFormat>("a4");
   const [orientation, setOrientation] = useState<Orientation>("portrait");
   const [viewMode, setViewMode] = useState(false);
+  const [viewModeImages, setViewModeImages] = useState<string[]>([]);
   const [overlayTextBoxes, setOverlayTextBoxes] = useState<OverlayTextBoxData[]>([]);
   const [isColorPickerActive, setIsColorPickerActive] = useState(false);
   const [selectedTextBoxId, setSelectedTextBoxId] = useState<string | null>(null);
@@ -213,36 +221,62 @@ export function LightPaperDocument({
     }
   }, [showSignDialog]);
 
-  // Load uploaded content
+  // Load uploaded content - ENHANCED for View Mode
   useEffect(() => {
     if (!uploadedContent || !editorRef.current) return;
     
-    console.log('Loading uploaded content into state');
-    console.log('Content length:', uploadedContent.content.length);
-    console.log('Title:', uploadedContent.title);
+    console.log('Loading uploaded content');
     
-    // Count pages in uploaded content
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(uploadedContent.content, 'text/html');
-    const pages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
-    const pageCount = pages.length > 0 ? pages.length : 1;
-    
-    setDocumentContent(uploadedContent.content);
-    setProjectTitle(uploadedContent.title);
-    setCurrentProjectId(null);
-    setTotalPages(pageCount);
-    setCurrentPage(1);
-    
-    // Load first page into editor
-    if (pages.length > 0) {
-      editorRef.current.innerHTML = pages[0].outerHTML;
-    } else {
-      editorRef.current.innerHTML = uploadedContent.content;
+    try {
+      // TRY TO PARSE AS JSON (View Mode)
+      const parsed = JSON.parse(uploadedContent.content);
+      
+      if (parsed.mode === 'view' && parsed.images) {
+        // VIEW MODE: Render as images
+        console.log(`View Mode: ${parsed.images.length} pages`);
+        setViewMode(true);
+        setViewModeImages(parsed.images);
+        setTotalPages(parsed.images.length);
+        setCurrentPage(1);
+        
+        // Set format if detected
+        if (parsed.detectedFormat) {
+          setPageFormat(parsed.detectedFormat);
+          toast.info(`Format detected: ${parsed.detectedFormat.toUpperCase()}`);
+        }
+        
+        // Clear editor content in view mode
+        editorRef.current.innerHTML = '';
+        setDocumentContent('');
+        
+        toast.success(`Document loaded in View Mode: ${parsed.images.length} pages`);
+      }
+    } catch (e) {
+      // NOT JSON: Regular HTML content (Edit Mode)
+      console.log('Edit Mode: Loading HTML content');
+      setViewMode(false);
+      setViewModeImages([]);
+      
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(uploadedContent.content, 'text/html');
+      const pages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
+      const pageCount = pages.length > 0 ? pages.length : 1;
+      
+      setDocumentContent(uploadedContent.content);
+      setTotalPages(pageCount);
+      setCurrentPage(1);
+      
+      if (pages.length > 0) {
+        editorRef.current.innerHTML = pages[0].outerHTML;
+      } else {
+        editorRef.current.innerHTML = uploadedContent.content;
+      }
+      
+      toast.success(`Document loaded: ${pageCount} pages`);
     }
     
-    toast.success(`Document loaded: ${uploadedContent.title} (${pageCount} pages)`);
-    
-    // Clear uploaded content after loading
+    setProjectTitle(uploadedContent.title);
+    setCurrentProjectId(null);
     onContentLoaded?.();
   }, [uploadedContent, onContentLoaded]);
 
@@ -1558,7 +1592,7 @@ export function LightPaperDocument({
         </div>
 
         {/* Page Navigation Controls */}
-        {totalPages > 1 && (
+        {(totalPages > 1 || (viewMode && viewModeImages.length > 1)) && (
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -1603,12 +1637,10 @@ export function LightPaperDocument({
             position: relative;
             box-sizing: border-box;
             transform: scale(${zoomLevel});
-            transform-origin: top left;
+            transform-origin: top center;
             transition: transform 0.2s ease;
-            margin: 0;
+            margin: 0 auto;
             flex-shrink: 0;
-            left: 50%;
-            margin-left: ${-(getPageDimensions().width * CM_TO_PX / 2)}px;
           }
           
           .page-content {
@@ -1616,8 +1648,27 @@ export function LightPaperDocument({
             height: 100%;
             padding: ${MARGIN_CM}cm;
             box-sizing: border-box;
-            overflow: hidden;
+            overflow: auto;
             position: relative;
+          }
+          
+          /* Custom scrollbar for page content */
+          .page-content::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+          }
+          
+          .page-content::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+          }
+          
+          .page-content::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+          }
+          
+          .page-content::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
           }
           
           /* View mode visual indicator */
@@ -1819,28 +1870,62 @@ export function LightPaperDocument({
             onClick={handleCanvasClick}
           >
             <div className="page-content">
-              <div
-                ref={editorRef} 
-                contentEditable={!viewMode}
-                className="outline-none min-h-full prose prose-lg max-w-none" 
-                style={{
-                  fontFamily: selectedFont,
-                  fontSize: `${selectedSize}px`,
-                  wordWrap: 'break-word',
-                  overflowWrap: 'break-word',
-                  backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
-                  color: isDarkMode ? "#ffffff" : "#000000",
-                  pointerEvents: viewMode ? 'none' : 'auto',
-                  userSelect: viewMode ? 'none' : 'auto'
-                }}
-                suppressContentEditableWarning
-                onClick={(e) => {
-                  if (currentProjectId && !viewMode) {
-                    updateCursor(e.clientX, e.clientY);
-                  }
-                }}
-              />
+              {viewMode && viewModeImages.length > 0 ? (
+                // VIEW MODE: Display image
+                <img 
+                  key={currentPage}
+                  src={viewModeImages[currentPage - 1]} 
+                  alt={`Page ${currentPage}`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain',
+                    pointerEvents: 'none',
+                    userSelect: 'none'
+                  }}
+                />
+              ) : (
+                // EDIT MODE: Editable content
+                <div
+                  ref={editorRef} 
+                  contentEditable={!viewMode}
+                  className="outline-none min-h-full prose prose-lg max-w-none" 
+                  style={{
+                    fontFamily: selectedFont,
+                    fontSize: `${selectedSize}px`,
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                    backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
+                    color: isDarkMode ? "#ffffff" : "#000000",
+                    pointerEvents: viewMode ? 'none' : 'auto',
+                    userSelect: viewMode ? 'none' : 'auto'
+                  }}
+                  suppressContentEditableWarning
+                  onClick={(e) => {
+                    if (currentProjectId && !viewMode) {
+                      updateCursor(e.clientX, e.clientY);
+                    }
+                  }}
+                />
+              )}
             </div>
+            
+            {/* AI Toolbar Integration */}
+            <AIToolbar 
+              onInsertText={(text) => {
+                if (!editorRef.current || viewMode) return;
+                const selection = window.getSelection();
+                if (selection && selection.rangeCount > 0) {
+                  const range = selection.getRangeAt(0);
+                  range.deleteContents();
+                  const textNode = document.createTextNode(text);
+                  range.insertNode(textNode);
+                } else {
+                  editorRef.current.innerHTML += `<p>${text}</p>`;
+                }
+              }}
+              isDarkMode={isDarkMode}
+            />
             
             {/* Overlay Text Boxes in View Mode */}
             {viewMode && overlayTextBoxes.map(box => (

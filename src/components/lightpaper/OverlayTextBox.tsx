@@ -44,7 +44,8 @@ export function OverlayTextBox({
   const [isResizing, setIsResizing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isSampling, setIsSampling] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const dragStart = useRef({ x: 0, y: 0 });
+  const resizeStart = useRef<{ startX: number; startY: number; startWidth: number; startHeight: number } | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
 
   const sampleBackgroundColor = async () => {
@@ -120,35 +121,59 @@ export function OverlayTextBox({
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).classList.contains('resize-handle')) {
+      e.preventDefault();
+      e.stopPropagation();
       setIsResizing(true);
-      setDragStart({ x: e.clientX, y: e.clientY });
-    } else if ((e.target as HTMLElement).classList.contains('drag-handle')) {
+      resizeStart.current = {
+        startX: e.clientX,
+        startY: e.clientY,
+        startWidth: width,
+        startHeight: height
+      };
+    } else if (!(e.target as HTMLElement).classList.contains('controls-area')) {
+      e.preventDefault();
+      e.stopPropagation();
       setIsDragging(true);
-      setDragStart({ x: e.clientX - x * zoomLevel, y: e.clientY - y * zoomLevel });
+      dragStart.current = { x: e.clientX, y: e.clientY };
     }
-    e.stopPropagation();
   };
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (isDragging) {
-        const newX = (e.clientX - dragStart.x) / zoomLevel;
-        const newY = (e.clientY - dragStart.y) / zoomLevel;
-        onUpdate(id, { x: Math.max(0, newX), y: Math.max(0, newY) });
-      } else if (isResizing) {
-        const deltaX = (e.clientX - dragStart.x) / zoomLevel;
-        const deltaY = (e.clientY - dragStart.y) / zoomLevel;
-        onUpdate(id, {
-          width: Math.max(100, width + deltaX),
-          height: Math.max(50, height + deltaY)
+        e.preventDefault();
+        const pageElement = document.querySelector('.page');
+        if (!pageElement) return;
+        
+        const pageRect = pageElement.getBoundingClientRect();
+        const deltaX = e.clientX - dragStart.current.x;
+        const deltaY = e.clientY - dragStart.current.y;
+        
+        const newX = x + deltaX / zoomLevel;
+        const newY = y + deltaY / zoomLevel;
+        
+        onUpdate(id, { 
+          x: Math.max(0, Math.min(newX, (pageRect.width / zoomLevel) - width)),
+          y: Math.max(0, Math.min(newY, (pageRect.height / zoomLevel) - height))
         });
-        setDragStart({ x: e.clientX, y: e.clientY });
+        
+        dragStart.current = { x: e.clientX, y: e.clientY };
+      } else if (isResizing && resizeStart.current) {
+        e.preventDefault();
+        const deltaX = e.clientX - resizeStart.current.startX;
+        const deltaY = e.clientY - resizeStart.current.startY;
+        
+        const newWidth = Math.max(100, resizeStart.current.startWidth + deltaX / zoomLevel);
+        const newHeight = Math.max(50, resizeStart.current.startHeight + deltaY / zoomLevel);
+        
+        onUpdate(id, { width: newWidth, height: newHeight });
       }
     };
 
     const handleMouseUp = () => {
       setIsDragging(false);
       setIsResizing(false);
+      resizeStart.current = null;
     };
 
     if (isDragging || isResizing) {
@@ -159,7 +184,7 @@ export function OverlayTextBox({
         document.removeEventListener('mouseup', handleMouseUp);
       };
     }
-  }, [isDragging, isResizing, dragStart, x, y, width, height, zoomLevel, id, onUpdate]);
+  }, [isDragging, isResizing, x, y, width, height, zoomLevel, id, onUpdate]);
 
   return (
     <div
@@ -170,7 +195,8 @@ export function OverlayTextBox({
         top: `${y}px`,
         width: `${width}px`,
         height: `${height}px`,
-        cursor: isDragging ? 'grabbing' : 'default'
+        cursor: isDragging ? 'grabbing' : 'grab',
+        zIndex: 100
       }}
       onMouseDown={handleMouseDown}
     >
@@ -208,7 +234,7 @@ export function OverlayTextBox({
       </div>
 
       {/* Controls */}
-      <div className="absolute -right-2 -top-8 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
+      <div className="controls-area absolute -right-2 -top-8 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
         <Button
           size="sm"
           variant="outline"

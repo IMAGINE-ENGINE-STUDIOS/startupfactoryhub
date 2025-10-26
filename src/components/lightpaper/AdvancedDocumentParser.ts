@@ -49,26 +49,40 @@ export async function detectFileType(file: File): Promise<'pdf' | 'docx' | 'unkn
   return 'unknown';
 }
 
-/**
- * Detect page format from dimensions (in pixels)
- */
-export function detectPageFormat(widthPx: number, heightPx: number): 'letter' | 'legal' | 'a4' | 'a5' | 'custom' {
+export function detectPageFormat(widthPx: number, heightPx: number): 'letter' | 'legal' | 'tabloid' | 'a3' | 'a4' | 'a5' | 'b4' | 'b5' | 'executive' | 'folio' | 'custom' {
   // Convert to mm for comparison (assuming 72 DPI)
   const widthMm = (widthPx / 72) * 25.4;
   const heightMm = (heightPx / 72) * 25.4;
   
+  const tolerance = 10; // mm tolerance
+  
   const formats = {
     letter: { w: 215.9, h: 279.4 },
     legal: { w: 215.9, h: 355.6 },
+    tabloid: { w: 279.4, h: 431.8 },
+    a3: { w: 297, h: 420 },
     a4: { w: 210, h: 297 },
-    a5: { w: 148, h: 210 }
+    a5: { w: 148, h: 210 },
+    b4: { w: 250, h: 353 },
+    b5: { w: 176, h: 250 },
+    executive: { w: 184, h: 267 },
+    folio: { w: 210, h: 330 }
   };
   
+  // Check portrait
   for (const [name, dims] of Object.entries(formats)) {
-    if (Math.abs(widthMm - dims.w) < 10 && Math.abs(heightMm - dims.h) < 10) {
-      return name as 'letter' | 'legal' | 'a4' | 'a5';
+    if (Math.abs(widthMm - dims.w) < tolerance && Math.abs(heightMm - dims.h) < tolerance) {
+      return name as any;
     }
   }
+  
+  // Check landscape (swap dimensions)
+  for (const [name, dims] of Object.entries(formats)) {
+    if (Math.abs(widthMm - dims.h) < tolerance && Math.abs(heightMm - dims.w) < tolerance) {
+      return name as any;
+    }
+  }
+  
   return 'custom';
 }
 
@@ -147,7 +161,7 @@ export interface ParsedContent {
     hasEditableText: boolean;
     hasImages: boolean;
     fileType: 'pdf' | 'docx';
-    detectedFormat?: 'letter' | 'legal' | 'a4' | 'a5' | 'custom';
+    detectedFormat?: 'letter' | 'legal' | 'tabloid' | 'a3' | 'a4' | 'a5' | 'b4' | 'b5' | 'executive' | 'folio' | 'custom';
     dimensions?: { width: number; height: number };
   };
   pages?: string[]; // Multiple page HTML strings
