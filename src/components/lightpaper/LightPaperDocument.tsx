@@ -79,6 +79,8 @@ export function LightPaperDocument({
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1.0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const commandHistory = useRef(new CommandHistory());
   const { user } = useAuth();
@@ -155,7 +157,16 @@ export function LightPaperDocument({
     setDocumentContent(uploadedContent.content);
     setProjectTitle(uploadedContent.title);
     setCurrentProjectId(null); // Clear any existing project
-    toast.success(`Document loaded: ${uploadedContent.title}`);
+    
+    // Count pages in uploaded content
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(uploadedContent.content, 'text/html');
+    const pages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
+    const pageCount = pages.length > 0 ? pages.length : 1;
+    setTotalPages(pageCount);
+    setCurrentPage(1);
+    
+    toast.success(`Document loaded: ${uploadedContent.title} (${pageCount} pages)`);
     
     // Clear uploaded content after loading
     onContentLoaded?.();
@@ -165,9 +176,23 @@ export function LightPaperDocument({
   const isUserTyping = useRef(false);
   useEffect(() => {
     if (editorRef.current && documentContent && !isUserTyping.current) {
-      editorRef.current.innerHTML = documentContent;
+      // Parse content to extract the current page
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(documentContent, 'text/html');
+      const pages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
+      
+      if (pages.length > 0) {
+        // Display only the current page
+        const currentPageElement = pages[currentPage - 1];
+        if (currentPageElement) {
+          editorRef.current.innerHTML = currentPageElement.outerHTML;
+        }
+      } else {
+        // No structured pages, display all content
+        editorRef.current.innerHTML = documentContent;
+      }
     }
-  }, [documentContent]);
+  }, [documentContent, currentPage]);
 
   // Load project and versions when selectedProject changes
   useEffect(() => {
@@ -1233,56 +1258,83 @@ export function LightPaperDocument({
         />
       </div>
 
-      {/* Zoom Controls */}
-      <div className="flex items-center gap-2 px-4 py-2 border-b bg-background">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setZoomLevel(Math.max(0.25, zoomLevel - 0.25))}
-          disabled={zoomLevel <= 0.25}
-        >
-          <ZoomOut className="h-4 w-4" />
-        </Button>
-        <span className="text-sm font-medium min-w-[60px] text-center">
-          {Math.round(zoomLevel * 100)}%
-        </span>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setZoomLevel(Math.min(3.0, zoomLevel + 0.25))}
-          disabled={zoomLevel >= 3.0}
-        >
-          <ZoomIn className="h-4 w-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => setZoomLevel(1.0)}
-        >
-          <Maximize2 className="h-4 w-4" />
-        </Button>
+      {/* Zoom and Page Navigation Controls */}
+      <div className="flex items-center justify-between gap-4 px-4 py-2 border-b bg-background">
+        {/* Zoom Controls */}
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setZoomLevel(Math.max(0.25, zoomLevel - 0.25))}
+            disabled={zoomLevel <= 0.25}
+          >
+            <ZoomOut className="h-4 w-4" />
+          </Button>
+          <span className="text-sm font-medium min-w-[60px] text-center">
+            {Math.round(zoomLevel * 100)}%
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setZoomLevel(Math.min(3.0, zoomLevel + 0.25))}
+            disabled={zoomLevel >= 3.0}
+          >
+            <ZoomIn className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setZoomLevel(1.0)}
+          >
+            <Maximize2 className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* Page Navigation Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              disabled={currentPage <= 1}
+            >
+              Previous
+            </Button>
+            <span className="text-sm font-medium px-3 py-1 bg-muted rounded-md min-w-[100px] text-center">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              disabled={currentPage >= totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Main Editor Area - Takes Full Height with Pages */}
-      <div ref={wrapperRef} className="flex-1 overflow-auto p-4 bg-muted/30 flex gap-0">
+      {/* Main Editor Area - Takes Full Height with Single Page View */}
+      <div ref={wrapperRef} className="flex-1 overflow-hidden bg-muted/30 flex gap-0 items-center justify-center">
         {/* Live Cursors */}
         {currentProjectId && (
           <LiveCursors cursors={cursors} containerRef={containerRef} />
         )}
         <style>{`
           .page {
-            width: 21cm;
-            min-height: 29.7cm;
+            width: 100%;
+            height: 100%;
+            max-width: 21cm;
             padding: 2cm;
-            margin: 1cm auto;
             background: white;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            page-break-after: always;
-            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0,0,0,0.2);
+            overflow: auto;
             position: relative;
             box-sizing: border-box;
             transform: scale(${zoomLevel});
-            transform-origin: top center;
+            transform-origin: center center;
             transition: transform 0.2s ease;
           }
           
@@ -1311,14 +1363,14 @@ export function LightPaperDocument({
             pointer-events: auto;
           }
 
-          /* PDF Reconstructed Page Container - NO background image */
+          /* PDF Reconstructed Page Container - Full screen single page */
           .pdf-page-reconstructed {
             position: relative;
             background: white;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            margin: 20px auto;
-            max-width: 100%;
-            height: auto;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100%;
           }
 
           /* PDF Logo images - higher z-index */
