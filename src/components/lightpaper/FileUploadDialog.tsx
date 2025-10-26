@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { renderAsync } from "docx-preview";
+import * as pdfjsLib from "pdfjs-dist";
 
 interface FileUploadDialogProps {
   isOpen: boolean;
@@ -15,6 +16,79 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>("Preparing...");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const processDOCX = async (file: File): Promise<string> => {
+    // Create temporary container for rendering
+    const container = document.createElement('div');
+    container.style.position = 'absolute';
+    container.style.left = '-9999px';
+    container.style.width = '210mm'; // A4 width
+    document.body.appendChild(container);
+
+    try {
+      // Render DOCX with full formatting preservation
+      await renderAsync(file, container, undefined, {
+        className: 'docx-content',
+        inWrapper: true,
+        ignoreWidth: false,
+        ignoreHeight: false,
+        ignoreFonts: false,
+        breakPages: true,
+        renderHeaders: true,
+        renderFooters: true,
+        useBase64URL: true, // Embed images as base64
+        debug: false,
+      });
+
+      // Extract rendered HTML
+      const html = container.innerHTML;
+      
+      // Clean up
+      document.body.removeChild(container);
+      
+      return html;
+    } catch (error) {
+      document.body.removeChild(container);
+      throw error;
+    }
+  };
+
+  const processPDF = async (file: File): Promise<string> => {
+    // Configure PDF.js worker
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    
+    let html = '<div class="pdf-document" style="max-width: 100%;">';
+    
+    // Render each page as high-resolution image
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+      setUploadProgress(`Rendering page ${pageNum} of ${pdf.numPages}...`);
+      
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 2.0 }); // 2x for high quality
+      
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d')!;
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      
+      await page.render({ 
+        canvasContext: context,
+        viewport,
+        canvas
+      }).promise;
+      
+      const imageData = canvas.toDataURL('image/png');
+      html += `<div style="margin: 1rem 0; page-break-after: always;">
+        <img src="${imageData}" style="max-width: 100%; height: auto; display: block;" alt="Page ${pageNum}" />
+      </div>`;
+    }
+    
+    html += '</div>';
+    return html;
+  };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -35,46 +109,28 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
     }
 
     setIsUploading(true);
-    setUploadProgress("Uploading file...");
+    setUploadProgress("Processing document...");
 
     try {
-      // Step 1: Upload to temp storage
-      const fileName = `${Date.now()}_${file.name}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('temp-uploads')
-        .upload(fileName, file, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (uploadError) {
-        throw new Error(`Upload failed: ${uploadError.message}`);
-      }
-
-      console.log('File uploaded to storage:', fileName);
-      setUploadProgress("Parsing document...");
-
-      // Step 2: Call edge function to parse
-      const { data: parseData, error: parseError } = await supabase.functions.invoke('parse-document', {
-        body: { filePath: fileName }
-      });
-
-      if (parseError) {
-        throw new Error(`Parsing failed: ${parseError.message}`);
-      }
-
-      if (!parseData.success) {
-        throw new Error(parseData.error || 'Failed to parse document');
-      }
-
-      console.log('Document parsed successfully');
-      setUploadProgress("Loading into editor...");
-
-      // Step 3: Load into editor
+      let content: string;
       const title = file.name.replace(/\.[^/.]+$/, '');
-      onFileLoaded(parseData.content, title);
+
+      // Process based on file type - all client-side, no APIs
+      if (fileExtension === 'docx') {
+        setUploadProgress("Rendering Word document...");
+        content = await processDOCX(file);
+        toast.success(`Successfully loaded ${file.name} with full formatting!`);
+      } else if (fileExtension === 'pdf') {
+        setUploadProgress("Converting PDF pages...");
+        content = await processPDF(file);
+        toast.success(`Successfully loaded ${file.name} as images!`);
+      } else {
+        throw new Error('Unsupported file type');
+      }
+
+      setUploadProgress("Loading into editor...");
+      onFileLoaded(content, title);
       
-      toast.success(`Successfully loaded ${file.name}`);
       setIsUploading(false);
       onClose();
 
