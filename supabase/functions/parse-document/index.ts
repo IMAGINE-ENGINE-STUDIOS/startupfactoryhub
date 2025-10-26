@@ -164,20 +164,60 @@ async function parseDOC(arrayBuffer: ArrayBuffer): Promise<string> {
     console.error('Mammoth failed for .doc file:', err);
   }
 
-  // Fallback: Extract raw text
+  // Improved fallback: Extract only readable text sequences
   const decoder = new TextDecoder('utf-8', { fatal: false });
-  const text = decoder.decode(arrayBuffer);
+  const rawText = decoder.decode(arrayBuffer);
   
-  const cleanText = text
-    .replace(/[\x00-\x08\x0B-\x0C\x0E-\x1F\x7F-\x9F]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-  if (cleanText.length > 100) {
-    return `<div class="doc-content"><p>${escapeHtml(cleanText)}</p></div>`;
+  // Extract text sequences (4+ consecutive readable characters)
+  const textPattern = /[\x20-\x7E\u00A0-\uFFFF]{4,}/g;
+  const textMatches = rawText.match(textPattern) || [];
+  
+  // Filter out XML metadata and file structure patterns
+  const filteredText = textMatches
+    .filter(text => {
+      // Remove XML metadata
+      if (text.includes('<?xml') || text.includes('<ds:') || text.includes('xmlns:')) return false;
+      // Remove Office metadata tags
+      if (text.includes('FormTemplates') || text.includes('datastoreItem')) return false;
+      // Remove file format markers
+      if (text.includes('mso-contentType') || text.includes('schemas.microsoft.com')) return false;
+      // Remove schema references
+      if (text.includes('schemas.openxmlformats.org')) return false;
+      // Remove very short fragments (likely noise)
+      if (text.trim().length < 10) return false;
+      
+      return true;
+    })
+    .map(text => text.trim())
+    .filter(text => text.length > 0);
+  
+  if (filteredText.length > 5) {
+    // Join with paragraph breaks
+    const htmlContent = filteredText
+      .map(text => `<p style="margin: 0.5rem 0;">${escapeHtml(text)}</p>`)
+      .join('');
+    
+    return `<div class="doc-content">${htmlContent}</div>`;
   }
 
-  return '<p>Unable to parse .doc file. Please save as .docx for better compatibility.</p>';
+  // If we couldn't extract quality content, show helpful message
+  return `
+    <div style="padding: 2rem; background: #fef3c7; border-left: 4px solid #f59e0b; margin: 1rem 0; border-radius: 0.5rem;">
+      <h3 style="color: #92400e; margin-bottom: 0.5rem; font-weight: bold;">⚠️ Legacy Document Format</h3>
+      <p style="color: #78350f; margin-bottom: 1rem;">
+        This .doc file uses an older format that's difficult to parse accurately.
+      </p>
+      <p style="color: #78350f; margin-bottom: 0.5rem;">
+        <strong>To edit this document, please:</strong>
+      </p>
+      <ol style="color: #78350f; padding-left: 1.5rem; margin-bottom: 0;">
+        <li>Open the file in Microsoft Word</li>
+        <li>Click "File" → "Save As"</li>
+        <li>Choose format: "Word Document (.docx)"</li>
+        <li>Upload the new .docx file here</li>
+      </ol>
+    </div>
+  `;
 }
 
 function escapeHtml(text: string): string {

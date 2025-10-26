@@ -138,6 +138,9 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
                 <li>✓ Word documents (.docx, .doc)</li>
                 <li>✓ Fully editable after upload</li>
               </ul>
+              <p className="text-xs text-yellow-600 dark:text-yellow-500 mt-2 p-2 bg-yellow-50 dark:bg-yellow-900/20 rounded border border-yellow-200 dark:border-yellow-800">
+                <strong>Note:</strong> .docx files work best. Legacy .doc files may have limited parsing quality.
+              </p>
             </div>
           </div>
         </div>
