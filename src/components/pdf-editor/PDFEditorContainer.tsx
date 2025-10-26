@@ -1,16 +1,18 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { PDFBackgroundLayer } from './PDFBackgroundLayer';
 import { PDFFabricCanvas } from './PDFFabricCanvas';
 import { PDFToolbar } from './PDFToolbar';
+import { PDFPropertiesPanel } from './PDFPropertiesPanel';
 import { FabricCanvasManager } from '@/lib/pdf/FabricCanvasManager';
 import { usePDFEditorStore } from '@/stores/pdfEditorStore';
-import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { FabricObject } from 'fabric';
 
 export const PDFEditorContainer = () => {
   const { pdfUrl, setPdfUrl, setTotalPages, currentPage, reset } = usePDFEditorStore();
   const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
+  const [selectedObject, setSelectedObject] = useState<FabricObject | null>(null);
   const fabricManagerRef = useRef<FabricCanvasManager | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -69,6 +71,44 @@ export const PDFEditorContainer = () => {
 
   const handleManagerReady = useCallback((manager: FabricCanvasManager) => {
     fabricManagerRef.current = manager;
+    
+    // Set selection change callback
+    manager.setSelectionChangeCallback((obj) => {
+      setSelectedObject(obj);
+    });
+  }, []);
+
+  const handleUpdateProperty = useCallback((property: string, value: any) => {
+    fabricManagerRef.current?.updateSelectedObjectProperty(property, value);
+  }, []);
+
+  const handleDeleteSelected = useCallback(() => {
+    fabricManagerRef.current?.deleteSelected();
+    setSelectedObject(null);
+  }, []);
+
+  // Keyboard shortcuts for undo/redo
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!fabricManagerRef.current) return;
+
+      // Ctrl+Z or Cmd+Z for undo
+      if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
+        e.preventDefault();
+        fabricManagerRef.current.undo();
+        toast.info('Undo');
+      }
+      
+      // Ctrl+Y or Cmd+Shift+Z for redo
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
+        e.preventDefault();
+        fabricManagerRef.current.redo();
+        toast.info('Redo');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const handleExport = useCallback(() => {
@@ -93,41 +133,53 @@ export const PDFEditorContainer = () => {
 
       <PDFToolbar onUpload={handleUpload} onExport={handleExport} />
 
-      <div className="flex-1 overflow-auto p-8">
-        {!pdfUrl ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-center space-y-4">
-              <h3 className="text-2xl font-semibold">No PDF loaded</h3>
-              <p className="text-muted-foreground">
-                Click "Upload PDF" to get started
-              </p>
+      <div className="flex-1 overflow-auto flex gap-4 p-4">
+        <div className="flex-1 overflow-auto">
+          {!pdfUrl ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center space-y-4">
+                <h3 className="text-2xl font-semibold">No PDF loaded</h3>
+                <p className="text-muted-foreground">
+                  Click "Upload PDF" to get started
+                </p>
+              </div>
             </div>
-          </div>
-        ) : (
-          <div className="flex justify-center">
-            <div 
-              className="relative bg-white shadow-2xl"
-              style={{
-                width: canvasDimensions.width || 'auto',
-                height: canvasDimensions.height || 'auto',
-              }}
-            >
-              <PDFBackgroundLayer
-                pdfUrl={pdfUrl}
-                pageNumber={currentPage}
-                zoom={1}
-                onLoadSuccess={handleLoadSuccess}
-                onPageLoadSuccess={handlePageLoadSuccess}
-              />
-              
-              {canvasDimensions.width > 0 && canvasDimensions.height > 0 && (
-                <PDFFabricCanvas
-                  width={canvasDimensions.width}
-                  height={canvasDimensions.height}
-                  onManagerReady={handleManagerReady}
+          ) : (
+            <div className="flex justify-center">
+              <div 
+                className="relative bg-white shadow-2xl"
+                style={{
+                  width: canvasDimensions.width || 'auto',
+                  height: canvasDimensions.height || 'auto',
+                }}
+              >
+                <PDFBackgroundLayer
+                  pdfUrl={pdfUrl}
+                  pageNumber={currentPage}
+                  zoom={1}
+                  onLoadSuccess={handleLoadSuccess}
+                  onPageLoadSuccess={handlePageLoadSuccess}
                 />
-              )}
+                
+                {canvasDimensions.width > 0 && canvasDimensions.height > 0 && (
+                  <PDFFabricCanvas
+                    width={canvasDimensions.width}
+                    height={canvasDimensions.height}
+                    onManagerReady={handleManagerReady}
+                  />
+                )}
+              </div>
             </div>
+          )}
+        </div>
+
+        {pdfUrl && (
+          <div className="flex-shrink-0">
+            <PDFPropertiesPanel
+              selectedObject={selectedObject}
+              onUpdateProperty={handleUpdateProperty}
+              onDelete={handleDeleteSelected}
+            />
           </div>
         )}
       </div>

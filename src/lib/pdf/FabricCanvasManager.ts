@@ -5,6 +5,9 @@ export class FabricCanvasManager {
   private canvas: FabricCanvas;
   private activeTool: ToolType = 'select';
   private activeColor: string = '#000000';
+  private history: string[] = [];
+  private historyStep: number = -1;
+  private onSelectionChange?: (obj: FabricObject | null) => void;
 
   constructor(canvasElement: HTMLCanvasElement, width: number, height: number) {
     this.canvas = new FabricCanvas(canvasElement, {
@@ -20,6 +23,7 @@ export class FabricCanvasManager {
     this.canvas.freeDrawingBrush.width = 2;
 
     this.setupEventHandlers();
+    this.saveState(); // Save initial state
   }
 
   private setupEventHandlers() {
@@ -44,6 +48,34 @@ export class FabricCanvasManager {
           break;
       }
     });
+
+    // Handle object modifications for undo/redo
+    this.canvas.on('object:modified', () => this.saveState());
+    this.canvas.on('object:added', () => this.saveState());
+    this.canvas.on('object:removed', () => this.saveState());
+
+    // Handle selection changes
+    this.canvas.on('selection:created', (e) => {
+      if (this.onSelectionChange && e.selected && e.selected[0]) {
+        this.onSelectionChange(e.selected[0]);
+      }
+    });
+    
+    this.canvas.on('selection:updated', (e) => {
+      if (this.onSelectionChange && e.selected && e.selected[0]) {
+        this.onSelectionChange(e.selected[0]);
+      }
+    });
+    
+    this.canvas.on('selection:cleared', () => {
+      if (this.onSelectionChange) {
+        this.onSelectionChange(null);
+      }
+    });
+  }
+
+  setSelectionChangeCallback(callback: (obj: FabricObject | null) => void) {
+    this.onSelectionChange = callback;
   }
 
   setTool(tool: ToolType) {
@@ -171,6 +203,61 @@ export class FabricCanvasManager {
 
   getCanvas(): FabricCanvas {
     return this.canvas;
+  }
+
+  // Undo/Redo functionality
+  private saveState() {
+    // Remove future states if we're not at the end
+    if (this.historyStep < this.history.length - 1) {
+      this.history = this.history.slice(0, this.historyStep + 1);
+    }
+
+    const json = this.serializeCanvas();
+    this.history.push(json);
+    this.historyStep = this.history.length - 1;
+
+    // Limit history to 50 states
+    if (this.history.length > 50) {
+      this.history.shift();
+      this.historyStep--;
+    }
+  }
+
+  undo() {
+    if (this.historyStep > 0) {
+      this.historyStep--;
+      this.loadFromJSON(this.history[this.historyStep]);
+    }
+  }
+
+  redo() {
+    if (this.historyStep < this.history.length - 1) {
+      this.historyStep++;
+      this.loadFromJSON(this.history[this.historyStep]);
+    }
+  }
+
+  canUndo(): boolean {
+    return this.historyStep > 0;
+  }
+
+  canRedo(): boolean {
+    return this.historyStep < this.history.length - 1;
+  }
+
+  // Property updates
+  updateSelectedObjectProperty(property: string, value: any) {
+    const activeObject = this.canvas.getActiveObject();
+    if (!activeObject) return;
+
+    (activeObject as any)[property] = value;
+    activeObject.setCoords();
+    this.canvas.requestRenderAll();
+    this.saveState();
+  }
+
+  getSelectedObject(): FabricObject | null {
+    return this.canvas.getActiveObject() || null;
   }
 
   dispose() {
