@@ -168,6 +168,32 @@ export class FabricCanvasManager {
     this.canvas.requestRenderAll();
   }
 
+  addImage(imageUrl: string, x: number, y: number, width: number = 200, height: number = 200) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.src = imageUrl;
+    
+    img.onload = () => {
+      import('fabric').then(({ FabricImage }) => {
+        FabricImage.fromURL(imageUrl, { crossOrigin: 'anonymous' }).then((fabricImage) => {
+          if (!fabricImage) return;
+          
+          fabricImage.set({
+            left: x,
+            top: y,
+            scaleX: width / (fabricImage.width || 1),
+            scaleY: height / (fabricImage.height || 1),
+            selectable: true,
+          });
+          
+          this.canvas.add(fabricImage);
+          this.canvas.setActiveObject(fabricImage);
+          this.canvas.requestRenderAll();
+        });
+      });
+    };
+  }
+
   deleteSelected() {
     const activeObjects = this.canvas.getActiveObjects();
     if (activeObjects.length > 0) {

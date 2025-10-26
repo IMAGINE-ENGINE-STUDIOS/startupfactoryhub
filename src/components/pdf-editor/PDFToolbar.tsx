@@ -8,7 +8,8 @@ import {
   Pencil, 
   Eraser,
   Download,
-  Upload
+  Upload,
+  Image as ImageIcon
 } from 'lucide-react';
 import { usePDFEditorStore, ToolType } from '@/stores/pdfEditorStore';
 import { cn } from '@/lib/utils';
@@ -16,11 +17,20 @@ import { cn } from '@/lib/utils';
 interface PDFToolbarProps {
   onUpload: () => void;
   onExport: () => void;
+  onImageUpload: () => void;
   isExporting?: boolean;
+  isUploading?: boolean;
   hasSession?: boolean;
 }
 
-export const PDFToolbar = ({ onUpload, onExport, isExporting = false, hasSession = false }: PDFToolbarProps) => {
+export const PDFToolbar = ({ 
+  onUpload, 
+  onExport, 
+  onImageUpload,
+  isExporting = false, 
+  isUploading = false,
+  hasSession = false 
+}: PDFToolbarProps) => {
   const { activeTool, setActiveTool } = usePDFEditorStore();
 
   const tools: { type: ToolType; icon: any; label: string }[] = [
@@ -34,9 +44,9 @@ export const PDFToolbar = ({ onUpload, onExport, isExporting = false, hasSession
 
   return (
     <div className="flex items-center gap-2 p-2 bg-background border-b">
-      <Button variant="outline" size="sm" onClick={onUpload}>
+      <Button variant="outline" size="sm" onClick={onUpload} disabled={isUploading}>
         <Upload className="w-4 h-4 mr-2" />
-        Upload PDF
+        {isUploading ? 'Uploading...' : 'Upload PDF'}
       </Button>
 
       <Separator orientation="vertical" className="h-8" />
@@ -48,7 +58,7 @@ export const PDFToolbar = ({ onUpload, onExport, isExporting = false, hasSession
             variant={activeTool === type ? 'default' : 'ghost'}
             size="sm"
             onClick={() => setActiveTool(type)}
-            title={label}
+            title={`${label} (${type === 'select' ? 'V' : type.charAt(0).toUpperCase()})`}
             className={cn(
               'w-9 h-9 p-0',
               activeTool === type && 'bg-primary text-primary-foreground'
@@ -64,12 +74,29 @@ export const PDFToolbar = ({ onUpload, onExport, isExporting = false, hasSession
       <Button 
         variant="outline" 
         size="sm" 
+        onClick={onImageUpload}
+        disabled={!hasSession}
+        title="Upload Image"
+      >
+        <ImageIcon className="w-4 h-4 mr-2" />
+        Image
+      </Button>
+
+      <Separator orientation="vertical" className="h-8" />
+
+      <Button 
+        variant="outline" 
+        size="sm" 
         onClick={onExport}
         disabled={!hasSession || isExporting}
       >
         <Download className="w-4 h-4 mr-2" />
         {isExporting ? 'Exporting...' : 'Export PDF'}
       </Button>
+
+      <div className="ml-auto text-xs text-muted-foreground hidden lg:block">
+        <span className="font-medium">Shortcuts:</span> T=Text, R=Rectangle, C=Circle, D=Draw, E=Erase, V=Select, Ctrl+S=Save, Ctrl+E=Export
+      </div>
     </div>
   );
 };

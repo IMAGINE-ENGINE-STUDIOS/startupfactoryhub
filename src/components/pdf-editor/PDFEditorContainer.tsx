@@ -3,6 +3,8 @@ import { PDFBackgroundLayer } from './PDFBackgroundLayer';
 import { PDFFabricCanvas } from './PDFFabricCanvas';
 import { PDFToolbar } from './PDFToolbar';
 import { PDFPropertiesPanel } from './PDFPropertiesPanel';
+import { PDFPageNavigator } from './PDFPageNavigator';
+import { PDFZoomControls } from './PDFZoomControls';
 import { FabricCanvasManager } from '@/lib/pdf/FabricCanvasManager';
 import { usePDFEditorStore } from '@/stores/pdfEditorStore';
 import { usePDFSession } from '@/hooks/usePDFSession';
@@ -12,15 +14,18 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { FabricObject } from 'fabric';
 import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
+import { Download, Upload as UploadIcon } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 export const PDFEditorContainer = () => {
-  const { pdfUrl, setPdfUrl, setTotalPages, currentPage, reset } = usePDFEditorStore();
+  const { pdfUrl, setPdfUrl, setTotalPages, currentPage, setCurrentPage, zoom, totalPages, reset } = usePDFEditorStore();
   const [canvasDimensions, setCanvasDimensions] = useState({ width: 0, height: 0 });
   const [selectedObject, setSelectedObject] = useState<FabricObject | null>(null);
   const [fabricJSON, setFabricJSON] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const fabricManagerRef = useRef<FabricCanvasManager | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
 
   // Session management
   const { sessionId, isLoading: isLoadingSession } = usePDFSession(pdfUrl);
@@ -43,6 +48,8 @@ export const PDFEditorContainer = () => {
       toast.error('Please upload a PDF file');
       return;
     }
+
+    setIsUploading(true);
 
     try {
       toast.loading('Uploading PDF...');
@@ -72,6 +79,55 @@ export const PDFEditorContainer = () => {
     } catch (error: any) {
       console.error('Upload error:', error);
       toast.error('Failed to upload PDF: ' + error.message);
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleImageUpload = useCallback(() => {
+    imageInputRef.current?.click();
+  }, []);
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !fabricManagerRef.current) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    try {
+      toast.loading('Uploading image...');
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast.error('Please sign in to upload images');
+        return;
+      }
+
+      // Upload to Supabase Storage
+      const filePath = `${user.id}/images/${Date.now()}_${file.name}`;
+      const { data, error } = await supabase.storage
+        .from('pdf-documents')
+        .upload(filePath, file);
+
+      if (error) throw error;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('pdf-documents')
+        .getPublicUrl(data.path);
+
+      // Add image to canvas at center
+      const centerX = canvasDimensions.width / 2 - 100;
+      const centerY = canvasDimensions.height / 2 - 100;
+      fabricManagerRef.current.addImage(publicUrl, centerX, centerY, 200, 200);
+
+      toast.success('Image added to canvas!');
+    } catch (error: any) {
+      console.error('Image upload error:', error);
+      toast.error('Failed to upload image: ' + error.message);
     }
   };
 
@@ -115,23 +171,80 @@ export const PDFEditorContainer = () => {
     setSelectedObject(null);
   }, []);
 
-  // Keyboard shortcuts for undo/redo
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+    // TODO: In full implementation, save current page state and load new page state
+    toast.info(`Switched to page ${page}`);
+  }, [setCurrentPage]);
+
+  // Keyboard shortcuts for undo/redo and tools
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!fabricManagerRef.current) return;
 
-      // Ctrl+Z or Cmd+Z for undo
+      // Undo/Redo
       if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
         e.preventDefault();
         fabricManagerRef.current.undo();
         toast.info('Undo');
+        return;
       }
       
-      // Ctrl+Y or Cmd+Shift+Z for redo
       if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.shiftKey && e.key === 'z'))) {
         e.preventDefault();
         fabricManagerRef.current.redo();
         toast.info('Redo');
+        return;
+      }
+
+      // Save shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (fabricJSON) {
+          toast.success('Auto-saved');
+        }
+        return;
+      }
+
+      // Export shortcut
+      if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        handleExport();
+        return;
+      }
+
+      // Tool shortcuts (only if not in input)
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+
+      const { setActiveTool } = usePDFEditorStore.getState();
+
+      switch (e.key.toLowerCase()) {
+        case 't':
+          setActiveTool('text');
+          toast.info('Text tool selected');
+          break;
+        case 'r':
+          setActiveTool('rectangle');
+          toast.info('Rectangle tool selected');
+          break;
+        case 'c':
+          setActiveTool('circle');
+          toast.info('Circle tool selected');
+          break;
+        case 'd':
+          setActiveTool('draw');
+          toast.info('Draw tool selected');
+          break;
+        case 'e':
+          setActiveTool('erase');
+          toast.info('Eraser tool selected');
+          break;
+        case 'v':
+          setActiveTool('select');
+          toast.info('Select tool activated');
+          break;
       }
     };
 
@@ -180,10 +293,20 @@ export const PDFEditorContainer = () => {
         className="hidden"
       />
 
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageChange}
+        className="hidden"
+      />
+
       <PDFToolbar 
         onUpload={handleUpload} 
         onExport={handleExport}
+        onImageUpload={handleImageUpload}
         isExporting={isExporting}
+        isUploading={isUploading}
         hasSession={!!sessionId}
       />
       
@@ -207,7 +330,15 @@ export const PDFEditorContainer = () => {
       )}
 
       <div className="flex-1 overflow-auto flex gap-4 p-4">
-        <div className="flex-1 overflow-auto">
+        {/* Left sidebar - Page navigator */}
+        {pdfUrl && totalPages > 1 && (
+          <div className="flex-shrink-0">
+            <PDFPageNavigator onPageChange={handlePageChange} />
+          </div>
+        )}
+
+        {/* Main canvas area */}
+        <div className="flex-1 overflow-auto relative">
           {!pdfUrl ? (
             <div className="flex items-center justify-center h-full">
               <div className="text-center space-y-4">
@@ -217,8 +348,29 @@ export const PDFEditorContainer = () => {
                 </p>
               </div>
             </div>
+          ) : isLoadingSession ? (
+            <div className="flex items-center justify-center h-full">
+              <div className="space-y-4 w-full max-w-3xl px-8">
+                <Skeleton className="h-[600px] w-full" />
+                <div className="flex gap-2 justify-center">
+                  <Skeleton className="h-10 w-24" />
+                  <Skeleton className="h-10 w-24" />
+                  <Skeleton className="h-10 w-24" />
+                </div>
+              </div>
+            </div>
           ) : (
-            <div className="flex justify-center">
+            <div className="flex flex-col items-center gap-4">
+              {/* Zoom controls */}
+              <div className="sticky top-4 z-10">
+                <PDFZoomControls
+                  canvasWidth={canvasDimensions.width / zoom}
+                  canvasHeight={canvasDimensions.height / zoom}
+                  containerWidth={800}
+                />
+              </div>
+
+              {/* PDF Canvas */}
               <div 
                 className="relative bg-white shadow-2xl"
                 style={{
@@ -229,7 +381,7 @@ export const PDFEditorContainer = () => {
                 <PDFBackgroundLayer
                   pdfUrl={pdfUrl}
                   pageNumber={currentPage}
-                  zoom={1}
+                  zoom={zoom}
                   onLoadSuccess={handleLoadSuccess}
                   onPageLoadSuccess={handlePageLoadSuccess}
                 />
@@ -246,7 +398,8 @@ export const PDFEditorContainer = () => {
           )}
         </div>
 
-        {pdfUrl && (
+        {/* Right sidebar - Properties panel */}
+        {pdfUrl && !isLoadingSession && (
           <div className="flex-shrink-0">
             <PDFPropertiesPanel
               selectedObject={selectedObject}
