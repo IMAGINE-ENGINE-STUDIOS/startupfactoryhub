@@ -460,15 +460,14 @@ export function renderTableAsHTML(table: TableStructure, scale: number = 1, zInd
     <div class="pdf-reconstructed-table" style="
       position: static;
       display: block;
-      width: ${Math.min(table.bounds.width, 100)}%;
+      width: 100%;
       max-width: calc(100% - ${marginPx * 2}px);
       margin: 16px auto;
       background: white;
       z-index: 1;
       border: ${borderWidth}px solid ${borderColor};
       box-sizing: border-box;
-      overflow-x: auto;
-      overflow-y: visible;
+      overflow: hidden;
     ">
       <table style="
         width: 100%;
