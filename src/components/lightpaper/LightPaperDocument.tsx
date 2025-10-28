@@ -1968,12 +1968,13 @@ export function LightPaperDocument({
             }
           }
         `}</style>
-        <div ref={containerRef} className="mx-auto pb-2 md:pb-0" style={{ 
+        <div ref={containerRef} className="mx-auto pb-0" style={{ 
           width: 'fit-content',
-          minHeight: 'auto',
+          minHeight: viewMode ? '100vh' : 'auto',
           display: 'flex',
           flexDirection: 'column',
-          alignItems: 'center'
+          alignItems: 'center',
+          overflow: 'visible'
         }}>
           <div 
             className={`page ${editMode ? 'edit-mode' : 'view-mode'} ${viewMode ? 'view-mode' : ''}`} 

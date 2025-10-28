@@ -113,7 +113,7 @@ export async function parseDocumentAsImages(
       onProgress?.(`Rendering page ${i}/${pageCount}...`, i, pageCount);
       
       const page = await pdf.getPage(i);
-      const viewport = page.getViewport({ scale: 2.0 }); // High resolution for viewing
+      const viewport = page.getViewport({ scale: 3.0 }); // Ultra-high resolution for viewing
       
       const canvas = document.createElement('canvas');
       canvas.width = viewport.width;

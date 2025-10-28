@@ -443,38 +443,45 @@ export function renderTableAsHTML(table: TableStructure, scale: number = 1, zInd
     rowHeights.push(maxHeight + cellPadding * 2);
   }
   
-  // Constrain table position within margins
-  const constrainedX = Math.max(marginPx, table.bounds.x);
-  const constrainedY = Math.max(marginPx, table.bounds.y);
+  // Calculate total table width and scale if necessary
+  const totalTableWidth = columnWidths.reduce((sum, w) => sum + w, 0);
+  const maxAllowedWidth = table.bounds.width;
+  
+  let scaleFactor = 1.0;
+  if (totalTableWidth > maxAllowedWidth) {
+    scaleFactor = maxAllowedWidth / totalTableWidth;
+    console.log(`Scaling table down by ${scaleFactor.toFixed(2)}x to fit width`);
+  }
+  
+  // Apply scale factor to all widths
+  const scaledColumnWidths = columnWidths.map(w => w * scaleFactor);
   
   let html = `
     <div class="pdf-reconstructed-table" style="
-      position: absolute;
-      left: ${constrainedX}px;
-      top: ${constrainedY}px;
-      width: ${table.bounds.width}px;
-      height: ${table.bounds.height}px;
+      position: static;
+      display: block;
+      width: ${Math.min(table.bounds.width, 100)}%;
       max-width: calc(100% - ${marginPx * 2}px);
-      max-height: calc(100% - ${marginPx * 2}px);
+      margin: 16px auto;
       background: white;
-      z-index: 10;
+      z-index: 1;
       border: ${borderWidth}px solid ${borderColor};
       box-sizing: border-box;
-      overflow: auto;
+      overflow-x: auto;
+      overflow-y: visible;
     ">
       <table style="
         width: 100%;
-        height: 100%;
         border-collapse: collapse;
         font-family: Arial, sans-serif;
         background: white;
-        table-layout: fixed;
+        table-layout: auto;
       ">
   `;
   
-  // Set column widths using colgroup for pixel-perfect layout
+  // Set column widths using colgroup for proportional layout
   html += '<colgroup>';
-  for (const width of columnWidths) {
+  for (const width of scaledColumnWidths) {
     html += `<col style="width: ${width}px;">`;
   }
   html += '</colgroup>';
