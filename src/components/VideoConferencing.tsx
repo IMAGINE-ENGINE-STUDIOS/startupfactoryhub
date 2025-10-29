@@ -52,10 +52,18 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
   // Auto-join when autoJoin prop is true and container is ready
   useEffect(() => {
     if (autoJoin && roomUrl && containerRef.current && !isCallActive && !isLoading) {
-      const timer = setTimeout(() => {
-        startCall();
-      }, 500); // Give time for container to be fully rendered
+      // Wait for container to have dimensions before starting
+      const checkAndStart = () => {
+        const rect = containerRef.current?.getBoundingClientRect();
+        if (rect && rect.width > 0 && rect.height > 0) {
+          startCall();
+        } else {
+          // Retry after 100ms if dimensions not ready
+          setTimeout(checkAndStart, 100);
+        }
+      };
       
+      const timer = setTimeout(checkAndStart, 200);
       return () => clearTimeout(timer);
     }
   }, [autoJoin, roomUrl, isCallActive, isLoading]);
@@ -275,10 +283,9 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
             ref={containerRef}
             className="aspect-video bg-accent rounded-lg overflow-hidden"
             style={{
-              opacity: isCallActive ? 1 : 0,
-              visibility: isCallActive ? 'visible' : 'hidden',
-              position: isCallActive ? 'relative' : 'absolute',
-              pointerEvents: isCallActive ? 'auto' : 'none'
+              display: isCallActive ? 'block' : 'none',
+              width: '100%',
+              minHeight: '400px'
             }}
           />
           
