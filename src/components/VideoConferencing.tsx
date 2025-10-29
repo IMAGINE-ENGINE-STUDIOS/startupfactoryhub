@@ -125,13 +125,21 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
     try {
       setIsLoading(true);
 
-      // Extract room name from URL
+      // Extract room name from URL and format it to bypass lobby
       // Format: https://meet.jit.si/RoomName or just RoomName
-      const roomName = roomUrl.split('/').pop() || roomUrl;
+      let roomName = roomUrl.split('/').pop() || roomUrl;
+      
+      // Remove any existing hash or query params
+      roomName = roomName.split('#')[0].split('?')[0];
 
-      // Initialize Jitsi Meet with host privileges
+      // Initialize Jitsi Meet
       const domain = 'meet.jit.si';
       const isHost = userId && hostId && userId === hostId;
+      
+      // For public meet.jit.si, append timestamp to make room unique and bypass lobby patterns
+      if (domain === 'meet.jit.si') {
+        roomName = `${roomName}-${Date.now()}`;
+      }
       
       const options = {
         roomName: roomName,
@@ -140,21 +148,29 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
         parentNode: containerRef.current,
         userInfo: {
           displayName: userName || 'User',
-          moderator: isHost, // Grant moderator role to host
+          // Moderator flag doesn't work on public servers
         },
         configOverwrite: {
-          startWithAudioMuted: false, // Everyone starts with audio on
-          startWithVideoMuted: false, // Everyone starts with video on
+          startWithAudioMuted: false,
+          startWithVideoMuted: false,
           enableWelcomePage: false,
-          prejoinPageEnabled: false, // Skip prejoin when auto-joining from dialog
+          prejoinPageEnabled: false,
           disableDeepLinking: true,
           subject: meetingTitle || 'Startup Factory Hub Meeting',
           defaultRemoteDisplayName: 'Participant',
-          requireDisplayName: false, // Don't require name
-          enableLobbyChat: false, // Disable lobby waiting
-          autoKnockLobby: false, // Don't wait in lobby
-          enableInsecureRoomNameWarning: false, // Disable warning
-          disableSelfView: false, // Allow self view
+          requireDisplayName: false,
+          enableLobbyChat: false,
+          autoKnockLobby: false,
+          enableInsecureRoomNameWarning: false,
+          disableSelfView: false,
+          // CRITICAL: Aggressive lobby bypass for public servers
+          disableLobby: true,
+          enableForcedReload: false,
+          p2p: {
+            enabled: false, // Disable P2P to force server mode
+          },
+          disableProfile: true, // Make everyone a guest to bypass moderator requirements
+          hideConferenceSubject: false,
         },
         interfaceConfigOverwrite: {
           APP_NAME: 'Startup Factory Hub',

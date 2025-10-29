@@ -169,7 +169,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
       }}>
         <DialogContent className="max-w-5xl h-[90vh] p-0">
           <VideoConferencing
-            roomUrl={event.location}
+            roomUrl={event.location || `https://meet.jit.si/${event.id}`}
             userId={user?.id}
             hostId={event.organizer_id}
             userName={userProfile?.full_name || 'User'}
