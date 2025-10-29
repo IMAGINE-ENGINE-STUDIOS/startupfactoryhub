@@ -37,6 +37,14 @@ export default function VideoConferencing({
       return;
     }
     
+    // Support legacy Jitsi links
+    if (roomUrl && roomUrl.includes('meet.jit.si')) {
+      setActiveRoomUrl(roomUrl);
+      setIsCallActive(true);
+      setIsLoading(false);
+      return;
+    }
+    
     // Otherwise, create a new room via API
     try {
       const response = await fetch(
@@ -75,8 +83,13 @@ export default function VideoConferencing({
     }
   };
 
+  // Different embed parameters for Whereby vs Jitsi
   const displayUrl = activeRoomUrl 
-    ? `${activeRoomUrl}?displayName=${encodeURIComponent(userName)}&roomMode=normal&minimal&embed`
+    ? activeRoomUrl.includes('whereby.com')
+      ? `${activeRoomUrl}?displayName=${encodeURIComponent(userName)}&roomMode=normal&minimal&embed`
+      : activeRoomUrl.includes('meet.jit.si')
+        ? `${activeRoomUrl}#config.prejoinPageEnabled=false&userInfo.displayName="${encodeURIComponent(userName)}"`
+        : activeRoomUrl
     : '';
 
   return (

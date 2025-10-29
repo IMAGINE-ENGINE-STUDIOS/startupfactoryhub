@@ -199,15 +199,35 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
               <Checkbox
                 id="online_event"
                 checked={isOnlineEvent}
-                onCheckedChange={(checked) => {
+                onCheckedChange={async (checked) => {
                   setIsOnlineEvent(checked as boolean);
-                  if (checked) {
-                    // Auto-generate Jitsi meeting link
-                    const eventId = `event-${crypto.randomUUID()}`;
-                    const meetingLink = `https://meet.jit.si/${eventId}`;
-                    setFormData(prev => ({ ...prev, location: meetingLink }));
+                  if (checked && user) {
+                    setUploading(true);
+                    try {
+                      const { data, error } = await supabase.functions.invoke('create-whereby-room', {
+                        body: { 
+                          roomName: `event-${crypto.randomUUID()}`,
+                          startDate: formData.start_date && formData.start_time 
+                            ? new Date(`${formData.start_date}T${formData.start_time}`).toISOString() 
+                            : undefined,
+                          endDate: formData.end_date && formData.end_time
+                            ? new Date(`${formData.end_date}T${formData.end_time}`).toISOString()
+                            : undefined
+                        }
+                      });
+                      
+                      if (error) throw error;
+                      
+                      setFormData(prev => ({ ...prev, location: data.roomUrl }));
+                      toast({ title: 'Video conference room created!' });
+                    } catch (error) {
+                      console.error('Failed to create Whereby room:', error);
+                      toast({ title: 'Failed to create meeting room', variant: 'destructive' });
+                      setIsOnlineEvent(false);
+                    } finally {
+                      setUploading(false);
+                    }
                   } else {
-                    // Clear location when unchecked
                     setFormData(prev => ({ ...prev, location: '' }));
                   }
                 }}
@@ -224,7 +244,7 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
               id="location"
               value={formData.location}
               onChange={e => !isOnlineEvent && setFormData(prev => ({ ...prev, location: e.target.value }))}
-              placeholder={isOnlineEvent ? 'Jitsi meeting link will be generated' : 'Event location or virtual link'}
+              placeholder={isOnlineEvent ? 'Whereby meeting link will be generated' : 'Event location or virtual link'}
               readOnly={isOnlineEvent}
               className={isOnlineEvent ? 'bg-muted' : ''}
             />
