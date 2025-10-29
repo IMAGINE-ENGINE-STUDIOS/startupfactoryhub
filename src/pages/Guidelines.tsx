@@ -472,34 +472,757 @@ export default function Guidelines() {
             </Card>
           </TabsContent>
 
-          {/* AI Tools Tab - Placeholder */}
-          <TabsContent value="ai-tools" className="mt-6">
+          {/* AI Tools Tab */}
+          <TabsContent value="ai-tools" className="space-y-6 mt-6">
+            {/* AI Assistant */}
             <Card>
               <CardHeader>
-                <CardTitle>AI Tools Guide</CardTitle>
-                <CardDescription>Coming soon - comprehensive guide for AI features</CardDescription>
+                <CardTitle className="flex items-center gap-2">
+                  AI Assistant
+                  <Badge variant="default">Popular</Badge>
+                </CardTitle>
+                <CardDescription>Your intelligent document companion powered by advanced AI</CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  This section will include guides for AI-powered features like sentiment analysis, 
-                  document summarization, translation, and more.
-                </p>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">How to Access</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>Navigate to any <strong>LightPaper</strong> document</li>
+                    <li>Click the <strong>AI Assistant</strong> button (robot icon) in the toolbar</li>
+                    <li>Start chatting with the AI about your document</li>
+                  </ol>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Key Features</h4>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Document Q&A</div>
+                      <p className="text-xs text-muted-foreground">Ask questions about your document content and get instant, accurate answers</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Content Generation</div>
+                      <p className="text-xs text-muted-foreground">Generate text, paragraphs, or entire sections based on your prompts</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Writing Assistance</div>
+                      <p className="text-xs text-muted-foreground">Get suggestions for improvement, grammar corrections, and style enhancements</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Smart Summaries</div>
+                      <p className="text-xs text-muted-foreground">Quickly summarize long documents into key points</p>
+                    </div>
+                  </div>
+                </div>
+                <Alert>
+                  <Lightbulb className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Pro Tip:</strong> The AI Assistant can understand context from your entire document, making it perfect for complex research or analysis tasks.
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
+
+            {/* AI Summarization */}
+            <Card>
+              <CardHeader>
+                <CardTitle>AI Text Summarizer</CardTitle>
+                <CardDescription>Instantly condense long documents into digestible summaries</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">How to Use</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>Select the text you want to summarize in your document</li>
+                    <li>Click the <strong>AI Summarize</strong> button or use the context menu</li>
+                    <li>Choose your preferred summary length (Short, Medium, Long)</li>
+                    <li>Review and insert the summary into your document</li>
+                  </ol>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Summary Options</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Short:</strong> Quick overview in 1-2 sentences</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Medium:</strong> Balanced summary with key points (3-5 sentences)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Long:</strong> Detailed summary preserving important details</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Best Use Cases</h4>
+                  <div className="grid md:grid-cols-3 gap-3">
+                    <div className="p-3 border rounded-lg text-sm">
+                      <div className="font-medium mb-1">Research Papers</div>
+                      <p className="text-xs text-muted-foreground">Extract key findings quickly</p>
+                    </div>
+                    <div className="p-3 border rounded-lg text-sm">
+                      <div className="font-medium mb-1">Meeting Notes</div>
+                      <p className="text-xs text-muted-foreground">Get action items at a glance</p>
+                    </div>
+                    <div className="p-3 border rounded-lg text-sm">
+                      <div className="font-medium mb-1">Long Articles</div>
+                      <p className="text-xs text-muted-foreground">Save time on reading</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* AI Translation */}
+            <Card>
+              <CardHeader>
+                <CardTitle>AI Translator</CardTitle>
+                <CardDescription>Translate content into 100+ languages with context awareness</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">How to Translate</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>Select the text you want to translate</li>
+                    <li>Click the <strong>Translate</strong> button in the AI toolbar</li>
+                    <li>Choose your target language from the dropdown</li>
+                    <li>Review the translation and insert it into your document</li>
+                  </ol>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Supported Languages (100+)</h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-muted-foreground">
+                    <div>Spanish • French</div>
+                    <div>German • Italian</div>
+                    <div>Chinese • Japanese</div>
+                    <div>Korean • Arabic</div>
+                    <div>Portuguese • Russian</div>
+                    <div>Hindi • Bengali</div>
+                    <div>Turkish • Polish</div>
+                    <div>Dutch • Swedish</div>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">...and 80+ more languages</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Translation Features</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Context-Aware:</strong> Maintains meaning and tone across languages</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Format Preservation:</strong> Keeps original formatting and structure</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Bulk Translation:</strong> Translate entire documents at once</span>
+                    </li>
+                  </ul>
+                </div>
+                <Alert>
+                  <Lightbulb className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Best Practice:</strong> For technical or legal documents, always review translations for accuracy and context.
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
+
+            {/* Sentiment Analysis */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Sentiment Analyzer</CardTitle>
+                <CardDescription>Understand emotional tone and sentiment in text</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">How It Works</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>Select any text passage in your document</li>
+                    <li>Click the <strong>Analyze Sentiment</strong> button</li>
+                    <li>View the sentiment score and breakdown</li>
+                    <li>Use insights to refine your content</li>
+                  </ol>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Sentiment Scores</h4>
+                  <div className="grid md:grid-cols-3 gap-3">
+                    <div className="p-3 border border-green-500/20 rounded-lg">
+                      <div className="font-medium text-green-600 mb-1">Positive (0.3 to 1.0)</div>
+                      <p className="text-xs text-muted-foreground">Optimistic, enthusiastic, or favorable tone</p>
+                    </div>
+                    <div className="p-3 border border-gray-500/20 rounded-lg">
+                      <div className="font-medium mb-1">Neutral (-0.3 to 0.3)</div>
+                      <p className="text-xs text-muted-foreground">Objective, factual, or balanced tone</p>
+                    </div>
+                    <div className="p-3 border border-red-500/20 rounded-lg">
+                      <div className="font-medium text-red-600 mb-1">Negative (-1.0 to -0.3)</div>
+                      <p className="text-xs text-muted-foreground">Critical, pessimistic, or unfavorable tone</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Use Cases</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Customer Feedback:</strong> Analyze reviews and feedback for insights</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Market Research:</strong> Understand public perception and trends</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Content Optimization:</strong> Ensure your messaging matches intent</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Brand Monitoring:</strong> Track sentiment in communications</span>
+                    </li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Document Analyzer */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Document Analyzer</CardTitle>
+                <CardDescription>Extract insights, patterns, and key information from documents</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">How to Analyze</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>Upload a document (PDF, DOCX, TXT) to LightPaper</li>
+                    <li>Click the <strong>Analyze Document</strong> button in the toolbar</li>
+                    <li>Select analysis type (Overview, Key Points, Entities, etc.)</li>
+                    <li>Review the AI-generated analysis and insights</li>
+                  </ol>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Analysis Features</h4>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Key Points Extraction</div>
+                      <p className="text-xs text-muted-foreground">Automatically identify main ideas and important takeaways</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Entity Recognition</div>
+                      <p className="text-xs text-muted-foreground">Detect names, dates, locations, organizations, and more</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Topic Modeling</div>
+                      <p className="text-xs text-muted-foreground">Understand main themes and subject areas</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Readability Metrics</div>
+                      <p className="text-xs text-muted-foreground">Assess complexity and reading level</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Export Options</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Export analysis results as PDF or JSON</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Share insights with team members</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Integrate with other platform features</span>
+                    </li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Task Automation */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Task Automation</CardTitle>
+                <CardDescription>Automate repetitive workflows with AI-powered triggers</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Getting Started</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>Navigate to <strong>Dashboard → Task Automation</strong></li>
+                    <li>Click <strong>Create New Automation</strong></li>
+                    <li>Select a trigger event (e.g., "New document uploaded")</li>
+                    <li>Choose actions to automate (e.g., "Summarize and email")</li>
+                    <li>Save and activate your automation</li>
+                  </ol>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Available Triggers</h4>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Document Events</div>
+                      <p className="text-xs text-muted-foreground">New upload, edit, signature added, etc.</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Time-Based</div>
+                      <p className="text-xs text-muted-foreground">Daily, weekly, or monthly schedules</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Collaboration Events</div>
+                      <p className="text-xs text-muted-foreground">New comment, share link created, etc.</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Custom Conditions</div>
+                      <p className="text-xs text-muted-foreground">Define your own triggers based on rules</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Automation Actions</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Auto-Summarize:</strong> Generate summaries for new documents</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Send Notifications:</strong> Email alerts for important events</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Organize Files:</strong> Auto-categorize and tag documents</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Export Reports:</strong> Schedule automatic report generation</span>
+                    </li>
+                  </ul>
+                </div>
+                <Alert>
+                  <Lightbulb className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Pro Tip:</strong> Chain multiple actions together for complex workflows. Example: "New document → Summarize → Translate → Email team"
+                  </AlertDescription>
+                </Alert>
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Platform Features Tab - Placeholder */}
-          <TabsContent value="platform" className="mt-6">
+          {/* Platform Features Tab */}
+          <TabsContent value="platform" className="space-y-6 mt-6">
+            {/* Dashboard Navigation */}
             <Card>
               <CardHeader>
-                <CardTitle>Platform Features</CardTitle>
-                <CardDescription>Coming soon - general platform documentation</CardDescription>
+                <CardTitle>Dashboard Navigation</CardTitle>
+                <CardDescription>Master your personalized dashboard experience</CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  This section will cover dashboard navigation, profile management, networking features, 
-                  and other platform capabilities.
-                </p>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-3">Dashboard Layouts by Role</h4>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium text-primary mb-1">Startup Dashboard</div>
+                      <p className="text-xs text-muted-foreground">Pitch deck, investor network, CRM, analytics, and funding opportunities</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium text-primary mb-1">Mentor Dashboard</div>
+                      <p className="text-xs text-muted-foreground">Sessions calendar, mentorship requests, endorsements, and roadmaps</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium text-primary mb-1">Investor Dashboard</div>
+                      <p className="text-xs text-muted-foreground">Startup browser, deal flow, portfolio tracking, and pitch bookings</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium text-primary mb-1">Student Dashboard</div>
+                      <p className="text-xs text-muted-foreground">Jobs board, internships, courses, study groups, and achievements</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium text-primary mb-1">Advisor Dashboard</div>
+                      <p className="text-xs text-muted-foreground">Advisory roles, expertise areas, availability, and client management</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Quick Actions Menu</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Access frequently-used features instantly from the Quick Actions button (⚡ icon) in the top navigation bar.
+                  </p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Create new documents, posts, or events</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Start video calls or messaging</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Access your calendar or notifications</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Search across the entire platform</span>
+                    </li>
+                  </ul>
+                </div>
+                <Alert>
+                  <Lightbulb className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Navigation Tip:</strong> Use the Global Search (Ctrl+K) to quickly jump to any page, person, or document.
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
+
+            {/* Profile Management */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile Management</CardTitle>
+                <CardDescription>Build a compelling professional presence</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-2">Setting Up Your Profile</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>Click your avatar in the top-right corner</li>
+                    <li>Select <strong>Edit Profile</strong> from the dropdown</li>
+                    <li>Fill in your personal and professional information</li>
+                    <li>Upload a professional photo and company logo (if applicable)</li>
+                    <li>Add your background, expertise, and interests</li>
+                    <li>Set your availability and contact preferences</li>
+                  </ol>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Role-Specific Profile Fields</h4>
+                  <div className="space-y-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Startup Profiles</div>
+                      <p className="text-xs text-muted-foreground">Company description, team size, funding stage, pitch deck, traction metrics, industry, and target market</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Mentor/Advisor Profiles</div>
+                      <p className="text-xs text-muted-foreground">Expertise areas, years of experience, mentorship style, availability calendar, rates (if applicable), and endorsements</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Investor Profiles</div>
+                      <p className="text-xs text-muted-foreground">Investment thesis, ticket size, preferred industries, portfolio companies, investment stage focus, and contact preferences</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Student Profiles</div>
+                      <p className="text-xs text-muted-foreground">University, major, graduation year, skills, courses completed, achievements, and career interests</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Privacy Settings</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Profile Visibility:</strong> Control who can view your profile (Public, Network Only, Private)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Contact Info:</strong> Choose what contact details are visible to others</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Activity Status:</strong> Show or hide your online status and last active time</span>
+                    </li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Networking Features */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Networking Features</CardTitle>
+                <CardDescription>Build meaningful connections in the startup ecosystem</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-3">Connecting with Others</h4>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Follow</div>
+                      <p className="text-xs text-muted-foreground">Stay updated on someone's posts and activities without requesting a connection</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Connect</div>
+                      <p className="text-xs text-muted-foreground">Send connection requests to build your network and enable direct messaging</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Advanced Matching</div>
+                      <p className="text-xs text-muted-foreground">Use AI-powered matching to find the most relevant startups, mentors, or investors</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Network Browser</div>
+                      <p className="text-xs text-muted-foreground">Explore users by role, industry, location, and expertise</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Messaging & Communication</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Direct Messaging:</strong> Send private messages to your connections</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Video Conferencing:</strong> Start instant video calls with integrated Jitsi Meet</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Real-Time Status:</strong> See who's online and available for immediate communication</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Notification Center:</strong> Never miss important messages or connection requests</span>
+                    </li>
+                  </ul>
+                </div>
+                <Alert>
+                  <Lightbulb className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Networking Tip:</strong> Personalize connection requests with a brief message explaining why you'd like to connect. This significantly increases acceptance rates.
+                  </AlertDescription>
+                </Alert>
+              </CardContent>
+            </Card>
+
+            {/* Opportunities */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Opportunities Board</CardTitle>
+                <CardDescription>Discover jobs, internships, and mentorship opportunities</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-3">Jobs & Internships</h4>
+                  <div className="space-y-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-2">For Job Seekers & Students</div>
+                      <ul className="space-y-1 text-xs text-muted-foreground">
+                        <li>• Browse opportunities by role, industry, and location</li>
+                        <li>• Apply with one click using your platform profile</li>
+                        <li>• Track application status in real-time</li>
+                        <li>• Receive task assignments from employers</li>
+                      </ul>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-2">For Employers & Startups</div>
+                      <ul className="space-y-1 text-xs text-muted-foreground">
+                        <li>• Post job and internship opportunities</li>
+                        <li>• Review applications and candidate profiles</li>
+                        <li>• Send tasks to applicants for skill assessment</li>
+                        <li>• Communicate directly with candidates</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Mentorship Offers</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Mentors can post available mentorship slots, and students/startups can browse and request sessions.
+                  </p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Filter by expertise area, industry, and availability</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>View mentor profiles, endorsements, and session ratings</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Book sessions directly through the platform calendar</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">CRM & Pipeline Management</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Startups can manage their sales pipeline, track leads, and organize opportunities using the built-in CRM board with drag-and-drop Kanban interface.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Educational Resources */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Educational Resources</CardTitle>
+                <CardDescription>Learn, grow, and develop new skills</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-3">Courses & Learning Paths</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Video Courses:</strong> Access curated educational content on entrepreneurship, product development, marketing, and more</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Progress Tracking:</strong> Monitor your course completion and earn certificates</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Shorts:</strong> Quick educational videos (60-90 seconds) for on-the-go learning</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Study Groups</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Join or create study groups to collaborate with peers on courses, projects, or specific topics.
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Group Features</div>
+                      <p className="text-xs text-muted-foreground">Chat, file sharing, video calls, and collaborative documents</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Public & Private Groups</div>
+                      <p className="text-xs text-muted-foreground">Create open groups for networking or private ones for focused collaboration</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Resources Library</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Access templates, guides, case studies, and industry reports curated for startup founders, mentors, investors, and students.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Events & Sessions */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Events & Sessions</CardTitle>
+                <CardDescription>Participate in and host virtual events</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-3">Creating Events</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                    <li>Navigate to your dashboard and click <strong>Create Event</strong></li>
+                    <li>Add event details: title, description, date, time, and duration</li>
+                    <li>Set event type: Public, Network Only, or Private</li>
+                    <li>Enable registration if needed and set capacity limits</li>
+                    <li>Publish your event and share it with your network</li>
+                  </ol>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Types of Sessions</h4>
+                  <div className="grid md:grid-cols-3 gap-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Pitch Sessions</div>
+                      <p className="text-xs text-muted-foreground">Startups can book time to pitch to investors</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Mentorship Sessions</div>
+                      <p className="text-xs text-muted-foreground">One-on-one or group mentoring with feedback and ratings</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Community Events</div>
+                      <p className="text-xs text-muted-foreground">Webinars, workshops, networking events, and more</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Unified Calendar</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    All your events, sessions, and bookings appear in your personal calendar with reminders and notifications.
+                  </p>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Sync with external calendars (Google, Outlook)</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Set availability windows for bookings</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span>Receive notifications before scheduled events</span>
+                    </li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Analytics */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Analytics & Insights</CardTitle>
+                <CardDescription>Track performance and gain actionable insights</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h4 className="font-semibold mb-3">Profile Metrics</h4>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Profile Views:</strong> See who viewed your profile and when</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Network Growth:</strong> Track follower and connection trends over time</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-primary">•</span>
+                      <span><strong>Engagement Rate:</strong> Monitor interactions on your posts and content</span>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-3">Startup Analytics Dashboard</h4>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Exclusive to startup profiles, offering comprehensive business metrics and insights.
+                  </p>
+                  <div className="grid md:grid-cols-2 gap-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Traction Metrics</div>
+                      <p className="text-xs text-muted-foreground">Revenue, users, growth rate, and key milestones</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Investor Interest</div>
+                      <p className="text-xs text-muted-foreground">Profile views from investors, pitch requests, and follow-ups</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">Roadmap Progress</div>
+                      <p className="text-xs text-muted-foreground">Track milestone completion and goal achievement</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="font-medium mb-1">AI Recommendations</div>
+                      <p className="text-xs text-muted-foreground">Get personalized suggestions for growth and fundraising</p>
+                    </div>
+                  </div>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">Market Intelligence</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Access market trends, industry analysis, and AI-powered predictions to inform strategic decisions (available for Pro users).
+                  </p>
+                </div>
+                <Alert>
+                  <Lightbulb className="h-4 w-4" />
+                  <AlertDescription>
+                    <strong>Pro Tip:</strong> Review your analytics weekly to identify trends, optimize your profile, and adjust your networking strategy.
+                  </AlertDescription>
+                </Alert>
               </CardContent>
             </Card>
           </TabsContent>
