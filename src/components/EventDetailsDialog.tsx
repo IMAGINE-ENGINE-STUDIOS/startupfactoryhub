@@ -167,7 +167,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
           onOpenChange(false);
         }
       }}>
-        <DialogContent className="max-w-5xl h-[90vh]">
+        <DialogContent className="max-w-5xl h-[90vh] p-0">
           <VideoConferencing
             roomUrl={event.location}
             userId={user?.id}

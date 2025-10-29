@@ -150,6 +150,11 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
           disableDeepLinking: true,
           subject: meetingTitle || 'Startup Factory Hub Meeting',
           defaultRemoteDisplayName: 'Participant',
+          requireDisplayName: false, // Don't require name
+          enableLobbyChat: false, // Disable lobby waiting
+          autoKnockLobby: false, // Don't wait in lobby
+          enableInsecureRoomNameWarning: false, // Disable warning
+          disableSelfView: false, // Allow self view
         },
         interfaceConfigOverwrite: {
           APP_NAME: 'Startup Factory Hub',
