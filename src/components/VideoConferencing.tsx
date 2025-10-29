@@ -51,19 +51,29 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
 
   // Auto-join when autoJoin prop is true and container is ready
   useEffect(() => {
-    if (autoJoin && roomUrl && containerRef.current && !isCallActive && !isLoading) {
-      // Wait for container to have dimensions before starting
+    if (autoJoin && roomUrl && !isCallActive && !isLoading) {
+      // Wait for container to be mounted and have dimensions
       const checkAndStart = () => {
-        const rect = containerRef.current?.getBoundingClientRect();
+        if (!containerRef.current) {
+          console.log('Container ref not ready, retrying...');
+          setTimeout(checkAndStart, 50);
+          return;
+        }
+        
+        const rect = containerRef.current.getBoundingClientRect();
+        console.log('Container dimensions check:', rect);
+        
         if (rect && rect.width > 0 && rect.height > 0) {
+          console.log('Container ready with dimensions:', rect.width, 'x', rect.height);
           startCall();
         } else {
-          // Retry after 100ms if dimensions not ready
-          setTimeout(checkAndStart, 100);
+          console.log('Container has 0x0 dimensions, retrying...');
+          setTimeout(checkAndStart, 50);
         }
       };
       
-      const timer = setTimeout(checkAndStart, 200);
+      // Start checking after a brief delay to ensure DOM is ready
+      const timer = setTimeout(checkAndStart, 100);
       return () => clearTimeout(timer);
     }
   }, [autoJoin, roomUrl, isCallActive, isLoading]);
@@ -277,17 +287,35 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
   return (
     <Card className="p-6">
       <div className="space-y-4">
-        {/* Always render container, toggle visibility */}
+        {/* Always render container with dimensions */}
         <div className="relative">
           <div 
             ref={containerRef}
             className="aspect-video bg-accent rounded-lg overflow-hidden"
             style={{
-              display: isCallActive ? 'block' : 'none',
               width: '100%',
-              minHeight: '400px'
+              height: '100%',
+              minHeight: '400px',
+              position: 'relative'
             }}
           />
+          
+          {/* Loading/waiting overlay when not active */}
+          {!isCallActive && (
+            <div className="absolute inset-0 bg-accent rounded-lg flex items-center justify-center z-10">
+              {isLoading ? (
+                <div className="flex flex-col items-center gap-2">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                  <p className="text-sm text-muted-foreground">Connecting to meeting...</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center gap-2">
+                  <Video className="h-8 w-8 opacity-50" />
+                  <p className="text-sm text-muted-foreground">Ready to join</p>
+                </div>
+              )}
+            </div>
+          )}
           
           {/* Show overlay badges when call is active */}
           {isCallActive && (
@@ -305,8 +333,8 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
           )}
         </div>
 
-        {/* Show join button when not active */}
-        {!isCallActive && (
+        {/* Show join button when not active and not auto-joining */}
+        {!isCallActive && !autoJoin && (
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <Video className="h-5 w-5" />
@@ -329,9 +357,6 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
                 </>
               )}
             </Button>
-            <p className="text-xs text-muted-foreground text-center">
-              Ready to join when you are
-            </p>
           </div>
         )}
 
