@@ -36,6 +36,7 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
   const [isMicOn, setIsMicOn] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [participantCount, setParticipantCount] = useState(1);
+  const [jitsiLoaded, setJitsiLoaded] = useState(false);
   const { toast } = useToast();
   
   const jitsiApiRef = useRef<any>(null);
@@ -177,11 +178,14 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
 
       const api = new window.JitsiMeetExternalAPI(domain, options);
       jitsiApiRef.current = api;
+      
+      // Hide overlay immediately when Jitsi starts loading
+      setJitsiLoaded(true);
+      setIsLoading(false);
 
       // Event listeners
       api.on('videoConferenceJoined', () => {
         setIsCallActive(true);
-        setIsLoading(false);
         toast({
           title: 'Joined meeting',
           description: 'You are now in the video call',
@@ -296,12 +300,13 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
               width: '100%',
               height: '100%',
               minHeight: '400px',
-              position: 'relative'
+              position: 'relative',
+              zIndex: 1
             }}
           />
           
           {/* Loading/waiting overlay when not active */}
-          {!isCallActive && (
+          {!jitsiLoaded && (
             <div className="absolute inset-0 bg-accent rounded-lg flex items-center justify-center z-10">
               {isLoading ? (
                 <div className="flex flex-col items-center gap-2">
