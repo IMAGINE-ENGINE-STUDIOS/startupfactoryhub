@@ -1,24 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-  Video,
-  VideoOff,
-  Mic,
-  MicOff,
-  Phone,
-  Users,
-  Loader2,
-} from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-
-// Jitsi External API types
-declare global {
-  interface Window {
-    JitsiMeetExternalAPI: any;
-  }
-}
+import { Video, Loader2 } from 'lucide-react';
 
 interface VideoConferencingProps {
   roomUrl?: string;
@@ -30,380 +13,114 @@ interface VideoConferencingProps {
   autoJoin?: boolean;
 }
 
-export default function VideoConferencing({ roomUrl, userId, hostId, userName, meetingTitle, onLeave, autoJoin }: VideoConferencingProps) {
-  const [isCallActive, setIsCallActive] = useState(false);
-  const [isCameraOn, setIsCameraOn] = useState(true);
-  const [isMicOn, setIsMicOn] = useState(true);
+export default function VideoConferencing({
+  roomUrl,
+  userName = 'User',
+  meetingTitle,
+  onLeave,
+  autoJoin = false,
+}: VideoConferencingProps) {
+  const [isCallActive, setIsCallActive] = useState(autoJoin);
   const [isLoading, setIsLoading] = useState(false);
-  const [participantCount, setParticipantCount] = useState(1);
-  const [jitsiLoaded, setJitsiLoaded] = useState(false);
-  const { toast } = useToast();
-  
-  const jitsiApiRef = useRef<any>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    return () => {
-      if (jitsiApiRef.current) {
-        jitsiApiRef.current.dispose();
-      }
-    };
-  }, []);
-
-  // Auto-join when autoJoin prop is true and container is ready
-  useEffect(() => {
-    if (autoJoin && roomUrl && !isCallActive && !isLoading) {
-      // Wait for container to be mounted and have dimensions
-      const checkAndStart = () => {
-        if (!containerRef.current) {
-          console.log('Container ref not ready, retrying...');
-          setTimeout(checkAndStart, 50);
-          return;
-        }
-        
-        const rect = containerRef.current.getBoundingClientRect();
-        console.log('Container dimensions check:', rect);
-        
-        if (rect && rect.width > 0 && rect.height > 0) {
-          console.log('Container ready with dimensions:', rect.width, 'x', rect.height);
-          startCall();
-        } else {
-          console.log('Container has 0x0 dimensions, retrying...');
-          setTimeout(checkAndStart, 50);
-        }
-      };
-      
-      // Start checking after a brief delay to ensure DOM is ready
-      const timer = setTimeout(checkAndStart, 100);
-      return () => clearTimeout(timer);
+  // Extract room name from Whereby URL or use event ID
+  const getRoomName = () => {
+    if (!roomUrl) return '';
+    
+    // If it's already a Whereby URL, extract the room name
+    if (roomUrl.includes('whereby.com')) {
+      return roomUrl.split('/').pop() || '';
     }
-  }, [autoJoin, roomUrl, isCallActive, isLoading]);
-
-  const startCall = async () => {
-    if (!roomUrl) {
-      toast({
-        title: 'No meeting URL',
-        description: 'Please provide a valid meeting URL',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    if (!window.JitsiMeetExternalAPI) {
-      toast({
-        title: 'Error',
-        description: 'Jitsi Meet is not loaded yet. Please try again.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-    // Check if container is ready
-    if (!containerRef.current) {
-      toast({
-        title: 'Container not ready',
-        description: 'Video container is still loading. Please try again in a moment.',
-        variant: 'destructive',
-      });
-      return;
-    }
-
-
-    // Validate container has dimensions
-    const containerRect = containerRef.current.getBoundingClientRect();
-    if (containerRect.width === 0 || containerRect.height === 0) {
-      console.error('Container dimensions invalid:', containerRect);
-      toast({
-        title: 'Container has no dimensions',
-        description: `Container size: ${containerRect.width}x${containerRect.height}. This shouldn't happen - please report this bug.`,
-        variant: 'destructive',
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-
-      // Extract room name from URL
-      let roomName = roomUrl.split('/').pop() || roomUrl;
-      
-      // Remove any existing hash or query params
-      roomName = roomName.split('#')[0].split('?')[0];
-
-      // CRITICAL FIX: Append hash config to force open meeting mode
-      // This tells Jitsi to skip lobby and allow everyone to join
-      const configHash = '#config.prejoinPageEnabled=false&config.requireDisplayName=false&config.startWithVideoMuted=false&config.startWithAudioMuted=false';
-      roomName = `${roomName}${configHash}`;
-
-      // Use meet.jit.si (URL hash configs are respected by Jitsi)
-      const domain = 'meet.jit.si';
-      const isHost = userId && hostId && userId === hostId;
-      
-      const options = {
-        roomName: roomName,
-        width: '100%',
-        height: '100%',
-        parentNode: containerRef.current,
-        userInfo: {
-          displayName: userName || 'User',
-          // Moderator flag doesn't work on public servers
-        },
-        configOverwrite: {
-          startWithAudioMuted: false,
-          startWithVideoMuted: false,
-          enableWelcomePage: false,
-          prejoinPageEnabled: false,
-          disableDeepLinking: true,
-          subject: meetingTitle || 'Startup Factory Hub Meeting',
-          defaultRemoteDisplayName: 'Participant',
-        },
-        interfaceConfigOverwrite: {
-          APP_NAME: 'Startup Factory Hub',
-          SHOW_JITSI_WATERMARK: false,
-          SHOW_WATERMARK_FOR_GUESTS: false,
-          SHOW_BRAND_WATERMARK: false,
-          BRAND_WATERMARK_LINK: '',
-          DEFAULT_BACKGROUND: '#1a1a2e',
-          TOOLBAR_BUTTONS: [
-            'microphone', 'camera', 'closedcaptions', 'desktop',
-            'fullscreen', 'fodeviceselection', 'hangup', 'chat',
-            'recording', 'livestreaming', 'settings', 'raisehand', 
-            'videoquality', 'filmstrip', 'stats', 'shortcuts', 
-            'tileview', 'mute-everyone'
-          ],
-        },
-      };
-
-      console.log('Initializing Jitsi with:', {
-        roomName,
-        domain,
-        isHost,
-        containerReady: !!containerRef.current,
-        containerDimensions: containerRef.current?.getBoundingClientRect(),
-      });
-
-      const api = new window.JitsiMeetExternalAPI(domain, options);
-      jitsiApiRef.current = api;
-      
-      // Hide overlay immediately when Jitsi starts loading
-      setJitsiLoaded(true);
-      setIsLoading(false);
-
-      // Event listeners
-      api.on('videoConferenceJoined', () => {
-        setIsCallActive(true);
-        toast({
-          title: 'Joined meeting',
-          description: 'You are now in the video call',
-        });
-      });
-
-      // Sync camera/mic state with Jitsi
-      api.on('videoMuteStatusChanged', (data: any) => {
-        setIsCameraOn(!data.muted);
-      });
-
-      api.on('audioMuteStatusChanged', (data: any) => {
-        setIsMicOn(!data.muted);
-      });
-
-      api.on('participantJoined', () => {
-        const count = api.getNumberOfParticipants();
-        setParticipantCount(count);
-      });
-
-      api.on('participantLeft', () => {
-        const count = api.getNumberOfParticipants();
-        setParticipantCount(count);
-      });
-
-      api.on('videoConferenceLeft', () => {
-        setIsCallActive(false);
-        onLeave?.();
-      });
-
-      api.on('readyToClose', () => {
-        api.dispose();
-        jitsiApiRef.current = null;
-        setIsCallActive(false);
-        onLeave?.();
-      });
-
-      api.on('errorOccurred', (error: any) => {
-        console.error('Jitsi error occurred:', error);
-        toast({
-          title: 'Video call error',
-          description: error.message || 'An error occurred in the video call',
-          variant: 'destructive',
-        });
-      });
-
-    } catch (error: any) {
-      console.error('Error starting Jitsi call:', error);
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        containerRef: containerRef.current,
-        roomUrl,
-      });
-      toast({
-        title: 'Failed to start call',
-        description: error.message || 'Could not connect to the video call. Check console for details.',
-        variant: 'destructive',
-      });
-      setIsLoading(false);
-    }
+    
+    // Otherwise, use the URL as the room identifier
+    return roomUrl.split('/').pop() || roomUrl;
   };
 
-  const endCall = async () => {
-    if (jitsiApiRef.current) {
-      jitsiApiRef.current.executeCommand('hangup');
-      jitsiApiRef.current.dispose();
-      jitsiApiRef.current = null;
-    }
+  const wherebyUrl = `https://whereby.com/${getRoomName()}?displayName=${encodeURIComponent(userName)}&roomMode=normal&minimal&embed`;
+
+  const handleJoin = () => {
+    setIsCallActive(true);
+    setIsLoading(false);
+  };
+
+  const handleLeave = () => {
     setIsCallActive(false);
-    toast({
-      title: 'Call ended',
-      description: 'You have left the meeting',
-    });
-    onLeave?.();
-  };
-
-  const toggleCamera = () => {
-    if (jitsiApiRef.current) {
-      jitsiApiRef.current.executeCommand('toggleVideo');
-      // Don't immediately update state - wait for Jitsi event
-    }
-  };
-
-  const toggleMic = () => {
-    if (jitsiApiRef.current) {
-      jitsiApiRef.current.executeCommand('toggleAudio');
-      // Don't immediately update state - wait for Jitsi event
+    if (onLeave) {
+      onLeave();
     }
   };
 
   if (!roomUrl) {
     return (
-      <Card className="p-6">
-        <div className="text-center text-muted-foreground">
-          <Video className="h-12 w-12 mx-auto mb-2 opacity-50" />
-          <p>No active meeting</p>
-        </div>
+      <Card className="p-8 text-center">
+        <Video className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+        <h3 className="text-lg font-semibold mb-2">No Active Meeting</h3>
+        <p className="text-muted-foreground">
+          There's no meeting link available for this event.
+        </p>
       </Card>
     );
   }
 
   return (
-    <Card className="p-6">
-      <div className="space-y-4">
-        {/* Always render container with dimensions */}
-        <div className="relative">
-          <div 
-            ref={containerRef}
-            className="aspect-video bg-accent rounded-lg overflow-hidden"
-            style={{
-              width: '100%',
-              height: '100%',
-              minHeight: '400px',
-              position: 'relative',
-              zIndex: 1
-            }}
-          />
-          
-          {/* Loading/waiting overlay when not active */}
-          {!jitsiLoaded && (
-            <div className="absolute inset-0 bg-accent rounded-lg flex items-center justify-center z-10">
-              {isLoading ? (
-                <div className="flex flex-col items-center gap-2">
-                  <Loader2 className="h-8 w-8 animate-spin" />
-                  <p className="text-sm text-muted-foreground">Connecting to meeting...</p>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center gap-2">
-                  <Video className="h-8 w-8 opacity-50" />
-                  <p className="text-sm text-muted-foreground">Ready to join</p>
-                </div>
-              )}
+    <Card className="relative overflow-hidden bg-secondary/5 h-full flex flex-col">
+      <div className="flex-1 relative rounded-lg overflow-hidden" style={{ minHeight: '500px' }}>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/95 z-10">
+            <div className="text-center space-y-4">
+              <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
+              <p className="text-lg font-semibold">Connecting to meeting...</p>
             </div>
-          )}
-          
-          {/* Show overlay badges when call is active */}
-          {isCallActive && (
-            <div className="absolute top-4 left-4 right-4 z-10 flex justify-between items-start">
-              <Badge className="bg-background/80 backdrop-blur">
-                <Users className="h-3 w-3 mr-1" />
-                {participantCount} {participantCount === 1 ? 'participant' : 'participants'}
-              </Badge>
-              {userId && hostId && userId === hostId && (
-                <Badge variant="default" className="bg-primary">
-                  Host
-                </Badge>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Show join button when not active and not auto-joining */}
-        {!isCallActive && !autoJoin && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <Video className="h-5 w-5" />
-              <h3 className="font-semibold">Video Conferencing</h3>
-            </div>
-            <Button 
-              className="w-full" 
-              onClick={startCall}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Connecting...
-                </>
-              ) : (
-                <>
-                  <Video className="h-4 w-4 mr-2" />
-                  Join Video Call
-                </>
-              )}
-            </Button>
           </div>
         )}
 
-        {/* Show controls when call is active */}
-        {isCallActive && (
-          <div className="flex items-center justify-center gap-4">
-            <Button
-              variant={isCameraOn ? 'default' : 'destructive'}
-              size="icon"
-              className="h-12 w-12 rounded-full"
-              onClick={toggleCamera}
-            >
-              {isCameraOn ? <Video className="h-5 w-5" /> : <VideoOff className="h-5 w-5" />}
-            </Button>
-
-            <Button
-              variant={isMicOn ? 'default' : 'destructive'}
-              size="icon"
-              className="h-12 w-12 rounded-full"
-              onClick={toggleMic}
-            >
-              {isMicOn ? <Mic className="h-5 w-5" /> : <MicOff className="h-5 w-5" />}
-            </Button>
-
-            <Button
-              variant="destructive"
-              size="icon"
-              className="h-12 w-12 rounded-full"
-              onClick={endCall}
-            >
-              <Phone className="h-5 w-5" />
-            </Button>
+        {/* Waiting to Join State */}
+        {!isCallActive && !isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
+            <div className="text-center space-y-6 p-8">
+              <div className="relative">
+                <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full"></div>
+                <Video className="h-24 w-24 mx-auto text-primary relative z-10" />
+              </div>
+              <div className="space-y-2">
+                <h3 className="text-2xl font-bold">Ready to Join?</h3>
+                <p className="text-muted-foreground max-w-md">
+                  {meetingTitle || 'Video Meeting'}
+                </p>
+                {userName && (
+                  <p className="text-sm text-muted-foreground">
+                    Joining as: <span className="font-medium text-foreground">{userName}</span>
+                  </p>
+                )}
+              </div>
+              <Button size="lg" onClick={handleJoin} className="gap-2 px-8">
+                <Video className="h-5 w-5" />
+                Join Video Call
+              </Button>
+            </div>
           </div>
+        )}
+
+        {/* Whereby Embed */}
+        {isCallActive && (
+          <iframe
+            src={wherebyUrl}
+            allow="camera; microphone; fullscreen; speaker; display-capture; compute-pressure"
+            className="w-full h-full border-0"
+            style={{ minHeight: '500px' }}
+          />
         )}
       </div>
+
+      {/* Leave Button */}
+      {isCallActive && (
+        <div className="p-4 bg-background border-t flex items-center justify-center">
+          <Button variant="destructive" size="lg" onClick={handleLeave} className="gap-2">
+            Leave Meeting
+          </Button>
+        </div>
+      )}
     </Card>
   );
 }

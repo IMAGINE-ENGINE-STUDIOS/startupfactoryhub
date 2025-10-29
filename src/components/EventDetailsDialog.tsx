@@ -145,7 +145,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
 
   const isOrganizer = user?.id === event.organizer_id;
   const isFull = event.max_attendees && attendees.length >= event.max_attendees;
-  const isOnlineEvent = event.location?.includes('meet.jit.si');
+  const isOnlineEvent = event.location?.includes('whereby.com') || event.location?.includes('meet.jit.si');
   const eventDate = new Date(event.start_date);
   const now = new Date();
   const isWithin15Min = eventDate.getTime() - now.getTime() < 15 * 60 * 1000 && eventDate.getTime() > now.getTime();
@@ -169,7 +169,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
       }}>
         <DialogContent className="max-w-5xl h-[90vh] p-0">
           <VideoConferencing
-            roomUrl={event.location || `https://meet.jit.si/${event.id}`}
+            roomUrl={event.location || `https://whereby.com/startup-factory-${event.id}`}
             userId={user?.id}
             hostId={event.organizer_id}
             userName={userProfile?.full_name || 'User'}
@@ -318,10 +318,10 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
           {isOnlineEvent && user && (userStatus === 'going' || isOrganizer) && (
             <div className="pt-4 border-t space-y-4">
               {isOrganizer && (
-                <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 text-sm">
-                  <p className="font-semibold text-yellow-600 dark:text-yellow-400">Host Tip:</p>
+                <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-sm">
+                  <p className="font-semibold text-primary">Host Tip:</p>
                   <p className="text-muted-foreground">
-                    Join first to automatically become the meeting moderator. The first person to join gets moderator privileges.
+                    You can start the meeting anytime. Everyone who joins will enter the same room automatically.
                   </p>
                 </div>
               )}
