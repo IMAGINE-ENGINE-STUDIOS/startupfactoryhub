@@ -11,6 +11,7 @@ interface VideoConferencingProps {
   meetingTitle?: string;
   onLeave?: () => void;
   autoJoin?: boolean;
+  eventId?: string;
 }
 
 export default function VideoConferencing({
@@ -19,28 +20,52 @@ export default function VideoConferencing({
   meetingTitle,
   onLeave,
   autoJoin = false,
+  eventId,
 }: VideoConferencingProps) {
   const [isCallActive, setIsCallActive] = useState(autoJoin);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeRoomUrl, setActiveRoomUrl] = useState(roomUrl);
 
-  // Extract room name from Whereby URL or use event ID
-  const getRoomName = () => {
-    if (!roomUrl) return '';
+  const handleJoin = async () => {
+    setIsLoading(true);
     
-    // If it's already a Whereby URL, extract the room name
-    if (roomUrl.includes('whereby.com')) {
-      return roomUrl.split('/').pop() || '';
+    // If we already have a Whereby room URL, use it
+    if (roomUrl && roomUrl.includes('whereby.com')) {
+      setActiveRoomUrl(roomUrl);
+      setIsCallActive(true);
+      setIsLoading(false);
+      return;
     }
     
-    // Otherwise, use the URL as the room identifier
-    return roomUrl.split('/').pop() || roomUrl;
-  };
-
-  const wherebyUrl = `https://whereby.com/${getRoomName()}?displayName=${encodeURIComponent(userName)}&roomMode=normal&minimal&embed`;
-
-  const handleJoin = () => {
-    setIsCallActive(true);
-    setIsLoading(false);
+    // Otherwise, create a new room via API
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-whereby-room`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            roomName: eventId ? `event-${eventId}` : `room-${Date.now()}`,
+          }),
+        }
+      );
+      
+      if (!response.ok) {
+        throw new Error('Failed to create meeting room');
+      }
+      
+      const data = await response.json();
+      setActiveRoomUrl(data.roomUrl);
+      setIsCallActive(true);
+    } catch (error) {
+      console.error('Error creating room:', error);
+      alert('Failed to create meeting room. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLeave = () => {
@@ -50,17 +75,9 @@ export default function VideoConferencing({
     }
   };
 
-  if (!roomUrl) {
-    return (
-      <Card className="p-8 text-center">
-        <Video className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-        <h3 className="text-lg font-semibold mb-2">No Active Meeting</h3>
-        <p className="text-muted-foreground">
-          There's no meeting link available for this event.
-        </p>
-      </Card>
-    );
-  }
+  const displayUrl = activeRoomUrl 
+    ? `${activeRoomUrl}?displayName=${encodeURIComponent(userName)}&roomMode=normal&minimal&embed`
+    : '';
 
   return (
     <Card className="relative overflow-hidden bg-secondary/5 h-full flex flex-col">
@@ -103,9 +120,9 @@ export default function VideoConferencing({
         )}
 
         {/* Whereby Embed */}
-        {isCallActive && (
+        {isCallActive && displayUrl && (
           <iframe
-            src={wherebyUrl}
+            src={displayUrl}
             allow="camera; microphone; fullscreen; speaker; display-capture; compute-pressure"
             className="w-full h-full border-0"
             style={{ minHeight: '500px' }}

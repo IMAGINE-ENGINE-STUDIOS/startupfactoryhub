@@ -44,3 +44,6 @@ verify_jwt = true
 
 [functions.parse-document]
 verify_jwt = true
+
+[functions.create-whereby-room]
+verify_jwt = true

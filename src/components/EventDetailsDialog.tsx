@@ -145,7 +145,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
 
   const isOrganizer = user?.id === event.organizer_id;
   const isFull = event.max_attendees && attendees.length >= event.max_attendees;
-  const isOnlineEvent = event.location?.includes('whereby.com') || event.location?.includes('meet.jit.si');
+  const isOnlineEvent = event.location?.includes('whereby.com');
   const eventDate = new Date(event.start_date);
   const now = new Date();
   const isWithin15Min = eventDate.getTime() - now.getTime() < 15 * 60 * 1000 && eventDate.getTime() > now.getTime();
@@ -169,12 +169,13 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
       }}>
         <DialogContent className="max-w-5xl h-[90vh] p-0">
           <VideoConferencing
-            roomUrl={event.location || `https://whereby.com/startup-factory-${event.id}`}
+            roomUrl={event.location}
             userId={user?.id}
             hostId={event.organizer_id}
             userName={userProfile?.full_name || 'User'}
             meetingTitle={event.title}
             autoJoin={true}
+            eventId={event.id}
             onLeave={() => {
               setShowVideo(false);
               onOpenChange(false);
