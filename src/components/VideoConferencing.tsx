@@ -125,21 +125,17 @@ export default function VideoConferencing({ roomUrl, userId, hostId, userName, m
     try {
       setIsLoading(true);
 
-      // Extract room name from URL and format it to bypass lobby
+      // Extract room name from URL
       // Format: https://meet.jit.si/RoomName or just RoomName
       let roomName = roomUrl.split('/').pop() || roomUrl;
       
       // Remove any existing hash or query params
       roomName = roomName.split('#')[0].split('?')[0];
 
-      // Initialize Jitsi Meet
-      const domain = 'meet.jit.si';
+      // Use 8x8.vc instead of meet.jit.si - it has more relaxed lobby policies
+      // and allows everyone to join without moderator approval
+      const domain = '8x8.vc';
       const isHost = userId && hostId && userId === hostId;
-      
-      // For public meet.jit.si, append timestamp to make room unique and bypass lobby patterns
-      if (domain === 'meet.jit.si') {
-        roomName = `${roomName}-${Date.now()}`;
-      }
       
       const options = {
         roomName: roomName,
