@@ -248,7 +248,7 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
       // Create Whereby room
       const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
         body: { 
-          roomName: `session-${formData.mentor_id}-${user.id}-${Date.now()}`,
+          roomName: `sess-${Math.random().toString(36).substring(2, 10)}`,
           startDate: selectedSlot.datetime.toISOString()
         }
       });

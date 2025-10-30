@@ -206,7 +206,7 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
                     try {
                       const { data, error } = await supabase.functions.invoke('create-whereby-room', {
                         body: { 
-                          roomName: `event-${crypto.randomUUID()}`,
+                          roomName: `evt-${Math.random().toString(36).substring(2, 10)}`,
                           startDate: formData.start_date && formData.start_time 
                             ? new Date(`${formData.start_date}T${formData.start_time}`).toISOString() 
                             : undefined,

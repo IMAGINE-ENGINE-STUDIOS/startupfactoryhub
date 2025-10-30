@@ -5,6 +5,11 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Helper function to generate short unique ID (8 chars)
+function generateShortId(): string {
+  return Math.random().toString(36).substring(2, 10);
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -18,6 +23,9 @@ serve(async (req) => {
       throw new Error("Whereby API key not configured");
     }
 
+    // Shorten room name to max 20 characters for Whereby API
+    const shortRoomName = roomName ? roomName.substring(0, 15) : generateShortId();
+
     // Create a Whereby room using their API
     const response = await fetch("https://api.whereby.dev/v1/meetings", {
       method: "POST",
@@ -28,7 +36,7 @@ serve(async (req) => {
       body: JSON.stringify({
         endDate: endDate || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Default 24 hours
         fields: ["hostRoomUrl"],
-        roomNamePrefix: roomName ? `/${roomName}` : undefined,
+        roomNamePrefix: `/${shortRoomName}`,
         roomMode: "normal",
       }),
     });

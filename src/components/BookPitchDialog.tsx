@@ -106,7 +106,7 @@ export default function BookPitchDialog({
       // Create Whereby room
       const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
         body: { 
-          roomName: `pitch-${companyId}-${investorId}-${Date.now()}`,
+          roomName: `pitch-${Date.now().toString(36).slice(-8)}`,
           startDate: scheduledDate.toISOString()
         }
       });
