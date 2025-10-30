@@ -145,9 +145,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
 
   const isOrganizer = user?.id === event.organizer_id;
   const isFull = event.max_attendees && attendees.length >= event.max_attendees;
-  const isOnlineEvent = event.location?.includes('whereby.com') || event.location?.includes('meet.jit.si');
-  const videoService = event.location?.includes('whereby.com') ? 'whereby' : 
-                       event.location?.includes('meet.jit.si') ? 'jitsi' : null;
+  const isOnlineEvent = event.location?.includes('whereby.com');
   const eventDate = new Date(event.start_date);
   const now = new Date();
   const isWithin15Min = eventDate.getTime() - now.getTime() < 15 * 60 * 1000 && eventDate.getTime() > now.getTime();
@@ -324,9 +322,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                 <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-sm">
                   <p className="font-semibold text-primary">Host Tip:</p>
                   <p className="text-muted-foreground">
-                    {videoService === 'whereby' 
-                      ? 'You can start the meeting anytime. Attendees will join the same Whereby room automatically.'
-                      : 'You can start the meeting anytime. Everyone who joins will enter the same room automatically.'}
+                    You can start the meeting anytime. Attendees will join the same Whereby room automatically.
                   </p>
                 </div>
               )}

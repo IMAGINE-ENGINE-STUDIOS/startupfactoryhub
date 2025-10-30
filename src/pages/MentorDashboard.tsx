@@ -274,7 +274,7 @@ const MentorDashboard = () => {
                                    <span className="line-clamp-1">{event.location}</span>
                                  </div>
                                )}
-                               {event.location?.startsWith('https://meet.jit.si/') && (
+                               {event.location?.includes('whereby.com') && (
                                   <Button
                                     size="sm"
                                     variant="outline"

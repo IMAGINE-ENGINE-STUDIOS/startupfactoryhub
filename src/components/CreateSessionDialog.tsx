@@ -245,9 +245,16 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
         throw new Error('Invalid time slot selected');
       }
 
-      // Generate Jitsi Meet room URL
-      const sessionId = `session-${crypto.randomUUID()}`;
-      const meetingLink = `https://meet.jit.si/${sessionId}`;
+      // Create Whereby room
+      const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
+        body: { 
+          roomName: `session-${formData.mentor_id}-${user.id}-${Date.now()}`,
+          startDate: selectedSlot.datetime.toISOString()
+        }
+      });
+
+      if (roomError) throw roomError;
+      const meetingLink = roomData.roomUrl;
 
       const { error } = await supabase
         .from('mentoring_sessions')

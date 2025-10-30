@@ -977,7 +977,7 @@ export default function Guidelines() {
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary">•</span>
-                      <span><strong>Video Conferencing:</strong> Start instant video calls with integrated Jitsi Meet</span>
+                      <span><strong>Video Conferencing:</strong> Start instant video calls with integrated Whereby</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <span className="text-primary">•</span>

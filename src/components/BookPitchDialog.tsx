@@ -103,9 +103,16 @@ export default function BookPitchDialog({
       const scheduledDate = new Date(date);
       scheduledDate.setHours(hours, minutes, 0, 0);
 
-      // Generate Jitsi Meet room URL for video conferencing
-      const meetingId = `pitch-${crypto.randomUUID()}`;
-      const meetingLink = `https://meet.jit.si/${meetingId}`;
+      // Create Whereby room
+      const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
+        body: { 
+          roomName: `pitch-${companyId}-${investorId}-${Date.now()}`,
+          startDate: scheduledDate.toISOString()
+        }
+      });
+
+      if (roomError) throw roomError;
+      const meetingLink = roomData.roomUrl;
 
       // Create pitch meeting
       const { error: pitchError } = await supabase
