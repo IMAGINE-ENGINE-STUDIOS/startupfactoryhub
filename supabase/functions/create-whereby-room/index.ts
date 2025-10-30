@@ -23,8 +23,8 @@ serve(async (req) => {
       throw new Error("Whereby API key not configured");
     }
 
-    // Shorten room name to max 20 characters for Whereby API
-    const shortRoomName = roomName ? roomName.substring(0, 15) : generateShortId();
+    // Shorten room name to max 39 characters for Whereby API (using 30 for safety)
+    const shortRoomName = roomName ? roomName.substring(0, 30) : generateShortId();
 
     // Create a Whereby room using their API
     const response = await fetch("https://api.whereby.dev/v1/meetings", {
@@ -36,15 +36,15 @@ serve(async (req) => {
       body: JSON.stringify({
         endDate: endDate || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Default 24 hours
         fields: ["hostRoomUrl"],
-        roomNamePrefix: `/${shortRoomName}`,
+        roomNamePrefix: shortRoomName,
         roomMode: "normal",
       }),
     });
 
     if (!response.ok) {
-      const error = await response.text();
-      console.error("Whereby API error:", error);
-      throw new Error(`Failed to create Whereby room: ${response.status}`);
+      const error = await response.json();
+      console.error("Whereby API error:", JSON.stringify(error, null, 2));
+      throw new Error(`Whereby API error: ${error.message || error.error || response.status}`);
     }
 
     const data = await response.json();
