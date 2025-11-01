@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Rocket, Mail, Lock, User, UserCheck } from 'lucide-react';
+import { Home, Mail, Lock, User, UserCheck } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { signInSchema, signUpSchema } from '@/lib/validations';
 import { supabase } from '@/integrations/supabase/client';
@@ -151,18 +151,15 @@ export default function Auth() {
       {/* Matrix animated background */}
       <MatrixBackground />
       
-      {/* Theme toggle */}
-      <div className="absolute top-4 right-4">
+      {/* Top right navigation */}
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        <Link to="/">
+          <Button variant="ghost" size="icon" className="neon-glow">
+            <Home className="h-4 w-4" />
+          </Button>
+        </Link>
         <ThemeToggle />
       </div>
-      
-      {/* Back to home */}
-      <Link to="/" className="absolute top-4 left-4">
-        <Button variant="ghost" className="neon-glow">
-          <Rocket className="h-4 w-4 mr-2" />
-          Back to Home
-        </Button>
-      </Link>
 
       <div className="w-full max-w-md relative z-10">
         <Card className="tech-card border-0">
