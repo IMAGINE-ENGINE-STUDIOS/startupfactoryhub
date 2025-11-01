@@ -14,7 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye, Copy } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye, Copy, MoreVertical, XCircle } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 
 interface Job {
@@ -73,6 +74,7 @@ export default function UnifiedJobsBoard() {
   const [showApplicationsDialog, setShowApplicationsDialog] = useState(false);
   const [updatingApplicationId, setUpdatingApplicationId] = useState<string | null>(null);
   const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
+  const [closedJobs, setClosedJobs] = useState<Job[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -81,6 +83,12 @@ export default function UnifiedJobsBoard() {
       fetchAppliedJobs();
     }
   }, [user, categoryFilter]);
+
+  useEffect(() => {
+    if (userCompanyId) {
+      fetchClosedJobs();
+    }
+  }, [userCompanyId]);
 
   const fetchAppliedJobs = async () => {
     if (!user) return;
@@ -92,6 +100,89 @@ export default function UnifiedJobsBoard() {
     
     if (!error && data) {
       setAppliedJobs(new Set(data.map(app => app.job_id)));
+    }
+  };
+
+  const fetchClosedJobs = async () => {
+    if (!userCompanyId) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('jobs')
+        .select(`
+          *,
+          companies (
+            id,
+            name,
+            logo_url
+          )
+        `)
+        .eq('status', 'closed')
+        .eq('company_id', userCompanyId)
+        .order('updated_at', { ascending: false });
+
+      if (error) throw error;
+      setClosedJobs(data || []);
+    } catch (error) {
+      console.error('Error fetching closed jobs:', error);
+    }
+  };
+
+  const handleCloseJob = async (jobId: string) => {
+    if (!confirm('Close this job posting? It will no longer be visible to applicants.')) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .update({ status: 'closed' })
+        .eq('id', jobId)
+        .eq('company_id', userCompanyId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Job closed',
+        description: 'The job posting is no longer active',
+      });
+
+      fetchJobs();
+      fetchClosedJobs();
+    } catch (error) {
+      console.error('Error closing job:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to close job posting',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleReopenJob = async (jobId: string) => {
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .update({ status: 'active' })
+        .eq('id', jobId)
+        .eq('company_id', userCompanyId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Job reopened',
+        description: 'The job posting is now active again',
+      });
+
+      fetchJobs();
+      fetchClosedJobs();
+    } catch (error) {
+      console.error('Error reopening job:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to reopen job posting',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -798,6 +889,19 @@ export default function UnifiedJobsBoard() {
                           <span className="hidden sm:inline">Copy Public Link</span>
                           <span className="sm:hidden">Copy Link</span>
                         </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => handleCloseJob(job.id)}>
+                              <XCircle className="h-4 w-4 mr-2" />
+                              Close Job Posting
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </>
                     )}
                     {!isCompanyUser && (
@@ -844,6 +948,83 @@ export default function UnifiedJobsBoard() {
           ))
         )}
       </div>
+
+      {/* Closed Jobs Section (Company Owners Only) */}
+      {isCompanyUser && closedJobs.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <XCircle className="h-5 w-5 text-muted-foreground" />
+              <CardTitle>Closed Job Postings</CardTitle>
+            </div>
+            <CardDescription>Previously closed positions that can be reopened</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 md:grid-cols-2">
+              {closedJobs.map((job) => (
+                <Card key={job.id} className="opacity-60 hover:opacity-100 transition-opacity">
+                  <CardHeader>
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      {job.companies?.logo_url && (
+                        <img 
+                          src={job.companies.logo_url} 
+                          alt={job.companies.name} 
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover flex-shrink-0"
+                        />
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-base sm:text-lg break-words">{job.title}</CardTitle>
+                            <CardDescription className="text-sm truncate">{job.companies?.name}</CardDescription>
+                          </div>
+                          <Badge variant="destructive">CLOSED</Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-muted-foreground line-clamp-2">{job.description}</p>
+                    
+                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                      {job.location && (
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          <span className="truncate">{job.location}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <Users className="w-3 h-3" />
+                        {job.applications_count} applications received
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 pt-2">
+                      <Button
+                        onClick={() => handleReopenJob(job.id)}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                      >
+                        Reopen Job Posting
+                      </Button>
+                      <Button
+                        onClick={() => handleViewApplications(job.id)}
+                        variant="outline"
+                        size="sm"
+                        className="gap-1"
+                      >
+                        <Eye className="w-3 h-3" />
+                        View Apps
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Applications Dialog */}
       <Dialog open={showApplicationsDialog} onOpenChange={handleCloseApplicationsDialog}>

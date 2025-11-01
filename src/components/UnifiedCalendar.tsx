@@ -6,7 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
-import { Calendar as CalendarIcon, MapPin, Users, Clock, Video, User, Building } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Calendar as CalendarIcon, MapPin, Users, Clock, Video, User, Building, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { EditEventDialog } from '@/components/EditEventDialog';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { useMentoringSessions } from '@/hooks/useMentoringSessions';
 import { useMentorAvailability } from '@/hooks/useMentorAvailability';
@@ -52,9 +55,12 @@ export default function UnifiedCalendar({
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<any[]>([]);
   const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const { user } = useAuth();
   const { sessions } = useMentoringSessions();
   const { availability } = useMentorAvailability();
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchEvents();
@@ -178,6 +184,51 @@ export default function UnifiedCalendar({
     }));
 
     setPitchMeetings(enrichedMeetings);
+  };
+
+  const handleEditEvent = (item: CalendarItem) => {
+    const event = events.find(e => e.id === item.id);
+    if (event) {
+      setEditingEvent(event);
+      setShowEditDialog(true);
+    }
+  };
+
+  const handleDeleteEvent = async (eventId: string) => {
+    if (!confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // Delete associated event_attendees first
+      await supabase
+        .from('event_attendees')
+        .delete()
+        .eq('event_id', eventId);
+
+      // Delete the event
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', eventId)
+        .eq('organizer_id', user?.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Event deleted',
+        description: 'The event has been successfully deleted',
+      });
+
+      fetchEvents();
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete event',
+        variant: 'destructive',
+      });
+    }
   };
 
   // Combine all calendar items
@@ -409,28 +460,60 @@ export default function UnifiedCalendar({
                 <p className="text-sm">No items on this day</p>
               </div>
             ) : (
-              selectedDateItems.map(item => (
-                <div
-                  key={`${item.type}-${item.id}`}
-                  className="p-3 rounded-lg border hover:border-primary cursor-pointer transition-all overflow-hidden"
-                  onClick={() => onItemClick?.(item)}
-                >
-                  {/* Event Banner */}
-                  {item.type === 'event' && item.banner_url && (
-                    <img
-                      src={item.banner_url}
-                      alt={item.title}
-                      className="w-full h-24 object-cover rounded-lg mb-3 -mt-3 -mx-3"
-                      style={{ width: 'calc(100% + 1.5rem)' }}
-                    />
-                  )}
-                  
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-semibold text-sm">{item.title}</h3>
-                    <Badge variant="outline" className={`text-xs ${getItemTypeColor(item.type)}`}>
-                      {getItemTypeIcon(item.type)}
-                    </Badge>
-                  </div>
+              selectedDateItems.map(item => {
+                const event = events.find(e => e.id === item.id);
+                const isOrganizer = item.type === 'event' && user?.id === event?.organizer_id;
+                
+                return (
+                  <div
+                    key={`${item.type}-${item.id}`}
+                    className="p-3 rounded-lg border hover:border-primary transition-all overflow-hidden"
+                  >
+                    {/* Event Banner */}
+                    {item.type === 'event' && item.banner_url && (
+                      <img
+                        src={item.banner_url}
+                        alt={item.title}
+                        className="w-full h-24 object-cover rounded-lg mb-3 -mt-3 -mx-3"
+                        style={{ width: 'calc(100% + 1.5rem)' }}
+                      />
+                    )}
+                    
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 
+                        className="font-semibold text-sm cursor-pointer hover:text-primary flex-1"
+                        onClick={() => onItemClick?.(item)}
+                      >
+                        {item.title}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className={`text-xs ${getItemTypeColor(item.type)}`}>
+                          {getItemTypeIcon(item.type)}
+                        </Badge>
+                        {isOrganizer && (
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-6 w-6">
+                                <MoreVertical className="h-3 w-3" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => handleEditEvent(item)}>
+                                <Pencil className="h-4 w-4 mr-2" />
+                                Edit Event
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                onClick={() => handleDeleteEvent(item.id)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4 mr-2" />
+                                Delete Event
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        )}
+                      </div>
+                    </div>
                   
                   <div className="space-y-1 text-xs text-muted-foreground">
                     <div className="flex items-center gap-2">
@@ -502,14 +585,23 @@ export default function UnifiedCalendar({
                           </Badge>
                         )}
                       </>
-                    )}
+                     )}
+                   </div>
                   </div>
-                </div>
-              ))
+               );
+             })
             )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Edit Event Dialog */}
+      <EditEventDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        onEventUpdated={fetchEvents}
+        event={editingEvent}
+      />
     </div>
   );
 }
