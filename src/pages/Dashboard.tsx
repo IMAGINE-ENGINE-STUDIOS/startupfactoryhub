@@ -26,7 +26,7 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import JobTaskManager from '@/components/JobTaskManager';
 import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
-import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench } from "lucide-react";
+import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import GuestPrompt from '@/components/GuestPrompt';
@@ -63,6 +63,7 @@ const Dashboard = () => {
   const [createPitchDialogOpen, setCreatePitchDialogOpen] = useState(false);
   const [companyId, setCompanyId] = useState<string>('');
   const [companyName, setCompanyName] = useState<string>('');
+  const [connectedInvestors, setConnectedInvestors] = useState<Array<{id: string, name: string}>>([]);
 
   // Redirect if wrong role
   useEffect(() => {
@@ -90,6 +91,40 @@ const Dashboard = () => {
     if (data) {
       setCompanyId(data.id);
       setCompanyName(data.name);
+      
+      // Fetch connected investors
+      const { data: investments } = await supabase
+        .from('investments')
+        .select('investor_id, profiles(full_name)')
+        .eq('company_id', data.id)
+        .eq('status', 'active');
+
+      const { data: interests } = await supabase
+        .from('investment_interests')
+        .select('investor_id, profiles(full_name)')
+        .eq('company_id', data.id)
+        .in('status', ['interested', 'due_diligence']);
+
+      const investorMap = new Map();
+      
+      investments?.forEach(inv => {
+        if (inv.profiles) {
+          investorMap.set(inv.investor_id, (inv.profiles as any).full_name || 'Investor');
+        }
+      });
+      
+      interests?.forEach(int => {
+        if (int.profiles && !investorMap.has(int.investor_id)) {
+          investorMap.set(int.investor_id, (int.profiles as any).full_name || 'Investor');
+        }
+      });
+
+      const investors = Array.from(investorMap.entries()).map(([id, name]) => ({
+        id,
+        name
+      }));
+      
+      setConnectedInvestors(investors);
     }
   };
   if (loading || analytics.loading) {
@@ -173,7 +208,7 @@ const Dashboard = () => {
                 <span className="hidden md:inline">Network</span>
               </TabsTrigger>
               <TabsTrigger value="journey" className="flex-shrink-0 gap-2">
-                <Map className="h-4 w-4" />
+                <MapIcon className="h-4 w-4" />
                 <span className="hidden md:inline">Journey</span>
               </TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
@@ -283,6 +318,7 @@ const Dashboard = () => {
               showCreateButton={false} 
               userRole="startup"
               onCreatePitchClick={() => setCreatePitchDialogOpen(true)}
+              connectedInvestors={connectedInvestors}
               onItemClick={item => {
                 if (item.type === 'event') {
                   setSelectedEvent(item);
