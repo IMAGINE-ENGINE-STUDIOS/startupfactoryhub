@@ -217,44 +217,44 @@ const MessagingInterface = memo(function MessagingInterface() {
   );
 
   return (
-    <div className="h-[calc(100vh-200px)] flex flex-col lg:flex-row gap-4">
+    <div className="h-[calc(100vh-200px)] flex flex-col lg:flex-row gap-6 p-4 animate-in fade-in duration-700">
       {/* Conversations List */}
-      <Card className={`w-full lg:w-80 flex flex-col ${selectedConversation ? 'hidden lg:flex' : 'flex'}`}>
-        <CardHeader className="pb-3">
+      <Card className={`w-full lg:w-80 flex flex-col backdrop-blur-lg bg-background/95 border-2 rounded-3xl shadow-2xl overflow-hidden ${selectedConversation ? 'hidden lg:flex' : 'flex'}`}>
+        <CardHeader className="pb-3 px-6 pt-6 bg-gradient-to-br from-primary/10 via-background to-background">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-xl flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
+            <CardTitle className="text-xl flex items-center gap-3 font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <MessageSquare className="h-6 w-6 text-primary drop-shadow-lg" />
               Messages
             </CardTitle>
             <Button 
               size="sm" 
               onClick={() => setShowNewChat(!showNewChat)}
-              variant="outline"
+              className="rounded-full px-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 bg-gradient-to-r from-primary to-primary/80"
             >
-              New
+              + New
             </Button>
           </div>
         </CardHeader>
         <CardContent className="flex-1 p-0 flex flex-col min-h-0">
           {showNewChat && (
-            <div className="p-4 border-b">
+            <div className="px-6 py-4 border-b border-border/50 bg-gradient-to-b from-primary/5 to-transparent">
               <Input
-                placeholder="Search users..."
+                placeholder="🔍 Search users..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="mb-2"
+                className="mb-3 rounded-2xl border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm"
               />
               <ScrollArea className="h-48">
                 {filteredUsers.map((user) => (
                   <div
                     key={user.user_id}
-                    className="flex items-center gap-3 p-2 hover:bg-muted rounded-lg cursor-pointer"
+                    className="flex items-center gap-3 p-3 mb-2 hover:bg-primary/10 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md backdrop-blur-sm bg-background/30"
                     onClick={() => startNewConversation(user.user_id)}
                   >
                     <div className="relative">
-                      <Avatar className="h-10 w-10">
+                      <Avatar className="h-10 w-10 ring-2 ring-primary/20 ring-offset-2 ring-offset-background shadow-md">
                         {user.avatar_url && <AvatarImage src={user.avatar_url} />}
-                        <AvatarFallback>{user.full_name.charAt(0)}</AvatarFallback>
+                        <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary/60 text-white font-semibold">{user.full_name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <OnlineStatusIndicator 
                         userId={user.user_id} 
@@ -273,19 +273,22 @@ const MessagingInterface = memo(function MessagingInterface() {
           
           <ScrollArea className="flex-1">
             {conversations.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">
-                <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                <p>No conversations yet</p>
-                <p className="text-sm">Start a new chat to connect</p>
+              <div className="p-12 text-center text-muted-foreground">
+                <div className="relative inline-block mb-6">
+                  <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full"></div>
+                  <MessageSquare className="relative h-16 w-16 mx-auto opacity-40 text-primary" />
+                </div>
+                <p className="text-lg font-semibold mb-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">No conversations yet</p>
+                <p className="text-sm text-muted-foreground/70">Start a new chat to connect with others</p>
               </div>
             ) : (
               conversations.map((conv) => (
                 <div
                   key={conv.id}
-                  className={`p-4 border-b cursor-pointer transition-colors ${
+                  className={`p-4 mx-3 mb-2 cursor-pointer transition-all duration-300 rounded-2xl ${
                     selectedConversation === (conv.user1_id === user?.id ? conv.user2_id : conv.user1_id)
-                      ? 'bg-muted'
-                      : 'hover:bg-muted/50'
+                      ? 'bg-gradient-to-r from-primary/20 to-primary/10 shadow-lg scale-[1.02] border-2 border-primary/30'
+                      : 'hover:bg-primary/5 hover:shadow-md hover:scale-[1.01] backdrop-blur-sm bg-background/30'
                   }`}
                   onClick={() => {
                     const otherUserId = conv.user1_id === user?.id ? conv.user2_id : conv.user1_id;
@@ -295,9 +298,9 @@ const MessagingInterface = memo(function MessagingInterface() {
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative">
-                      <Avatar>
+                      <Avatar className="h-12 w-12 ring-2 ring-primary/20 ring-offset-2 ring-offset-background shadow-lg">
                         {conv.other_user?.avatar_url && <AvatarImage src={conv.other_user.avatar_url} />}
-                        <AvatarFallback>
+                        <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary/60 text-white font-bold">
                           {conv.other_user?.full_name?.charAt(0) || 'U'}
                         </AvatarFallback>
                       </Avatar>
@@ -315,7 +318,7 @@ const MessagingInterface = memo(function MessagingInterface() {
                           {conv.other_user?.full_name || 'Unknown User'}
                         </p>
                         {conv.unread_count > 0 && (
-                          <Badge variant="destructive" className="ml-2">
+                          <Badge className="ml-2 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg animate-pulse">
                             {conv.unread_count}
                           </Badge>
                         )}
@@ -336,23 +339,23 @@ const MessagingInterface = memo(function MessagingInterface() {
       </Card>
 
       {/* Messages Area */}
-      <Card className={`flex-1 flex flex-col ${selectedConversation ? 'flex' : 'hidden lg:flex'}`}>
+      <Card className={`flex-1 flex flex-col backdrop-blur-lg bg-background/95 border-2 rounded-3xl shadow-2xl overflow-hidden ${selectedConversation ? 'flex' : 'hidden lg:flex'}`}>
         {selectedConversation && selectedUser ? (
           <>
-            <CardHeader className="pb-3 border-b">
+            <CardHeader className="pb-4 pt-4 px-6 border-b border-border/50 bg-gradient-to-r from-primary/10 via-background to-background">
               <div className="flex items-center gap-3">
                 <Button 
                   variant="ghost" 
                   size="sm" 
-                  className="lg:hidden"
+                  className="lg:hidden rounded-full hover:bg-primary/10 transition-all duration-300 hover:scale-110"
                   onClick={() => setSelectedConversation(null)}
                 >
                   ← Back
                 </Button>
                 <div className="relative">
-                  <Avatar>
+                  <Avatar className="h-11 w-11 ring-2 ring-primary/30 ring-offset-2 ring-offset-background shadow-lg">
                     {selectedUser.avatar_url && <AvatarImage src={selectedUser.avatar_url} />}
-                    <AvatarFallback>{selectedUser.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                    <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary/60 text-white font-bold">{selectedUser.full_name?.charAt(0) || 'U'}</AvatarFallback>
                   </Avatar>
                   <OnlineStatusIndicator 
                     userId={selectedUser.user_id} 
@@ -366,24 +369,24 @@ const MessagingInterface = memo(function MessagingInterface() {
             </div>
             </CardHeader>
             
-            <ScrollArea className="flex-1 p-4">
-              <div className="space-y-4">
+            <ScrollArea className="flex-1 p-4 scroll-smooth">
+              <div className="space-y-3">
                 {messages.map((msg) => {
                   const isOwn = msg.sender_id === user?.id;
                   return (
                     <div
                       key={msg.id}
-                      className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                      className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-3`}
                     >
                       <div
-                        className={`max-w-[70%] rounded-lg p-3 ${
+                        className={`max-w-[70%] rounded-3xl p-4 shadow-lg transition-all duration-300 hover:shadow-xl ${
                           isOwn
-                            ? 'bg-primary text-primary-foreground'
-                            : 'bg-muted'
+                            ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md'
+                            : 'bg-gradient-to-br from-muted to-muted/80 backdrop-blur-sm rounded-bl-md'
                         }`}
                       >
-                        <p className="text-sm break-words">{msg.content}</p>
-                        <p className={`text-xs mt-1 ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                        <p className="text-sm break-words leading-relaxed">{msg.content}</p>
+                        <p className={`text-xs mt-2 ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                           {formatDistanceToNow(new Date(msg.created_at))} ago
                         </p>
                       </div>
@@ -394,32 +397,41 @@ const MessagingInterface = memo(function MessagingInterface() {
               </div>
             </ScrollArea>
 
-            <CardContent className="border-t pt-4">
+            <CardContent className="border-t border-border/50 pt-4 pb-4 px-6 bg-gradient-to-t from-primary/5 to-transparent">
               <form 
                 onSubmit={(e) => {
                   e.preventDefault();
                   sendMessage();
                 }}
-                className="flex gap-2"
+                className="flex gap-3"
               >
                 <Input
-                  placeholder="Type a message..."
+                  placeholder="💬 Type a message..."
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   aria-label="Message input"
+                  className="rounded-full border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm px-6"
                 />
-                <Button type="submit" disabled={!newMessage.trim()} aria-label="Send message">
-                  <Send className="h-4 w-4" />
+                <Button 
+                  type="submit" 
+                  disabled={!newMessage.trim()} 
+                  aria-label="Send message"
+                  className="rounded-full h-11 w-11 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:scale-100 bg-gradient-to-r from-primary to-primary/80"
+                >
+                  <Send className="h-5 w-5" />
                 </Button>
               </form>
             </CardContent>
           </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
-            <div className="text-center">
-              <MessageSquare className="h-16 w-16 mx-auto mb-4 opacity-20" />
-              <p className="text-lg font-medium">Select a conversation</p>
-              <p className="text-sm">Choose a conversation or start a new one</p>
+            <div className="text-center p-12">
+              <div className="relative inline-block mb-6">
+                <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full"></div>
+                <MessageSquare className="relative h-16 w-16 mx-auto opacity-40 text-primary" />
+              </div>
+              <p className="text-lg font-semibold mb-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">Select a conversation</p>
+              <p className="text-sm text-muted-foreground/70">Choose a conversation or start a new one</p>
             </div>
           </div>
         )}
