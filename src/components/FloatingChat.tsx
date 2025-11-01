@@ -401,7 +401,6 @@ export default function FloatingChat() {
                 <TabsList className="grid w-full grid-cols-2 mt-2 mb-2 mx-2 shrink-0">
                   <TabsTrigger value="messages" className="gap-1 text-xs px-1 sm:px-2 min-w-0">
                     <MessageSquare className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">Messages</span>
                   </TabsTrigger>
                   <TabsTrigger value="ai" className="gap-1 text-xs px-1 sm:px-2 min-w-0">
                     <Brain className="h-3.5 w-3.5 shrink-0" />
