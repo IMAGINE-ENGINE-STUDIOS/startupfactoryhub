@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw, Settings } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +13,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import TRLTracker from '@/components/TRLTracker';
+import RoadmapChecklist, { ChecklistItem } from '@/components/RoadmapChecklist';
 
 interface RoadmapStep {
   id: string;
@@ -22,6 +25,17 @@ interface RoadmapStep {
   locked: boolean;
   resources: string[];
   icon: any;
+  checklist?: ChecklistItem[];
+  trlLevel?: number;
+  defaultChecklist?: ChecklistItem[];
+}
+
+interface StepNotes {
+  title?: string;
+  description?: string;
+  checklist?: ChecklistItem[];
+  trl_level?: number;
+  show_growth_step?: boolean;
 }
 
 const roadmapSteps: RoadmapStep[] = [
@@ -33,7 +47,13 @@ const roadmapSteps: RoadmapStep[] = [
     completed: false,
     locked: false,
     resources: ['Business Model Canvas', 'Customer Interview Guide', 'Market Research Templates'],
-    icon: Lightbulb
+    icon: Lightbulb,
+    defaultChecklist: [
+      { id: 'iv-1', text: 'Define problem statement', completed: false },
+      { id: 'iv-2', text: 'Identify target audience', completed: false },
+      { id: 'iv-3', text: 'Conduct customer interviews (min 10)', completed: false },
+      { id: 'iv-4', text: 'Validate problem-solution fit', completed: false },
+    ]
   },
   {
     id: '2',
@@ -43,7 +63,13 @@ const roadmapSteps: RoadmapStep[] = [
     completed: false,
     locked: true,
     resources: ['Competitor Analysis Framework', 'Market Size Calculator', 'Industry Reports'],
-    icon: FileText
+    icon: FileText,
+    defaultChecklist: [
+      { id: 'mr-1', text: 'Analyze top 5 competitors', completed: false },
+      { id: 'mr-2', text: 'Calculate Total Addressable Market (TAM)', completed: false },
+      { id: 'mr-3', text: 'Define unique value proposition', completed: false },
+      { id: 'mr-4', text: 'Create buyer personas', completed: false },
+    ]
   },
   {
     id: '3',
@@ -53,7 +79,14 @@ const roadmapSteps: RoadmapStep[] = [
     completed: false,
     locked: true,
     resources: ['MVP Planning Guide', 'Tech Stack Recommendations', 'Development Roadmap'],
-    icon: Circle
+    icon: Circle,
+    defaultChecklist: [
+      { id: 'mvp-1', text: 'Define core features', completed: false },
+      { id: 'mvp-2', text: 'Choose technology stack', completed: false },
+      { id: 'mvp-3', text: 'Build working prototype', completed: false },
+      { id: 'mvp-4', text: 'Conduct internal testing', completed: false },
+    ],
+    trlLevel: 0
   },
   {
     id: '4',
@@ -63,7 +96,13 @@ const roadmapSteps: RoadmapStep[] = [
     completed: false,
     locked: true,
     resources: ['User Testing Scripts', 'Feedback Collection Tools', 'Analytics Setup'],
-    icon: Users
+    icon: Users,
+    defaultChecklist: [
+      { id: 'uv-1', text: 'Recruit beta testers', completed: false },
+      { id: 'uv-2', text: 'Conduct usability testing', completed: false },
+      { id: 'uv-3', text: 'Gather user feedback', completed: false },
+      { id: 'uv-4', text: 'Iterate based on feedback', completed: false },
+    ]
   },
   {
     id: '5',
@@ -73,7 +112,13 @@ const roadmapSteps: RoadmapStep[] = [
     completed: false,
     locked: true,
     resources: ['Launch Checklist', 'Marketing Strategies', 'PR Templates'],
-    icon: TrendingUp
+    icon: TrendingUp,
+    defaultChecklist: [
+      { id: 'pl-1', text: 'Finalize marketing materials', completed: false },
+      { id: 'pl-2', text: 'Set up analytics tracking', completed: false },
+      { id: 'pl-3', text: 'Launch on Product Hunt', completed: false },
+      { id: 'pl-4', text: 'Announce on social media', completed: false },
+    ]
   },
   {
     id: '6',
@@ -83,7 +128,13 @@ const roadmapSteps: RoadmapStep[] = [
     completed: false,
     locked: true,
     resources: ['Pitch Deck Template', 'Investor Database', 'Growth Hacking Strategies'],
-    icon: DollarSign
+    icon: DollarSign,
+    defaultChecklist: [
+      { id: 'gf-1', text: 'Create pitch deck', completed: false },
+      { id: 'gf-2', text: 'Build financial model', completed: false },
+      { id: 'gf-3', text: 'Identify target investors', completed: false },
+      { id: 'gf-4', text: 'Schedule investor meetings', completed: false },
+    ]
   }
 ];
 
@@ -94,6 +145,7 @@ export default function StartupRoadmap() {
   const [newStepTitle, setNewStepTitle] = useState('');
   const [newStepDescription, setNewStepDescription] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showGrowthStep, setShowGrowthStep] = useState(false);
   const roadmapProgress = useRoadmapProgress(refreshTrigger);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -117,12 +169,23 @@ export default function StartupRoadmap() {
       return;
     }
 
-    const progressMap = new Map(data?.map(p => [p.step_id, p.completed]) || []);
+    const progressMap = new Map(data?.map(p => [p.step_id, p]) || []);
     const customStepsData = data?.filter(p => p.step_id.startsWith('custom-')) || [];
+    
+    // Check if user wants to see Growth & Funding step
+    const growthStepData = data?.find(p => p.step_id === '6');
+    if (growthStepData?.notes) {
+      try {
+        const notes: StepNotes = JSON.parse(growthStepData.notes);
+        setShowGrowthStep(notes.show_growth_step !== false);
+      } catch (e) {
+        setShowGrowthStep(false);
+      }
+    }
     
     // Load custom steps from database
     const customSteps: RoadmapStep[] = customStepsData.map(customStep => {
-      const notes = customStep.notes ? JSON.parse(customStep.notes) : {};
+      const notes: StepNotes = customStep.notes ? JSON.parse(customStep.notes) : {};
       return {
         id: customStep.step_id,
         title: notes.title || 'Custom Step',
@@ -131,18 +194,40 @@ export default function StartupRoadmap() {
         completed: customStep.completed || false,
         locked: false,
         resources: [],
-        icon: Circle
+        icon: Circle,
+        checklist: notes.checklist || []
       };
     });
     
     const updatedSteps = roadmapSteps.map((step, index) => {
-      const completed = progressMap.get(step.id) || false;
-      const prevCompleted = index === 0 || progressMap.get(roadmapSteps[index - 1].id) || false;
+      const progressData = progressMap.get(step.id);
+      const completed = progressData?.completed || false;
+      const prevCompleted = index === 0 || progressMap.get(roadmapSteps[index - 1].id)?.completed || false;
+      
+      // Parse notes for checklist and TRL data
+      let checklist = step.defaultChecklist || [];
+      let trlLevel = step.trlLevel || 0;
+      
+      if (progressData?.notes) {
+        try {
+          const notes: StepNotes = JSON.parse(progressData.notes);
+          if (notes.checklist && notes.checklist.length > 0) {
+            checklist = notes.checklist;
+          }
+          if (notes.trl_level !== undefined) {
+            trlLevel = notes.trl_level;
+          }
+        } catch (e) {
+          console.error('Error parsing notes:', e);
+        }
+      }
       
       return {
         ...step,
         completed,
-        locked: index === 0 ? false : !prevCompleted
+        locked: index === 0 ? false : !prevCompleted,
+        checklist,
+        trlLevel
       };
     });
     
@@ -308,7 +393,14 @@ export default function StartupRoadmap() {
         completed: false,
         locked: false,
         resources: [],
-        icon: Circle
+        icon: Circle,
+        checklist: []
+      };
+
+      const notes: StepNotes = {
+        title: newStepTitle,
+        description: newStepDescription,
+        checklist: []
       };
 
       const { error } = await supabase
@@ -317,7 +409,7 @@ export default function StartupRoadmap() {
           user_id: user.id,
           step_id: customStepId,
           completed: false,
-          notes: JSON.stringify({ title: newStepTitle, description: newStepDescription })
+          notes: JSON.stringify(notes)
         });
 
       if (error) {
@@ -352,6 +444,153 @@ export default function StartupRoadmap() {
     }
   };
 
+  const updateStepChecklist = async (stepId: string, checklist: ChecklistItem[]) => {
+    if (!user) return;
+
+    try {
+      const step = steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      // Get existing notes
+      const { data: existing } = await supabase
+        .from('roadmap_progress')
+        .select('notes')
+        .eq('user_id', user.id)
+        .eq('step_id', stepId)
+        .maybeSingle();
+
+      const existingNotes: StepNotes = existing?.notes ? JSON.parse(existing.notes) : {};
+      const updatedNotes: StepNotes = {
+        ...existingNotes,
+        checklist
+      };
+
+      // Upsert the progress with updated checklist
+      const { error } = await supabase
+        .from('roadmap_progress')
+        .upsert({
+          user_id: user.id,
+          step_id: stepId,
+          completed: step.completed,
+          notes: JSON.stringify(updatedNotes)
+        });
+
+      if (error) throw error;
+
+      // Update local state
+      setSteps(steps.map(s => 
+        s.id === stepId ? { ...s, checklist } : s
+      ));
+    } catch (error) {
+      console.error('Error updating checklist:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update checklist.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateTRLLevel = async (stepId: string, trlLevel: number) => {
+    if (!user) return;
+
+    try {
+      const step = steps.find(s => s.id === stepId);
+      if (!step) return;
+
+      // Get existing notes
+      const { data: existing } = await supabase
+        .from('roadmap_progress')
+        .select('notes')
+        .eq('user_id', user.id)
+        .eq('step_id', stepId)
+        .maybeSingle();
+
+      const existingNotes: StepNotes = existing?.notes ? JSON.parse(existing.notes) : {};
+      const updatedNotes: StepNotes = {
+        ...existingNotes,
+        trl_level: trlLevel
+      };
+
+      // Upsert the progress with updated TRL
+      const { error } = await supabase
+        .from('roadmap_progress')
+        .upsert({
+          user_id: user.id,
+          step_id: stepId,
+          completed: step.completed,
+          notes: JSON.stringify(updatedNotes)
+        });
+
+      if (error) throw error;
+
+      // Update local state
+      setSteps(steps.map(s => 
+        s.id === stepId ? { ...s, trlLevel } : s
+      ));
+
+      toast({
+        title: "TRL Updated",
+        description: `Technology Readiness Level set to ${trlLevel}`,
+      });
+    } catch (error) {
+      console.error('Error updating TRL:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update TRL level.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleGrowthStepVisibility = async (visible: boolean) => {
+    if (!user) return;
+
+    try {
+      // Get existing notes for step 6
+      const { data: existing } = await supabase
+        .from('roadmap_progress')
+        .select('notes, completed')
+        .eq('user_id', user.id)
+        .eq('step_id', '6')
+        .maybeSingle();
+
+      const existingNotes: StepNotes = existing?.notes ? JSON.parse(existing.notes) : {};
+      const updatedNotes: StepNotes = {
+        ...existingNotes,
+        show_growth_step: visible
+      };
+
+      // Upsert the progress with visibility flag
+      const { error } = await supabase
+        .from('roadmap_progress')
+        .upsert({
+          user_id: user.id,
+          step_id: '6',
+          completed: existing?.completed || false,
+          notes: JSON.stringify(updatedNotes)
+        });
+
+      if (error) throw error;
+
+      setShowGrowthStep(visible);
+      
+      toast({
+        title: visible ? "Growth & Funding Step Enabled" : "Growth & Funding Step Hidden",
+        description: visible 
+          ? "This step is now visible in your roadmap" 
+          : "This step is now hidden from your roadmap",
+      });
+    } catch (error) {
+      console.error('Error toggling growth step:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update visibility.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const getStageColor = (stage: string) => {
     const colors = {
       idea: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-600',
@@ -363,6 +602,14 @@ export default function StartupRoadmap() {
     };
     return colors[stage as keyof typeof colors] || colors.idea;
   };
+
+  // Filter steps based on Growth & Funding visibility
+  const visibleSteps = steps.filter(step => {
+    if (step.id === '6') {
+      return showGrowthStep;
+    }
+    return true;
+  });
 
   return (
     <div className="space-y-4 md:space-y-6 pb-20 md:pb-6">
@@ -376,21 +623,36 @@ export default function StartupRoadmap() {
             </Badge>
           </CardTitle>
         </CardHeader>
-        <CardContent className="px-4 sm:px-6">
+        <CardContent className="px-4 sm:px-6 space-y-4">
           <Progress 
             value={roadmapProgress.percentage} 
-            className="h-2 sm:h-3 mb-3 sm:mb-4 transition-all duration-700 ease-out" 
+            className="h-2 sm:h-3 transition-all duration-700 ease-out" 
           />
           <p className="text-xs sm:text-sm text-muted-foreground">
             {roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps completed. 
             Follow our proven algorithm to build your startup step by step.
           </p>
+          
+          {/* Growth & Funding visibility toggle */}
+          <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
+            <div className="flex items-center gap-2">
+              <Settings className="w-4 h-4 text-muted-foreground" />
+              <Label htmlFor="growth-toggle" className="text-xs sm:text-sm cursor-pointer">
+                Show Growth & Funding step
+              </Label>
+            </div>
+            <Switch
+              id="growth-toggle"
+              checked={showGrowthStep}
+              onCheckedChange={toggleGrowthStepVisibility}
+            />
+          </div>
         </CardContent>
       </Card>
 
       {/* Roadmap Steps */}
       <div className="space-y-3 md:space-y-4">
-        {steps.map((step, index) => {
+        {visibleSteps.map((step, index) => {
           const Icon = step.icon;
           return (
             <Card 
@@ -425,6 +687,24 @@ export default function StartupRoadmap() {
                     <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">{step.description}</p>
                     
                     <div className="space-y-3">
+                      {/* Checklist */}
+                      {step.checklist && step.checklist.length > 0 && (
+                        <RoadmapChecklist
+                          items={step.checklist}
+                          onItemsUpdate={(items) => updateStepChecklist(step.id, items)}
+                          disabled={step.locked}
+                        />
+                      )}
+
+                      {/* TRL Tracker for MVP Development step */}
+                      {step.id === '3' && (
+                        <TRLTracker
+                          currentLevel={step.trlLevel || 0}
+                          onLevelUpdate={(level) => updateTRLLevel(step.id, level)}
+                          disabled={step.locked}
+                        />
+                      )}
+
                       <div>
                         <h4 className="text-xs sm:text-sm font-medium text-foreground mb-2">Resources Available:</h4>
                         <div className="flex flex-wrap gap-1.5 sm:gap-2">
