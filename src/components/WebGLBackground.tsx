@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 
 const WebGLBackground = () => {
@@ -7,6 +7,25 @@ const WebGLBackground = () => {
   const cameraRef = useRef<THREE.PerspectiveCamera | null>(null);
   const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
   const particlesRef = useRef<THREE.Points | null>(null);
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Check initial theme
+    const checkTheme = () => {
+      setIsDark(document.documentElement.classList.contains('dark'));
+    };
+    
+    checkTheme();
+    
+    // Listen for theme changes
+    const observer = new MutationObserver(checkTheme);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class']
+    });
+    
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -49,9 +68,9 @@ const WebGLBackground = () => {
     // Particle material
     const particlesMaterial = new THREE.PointsMaterial({
       size: 0.3,
-      color: 0x4f46e5,
+      color: isDark ? 0x4f46e5 : 0x10b981,
       transparent: true,
-      opacity: 0.8,
+      opacity: isDark ? 0.8 : 0.6,
       blending: THREE.AdditiveBlending,
     });
 
@@ -72,7 +91,7 @@ const WebGLBackground = () => {
       
       if (context) {
         context.font = 'Bold 40px Arial';
-        context.fillStyle = 'rgba(79, 70, 229, 0.8)';
+        context.fillStyle = isDark ? 'rgba(79, 70, 229, 0.8)' : 'rgba(16, 185, 129, 0.7)';
         context.textAlign = 'center';
         context.textBaseline = 'middle';
         const char = characters.charAt(Math.floor(Math.random() * characters.length));
@@ -108,10 +127,10 @@ const WebGLBackground = () => {
     const shapes: THREE.Mesh[] = [];
     geometries.forEach((geometry, index) => {
       const material = new THREE.MeshBasicMaterial({
-        color: 0x4f46e5,
+        color: isDark ? 0x4f46e5 : 0x10b981,
         wireframe: true,
         transparent: true,
-        opacity: 0.1,
+        opacity: isDark ? 0.1 : 0.15,
       });
       const mesh = new THREE.Mesh(geometry, material);
       mesh.position.x = (index - 1) * 25;
@@ -205,7 +224,7 @@ const WebGLBackground = () => {
         }
       });
     };
-  }, []);
+  }, [isDark]);
 
   return (
     <div
