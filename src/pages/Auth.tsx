@@ -13,6 +13,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { signInSchema, signUpSchema } from '@/lib/validations';
 import { supabase } from '@/integrations/supabase/client';
 import logo from '@/assets/logo.png';
+import MatrixBackground from '@/components/MatrixBackground';
 
 export default function Auth() {
   const [email, setEmail] = useState('');
@@ -147,11 +148,8 @@ export default function Auth() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Animated background */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
-      </div>
+      {/* Matrix animated background */}
+      <MatrixBackground />
       
       {/* Theme toggle */}
       <div className="absolute top-4 right-4">
@@ -223,7 +221,7 @@ export default function Auth() {
                   
                   <Button 
                     type="submit" 
-                    className="w-full pulse-primary"
+                    className="w-full hover-glow"
                     disabled={loading}
                   >
                     {loading ? 'Signing In...' : 'Sign In'}
@@ -314,7 +312,7 @@ export default function Auth() {
                   
                   <Button 
                     type="submit" 
-                    className="w-full pulse-primary"
+                    className="w-full hover-glow"
                     disabled={loading}
                   >
                     {loading ? 'Creating Account...' : 'Create Account'}
