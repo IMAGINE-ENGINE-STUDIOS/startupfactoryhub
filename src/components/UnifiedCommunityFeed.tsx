@@ -1376,16 +1376,17 @@ export default function UnifiedCommunityFeed({
                         }}
                         className="flex-1 text-sm"
                       />
-                      <Button onClick={() => addComment(post.id)} size="sm">
+                       <Button onClick={() => addComment(post.id)} size="sm">
                         <Send className="h-4 w-4" />
                       </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardContent>
+            </Card>
+          )
+        })}
         
         {/* Infinite Scroll Trigger */}
         {hasMore && posts.length > 0 && (
