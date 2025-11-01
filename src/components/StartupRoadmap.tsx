@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw, ChevronDown } from 'lucide-react';
+import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw, ChevronDown, Trophy } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -148,7 +148,6 @@ export default function StartupRoadmap() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [expandedSteps, setExpandedSteps] = useState<Set<string>>(new Set(['1']));
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
-  const [hasShownCompletion, setHasShownCompletion] = useState(false);
   const roadmapProgress = useRoadmapProgress(refreshTrigger);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -159,13 +158,7 @@ export default function StartupRoadmap() {
     }
   }, [user]);
 
-  useEffect(() => {
-    const hasCompleted = localStorage.getItem('roadmap_journey_completed');
-    if (hasCompleted === 'true') {
-      setHasShownCompletion(true);
-    }
-  }, []);
-
+  // Auto-show journey completion dialog only once
   useEffect(() => {
     const standardSteps = steps.filter(step => {
       const stepNum = parseInt(step.id);
@@ -173,13 +166,14 @@ export default function StartupRoadmap() {
     });
     
     const allCompleted = standardSteps.length > 0 && standardSteps.every(step => step.completed);
+    const hasAutoShown = localStorage.getItem('roadmap_journey_auto_shown');
     
-    if (allCompleted && !hasShownCompletion) {
+    // Auto-show dialog only once when journey is first completed
+    if (allCompleted && hasAutoShown !== 'true') {
       setShowCompletionDialog(true);
-      setHasShownCompletion(true);
-      localStorage.setItem('roadmap_journey_completed', 'true');
+      localStorage.setItem('roadmap_journey_auto_shown', 'true');
     }
-  }, [steps, hasShownCompletion]);
+  }, [steps]);
 
   const loadUserProgress = async () => {
     if (!user) return;
@@ -585,11 +579,25 @@ export default function StartupRoadmap() {
     const completedSteps = standardSteps.filter(s => s.completed).length;
     const totalSteps = standardSteps.length;
     
+    // Validate that journey is actually complete
+    if (completedSteps !== totalSteps) {
+      toast({
+        title: "Journey not complete",
+        description: "Complete all 6 steps to share your journey!",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Track share count
+    const shareCount = (parseInt(localStorage.getItem('journey_share_count') || '0')) + 1;
+    
     const journeyData = {
       completed_steps: completedSteps,
       total_steps: totalSteps,
       completion_date: new Date().toISOString(),
-      milestone: 'full_journey_complete'
+      milestone: 'full_journey_complete',
+      share_count: shareCount
     };
     
     const { error } = await supabase
@@ -609,11 +617,43 @@ export default function StartupRoadmap() {
         variant: "destructive"
       });
     } else {
+      // Increment share count
+      localStorage.setItem('journey_share_count', shareCount.toString());
+      
       toast({
         title: "🎉 Journey shared!",
-        description: "Your achievement has been posted to the community feed",
+        description: `Your achievement has been posted to the community feed${shareCount > 1 ? ` (shared ${shareCount} times)` : ''}`,
       });
       setShowCompletionDialog(false);
+    }
+  };
+
+  const handleResetProgress = async () => {
+    if (!user) return;
+    
+    const { error } = await supabase
+      .from('roadmap_progress')
+      .delete()
+      .eq('user_id', user.id);
+    
+    if (error) {
+      toast({
+        title: "Error resetting progress",
+        description: "Could not reset progress. Please try again.",
+        variant: "destructive"
+      });
+    } else {
+      // Clear localStorage
+      localStorage.removeItem('roadmap_journey_auto_shown');
+      localStorage.removeItem('journey_share_count');
+      
+      // Reload progress
+      setRefreshTrigger(prev => prev + 1);
+      
+      toast({
+        title: "Progress reset",
+        description: "Your journey has been reset. Start fresh!",
+      });
     }
   };
 
@@ -651,6 +691,43 @@ export default function StartupRoadmap() {
             {roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps completed. 
             Follow our proven algorithm to build your startup step by step.
           </p>
+          
+          {/* Share Journey Completion Button - shown when all 6 standard steps are complete */}
+          {roadmapProgress.percentage === 100 && (
+            <div className="space-y-2 pt-2">
+              <Button
+                onClick={() => setShowCompletionDialog(true)}
+                className="w-full gap-2 bg-gradient-to-r from-yellow-500 via-pink-500 to-purple-500 hover:from-yellow-600 hover:via-pink-600 hover:to-purple-600 text-white"
+                size="lg"
+              >
+                <Trophy className="w-5 h-5" />
+                🎉 Share Your Journey Completion
+              </Button>
+              
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full gap-2">
+                    <RotateCcw className="w-4 h-4" />
+                    Reset Journey Progress
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Reset Journey Progress?</DialogTitle>
+                  </DialogHeader>
+                  <p className="text-sm text-muted-foreground">
+                    This will reset all your progress and allow you to start fresh. Your previous achievements will remain in the community feed.
+                  </p>
+                  <div className="flex gap-2 justify-end mt-4">
+                    <Button variant="outline" onClick={() => {}}>Cancel</Button>
+                    <Button variant="destructive" onClick={handleResetProgress}>
+                      Reset All Progress
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+          )}
         </CardContent>
       </Card>
 
