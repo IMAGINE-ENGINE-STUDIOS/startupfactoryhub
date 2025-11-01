@@ -26,7 +26,9 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import JobTaskManager from '@/components/JobTaskManager';
 import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
-import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench } from "lucide-react";
+import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import GuestPrompt from '@/components/GuestPrompt';
@@ -265,10 +267,32 @@ const Dashboard = () => {
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-4">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
-              <Button onClick={() => setCreateSessionDialogOpen(true)} variant="outline" className="gap-2 w-full sm:w-auto">
-                <CalendarIcon className="h-4 w-4" />
-                <span className="sm:inline">Schedule Session</span>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="gap-2 w-full sm:w-auto">
+                    <CalendarIcon className="h-4 w-4" />
+                    <span className="sm:inline">Schedule Meeting</span>
+                    <ChevronDown className="h-4 w-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel>Meeting Type</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setCreateSessionDialogOpen(true)} className="gap-2">
+                    <Users className="h-4 w-4" />
+                    <span>Schedule Mentoring Session</span>
+                  </DropdownMenuItem>
+                  {connectedInvestors.length > 0 && (
+                    <DropdownMenuItem onClick={() => setCreatePitchDialogOpen(true)} className="gap-2">
+                      <Briefcase className="h-4 w-4" />
+                      <span>Book Pitch Meeting</span>
+                      <Badge variant="secondary" className="ml-auto">
+                        {connectedInvestors.length}
+                      </Badge>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
               <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2 w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
                 <span className="sm:inline">Create Event</span>
@@ -317,8 +341,6 @@ const Dashboard = () => {
             <UnifiedCalendar 
               showCreateButton={false} 
               userRole="startup"
-              onCreatePitchClick={() => setCreatePitchDialogOpen(true)}
-              connectedInvestors={connectedInvestors}
               onItemClick={item => {
                 if (item.type === 'event') {
                   setSelectedEvent(item);
