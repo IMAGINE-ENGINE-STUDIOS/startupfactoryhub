@@ -3,8 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Switch } from '@/components/ui/switch';
-import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw, Settings } from 'lucide-react';
+import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -35,7 +34,6 @@ interface StepNotes {
   description?: string;
   checklist?: ChecklistItem[];
   trl_level?: number;
-  show_growth_step?: boolean;
 }
 
 const roadmapSteps: RoadmapStep[] = [
@@ -122,18 +120,37 @@ const roadmapSteps: RoadmapStep[] = [
   },
   {
     id: '6',
-    title: 'Growth & Funding',
-    description: 'Scale your startup and secure funding for growth',
+    title: 'Generate Revenue',
+    description: 'Start generating revenue by acquiring paying customers and tracking key metrics',
     stage: 'growth',
     completed: false,
     locked: true,
-    resources: ['Pitch Deck Template', 'Investor Database', 'Growth Hacking Strategies'],
+    resources: ['Revenue Models', 'Pricing Strategies', 'Customer Acquisition'],
     icon: DollarSign,
     defaultChecklist: [
-      { id: 'gf-1', text: 'Create pitch deck', completed: false },
-      { id: 'gf-2', text: 'Build financial model', completed: false },
-      { id: 'gf-3', text: 'Identify target investors', completed: false },
+      { id: 'gr-1', text: 'Acquire first 10 paying customers', completed: false },
+      { id: 'gr-2', text: 'Reach $1,000 Monthly Recurring Revenue (MRR)', completed: false },
+      { id: 'gr-3', text: 'Acquire 50 paying customers', completed: false },
+      { id: 'gr-4', text: 'Reach $10,000 Monthly Recurring Revenue (MRR)', completed: false },
+      { id: 'gr-5', text: 'Acquire 100+ paying customers', completed: false },
+      { id: 'gr-6', text: 'Reach $50,000+ Monthly Recurring Revenue (MRR)', completed: false },
+    ]
+  },
+  {
+    id: '7',
+    title: 'Growth & Funding',
+    description: 'Scale your startup and secure funding for accelerated growth',
+    stage: 'growth',
+    completed: false,
+    locked: true,
+    resources: ['Pitch Deck Template', 'Investor Database', 'Cap Table Management'],
+    icon: TrendingUp,
+    defaultChecklist: [
+      { id: 'gf-1', text: 'Create investor pitch deck', completed: false },
+      { id: 'gf-2', text: 'Build 3-year financial model', completed: false },
+      { id: 'gf-3', text: 'Identify target investors (VCs/Angels)', completed: false },
       { id: 'gf-4', text: 'Schedule investor meetings', completed: false },
+      { id: 'gf-5', text: 'Complete due diligence process', completed: false },
     ]
   }
 ];
@@ -145,7 +162,6 @@ export default function StartupRoadmap() {
   const [newStepTitle, setNewStepTitle] = useState('');
   const [newStepDescription, setNewStepDescription] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [showGrowthStep, setShowGrowthStep] = useState(false);
   const roadmapProgress = useRoadmapProgress(refreshTrigger);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -171,17 +187,6 @@ export default function StartupRoadmap() {
 
     const progressMap = new Map(data?.map(p => [p.step_id, p]) || []);
     const customStepsData = data?.filter(p => p.step_id.startsWith('custom-')) || [];
-    
-    // Check if user wants to see Growth & Funding step
-    const growthStepData = data?.find(p => p.step_id === '6');
-    if (growthStepData?.notes) {
-      try {
-        const notes: StepNotes = JSON.parse(growthStepData.notes);
-        setShowGrowthStep(notes.show_growth_step !== false);
-      } catch (e) {
-        setShowGrowthStep(false);
-      }
-    }
     
     // Load custom steps from database
     const customSteps: RoadmapStep[] = customStepsData.map(customStep => {
@@ -547,55 +552,6 @@ export default function StartupRoadmap() {
     }
   };
 
-  const toggleGrowthStepVisibility = async (visible: boolean) => {
-    if (!user) return;
-
-    try {
-      // Get existing notes for step 6
-      const { data: existing } = await supabase
-        .from('roadmap_progress')
-        .select('notes, completed')
-        .eq('user_id', user.id)
-        .eq('step_id', '6')
-        .maybeSingle();
-
-      const existingNotes: StepNotes = existing?.notes ? JSON.parse(existing.notes) : {};
-      const updatedNotes: StepNotes = {
-        ...existingNotes,
-        show_growth_step: visible
-      };
-
-      // Upsert the progress with visibility flag
-      const { error } = await supabase
-        .from('roadmap_progress')
-        .upsert({
-          user_id: user.id,
-          step_id: '6',
-          completed: existing?.completed || false,
-          notes: JSON.stringify(updatedNotes)
-        }, {
-          onConflict: 'user_id,step_id'
-        });
-
-      if (error) throw error;
-
-      setShowGrowthStep(visible);
-      
-      toast({
-        title: visible ? "Growth & Funding Step Enabled" : "Growth & Funding Step Hidden",
-        description: visible 
-          ? "This step is now visible in your roadmap" 
-          : "This step is now hidden from your roadmap",
-      });
-    } catch (error) {
-      console.error('Error toggling growth step:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update visibility.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const getStageColor = (stage: string) => {
     const colors = {
@@ -609,13 +565,6 @@ export default function StartupRoadmap() {
     return colors[stage as keyof typeof colors] || colors.idea;
   };
 
-  // Filter steps based on Growth & Funding visibility
-  const visibleSteps = steps.filter(step => {
-    if (step.id === '6') {
-      return showGrowthStep;
-    }
-    return true;
-  });
 
   return (
     <div className="space-y-4 md:space-y-6 pb-20 md:pb-6">
@@ -638,27 +587,12 @@ export default function StartupRoadmap() {
             {roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps completed. 
             Follow our proven algorithm to build your startup step by step.
           </p>
-          
-          {/* Growth & Funding visibility toggle */}
-          <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border border-border">
-            <div className="flex items-center gap-2">
-              <Settings className="w-4 h-4 text-muted-foreground" />
-              <Label htmlFor="growth-toggle" className="text-xs sm:text-sm cursor-pointer">
-                Show Growth & Funding step
-              </Label>
-            </div>
-            <Switch
-              id="growth-toggle"
-              checked={showGrowthStep}
-              onCheckedChange={toggleGrowthStepVisibility}
-            />
-          </div>
         </CardContent>
       </Card>
 
       {/* Roadmap Steps */}
       <div className="space-y-3 md:space-y-4">
-        {visibleSteps.map((step, index) => {
+        {steps.map((step, index) => {
           const Icon = step.icon;
           return (
             <Card 
