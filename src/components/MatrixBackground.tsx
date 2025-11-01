@@ -13,7 +13,7 @@ export default function MatrixBackground() {
     canvas.width = canvas.offsetWidth;
     canvas.height = canvas.offsetHeight;
 
-    const characters = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン01";
+    const characters = "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン01ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩⅪⅫABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*";
     const fontSize = 14;
     const columns = canvas.width / fontSize;
     const drops: number[] = [];

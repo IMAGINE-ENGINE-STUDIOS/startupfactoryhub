@@ -59,6 +59,45 @@ const WebGLBackground = () => {
     scene.add(particlesMesh);
     particlesRef.current = particlesMesh;
 
+    // Create text sprites with Roman numerals and alphanumeric characters
+    const characters = "ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const textSprites: THREE.Sprite[] = [];
+    const spriteCount = 50;
+
+    for (let i = 0; i < spriteCount; i++) {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = 64;
+      canvas.height = 64;
+      
+      if (context) {
+        context.font = 'Bold 40px Arial';
+        context.fillStyle = 'rgba(79, 70, 229, 0.8)';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        const char = characters.charAt(Math.floor(Math.random() * characters.length));
+        context.fillText(char, 32, 32);
+      }
+      
+      const texture = new THREE.CanvasTexture(canvas);
+      const spriteMaterial = new THREE.SpriteMaterial({
+        map: texture,
+        transparent: true,
+        opacity: 0.6,
+      });
+      
+      const sprite = new THREE.Sprite(spriteMaterial);
+      sprite.position.set(
+        (Math.random() - 0.5) * 100,
+        (Math.random() - 0.5) * 100,
+        (Math.random() - 0.5) * 100
+      );
+      sprite.scale.set(5, 5, 1);
+      
+      scene.add(sprite);
+      textSprites.push(sprite);
+    }
+
     // Create geometric shapes
     const geometries = [
       new THREE.TorusGeometry(10, 2, 16, 100),
@@ -111,6 +150,18 @@ const WebGLBackground = () => {
         shape.position.y = Math.sin(elapsedTime + index) * 2;
       });
 
+      // Animate text sprites
+      textSprites.forEach((sprite, index) => {
+        sprite.position.y += Math.sin(elapsedTime + index) * 0.02;
+        sprite.rotation.z = elapsedTime * 0.1 * (index % 2 === 0 ? 1 : -1);
+        
+        // Fade in and out
+        const opacity = 0.3 + Math.sin(elapsedTime * 0.5 + index) * 0.3;
+        if (sprite.material instanceof THREE.SpriteMaterial) {
+          sprite.material.opacity = opacity;
+        }
+      });
+
       // Camera follows mouse
       camera.position.x += (mouseX * 10 - camera.position.x) * 0.05;
       camera.position.y += (mouseY * 10 - camera.position.y) * 0.05;
@@ -145,6 +196,12 @@ const WebGLBackground = () => {
       shapes.forEach(s => {
         if (s.material instanceof THREE.Material) {
           s.material.dispose();
+        }
+      });
+      textSprites.forEach(sprite => {
+        if (sprite.material instanceof THREE.SpriteMaterial && sprite.material.map) {
+          sprite.material.map.dispose();
+          sprite.material.dispose();
         }
       });
     };
