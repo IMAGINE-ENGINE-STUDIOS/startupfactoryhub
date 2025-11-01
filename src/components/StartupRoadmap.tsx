@@ -593,7 +593,7 @@ export default function StartupRoadmap() {
     };
     
     const { error } = await supabase
-      .from('community_feed' as any)
+      .from('feed_posts')
       .insert({
         user_id: user.id,
         content: "🎉 I just completed my entire startup journey on Startup Factory Hub! From idea validation to growth & funding. Excited for what's next! #StartupJourney #Milestone",
