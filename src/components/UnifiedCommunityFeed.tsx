@@ -10,8 +10,9 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, 
   Bookmark, Repeat2, Send, Calendar, Image as ImageIcon, 
-  Video, Sparkles, X, Trash2, Hash
+  Video, Sparkles, X, Trash2, Hash, Trophy
 } from 'lucide-react';
+import { motion } from 'framer-motion';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -885,8 +886,263 @@ export default function UnifiedCommunityFeed({
 
       {/* Posts Grid */}
       <div className="space-y-4">
-        {posts.map((post) => (
-          <Card key={post.id} className="tech-card border-0 hover:scale-[1.01] transition-all">
+        {posts.map((post) => {
+          const isJourneyCompletion = post.post_type === 'journey_completion';
+          
+          return isJourneyCompletion ? (
+            <motion.div
+              key={post.id}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="relative"
+            >
+              {/* Gradient border effect */}
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 rounded-lg opacity-75 blur" />
+              
+              <Card className="relative tech-card border-2 border-yellow-400">
+                {/* Trophy badge header */}
+                <div className="bg-gradient-to-r from-yellow-50 to-pink-50 dark:from-yellow-950/50 dark:to-pink-950/50 px-4 py-2 border-b flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+                  <span className="text-sm font-semibold text-yellow-700 dark:text-yellow-300">
+                    🎉 Journey Complete - Celebrate This Milestone!
+                  </span>
+                </div>
+                
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex space-x-3 sm:space-x-4">
+                    <div className="relative">
+                      <Avatar 
+                        className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:ring-2 ring-primary transition-all"
+                        onClick={() => handleUserClick(post.user_id)}
+                      >
+                        {post.profiles?.avatar_url ? (
+                          <AvatarImage src={post.profiles.avatar_url} />
+                        ) : null}
+                        <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                          {post.profiles?.full_name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <OnlineStatusIndicator 
+                        userId={post.user_id} 
+                        size="sm" 
+                        className="absolute bottom-0 right-0" 
+                      />
+                    </div>
+                    
+                    <div className="flex-1 space-y-3 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                          <h3 
+                            className="font-semibold text-sm sm:text-base text-foreground truncate cursor-pointer hover:text-primary transition-colors"
+                            onClick={() => handleUserClick(post.user_id)}
+                          >
+                            {post.profiles?.full_name || 'Anonymous User'}
+                          </h3>
+                          {post.user_role && (
+                            <Badge 
+                              variant="outline" 
+                              className={`text-xs ${getRoleBadgeColor(post.user_role)}`}
+                            >
+                              {getRoleLabel(post.user_role)}
+                            </Badge>
+                          )}
+                          <span className="text-muted-foreground">•</span>
+                          <span className="text-xs sm:text-sm text-muted-foreground">{formatDate(post.created_at)}</span>
+                        </div>
+                      </div>
+                    
+                      <p className="text-sm sm:text-base text-foreground leading-relaxed whitespace-pre-wrap break-words">{post.content}</p>
+                      
+                      {/* Media Display */}
+                      {post.media_urls && post.media_urls.length > 0 && (
+                        <div className={`grid gap-2 mt-3 ${post.media_urls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                          {post.media_urls.filter(url => url).map((url, idx) => {
+                            const isVideo = url?.includes('.mp4') || url?.includes('.webm') || url?.includes('.mov') || url?.includes('video');
+                            return isVideo ? (
+                              <video 
+                                key={idx}
+                                src={url} 
+                                controls 
+                                className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover"
+                              />
+                            ) : (
+                              <img 
+                                key={idx}
+                                src={url} 
+                                alt={`Media ${idx + 1}`}
+                                className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover"
+                              />
+                            );
+                          })}
+                        </div>
+                      )}
+                      
+                      <div className="flex items-center flex-wrap gap-3 sm:gap-6 pt-3 border-t border-border">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={`text-muted-foreground hover:text-primary px-2 ${
+                            likedPosts.has(post.id) ? 'text-red-500' : ''
+                          }`}
+                          onClick={() => toggleLike(post.id)}
+                        >
+                          <Heart className={`h-4 w-4 mr-1 sm:mr-2 ${
+                            likedPosts.has(post.id) ? 'fill-current' : ''
+                          }`} />
+                          <span className="text-xs sm:text-sm">{post._count?.post_likes || 0}</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-muted-foreground hover:text-primary px-2"
+                          onClick={() => toggleComments(post.id)}
+                        >
+                          <MessageCircle className="h-4 w-4 mr-1 sm:mr-2" />
+                          <span className="text-xs sm:text-sm">{post._count?.post_comments || 0}</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-muted-foreground hover:text-primary px-2"
+                          onClick={() => sharePost(post.id, false)}
+                        >
+                          <Share className="h-4 w-4 mr-1 sm:mr-2" />
+                          <span className="text-xs sm:text-sm hidden sm:inline">Share</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-muted-foreground hover:text-primary px-2"
+                          onClick={() => sharePost(post.id, true)}
+                        >
+                          <Repeat2 className="h-4 w-4 mr-1 sm:mr-2" />
+                          <span className="text-xs sm:text-sm hidden sm:inline">Repost</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className={`text-muted-foreground hover:text-primary px-2 ml-auto ${
+                            bookmarkedPosts.has(post.id) ? 'text-primary' : ''
+                          }`}
+                          onClick={() => toggleBookmark(post.id)}
+                        >
+                          <Bookmark className={`h-4 w-4 ${
+                            bookmarkedPosts.has(post.id) ? 'fill-current' : ''
+                          }`} />
+                        </Button>
+                        {post.user_id === user?.id && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="text-muted-foreground hover:text-destructive px-2"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Post</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this post? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction onClick={() => deletePost(post.id)}>
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
+                      
+                      {/* Comments Section */}
+                      {expandedComments.has(post.id) && (
+                        <div className="space-y-3 mt-4">
+                          {comments[post.id] && comments[post.id].length > 0 ? (
+                            comments[post.id].map((comment: any) => (
+                              <div key={comment.id} className="flex gap-2 sm:gap-3 pl-0 sm:pl-4">
+                                <Avatar className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0">
+                                  {comment.profiles?.avatar_url ? (
+                                    <AvatarImage src={comment.profiles.avatar_url} />
+                                  ) : null}
+                                  <AvatarFallback className="text-xs bg-gradient-primary text-primary-foreground">
+                                    {comment.profiles?.full_name?.charAt(0) || 'U'}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1 bg-muted/30 rounded-lg px-3 py-2">
+                                  <div className="flex items-center justify-between gap-2 mb-1">
+                                    <p className="text-xs sm:text-sm font-medium text-foreground">
+                                      {comment.profiles?.full_name || 'Anonymous'}
+                                    </p>
+                                    <span className="text-xs text-muted-foreground">
+                                      {formatDate(comment.created_at)}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs sm:text-sm text-foreground break-words">{comment.content}</p>
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <p className="text-sm text-muted-foreground pl-0 sm:pl-4">No comments yet. Be the first!</p>
+                          )}
+                          {comments[post.id] && comments[post.id].length > 3 && (
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="text-xs text-muted-foreground hover:text-primary"
+                              onClick={() => toggleComments(post.id)}
+                            >
+                              Show less
+                            </Button>
+                          )}
+                        </div>
+                      )}
+                      
+                      {/* Add comment input - ALWAYS visible */}
+                      <div className="flex gap-2">
+                        <Input
+                          placeholder={(post._count?.post_comments || 0) === 0 ? "Be the first to comment..." : "Write a comment..."}
+                          value={newComment[post.id] || ''}
+                          onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              addComment(post.id);
+                            }
+                          }}
+                          className="flex-1 text-sm"
+                        />
+                        <Button onClick={() => addComment(post.id)} size="sm">
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                
+                {/* Floating trophy emoji */}
+                <motion.div
+                  className="absolute -top-6 -right-6 text-5xl pointer-events-none"
+                  animate={{
+                    y: [0, -10, 0],
+                    rotate: [0, 10, -10, 0]
+                  }}
+                  transition={{
+                    duration: 2,
+                    repeat: Infinity,
+                    ease: "easeInOut"
+                  }}
+                >
+                  🏆
+                </motion.div>
+              </Card>
+            </motion.div>
+          ) : (
+            <Card key={post.id} className="tech-card border-0 hover:scale-[1.01] transition-all">
             <CardContent className="p-4 sm:p-6">
               <div className="flex space-x-3 sm:space-x-4">
                 <div className="relative">

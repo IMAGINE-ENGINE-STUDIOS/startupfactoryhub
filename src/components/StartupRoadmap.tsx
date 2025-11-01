@@ -3,17 +3,19 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw } from 'lucide-react';
+import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw, ChevronDown } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import TRLTracker from '@/components/TRLTracker';
 import RoadmapChecklist, { ChecklistItem } from '@/components/RoadmapChecklist';
+import JourneyCompletionDialog from '@/components/JourneyCompletionDialog';
 
 interface RoadmapStep {
   id: string;
@@ -120,24 +122,6 @@ const roadmapSteps: RoadmapStep[] = [
   },
   {
     id: '6',
-    title: 'Generate Revenue',
-    description: 'Start generating revenue by acquiring paying customers and tracking key metrics',
-    stage: 'growth',
-    completed: false,
-    locked: true,
-    resources: ['Revenue Models', 'Pricing Strategies', 'Customer Acquisition'],
-    icon: DollarSign,
-    defaultChecklist: [
-      { id: 'gr-1', text: 'Acquire first 10 paying customers', completed: false },
-      { id: 'gr-2', text: 'Reach $1,000 Monthly Recurring Revenue (MRR)', completed: false },
-      { id: 'gr-3', text: 'Acquire 50 paying customers', completed: false },
-      { id: 'gr-4', text: 'Reach $10,000 Monthly Recurring Revenue (MRR)', completed: false },
-      { id: 'gr-5', text: 'Acquire 100+ paying customers', completed: false },
-      { id: 'gr-6', text: 'Reach $50,000+ Monthly Recurring Revenue (MRR)', completed: false },
-    ]
-  },
-  {
-    id: '7',
     title: 'Growth & Funding',
     description: 'Scale your startup and secure funding for accelerated growth',
     stage: 'growth',
@@ -162,6 +146,9 @@ export default function StartupRoadmap() {
   const [newStepTitle, setNewStepTitle] = useState('');
   const [newStepDescription, setNewStepDescription] = useState('');
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [expandedSteps, setExpandedSteps] = useState<Set<string>>(new Set(['1']));
+  const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [hasShownCompletion, setHasShownCompletion] = useState(false);
   const roadmapProgress = useRoadmapProgress(refreshTrigger);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -171,6 +158,28 @@ export default function StartupRoadmap() {
       loadUserProgress();
     }
   }, [user]);
+
+  useEffect(() => {
+    const hasCompleted = localStorage.getItem('roadmap_journey_completed');
+    if (hasCompleted === 'true') {
+      setHasShownCompletion(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    const standardSteps = steps.filter(step => {
+      const stepNum = parseInt(step.id);
+      return !isNaN(stepNum) && stepNum >= 1 && stepNum <= 6;
+    });
+    
+    const allCompleted = standardSteps.length > 0 && standardSteps.every(step => step.completed);
+    
+    if (allCompleted && !hasShownCompletion) {
+      setShowCompletionDialog(true);
+      setHasShownCompletion(true);
+      localStorage.setItem('roadmap_journey_completed', 'true');
+    }
+  }, [steps, hasShownCompletion]);
 
   const loadUserProgress = async () => {
     if (!user) return;
@@ -553,6 +562,61 @@ export default function StartupRoadmap() {
   };
 
 
+  const toggleStepExpanded = (stepId: string) => {
+    setExpandedSteps(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(stepId)) {
+        newSet.delete(stepId);
+      } else {
+        newSet.add(stepId);
+      }
+      return newSet;
+    });
+  };
+
+  const shareJourneyCompletion = async () => {
+    if (!user) return;
+    
+    const standardSteps = steps.filter(s => {
+      const num = parseInt(s.id);
+      return !isNaN(num) && num >= 1 && num <= 6;
+    });
+    
+    const completedSteps = standardSteps.filter(s => s.completed).length;
+    const totalSteps = standardSteps.length;
+    
+    const journeyData = {
+      completed_steps: completedSteps,
+      total_steps: totalSteps,
+      completion_date: new Date().toISOString(),
+      milestone: 'full_journey_complete'
+    };
+    
+    const { error } = await supabase
+      .from('community_feed')
+      .insert({
+        user_id: user.id,
+        content: "🎉 I just completed my entire startup journey on Startup Factory Hub! From idea validation to growth & funding. Excited for what's next! #StartupJourney #Milestone",
+        post_type: 'journey_completion',
+        internship_data: journeyData,
+      });
+    
+    if (error) {
+      console.error('Error posting to community:', error);
+      toast({
+        title: "Error sharing",
+        description: "Could not post to community feed. Please try again.",
+        variant: "destructive"
+      });
+    } else {
+      toast({
+        title: "🎉 Journey shared!",
+        description: "Your achievement has been posted to the community feed",
+      });
+      setShowCompletionDialog(false);
+    }
+  };
+
   const getStageColor = (stage: string) => {
     const colors = {
       idea: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-600',
@@ -594,39 +658,64 @@ export default function StartupRoadmap() {
       <div className="space-y-3 md:space-y-4">
         {steps.map((step, index) => {
           const Icon = step.icon;
+          const isExpanded = expandedSteps.has(step.id);
+          
           return (
-            <Card 
-              key={step.id} 
-              className={`tech-card border-0 ${step.completed ? 'ring-2 ring-primary/20' : ''} ${
-                step.locked ? 'opacity-60' : 'md:hover:scale-[1.02] transition-transform'
-              }`}
+            <Collapsible
+              key={step.id}
+              open={isExpanded}
+              onOpenChange={() => toggleStepExpanded(step.id)}
             >
-              <CardContent className="p-4 sm:p-6">
-                <div className="flex items-start gap-3 sm:gap-4">
-                  <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${
-                    step.completed ? 'bg-primary text-primary-foreground' : 
-                    step.locked ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary'
-                  }`}>
-                    {step.completed ? (
-                      <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-                    ) : step.locked ? (
-                      <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
-                    ) : (
-                      <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
-                    )}
-                  </div>
-                  
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-                      <h3 className="text-base sm:text-lg font-semibold text-foreground">{step.title}</h3>
-                      <Badge className={`${getStageColor(step.stage)} w-fit`} variant="outline">
-                        {step.stage.charAt(0).toUpperCase() + step.stage.slice(1)}
-                      </Badge>
+              <Card 
+                className={`tech-card border-0 ${step.completed ? 'ring-2 ring-primary/20' : ''} ${
+                  step.locked ? 'opacity-60' : 'transition-all'
+                }`}
+              >
+                <CardContent className="p-4 sm:p-6">
+                  <CollapsibleTrigger asChild>
+                    <div className="flex items-start gap-3 sm:gap-4 cursor-pointer">
+                      <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${
+                        step.completed ? 'bg-primary text-primary-foreground' : 
+                        step.locked ? 'bg-muted text-muted-foreground' : 'bg-primary/10 text-primary'
+                      }`}>
+                        {step.completed ? (
+                          <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+                        ) : step.locked ? (
+                          <Lock className="w-5 h-5 sm:w-6 sm:h-6" />
+                        ) : (
+                          <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+                        )}
+                      </div>
+                      
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-base sm:text-lg font-semibold text-foreground">{step.title}</h3>
+                            {step.completed && (
+                              <Badge variant="default" className="bg-green-500">
+                                ✓
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge className={`${getStageColor(step.stage)} w-fit`} variant="outline">
+                              {step.stage.charAt(0).toUpperCase() + step.stage.slice(1)}
+                            </Badge>
+                            <ChevronDown 
+                              className={`w-5 h-5 text-muted-foreground transition-transform ${
+                                isExpanded ? 'rotate-180' : ''
+                              }`}
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    
-                    <p className="text-sm sm:text-base text-muted-foreground mb-3 sm:mb-4">{step.description}</p>
-                    
-                    <div className="space-y-3">
+                  </CollapsibleTrigger>
+                  
+                  <CollapsibleContent className="mt-4">
+                    <div className="ml-0 sm:ml-16 space-y-3">
+                      <p className="text-sm sm:text-base text-muted-foreground">{step.description}</p>
+                      
                       {/* Checklist */}
                       {step.checklist && step.checklist.length > 0 && (
                         <RoadmapChecklist
@@ -657,20 +746,20 @@ export default function StartupRoadmap() {
                       </div>
                       
                       <div className="flex flex-wrap gap-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        disabled={step.locked}
-                        className="text-xs sm:text-sm h-8 sm:h-9"
-                        onClick={() => {
-                          toast({
-                            title: "Resource Access",
-                            description: `Opening resources for ${step.title}`,
-                          });
-                        }}
-                      >
-                        View Resources
-                      </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          disabled={step.locked}
+                          className="text-xs sm:text-sm h-8 sm:h-9"
+                          onClick={() => {
+                            toast({
+                              title: "Resource Access",
+                              description: `Opening resources for ${step.title}`,
+                            });
+                          }}
+                        >
+                          View Resources
+                        </Button>
                         {!step.completed && !step.locked && (
                           <Button 
                             size="sm" 
@@ -681,27 +770,22 @@ export default function StartupRoadmap() {
                           </Button>
                         )}
                         {step.completed && (
-                          <>
-                            <Badge variant="default" className="bg-green-500 h-8 sm:h-9 px-3">
-                              ✓ Completed
-                            </Badge>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => uncompleteStep(step.id)}
-                              className="text-muted-foreground hover:text-foreground text-xs sm:text-sm h-8 sm:h-9"
-                            >
-                              <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                              Undo
-                            </Button>
-                          </>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => uncompleteStep(step.id)}
+                            className="text-muted-foreground hover:text-foreground text-xs sm:text-sm h-8 sm:h-9"
+                          >
+                            <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                            Undo
+                          </Button>
                         )}
                       </div>
                     </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                  </CollapsibleContent>
+                </CardContent>
+              </Card>
+            </Collapsible>
           );
         })}
         
@@ -761,6 +845,14 @@ export default function StartupRoadmap() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Journey Completion Dialog */}
+      <JourneyCompletionDialog
+        open={showCompletionDialog}
+        onOpenChange={setShowCompletionDialog}
+        onShare={shareJourneyCompletion}
+        totalSteps={steps.filter(s => !isNaN(parseInt(s.id)) && parseInt(s.id) <= 6).length}
+      />
     </div>
   );
 }
