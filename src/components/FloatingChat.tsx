@@ -327,14 +327,13 @@ export default function FloatingChat() {
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-14 w-14 rounded-full shadow-lg z-50"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-3xl z-50 transition-all duration-300 hover:scale-110 bg-gradient-to-br from-primary to-primary/80"
           size="icon"
         >
           <MessageSquare className="h-6 w-6" />
           {totalUnread > 0 && (
             <Badge 
-              variant="destructive" 
-              className="absolute -top-1 -right-1 h-6 w-6 flex items-center justify-center p-0 rounded-full"
+              className="absolute -top-1 -right-1 h-6 w-6 flex items-center justify-center p-0 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg animate-pulse"
             >
               {totalUnread}
             </Badge>
@@ -344,9 +343,9 @@ export default function FloatingChat() {
 
       {/* Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-2 right-2 left-2 sm:left-auto sm:bottom-6 sm:right-6 sm:w-96 h-[600px] max-h-[calc(100vh-1rem)] bg-background border rounded-lg shadow-2xl flex flex-col z-50">
+        <div className="fixed bottom-2 right-2 left-2 sm:left-auto sm:bottom-6 sm:right-6 sm:w-96 h-[600px] max-h-[calc(100vh-1rem)] backdrop-blur-lg bg-background/95 border-2 rounded-3xl shadow-2xl flex flex-col z-50 overflow-hidden animate-in slide-in-from-bottom duration-300">
           {/* Header */}
-          <div className="flex items-center justify-between p-3 border-b bg-card shrink-0">
+          <div className="flex items-center justify-between p-4 border-b border-border/50 bg-gradient-to-r from-primary/10 via-background to-background shrink-0">
             <div className="flex items-center gap-2">
               {activeTab === 'ai' ? (
                 <>
@@ -415,31 +414,30 @@ export default function FloatingChat() {
                     <Button 
                       size="sm" 
                       onClick={() => setShowNewChat(!showNewChat)}
-                      variant="outline"
-                      className="w-full"
+                      className="w-full rounded-full shadow-md hover:shadow-lg transition-all duration-300 hover:scale-[1.02] bg-gradient-to-r from-primary to-primary/80"
                     >
-                      New Message
+                      + New Message
                     </Button>
                   </div>
 
                   {showNewChat && (
                     <div className="p-3 border-b">
                       <Input
-                        placeholder="Search users..."
+                        placeholder="🔍 Search users..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="mb-2"
+                        className="mb-3 rounded-2xl border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm"
                       />
                       <ScrollArea className="h-32">
                         {filteredUsers.map((user) => (
                           <div
                             key={user.user_id}
-                            className="flex items-center gap-2 p-2 hover:bg-muted rounded-lg cursor-pointer"
+                            className="flex items-center gap-3 p-3 mb-2 hover:bg-primary/10 rounded-2xl cursor-pointer transition-all duration-300 hover:scale-[1.02] hover:shadow-md backdrop-blur-sm bg-background/30"
                             onClick={() => startNewConversation(user.user_id)}
                           >
-                            <Avatar className="h-8 w-8">
+                            <Avatar className="h-10 w-10 ring-2 ring-primary/20 ring-offset-2 ring-offset-background shadow-md">
                             {user.avatar_url && <AvatarImage src={user.avatar_url} />}
-                            <AvatarFallback className="text-xs">{user.full_name.charAt(0)}</AvatarFallback>
+                            <AvatarFallback className="text-xs bg-gradient-to-br from-primary/80 to-primary/60 text-white font-semibold">{user.full_name.charAt(0)}</AvatarFallback>
                           </Avatar>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{user.full_name}</p>
@@ -452,25 +450,29 @@ export default function FloatingChat() {
                   
                   <ScrollArea className="flex-1">
                     {conversations.length === 0 ? (
-                      <div className="p-8 text-center text-muted-foreground">
-                        <MessageSquare className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                        <p className="text-sm">No conversations yet</p>
+                      <div className="p-10 text-center text-muted-foreground">
+                        <div className="relative inline-block mb-4">
+                          <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full"></div>
+                          <MessageSquare className="relative h-14 w-14 mx-auto opacity-40 text-primary" />
+                        </div>
+                        <p className="text-sm font-medium bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">No conversations yet</p>
+                        <p className="text-xs mt-2 text-muted-foreground/70">Start a new chat to connect</p>
                       </div>
                     ) : (
                       conversations.map((conv) => (
                         <div
                           key={conv.id}
-                          className="p-3 border-b cursor-pointer hover:bg-muted/50 transition-colors"
+                          className="p-3 mx-2 mb-2 cursor-pointer hover:bg-primary/10 hover:shadow-md rounded-2xl transition-all duration-300 hover:scale-[1.01] backdrop-blur-sm bg-background/30"
                           onClick={() => {
                             const otherUserId = conv.user1_id === user?.id ? conv.user2_id : conv.user1_id;
                             setSelectedConversation(otherUserId);
                             fetchMessages(otherUserId);
                           }}
                         >
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-10 w-10">
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-12 w-12 ring-2 ring-primary/20 ring-offset-2 ring-offset-background shadow-lg">
                               {conv.other_user?.avatar_url && <AvatarImage src={conv.other_user.avatar_url} />}
-                              <AvatarFallback>
+                              <AvatarFallback className="bg-gradient-to-br from-primary/80 to-primary/60 text-white font-bold">
                                 {conv.other_user?.full_name?.charAt(0) || 'U'}
                               </AvatarFallback>
                             </Avatar>
@@ -480,7 +482,7 @@ export default function FloatingChat() {
                                   {conv.other_user?.full_name || 'Unknown User'}
                                 </p>
                                 {conv.unread_count > 0 && (
-                                  <Badge variant="destructive" className="ml-2 h-5 min-w-5 text-xs">
+                                  <Badge className="ml-2 h-5 min-w-5 text-xs rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-md animate-pulse">
                                     {conv.unread_count}
                                   </Badge>
                                 )}
@@ -507,17 +509,17 @@ export default function FloatingChat() {
                         return (
                           <div
                             key={msg.id}
-                            className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}
+                            className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-2`}
                           >
                             <div
-                              className={`max-w-[75%] rounded-lg p-2 ${
+                              className={`max-w-[75%] rounded-3xl p-3 shadow-md transition-all duration-300 hover:shadow-lg ${
                                 isOwn
-                                  ? 'bg-primary text-primary-foreground'
-                                  : 'bg-muted'
+                                  ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md'
+                                  : 'bg-gradient-to-br from-muted to-muted/80 backdrop-blur-sm rounded-bl-md'
                               }`}
                             >
-                              <p className="text-sm break-words">{msg.content}</p>
-                              <p className={`text-xs mt-1 ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
+                              <p className="text-sm break-words leading-relaxed">{msg.content}</p>
+                              <p className={`text-xs mt-2 ${isOwn ? 'text-primary-foreground/70' : 'text-muted-foreground'}`}>
                                 {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
                               </p>
                             </div>
@@ -528,16 +530,21 @@ export default function FloatingChat() {
                     </div>
                   </ScrollArea>
 
-                  <div className="p-3 border-t">
+                  <div className="p-4 border-t border-border/50 bg-gradient-to-t from-primary/5 to-transparent">
                     <div className="flex gap-2">
                       <Input
-                        placeholder="Type a message..."
+                        placeholder="💬 Type a message..."
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
-                        className="flex-1"
+                        className="flex-1 rounded-full border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm px-4"
                       />
-                      <Button onClick={sendMessage} disabled={!newMessage.trim()} size="icon">
+                      <Button 
+                        onClick={sendMessage} 
+                        disabled={!newMessage.trim()} 
+                        size="icon"
+                        className="rounded-full h-10 w-10 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:scale-100 bg-gradient-to-r from-primary to-primary/80"
+                      >
                         <Send className="h-4 w-4" />
                       </Button>
                     </div>
@@ -550,9 +557,12 @@ export default function FloatingChat() {
                   <ScrollArea className="flex-1 p-3">
                     {aiMessages.length === 0 && (
                       <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground px-4">
-                        <Bot className="h-10 w-10 mb-3 opacity-50" />
-                        <p className="text-sm font-medium">How can I help you today?</p>
-                        <p className="text-xs mt-2">Ask me about your startup, funding, mentorship, or learning!</p>
+                        <div className="relative inline-block mb-4">
+                          <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full"></div>
+                          <Brain className="relative h-14 w-14 opacity-50 text-primary" />
+                        </div>
+                        <p className="text-base font-semibold mb-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">How can I help you today?</p>
+                        <p className="text-xs text-muted-foreground/70">Ask me about your startup, funding, mentorship, or learning!</p>
                       </div>
                     )}
                     
@@ -560,24 +570,24 @@ export default function FloatingChat() {
                       {aiMessages.map((message, index) => (
                         <div
                           key={index}
-                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-3`}
                         >
                           <div
-                            className={`max-w-[85%] rounded-lg px-3 py-2 ${
+                            className={`max-w-[85%] rounded-3xl px-4 py-3 shadow-md transition-all duration-300 hover:shadow-lg ${
                               message.role === 'user'
-                                ? 'bg-primary text-primary-foreground'
-                                : 'bg-muted'
+                                ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md'
+                                : 'bg-gradient-to-br from-muted to-muted/80 backdrop-blur-sm rounded-bl-md'
                             }`}
                           >
-                            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+                            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
                           </div>
                         </div>
                       ))}
                       
                       {isAiLoading && (
-                        <div className="flex justify-start">
-                          <div className="bg-muted rounded-lg px-3 py-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
+                        <div className="flex justify-start mb-3">
+                          <div className="bg-gradient-to-br from-muted to-muted/80 rounded-3xl rounded-bl-md px-4 py-3 shadow-md backdrop-blur-sm">
+                            <Loader2 className="h-5 w-5 animate-spin text-primary" />
                           </div>
                         </div>
                       )}
@@ -585,7 +595,7 @@ export default function FloatingChat() {
                     </div>
                   </ScrollArea>
                   
-                  <div className="border-t p-3 shrink-0 bg-background">
+                  <div className="border-t border-border/50 p-4 shrink-0 bg-gradient-to-t from-primary/5 to-transparent">
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
@@ -596,11 +606,16 @@ export default function FloatingChat() {
                       <Input
                         value={aiInput}
                         onChange={(e) => setAiInput(e.target.value)}
-                        placeholder="Type your message..."
+                        placeholder="🤖 Ask me anything..."
                         disabled={isAiLoading}
-                        className="text-sm"
+                        className="text-sm rounded-full border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm px-4"
                       />
-                      <Button type="submit" size="icon" disabled={isAiLoading || !aiInput.trim()} className="shrink-0">
+                      <Button 
+                        type="submit" 
+                        size="icon" 
+                        disabled={isAiLoading || !aiInput.trim()} 
+                        className="shrink-0 rounded-full h-10 w-10 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:scale-100 bg-gradient-to-r from-primary to-primary/80"
+                      >
                         <Send className="h-4 w-4" />
                       </Button>
                     </form>
