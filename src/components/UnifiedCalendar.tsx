@@ -53,6 +53,8 @@ interface UnifiedCalendarProps {
   onItemClick?: (item: CalendarItem) => void;
   filterTypes?: CalendarItemType[];
   userRole: 'advisor' | 'mentor' | 'startup' | 'student' | 'investor';
+  onCreatePitchClick?: () => void;
+  connectedInvestors?: Array<{id: string, name: string}>;
 }
 
 export default function UnifiedCalendar({ 
@@ -60,7 +62,9 @@ export default function UnifiedCalendar({
   onCreateEvent,
   onItemClick,
   filterTypes = ['event', 'session', 'availability', 'pitch'],
-  userRole
+  userRole,
+  onCreatePitchClick,
+  connectedInvestors
 }: UnifiedCalendarProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [events, setEvents] = useState<any[]>([]);
@@ -397,12 +401,20 @@ export default function UnifiedCalendar({
             <p className="text-muted-foreground">Events, sessions, and availability in one place</p>
           </div>
         </div>
-        {showCreateButton && user && onCreateEvent && (
-          <Button onClick={onCreateEvent} className="gap-2">
-            <CalendarIcon className="h-4 w-4" />
-            Create Event
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {showCreateButton && user && onCreateEvent && (
+            <Button onClick={onCreateEvent} className="gap-2">
+              <CalendarIcon className="h-4 w-4" />
+              Create Event
+            </Button>
+          )}
+          {userRole === 'startup' && onCreatePitchClick && connectedInvestors && connectedInvestors.length > 0 && (
+            <Button onClick={onCreatePitchClick} variant="outline" className="gap-2">
+              <Users className="h-4 w-4" />
+              Book Pitch
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Legend */}

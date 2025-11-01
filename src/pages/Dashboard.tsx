@@ -25,6 +25,7 @@ import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import JobTaskManager from '@/components/JobTaskManager';
+import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
 import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench } from "lucide-react";
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -59,6 +60,9 @@ const Dashboard = () => {
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [createPitchDialogOpen, setCreatePitchDialogOpen] = useState(false);
+  const [companyId, setCompanyId] = useState<string>('');
+  const [companyName, setCompanyName] = useState<string>('');
 
   // Redirect if wrong role
   useEffect(() => {
@@ -66,6 +70,28 @@ const Dashboard = () => {
       navigate('/dashboard');
     }
   }, [role, roleLoading, navigate]);
+
+  // Fetch company info
+  useEffect(() => {
+    if (user) {
+      fetchCompanyInfo();
+    }
+  }, [user]);
+
+  const fetchCompanyInfo = async () => {
+    if (!user) return;
+    
+    const { data } = await supabase
+      .from('companies')
+      .select('id, name')
+      .eq('user_id', user.id)
+      .maybeSingle();
+      
+    if (data) {
+      setCompanyId(data.id);
+      setCompanyName(data.name);
+    }
+  };
   if (loading || analytics.loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -256,13 +282,16 @@ const Dashboard = () => {
             <UnifiedCalendar 
               showCreateButton={false} 
               userRole="startup"
+              onCreatePitchClick={() => setCreatePitchDialogOpen(true)}
               onItemClick={item => {
                 if (item.type === 'event') {
                   setSelectedEvent(item);
                   setShowEventDetails(true);
+                } else if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
+                  window.open(item.meeting_link, '_blank');
                 }
               }} 
-              filterTypes={['event', 'session', 'availability', 'pitch']} 
+              filterTypes={['event', 'session', 'pitch']} 
             />
           </TabsContent>
 
@@ -331,6 +360,14 @@ const Dashboard = () => {
       {selectedEvent && <EventDetailsDialog event={selectedEvent} open={showEventDetails} onOpenChange={setShowEventDetails} onEventUpdated={() => {
       setShowEventDetails(false);
     }} />}
+      {companyId && companyName && (
+        <CreatePitchMeetingDialog
+          open={createPitchDialogOpen}
+          onOpenChange={setCreatePitchDialogOpen}
+          companyId={companyId}
+          companyName={companyName}
+        />
+      )}
     </div>;
 };
 export default Dashboard;

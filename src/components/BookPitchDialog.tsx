@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar as CalendarIcon, Clock } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Loader2, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
@@ -40,18 +40,69 @@ export default function BookPitchDialog({
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
+  const [hasConnection, setHasConnection] = useState<boolean>(false);
+  const [checkingConnection, setCheckingConnection] = useState(true);
 
   useEffect(() => {
     if (open && investorId) {
+      checkConnection();
       fetchAvailability();
     }
-  }, [open, investorId]);
+  }, [open, investorId, companyId]);
 
   useEffect(() => {
     if (date) {
       generateAvailableSlots();
     }
   }, [date, availability]);
+
+  const checkConnection = async () => {
+    if (!user?.id || !investorId || !companyId) {
+      setCheckingConnection(false);
+      return;
+    }
+    
+    setCheckingConnection(true);
+    
+    try {
+      // Check if investor has invested in this company
+      const { data: investment } = await supabase
+        .from('investments')
+        .select('id')
+        .eq('investor_id', investorId)
+        .eq('company_id', companyId)
+        .eq('status', 'active')
+        .maybeSingle();
+      
+      if (investment) {
+        setHasConnection(true);
+        setCheckingConnection(false);
+        return;
+      }
+      
+      // Check if investor has expressed interest
+      const { data: interest } = await supabase
+        .from('investment_interests')
+        .select('id')
+        .eq('investor_id', investorId)
+        .eq('company_id', companyId)
+        .in('status', ['interested', 'due_diligence'])
+        .maybeSingle();
+      
+      if (interest) {
+        setHasConnection(true);
+        setCheckingConnection(false);
+        return;
+      }
+      
+      setHasConnection(false);
+    } catch (error) {
+      console.error('Error checking connection:', error);
+      setHasConnection(false);
+    } finally {
+      setCheckingConnection(false);
+    }
+  };
 
   const fetchAvailability = async () => {
     const { data } = await supabase
@@ -178,17 +229,35 @@ export default function BookPitchDialog({
         </DialogHeader>
 
         <div className="space-y-6">
-          <div>
-            <label className="text-sm font-medium mb-2 block">Select Date</label>
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              disabled={(date) => date < new Date() || date < new Date(new Date().setHours(0, 0, 0, 0))}
-              initialFocus
-              className={cn("border rounded-md pointer-events-auto")}
-            />
-          </div>
+          {checkingConnection ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <span className="ml-2 text-muted-foreground">Checking connection...</span>
+            </div>
+          ) : !hasConnection ? (
+            <div className="text-center py-8">
+              <AlertCircle className="h-12 w-12 mx-auto mb-4 text-destructive" />
+              <h3 className="text-lg font-semibold mb-2">Connection Required</h3>
+              <p className="text-muted-foreground mb-4">
+                You can only book pitch meetings with investors who have expressed interest in or invested in your company.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                This investor hasn't connected with {companyName} yet.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div>
+                <label className="text-sm font-medium mb-2 block">Select Date</label>
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  disabled={(date) => date < new Date() || date < new Date(new Date().setHours(0, 0, 0, 0))}
+                  initialFocus
+                  className={cn("border rounded-md pointer-events-auto")}
+                />
+              </div>
 
           {date && availableSlots.length > 0 && (
             <div>
@@ -219,19 +288,21 @@ export default function BookPitchDialog({
             </div>
           )}
 
-          <div className="flex gap-3 pt-4 border-t">
-            <Button
-              className="flex-1"
-              size="lg"
-              onClick={handleBookPitch}
-              disabled={!date || !timeSlot || loading}
-            >
-              {loading ? 'Booking...' : 'Confirm Booking'}
-            </Button>
-            <Button variant="outline" size="lg" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-          </div>
+              <div className="flex gap-3 pt-4 border-t">
+                <Button
+                  className="flex-1"
+                  size="lg"
+                  onClick={handleBookPitch}
+                  disabled={!date || !timeSlot || loading}
+                >
+                  {loading ? 'Booking...' : 'Confirm Booking'}
+                </Button>
+                <Button variant="outline" size="lg" onClick={() => onOpenChange(false)}>
+                  Cancel
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       </DialogContent>
     </Dialog>
