@@ -473,6 +473,8 @@ export default function StartupRoadmap() {
           step_id: stepId,
           completed: step.completed,
           notes: JSON.stringify(updatedNotes)
+        }, {
+          onConflict: 'user_id,step_id'
         });
 
       if (error) throw error;
@@ -520,6 +522,8 @@ export default function StartupRoadmap() {
           step_id: stepId,
           completed: step.completed,
           notes: JSON.stringify(updatedNotes)
+        }, {
+          onConflict: 'user_id,step_id'
         });
 
       if (error) throw error;
@@ -569,6 +573,8 @@ export default function StartupRoadmap() {
           step_id: '6',
           completed: existing?.completed || false,
           notes: JSON.stringify(updatedNotes)
+        }, {
+          onConflict: 'user_id,step_id'
         });
 
       if (error) throw error;
