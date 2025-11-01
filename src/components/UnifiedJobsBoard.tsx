@@ -17,6 +17,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye, Copy, MoreVertical, XCircle } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Job {
   id: string;
@@ -75,6 +85,7 @@ export default function UnifiedJobsBoard() {
   const [updatingApplicationId, setUpdatingApplicationId] = useState<string | null>(null);
   const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
   const [closedJobs, setClosedJobs] = useState<Job[]>([]);
+  const [closeJobId, setCloseJobId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -128,16 +139,18 @@ export default function UnifiedJobsBoard() {
     }
   };
 
-  const handleCloseJob = async (jobId: string) => {
-    if (!confirm('Close this job posting? It will no longer be visible to applicants.')) {
-      return;
-    }
+  const handleCloseJob = (jobId: string) => {
+    setCloseJobId(jobId);
+  };
+
+  const confirmCloseJob = async () => {
+    if (!closeJobId) return;
 
     try {
       const { error } = await supabase
         .from('jobs')
         .update({ status: 'closed' })
-        .eq('id', jobId)
+        .eq('id', closeJobId)
         .eq('company_id', userCompanyId);
 
       if (error) throw error;
@@ -156,6 +169,8 @@ export default function UnifiedJobsBoard() {
         description: 'Failed to close job posting',
         variant: 'destructive',
       });
+    } finally {
+      setCloseJobId(null);
     }
   };
 
@@ -1135,6 +1150,27 @@ export default function UnifiedJobsBoard() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Close Job Confirmation Dialog */}
+      <AlertDialog open={closeJobId !== null} onOpenChange={(open) => !open && setCloseJobId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Close Job Posting</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to close this job posting? It will no longer be visible to applicants. You can reopen it later from the Closed Jobs section.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmCloseJob}
+              className="bg-orange-600 text-white hover:bg-orange-700"
+            >
+              Close Job Posting
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

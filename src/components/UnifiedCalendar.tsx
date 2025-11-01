@@ -10,6 +10,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Calendar as CalendarIcon, MapPin, Users, Clock, Video, User, Building, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { EditEventDialog } from '@/components/EditEventDialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { format, isSameDay, parseISO } from 'date-fns';
 import { useMentoringSessions } from '@/hooks/useMentoringSessions';
 import { useMentorAvailability } from '@/hooks/useMentorAvailability';
@@ -57,6 +67,7 @@ export default function UnifiedCalendar({
   const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
   const { user } = useAuth();
   const { sessions } = useMentoringSessions();
   const { availability } = useMentorAvailability();
@@ -194,23 +205,25 @@ export default function UnifiedCalendar({
     }
   };
 
-  const handleDeleteEvent = async (eventId: string) => {
-    if (!confirm('Are you sure you want to delete this event? This action cannot be undone.')) {
-      return;
-    }
+  const handleDeleteEvent = (eventId: string) => {
+    setDeleteEventId(eventId);
+  };
+
+  const confirmDeleteEvent = async () => {
+    if (!deleteEventId) return;
 
     try {
       // Delete associated event_attendees first
       await supabase
         .from('event_attendees')
         .delete()
-        .eq('event_id', eventId);
+        .eq('event_id', deleteEventId);
 
       // Delete the event
       const { error } = await supabase
         .from('events')
         .delete()
-        .eq('id', eventId)
+        .eq('id', deleteEventId)
         .eq('organizer_id', user?.id);
 
       if (error) throw error;
@@ -228,6 +241,8 @@ export default function UnifiedCalendar({
         description: 'Failed to delete event',
         variant: 'destructive',
       });
+    } finally {
+      setDeleteEventId(null);
     }
   };
 
@@ -602,6 +617,27 @@ export default function UnifiedCalendar({
         onEventUpdated={fetchEvents}
         event={editingEvent}
       />
+
+      {/* Delete Event Confirmation Dialog */}
+      <AlertDialog open={deleteEventId !== null} onOpenChange={(open) => !open && setDeleteEventId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Event</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this event? This action cannot be undone. All attendee data will also be removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteEvent}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Event
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
