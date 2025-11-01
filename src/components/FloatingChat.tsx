@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Bot, Sparkles, Loader2 } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Bot, Sparkles, Loader2, Brain } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 
@@ -350,8 +350,7 @@ export default function FloatingChat() {
             <div className="flex items-center gap-2">
               {activeTab === 'ai' ? (
                 <>
-                  <Sparkles className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold text-sm">AI Assistant</h3>
+                  <Brain className="h-5 w-5 text-primary" />
                 </>
               ) : (
                 <>
@@ -405,8 +404,7 @@ export default function FloatingChat() {
                     <span className="truncate">Messages</span>
                   </TabsTrigger>
                   <TabsTrigger value="ai" className="gap-1 text-xs px-1 sm:px-2 min-w-0">
-                    <Bot className="h-3.5 w-3.5 shrink-0" />
-                    <span className="truncate">AI Assistant</span>
+                    <Brain className="h-3.5 w-3.5 shrink-0" />
                   </TabsTrigger>
                 </TabsList>
 
