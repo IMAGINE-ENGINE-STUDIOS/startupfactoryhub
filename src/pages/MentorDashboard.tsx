@@ -58,6 +58,7 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import VideoConferencing from '@/components/VideoConferencing';
 import { Video } from 'lucide-react';
 
@@ -263,9 +264,6 @@ const MentorDashboard = () => {
               </Button>
             </div>
 
-            {/* Availability Manager */}
-            <AvailabilityManager />
-
             {/* Upcoming Events with Banners */}
             {upcomingEvents.length > 0 && (
               <Card>
@@ -273,70 +271,55 @@ const MentorDashboard = () => {
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {upcomingEvents.slice(0, 6).map((event) => (
-                      <div
-                        key={event.id}
-                        className="group cursor-pointer"
-                        onClick={() => {
-                          setSelectedEvent(event);
-                          setShowEventDetails(true);
-                        }}
-                      >
-                        <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
-                          {event.banner_url ? (
-                            <img
-                              src={event.banner_url}
-                              alt={event.title}
-                              className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                            />
-                          ) : (
-                            <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
-                              <CalendarIcon className="h-16 w-16 text-purple-500/30" />
-                            </div>
-                          )}
-                          <div className="p-4">
-                            <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
-                            <div className="space-y-1 text-sm text-muted-foreground">
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-3 w-3" />
-                                {format(parseISO(event.start_date), 'MMM d, h:mm a')}
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-4 pb-4">
+                      {upcomingEvents.slice(0, 6).map((event) => (
+                        <div
+                          key={event.id}
+                          className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]"
+                          onClick={() => {
+                            setSelectedEvent(event);
+                            setShowEventDetails(true);
+                          }}
+                        >
+                          <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
+                            {event.banner_url ? (
+                              <img
+                                src={event.banner_url}
+                                alt={event.title}
+                                className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                              />
+                            ) : (
+                              <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                                <CalendarIcon className="h-16 w-16 text-purple-500/30" />
                               </div>
-                               {event.location && (
-                                 <div className="flex items-center gap-2">
-                                   <MapPin className="h-3 w-3" />
-                                   <span className="line-clamp-1">{event.location}</span>
-                                 </div>
-                               )}
-                               {event.location?.includes('whereby.com') && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setActiveVideoSession({ 
-                                        meeting_link: event.location,
-                                        host_id: event.organizer_id,
-                                        topic: event.title 
-                                      });
-                                    }}
-                                    className="gap-2 mt-2 w-full"
-                                  >
-                                    <Video className="h-4 w-4" />
-                                    Join Event
-                                  </Button>
-                               )}
-                              <div className="flex items-center gap-2">
-                                <Users className="h-3 w-3" />
-                                {event.attendees} attending
-                                {event.max_attendees && ` / ${event.max_attendees}`}
+                            )}
+                            <div className="p-4">
+                              <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
+                              <div className="space-y-1 text-sm text-muted-foreground">
+                                <div className="flex items-center gap-2">
+                                  <Clock className="h-3 w-3" />
+                                  {format(parseISO(event.start_date), 'MMM d, h:mm a')}
+                                </div>
+                                {event.location && (
+                                  <div className="flex items-center gap-2">
+                                    <MapPin className="h-3 w-3" />
+                                    <span className="line-clamp-1">{event.location}</span>
+                                  </div>
+                                )}
+                                <div className="flex items-center gap-2">
+                                  <Users className="h-3 w-3" />
+                                  {event.attendees} attending
+                                  {event.max_attendees && ` / ${event.max_attendees}`}
+                                </div>
                               </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
                 </CardContent>
               </Card>
             )}
@@ -354,6 +337,17 @@ const MentorDashboard = () => {
               }}
               filterTypes={['event', 'session', 'availability']}
             />
+
+            {/* Availability Manager - Bottom of Calendar Tab */}
+            <div className="pt-6 border-t">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold">Availability Schedule</h3>
+                <p className="text-sm text-muted-foreground">
+                  Set your recurring weekly availability for mentoring sessions
+                </p>
+              </div>
+              <AvailabilityManager />
+            </div>
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
