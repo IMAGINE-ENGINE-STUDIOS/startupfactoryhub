@@ -9,7 +9,7 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Calendar as CalendarIcon, ExternalLink, Video, Plus, Bell, Clock, MapPin, MessageCircle, Network, UserCircle, BarChart, Brain, Wrench } from 'lucide-react';
+import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Calendar as CalendarIcon, ExternalLink, Video, Plus, Bell, Clock, MapPin, MessageCircle, Network, UserCircle, BarChart, Brain, Wrench, Briefcase, Check, X } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
@@ -52,6 +52,7 @@ export default function InvestorDashboard() {
   const [investorProfile, setInvestorProfile] = useState<any>(null);
   const [activeTab, setActiveTab] = useState('social');
   const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
+  const [pendingPitchesCount, setPendingPitchesCount] = useState(0);
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | undefined>();
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
@@ -61,6 +62,11 @@ export default function InvestorDashboard() {
   const { toast } = useToast();
   const { profile: profileWithRole } = useProfileWithRole();
   const { upcomingEvents } = useEvents();
+
+  useEffect(() => {
+    const pending = pitchMeetings.filter(m => m.status === 'pending').length;
+    setPendingPitchesCount(pending);
+  }, [pitchMeetings]);
 
   useEffect(() => {
     if (user) {
@@ -96,12 +102,82 @@ export default function InvestorDashboard() {
         startup:profiles!pitch_meetings_startup_id_fkey(full_name, avatar_url)
       `)
       .eq('investor_id', user.id)
-      .gte('scheduled_date', new Date().toISOString())
-      .order('scheduled_date', { ascending: true })
-      .limit(10);
+      .order('scheduled_date', { ascending: true });
 
     if (!error && data) {
       setPitchMeetings(data);
+    }
+  };
+
+  const handleAcceptPitch = async (pitchId: string) => {
+    try {
+      const { error } = await supabase
+        .from('pitch_meetings')
+        .update({ status: 'scheduled' })
+        .eq('id', pitchId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Pitch Accepted',
+        description: 'The startup has been notified',
+      });
+
+      // Send notification to startup
+      const meeting = pitchMeetings.find(m => m.id === pitchId);
+      if (meeting) {
+        await supabase.from('notifications').insert({
+          user_id: meeting.startup_id,
+          title: 'Pitch Meeting Accepted',
+          message: `Your pitch meeting has been accepted`,
+          type: 'success',
+        });
+      }
+
+      fetchPitchMeetings();
+    } catch (error) {
+      console.error('Error accepting pitch:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to accept pitch meeting',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRejectPitch = async (pitchId: string) => {
+    try {
+      const { error } = await supabase
+        .from('pitch_meetings')
+        .update({ status: 'cancelled' })
+        .eq('id', pitchId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Pitch Declined',
+        description: 'The startup has been notified',
+      });
+
+      // Send notification to startup
+      const meeting = pitchMeetings.find(m => m.id === pitchId);
+      if (meeting) {
+        await supabase.from('notifications').insert({
+          user_id: meeting.startup_id,
+          title: 'Pitch Meeting Declined',
+          message: `Your pitch meeting request was declined`,
+          type: 'info',
+        });
+      }
+
+      fetchPitchMeetings();
+    } catch (error) {
+      console.error('Error rejecting pitch:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to decline pitch meeting',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -348,7 +424,7 @@ export default function InvestorDashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-8 max-w-7xl whitespace-nowrap">
+            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-9 max-w-7xl whitespace-nowrap">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden md:inline">Social</span>
@@ -360,6 +436,13 @@ export default function InvestorDashboard() {
               <TabsTrigger value="portfolio" className="flex-shrink-0 gap-2">
                 <Building className="h-4 w-4" />
                 <span className="hidden md:inline">Portfolio</span>
+              </TabsTrigger>
+              <TabsTrigger value="pitches" className="flex-shrink-0 gap-2">
+                <Briefcase className="h-4 w-4" />
+                <span className="hidden md:inline">Pitches</span>
+                {pendingPitchesCount > 0 && (
+                  <Badge variant="destructive" className="ml-1">{pendingPitchesCount}</Badge>
+                )}
               </TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
                 <CalendarIcon className="h-4 w-4" />
@@ -439,6 +522,130 @@ export default function InvestorDashboard() {
           <TabsContent value="network" className="space-y-4">
             <MatchingSystem />
             <NetworkBrowser />
+          </TabsContent>
+
+          {/* Pitches Tab */}
+          <TabsContent value="pitches" className="space-y-4">
+            <Card className="tech-card border-0">
+              <CardHeader>
+                <CardTitle>Pending Pitch Requests</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {pitchMeetings.filter(m => m.status === 'pending').length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Briefcase className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                    <p>No pending pitch requests</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {pitchMeetings.filter(m => m.status === 'pending').map((meeting) => (
+                      <Card key={meeting.id} className="border-orange-500/30 bg-orange-500/5">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={meeting.company?.logo_url} />
+                              <AvatarFallback>{meeting.company?.name?.[0] || 'C'}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-lg">{meeting.company?.name}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                Requested by {meeting.startup?.full_name}
+                              </p>
+                              <div className="flex items-center gap-2 mt-2 text-sm">
+                                <CalendarIcon className="h-4 w-4" />
+                                {format(new Date(meeting.scheduled_date), 'PPP p')}
+                              </div>
+                              <Badge variant="outline" className="mt-2">
+                                {meeting.duration_minutes} minutes
+                              </Badge>
+                            </div>
+                          </div>
+                          
+                          {meeting.company?.pitch_deck_url && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => window.open(meeting.company.pitch_deck_url, '_blank')}
+                              className="gap-2 w-full mt-3"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                              Review Pitch Deck
+                            </Button>
+                          )}
+                          
+                          <div className="flex gap-2 mt-3">
+                            <Button
+                              className="flex-1 bg-green-600 hover:bg-green-700"
+                              onClick={() => handleAcceptPitch(meeting.id)}
+                            >
+                              <Check className="h-4 w-4 mr-2" />
+                              Accept
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              className="flex-1"
+                              onClick={() => handleRejectPitch(meeting.id)}
+                            >
+                              <X className="h-4 w-4 mr-2" />
+                              Decline
+                            </Button>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="tech-card border-0">
+              <CardHeader>
+                <CardTitle>Accepted Pitch Meetings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {pitchMeetings.filter(m => m.status === 'scheduled').length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                    <p>No accepted pitch meetings</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {pitchMeetings.filter(m => m.status === 'scheduled').map((meeting) => (
+                      <Card key={meeting.id} className="border-green-500/30">
+                        <CardContent className="p-4">
+                          <div className="flex items-start gap-3">
+                            <Avatar className="h-12 w-12">
+                              <AvatarImage src={meeting.company?.logo_url} />
+                              <AvatarFallback>{meeting.company?.name?.[0] || 'C'}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1">
+                              <h4 className="font-semibold text-lg">{meeting.company?.name}</h4>
+                              <p className="text-sm text-muted-foreground">
+                                with {meeting.startup?.full_name}
+                              </p>
+                              <div className="flex items-center gap-2 mt-2 text-sm">
+                                <CalendarIcon className="h-4 w-4" />
+                                {format(new Date(meeting.scheduled_date), 'PPP p')}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {meeting.meeting_link && (
+                            <Button
+                              className="w-full mt-3"
+                              onClick={() => setActiveVideoUrl(meeting.meeting_link)}
+                            >
+                              <Video className="h-4 w-4 mr-2" />
+                              Join Pitch Meeting
+                            </Button>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Calendar Tab - Merged Events & Pitches */}

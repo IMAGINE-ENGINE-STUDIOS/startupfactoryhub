@@ -19,6 +19,7 @@ import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 import AdvisorJobTaskViewer from '@/components/AdvisorJobTaskViewer';
+import AvailabilityManager from '@/components/AvailabilityManager';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import StartupProfileDialog from '@/components/StartupProfileDialog';
 import NetworkBrowser from '@/components/NetworkBrowser';
@@ -681,6 +682,9 @@ export default function AdvisorDashboard() {
                 <span className="sm:inline">Create Event</span>
               </Button>
             </div>
+
+            {/* Availability Manager */}
+            <AvailabilityManager />
 
             {/* Upcoming Events with Banners */}
             {upcomingEvents.length > 0 && (

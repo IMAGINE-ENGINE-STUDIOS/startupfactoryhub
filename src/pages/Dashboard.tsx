@@ -31,6 +31,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 import GuestPrompt from '@/components/GuestPrompt';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { DashboardHeader } from '@/components/DashboardHeader';
@@ -47,6 +48,7 @@ const Dashboard = () => {
     user,
     loading
   } = useAuth();
+  const { toast } = useToast();
   const { role, loading: roleLoading } = useUserRole();
   const [activeTab, setActiveTab] = useState("social");
   const {
@@ -267,15 +269,29 @@ const Dashboard = () => {
                     <Users className="h-4 w-4" />
                     <span>Schedule Mentoring Session</span>
                   </DropdownMenuItem>
-                  {connectedInvestors.length > 0 && (
-                    <DropdownMenuItem onClick={() => setCreatePitchDialogOpen(true)} className="gap-2">
-                      <Briefcase className="h-4 w-4" />
-                      <span>Book Pitch Meeting</span>
+                  <DropdownMenuItem 
+                    onClick={() => {
+                      if (connectedInvestors.length === 0) {
+                        toast({
+                          title: 'No Connected Investors',
+                          description: 'Connect with investors first to schedule pitch meetings',
+                          variant: 'destructive',
+                        });
+                      } else {
+                        setCreatePitchDialogOpen(true);
+                      }
+                    }} 
+                    className="gap-2"
+                    disabled={connectedInvestors.length === 0}
+                  >
+                    <Briefcase className="h-4 w-4" />
+                    <span>Book Pitch Meeting</span>
+                    {connectedInvestors.length > 0 && (
                       <Badge variant="secondary" className="ml-auto">
                         {connectedInvestors.length}
                       </Badge>
-                    </DropdownMenuItem>
-                  )}
+                    )}
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2 w-full sm:w-auto">

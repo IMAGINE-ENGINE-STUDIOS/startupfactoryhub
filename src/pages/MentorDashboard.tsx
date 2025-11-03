@@ -7,11 +7,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MentorRoadmapWidget from "@/components/MentorRoadmapWidget";
 import MentorCalendarWidget from "@/components/MentorCalendarWidget";
+import AvailabilityManager from "@/components/AvailabilityManager";
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
 import AIFeaturesHub from "@/components/AIFeaturesHub";
 import MentorshipRequests from "@/components/MentorshipRequests";
 import ConnectionsWidget from "@/components/ConnectionsWidget";
-import AvailabilityManager from "@/components/AvailabilityManager";
 import FloatingChat from "@/components/FloatingChat";
 import UnifiedJobsBoard from "@/components/UnifiedJobsBoard";
 import AdvisorJobTaskViewer from "@/components/AdvisorJobTaskViewer";
@@ -231,6 +231,9 @@ const MentorDashboard = () => {
                 <span className="sm:inline">Create Event</span>
               </Button>
             </div>
+
+            {/* Availability Manager */}
+            <AvailabilityManager />
 
             {/* Upcoming Events with Banners */}
             {upcomingEvents.length > 0 && (

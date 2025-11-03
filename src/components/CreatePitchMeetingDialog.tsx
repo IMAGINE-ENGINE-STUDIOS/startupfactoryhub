@@ -157,7 +157,7 @@ export default function CreatePitchMeetingDialog({
       const scheduledDate = new Date(selectedDate);
       scheduledDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
 
-      // Insert pitch meeting
+      // Insert pitch meeting with 'pending' status
       const { error } = await supabase
         .from('pitch_meetings')
         .insert({
@@ -166,7 +166,7 @@ export default function CreatePitchMeetingDialog({
           company_id: companyId,
           scheduled_date: scheduledDate.toISOString(),
           duration_minutes: 30,
-          status: 'scheduled',
+          status: 'pending',
           meeting_link: meetingLink,
           host_id: user.id
         });
@@ -179,8 +179,8 @@ export default function CreatePitchMeetingDialog({
         .insert({
           user_id: selectedInvestorId,
           type: 'pitch_scheduled',
-          title: 'New Pitch Meeting Scheduled',
-          message: `${companyName} has scheduled a pitch meeting with you`,
+          title: 'New Pitch Meeting Request',
+          message: `${companyName} has requested a pitch meeting with you`,
           data: {
             company_id: companyId,
             company_name: companyName,
@@ -189,8 +189,8 @@ export default function CreatePitchMeetingDialog({
         });
 
       toast({
-        title: 'Pitch Meeting Booked!',
-        description: `Your pitch with the investor is scheduled for ${scheduledDate.toLocaleString()}`
+        title: 'Pitch Request Sent!',
+        description: `Your pitch meeting request has been sent. You'll be notified once they respond.`
       });
 
       onOpenChange(false);
