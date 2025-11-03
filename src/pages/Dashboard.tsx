@@ -225,27 +225,32 @@ const Dashboard = () => {
           </div>
 
           {/* Social Tab */}
-          <TabsContent value="social" className="space-y-4">
-            <UnifiedCommunityFeed showCreatePost={true} />
-          </TabsContent>
+          {activeTab === "social" && (
+            <TabsContent value="social" className="space-y-4">
+              <UnifiedCommunityFeed showCreatePost={true} />
+            </TabsContent>
+          )}
 
           {/* Journey Tab */}
-          <TabsContent value="journey" className="space-y-4">
-            <Card className="tech-card border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Target className="h-5 w-5 text-primary" />
-                  <span>Your Startup Journey</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <StartupRoadmap />
-              </CardContent>
-            </Card>
-          </TabsContent>
+          {activeTab === "journey" && (
+            <TabsContent value="journey" className="space-y-4">
+              <Card className="tech-card border-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center space-x-2">
+                    <Target className="h-5 w-5 text-primary" />
+                    <span>Your Startup Journey</span>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <StartupRoadmap />
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
 
           {/* Calendar Tab */}
-          <TabsContent value="calendar" className="space-y-4">
+          {activeTab === "calendar" && (
+            <TabsContent value="calendar" className="space-y-4">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -331,57 +336,71 @@ const Dashboard = () => {
               }} 
               filterTypes={['event', 'session', 'pitch']} 
             />
-          </TabsContent>
+            </TabsContent>
+          )}
 
           {/* Network Tab */}
-          <TabsContent value="network" className="space-y-4">
-            <MatchingSystem />
-            <NetworkBrowser />
-          </TabsContent>
+          {activeTab === "network" && (
+            <TabsContent value="network" className="space-y-4">
+              <MatchingSystem />
+              <NetworkBrowser />
+            </TabsContent>
+          )}
 
           {/* Profile Tab */}
-          <TabsContent value="profile" className="space-y-4">
-            <CompanyProfileManager />
-          </TabsContent>
+          {activeTab === "profile" && (
+            <TabsContent value="profile" className="space-y-4">
+              <CompanyProfileManager />
+            </TabsContent>
+          )}
 
           {/* Jobs Tab */}
-          <TabsContent value="jobs" className="space-y-4">
-            <UnifiedJobsBoard />
-            <JobTaskManager />
-          </TabsContent>
-
+          {activeTab === "jobs" && (
+            <TabsContent value="jobs" className="space-y-4">
+              <UnifiedJobsBoard />
+              <JobTaskManager />
+            </TabsContent>
+          )}
 
           {/* Learn Tab */}
-          <TabsContent value="learn" className="space-y-4">
-            <EducationalResources />
-          </TabsContent>
+          {activeTab === "learn" && (
+            <TabsContent value="learn" className="space-y-4">
+              <EducationalResources />
+            </TabsContent>
+          )}
 
           {/* Analytics Tab */}
-          <TabsContent value="analytics" className="space-y-4">
-            {/* Journey Progress - unique metric not in AnalyticsDashboard */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm font-medium text-muted-foreground">Journey Progress</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-primary">{roadmapProgress.percentage}%</div>
-                <p className="text-xs text-muted-foreground">{roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps</p>
-              </CardContent>
-            </Card>
-            <AnalyticsDashboard />
-          </TabsContent>
+          {activeTab === "analytics" && (
+            <TabsContent value="analytics" className="space-y-4">
+              {/* Journey Progress - unique metric not in AnalyticsDashboard */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Journey Progress</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-primary">{roadmapProgress.percentage}%</div>
+                  <p className="text-xs text-muted-foreground">{roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps</p>
+                </CardContent>
+              </Card>
+              <AnalyticsDashboard />
+            </TabsContent>
+          )}
 
           {/* Intelligence Tab */}
-          <TabsContent value="intelligence" className="space-y-4">
-            <StartupAIRecommendations />
-            <MarketIntelligenceWidget />
-          </TabsContent>
+          {activeTab === "intelligence" && (
+            <TabsContent value="intelligence" className="space-y-4">
+              <StartupAIRecommendations />
+              <MarketIntelligenceWidget />
+            </TabsContent>
+          )}
 
           {/* Tools Tab */}
-          <TabsContent value="tools" className="space-y-4">
-            
-            <AIFeaturesHub />
-          </TabsContent>
+          {activeTab === "tools" && (
+            <TabsContent value="tools" className="space-y-4">
+              
+              <AIFeaturesHub />
+            </TabsContent>
+          )}
         </Tabs>
       </div>
 

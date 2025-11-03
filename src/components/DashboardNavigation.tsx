@@ -98,51 +98,6 @@ const DashboardNavigation = () => {
                 variant="ghost" 
                 size="sm"
                 className="flex items-center space-x-2"
-                onClick={() => navigate("/explore")}
-              >
-                <Compass className="w-4 h-4" />
-                <span>Explore</span>
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="flex items-center space-x-2"
-                onClick={() => navigate("/feed")}
-              >
-                <Users className="w-4 h-4" />
-                <span>Community</span>
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="flex items-center space-x-2"
-                onClick={() => navigate("/calendar")}
-              >
-                <Calendar className="w-4 h-4" />
-                <span>Calendar</span>
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="flex items-center space-x-2"
-                onClick={() => navigate("/analytics")}
-              >
-                <BarChart3 className="w-4 h-4" />
-                <span>Analytics</span>
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="flex items-center space-x-2"
-                onClick={() => navigate("/market-intelligence")}
-              >
-                <Sparkles className="w-4 h-4" />
-                <span>Intelligence</span>
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="flex items-center space-x-2"
                 onClick={() => navigate("/lightpaper")}
               >
                 <FileText className="w-4 h-4" />
@@ -214,10 +169,6 @@ const DashboardNavigation = () => {
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => navigate("/profile")}>
-                    <Users className="mr-2 h-4 w-4" />
-                    <span>View Profile</span>
-                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/profile-setup")}>
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
@@ -236,7 +187,7 @@ const DashboardNavigation = () => {
 
       {/* Mobile Bottom Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-ocean-border pb-safe">
-        <div className="grid grid-cols-5 gap-1 px-2 py-2">
+        <div className="grid grid-cols-3 gap-1 px-2 py-2">
           <Button
             variant="ghost"
             size="sm"
@@ -250,37 +201,19 @@ const DashboardNavigation = () => {
             variant="ghost"
             size="sm"
             className="flex flex-col items-center space-y-1 h-auto py-2"
-            onClick={() => navigate("/feed")}
+            onClick={() => navigate("/lightpaper")}
           >
-            <Users className="w-5 h-5" />
-            <span className="text-xs">Feed</span>
+            <FileText className="w-5 h-5" />
+            <span className="text-xs">LightPaper</span>
           </Button>
           <Button
             variant="ghost"
             size="sm"
             className="flex flex-col items-center space-y-1 h-auto py-2"
-            onClick={() => navigate("/calendar")}
+            onClick={() => navigate("/guidelines")}
           >
-            <Calendar className="w-5 h-5" />
-            <span className="text-xs">Calendar</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex flex-col items-center space-y-1 h-auto py-2"
-            onClick={() => navigate("/analytics")}
-          >
-            <BarChart3 className="w-5 h-5" />
-            <span className="text-xs">Stats</span>
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex flex-col items-center space-y-1 h-auto py-2"
-            onClick={() => navigate("/explore")}
-          >
-            <Compass className="w-5 h-5" />
-            <span className="text-xs">More</span>
+            <BookOpen className="w-5 h-5" />
+            <span className="text-xs">Help</span>
           </Button>
         </div>
       </div>
