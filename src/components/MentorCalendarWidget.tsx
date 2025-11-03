@@ -75,16 +75,19 @@ export default function MentorCalendarWidget({ onJoinMeeting }: MentorCalendarWi
                       {format(sessionDate, 'MMM d, h:mm a')}
                     </span>
                     <span>{session.duration_minutes} min</span>
+                    {sessionDate <= now && sessionDate > new Date(Date.now() - session.duration_minutes * 60 * 1000) && (
+                      <Badge variant="destructive" className="text-xs">LIVE</Badge>
+                    )}
                   </div>
-                  {isWithin30Min && session.meeting_link && (
+                  {session.meeting_link && sessionDate > new Date(Date.now() - 60 * 60 * 1000) && (
                     <Button 
-                      variant="default" 
+                      variant={sessionDate <= now ? "default" : "outline"}
                       size="sm" 
                       className="w-full gap-2"
                       onClick={() => handleJoinMeeting(session.meeting_link, session)}
                     >
                       <Video className="h-3 w-3" />
-                      Start Session
+                      {sessionDate <= now ? 'Join Now' : 'Start Session'}
                     </Button>
                   )}
                 </div>

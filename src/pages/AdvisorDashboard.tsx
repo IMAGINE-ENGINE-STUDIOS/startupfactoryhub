@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -65,7 +65,7 @@ export default function AdvisorDashboard() {
   const { role, loading: roleLoading } = useUserRole();
   const { profile: profileWithRole } = useProfileWithRole();
   const { upcomingEvents } = useEvents();
-  const { pendingRequests, activeMentees, todaySessions, loading: dashboardLoading, refetch } = useMentorDashboard();
+  const { pendingRequests, activeMentees, pastMentees, todaySessions, loading: dashboardLoading, refetch } = useMentorDashboard();
   
   const [mentorStats, setMentorStats] = useState({
     activeMentees: 0,
@@ -613,6 +613,35 @@ export default function AdvisorDashboard() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Past Mentees Section */}
+            {pastMentees && pastMentees.length > 0 && (
+              <Card className="tech-card border-0">
+                <CardHeader>
+                  <CardTitle>Past Mentees</CardTitle>
+                  <CardDescription>Previous mentorship relationships</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {pastMentees.map(mentee => (
+                      <div key={mentee.id} className="flex items-center gap-3 p-3 rounded-lg border">
+                        <Avatar>
+                          <AvatarImage src={mentee.mentee.avatar_url} />
+                          <AvatarFallback>{mentee.mentee.full_name?.[0] || 'M'}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-medium">{mentee.mentee.full_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {mentee.companies?.name || 'No company info'}
+                          </p>
+                        </div>
+                        <Badge variant="secondary">Completed</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* New Opportunities */}
             {startups.length > 0 && (

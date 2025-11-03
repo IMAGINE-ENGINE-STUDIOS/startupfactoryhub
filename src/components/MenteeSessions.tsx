@@ -258,19 +258,25 @@ export default function MenteeSessions({ onJoinMeeting }: MenteeSessionsProps = 
                                 <Users className="h-3 w-3" />
                                 {session.duration_minutes} min
                               </div>
+                              {sessionDate <= now && sessionDate > new Date(Date.now() - session.duration_minutes * 60 * 1000) && (
+                                <Badge variant="destructive" className="text-xs">LIVE NOW</Badge>
+                              )}
+                              {sessionDate > now && isWithin30Min && (
+                                <Badge className="text-xs">Starting Soon</Badge>
+                              )}
                             </div>
                           </div>
                         </div>
                         <div className="flex sm:flex-col gap-2">
-                          {isWithin30Min && (
+                          {session.meeting_link && sessionDate > new Date(Date.now() - 60 * 60 * 1000) && (
                             <Button
                               size="sm"
-                              variant="default"
+                              variant={sessionDate <= now ? "default" : "outline"}
                               onClick={() => handleJoinMeeting(session.meeting_link, session)}
                               className="flex-1 sm:flex-none gap-2"
                             >
                               <Video className="h-4 w-4" />
-                              Join Session
+                              {sessionDate <= now && sessionDate > new Date(Date.now() - session.duration_minutes * 60 * 1000) ? 'Join Now (Live)' : 'Join Session'}
                             </Button>
                           )}
                           <Button

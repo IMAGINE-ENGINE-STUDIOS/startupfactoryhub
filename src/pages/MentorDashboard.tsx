@@ -65,7 +65,7 @@ const MentorDashboard = () => {
   const navigate = useNavigate();
   const { role, loading: roleLoading } = useUserRole();
   const { profile: profileWithRole } = useProfileWithRole();
-  const { activeMentees, todaySessions } = useMentorDashboard();
+  const { activeMentees, pastMentees, todaySessions } = useMentorDashboard();
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
@@ -218,6 +218,35 @@ const MentorDashboard = () => {
             <MenteeSessions onJoinMeeting={(link, sessionData) => setActiveVideoSession(sessionData)} />
             <MentorshipRequests />
             <MentorOffersBoard />
+            
+            {/* Past Mentees Section */}
+            {pastMentees && pastMentees.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Past Mentees</CardTitle>
+                  <CardDescription>Previous mentorship relationships</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {pastMentees.map(mentee => (
+                      <div key={mentee.id} className="flex items-center gap-3 p-3 rounded-lg border">
+                        <Avatar>
+                          <AvatarImage src={mentee.mentee.avatar_url} />
+                          <AvatarFallback>{mentee.mentee.full_name?.[0] || 'M'}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-medium">{mentee.mentee.full_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {mentee.companies?.name || 'No company info'}
+                          </p>
+                        </div>
+                        <Badge variant="secondary">Completed</Badge>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-6">

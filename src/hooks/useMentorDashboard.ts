@@ -22,6 +22,8 @@ interface MentorshipRelationship {
     industry: string;
     description: string;
   } | null;
+  hasUpcomingSessions?: boolean;
+  hasRecentSessions?: boolean;
 }
 
 interface MentoringSession {
@@ -69,24 +71,47 @@ export const useMentorDashboard = () => {
       return;
     }
 
-    // Fetch company info for each mentee
+    // Fetch company info and session data for each mentee
     if (data) {
-      const mentorshipsWithCompanies = await Promise.all(
+      const mentorshipsWithData = await Promise.all(
         data.map(async (mentorship: any) => {
+          // Fetch company info
           const { data: companyData } = await supabase
             .from('companies')
             .select('id, name, description, stage, industry')
             .eq('user_id', mentorship.mentee?.user_id)
             .maybeSingle();
           
+          // Check for upcoming sessions
+          const { data: upcomingSessions } = await supabase
+            .from('mentoring_sessions')
+            .select('id, scheduled_at')
+            .eq('mentor_id', user.id)
+            .eq('mentee_id', mentorship.mentee_id)
+            .gte('scheduled_at', new Date().toISOString())
+            .order('scheduled_at', { ascending: true })
+            .limit(1);
+
+          // Check for recent past sessions (within last 30 days)
+          const { data: recentSessions } = await supabase
+            .from('mentoring_sessions')
+            .select('id, scheduled_at')
+            .eq('mentor_id', user.id)
+            .eq('mentee_id', mentorship.mentee_id)
+            .gte('scheduled_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
+            .order('scheduled_at', { ascending: false })
+            .limit(1);
+          
           return {
             ...mentorship,
-            companies: companyData || null
+            companies: companyData || null,
+            hasUpcomingSessions: (upcomingSessions?.length || 0) > 0,
+            hasRecentSessions: (recentSessions?.length || 0) > 0,
           };
         })
       );
 
-      setMentorships(mentorshipsWithCompanies as MentorshipRelationship[]);
+      setMentorships(mentorshipsWithData as MentorshipRelationship[]);
     }
   };
 
@@ -166,12 +191,14 @@ export const useMentorDashboard = () => {
   });
 
   const pendingRequests = mentorships.filter(m => m.status === 'pending');
-  const activeMentees = mentorships.filter(m => m.status === 'active');
+  const activeMentees = mentorships.filter(m => m.hasUpcomingSessions || m.hasRecentSessions);
+  const pastMentees = mentorships.filter(m => m.status === 'active' && !m.hasUpcomingSessions && !m.hasRecentSessions);
 
   return {
     mentorships,
     pendingRequests,
     activeMentees,
+    pastMentees,
     todaySessions,
     loading,
     refetch: () => Promise.all([fetchMentorships(), fetchTodaySessions()]),
