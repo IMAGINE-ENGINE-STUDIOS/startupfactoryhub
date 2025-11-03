@@ -94,36 +94,16 @@ const Dashboard = () => {
       setCompanyId(data.id);
       setCompanyName(data.name);
       
-      // Fetch connected investors
+      // Fetch connected investors who have invested
       const { data: investments } = await supabase
         .from('investments')
         .select('investor_id, profiles(full_name)')
         .eq('company_id', data.id)
         .eq('status', 'active');
 
-      const { data: interests } = await supabase
-        .from('investment_interests')
-        .select('investor_id, profiles(full_name)')
-        .eq('company_id', data.id)
-        .in('status', ['interested', 'due_diligence']);
-
-      const investorMap = new Map();
-      
-      investments?.forEach(inv => {
-        if (inv.profiles) {
-          investorMap.set(inv.investor_id, (inv.profiles as any).full_name || 'Investor');
-        }
-      });
-      
-      interests?.forEach(int => {
-        if (int.profiles && !investorMap.has(int.investor_id)) {
-          investorMap.set(int.investor_id, (int.profiles as any).full_name || 'Investor');
-        }
-      });
-
-      const investors = Array.from(investorMap.entries()).map(([id, name]) => ({
-        id,
-        name
+      const investors = (investments || []).map(inv => ({
+        id: inv.investor_id,
+        name: inv.profiles ? (inv.profiles as any).full_name || 'Investor' : 'Investor'
       }));
       
       setConnectedInvestors(investors);

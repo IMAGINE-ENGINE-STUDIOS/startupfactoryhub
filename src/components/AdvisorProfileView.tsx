@@ -576,6 +576,36 @@ function ExperienceForm({ onSave, onCancel }: any) {
     is_current: false,
     description: '',
   });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSave = async () => {
+    if (!formData.title || !formData.company) {
+      setError('Title and Company are required');
+      return;
+    }
+    
+    setSaving(true);
+    setError('');
+    
+    try {
+      await onSave(formData);
+      setFormData({
+        title: '',
+        company: '',
+        location: '',
+        start_date: '',
+        end_date: '',
+        is_current: false,
+        description: '',
+      });
+      onCancel();
+    } catch (err) {
+      setError('Failed to save. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <Card className="bg-muted/50">
@@ -592,9 +622,12 @@ function ExperienceForm({ onSave, onCancel }: any) {
           I currently work here
         </label>
         <Textarea placeholder="Description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} />
+        {error && <p className="text-sm text-destructive">{error}</p>}
         <div className="flex gap-2">
-          <Button onClick={() => onSave(formData)} size="sm">Save</Button>
-          <Button onClick={onCancel} size="sm" variant="outline">Cancel</Button>
+          <Button onClick={handleSave} size="sm" disabled={saving}>
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+          <Button onClick={onCancel} size="sm" variant="outline" disabled={saving}>Cancel</Button>
         </div>
       </CardContent>
     </Card>
@@ -610,6 +643,35 @@ function EducationForm({ onSave, onCancel }: any) {
     end_date: '',
     description: '',
   });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSave = async () => {
+    if (!formData.degree || !formData.institution) {
+      setError('Degree and Institution are required');
+      return;
+    }
+    
+    setSaving(true);
+    setError('');
+    
+    try {
+      await onSave(formData);
+      setFormData({
+        degree: '',
+        institution: '',
+        field_of_study: '',
+        start_date: '',
+        end_date: '',
+        description: '',
+      });
+      onCancel();
+    } catch (err) {
+      setError('Failed to save. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <Card className="bg-muted/50">
@@ -622,9 +684,12 @@ function EducationForm({ onSave, onCancel }: any) {
           <Input type="date" placeholder="End Date" value={formData.end_date} onChange={(e) => setFormData({ ...formData, end_date: e.target.value })} />
         </div>
         <Textarea placeholder="Description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2} />
+        {error && <p className="text-sm text-destructive">{error}</p>}
         <div className="flex gap-2">
-          <Button onClick={() => onSave(formData)} size="sm">Save</Button>
-          <Button onClick={onCancel} size="sm" variant="outline">Cancel</Button>
+          <Button onClick={handleSave} size="sm" disabled={saving}>
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+          <Button onClick={onCancel} size="sm" variant="outline" disabled={saving}>Cancel</Button>
         </div>
       </CardContent>
     </Card>
@@ -638,6 +703,33 @@ function AchievementForm({ onSave, onCancel }: any) {
     date: '',
     description: '',
   });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSave = async () => {
+    if (!formData.title) {
+      setError('Title is required');
+      return;
+    }
+    
+    setSaving(true);
+    setError('');
+    
+    try {
+      await onSave(formData);
+      setFormData({
+        title: '',
+        organization: '',
+        date: '',
+        description: '',
+      });
+      onCancel();
+    } catch (err) {
+      setError('Failed to save. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <Card className="bg-muted/50">
@@ -646,9 +738,12 @@ function AchievementForm({ onSave, onCancel }: any) {
         <Input placeholder="Organization" value={formData.organization} onChange={(e) => setFormData({ ...formData, organization: e.target.value })} />
         <Input type="date" placeholder="Date" value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
         <Textarea placeholder="Description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2} />
+        {error && <p className="text-sm text-destructive">{error}</p>}
         <div className="flex gap-2">
-          <Button onClick={() => onSave(formData)} size="sm">Save</Button>
-          <Button onClick={onCancel} size="sm" variant="outline">Cancel</Button>
+          <Button onClick={handleSave} size="sm" disabled={saving}>
+            {saving ? 'Saving...' : 'Save'}
+          </Button>
+          <Button onClick={onCancel} size="sm" variant="outline" disabled={saving}>Cancel</Button>
         </div>
       </CardContent>
     </Card>
@@ -660,6 +755,31 @@ function SkillForm({ onSave, onCancel }: any) {
     skill_name: '',
     category: 'technical',
   });
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleSave = async () => {
+    if (!formData.skill_name) {
+      setError('Skill name is required');
+      return;
+    }
+    
+    setSaving(true);
+    setError('');
+    
+    try {
+      await onSave(formData);
+      setFormData({
+        skill_name: '',
+        category: 'technical',
+      });
+      onCancel();
+    } catch (err) {
+      setError('Failed to save. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
     <Card className="bg-muted/50">
@@ -674,9 +794,12 @@ function SkillForm({ onSave, onCancel }: any) {
           <option value="business">Business</option>
           <option value="soft_skills">Soft Skills</option>
         </select>
+        {error && <p className="text-sm text-destructive">{error}</p>}
         <div className="flex gap-2">
-          <Button onClick={() => onSave(formData)} size="sm">Add</Button>
-          <Button onClick={onCancel} size="sm" variant="outline">Cancel</Button>
+          <Button onClick={handleSave} size="sm" disabled={saving}>
+            {saving ? 'Saving...' : 'Add'}
+          </Button>
+          <Button onClick={onCancel} size="sm" variant="outline" disabled={saving}>Cancel</Button>
         </div>
       </CardContent>
     </Card>

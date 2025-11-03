@@ -56,24 +56,14 @@ export default function CreatePitchMeetingDialog({
   const fetchConnectedInvestors = async () => {
     setLoading(true);
     try {
-      // Get investors who invested
+      // Get investors who invested in this company
       const { data: investments } = await supabase
         .from('investments')
         .select('investor_id')
         .eq('company_id', companyId)
         .eq('status', 'active');
 
-      // Get investors who expressed interest
-      const { data: interests } = await supabase
-        .from('investment_interests')
-        .select('investor_id')
-        .eq('company_id', companyId)
-        .in('status', ['interested', 'due_diligence']);
-
-      const investorIds = [
-        ...(investments?.map(i => i.investor_id) || []),
-        ...(interests?.map(i => i.investor_id) || [])
-      ];
+      const investorIds = investments?.map(i => i.investor_id) || [];
 
       if (investorIds.length === 0) {
         setConnectedInvestors([]);
@@ -92,7 +82,7 @@ export default function CreatePitchMeetingDialog({
         user_id: p.user_id,
         name: p.full_name || 'Unknown',
         avatar_url: p.avatar_url,
-        connection_type: investments?.some(i => i.investor_id === p.user_id) ? 'invested' : 'interested'
+        connection_type: 'invested'
       }));
 
       setConnectedInvestors(investors);
