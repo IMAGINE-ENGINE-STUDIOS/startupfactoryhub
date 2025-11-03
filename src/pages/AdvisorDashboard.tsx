@@ -23,6 +23,7 @@ import AvailabilityManager from '@/components/AvailabilityManager';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import StartupProfileDialog from '@/components/StartupProfileDialog';
 import NetworkBrowser from '@/components/NetworkBrowser';
+import MatchingSystem from '@/components/MatchingSystem';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
@@ -421,6 +422,7 @@ export default function AdvisorDashboard() {
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
+            <MatchingSystem />
             <NetworkBrowser />
           </TabsContent>
 
