@@ -165,9 +165,21 @@ export default function AdvisorProfileView() {
                   <h1 className="text-3xl font-bold">{profile?.full_name || 'Advisor'}</h1>
                   <p className="text-muted-foreground">Professional Advisor & Mentor</p>
                 </div>
-                <Button onClick={isEditing ? handleSaveProfile : toggleEdit} variant={isEditing ? "default" : "outline"}>
-                  {isEditing ? <><Save className="h-4 w-4 mr-2" /> Save</> : <><Edit className="h-4 w-4 mr-2" /> Edit</>}
-                </Button>
+                <div className="flex gap-2">
+                  {mentorProfile?.scheduling_link && !isEditing && (
+                    <Button 
+                      variant="default" 
+                      onClick={() => window.open(mentorProfile.scheduling_link, '_blank')}
+                      className="gap-2"
+                    >
+                      <Calendar className="h-4 w-4" />
+                      Schedule Session
+                    </Button>
+                  )}
+                  <Button onClick={isEditing ? handleSaveProfile : toggleEdit} variant={isEditing ? "default" : "outline"}>
+                    {isEditing ? <><Save className="h-4 w-4 mr-2" /> Save</> : <><Edit className="h-4 w-4 mr-2" /> Edit</>}
+                  </Button>
+                </div>
               </div>
 
               <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
@@ -325,6 +337,20 @@ export default function AdvisorProfileView() {
                     min={0}
                   />
                   <p className="text-xs text-muted-foreground">Set to 0 for free mentorship</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label>Scheduling Link</Label>
+                  <Input
+                    type="url"
+                    placeholder="https://calendly.com/your-link"
+                    value={mentorProfile?.scheduling_link || ''}
+                    onChange={(e) => updateMentorSettings('scheduling_link', e.target.value)}
+                    disabled={updatingSettings}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Add your Calendly, Cal.com, or other scheduling tool link
+                  </p>
                 </div>
               </div>
             </CardContent>

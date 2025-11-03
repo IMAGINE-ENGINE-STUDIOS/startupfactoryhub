@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 interface Experience {
   id: string;
@@ -41,6 +42,7 @@ interface Skill {
 
 export const useAdvisorProfile = (userId?: string) => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const targetUserId = userId || user?.id;
 
   const [experiences, setExperiences] = useState<Experience[]>([]);
@@ -94,16 +96,43 @@ export const useAdvisorProfile = (userId?: string) => {
   }, [targetUserId]);
 
   const addExperience = async (experience: Omit<Experience, 'id'>) => {
-    if (!user) return;
+    if (!user) return { success: false, error: 'No user' };
+
+    if (!experience.title || !experience.company || !experience.start_date) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all required fields',
+        variant: 'destructive'
+      });
+      return { success: false };
+    }
+
     const { data, error } = await supabase
       .from('advisor_experiences')
       .insert({ ...experience, user_id: user.id })
       .select()
       .single();
 
-    if (data && !error) {
-      setExperiences((prev) => [data, ...prev]);
+    if (error) {
+      console.error('Error adding experience:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add experience. Please try again.',
+        variant: 'destructive'
+      });
+      return { success: false, error };
     }
+
+    if (data) {
+      setExperiences((prev) => [data, ...prev]);
+      toast({
+        title: 'Success',
+        description: 'Experience added successfully'
+      });
+      return { success: true, data };
+    }
+
+    return { success: false };
   };
 
   const updateExperience = async (id: string, updates: Partial<Experience>) => {
@@ -125,16 +154,43 @@ export const useAdvisorProfile = (userId?: string) => {
   };
 
   const addEducation = async (edu: Omit<Education, 'id'>) => {
-    if (!user) return;
+    if (!user) return { success: false, error: 'No user' };
+
+    if (!edu.degree || !edu.institution || !edu.start_date) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all required fields',
+        variant: 'destructive'
+      });
+      return { success: false };
+    }
+
     const { data, error } = await supabase
       .from('advisor_education')
       .insert({ ...edu, user_id: user.id })
       .select()
       .single();
 
-    if (data && !error) {
-      setEducation((prev) => [data, ...prev]);
+    if (error) {
+      console.error('Error adding education:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add education. Please try again.',
+        variant: 'destructive'
+      });
+      return { success: false, error };
     }
+
+    if (data) {
+      setEducation((prev) => [data, ...prev]);
+      toast({
+        title: 'Success',
+        description: 'Education added successfully'
+      });
+      return { success: true, data };
+    }
+
+    return { success: false };
   };
 
   const updateEducation = async (id: string, updates: Partial<Education>) => {
@@ -156,16 +212,43 @@ export const useAdvisorProfile = (userId?: string) => {
   };
 
   const addAchievement = async (achievement: Omit<Achievement, 'id'>) => {
-    if (!user) return;
+    if (!user) return { success: false, error: 'No user' };
+
+    if (!achievement.title || !achievement.date) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please fill in all required fields',
+        variant: 'destructive'
+      });
+      return { success: false };
+    }
+
     const { data, error } = await supabase
       .from('advisor_achievements')
       .insert({ ...achievement, user_id: user.id })
       .select()
       .single();
 
-    if (data && !error) {
-      setAchievements((prev) => [data, ...prev]);
+    if (error) {
+      console.error('Error adding achievement:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add achievement. Please try again.',
+        variant: 'destructive'
+      });
+      return { success: false, error };
     }
+
+    if (data) {
+      setAchievements((prev) => [data, ...prev]);
+      toast({
+        title: 'Success',
+        description: 'Achievement added successfully'
+      });
+      return { success: true, data };
+    }
+
+    return { success: false };
   };
 
   const deleteAchievement = async (id: string) => {
@@ -174,16 +257,43 @@ export const useAdvisorProfile = (userId?: string) => {
   };
 
   const addSkill = async (skill: Omit<Skill, 'id' | 'endorsement_count'>) => {
-    if (!user) return;
+    if (!user) return { success: false, error: 'No user' };
+
+    if (!skill.skill_name) {
+      toast({
+        title: 'Missing Information',
+        description: 'Please enter a skill name',
+        variant: 'destructive'
+      });
+      return { success: false };
+    }
+
     const { data, error } = await supabase
       .from('advisor_skills')
       .insert({ ...skill, user_id: user.id })
       .select()
       .single();
 
-    if (data && !error) {
-      setSkills((prev) => [...prev, data]);
+    if (error) {
+      console.error('Error adding skill:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to add skill. Please try again.',
+        variant: 'destructive'
+      });
+      return { success: false, error };
     }
+
+    if (data) {
+      setSkills((prev) => [...prev, data]);
+      toast({
+        title: 'Success',
+        description: 'Skill added successfully'
+      });
+      return { success: true, data };
+    }
+
+    return { success: false };
   };
 
   const deleteSkill = async (id: string) => {

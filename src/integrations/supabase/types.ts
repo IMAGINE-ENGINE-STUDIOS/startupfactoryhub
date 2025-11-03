@@ -2053,6 +2053,7 @@ export type Database = {
           id: string
           is_accepting_mentees: boolean | null
           max_mentees: number | null
+          scheduling_link: string | null
           success_stories: string[] | null
           total_mentees: number | null
           total_sessions: number | null
@@ -2068,6 +2069,7 @@ export type Database = {
           id?: string
           is_accepting_mentees?: boolean | null
           max_mentees?: number | null
+          scheduling_link?: string | null
           success_stories?: string[] | null
           total_mentees?: number | null
           total_sessions?: number | null
@@ -2083,6 +2085,7 @@ export type Database = {
           id?: string
           is_accepting_mentees?: boolean | null
           max_mentees?: number | null
+          scheduling_link?: string | null
           success_stories?: string[] | null
           total_mentees?: number | null
           total_sessions?: number | null

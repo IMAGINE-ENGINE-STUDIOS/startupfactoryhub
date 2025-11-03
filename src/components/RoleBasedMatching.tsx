@@ -154,26 +154,93 @@ export default function RoleBasedMatching() {
   };
 
   const fetchStartupsForAdvisor = async (): Promise<Match[]> => {
+    if (!user) return [];
+
+    // 1. Get advisor's experience and skills
+    const [expData, skillData] = await Promise.all([
+      supabase
+        .from('advisor_experiences')
+        .select('title, company, description')
+        .eq('user_id', user.id),
+      supabase
+        .from('advisor_skills')
+        .select('skill_name, category')
+        .eq('user_id', user.id)
+    ]);
+
+    // Build advisor expertise text from experience titles and descriptions
+    const advisorExpertise = expData.data
+      ?.map(exp => `${exp.title} ${exp.description || ''} ${exp.company}`.toLowerCase())
+      .join(' ') || '';
+
+    const advisorSkills = new Set(
+      skillData.data?.map(s => s.skill_name.toLowerCase()) || []
+    );
+
+    // 2. Fetch all companies
     const { data: companies, error } = await supabase
       .from('companies')
-      .select(`
-        *,
-        profiles(full_name, avatar_url)
-      `)
-      .limit(10);
+      .select('*')
+      .limit(50);
 
     if (error || !companies) return [];
 
-    return companies.map(company => ({
-      id: company.id,
-      name: company.name,
-      role: 'Startup',
-      description: company.description,
-      industry: company.industry,
-      stage: company.stage,
-      location: company.location,
-      compatibility_score: Math.floor(Math.random() * 40) + 60,
-    }));
+    // 3. Calculate match scores based on:
+    // - Industry overlap (40 points)
+    // - Stage match (20 points - advisors good for early stage)
+    // - Looking_for contains 'advisor' or 'mentor' (30 points)
+    // - Skills match (10 points)
+
+    const scoredCompanies = companies.map(company => {
+      let score = 50; // Base score
+
+      // Industry/expertise match - check if company industry appears in advisor expertise
+      const companyIndustry = company.industry?.toLowerCase() || '';
+      if (companyIndustry && advisorExpertise.includes(companyIndustry)) {
+        score += 40;
+      }
+
+      // Early stage companies need more guidance
+      if (['idea', 'prototype', 'mvp'].includes(company.stage)) {
+        score += 20;
+      }
+
+      // Actively looking for advisors
+      if (company.looking_for?.some((item: string) =>
+        ['advisor', 'mentor', 'guidance'].includes(item.toLowerCase())
+      )) {
+        score += 30;
+      }
+
+      // Skills relevance (check if company description mentions advisor skills)
+      const companyText = `${company.description || ''} ${company.industry || ''}`.toLowerCase();
+      const matchingSkills = Array.from(advisorSkills).filter(skill =>
+        companyText.includes(skill)
+      );
+      if (matchingSkills.length > 0) {
+        score += Math.min(10, matchingSkills.length * 3);
+      }
+
+      return {
+        ...company,
+        compatibility_score: Math.min(100, Math.max(0, score))
+      };
+    });
+
+    // 4. Sort by score and return top 10
+    return scoredCompanies
+      .sort((a, b) => b.compatibility_score - a.compatibility_score)
+      .slice(0, 10)
+      .map(company => ({
+        id: company.id,
+        name: company.name,
+        role: 'Startup',
+        description: company.description,
+        industry: company.industry,
+        stage: company.stage,
+        location: company.location,
+        compatibility_score: company.compatibility_score,
+      }));
   };
 
   const fetchInternshipOpportunities = async (): Promise<Match[]> => {
