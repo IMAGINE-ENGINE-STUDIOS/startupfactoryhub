@@ -3225,6 +3225,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_user_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_email: string
+        }
+        Returns: undefined
+      }
       cleanup_old_cursors: { Args: never; Returns: undefined }
       cleanup_stale_online_status: { Args: never; Returns: undefined }
       get_user_role: {
