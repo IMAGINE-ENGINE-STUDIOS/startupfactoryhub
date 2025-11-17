@@ -71,6 +71,36 @@ const youtubeCourses: Course[] = [
     duration: '15 hours',
     playlist_url: 'https://www.youtube.com/playlist?list=PLfA33-E9P7FAvnrOcgy4MvIcCXxoyjuku'
   },
+  {
+    id: '6',
+    title: 'Startup Essentials Course',
+    instructor: 'Expert Instructor',
+    description: 'Essential knowledge and strategies for building successful startups.',
+    category: 'Entrepreneurship',
+    level: 'Beginner',
+    duration: '2 hours',
+    playlist_url: 'https://www.youtube.com/watch?v=oWZbWzAyHAE'
+  },
+  {
+    id: '7',
+    title: 'Business Growth Strategies',
+    instructor: 'Industry Expert',
+    description: 'Learn proven strategies to scale and grow your business effectively.',
+    category: 'Entrepreneurship',
+    level: 'Intermediate',
+    duration: '1.5 hours',
+    playlist_url: 'https://www.youtube.com/watch?v=zBUhQPPS9AY'
+  },
+  {
+    id: '8',
+    title: 'Advanced Startup Tactics',
+    instructor: 'Business Leader',
+    description: 'Advanced techniques and insights for startup success and scaling.',
+    category: 'Entrepreneurship',
+    level: 'Advanced',
+    duration: '2 hours',
+    playlist_url: 'https://www.youtube.com/watch?v=u36A-YTxiOw'
+  },
 ];
 
 export default function EducationalResources() {
