@@ -52,16 +52,6 @@ const youtubeCourses: Course[] = [
     playlist_url: 'https://www.youtube.com/playlist?list=PL8dPuuaLjXtNamNKW5qlS-nKgA0on7Qze'
   },
   {
-    id: '3',
-    title: 'Pitch Deck Masterclass',
-    instructor: 'Dave McClure',
-    description: 'Learn to create compelling pitch decks that attract investors from 500 Startups founder.',
-    category: 'Fundraising',
-    level: 'Beginner',
-    duration: '1 hour',
-    playlist_url: 'https://www.youtube.com/watch?v=9c2oiXPZkc0'
-  },
-  {
     id: '4',
     title: 'Financial Modeling for Startups',
     instructor: 'Corporate Finance Institute',
@@ -81,26 +71,6 @@ const youtubeCourses: Course[] = [
     duration: '15 hours',
     playlist_url: 'https://www.youtube.com/playlist?list=PLfA33-E9P7FAvnrOcgy4MvIcCXxoyjuku'
   },
-  {
-    id: '6',
-    title: 'Y Combinator Investor Pitches',
-    instructor: 'Y Combinator',
-    description: 'Watch real startup pitches and learn what investors look for in fundraising presentations.',
-    category: 'Fundraising',
-    level: 'Intermediate',
-    duration: '5 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PLQ-uHSnFig5MiLRb-l6yiJ5VZQdAKyt3-'
-  },
-  {
-    id: '7',
-    title: 'Google Digital Garage - Tech Skills',
-    instructor: 'Google',
-    description: 'Build essential digital skills for modern business from Google experts.',
-    category: 'Technology',
-    level: 'Beginner',
-    duration: '10 hours',
-    playlist_url: 'https://www.youtube.com/playlist?list=PLyQrd1vAV_2Ix8nxGdAiPl8PYCuDLaX-Y'
-  }
 ];
 
 export default function EducationalResources() {
