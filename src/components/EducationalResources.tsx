@@ -101,6 +101,26 @@ const youtubeCourses: Course[] = [
     duration: '2 hours',
     playlist_url: 'https://www.youtube.com/watch?v=u36A-YTxiOw'
   },
+  {
+    id: '9',
+    title: 'Startup Fundamentals',
+    instructor: 'Industry Expert',
+    description: 'Core fundamentals and principles for building successful startups.',
+    category: 'Entrepreneurship',
+    level: 'Beginner',
+    duration: '1.5 hours',
+    playlist_url: 'https://www.youtube.com/watch?v=aGPzQDfKcIU'
+  },
+  {
+    id: '10',
+    title: 'Business Strategy & Innovation',
+    instructor: 'Business Expert',
+    description: 'Strategic approaches and innovative methods for business development.',
+    category: 'Entrepreneurship',
+    level: 'Intermediate',
+    duration: '2 hours',
+    playlist_url: 'https://www.youtube.com/watch?v=ioSW__2I-B8'
+  },
 ];
 
 export default function EducationalResources() {
