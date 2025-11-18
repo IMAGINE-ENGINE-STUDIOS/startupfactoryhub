@@ -202,7 +202,6 @@ const PrivacyPolicy = () => {
               </p>
               <ul className="space-y-2 text-muted-foreground">
                 <li><strong>Email:</strong> privacy@startupfactoryhub.com</li>
-                <li><strong>Address:</strong> Startup Factory Hub, Innovation District, San Francisco, CA 94103</li>
                 <li><strong>Support:</strong> support@startupfactoryhub.com</li>
               </ul>
             </section>
