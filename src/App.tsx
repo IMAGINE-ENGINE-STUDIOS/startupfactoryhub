@@ -22,6 +22,9 @@ const PublicJobApplication = lazy(() => import("./pages/PublicJobApplication"));
 const PublicInternshipApplication = lazy(() => import("./pages/PublicInternshipApplication"));
 const PublicJobApplicationPage = lazy(() => import("./pages/PublicJobApplicationPage"));
 const AcceptInvitation = lazy(() => import("./pages/AcceptInvitation"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const TermsOfService = lazy(() => import("./pages/TermsOfService"));
+const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,6 +68,9 @@ const App = () => (
                   <Route path="/jobs/:jobId/apply" element={<PublicJobApplicationPage />} />
                   <Route path="/internships/:internshipId/apply" element={<PublicInternshipApplication />} />
                   <Route path="/accept-invitation" element={<AcceptInvitation />} />
+                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                  <Route path="/terms-of-service" element={<TermsOfService />} />
+                  <Route path="/cookie-policy" element={<CookiePolicy />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>
