@@ -567,6 +567,20 @@ export default function UnifiedCalendar({
                           {item.attendees} attending
                           {item.max_attendees && ` / ${item.max_attendees}`}
                         </div>
+                        {item.location?.includes('whereby.com') && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onItemClick?.(item);
+                            }}
+                            className="gap-2 mt-2 w-full"
+                          >
+                            <Video className="h-3 w-3" />
+                            Join Video Call
+                          </Button>
+                        )}
                       </>
                     )}
                     

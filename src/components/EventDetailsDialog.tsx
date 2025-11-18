@@ -10,6 +10,7 @@ import { Calendar, MapPin, Users, Clock, UserPlus, Check, X, Video } from 'lucid
 import { format, parseISO } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import VideoConferencing from './VideoConferencing';
+import { cn } from '@/lib/utils';
 
 interface Event {
   id: string;
@@ -43,6 +44,10 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const [userProfile, setUserProfile] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const isWherebyUrl = (url: string | null) => {
+    return url?.includes('whereby.com') || false;
+  };
 
   useEffect(() => {
     if (open) {
@@ -329,20 +334,30 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
               <Button
                 onClick={handleJoinEvent}
                 disabled={!isWithin15Min && !hasStarted && !isOrganizer}
-                className="w-full gap-2"
+                className={cn(
+                  "w-full gap-2",
+                  (isWithin15Min || hasStarted) && "bg-green-600 hover:bg-green-700"
+                )}
                 size="lg"
-                variant={isOrganizer ? 'default' : (isWithin15Min || hasStarted) ? 'default' : 'outline'}
               >
                 <Video className="h-5 w-5" />
                 {isOrganizer 
                   ? 'Start Meeting' 
                   : hasStarted 
-                    ? 'Join Meeting' 
+                    ? 'Join Meeting Now' 
                     : isWithin15Min 
-                      ? 'Join Meeting (Starting Soon)' 
-                      : `Meeting opens ${format(eventDate, 'h:mm a')}`
+                      ? 'Join Meeting (Available)' 
+                      : 'Join Meeting (Opens 15 min before)'
                 }
               </Button>
+            </div>
+          )}
+          
+          {isOnlineEvent && !event.location && (
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg mt-4">
+              <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                ⚠️ Video link not available. Please contact the organizer.
+              </p>
             </div>
           )}
 
