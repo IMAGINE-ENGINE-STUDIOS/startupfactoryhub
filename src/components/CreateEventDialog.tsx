@@ -74,16 +74,44 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
       const startDateTime = new Date(`${formData.start_date}T${formData.start_time}`);
       const endDateTime = new Date(`${formData.end_date}T${formData.end_time}`);
 
+      let meetingLocation = formData.location;
+
+      // If online event, create Whereby room
+      if (isOnlineEvent) {
+        const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
+          body: {
+            roomName: `evt-${formData.title.substring(0, 20).replace(/\s+/g, '-')}-${Date.now().toString(36).slice(-8)}`,
+            startDate: startDateTime.toISOString(),
+            endDate: endDateTime.toISOString()
+          }
+        });
+
+        if (roomError) {
+          console.error('Failed to create Whereby room:', roomError);
+          toast({ 
+            title: 'Warning: Video room creation failed', 
+            description: 'Event will be created without a video link.',
+            variant: 'destructive' 
+          });
+        } else if (roomData?.roomUrl) {
+          meetingLocation = roomData.roomUrl;
+          toast({ 
+            title: 'Video room created!', 
+            description: 'Meeting link has been generated.',
+          });
+        }
+      }
+
       const { data: eventData, error } = await supabase.from('events').insert({
         title: formData.title,
         description: formData.description,
-        location: formData.location || null,
+        location: meetingLocation || null,
         start_date: startDateTime.toISOString(),
         end_date: endDateTime.toISOString(),
         max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
         banner_url: formData.banner_url || null,
         organizer_id: user.id,
-        host_id: user.id // Set event creator as host
+        host_id: user.id
       }).select().single();
 
       if (error) throw error;
