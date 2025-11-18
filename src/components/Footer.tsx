@@ -100,31 +100,31 @@ const Footer = () => {
             <h3 className="font-semibold text-foreground mb-4">Legal</h3>
             <ul className="space-y-3">
               <li>
-                <a 
-                  href="#" 
+                <Link 
+                  to="/privacy-policy" 
                   className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
                 >
                   <Shield className="h-3 w-3" />
                   Privacy Policy
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="#" 
+                <Link 
+                  to="/terms-of-service" 
                   className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
                 >
                   <FileText className="h-3 w-3" />
                   Terms of Service
-                </a>
+                </Link>
               </li>
               <li>
-                <a 
-                  href="#" 
+                <Link 
+                  to="/cookie-policy" 
                   className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
                 >
                   <Cookie className="h-3 w-3" />
                   Cookie Policy
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
