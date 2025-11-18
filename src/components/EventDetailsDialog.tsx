@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -44,10 +44,6 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const [userProfile, setUserProfile] = useState<any>(null);
   const { user } = useAuth();
   const { toast } = useToast();
-
-  const isWherebyUrl = (url: string | null) => {
-    return url?.includes('whereby.com') || false;
-  };
 
   useEffect(() => {
     if (open) {
@@ -151,17 +147,30 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const isOrganizer = user?.id === event.organizer_id;
   const isFull = event.max_attendees && attendees.length >= event.max_attendees;
   const isOnlineEvent = event.location?.includes('whereby.com');
-  const eventDate = new Date(event.start_date);
-  const now = new Date();
-  const isWithin15Min = eventDate.getTime() - now.getTime() < 15 * 60 * 1000 && eventDate.getTime() > now.getTime();
-  const hasStarted = eventDate.getTime() <= now.getTime();
+  
+  const timeData = useMemo(() => {
+    const eventDate = new Date(event.start_date);
+    const now = new Date();
+    const isWithin15Min = eventDate.getTime() - now.getTime() < 15 * 60 * 1000 && eventDate.getTime() > now.getTime();
+    const hasStarted = eventDate.getTime() <= now.getTime();
+    
+    return { isWithin15Min, hasStarted };
+  }, [event.start_date]);
+
+  const { isWithin15Min, hasStarted } = timeData;
 
   const handleJoinEvent = async () => {
-    if (isOnlineEvent && event.location) {
-      setShowVideo(true);
-      // Wait for dialog to mount before auto-joining
-      await new Promise(resolve => setTimeout(resolve, 300));
+    if (!event.location) {
+      toast({ 
+        title: 'No video link available', 
+        description: 'This event does not have a video call link.',
+        variant: 'destructive' 
+      });
+      return;
     }
+    
+    setShowVideo(true);
+    await new Promise(resolve => setTimeout(resolve, 300));
   };
 
   if (showVideo && isOnlineEvent && event.location) {
