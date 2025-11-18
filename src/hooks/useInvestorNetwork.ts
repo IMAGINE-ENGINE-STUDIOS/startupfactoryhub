@@ -15,6 +15,7 @@ interface NetworkStartup {
   funding_amount?: number;
   looking_for?: string[];
   connection_type: 'invested' | 'interested' | 'available';
+  user_id?: string;
 }
 
 export function useInvestorNetwork(userId: string | undefined) {
@@ -66,7 +67,8 @@ export function useInvestorNetwork(userId: string | undefined) {
             location,
             team_size,
             funding_amount,
-            looking_for
+            looking_for,
+            user_id
           `)
           .order('created_at', { ascending: false })
       ]);
@@ -99,6 +101,7 @@ export function useInvestorNetwork(userId: string | undefined) {
           funding_amount: company.funding_amount,
           looking_for: company.looking_for,
           connection_type,
+          user_id: company.user_id,
         };
       });
 
