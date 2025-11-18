@@ -13,7 +13,8 @@ import {
   MapPin, 
   FileText, 
   ExternalLink,
-  Heart
+  Heart,
+  Calendar
 } from 'lucide-react';
 
 interface Company {
@@ -36,13 +37,15 @@ interface StartupProfileDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onExpressInterest?: (companyId: string) => void;
+  onSchedulePitch?: (companyId: string, companyName: string) => void;
 }
 
 export default function StartupProfileDialog({ 
   company, 
   open, 
   onOpenChange,
-  onExpressInterest 
+  onExpressInterest,
+  onSchedulePitch 
 }: StartupProfileDialogProps) {
   if (!company) return null;
 
@@ -255,6 +258,16 @@ export default function StartupProfileDialog({
 
         {/* Actions */}
         <div className="flex gap-3 pt-4 border-t border-border/50">
+          {onSchedulePitch && (
+            <Button 
+              className="flex-1" 
+              size="lg"
+              onClick={() => onSchedulePitch(company.id, company.name)}
+            >
+              <Calendar className="h-4 w-4 mr-2" />
+              Schedule Pitch
+            </Button>
+          )}
           <Button 
             className="flex-1" 
             size="lg"

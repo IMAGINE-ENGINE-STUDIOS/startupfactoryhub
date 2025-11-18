@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Building, Users, ExternalLink } from 'lucide-react';
 import StartupProfileDialog from './StartupProfileDialog';
+import InvestorBookPitchDialog from './InvestorBookPitchDialog';
 import { useInvestorNetwork } from '@/hooks/useInvestorNetwork';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +17,13 @@ export default function InvestorStartupNetwork() {
   const { startups, loading, refetch } = useInvestorNetwork(user?.id);
   const [selectedStartup, setSelectedStartup] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [pitchDialogOpen, setPitchDialogOpen] = useState(false);
+  const [selectedPitchStartup, setSelectedPitchStartup] = useState<{
+    userId: string;
+    name: string;
+    companyId: string;
+    companyName: string;
+  } | null>(null);
 
   const handleExpressInterest = async (companyId: string) => {
     if (!user || !selectedStartup) return;
@@ -92,6 +100,22 @@ export default function InvestorStartupNetwork() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleSchedulePitch = (companyId: string, companyName: string) => {
+    if (!selectedStartup) return;
+    
+    // Get the startup's user_id from the selected startup
+    const startupUserId = selectedStartup.user_id || selectedStartup.userId;
+    
+    setSelectedPitchStartup({
+      userId: startupUserId,
+      name: selectedStartup.name,
+      companyId: companyId,
+      companyName: companyName
+    });
+    setPitchDialogOpen(true);
+    setDialogOpen(false); // Close the profile dialog
   };
 
   if (loading) {
@@ -183,7 +207,19 @@ export default function InvestorStartupNetwork() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onExpressInterest={handleExpressInterest}
+        onSchedulePitch={handleSchedulePitch}
       />
+
+      {selectedPitchStartup && (
+        <InvestorBookPitchDialog
+          open={pitchDialogOpen}
+          onOpenChange={setPitchDialogOpen}
+          startupId={selectedPitchStartup.userId}
+          startupName={selectedPitchStartup.name}
+          companyId={selectedPitchStartup.companyId}
+          companyName={selectedPitchStartup.companyName}
+        />
+      )}
     </CardContent>
   </Card>
   );
