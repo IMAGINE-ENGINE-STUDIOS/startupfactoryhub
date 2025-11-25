@@ -13,9 +13,9 @@ export default function Guidelines() {
   const navigate = useNavigate();
 
   const KeyboardShortcut = ({ keys }: { keys: string[] }) => (
-    <div className="inline-flex gap-1">
+    <div className="inline-flex gap-1 flex-wrap">
       {keys.map((key, i) => (
-        <Badge key={i} variant="secondary" className="font-mono text-xs px-2 py-0.5">
+        <Badge key={i} variant="secondary" className="font-mono text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5">
           {key}
         </Badge>
       ))}
@@ -26,66 +26,69 @@ export default function Guidelines() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b bg-card sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <BookOpen className="h-8 w-8 text-primary" />
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
               <div>
-                <h1 className="text-2xl font-bold">User Guidelines</h1>
-                <p className="text-sm text-muted-foreground">Complete platform documentation</p>
+                <h1 className="text-xl sm:text-2xl font-bold">User Guidelines</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">Complete platform documentation</p>
               </div>
             </div>
-            <Button variant="outline" onClick={() => navigate(-1)}>
+            <Button variant="outline" onClick={() => navigate(-1)} className="self-end sm:self-auto text-sm">
               Back to Dashboard
             </Button>
           </div>
           
           {/* Search */}
-          <div className="mt-4 relative max-w-md">
+          <div className="mt-3 sm:mt-4 relative max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               placeholder="Search guidelines..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="pl-10 text-sm"
             />
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
         <Tabs defaultValue="lightpaper" className="w-full">
-          <TabsList className="grid w-full grid-cols-1 md:grid-cols-3 lg:w-auto">
-            <TabsTrigger value="lightpaper" className="gap-2">
-              <FileText className="h-4 w-4" />
-              LightPaper Workspace
+          <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 gap-1">
+            <TabsTrigger value="lightpaper" className="gap-2 text-xs sm:text-sm">
+              <FileText className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">LightPaper Workspace</span>
+              <span className="xs:hidden">LightPaper</span>
             </TabsTrigger>
-            <TabsTrigger value="ai-tools" className="gap-2">
-              <Sparkles className="h-4 w-4" />
-              AI Tools Guide
+            <TabsTrigger value="ai-tools" className="gap-2 text-xs sm:text-sm">
+              <Sparkles className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">AI Tools Guide</span>
+              <span className="xs:hidden">AI Tools</span>
             </TabsTrigger>
-            <TabsTrigger value="platform" className="gap-2">
-              <Users className="h-4 w-4" />
-              Platform Features
+            <TabsTrigger value="platform" className="gap-2 text-xs sm:text-sm">
+              <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+              <span className="hidden xs:inline">Platform Features</span>
+              <span className="xs:hidden">Platform</span>
             </TabsTrigger>
           </TabsList>
 
           {/* LightPaper Workspace Tab */}
-          <TabsContent value="lightpaper" className="space-y-6 mt-6">
+          <TabsContent value="lightpaper" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
             {/* Getting Started */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <BookOpen className="h-5 w-5" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <BookOpen className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                   Getting Started with LightPaper
                 </CardTitle>
-                <CardDescription>Access the professional workspace for documents, spreadsheets, and presentations</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Access the professional workspace for documents, spreadsheets, and presentations</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                 <div>
-                  <h4 className="font-semibold mb-2">How to Access</h4>
-                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                  <h4 className="font-semibold mb-2 text-sm sm:text-base">How to Access</h4>
+                  <ol className="list-decimal list-inside space-y-2 text-xs sm:text-sm text-muted-foreground">
                     <li>Navigate to your dashboard</li>
                     <li>Look for the <strong>LightPaper</strong> section</li>
                     <li>Choose between Document, Spreadsheet, or Presentation tabs</li>
@@ -93,8 +96,8 @@ export default function Guidelines() {
                   </ol>
                 </div>
                 <Alert>
-                  <Lightbulb className="h-4 w-4" />
-                  <AlertDescription>
+                  <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <AlertDescription className="text-xs sm:text-sm">
                     All your work is auto-saved! Projects are stored securely and can be accessed anytime from "My Files".
                   </AlertDescription>
                 </Alert>
@@ -103,32 +106,32 @@ export default function Guidelines() {
 
             {/* Document Editor */}
             <Card className="border-primary/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-primary" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg flex-wrap">
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
                   Document Editor
-                  <Badge variant="default">Featured</Badge>
+                  <Badge variant="default" className="text-xs">Featured</Badge>
                 </CardTitle>
-                <CardDescription>Professional document creation and editing with rich formatting</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Professional document creation and editing with rich formatting</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
                 {/* Text Formatting */}
                 <div>
-                  <h4 className="font-semibold mb-3">Text Formatting</h4>
-                  <div className="grid md:grid-cols-2 gap-3 text-sm">
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">Text Formatting</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+                    <div className="flex items-center justify-between p-2 sm:p-3 border rounded-lg">
                       <span className="font-medium">Bold</span>
                       <KeyboardShortcut keys={["Ctrl", "B"]} />
                     </div>
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center justify-between p-2 sm:p-3 border rounded-lg">
                       <span className="font-medium">Italic</span>
                       <KeyboardShortcut keys={["Ctrl", "I"]} />
                     </div>
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center justify-between p-2 sm:p-3 border rounded-lg">
                       <span className="font-medium">Underline</span>
                       <KeyboardShortcut keys={["Ctrl", "U"]} />
                     </div>
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center justify-between p-2 sm:p-3 border rounded-lg">
                       <span className="font-medium">Strikethrough</span>
                       <span className="text-xs text-muted-foreground">Toolbar button</span>
                     </div>
@@ -137,18 +140,18 @@ export default function Guidelines() {
 
                 {/* Font & Styling */}
                 <div>
-                  <h4 className="font-semibold mb-3">Font & Styling Options</h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">Font & Styling Options</h4>
+                  <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>9 Professional Fonts:</strong> Arial, Times New Roman, Courier New, Georgia, Verdana, Comic Sans MS, Impact, Lucida Console, Palatino Linotype</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Font Sizes:</strong> 8pt to 72pt for all text elements</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Dark/Light Mode:</strong> Toggle between themes for comfortable editing</span>
                     </li>
                   </ul>
@@ -156,33 +159,33 @@ export default function Guidelines() {
 
                 {/* Page Formats */}
                 <div>
-                  <h4 className="font-semibold mb-3">Page Format Options</h4>
-                  <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-xs">
-                    <div className="p-2 border rounded text-center">A4</div>
-                    <div className="p-2 border rounded text-center">Letter</div>
-                    <div className="p-2 border rounded text-center">Legal</div>
-                    <div className="p-2 border rounded text-center">A3</div>
-                    <div className="p-2 border rounded text-center">A5</div>
-                    <div className="p-2 border rounded text-center">B4</div>
-                    <div className="p-2 border rounded text-center">B5</div>
-                    <div className="p-2 border rounded text-center">Executive</div>
-                    <div className="p-2 border rounded text-center">Folio</div>
-                    <div className="p-2 border rounded text-center">Tabloid</div>
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">Page Format Options</h4>
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-1 sm:gap-2 text-xs">
+                    <div className="p-1.5 sm:p-2 border rounded text-center">A4</div>
+                    <div className="p-1.5 sm:p-2 border rounded text-center">Letter</div>
+                    <div className="p-1.5 sm:p-2 border rounded text-center">Legal</div>
+                    <div className="p-1.5 sm:p-2 border rounded text-center">A3</div>
+                    <div className="p-1.5 sm:p-2 border rounded text-center">A5</div>
+                    <div className="p-1.5 sm:p-2 border rounded text-center">B4</div>
+                    <div className="p-1.5 sm:p-2 border rounded text-center">B5</div>
+                    <div className="p-1.5 sm:p-2 border rounded text-center">Executive</div>
+                    <div className="p-1.5 sm:p-2 border rounded text-center">Folio</div>
+                    <div className="p-1.5 sm:p-2 border rounded text-center">Tabloid</div>
                   </div>
                 </div>
 
                 {/* Digital Signatures */}
                 <div>
-                  <h4 className="font-semibold mb-3">Digital Signatures</h4>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="p-4 border rounded-lg space-y-2">
-                      <div className="font-medium text-primary">Draw Signature</div>
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">Digital Signatures</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="p-3 sm:p-4 border rounded-lg space-y-2">
+                      <div className="font-medium text-primary text-sm">Draw Signature</div>
                       <p className="text-xs text-muted-foreground">
                         Use your mouse or touch screen to draw your signature naturally
                       </p>
                     </div>
-                    <div className="p-4 border rounded-lg space-y-2">
-                      <div className="font-medium text-primary">Type Signature</div>
+                    <div className="p-3 sm:p-4 border rounded-lg space-y-2">
+                      <div className="font-medium text-primary text-sm">Type Signature</div>
                       <p className="text-xs text-muted-foreground">
                         Type your name and choose from elegant font styles
                       </p>
@@ -192,11 +195,11 @@ export default function Guidelines() {
 
                 {/* Keyboard Shortcuts */}
                 <div>
-                  <h4 className="font-semibold mb-3 flex items-center gap-2">
-                    <Keyboard className="h-4 w-4" />
+                  <h4 className="font-semibold mb-3 flex items-center gap-2 text-sm sm:text-base">
+                    <Keyboard className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                     Essential Shortcuts
                   </h4>
-                  <div className="grid md:grid-cols-2 gap-2 text-sm">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
                     <div className="flex items-center justify-between p-2 border rounded">
                       <span>Save Document</span>
                       <KeyboardShortcut keys={["Ctrl", "S"]} />
@@ -218,26 +221,26 @@ export default function Guidelines() {
 
                 {/* Save & Export */}
                 <div>
-                  <h4 className="font-semibold mb-3">Save & Export</h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">Save & Export</h4>
+                  <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Auto-Save:</strong> Your work is saved automatically as you type</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Save Project:</strong> Press Ctrl+S or click Save to store your document</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Load Projects:</strong> Access saved documents from "My Files" drawer</span>
                     </li>
                   </ul>
                 </div>
 
                 <Alert>
-                  <Lightbulb className="h-4 w-4" />
-                  <AlertDescription>
+                  <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <AlertDescription className="text-xs sm:text-sm">
                     <strong>Pro Tip:</strong> Use Ctrl+/ to view all available keyboard shortcuts while working!
                   </AlertDescription>
                 </Alert>
@@ -246,29 +249,29 @@ export default function Guidelines() {
 
             {/* Spreadsheet */}
             <Card className="border-primary/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Table className="h-5 w-5 text-primary" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg flex-wrap">
+                  <Table className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
                   Spreadsheet
-                  <Badge variant="default">Featured</Badge>
+                  <Badge variant="default" className="text-xs">Featured</Badge>
                 </CardTitle>
-                <CardDescription>Powerful Excel-like spreadsheet with formulas and data analysis</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Powerful Excel-like spreadsheet with formulas and data analysis</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
                 {/* Basic Operations */}
                 <div>
-                  <h4 className="font-semibold mb-3">Getting Started</h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">Getting Started</h4>
+                  <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Navigation:</strong> Click any cell to select it, use arrow keys to move</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Editing:</strong> Double-click a cell or press Enter to start editing</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Infinite Scrolling:</strong> Add more rows and columns as needed</span>
                     </li>
                   </ul>
@@ -276,21 +279,21 @@ export default function Guidelines() {
 
                 {/* Cell Formatting */}
                 <div>
-                  <h4 className="font-semibold mb-3">Cell Formatting</h4>
-                  <div className="grid md:grid-cols-2 gap-3 text-sm">
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">Cell Formatting</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 text-xs sm:text-sm">
+                    <div className="flex items-center justify-between p-2 sm:p-3 border rounded-lg">
                       <span className="font-medium">Bold Text</span>
                       <KeyboardShortcut keys={["Ctrl", "B"]} />
                     </div>
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center justify-between p-2 sm:p-3 border rounded-lg">
                       <span className="font-medium">Italic Text</span>
                       <KeyboardShortcut keys={["Ctrl", "I"]} />
                     </div>
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center justify-between p-2 sm:p-3 border rounded-lg">
                       <span className="font-medium">Underline</span>
                       <KeyboardShortcut keys={["Ctrl", "U"]} />
                     </div>
-                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                    <div className="flex items-center justify-between p-2 sm:p-3 border rounded-lg">
                       <span className="font-medium">Alignment</span>
                       <span className="text-xs text-muted-foreground">Left/Center/Right</span>
                     </div>
@@ -299,30 +302,30 @@ export default function Guidelines() {
 
                 {/* Formulas */}
                 <div>
-                  <h4 className="font-semibold mb-3">Available Formulas</h4>
-                  <div className="grid md:grid-cols-2 gap-3">
-                    <div className="p-3 border rounded-lg space-y-1">
-                      <div className="font-mono text-sm font-medium text-primary">=SUM(A1:A10)</div>
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">Available Formulas</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                    <div className="p-2 sm:p-3 border rounded-lg space-y-1">
+                      <div className="font-mono text-xs sm:text-sm font-medium text-primary break-all">=SUM(A1:A10)</div>
                       <p className="text-xs text-muted-foreground">Calculate the sum of a range</p>
                     </div>
-                    <div className="p-3 border rounded-lg space-y-1">
-                      <div className="font-mono text-sm font-medium text-primary">=AVG(B1:B5)</div>
+                    <div className="p-2 sm:p-3 border rounded-lg space-y-1">
+                      <div className="font-mono text-xs sm:text-sm font-medium text-primary break-all">=AVG(B1:B5)</div>
                       <p className="text-xs text-muted-foreground">Calculate the average value</p>
                     </div>
-                    <div className="p-3 border rounded-lg space-y-1">
-                      <div className="font-mono text-sm font-medium text-primary">=COUNT(C1:C20)</div>
+                    <div className="p-2 sm:p-3 border rounded-lg space-y-1">
+                      <div className="font-mono text-xs sm:text-sm font-medium text-primary break-all">=COUNT(C1:C20)</div>
                       <p className="text-xs text-muted-foreground">Count non-empty cells</p>
                     </div>
-                    <div className="p-3 border rounded-lg space-y-1">
-                      <div className="font-mono text-sm font-medium text-primary">=MAX(D1:D10)</div>
+                    <div className="p-2 sm:p-3 border rounded-lg space-y-1">
+                      <div className="font-mono text-xs sm:text-sm font-medium text-primary break-all">=MAX(D1:D10)</div>
                       <p className="text-xs text-muted-foreground">Find the maximum value</p>
                     </div>
-                    <div className="p-3 border rounded-lg space-y-1">
-                      <div className="font-mono text-sm font-medium text-primary">=MIN(E1:E10)</div>
+                    <div className="p-2 sm:p-3 border rounded-lg space-y-1">
+                      <div className="font-mono text-xs sm:text-sm font-medium text-primary break-all">=MIN(E1:E10)</div>
                       <p className="text-xs text-muted-foreground">Find the minimum value</p>
                     </div>
-                    <div className="p-3 border rounded-lg space-y-1">
-                      <div className="font-mono text-sm font-medium text-primary">=A1*B1</div>
+                    <div className="p-2 sm:p-3 border rounded-lg space-y-1">
+                      <div className="font-mono text-xs sm:text-sm font-medium text-primary break-all">=A1*B1</div>
                       <p className="text-xs text-muted-foreground">Basic arithmetic operations</p>
                     </div>
                   </div>
@@ -330,11 +333,11 @@ export default function Guidelines() {
 
                 {/* Formula Builder */}
                 <div>
-                  <h4 className="font-semibold mb-3">Formula Builder Tool</h4>
-                  <p className="text-sm text-muted-foreground mb-3">
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">Formula Builder Tool</h4>
+                  <p className="text-xs sm:text-sm text-muted-foreground mb-3">
                     Use the built-in Formula Builder to create complex formulas without memorizing syntax:
                   </p>
-                  <ol className="list-decimal list-inside space-y-2 text-sm text-muted-foreground">
+                  <ol className="list-decimal list-inside space-y-2 text-xs sm:text-sm text-muted-foreground">
                     <li>Select a cell where you want the formula result</li>
                     <li>Click the "Formula" button in the toolbar</li>
                     <li>Choose your function (SUM, AVG, COUNT, etc.)</li>
@@ -345,16 +348,16 @@ export default function Guidelines() {
 
                 {/* Import/Export */}
                 <div>
-                  <h4 className="font-semibold mb-3">Import & Export</h4>
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="p-4 border rounded-lg space-y-2">
-                      <div className="font-medium text-primary">Import Excel Files</div>
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">Import & Export</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="p-3 sm:p-4 border rounded-lg space-y-2">
+                      <div className="font-medium text-primary text-sm">Import Excel Files</div>
                       <p className="text-xs text-muted-foreground">
                         Upload .xlsx files to continue working on existing spreadsheets
                       </p>
                     </div>
-                    <div className="p-4 border rounded-lg space-y-2">
-                      <div className="font-medium text-primary">Export to Excel</div>
+                    <div className="p-3 sm:p-4 border rounded-lg space-y-2">
+                      <div className="font-medium text-primary text-sm">Export to Excel</div>
                       <p className="text-xs text-muted-foreground">
                         Download your work as .xlsx files compatible with Excel and Google Sheets
                       </p>
@@ -364,26 +367,26 @@ export default function Guidelines() {
 
                 {/* Advanced Features */}
                 <div>
-                  <h4 className="font-semibold mb-3">Advanced Features</h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
+                  <h4 className="font-semibold mb-3 text-sm sm:text-base">Advanced Features</h4>
+                  <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Scientific Calculator:</strong> Built-in calculator for complex calculations</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Auto-Save:</strong> Your spreadsheet is saved automatically</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Undo/Redo:</strong> Full history of changes with unlimited undo</span>
                     </li>
                   </ul>
                 </div>
 
                 <Alert>
-                  <Lightbulb className="h-4 w-4" />
-                  <AlertDescription>
+                  <Lightbulb className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
+                  <AlertDescription className="text-xs sm:text-sm">
                     <strong>Pro Tip:</strong> Start formulas with "=" and use the Formula Builder for help with syntax!
                   </AlertDescription>
                 </Alert>
@@ -392,15 +395,15 @@ export default function Guidelines() {
 
             {/* Presentation */}
             <Card className="border-primary/50">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Presentation className="h-5 w-5 text-primary" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg flex-wrap">
+                  <Presentation className="h-4 w-4 sm:h-5 sm:w-5 text-primary flex-shrink-0" />
                   Presentation
-                  <Badge variant="default">Featured</Badge>
+                  <Badge variant="default" className="text-xs">Featured</Badge>
                 </CardTitle>
-                <CardDescription>Create stunning presentations with professional layouts and animations</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Create stunning presentations with professional layouts and animations</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
+              <CardContent className="space-y-4 sm:space-y-6 p-4 sm:p-6">
                 {/* Getting Started */}
                 <div>
                   <h4 className="font-semibold mb-3">Creating Slides</h4>
@@ -580,18 +583,18 @@ export default function Guidelines() {
           </TabsContent>
 
           {/* AI Tools Tab */}
-          <TabsContent value="ai-tools" className="space-y-6 mt-6">
+          <TabsContent value="ai-tools" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
             {/* Introduction */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="h-5 w-5" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                   AI-Powered Tools
                 </CardTitle>
-                <CardDescription>Leverage artificial intelligence to enhance your productivity</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Leverage artificial intelligence to enhance your productivity</CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground">
+              <CardContent className="p-4 sm:p-6">
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Our platform includes powerful AI tools to help you summarize content, analyze sentiment, 
                   translate text, understand documents, and automate tasks. All tools are accessible from the 
                   AI Features Hub in your dashboard.
@@ -834,34 +837,34 @@ export default function Guidelines() {
           </TabsContent>
 
           {/* Platform Features Tab */}
-          <TabsContent value="platform" className="space-y-6 mt-6">
+          <TabsContent value="platform" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
             {/* Dashboard Navigation */}
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Users className="h-5 w-5" />
+              <CardHeader className="p-4 sm:p-6">
+                <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 flex-shrink-0" />
                   Dashboard Navigation
                 </CardTitle>
-                <CardDescription>Understanding your personalized dashboard</CardDescription>
+                <CardDescription className="text-xs sm:text-sm">Understanding your personalized dashboard</CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="space-y-3 sm:space-y-4 p-4 sm:p-6">
                 <div>
-                  <h4 className="font-semibold mb-2">Dashboard Sections</h4>
-                  <ul className="space-y-2 text-sm text-muted-foreground">
+                  <h4 className="font-semibold mb-2 text-sm sm:text-base">Dashboard Sections</h4>
+                  <ul className="space-y-2 text-xs sm:text-sm text-muted-foreground">
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Quick Actions:</strong> Access frequently used features instantly</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Recent Activity:</strong> See your latest projects and interactions</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Notifications:</strong> Stay updated with important alerts</span>
                     </li>
                     <li className="flex items-start gap-2">
-                      <span className="text-primary">•</span>
+                      <span className="text-primary flex-shrink-0">•</span>
                       <span><strong>Analytics:</strong> Track your progress and engagement</span>
                     </li>
                   </ul>
