@@ -1,12 +1,6 @@
 import { Users, Target, Rocket, TrendingUp } from "lucide-react";
 
 const AboutSection = () => {
-  const stats = [
-    { icon: Users, value: "10,000+", label: "Active Users" },
-    { icon: Rocket, value: "500+", label: "Startups" },
-    { icon: Target, value: "200+", label: "Mentors & Advisors" },
-    { icon: TrendingUp, value: "$50M+", label: "Funding Raised" },
-  ];
 
   return (
     <section id="about" className="py-20 sm:py-32 relative overflow-hidden">
@@ -54,26 +48,6 @@ const AboutSection = () => {
           </div>
         </div>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
-          {stats.map((stat, index) => (
-            <div 
-              key={index}
-              className="glass-card p-6 rounded-xl border border-ocean-border text-center hover-scale"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <div className="w-12 h-12 rounded-lg bg-gradient-primary/20 flex items-center justify-center mx-auto mb-4">
-                <stat.icon className="h-6 w-6 text-primary" />
-              </div>
-              <div className="text-3xl font-bold mb-2 bg-gradient-primary bg-clip-text text-transparent">
-                {stat.value}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {stat.label}
-              </div>
-            </div>
-          ))}
-        </div>
 
         {/* What We Offer */}
         <div className="glass-card p-8 sm:p-12 rounded-xl border border-ocean-border">
