@@ -292,3 +292,52 @@ All colors MUST be HSL.
   0%, 100% { box-shadow: 0 0 20px hsl(var(--primary) / 0.3); }
   50% { box-shadow: 0 0 40px hsl(var(--primary) / 0.6); }
 }
+
+/* Global Print Styles - Hide all UI elements when printing */
+@media print {
+  /* Hide navigation and headers */
+  nav,
+  header,
+  .dashboard-header,
+  .dashboard-navigation,
+  [role="tablist"],
+  .tabs-list,
+  button,
+  .fixed,
+  .sticky {
+    display: none !important;
+  }
+  
+  /* Hide all toolbars and floating elements */
+  .no-print,
+  .desktop-toolbar,
+  .mobile-toolbar,
+  .floating-action-menu,
+  .comments-sidebar,
+  .page-navigation,
+  .zoom-controls,
+  .ai-toolbar,
+  [data-radix-popper-content-wrapper],
+  [data-radix-dialog-overlay],
+  [data-radix-dialog-content] {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Reset body for clean printing */
+  body {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Make document pages print properly */
+  .page {
+    margin: 0 !important;
+    padding: 20mm !important;
+    box-shadow: none !important;
+    transform: none !important;
+    page-break-after: always;
+    break-after: page;
+  }
+}
