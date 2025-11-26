@@ -22,6 +22,7 @@ import {
 import { TrendingUp, TrendingDown, Users, Target, Activity, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
+import { useAuth } from '@/contexts/AuthContext';
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', 'hsl(var(--muted))'];
 
@@ -30,18 +31,21 @@ interface AnalyticsDashboardProps {
 }
 
 export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
+  const { user } = useAuth();
   const analytics = useStartupAnalytics();
   const [historicalData, setHistoricalData] = useState<any[]>([]);
   const [engagementData, setEngagementData] = useState<any[]>([]);
 
+  const effectiveUserId = userId || user?.id;
+
   useEffect(() => {
-    if (userId) {
+    if (effectiveUserId && !analytics.loading) {
       fetchHistoricalData();
     }
-  }, [userId]);
+  }, [effectiveUserId, analytics.loading, analytics.posts, analytics.comments, analytics.likes]);
 
   const fetchHistoricalData = async () => {
-    if (!userId) return;
+    if (!effectiveUserId) return;
 
     // Show activity growth over time (not in metric cards as raw numbers)
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
