@@ -12,31 +12,39 @@ export default function CollapsibleToolbar({
 }: CollapsibleToolbarProps) {
   return (
     <div className={cn("border-b bg-background shadow-sm overflow-hidden", className)}>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          .toolbar-scrollable::-webkit-scrollbar {
+            height: 14px;
+          }
+          .toolbar-scrollable::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 7px;
+            cursor: grab;
+          }
+          .toolbar-scrollable::-webkit-scrollbar-thumb:active {
+            cursor: grabbing;
+            background: #555;
+          }
+          .toolbar-scrollable::-webkit-scrollbar-thumb:hover {
+            background: #666;
+          }
+          .toolbar-scrollable::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+            border-radius: 7px;
+            margin: 0 8px;
+          }
+        `
+      }} />
       <div 
-        className="p-1.5 bg-muted/30 overflow-x-auto"
+        className="p-1.5 bg-muted/30 overflow-x-auto toolbar-scrollable"
         style={{
           scrollbarWidth: 'auto',
-          scrollbarColor: 'hsl(var(--muted-foreground)) transparent',
-          scrollBehavior: 'smooth'
+          scrollbarColor: '#888 rgba(0,0,0,0.1)',
+          scrollBehavior: 'smooth',
+          cursor: 'grab'
         }}
       >
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            .p-1\\.5::-webkit-scrollbar {
-              height: 12px;
-            }
-            .p-1\\.5::-webkit-scrollbar-thumb {
-              background: hsl(var(--muted-foreground));
-              border-radius: 6px;
-            }
-            .p-1\\.5::-webkit-scrollbar-thumb:hover {
-              background: hsl(var(--foreground) / 0.6);
-            }
-            .p-1\\.5::-webkit-scrollbar-track {
-              background: transparent;
-            }
-          `
-        }} />
         {children}
       </div>
     </div>
