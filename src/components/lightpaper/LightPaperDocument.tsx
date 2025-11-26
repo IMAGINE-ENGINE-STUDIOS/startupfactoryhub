@@ -27,6 +27,8 @@ import { MobileToolbar } from "./MobileToolbar";
 import { FileUploadDialog } from "./FileUploadDialog";
 import { OverlayTextBox } from "./OverlayTextBox";
 import { AIToolbar } from "./AIToolbar";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
 
 const FONTS = ["Arial", "Times New Roman", "Georgia", "Verdana", "Courier New", "Roboto", "Open Sans", "Lato", "Montserrat"];
 const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
@@ -1151,13 +1153,107 @@ export function LightPaperDocument({
       setIsSaving(false);
     }
   };
-  const handlePrint = () => {
-    window.print();
+  const handlePrint = async () => {
+    try {
+      toast.loading("Preparing document for print...");
+      
+      // Get all page elements
+      const pageElements = document.querySelectorAll('.page');
+      if (pageElements.length === 0) {
+        toast.dismiss();
+        toast.error("No document pages found");
+        return;
+      }
+      
+      // Create PDF with A4 dimensions
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = 210; // A4 width in mm
+      const pdfHeight = 297; // A4 height in mm
+      
+      for (let i = 0; i < pageElements.length; i++) {
+        const pageElement = pageElements[i] as HTMLElement;
+        
+        // Capture the page using html2canvas
+        const canvas = await html2canvas(pageElement, {
+          scale: 2, // Higher quality
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+        });
+        
+        // Convert canvas to image and add to PDF
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const imgWidth = pdfWidth;
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+        
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, Math.min(imgHeight, pdfHeight));
+      }
+      
+      // Open PDF in new tab for printing
+      const pdfBlob = pdf.output('blob');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      window.open(pdfUrl, '_blank');
+      
+      toast.dismiss();
+      toast.success("Document ready for printing");
+    } catch (error) {
+      console.error('Print error:', error);
+      toast.dismiss();
+      toast.error("Failed to prepare document for printing");
+    }
   };
 
-  const handleExportPDF = () => {
-    window.print(); // Uses browser's print to PDF functionality
-    toast.success("Print dialog opened - select 'Save as PDF'");
+  const handleExportPDF = async () => {
+    try {
+      toast.loading("Generating PDF...");
+      
+      // Get all page elements
+      const pageElements = document.querySelectorAll('.page');
+      if (pageElements.length === 0) {
+        toast.dismiss();
+        toast.error("No document pages found");
+        return;
+      }
+      
+      // Create PDF with A4 dimensions
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = 210; // A4 width in mm
+      const pdfHeight = 297; // A4 height in mm
+      
+      for (let i = 0; i < pageElements.length; i++) {
+        const pageElement = pageElements[i] as HTMLElement;
+        
+        // Capture the page using html2canvas
+        const canvas = await html2canvas(pageElement, {
+          scale: 2, // Higher quality
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+        });
+        
+        // Convert canvas to image and add to PDF
+        const imgData = canvas.toDataURL('image/jpeg', 0.95);
+        const imgWidth = pdfWidth;
+        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+        
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, Math.min(imgHeight, pdfHeight));
+      }
+      
+      // Save with document title
+      const fileName = `${projectTitle || 'Document'}.pdf`;
+      pdf.save(fileName);
+      
+      toast.dismiss();
+      toast.success("PDF exported successfully");
+    } catch (error) {
+      console.error('Export PDF error:', error);
+      toast.dismiss();
+      toast.error("Failed to export PDF");
+    }
   };
 
   // Helper function to get current page dimensions based on format and orientation
