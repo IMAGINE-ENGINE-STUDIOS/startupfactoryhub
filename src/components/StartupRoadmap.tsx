@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw, ChevronDown, Trophy } from 'lucide-react';
+import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw, ChevronDown, Trophy, Trash2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -452,6 +452,48 @@ export default function StartupRoadmap() {
     }
   };
 
+  const deleteCustomStep = async (stepId: string) => {
+    if (!user) return;
+    
+    // Only allow deleting custom steps
+    if (!stepId.startsWith('custom-')) {
+      toast({
+        title: "Cannot delete",
+        description: "Only custom steps can be deleted.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('roadmap_progress')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('step_id', stepId);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setSteps(steps.filter(s => s.id !== stepId));
+      
+      // Force progress refresh
+      setRefreshTrigger(prev => prev + 1);
+
+      toast({
+        title: "Step Deleted",
+        description: "Your custom step has been removed.",
+      });
+    } catch (error) {
+      console.error('Error deleting custom step:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete custom step. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const updateStepChecklist = async (stepId: string, checklist: ChecklistItem[]) => {
     if (!user) return;
 
@@ -856,6 +898,37 @@ export default function StartupRoadmap() {
                             <RotateCcw className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
                             Undo
                           </Button>
+                        )}
+                        {/* Delete button for custom steps only */}
+                        {step.id.startsWith('custom-') && (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-destructive hover:text-destructive/80 text-xs sm:text-sm h-8 sm:h-9"
+                              >
+                                <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                                Delete
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Delete Custom Step?</DialogTitle>
+                              </DialogHeader>
+                              <p className="text-sm text-muted-foreground">
+                                Are you sure you want to delete "{step.title}"? This action cannot be undone.
+                              </p>
+                              <div className="flex gap-2 justify-end mt-4">
+                                <DialogTrigger asChild>
+                                  <Button variant="outline">Cancel</Button>
+                                </DialogTrigger>
+                                <Button variant="destructive" onClick={() => deleteCustomStep(step.id)}>
+                                  Delete Step
+                                </Button>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                         )}
                       </div>
                     </div>
