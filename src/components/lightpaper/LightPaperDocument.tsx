@@ -1324,63 +1324,79 @@ export function LightPaperDocument({
     try {
       toast.loading("Generating PDF...");
       
-      if (pages.length === 0) {
+      // CRITICAL: Save current page content before export
+      if (editorRef.current) {
+        const currentContent = editorRef.current.innerHTML;
+        const updatedPages = [...pages];
+        updatedPages[currentPage - 1] = currentContent;
+        
+        if (updatedPages.length === 0 || (updatedPages.length === 1 && !updatedPages[0])) {
+          toast.dismiss();
+          toast.error("No document content found");
+          return;
+        }
+        
+        const pdf = new jsPDF(orientation === 'portrait' ? 'p' : 'l', 'mm', pageFormat);
+        const pdfWidth = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].width * 10 : PAGE_FORMATS[pageFormat].height * 10;
+        const pdfHeight = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].height * 10 : PAGE_FORMATS[pageFormat].width * 10;
+        
+        // Create hidden container
+        const hiddenContainer = document.createElement('div');
+        hiddenContainer.style.position = 'absolute';
+        hiddenContainer.style.left = '-9999px';
+        hiddenContainer.style.top = '0';
+        hiddenContainer.style.width = `${getPageDimensions().width}cm`;
+        document.body.appendChild(hiddenContainer);
+        
+        for (let i = 0; i < updatedPages.length; i++) {
+          const pageDiv = document.createElement('div');
+          pageDiv.innerHTML = updatedPages[i] || '<p>Empty page</p>';
+          
+          // Apply comprehensive styling
+          Object.assign(pageDiv.style, {
+            width: `${getPageDimensions().width}cm`,
+            minHeight: `${getPageDimensions().height}cm`,
+            background: '#ffffff',
+            color: '#000000',
+            fontFamily: selectedFont,
+            fontSize: `${selectedSize}px`,
+            padding: '2cm',
+            boxSizing: 'border-box',
+            lineHeight: '1.6',
+            overflow: 'visible',
+            position: 'relative',
+            display: 'block'
+          });
+          
+          // Clear and add single page at a time
+          hiddenContainer.innerHTML = '';
+          hiddenContainer.appendChild(pageDiv);
+          
+          // Wait for render
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          const canvas = await html2canvas(pageDiv, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            width: pageDiv.offsetWidth,
+            height: pageDiv.offsetHeight,
+            logging: false
+          });
+          
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          
+          if (i > 0) pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        }
+        
+        document.body.removeChild(hiddenContainer);
+        
+        pdf.save(`${projectTitle || 'Document'}.pdf`);
         toast.dismiss();
-        toast.error("No document pages found");
-        return;
+        toast.success(`PDF exported with ${updatedPages.length} pages!`);
       }
-      
-      // Create PDF with proper dimensions
-      const pdf = new jsPDF(orientation === 'portrait' ? 'p' : 'l', 'mm', pageFormat);
-      const pdfWidth = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].width * 10 : PAGE_FORMATS[pageFormat].height * 10;
-      const pdfHeight = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].height * 10 : PAGE_FORMATS[pageFormat].width * 10;
-      
-      // Create a hidden container to render all pages
-      const hiddenContainer = document.createElement('div');
-      hiddenContainer.style.position = 'absolute';
-      hiddenContainer.style.left = '-9999px';
-      hiddenContainer.style.top = '0';
-      document.body.appendChild(hiddenContainer);
-      
-      // Render and capture each page from the pages array
-      for (let i = 0; i < pages.length; i++) {
-        const pageDiv = document.createElement('div');
-        pageDiv.className = 'page';
-        pageDiv.innerHTML = pages[i];
-        
-        // Apply proper styling for PDF export
-        pageDiv.style.width = `${getPageDimensions().width}cm`;
-        pageDiv.style.height = `${getPageDimensions().height}cm`;
-        pageDiv.style.background = '#ffffff';
-        pageDiv.style.color = '#000000';
-        pageDiv.style.fontFamily = selectedFont;
-        pageDiv.style.fontSize = `${selectedSize}px`;
-        pageDiv.style.padding = '2cm';
-        pageDiv.style.boxSizing = 'border-box';
-        pageDiv.style.lineHeight = '1.6';
-        pageDiv.style.overflow = 'hidden';
-        
-        hiddenContainer.appendChild(pageDiv);
-        
-        const canvas = await html2canvas(pageDiv, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-        });
-        
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-      }
-      
-      // Clean up
-      document.body.removeChild(hiddenContainer);
-      
-      pdf.save(`${projectTitle || 'Document'}.pdf`);
-      toast.dismiss();
-      toast.success(`PDF exported with ${pages.length} pages!`);
     } catch (error) {
       console.error('Export PDF error:', error);
       toast.dismiss();
@@ -1527,7 +1543,7 @@ export function LightPaperDocument({
       {/* Desktop Toolbar */}
       <div className="hidden md:block border-b bg-background no-print desktop-toolbar shrink-0 relative z-40">
       <CollapsibleToolbar>
-        <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent pr-4" style={{ maxWidth: '100%' }}>
+        <div className="flex items-center gap-0.5 flex-nowrap pr-4">
             {/* Font Controls */}
             <Select value={selectedFont} onValueChange={font => {
             setSelectedFont(font);
