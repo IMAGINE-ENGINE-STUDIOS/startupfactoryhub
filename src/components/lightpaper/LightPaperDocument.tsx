@@ -228,6 +228,15 @@ export function LightPaperDocument({
     }
   }, [showSignDialog]);
 
+  // Initialize pages with default content if empty
+  useEffect(() => {
+    if (pages.length === 0 || (pages.length === 1 && pages[0] === '')) {
+      const initialContent = documentContent || `<p style="font-size: 14pt; color: inherit;">Start writing...</p>`;
+      setPages([initialContent]);
+      setTotalPages(1);
+    }
+  }, []);
+
   // Load uploaded content - ENHANCED for View Mode
   useEffect(() => {
     if (!uploadedContent || !editorRef.current) return;
@@ -525,6 +534,33 @@ export function LightPaperDocument({
     }
   };
 
+  // Save current page content to pages array
+  const saveCurrentPageContent = () => {
+    if (editorRef.current) {
+      const content = editorRef.current.innerHTML;
+      setPages(prevPages => {
+        const newPages = [...prevPages];
+        newPages[currentPage - 1] = content;
+        return newPages;
+      });
+    }
+  };
+
+  // Handle page selection with content save/load
+  const handlePageSelect = (newPage: number) => {
+    // Save current page content first
+    saveCurrentPageContent();
+    
+    // Switch to new page
+    setCurrentPage(newPage);
+    
+    // Load new page content into editor
+    if (editorRef.current && pages[newPage - 1]) {
+      editorRef.current.innerHTML = pages[newPage - 1];
+      setDocumentContent(pages[newPage - 1]);
+    }
+  };
+
   // Auto-save version with debounce
   const autoSaveVersion = (html: string) => {
     if (saveTimeoutRef.current) {
@@ -543,6 +579,14 @@ export function LightPaperDocument({
       isUserTyping.current = true;
       const html = editor.innerHTML;
       setDocumentContent(html); // Update state
+      
+      // Also update the current page in pages array
+      setPages(prevPages => {
+        const newPages = [...prevPages];
+        newPages[currentPage - 1] = html;
+        return newPages;
+      });
+      
       autoSaveVersion(html);
       setTimeout(() => {
         isUserTyping.current = false;
@@ -1261,10 +1305,20 @@ export function LightPaperDocument({
   // Helper function to get current page dimensions based on format and orientation
   // Page management functions
   const addPage = () => {
+    // Save current page content before adding new page
+    saveCurrentPageContent();
+    
     const newPage = `<p style="font-size: 14pt; color: inherit;">New page...</p>`;
-    setPages([...pages, newPage]);
-    setTotalPages(pages.length + 1);
-    setCurrentPage(pages.length + 1);
+    const newPages = [...pages, newPage];
+    setPages(newPages);
+    setTotalPages(newPages.length);
+    setCurrentPage(newPages.length);
+    
+    // Load new page into editor
+    if (editorRef.current) {
+      editorRef.current.innerHTML = newPage;
+      setDocumentContent(newPage);
+    }
     toast.success("New page added");
   };
 
@@ -1273,16 +1327,31 @@ export function LightPaperDocument({
       toast.error("Cannot delete the last page");
       return;
     }
+    
+    // Save current page first
+    saveCurrentPageContent();
+    
     const newPages = pages.filter((_, i) => i !== pageNum - 1);
     setPages(newPages);
     setTotalPages(newPages.length);
-    if (currentPage > newPages.length) {
-      setCurrentPage(newPages.length);
+    
+    // Determine which page to show after deletion
+    const newCurrentPage = currentPage > newPages.length ? newPages.length : 
+                           (pageNum <= currentPage ? Math.max(1, currentPage - 1) : currentPage);
+    setCurrentPage(newCurrentPage);
+    
+    // Load the new current page content
+    if (editorRef.current && newPages[newCurrentPage - 1]) {
+      editorRef.current.innerHTML = newPages[newCurrentPage - 1];
+      setDocumentContent(newPages[newCurrentPage - 1]);
     }
+    
     toast.success(`Page ${pageNum} deleted`);
   };
 
   const duplicatePage = (pageNum: number) => {
+    saveCurrentPageContent();
+    
     const pageToDuplicate = pages[pageNum - 1];
     const newPages = [...pages];
     newPages.splice(pageNum, 0, pageToDuplicate);
@@ -1882,11 +1951,11 @@ export function LightPaperDocument({
       <div className="flex-1 flex overflow-hidden">
         {/* Page Management Panel */}
         {showPagePanel && (
-          <div className="w-64 border-r bg-background shrink-0">
+          <div className="w-64 border-r bg-background shrink-0 z-10 relative h-full overflow-auto">
             <PageManagementPanel
               numPages={totalPages}
               currentPage={currentPage}
-              onPageSelect={(page) => setCurrentPage(page)}
+              onPageSelect={handlePageSelect}
               onAddPage={addPage}
               onDeletePage={deletePage}
               onDuplicatePage={duplicatePage}
