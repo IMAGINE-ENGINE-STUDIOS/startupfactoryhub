@@ -133,7 +133,7 @@ const Footer = () => {
         <div className="border-t border-ocean-border pt-6 sm:pt-8">
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
-              © 2024 Startup Factory Hub. All rights reserved.
+              © 2025 Startup Factory Hub. All rights reserved.
             </p>
             <p className="text-xs text-muted-foreground text-center sm:text-right">
               Built with ❤️ for the startup community
