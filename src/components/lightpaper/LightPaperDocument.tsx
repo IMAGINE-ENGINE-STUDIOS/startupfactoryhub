@@ -1324,46 +1324,54 @@ export function LightPaperDocument({
     try {
       toast.loading("Generating PDF...");
       
-      // Get all page elements
-      const pageElements = document.querySelectorAll('.page');
-      if (pageElements.length === 0) {
+      if (pages.length === 0) {
         toast.dismiss();
         toast.error("No document pages found");
         return;
       }
       
-      // Create PDF with A4 dimensions
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = 210; // A4 width in mm
-      const pdfHeight = 297; // A4 height in mm
+      // Create PDF with proper dimensions
+      const pdf = new jsPDF(orientation === 'portrait' ? 'p' : 'l', 'mm', pageFormat);
+      const pdfWidth = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].width * 10 : PAGE_FORMATS[pageFormat].height * 10;
+      const pdfHeight = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].height * 10 : PAGE_FORMATS[pageFormat].width * 10;
       
-      for (let i = 0; i < pageElements.length; i++) {
-        const pageElement = pageElements[i] as HTMLElement;
+      // Create a hidden container to render all pages
+      const hiddenContainer = document.createElement('div');
+      hiddenContainer.style.position = 'absolute';
+      hiddenContainer.style.left = '-9999px';
+      hiddenContainer.style.top = '0';
+      document.body.appendChild(hiddenContainer);
+      
+      // Render and capture each page from the pages array
+      for (let i = 0; i < pages.length; i++) {
+        const pageDiv = document.createElement('div');
+        pageDiv.className = 'page';
+        pageDiv.innerHTML = pages[i];
+        pageDiv.style.width = `${getPageDimensions().width}cm`;
+        pageDiv.style.height = `${getPageDimensions().height}cm`;
+        pageDiv.style.background = isDarkMode ? 'black' : 'white';
+        pageDiv.style.color = isDarkMode ? 'white' : 'black';
+        hiddenContainer.appendChild(pageDiv);
         
-        // Capture the page using html2canvas
-        const canvas = await html2canvas(pageElement, {
-          scale: 2, // Higher quality
+        const canvas = await html2canvas(pageDiv, {
+          scale: 2,
           useCORS: true,
           allowTaint: true,
-          backgroundColor: '#ffffff',
-          logging: false,
+          backgroundColor: isDarkMode ? '#000000' : '#ffffff',
         });
         
-        // Convert canvas to image and add to PDF
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        const imgWidth = pdfWidth;
-        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
         
         if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, Math.min(imgHeight, pdfHeight));
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
       }
       
-      // Save with document title
-      const fileName = `${projectTitle || 'Document'}.pdf`;
-      pdf.save(fileName);
+      // Clean up
+      document.body.removeChild(hiddenContainer);
       
+      pdf.save(`${projectTitle || 'Document'}.pdf`);
       toast.dismiss();
-      toast.success("PDF exported successfully");
+      toast.success(`PDF exported with ${pages.length} pages!`);
     } catch (error) {
       console.error('Export PDF error:', error);
       toast.dismiss();
@@ -1510,7 +1518,7 @@ export function LightPaperDocument({
       {/* Desktop Toolbar */}
       <div className="hidden md:block border-b bg-background no-print desktop-toolbar shrink-0 relative z-40">
         <CollapsibleToolbar>
-          <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent pr-4">
+          <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent pr-6 min-w-max">
             {/* Font Controls */}
             <Select value={selectedFont} onValueChange={font => {
             setSelectedFont(font);

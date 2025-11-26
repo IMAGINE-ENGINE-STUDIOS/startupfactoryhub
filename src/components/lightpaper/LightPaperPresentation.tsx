@@ -1,13 +1,11 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Trash2, ChevronLeft, ChevronRight, Play, Download, Upload, ImageIcon, Save, FileText, Keyboard } from "lucide-react";
+import { Plus, Trash2, ChevronLeft, ChevronRight, Play, Download, Upload, ImageIcon, Keyboard } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { useLightPaperProjects } from "@/hooks/useLightPaperProjects";
 import { ShortcutsDialog } from "./ShortcutsDialog";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -40,13 +38,8 @@ export function LightPaperPresentation() {
   ]);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isPresenting, setIsPresenting] = useState(false);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
   const [projectTitle, setProjectTitle] = useState("Untitled Presentation");
-  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [lastSaved, setLastSaved] = useState<Date | null>(null);
-  const { saveProject, projects } = useLightPaperProjects("presentation");
   const isMobile = useIsMobile();
 
   // Keyboard shortcuts
@@ -57,35 +50,8 @@ export function LightPaperPresentation() {
     { key: 'Escape', handler: () => { if (isPresenting) setIsPresenting(false); }, description: 'Exit presentation' },
     { key: 'ArrowLeft', handler: () => prevSlide(), description: 'Previous slide' },
     { key: 'ArrowRight', handler: () => nextSlide(), description: 'Next slide' },
-    { key: 's', ctrl: true, handler: (e) => { e.preventDefault(); setShowSaveDialog(true); }, description: 'Save' },
     { key: '/', ctrl: true, handler: (e) => { e.preventDefault(); setShowShortcutsDialog(true); }, description: 'Shortcuts' },
   ], true);
-
-  // Auto-save functionality
-  const autoSave = useCallback(async () => {
-    if (!currentProjectId || slides.length === 0) return;
-    
-    try {
-      setIsSaving(true);
-      await saveProject(projectTitle, "presentation", { slides }, currentProjectId);
-      setLastSaved(new Date());
-    } catch (error) {
-      console.error("Auto-save failed:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  }, [slides, projectTitle, currentProjectId, saveProject]);
-
-  // Debounced auto-save
-  useEffect(() => {
-    if (!currentProjectId) return;
-    
-    const timer = setTimeout(() => {
-      autoSave();
-    }, 3000); // Auto-save after 3 seconds of inactivity
-
-    return () => clearTimeout(timer);
-  }, [slides, autoSave, currentProjectId]);
 
   const currentSlide = slides[currentSlideIndex];
 
@@ -135,47 +101,14 @@ export function LightPaperPresentation() {
   };
 
   const exportPresentation = () => {
-    const data = JSON.stringify(slides, null, 2);
-    const blob = new Blob([data], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${projectTitle}.json`;
-    a.click();
+    const dataStr = JSON.stringify({ title: projectTitle, slides }, null, 2);
+    const dataBlob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${projectTitle}.json`;
+    link.click();
     toast.success("Presentation exported!");
-  };
-
-  const handleSaveToAccount = async () => {
-    if (!projectTitle.trim()) {
-      toast.error("Please enter a presentation title");
-      return;
-    }
-
-    try {
-      setIsSaving(true);
-      const result = await saveProject(projectTitle, "presentation", { slides }, currentProjectId || undefined);
-      if (result) {
-        setCurrentProjectId(result.id);
-        setLastSaved(new Date());
-        setShowSaveDialog(false);
-        toast.success("Presentation saved!");
-      }
-    } catch (error) {
-      toast.error("Failed to save presentation");
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleLoadProject = async (projectId: string) => {
-    const project = projects.find(p => p.id === projectId);
-    if (project) {
-      setSlides(project.content.slides || []);
-      setProjectTitle(project.title);
-      setCurrentProjectId(project.id);
-      setCurrentSlideIndex(0);
-      toast.success("Project loaded!");
-    }
   };
 
   const handleImageUpload = () => {
@@ -218,28 +151,10 @@ export function LightPaperPresentation() {
           <Card className="p-4">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm" onClick={() => setShowSaveDialog(true)} disabled={isSaving}>
-                  <Save className="h-4 w-4 mr-1" />
-                  {isSaving ? "Saving..." : "Save to Account"}
+                <Button variant="outline" size="sm" onClick={exportPresentation}>
+                  <Download className="h-4 w-4 mr-1" />
+                  Export
                 </Button>
-                {lastSaved && (
-                  <span className="text-xs text-muted-foreground">
-                    Saved {lastSaved.toLocaleTimeString()}
-                  </span>
-                )}
-                <Select value={currentProjectId || ""} onValueChange={handleLoadProject}>
-                  <SelectTrigger className="w-[180px]">
-                    <FileText className="h-4 w-4 mr-2" />
-                    <SelectValue placeholder="My Projects" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {projects.map((project) => (
-                      <SelectItem key={project.id} value={project.id}>
-                        {project.title}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
                 <Button variant="outline" size="sm" onClick={addSlide}>
                   <Plus className="h-4 w-4 mr-1" />
                   Add Slide
@@ -456,34 +371,6 @@ export function LightPaperPresentation() {
         onOpenChange={setShowShortcutsDialog}
         type="presentation"
       />
-
-      {/* Save Dialog */}
-      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Save Presentation</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Presentation Title</label>
-              <Input
-                value={projectTitle}
-                onChange={(e) => setProjectTitle(e.target.value)}
-                placeholder="Enter presentation title"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSaveToAccount}>
-                <Save className="h-4 w-4 mr-2" />
-                Save
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
