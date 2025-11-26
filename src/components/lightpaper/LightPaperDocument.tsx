@@ -27,6 +27,7 @@ import { MobileToolbar } from "./MobileToolbar";
 import { FileUploadDialog } from "./FileUploadDialog";
 import { OverlayTextBox } from "./OverlayTextBox";
 import { AIToolbar } from "./AIToolbar";
+import { PageManagementPanel } from "./PageManagementPanel";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -147,6 +148,8 @@ export function LightPaperDocument({
   const [isColorPickerActive, setIsColorPickerActive] = useState(false);
   const [selectedTextBoxId, setSelectedTextBoxId] = useState<string | null>(null);
   const [isEditingText, setIsEditingText] = useState(false);
+  const [pages, setPages] = useState<string[]>(['']);
+  const [showPagePanel, setShowPagePanel] = useState(false);
   const {
     saveProject
   } = useLightPaperProjects("document");
@@ -379,47 +382,47 @@ export function LightPaperDocument({
       const content = selectedProject.content as any;
       
       if (content) {
+        // Reset view mode when loading a saved project
+        setViewMode(false);
+        setViewModeImages([]);
+
         if (content.html) {
           setDocumentContent(content.html);
           
-          // Count pages
-          const parser = new DOMParser();
-          const doc = parser.parseFromString(content.html, 'text/html');
-          const pages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
-          const pageCount = pages.length > 0 ? pages.length : 1;
-          
-          setTotalPages(content.totalPages || pageCount);
-          setCurrentPage(content.currentPage || 1);
-          
-          // Load the appropriate page
-          if (pages.length > 0 && editorRef.current) {
-            const pageIndex = (content.currentPage || 1) - 1;
-            editorRef.current.innerHTML = pages[pageIndex]?.outerHTML || pages[0].outerHTML;
-          } else if (editorRef.current) {
+          // Directly set editor content
+          if (editorRef.current) {
             editorRef.current.innerHTML = content.html;
           }
-        }
-        if (content.font) setSelectedFont(content.font);
-        if (content.size) setSelectedSize(content.size);
-        
-        // Restore dark mode state
-        if (content.darkMode !== undefined) {
-          setIsDarkMode(content.darkMode);
-          const pageElement = document.querySelector('.page') as HTMLElement;
-          if (pageElement) {
-            pageElement.style.backgroundColor = content.darkMode ? 'black' : 'white';
-            pageElement.style.color = content.darkMode ? 'white' : 'black';
+          
+          // Restore other settings
+          if (content.font) setSelectedFont(content.font);
+          if (content.size) setSelectedSize(content.size);
+          if (content.totalPages) setTotalPages(content.totalPages);
+          if (content.currentPage) setCurrentPage(content.currentPage);
+          if (content.darkMode !== undefined) {
+            setIsDarkMode(content.darkMode);
+            const pageElement = document.querySelector('.page') as HTMLElement;
+            if (pageElement) {
+              pageElement.style.backgroundColor = content.darkMode ? 'black' : 'white';
+              pageElement.style.color = content.darkMode ? 'white' : 'black';
+            }
+            if (editorRef.current) {
+              editorRef.current.style.color = content.darkMode ? 'white' : 'black';
+            }
           }
-          if (editorRef.current) {
-            editorRef.current.style.color = content.darkMode ? 'white' : 'black';
+          if (content.pageFormat) setPageFormat(content.pageFormat);
+          if (content.orientation) setOrientation(content.orientation);
+          if (content.overlayTextBoxes) setOverlayTextBoxes(content.overlayTextBoxes);
+
+          // Initialize pages array from content
+          if (content.pages && Array.isArray(content.pages)) {
+            setPages(content.pages);
+          } else {
+            setPages([content.html]);
           }
+
+          toast.success("Document loaded successfully");
         }
-        
-        // Restore page format and view mode states
-        if (content.pageFormat) setPageFormat(content.pageFormat);
-        if (content.orientation) setOrientation(content.orientation);
-        if (content.viewMode !== undefined) setViewMode(content.viewMode);
-        if (content.overlayTextBoxes) setOverlayTextBoxes(content.overlayTextBoxes);
       }
 
       // Load version history for this session
@@ -433,8 +436,6 @@ export function LightPaperDocument({
           console.log(`Cleaned up ${result.deletedCount} old versions`);
         }
       }
-      
-      toast.success("Document loaded");
     };
     
     loadProjectWithVersions();
@@ -1118,11 +1119,12 @@ export function LightPaperDocument({
       // Save full document content including all pages
       const content = {
         html: documentContent || editorRef.current?.innerHTML || "",
+        pages: pages,
         font: selectedFont,
         size: selectedSize,
         darkMode: isDarkMode,
         currentPage,
-        totalPages,
+        totalPages: pages.length,
         pageFormat,
         orientation,
         viewMode,
@@ -1257,6 +1259,50 @@ export function LightPaperDocument({
   };
 
   // Helper function to get current page dimensions based on format and orientation
+  // Page management functions
+  const addPage = () => {
+    const newPage = `<p style="font-size: 14pt; color: inherit;">New page...</p>`;
+    setPages([...pages, newPage]);
+    setTotalPages(pages.length + 1);
+    setCurrentPage(pages.length + 1);
+    toast.success("New page added");
+  };
+
+  const deletePage = (pageNum: number) => {
+    if (pages.length <= 1) {
+      toast.error("Cannot delete the last page");
+      return;
+    }
+    const newPages = pages.filter((_, i) => i !== pageNum - 1);
+    setPages(newPages);
+    setTotalPages(newPages.length);
+    if (currentPage > newPages.length) {
+      setCurrentPage(newPages.length);
+    }
+    toast.success(`Page ${pageNum} deleted`);
+  };
+
+  const duplicatePage = (pageNum: number) => {
+    const pageToDuplicate = pages[pageNum - 1];
+    const newPages = [...pages];
+    newPages.splice(pageNum, 0, pageToDuplicate);
+    setPages(newPages);
+    setTotalPages(newPages.length);
+    toast.success(`Page ${pageNum} duplicated`);
+  };
+
+  const rotatePage = (pageNum: number) => {
+    toast.info(`Page ${pageNum} rotated`);
+  };
+
+  const movePage = (from: number, to: number) => {
+    const newPages = [...pages];
+    const [movedPage] = newPages.splice(from - 1, 1);
+    newPages.splice(to - 1, 0, movedPage);
+    setPages(newPages);
+    toast.success(`Page moved from ${from} to ${to}`);
+  };
+
   const getPageDimensions = () => {
     const format = PAGE_FORMATS[pageFormat];
     const width = orientation === "portrait" ? format.width : format.height;
@@ -1605,6 +1651,19 @@ export function LightPaperDocument({
               </Button>
             </div>
 
+            {/* Pages Panel */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button 
+                variant={showPagePanel ? "secondary" : "ghost"} 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                onClick={() => setShowPagePanel(!showPagePanel)} 
+                title="Toggle Pages Panel"
+              >
+                <FileText className="h-4 w-4" />
+              </Button>
+            </div>
+
             {/* Export Options */}
             <div className="flex gap-0.5 border-l pl-1">
               <DropdownMenu>
@@ -1806,9 +1865,36 @@ export function LightPaperDocument({
               Next
               <ChevronRight className="h-4 w-4 ml-1" />
             </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={addPage}
+              className="min-w-[90px]"
+            >
+              <Plus className="h-4 w-4 mr-1" />
+              Add Page
+            </Button>
           </div>
         )}
       </div>
+
+      {/* Main Content Area with Page Panel */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Page Management Panel */}
+        {showPagePanel && (
+          <div className="w-64 border-r bg-background shrink-0">
+            <PageManagementPanel
+              numPages={totalPages}
+              currentPage={currentPage}
+              onPageSelect={(page) => setCurrentPage(page)}
+              onAddPage={addPage}
+              onDeletePage={deletePage}
+              onDuplicatePage={duplicatePage}
+              onRotatePage={rotatePage}
+              onMovePage={movePage}
+            />
+          </div>
+        )}
 
       {/* Main Editor Area - Reduced padding for mobile */}
       <div ref={wrapperRef} className="flex-1 overflow-auto scroll-smooth bg-muted/30 flex gap-0 items-start justify-center py-2 md:py-4" style={{
@@ -2273,6 +2359,7 @@ export function LightPaperDocument({
           />
           </div>
         )}
+      </div>
       </div>
 
       {/* Floating Action Menu */}
