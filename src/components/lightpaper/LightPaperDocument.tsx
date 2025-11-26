@@ -1228,7 +1228,7 @@ export function LightPaperDocument({
   return (
     <div className="flex flex-col h-screen">
       {/* Desktop Toolbar */}
-      <div className="hidden md:block border-b bg-background">
+      <div className="hidden md:block border-b bg-background no-print desktop-toolbar">
         <CollapsibleToolbar>
           <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
             {/* Font Controls */}
@@ -1558,7 +1558,7 @@ export function LightPaperDocument({
       </div>
 
       {/* Mobile Toolbar */}
-      <div className="md:hidden p-1 border-b bg-background shrink-0">
+      <div className="md:hidden p-1 border-b bg-background shrink-0 no-print mobile-toolbar">
         <MobileToolbar
           groups={[
             {
@@ -1630,7 +1630,7 @@ export function LightPaperDocument({
       </div>
 
       {/* Zoom and Page Navigation Controls */}
-      <div className="flex items-center justify-between gap-4 px-4 py-1 border-b bg-background shrink-0">
+      <div className="flex items-center justify-between gap-4 px-4 py-1 border-b bg-background shrink-0 no-print zoom-controls page-navigation">
         {/* Status Info */}
         <div className="flex items-center gap-4 text-xs text-muted-foreground">
           <span className="flex items-center gap-1">
@@ -1961,10 +1961,48 @@ export function LightPaperDocument({
           }
           
           @media print {
+            /* Hide all UI elements */
+            .no-print,
+            .desktop-toolbar,
+            .mobile-toolbar,
+            .floating-action-menu,
+            .comments-sidebar,
+            .page-navigation,
+            .zoom-controls,
+            .ai-toolbar {
+              display: none !important;
+              visibility: hidden !important;
+            }
+            
+            /* Reset body and html for printing */
+            body, html {
+              background: white !important;
+              margin: 0 !important;
+              padding: 0 !important;
+            }
+            
+            /* Make page content print properly */
             .page {
-              margin: 0;
-              box-shadow: none;
+              margin: 0 !important;
+              padding: 0 !important;
+              box-shadow: none !important;
+              transform: none !important;
+              width: 100% !important;
+              max-width: none !important;
+              height: auto !important;
               page-break-after: always;
+              break-after: page;
+            }
+            
+            .page-content {
+              padding: 1cm !important;
+            }
+            
+            /* Hide the wrapper styling */
+            .editor-wrapper {
+              background: white !important;
+              padding: 0 !important;
+              overflow: visible !important;
             }
           }
         `}</style>
@@ -2127,7 +2165,8 @@ export function LightPaperDocument({
 
         {/* Comments Sidebar */}
         {showComments && currentProjectId && (
-          <CommentsSidebar
+          <div className="no-print comments-sidebar">
+            <CommentsSidebar
             comments={comments}
             onAddComment={async (content) => {
               await addComment(content);
@@ -2136,11 +2175,14 @@ export function LightPaperDocument({
             onDeleteComment={deleteComment}
             currentUserId={user?.id}
           />
+          </div>
         )}
       </div>
 
       {/* Floating Action Menu */}
-      <FloatingActionMenu onSave={() => setShowSaveDialog(true)} onPrint={handlePrint} />
+      <div className="no-print floating-action-menu">
+        <FloatingActionMenu onSave={() => setShowSaveDialog(true)} onPrint={handlePrint} />
+      </div>
 
       {/* Save Dialog */}
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
@@ -2310,7 +2352,7 @@ export function LightPaperDocument({
 
       {/* Mobile Page Navigation - Fixed at Bottom */}
       {((viewMode && viewModeImages.length > 0) || (!viewMode && (totalPages > 0 || documentContent))) && (
-        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-3 z-50">
+        <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-3 z-50 no-print page-navigation">
           <div className="flex items-center justify-center gap-2">
             <Button
               variant="outline"
