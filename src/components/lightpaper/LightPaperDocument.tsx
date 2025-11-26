@@ -4,8 +4,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType, ChevronLeft, ChevronRight } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType, ChevronLeft, ChevronRight, Cloud } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
@@ -1199,6 +1199,75 @@ export function LightPaperDocument({
       setIsSaving(false);
     }
   };
+
+  const handleDownloadHTML = () => {
+    try {
+      const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>${projectTitle || 'Document'}</title>
+  <style>
+    body { 
+      font-family: ${selectedFont}; 
+      font-size: ${selectedSize}pt; 
+      margin: 2.54cm;
+      ${isDarkMode ? 'background-color: #1a1a1a; color: #ffffff;' : 'background-color: #ffffff; color: #000000;'}
+    }
+    .page { 
+      page-break-after: always; 
+      margin-bottom: 2cm;
+    }
+    .page:last-child { 
+      page-break-after: auto; 
+    }
+  </style>
+</head>
+<body>${pages.map((page, idx) => `<div class="page" data-page="${idx + 1}">${page}</div>`).join('\n')}</body>
+</html>`;
+      
+      const blob = new Blob([htmlContent], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${projectTitle || 'Document'}.html`;
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success("HTML file downloaded");
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.error("Failed to download HTML file");
+    }
+  };
+
+  const handleDownloadDOCX = async () => {
+    try {
+      toast.loading("Preparing Word document...");
+      
+      // Create a simple text version of the document
+      const textContent = pages.map((page, idx) => {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = page;
+        return `Page ${idx + 1}\n\n${tempDiv.textContent || ''}\n\n`;
+      }).join('\n---\n\n');
+      
+      // Create a blob with the text content
+      const blob = new Blob([textContent], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${projectTitle || 'Document'}.txt`;
+      link.click();
+      URL.revokeObjectURL(url);
+      
+      toast.dismiss();
+      toast.success("Document downloaded as text file");
+    } catch (error) {
+      console.error('Download error:', error);
+      toast.dismiss();
+      toast.error("Failed to download document");
+    }
+  };
   const handlePrint = async () => {
     try {
       toast.loading("Preparing document for print...");
@@ -1756,16 +1825,38 @@ export function LightPaperDocument({
 
             {/* Save Button */}
             <div className="flex gap-2 items-center border-l pl-1 ml-auto shrink-0">
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0" 
-                onClick={() => setShowSaveDialog(true)} 
-                disabled={isSaving}
-                title="Save Document (Ctrl+S)"
-              >
-                <Save className="h-4 w-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-8 w-8 p-0" 
+                    disabled={isSaving}
+                    title="Save Document"
+                  >
+                    <Save className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="bg-background z-50">
+                  <DropdownMenuItem onClick={handleExportPDF}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Save as PDF
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDownloadHTML}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Save as HTML
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={handleDownloadDOCX}>
+                    <FileText className="h-4 w-4 mr-2" />
+                    Save as Text
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setShowSaveDialog(true)}>
+                    <Cloud className="h-4 w-4 mr-2" />
+                    Save to Cloud
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
               {isSaving && (
                 <span className="text-xs text-muted-foreground">
                   Saving...
@@ -1842,7 +1933,7 @@ export function LightPaperDocument({
             },
           ]}
           rightActions={[
-            { icon: Save, label: "Save", onClick: () => setShowSaveDialog(true), priority: "high" as const, variant: "default" as const, disabled: isSaving },
+            { icon: Download, label: "Save", onClick: handleExportPDF, priority: "high" as const, variant: "default" as const, disabled: isSaving },
             { icon: MessageSquare, label: "Comments", onClick: () => setShowComments(!showComments), priority: "high" as const, variant: showComments ? ("default" as const) : ("outline" as const) },
             ...(viewMode ? [
               { icon: Plus, label: "Add Box", onClick: addTextBox, priority: "high" as const },
