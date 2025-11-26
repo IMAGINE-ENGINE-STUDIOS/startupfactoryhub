@@ -29,9 +29,6 @@ export default function FloatingActionMenu({
 
   const actions = [
     { icon: Pen, label: "Signature", onClick: onSignature, show: !!onSignature },
-    { icon: Save, label: "Save", onClick: onSave, show: !!onSave },
-    { icon: Share2, label: "Share", onClick: onShare, show: !!onShare },
-    { icon: Printer, label: "Print", onClick: onPrint, show: !!onPrint },
   ].filter((action) => action.show);
 
   return (
