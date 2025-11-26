@@ -204,15 +204,11 @@ export function useDocumentCollaboration({ projectId, enabled = true }: UseDocum
         const allCursors = Object.values(state).flat() as any[];
         setCursors(allCursors.filter((c: any) => c.user_id !== user.id) as CursorPosition[]);
       })
-      .on('presence', { event: 'join' }, ({ newPresences }) => {
-        if (newPresences[0]?.user_name) {
-          toast.info(`${newPresences[0].user_name} joined`);
-        }
+      .on('presence', { event: 'join' }, () => {
+        // Silently handle join - cursor will show in UI
       })
-      .on('presence', { event: 'leave' }, ({ leftPresences }) => {
-        if (leftPresences[0]?.user_name) {
-          toast.info(`${leftPresences[0].user_name} left`);
-        }
+      .on('presence', { event: 'leave' }, () => {
+        // Silently handle leave - cursor will disappear from UI
       })
       .subscribe(async (status) => {
         if (status === 'SUBSCRIBED') {
