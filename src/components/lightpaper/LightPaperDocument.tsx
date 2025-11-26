@@ -2611,7 +2611,7 @@ export function LightPaperDocument({
 
       {/* Floating Action Menu */}
       <div className="no-print floating-action-menu">
-        <FloatingActionMenu onSave={() => setShowSaveDialog(true)} onPrint={handlePrint} />
+        <FloatingActionMenu />
       </div>
 
       {/* Save Dialog */}
