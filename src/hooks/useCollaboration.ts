@@ -112,21 +112,11 @@ export const useCollaboration = (sessionId: string | null) => {
         setActiveUsers(users);
         setCursors(cursorMap);
       })
-      .on('presence', { event: 'join' }, ({ key, newPresences }) => {
-        const presence = newPresences[0];
-        if (key !== currentUser.id && presence) {
-          toast.success(`${presence.userName} joined the session`, {
-            duration: 2000,
-          });
-        }
+      .on('presence', { event: 'join' }, () => {
+        // Silently handle join - presence state will update
       })
-      .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-        const presence = leftPresences[0];
-        if (key !== currentUser.id && presence) {
-          toast.info(`${presence.userName} left the session`, {
-            duration: 2000,
-          });
-        }
+      .on('presence', { event: 'leave' }, () => {
+        // Silently handle leave - presence state will update
       });
 
     // Subscribe and track initial presence
