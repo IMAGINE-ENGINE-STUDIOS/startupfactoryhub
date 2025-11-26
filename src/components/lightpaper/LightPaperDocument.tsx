@@ -1347,17 +1347,26 @@ export function LightPaperDocument({
         const pageDiv = document.createElement('div');
         pageDiv.className = 'page';
         pageDiv.innerHTML = pages[i];
+        
+        // Apply proper styling for PDF export
         pageDiv.style.width = `${getPageDimensions().width}cm`;
         pageDiv.style.height = `${getPageDimensions().height}cm`;
-        pageDiv.style.background = isDarkMode ? 'black' : 'white';
-        pageDiv.style.color = isDarkMode ? 'white' : 'black';
+        pageDiv.style.background = '#ffffff';
+        pageDiv.style.color = '#000000';
+        pageDiv.style.fontFamily = selectedFont;
+        pageDiv.style.fontSize = `${selectedSize}px`;
+        pageDiv.style.padding = '2cm';
+        pageDiv.style.boxSizing = 'border-box';
+        pageDiv.style.lineHeight = '1.6';
+        pageDiv.style.overflow = 'hidden';
+        
         hiddenContainer.appendChild(pageDiv);
         
         const canvas = await html2canvas(pageDiv, {
           scale: 2,
           useCORS: true,
           allowTaint: true,
-          backgroundColor: isDarkMode ? '#000000' : '#ffffff',
+          backgroundColor: '#ffffff',
         });
         
         const imgData = canvas.toDataURL('image/jpeg', 0.95);
@@ -1517,8 +1526,8 @@ export function LightPaperDocument({
     <div className="flex flex-col h-screen">
       {/* Desktop Toolbar */}
       <div className="hidden md:block border-b bg-background no-print desktop-toolbar shrink-0 relative z-40">
-        <CollapsibleToolbar>
-          <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent pr-6 min-w-max">
+      <CollapsibleToolbar>
+        <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent pr-4" style={{ maxWidth: '100%' }}>
             {/* Font Controls */}
             <Select value={selectedFont} onValueChange={font => {
             setSelectedFont(font);
