@@ -4,12 +4,10 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Download, Upload, Calculator, BookOpen, Save, FileText, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, Keyboard, Undo, Redo } from "lucide-react";
+import { Plus, Download, Upload, Calculator, BookOpen, FileText, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, Keyboard, Undo, Redo } from "lucide-react";
 import { toast } from "sonner";
 import { FormulaBuilder } from "./FormulaBuilder";
 import { FormulaEngine } from "@/lib/formulaEngine";
-import { useLightPaperProjects } from "@/hooks/useLightPaperProjects";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
 import { ShortcutsDialog } from "./ShortcutsDialog";
 import * as XLSX from "xlsx";
@@ -51,19 +49,15 @@ export function LightPaperSpreadsheet() {
   const [selectedCell, setSelectedCell] = useState<string | null>(null);
   const [showFormulas, setShowFormulas] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
-  const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
   const [projectTitle, setProjectTitle] = useState("Untitled Spreadsheet");
-  const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [visibleRows, setVisibleRows] = useState(INITIAL_ROWS);
   const [columns] = useState(() => generateColumns(TOTAL_COLUMNS));
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const { saveProject, projects } = useLightPaperProjects("spreadsheet");
   const isMobile = useIsMobile();
 
   // Keyboard shortcuts
   useKeyboardShortcuts([
-    { key: 's', ctrl: true, handler: (e) => { e.preventDefault(); setShowSaveDialog(true); }, description: 'Save' },
     { key: 'Delete', handler: () => { if (selectedCell) handleCellChange(selectedCell, ''); }, description: 'Clear cell' },
     { key: '/', ctrl: true, handler: (e) => { e.preventDefault(); setShowShortcutsDialog(true); }, description: 'Shortcuts' },
   ], true);
@@ -143,23 +137,6 @@ export function LightPaperSpreadsheet() {
     return engine.evaluate(cellId);
   };
 
-  const handleSaveToAccount = async () => {
-    const result = await saveProject(projectTitle, "spreadsheet", { data }, currentProjectId || undefined);
-    if (result) {
-      setCurrentProjectId(result.id);
-      setShowSaveDialog(false);
-    }
-  };
-
-  const handleLoadProject = async (projectId: string) => {
-    const project = projects.find(p => p.id === projectId);
-    if (project) {
-      setData(project.content.data || {});
-      setProjectTitle(project.title);
-      setCurrentProjectId(project.id);
-      toast.success("Project loaded!");
-    }
-  };
 
   const handleInsertFormula = (formula: string) => {
     if (selectedCell) {
@@ -407,13 +384,10 @@ export function LightPaperSpreadsheet() {
               </DropdownMenu>
             </div>
 
-            {/* Save Button */}
+            {/* Shortcuts Button */}
             <div className="flex gap-0.5 border-l pl-1 ml-auto shrink-0">
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowShortcutsDialog(true)} title="Keyboard Shortcuts (Ctrl+/)">
                 <Keyboard className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSaveDialog(true)} title="Save">
-                <Save className="h-4 w-4" />
               </Button>
             </div>
           </div>
@@ -473,33 +447,6 @@ export function LightPaperSpreadsheet() {
         onOpenChange={setShowShortcutsDialog}
         type="spreadsheet"
       />
-
-      <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Save Spreadsheet</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Spreadsheet Title</label>
-              <Input
-                value={projectTitle}
-                onChange={(e) => setProjectTitle(e.target.value)}
-                placeholder="Enter spreadsheet title"
-              />
-            </div>
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowSaveDialog(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleSaveToAccount}>
-                <Save className="h-4 w-4 mr-2" />
-                Save
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

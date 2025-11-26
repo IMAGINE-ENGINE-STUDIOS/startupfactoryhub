@@ -84,69 +84,69 @@ export const PageManagementPanel = ({
                   )}
                 </div>
                 <div className="flex-1">
-                  <div className="text-sm font-medium">Page {pageNum}</div>
-                  <div className="flex gap-1 mt-2">
+                  <div className="text-sm font-medium mb-1">Page {pageNum}</div>
+                  <div className="flex flex-wrap gap-1">
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="outline"
                       onClick={(e) => {
                         e.stopPropagation();
                         onDuplicatePage(pageNum);
                       }}
-                      className="h-7 w-7 p-0"
+                      className="h-8 w-8 p-0"
                       title="Duplicate"
                     >
-                      <Copy className="h-3 w-3" />
+                      <Copy className="h-4 w-4" />
                     </Button>
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="outline"
                       onClick={(e) => {
                         e.stopPropagation();
                         onRotatePage(pageNum);
                       }}
-                      className="h-7 w-7 p-0"
+                      className="h-8 w-8 p-0"
                       title="Rotate 90°"
                     >
-                      <RotateCw className="h-3 w-3" />
+                      <RotateCw className="h-4 w-4" />
                     </Button>
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="outline"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleMoveUp(pageNum);
                       }}
                       disabled={pageNum === 1}
-                      className="h-7 w-7 p-0"
+                      className="h-8 w-8 p-0"
                       title="Move Up"
                     >
-                      <MoveUp className="h-3 w-3" />
+                      <MoveUp className="h-4 w-4" />
                     </Button>
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="outline"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleMoveDown(pageNum);
                       }}
                       disabled={pageNum === numPages}
-                      className="h-7 w-7 p-0"
+                      className="h-8 w-8 p-0"
                       title="Move Down"
                     >
-                      <MoveDown className="h-3 w-3" />
+                      <MoveDown className="h-4 w-4" />
                     </Button>
                     <Button
                       size="sm"
-                      variant="ghost"
+                      variant="outline"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeletePage(pageNum);
                       }}
-                      className="h-7 w-7 p-0 hover:text-destructive"
+                      className="h-8 w-8 p-0 hover:text-destructive hover:border-destructive"
                       title="Delete"
                     >
-                      <Trash2 className="h-3 w-3" />
+                      <Trash2 className="h-4 w-4" />
                     </Button>
                   </div>
                 </div>
