@@ -1272,47 +1272,85 @@ export function LightPaperDocument({
     try {
       toast.loading("Preparing document for print...");
       
-      // Get all page elements
-      const pageElements = document.querySelectorAll('.page');
-      if (pageElements.length === 0) {
+      // CRITICAL: Save current page content before printing
+      if (editorRef.current) {
+        const currentContent = editorRef.current.innerHTML;
+        const updatedPages = [...pages];
+        updatedPages[currentPage - 1] = currentContent;
+        
+        if (updatedPages.length === 0 || (updatedPages.length === 1 && !updatedPages[0])) {
+          toast.dismiss();
+          toast.error("No document content found");
+          return;
+        }
+        
+        // Create PDF with proper dimensions
+        const pdf = new jsPDF(orientation === 'portrait' ? 'p' : 'l', 'mm', pageFormat);
+        const pdfWidth = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].width * 10 : PAGE_FORMATS[pageFormat].height * 10;
+        const pdfHeight = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].height * 10 : PAGE_FORMATS[pageFormat].width * 10;
+        
+        // Create hidden container
+        const hiddenContainer = document.createElement('div');
+        hiddenContainer.style.position = 'absolute';
+        hiddenContainer.style.left = '-9999px';
+        hiddenContainer.style.top = '0';
+        hiddenContainer.style.width = `${getPageDimensions().width}cm`;
+        document.body.appendChild(hiddenContainer);
+        
+        for (let i = 0; i < updatedPages.length; i++) {
+          const pageDiv = document.createElement('div');
+          pageDiv.innerHTML = updatedPages[i] || '<p>Empty page</p>';
+          
+          // Apply comprehensive styling
+          Object.assign(pageDiv.style, {
+            width: `${getPageDimensions().width}cm`,
+            minHeight: `${getPageDimensions().height}cm`,
+            background: '#ffffff',
+            color: '#000000',
+            fontFamily: selectedFont,
+            fontSize: `${selectedSize}px`,
+            padding: '2cm',
+            boxSizing: 'border-box',
+            lineHeight: '1.6',
+            overflow: 'visible',
+            position: 'relative',
+            display: 'block'
+          });
+          
+          // Clear and add single page at a time
+          hiddenContainer.innerHTML = '';
+          hiddenContainer.appendChild(pageDiv);
+          
+          // Wait for render
+          await new Promise(resolve => setTimeout(resolve, 100));
+          
+          const canvas = await html2canvas(pageDiv, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            width: pageDiv.offsetWidth,
+            height: pageDiv.offsetHeight,
+            logging: false
+          });
+          
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          
+          if (i > 0) pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        }
+        
+        // Clean up
+        document.body.removeChild(hiddenContainer);
+        
+        // Open PDF in new tab for printing
+        const pdfBlob = pdf.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        window.open(pdfUrl, '_blank');
+        
         toast.dismiss();
-        toast.error("No document pages found");
-        return;
+        toast.success(`Document ready for printing (${updatedPages.length} pages)`);
       }
-      
-      // Create PDF with A4 dimensions
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = 210; // A4 width in mm
-      const pdfHeight = 297; // A4 height in mm
-      
-      for (let i = 0; i < pageElements.length; i++) {
-        const pageElement = pageElements[i] as HTMLElement;
-        
-        // Capture the page using html2canvas
-        const canvas = await html2canvas(pageElement, {
-          scale: 2, // Higher quality
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: '#ffffff',
-          logging: false,
-        });
-        
-        // Convert canvas to image and add to PDF
-        const imgData = canvas.toDataURL('image/jpeg', 0.95);
-        const imgWidth = pdfWidth;
-        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-        
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, Math.min(imgHeight, pdfHeight));
-      }
-      
-      // Open PDF in new tab for printing
-      const pdfBlob = pdf.output('blob');
-      const pdfUrl = URL.createObjectURL(pdfBlob);
-      window.open(pdfUrl, '_blank');
-      
-      toast.dismiss();
-      toast.success("Document ready for printing");
     } catch (error) {
       console.error('Print error:', error);
       toast.dismiss();
