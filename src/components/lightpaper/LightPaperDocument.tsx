@@ -1275,10 +1275,19 @@ export function LightPaperDocument({
       // CRITICAL: Save current page content before printing
       if (editorRef.current) {
         const currentContent = editorRef.current.innerHTML;
+        console.log('📄 Print - Current editor content:', currentContent.substring(0, 100));
+        console.log('📄 Print - Pages array before update:', pages.length, 'pages');
+        
         const updatedPages = [...pages];
         updatedPages[currentPage - 1] = currentContent;
         
-        if (updatedPages.length === 0 || (updatedPages.length === 1 && !updatedPages[0])) {
+        console.log('📄 Print - Updated pages:', updatedPages.length, 'pages');
+        console.log('📄 Print - First page content:', updatedPages[0]?.substring(0, 100));
+        
+        // Check if we have valid content
+        const hasContent = updatedPages.some(page => page && page.trim().length > 0);
+        if (!hasContent) {
+          console.error('❌ Print - No valid content in any page');
           toast.dismiss();
           toast.error("No document content found");
           return;
@@ -1297,9 +1306,14 @@ export function LightPaperDocument({
         hiddenContainer.style.width = `${getPageDimensions().width}cm`;
         document.body.appendChild(hiddenContainer);
         
+        console.log(`📄 Print - Starting PDF generation for ${updatedPages.length} pages`);
+        
         for (let i = 0; i < updatedPages.length; i++) {
+          console.log(`📄 Print - Processing page ${i + 1}/${updatedPages.length}`);
           const pageDiv = document.createElement('div');
           pageDiv.innerHTML = updatedPages[i] || '<p>Empty page</p>';
+          
+          console.log(`📄 Print - Page ${i + 1} content length:`, updatedPages[i]?.length || 0);
           
           // Apply comprehensive styling
           Object.assign(pageDiv.style, {
@@ -1324,6 +1338,7 @@ export function LightPaperDocument({
           // Wait for render
           await new Promise(resolve => setTimeout(resolve, 100));
           
+          console.log(`📄 Print - Capturing page ${i + 1} with html2canvas...`);
           const canvas = await html2canvas(pageDiv, {
             scale: 2,
             useCORS: true,
@@ -1334,10 +1349,16 @@ export function LightPaperDocument({
             logging: false
           });
           
+          console.log(`📄 Print - Page ${i + 1} captured, canvas size: ${canvas.width}x${canvas.height}`);
+          
           const imgData = canvas.toDataURL('image/jpeg', 0.95);
           
-          if (i > 0) pdf.addPage();
+          if (i > 0) {
+            console.log(`📄 Print - Adding new page to PDF`);
+            pdf.addPage();
+          }
           pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+          console.log(`📄 Print - Page ${i + 1} added to PDF`);
         }
         
         // Clean up
