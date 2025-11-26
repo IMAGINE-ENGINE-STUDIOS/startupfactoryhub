@@ -149,15 +149,17 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const isOnlineEvent = event.location?.includes('whereby.com');
   
   const timeData = useMemo(() => {
-    const eventDate = new Date(event.start_date);
+    const eventStartDate = new Date(event.start_date);
+    const eventEndDate = new Date(event.end_date);
     const now = new Date();
-    const isWithin15Min = eventDate.getTime() - now.getTime() < 15 * 60 * 1000 && eventDate.getTime() > now.getTime();
-    const hasStarted = eventDate.getTime() <= now.getTime();
+    const isWithin15Min = eventStartDate.getTime() - now.getTime() < 15 * 60 * 1000 && eventStartDate.getTime() > now.getTime();
+    const hasStarted = eventStartDate.getTime() <= now.getTime();
+    const hasEnded = eventEndDate.getTime() < now.getTime();
     
-    return { isWithin15Min, hasStarted };
-  }, [event.start_date]);
+    return { isWithin15Min, hasStarted, hasEnded };
+  }, [event.start_date, event.end_date]);
 
-  const { isWithin15Min, hasStarted } = timeData;
+  const { isWithin15Min, hasStarted, hasEnded } = timeData;
 
   const handleJoinEvent = async () => {
     if (!event.location) {
@@ -330,7 +332,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
           )}
 
           {/* Online Event Join Button */}
-          {isOnlineEvent && user && (userStatus === 'going' || isOrganizer) && (
+          {isOnlineEvent && user && (userStatus === 'going' || isOrganizer) && !hasEnded && (
             <div className="pt-4 border-t space-y-4">
               {isOrganizer && (
                 <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 text-sm">
@@ -359,6 +361,17 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                       : 'Join Meeting (Opens 15 min before)'
                 }
               </Button>
+            </div>
+          )}
+          
+          {/* Past Event Message */}
+          {isOnlineEvent && hasEnded && (
+            <div className="pt-4 border-t">
+              <div className="p-4 bg-muted border border-border rounded-lg">
+                <p className="text-sm text-muted-foreground text-center">
+                  This event has ended. The video meeting is no longer available.
+                </p>
+              </div>
             </div>
           )}
           
