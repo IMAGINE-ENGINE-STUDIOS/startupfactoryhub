@@ -1439,9 +1439,9 @@ export function LightPaperDocument({
   return (
     <div className="flex flex-col h-screen">
       {/* Desktop Toolbar */}
-      <div className="hidden md:block border-b bg-background no-print desktop-toolbar">
+      <div className="hidden md:block border-b bg-background no-print desktop-toolbar shrink-0 relative z-40">
         <CollapsibleToolbar>
-          <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent">
+          <div className="flex items-center gap-0.5 overflow-x-auto scrollbar-thin scrollbar-thumb-muted scrollbar-track-transparent pr-4">
             {/* Font Controls */}
             <Select value={selectedFont} onValueChange={font => {
             setSelectedFont(font);
@@ -1911,7 +1911,7 @@ export function LightPaperDocument({
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              onClick={() => handlePageSelect(Math.max(1, currentPage - 1))}
               disabled={currentPage <= 1}
               className="min-w-[90px]"
             >
@@ -1926,7 +1926,7 @@ export function LightPaperDocument({
               size="sm"
               onClick={() => {
                 const maxPage = viewMode ? viewModeImages.length : totalPages;
-                setCurrentPage(Math.min(maxPage, currentPage + 1));
+                handlePageSelect(Math.min(maxPage, currentPage + 1));
               }}
               disabled={currentPage >= (viewMode ? viewModeImages.length : totalPages)}
               className="min-w-[90px]"
@@ -1951,7 +1951,7 @@ export function LightPaperDocument({
       <div className="flex-1 flex overflow-hidden">
         {/* Page Management Panel */}
         {showPagePanel && (
-          <div className="w-64 border-r bg-background shrink-0 z-10 relative h-full overflow-auto">
+          <div className="w-64 border-r bg-background shrink-0 z-50 relative h-full overflow-auto shadow-lg">
             <PageManagementPanel
               numPages={totalPages}
               currentPage={currentPage}
