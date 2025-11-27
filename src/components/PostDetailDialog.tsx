@@ -5,7 +5,18 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Heart, MessageCircle, Share2, Bookmark, Play, Pause, Volume2, VolumeX, Send } from 'lucide-react';
+import { Heart, MessageCircle, Share2, Bookmark, Play, Pause, Volume2, VolumeX, Send, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -39,9 +50,10 @@ interface PostDetailDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onLikeToggle?: (postId: string, isLiked: boolean) => void;
+  onDelete?: (postId: string) => void;
 }
 
-export const PostDetailDialog = ({ post, open, onOpenChange, onLikeToggle }: PostDetailDialogProps) => {
+export const PostDetailDialog = ({ post, open, onOpenChange, onLikeToggle, onDelete }: PostDetailDialogProps) => {
   const { user } = useAuth();
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
@@ -226,6 +238,27 @@ export const PostDetailDialog = ({ post, open, onOpenChange, onLikeToggle }: Pos
     setIsMuted(!isMuted);
   };
 
+  const deletePost = async () => {
+    if (!post || !user) return;
+    
+    try {
+      const { error } = await supabase
+        .from('feed_posts')
+        .delete()
+        .eq('id', post.id)
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      onDelete?.(post.id);
+      onOpenChange(false);
+      toast.success('Post deleted successfully');
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      toast.error('Failed to delete post');
+    }
+  };
+
   if (!post) return null;
 
   const hasMedia = post.media_urls && post.media_urls.length > 0;
@@ -290,6 +323,29 @@ export const PostDetailDialog = ({ post, open, onOpenChange, onLikeToggle }: Pos
                   </p>
                 </div>
                 <Badge variant="secondary">{post.post_type}</Badge>
+                {user?.id === post.user_id && (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Delete Post?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This action cannot be undone. This will permanently delete your post and all associated comments.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={deletePost} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                          Delete
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             </DialogHeader>
 

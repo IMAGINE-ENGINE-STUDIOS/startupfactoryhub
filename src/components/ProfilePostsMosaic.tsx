@@ -63,6 +63,17 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
           commentDebounceTimer = setTimeout(() => fetchPosts(), 500);
         }
       )
+      .on('postgres_changes', 
+        { event: 'DELETE', schema: 'public', table: 'feed_posts' },
+        (payload) => {
+          // Remove deleted post from list (syncs when deleted from social tab too)
+          setPosts(prev => prev.filter(p => p.id !== payload.old.id));
+          if (selectedPost?.id === payload.old.id) {
+            setSelectedPost(null);
+            setIsDialogOpen(false);
+          }
+        }
+      )
       .subscribe();
 
     return () => {
@@ -143,6 +154,11 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
         ? { ...p, likes_count: isLiked ? p.likes_count + 1 : p.likes_count - 1 }
         : p
     ));
+  };
+
+  const handlePostDelete = (postId: string) => {
+    setPosts(prev => prev.filter(p => p.id !== postId));
+    setSelectedPost(null);
   };
 
   const getMosaicClass = (post: Post, index: number) => {
@@ -397,6 +413,7 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         onLikeToggle={handleLikeToggle}
+        onDelete={handlePostDelete}
       />
     </div>
   );
