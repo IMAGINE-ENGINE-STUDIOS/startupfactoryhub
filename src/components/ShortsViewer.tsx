@@ -54,6 +54,7 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
   const [comments, setComments] = useState<any[]>([]);
   const [newComment, setNewComment] = useState("");
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
+  const [isLoadingComments, setIsLoadingComments] = useState(false);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -173,23 +174,49 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
   };
 
   const fetchComments = async (shortId: string) => {
+    setIsLoadingComments(true);
     try {
-      const { data, error } = await supabase
+      // Step 1: Fetch comments
+      const { data: commentsData, error: commentsError } = await supabase
         .from('post_comments')
-        .select(`
-          id,
-          content,
-          created_at,
-          user_id,
-          profiles:user_id(full_name, avatar_url)
-        `)
+        .select('id, content, created_at, user_id')
         .eq('post_id', shortId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
-      setComments(data || []);
+      if (commentsError) throw commentsError;
+
+      if (!commentsData || commentsData.length === 0) {
+        setComments([]);
+        setIsLoadingComments(false);
+        return;
+      }
+
+      // Step 2: Get unique user IDs and fetch profiles separately
+      const userIds = [...new Set(commentsData.map(c => c.user_id))];
+      const { data: profilesData, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url')
+        .in('user_id', userIds);
+
+      if (profilesError) throw profilesError;
+
+      // Step 3: Map profiles to comments
+      const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
+      const commentsWithProfiles = commentsData.map(comment => ({
+        ...comment,
+        profiles: profilesMap.get(comment.user_id) || null
+      }));
+
+      setComments(commentsWithProfiles);
     } catch (error) {
       console.error('Error fetching comments:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load comments",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingComments(false);
     }
   };
 
@@ -602,7 +629,12 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
 
                 {/* Comments List */}
                 <ScrollArea className="h-[calc(100%-10rem)] px-4">
-                  {comments.length === 0 ? (
+                  {isLoadingComments ? (
+                    <div className="flex flex-col items-center justify-center h-full text-slate-400 py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mb-3" />
+                      <p className="text-sm font-medium">Loading comments...</p>
+                    </div>
+                  ) : comments.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-slate-400 py-12">
                       <MessageCircle className="h-12 w-12 mb-3 opacity-30" />
                       <p className="text-sm font-medium">No comments yet</p>
