@@ -88,19 +88,64 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
     return 'row-span-1';
   };
 
+  const isVideoUrl = (url: string) => {
+    const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov'];
+    return videoExtensions.some(ext => url.toLowerCase().includes(ext));
+  };
+
+  const getMediaUrl = (url: string) => {
+    // If URL is already a full URL, return it
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      return url;
+    }
+    
+    // If URL is a Supabase storage path, construct the full URL
+    if (url.startsWith('storage/')) {
+      const path = url.replace('storage/', '');
+      return `https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/${path}`;
+    }
+    
+    return url;
+  };
+
   const renderPostContent = (post: Post) => {
     const hasMedia = post.media_urls && post.media_urls.length > 0;
     const isShort = post.post_type === 'short';
     const isEvent = post.post_type === 'event';
 
     if (isShort && hasMedia) {
+      const mediaUrl = getMediaUrl(post.media_urls![0]);
+      const isVideo = isVideoUrl(mediaUrl);
+      
       return (
         <div className="relative w-full h-full group">
-          <img 
-            src={post.media_urls![0]} 
-            alt="Short"
-            className="w-full h-full object-cover"
-          />
+          {isVideo ? (
+            <video 
+              src={mediaUrl}
+              className="w-full h-full object-cover"
+              muted
+              playsInline
+              onError={(e) => {
+                console.error('Video load error:', e);
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+          ) : (
+            <img 
+              src={mediaUrl} 
+              alt="Short"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                console.error('Image load error for short:', mediaUrl);
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+          )}
+          <div className="hidden absolute inset-0 bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+            <ImageIcon className="h-12 w-12 text-muted-foreground" />
+          </div>
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
             <div className="bg-background/90 rounded-full p-4">
@@ -113,13 +158,38 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
     }
 
     if (hasMedia) {
+      const mediaUrl = getMediaUrl(post.media_urls![0]);
+      const isVideo = isVideoUrl(mediaUrl);
+      
       return (
         <div className="relative w-full h-full group">
-          <img 
-            src={post.media_urls![0]} 
-            alt="Post media"
-            className="w-full h-full object-cover"
-          />
+          {isVideo ? (
+            <video 
+              src={mediaUrl}
+              className="w-full h-full object-cover"
+              muted
+              playsInline
+              onError={(e) => {
+                console.error('Video load error:', e);
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+          ) : (
+            <img 
+              src={mediaUrl} 
+              alt="Post media"
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                console.error('Image load error:', mediaUrl);
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.nextElementSibling?.classList.remove('hidden');
+              }}
+            />
+          )}
+          <div className="hidden absolute inset-0 bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+            <ImageIcon className="h-12 w-12 text-muted-foreground" />
+          </div>
           {post.media_urls!.length > 1 && (
             <Badge className="absolute top-2 right-2 bg-background/90 flex items-center gap-1">
               <ImageIcon className="h-3 w-3" />
