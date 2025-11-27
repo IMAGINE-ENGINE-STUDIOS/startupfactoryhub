@@ -313,33 +313,101 @@ export default function UnifiedCommunityFeed({
     setMediaPreview(prev => prev.filter((_, i) => i !== index));
   };
 
-  const uploadMedia = async (file: File): Promise<string | null> => {
+  const uploadMedia = async (file: File, retries = 3): Promise<string | null> => {
     try {
+      // Check file size before upload
+      if (file.size > 500 * 1024 * 1024) {
+        toast({
+          title: 'File Too Large',
+          description: 'Video must be under 500MB. Your file is ' + (file.size / (1024 * 1024)).toFixed(2) + 'MB',
+          variant: 'destructive',
+        });
+        throw new Error('File size exceeds 500MB limit');
+      }
+
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random()}.${fileExt}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `${user!.id}/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
+      console.log('[Upload] Starting upload:', { 
+        fileName, 
+        fileSize: (file.size / (1024 * 1024)).toFixed(2) + 'MB',
+        fileType: file.type 
+      });
+
+      // Upload with timeout
+      const uploadPromise = supabase.storage
         .from('feed-media')
-        .upload(filePath, file);
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      // Add 5 minute timeout
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Upload timeout after 5 minutes')), 300000)
+      );
+
+      const { data: uploadData, error: uploadError } = await Promise.race([
+        uploadPromise,
+        timeoutPromise
+      ]) as any;
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
+        console.error('[Upload] Upload error:', uploadError);
+        
+        // Retry on network errors
+        if (retries > 0 && (uploadError.message.includes('network') || uploadError.message.includes('timeout'))) {
+          console.log(`[Upload] Retrying upload... (${retries} attempts left)`);
+          toast({
+            title: 'Retrying upload...',
+            description: `Network issue detected. Retrying... (${retries} attempts left)`,
+          });
+          await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s before retry
+          return uploadMedia(file, retries - 1);
+        }
+
+        let errorMsg = uploadError.message;
+        if (uploadError.message.includes('quota')) {
+          errorMsg = 'Storage quota exceeded. Please contact support.';
+        } else if (uploadError.message.includes('size')) {
+          errorMsg = 'File too large. Maximum size is 500MB.';
+        } else if (uploadError.message.includes('network') || uploadError.message.includes('timeout')) {
+          errorMsg = 'Network error. Check your connection and try again.';
+        }
+
         toast({
           title: 'Upload Failed',
-          description: uploadError.message,
+          description: errorMsg,
           variant: 'destructive',
         });
         throw uploadError;
       }
 
+      console.log('[Upload] Upload successful, getting public URL');
+
       const { data } = supabase.storage
         .from('feed-media')
         .getPublicUrl(filePath);
 
+      if (!data.publicUrl) {
+        throw new Error('Failed to get public URL');
+      }
+
+      console.log('[Upload] Public URL obtained successfully');
       return data.publicUrl;
-    } catch (error) {
-      console.error('Error uploading file:', error);
+    } catch (error: any) {
+      console.error('[Upload] Error uploading file:', error);
+      
+      if (error.message === 'File size exceeds 500MB limit') {
+        throw error;
+      }
+      
+      toast({
+        title: 'Upload Error',
+        description: error.message || 'Failed to upload video. Please try again.',
+        variant: 'destructive',
+      });
       return null;
     }
   };
