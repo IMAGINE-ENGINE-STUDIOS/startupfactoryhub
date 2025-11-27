@@ -465,7 +465,7 @@ export default function StudyRooms() {
 
       {/* Room Details Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetContent side="right" className="w-full sm:max-w-2xl h-full flex flex-col">
           {selectedGroup && (
             <>
               <SheetHeader>
@@ -475,7 +475,8 @@ export default function StudyRooms() {
                 )}
               </SheetHeader>
 
-              <Tabs defaultValue="comments" className="w-full mt-6">
+              <div className="flex-1 flex flex-col overflow-hidden">
+                <Tabs defaultValue="comments" className="flex-1 flex flex-col mt-6 overflow-hidden">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="comments">
                     <MessageSquare className="h-4 w-4 mr-2" />
@@ -492,8 +493,8 @@ export default function StudyRooms() {
                 </TabsList>
 
                 {/* Comments Tab */}
-                <TabsContent value="comments" className="space-y-4">
-                  <ScrollArea className="h-[400px] pr-4">
+                <TabsContent value="comments" className="flex-1 flex flex-col overflow-hidden">
+                  <ScrollArea className="flex-1 pr-4">
                     <div className="space-y-4">
                       {messages.map((message) => (
                         <div key={message.id} className="border-b pb-3">
@@ -522,7 +523,7 @@ export default function StudyRooms() {
                 </TabsContent>
 
                 {/* Documents Tab */}
-                <TabsContent value="documents" className="space-y-4">
+                <TabsContent value="documents" className="flex-1 flex flex-col overflow-hidden space-y-4">
                   <div className="border-2 border-dashed rounded-lg p-6 text-center">
                     <Label htmlFor="file-upload" className="cursor-pointer">
                       <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
@@ -538,7 +539,7 @@ export default function StudyRooms() {
                     </Label>
                   </div>
 
-                  <ScrollArea className="h-[300px]">
+                  <ScrollArea className="flex-1">
                     <div className="space-y-2">
                       {files.map((file) => (
                         <div
@@ -566,8 +567,8 @@ export default function StudyRooms() {
                 </TabsContent>
 
                 {/* Members Tab */}
-                <TabsContent value="members">
-                  <ScrollArea className="h-[400px]">
+                <TabsContent value="members" className="flex-1 flex flex-col overflow-hidden">
+                  <ScrollArea className="flex-1">
                     <div className="space-y-2">
                       {members.map((member, idx) => (
                         <div
@@ -587,6 +588,7 @@ export default function StudyRooms() {
                   </ScrollArea>
                 </TabsContent>
               </Tabs>
+              </div>
             </>
           )}
         </SheetContent>
