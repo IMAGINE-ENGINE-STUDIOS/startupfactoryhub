@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Loader2 } from 'lucide-react';
+import { Upload, Loader2, ExternalLink } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
 
@@ -291,6 +291,17 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
               readOnly={isOnlineEvent}
               className={isOnlineEvent ? 'bg-muted' : ''}
             />
+            {formData.location && formData.location.startsWith('http') && (
+              <a 
+                href={formData.location} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:underline flex items-center gap-1"
+              >
+                <ExternalLink className="h-3 w-3" />
+                Open link
+              </a>
+            )}
           </div>
 
           {/* Start Date & Time */}

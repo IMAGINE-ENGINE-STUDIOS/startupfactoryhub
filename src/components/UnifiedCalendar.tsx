@@ -565,7 +565,19 @@ export default function UnifiedCalendar({
                         {item.location && (
                           <div className="flex items-center gap-2">
                             <MapPin className="h-3 w-3" />
-                            <span className="line-clamp-1">{item.location}</span>
+                            {item.location.startsWith('http') ? (
+                              <a 
+                                href={item.location} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline line-clamp-1"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {item.location}
+                              </a>
+                            ) : (
+                              <span className="line-clamp-1">{item.location}</span>
+                            )}
                           </div>
                         )}
                         <div className="flex items-center gap-2">
