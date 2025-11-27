@@ -2,9 +2,12 @@ import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import UserProfileDialog from "@/components/UserProfileDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 import { 
   X, 
   Heart, 
@@ -12,7 +15,8 @@ import {
   Share2,
   Volume2,
   VolumeX,
-  Zap
+  Zap,
+  Send
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -46,9 +50,14 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [touchStartY, setTouchStartY] = useState<number>(0);
   const [touchDeltaY, setTouchDeltaY] = useState<number>(0);
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<any[]>([]);
+  const [newComment, setNewComment] = useState("");
+  const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const currentShort = shorts[currentIndex];
 
@@ -61,13 +70,16 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
     setCurrentIndex(initialIndex);
   }, [initialIndex]);
 
-  // Initialize like counts from shorts data
+  // Initialize like and comment counts from shorts data
   useEffect(() => {
-    const counts: Record<string, number> = {};
+    const likes: Record<string, number> = {};
+    const comments: Record<string, number> = {};
     shorts.forEach(short => {
-      counts[short.id] = short.likes_count || 0;
+      likes[short.id] = short.likes_count || 0;
+      comments[short.id] = short.comments_count || 0;
     });
-    setLikeCounts(counts);
+    setLikeCounts(likes);
+    setCommentCounts(comments);
   }, [shorts]);
 
   useEffect(() => {
@@ -160,11 +172,77 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
     }
   };
 
+  const fetchComments = async (shortId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('post_comments')
+        .select(`
+          id,
+          content,
+          created_at,
+          user_id,
+          profiles:user_id(full_name, avatar_url)
+        `)
+        .eq('post_id', shortId)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setComments(data || []);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+    }
+  };
+
   const handleComment = () => {
-    toast({
-      title: "Comments",
-      description: "Comment feature coming soon!",
-    });
+    setShowComments(!showComments);
+    if (!showComments) {
+      fetchComments(currentShort.id);
+    }
+  };
+
+  const addComment = async () => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to comment",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!newComment.trim()) return;
+
+    try {
+      const { error } = await supabase
+        .from('post_comments')
+        .insert({
+          post_id: currentShort.id,
+          user_id: user.id,
+          content: newComment.trim()
+        });
+
+      if (error) throw error;
+
+      setNewComment("");
+      fetchComments(currentShort.id);
+      
+      // Update comment count
+      setCommentCounts(prev => ({
+        ...prev,
+        [currentShort.id]: (prev[currentShort.id] || 0) + 1
+      }));
+
+      toast({
+        title: "Comment added!",
+      });
+    } catch (error) {
+      console.error('Error adding comment:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add comment",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleShare = async () => {
@@ -441,8 +519,8 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
                     <MessageCircle className="h-3.5 w-3.5 text-slate-400 group-hover:text-emerald-400 group-hover:scale-110 transition-all duration-300" />
                   </div>
                 </div>
-                <span className="text-slate-500 group-hover:text-emerald-400 text-[9px] font-mono font-semibold transition-colors opacity-60">
-                  {currentShort.comments_count}
+                 <span className="text-slate-500 group-hover:text-emerald-400 text-[9px] font-mono font-semibold transition-colors opacity-60">
+                  {commentCounts[currentShort.id] || 0}
                 </span>
               </button>
 
@@ -478,6 +556,89 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
                 </div>
               </button>
             </div>
+
+            {/* Comments Panel */}
+            {showComments && (
+              <div className="absolute right-24 bottom-24 w-80 h-96 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl rounded-xl border border-slate-700/50 shadow-2xl z-50">
+                {/* Header */}
+                <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
+                  <div className="flex items-center gap-2">
+                    <MessageCircle className="h-4 w-4 text-cyan-400" />
+                    <h3 className="text-sm font-semibold text-white">Comments</h3>
+                    <span className="text-xs text-slate-400">({commentCounts[currentShort.id] || 0})</span>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowComments(false)}
+                    className="h-6 w-6 p-0 text-slate-400 hover:text-white"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Comments List */}
+                <ScrollArea className="h-[calc(100%-8rem)] p-4">
+                  {comments.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-slate-400 text-sm">
+                      <MessageCircle className="h-8 w-8 mb-2 opacity-40" />
+                      <p>No comments yet</p>
+                      <p className="text-xs mt-1">Be the first to comment!</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {comments.map((comment) => (
+                        <div key={comment.id} className="flex gap-2">
+                          <Avatar className="h-8 w-8 flex-shrink-0">
+                            <AvatarImage src={comment.profiles?.avatar_url} />
+                            <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 text-xs">
+                              {comment.profiles?.full_name?.[0] || "U"}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <div className="bg-slate-800/50 rounded-lg p-2 border border-slate-700/30">
+                              <p className="text-xs font-semibold text-cyan-400 mb-1">
+                                {comment.profiles?.full_name || "User"}
+                              </p>
+                              <p className="text-sm text-white">{comment.content}</p>
+                            </div>
+                            <p className="text-xs text-slate-500 mt-1 ml-2">
+                              {new Date(comment.created_at).toLocaleDateString()}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </ScrollArea>
+
+                {/* Add Comment */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700/50 bg-gradient-to-t from-slate-900/95 to-transparent backdrop-blur-xl">
+                  <div className="flex gap-2">
+                    <Input
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Add a comment..."
+                      className="flex-1 bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500 text-sm"
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          addComment();
+                        }
+                      }}
+                    />
+                    <Button
+                      onClick={addComment}
+                      size="sm"
+                      disabled={!newComment.trim()}
+                      className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
+                    >
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Progress Indicator - HUD Style */}
             <div className="absolute top-8 left-1/2 -translate-x-1/2 z-40">
