@@ -200,6 +200,25 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
     }
   };
 
+  const formatTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+    if (seconds < 60) return 'just now';
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    if (days < 7) return `${days}d ago`;
+    const weeks = Math.floor(days / 7);
+    if (weeks < 4) return `${weeks}w ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months}mo ago`;
+    return `${Math.floor(months / 12)}y ago`;
+  };
+
   const addComment = async () => {
     if (!user) {
       toast({
@@ -557,54 +576,69 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
               </button>
             </div>
 
-            {/* Comments Panel */}
+            {/* Comments Panel - YouTube Style */}
             {showComments && (
-              <div className="absolute right-24 bottom-24 w-80 h-96 bg-gradient-to-br from-slate-900/95 via-slate-800/95 to-slate-900/95 backdrop-blur-xl rounded-xl border border-slate-700/50 shadow-2xl z-50">
+              <div className="fixed inset-x-0 bottom-0 max-w-[500px] mx-auto h-[70vh] bg-gradient-to-b from-slate-900/98 to-black/98 backdrop-blur-xl rounded-t-2xl border-t border-x border-slate-700/50 shadow-2xl z-50 animate-in slide-in-from-bottom duration-300">
+                {/* Drag Handle */}
+                <div className="flex justify-center pt-3 pb-2">
+                  <div className="w-10 h-1 bg-slate-600 rounded-full" />
+                </div>
+
                 {/* Header */}
-                <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
+                <div className="flex items-center justify-between px-4 pb-3 border-b border-slate-700/50">
                   <div className="flex items-center gap-2">
-                    <MessageCircle className="h-4 w-4 text-cyan-400" />
                     <h3 className="text-sm font-semibold text-white">Comments</h3>
-                    <span className="text-xs text-slate-400">({commentCounts[currentShort.id] || 0})</span>
+                    <span className="text-sm text-slate-400">{commentCounts[currentShort.id] || 0}</span>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setShowComments(false)}
-                    className="h-6 w-6 p-0 text-slate-400 hover:text-white"
+                    className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-slate-800"
                   >
                     <X className="h-4 w-4" />
                   </Button>
                 </div>
 
                 {/* Comments List */}
-                <ScrollArea className="h-[calc(100%-8rem)] p-4">
+                <ScrollArea className="h-[calc(100%-10rem)] px-4">
                   {comments.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-slate-400 text-sm">
-                      <MessageCircle className="h-8 w-8 mb-2 opacity-40" />
-                      <p>No comments yet</p>
-                      <p className="text-xs mt-1">Be the first to comment!</p>
+                    <div className="flex flex-col items-center justify-center h-full text-slate-400 py-12">
+                      <MessageCircle className="h-12 w-12 mb-3 opacity-30" />
+                      <p className="text-sm font-medium">No comments yet</p>
+                      <p className="text-xs mt-1 opacity-60">Be the first to comment!</p>
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="py-4 space-y-4">
                       {comments.map((comment) => (
-                        <div key={comment.id} className="flex gap-2">
-                          <Avatar className="h-8 w-8 flex-shrink-0">
+                        <div key={comment.id} className="flex gap-3">
+                          <Avatar className="h-10 w-10 flex-shrink-0 mt-1">
                             <AvatarImage src={comment.profiles?.avatar_url} />
-                            <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 text-xs">
+                            <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 text-sm">
                               {comment.profiles?.full_name?.[0] || "U"}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="flex-1">
-                            <div className="bg-slate-800/50 rounded-lg p-2 border border-slate-700/30">
-                              <p className="text-xs font-semibold text-cyan-400 mb-1">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="text-sm font-medium text-white truncate">
                                 {comment.profiles?.full_name || "User"}
                               </p>
-                              <p className="text-sm text-white">{comment.content}</p>
+                              <span className="text-xs text-slate-500 flex-shrink-0">
+                                {formatTimeAgo(comment.created_at)}
+                              </span>
                             </div>
-                            <p className="text-xs text-slate-500 mt-1 ml-2">
-                              {new Date(comment.created_at).toLocaleDateString()}
+                            <p className="text-sm text-slate-200 leading-relaxed break-words">
+                              {comment.content}
                             </p>
+                            <div className="flex items-center gap-4 mt-2">
+                              <button className="flex items-center gap-1 text-slate-400 hover:text-white transition-colors group">
+                                <Heart className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
+                                <span className="text-xs">0</span>
+                              </button>
+                              <button className="text-xs text-slate-400 hover:text-white transition-colors font-medium">
+                                Reply
+                              </button>
+                            </div>
                           </div>
                         </div>
                       ))}
@@ -612,29 +646,39 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
                   )}
                 </ScrollArea>
 
-                {/* Add Comment */}
-                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700/50 bg-gradient-to-t from-slate-900/95 to-transparent backdrop-blur-xl">
-                  <div className="flex gap-2">
-                    <Input
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Add a comment..."
-                      className="flex-1 bg-slate-800/50 border-slate-700/50 text-white placeholder:text-slate-500 text-sm"
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter' && !e.shiftKey) {
-                          e.preventDefault();
-                          addComment();
-                        }
-                      }}
-                    />
-                    <Button
-                      onClick={addComment}
-                      size="sm"
-                      disabled={!newComment.trim()}
-                      className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
-                    >
-                      <Send className="h-4 w-4" />
-                    </Button>
+                {/* Add Comment Input */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700/50 bg-gradient-to-t from-black/95 to-transparent backdrop-blur-xl">
+                  <div className="flex gap-3 items-start">
+                    {user && (
+                      <Avatar className="h-10 w-10 flex-shrink-0">
+                        <AvatarImage src={user.user_metadata?.avatar_url} />
+                        <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 text-sm">
+                          {user.user_metadata?.full_name?.[0] || "U"}
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div className="flex-1 flex gap-2">
+                      <Input
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Add a comment..."
+                        className="flex-1 bg-slate-800/80 border-slate-700/50 text-white placeholder:text-slate-500 text-sm focus:ring-2 focus:ring-cyan-500/50 rounded-full px-4"
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault();
+                            addComment();
+                          }
+                        }}
+                      />
+                      <Button
+                        onClick={addComment}
+                        size="sm"
+                        disabled={!newComment.trim()}
+                        className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 disabled:opacity-40 rounded-full h-10 w-10 p-0"
+                      >
+                        <Send className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               </div>
