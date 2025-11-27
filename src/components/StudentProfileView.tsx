@@ -153,11 +153,12 @@ export default function StudentProfileView() {
         <CardContent className="relative -mt-16 space-y-6 pb-8">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div className="flex flex-col sm:flex-row items-center sm:items-end gap-6">
-              <div className="relative">
-                <div className="p-1 rounded-full bg-gradient-to-br from-primary to-accent">
-                  <AvatarUpload />
-                </div>
-              </div>
+              <AvatarUpload 
+                currentAvatarUrl={profile?.avatar_url}
+                userRole="student"
+                size="lg"
+                showGradientBorder={true}
+              />
               <div className="text-center sm:text-left space-y-2">
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                   {profile?.full_name || 'Student Profile'}

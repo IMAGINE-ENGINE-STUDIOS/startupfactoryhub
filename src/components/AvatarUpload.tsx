@@ -16,13 +16,15 @@ interface AvatarUploadProps {
   onUploadComplete?: (url: string) => void;
   size?: 'sm' | 'md' | 'lg';
   userRole?: 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | null;
+  showGradientBorder?: boolean;
 }
 
 export default function AvatarUpload({ 
   currentAvatarUrl, 
   onUploadComplete,
   size = 'md',
-  userRole
+  userRole,
+  showGradientBorder = false
 }: AvatarUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState(currentAvatarUrl || null);
@@ -132,28 +134,38 @@ export default function AvatarUpload({
     }
   };
 
+  const avatarComponent = (
+    <div className="relative group">
+      <Avatar className={sizeClasses[size]}>
+        <AvatarImage src={getDefaultBadge() || undefined} />
+        <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
+          {user?.email?.charAt(0).toUpperCase() || 'U'}
+        </AvatarFallback>
+      </Avatar>
+      
+      <button
+        onClick={() => fileInputRef.current?.click()}
+        disabled={uploading}
+        className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+      >
+        {uploading ? (
+          <Loader2 className="h-6 w-6 text-white animate-spin" />
+        ) : (
+          <Camera className="h-6 w-6 text-white" />
+        )}
+      </button>
+    </div>
+  );
+
   return (
     <div className="flex flex-col items-center space-y-4">
-      <div className="relative group">
-        <Avatar className={sizeClasses[size]}>
-          <AvatarImage src={getDefaultBadge() || undefined} />
-          <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
-            {user?.email?.charAt(0).toUpperCase() || 'U'}
-          </AvatarFallback>
-        </Avatar>
-        
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          disabled={uploading}
-          className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-        >
-          {uploading ? (
-            <Loader2 className="h-6 w-6 text-white animate-spin" />
-          ) : (
-            <Camera className="h-6 w-6 text-white" />
-          )}
-        </button>
-      </div>
+      {showGradientBorder ? (
+        <div className="p-1 rounded-full bg-gradient-to-br from-primary to-accent">
+          {avatarComponent}
+        </div>
+      ) : (
+        avatarComponent
+      )}
 
       <input
         ref={fileInputRef}
