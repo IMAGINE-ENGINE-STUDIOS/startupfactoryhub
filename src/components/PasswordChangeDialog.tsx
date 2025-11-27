@@ -14,13 +14,21 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Lock, KeyRound } from "lucide-react";
 
-export function PasswordChangeDialog() {
-  const [open, setOpen] = useState(false);
+interface PasswordChangeDialogProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function PasswordChangeDialog({ open, onOpenChange }: PasswordChangeDialogProps = {}) {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+
+  const isOpen = open !== undefined ? open : internalOpen;
+  const setIsOpen = onOpenChange || setInternalOpen;
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +67,7 @@ export function PasswordChangeDialog() {
         title: "Password updated",
         description: "Your password has been changed successfully.",
       });
-      setOpen(false);
+      setIsOpen(false);
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -68,13 +76,15 @@ export function PasswordChangeDialog() {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="gap-2">
-          <KeyRound className="h-4 w-4" />
-          Change Password
-        </Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      {!open && (
+        <DialogTrigger asChild>
+          <Button variant="outline" className="gap-2">
+            <KeyRound className="h-4 w-4" />
+            Change Password
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Change Password</DialogTitle>

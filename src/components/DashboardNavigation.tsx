@@ -35,9 +35,11 @@ import {
   Sparkles,
   FileText,
   Brain,
-  BookOpen
+  BookOpen,
+  KeyRound
 } from "lucide-react";
 import RecommendationPopup from "./RecommendationPopup";
+import { PasswordChangeDialog } from "./PasswordChangeDialog";
 
 const DashboardNavigation = () => {
   const navigate = useNavigate();
@@ -45,6 +47,7 @@ const DashboardNavigation = () => {
   const { toast } = useToast();
   const [recommendationCount, setRecommendationCount] = useState(0);
   const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
 
   const handleRecommendationsLoad = (count: number) => {
     if (count > 0 && count !== recommendationCount) {
@@ -173,6 +176,10 @@ const DashboardNavigation = () => {
                     <Settings className="mr-2 h-4 w-4" />
                     <span>Settings</span>
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setPasswordDialogOpen(true)}>
+                    <KeyRound className="mr-2 h-4 w-4" />
+                    <span>Change Password</span>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -217,6 +224,9 @@ const DashboardNavigation = () => {
           </Button>
         </div>
       </div>
+      
+      {/* Password Change Dialog */}
+      <PasswordChangeDialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen} />
     </>
   );
 };
