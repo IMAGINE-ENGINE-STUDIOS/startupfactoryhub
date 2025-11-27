@@ -91,7 +91,7 @@ export const PostDetailDialog = ({ post, open, onOpenChange, onLikeToggle }: Pos
     const { data } = await supabase
       .from('profiles')
       .select('full_name, avatar_url')
-      .eq('id', post.user_id)
+      .eq('user_id', post.user_id)
       .single();
     
     if (data) setAuthorProfile(data);
@@ -123,10 +123,10 @@ export const PostDetailDialog = ({ post, open, onOpenChange, onLikeToggle }: Pos
       const userIds = [...new Set(data.map(c => c.user_id))];
       const { data: profilesData } = await supabase
         .from('profiles')
-        .select('id, full_name, avatar_url')
-        .in('id', userIds);
+        .select('user_id, full_name, avatar_url')
+        .in('user_id', userIds);
 
-      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+      const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
       
       const commentsWithProfiles = data.map(comment => ({
         ...comment,
