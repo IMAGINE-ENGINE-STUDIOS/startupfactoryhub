@@ -3277,6 +3277,7 @@ export type Database = {
       }
       study_groups: {
         Row: {
+          banner_url: string | null
           category: string
           created_at: string
           created_by: string
@@ -3288,6 +3289,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          banner_url?: string | null
           category: string
           created_at?: string
           created_by: string
@@ -3299,6 +3301,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          banner_url?: string | null
           category?: string
           created_at?: string
           created_by?: string
