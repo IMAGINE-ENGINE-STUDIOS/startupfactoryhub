@@ -31,7 +31,6 @@ export default function InvestorProfileView() {
   const [editedLinkedin, setEditedLinkedin] = useState('');
 
   const [investorProfile, setInvestorProfile] = useState<any>(null);
-  const [portfolioCompanies, setPortfolioCompanies] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchInvestorData = async () => {
@@ -43,14 +42,7 @@ export default function InvestorProfileView() {
         .eq('user_id', profile.user_id)
         .maybeSingle();
       
-      const { data: portfolio } = await supabase
-        .from('portfolio_companies')
-        .select('*')
-        .eq('investor_id', profile.user_id)
-        .order('created_at', { ascending: false });
-      
       setInvestorProfile(invProfile);
-      setPortfolioCompanies(portfolio || []);
     };
 
     fetchInvestorData();
@@ -263,46 +255,6 @@ export default function InvestorProfileView() {
               )) || <p className="text-sm text-muted-foreground">No preferred industries set</p>}
             </div>
           </div>
-        </CardContent>
-      </Card>
-
-      {/* Portfolio Companies */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Portfolio Companies</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {portfolioCompanies.length === 0 ? (
-            <p className="text-muted-foreground text-sm">No portfolio companies yet.</p>
-          ) : (
-            <div className="space-y-4">
-              {portfolioCompanies.map((company) => (
-                <div key={company.id} className="flex items-start gap-4 p-4 border rounded-lg">
-                  {company.company_logo_url && (
-                    <img src={company.company_logo_url} alt={company.company_name} className="w-12 h-12 rounded object-cover" />
-                  )}
-                  <div className="flex-1">
-                    <h3 className="font-semibold">{company.company_name}</h3>
-                    <p className="text-sm text-muted-foreground">{company.industry} • {company.stage}</p>
-                    {company.description && (
-                      <p className="text-sm mt-1">{company.description}</p>
-                    )}
-                    <div className="flex gap-4 mt-2 text-xs text-muted-foreground">
-                      {company.investment_amount && (
-                        <span>Investment: {formatCurrency(company.investment_amount)}</span>
-                      )}
-                      {company.investment_year && (
-                        <span>Year: {company.investment_year}</span>
-                      )}
-                      {company.exit_status && (
-                        <Badge variant="outline" className="ml-auto">{company.exit_status}</Badge>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>
