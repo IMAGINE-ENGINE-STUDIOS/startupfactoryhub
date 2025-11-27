@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import AdvisorProfileViewPublic from '@/components/AdvisorProfileViewPublic';
+import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { 
   UserPlus, UserMinus, MapPin, Globe, Briefcase, UserCheck, Clock,
   Building, TrendingUp, Users, DollarSign, FileText, ExternalLink,
@@ -601,6 +602,16 @@ export default function UserProfileDialog({
                   </Card>
                 </div>
               )}
+
+              {/* Posts Section */}
+              <Separator />
+              <div>
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <FileText className="h-5 w-5 text-primary" />
+                  Posts
+                </h3>
+                <ProfilePostsMosaic userId={userId!} isOwnProfile={isOwnProfile} />
+              </div>
             </div>
           </div>
         )}
