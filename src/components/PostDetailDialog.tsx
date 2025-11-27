@@ -234,47 +234,45 @@ export const PostDetailDialog = ({ post, open, onOpenChange, onLikeToggle }: Pos
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0 gap-0">
-        <div className="grid md:grid-cols-2 gap-0 h-full">
-          {/* Media Section */}
-          <div className="relative bg-black flex items-center justify-center min-h-[300px] md:min-h-[500px]">
-            {isVideo ? (
-              <div className="relative w-full h-full">
-                <video
-                  ref={videoRef}
-                  src={mediaUrl}
-                  className="w-full h-full object-contain"
-                  loop
-                  playsInline
-                  muted={isMuted}
-                  onClick={togglePlayPause}
-                />
-                <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2">
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="bg-background/80 hover:bg-background"
+        <div className={`grid ${hasMedia ? 'md:grid-cols-2' : 'grid-cols-1'} gap-0 h-full`}>
+          {/* Media Section - Only show if post has media */}
+          {hasMedia && (
+            <div className="relative bg-black flex items-center justify-center min-h-[300px] md:min-h-[500px]">
+              {isVideo ? (
+                <div className="relative w-full h-full">
+                  <video
+                    ref={videoRef}
+                    src={mediaUrl}
+                    className="w-full h-full object-contain"
+                    loop
+                    playsInline
+                    muted={isMuted}
                     onClick={togglePlayPause}
-                  >
-                    {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="secondary"
-                    className="bg-background/80 hover:bg-background"
-                    onClick={toggleMute}
-                  >
-                    {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-                  </Button>
+                  />
+                  <div className="absolute bottom-4 left-4 right-4 flex items-center gap-2">
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="bg-background/80 hover:bg-background"
+                      onClick={togglePlayPause}
+                    >
+                      {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="secondary"
+                      className="bg-background/80 hover:bg-background"
+                      onClick={toggleMute}
+                    >
+                      {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ) : hasMedia ? (
-              <img src={mediaUrl} alt="Post media" className="w-full h-full object-contain" />
-            ) : (
-              <div className="flex items-center justify-center w-full h-full bg-muted">
-                <p className="text-muted-foreground">No media</p>
-              </div>
-            )}
-          </div>
+              ) : (
+                <img src={mediaUrl} alt="Post media" className="w-full h-full object-contain" />
+              )}
+            </div>
+          )}
 
           {/* Content Section */}
           <div className="flex flex-col h-full">
