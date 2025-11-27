@@ -38,7 +38,7 @@ interface PostDetailDialogProps {
   post: Post | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onLikeToggle?: () => void;
+  onLikeToggle?: (postId: string, isLiked: boolean) => void;
 }
 
 export const PostDetailDialog = ({ post, open, onOpenChange, onLikeToggle }: PostDetailDialogProps) => {
@@ -147,6 +147,9 @@ export const PostDetailDialog = ({ post, open, onOpenChange, onLikeToggle }: Pos
     setIsLiked(newIsLiked);
     setLikesCount(prev => newIsLiked ? prev + 1 : prev - 1);
 
+    // Optimistically notify parent
+    onLikeToggle?.(post.id, newIsLiked);
+
     if (newIsLiked) {
       await supabase.from('post_likes').insert({ post_id: post.id, user_id: user.id });
     } else {
@@ -156,8 +159,6 @@ export const PostDetailDialog = ({ post, open, onOpenChange, onLikeToggle }: Pos
     await supabase.from('feed_posts').update({ 
       likes_count: newIsLiked ? (post.likes_count || 0) + 1 : (post.likes_count || 0) - 1 
     }).eq('id', post.id);
-
-    onLikeToggle?.();
   };
 
   const toggleBookmark = async () => {

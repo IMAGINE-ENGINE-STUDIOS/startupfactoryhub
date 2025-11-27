@@ -47,7 +47,7 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
     }
   }, [userId, user]);
 
-  // Real-time subscription for post interactions
+  // Real-time subscription for comments only
   useEffect(() => {
     if (!userId) return;
 
@@ -55,15 +55,6 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
 
     const channel = supabase
       .channel(`profile-posts-${userId}`)
-      .on('postgres_changes', 
-        { event: 'UPDATE', schema: 'public', table: 'feed_posts', filter: `user_id=eq.${userId}` },
-        (payload) => {
-          // Update specific post counts without refetching
-          setPosts(prev => prev.map(p => 
-            p.id === payload.new.id ? { ...p, ...payload.new } : p
-          ));
-        }
-      )
       .on('postgres_changes', 
         { event: 'INSERT', schema: 'public', table: 'post_comments' },
         () => {
@@ -134,9 +125,24 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
     setIsDialogOpen(true);
   };
 
-  const handleLikeToggle = () => {
-    // Only refetch user likes - post counts updated via real-time subscription
-    if (user) fetchUserLikes();
+  const handleLikeToggle = (postId: string, isLiked: boolean) => {
+    // Optimistically update liked posts Set
+    setLikedPosts(prev => {
+      const newSet = new Set(prev);
+      if (isLiked) {
+        newSet.add(postId);
+      } else {
+        newSet.delete(postId);
+      }
+      return newSet;
+    });
+
+    // Update post counts optimistically
+    setPosts(prev => prev.map(p => 
+      p.id === postId 
+        ? { ...p, likes_count: isLiked ? p.likes_count + 1 : p.likes_count - 1 }
+        : p
+    ));
   };
 
   const getMosaicClass = (post: Post, index: number) => {
