@@ -27,6 +27,7 @@ import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import InvestorAvailabilityManager from '@/components/InvestorAvailabilityManager';
 import InvestorProfileView from '@/components/InvestorProfileView';
 import VideoConferencing from '@/components/VideoConferencing';
+import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
@@ -834,6 +835,18 @@ export default function InvestorDashboard() {
               </CardHeader>
               <CardContent>
                 <InvestorAvailabilityManager />
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5" />
+                  Your Posts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
               </CardContent>
             </Card>
           </TabsContent>

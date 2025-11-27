@@ -21,6 +21,7 @@ import CompanyProfileManager from '@/components/CompanyProfileManager';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
+import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import JobTaskManager from '@/components/JobTaskManager';
@@ -382,6 +383,18 @@ const Dashboard = () => {
           {activeTab === "profile" && (
             <TabsContent value="profile" className="space-y-4">
               <CompanyProfileManager />
+              
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <MessageCircle className="h-5 w-5" />
+                    Your Posts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
+                </CardContent>
+              </Card>
             </TabsContent>
           )}
 
