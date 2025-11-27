@@ -51,33 +51,34 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
   useEffect(() => {
     if (!userId) return;
 
+    let commentDebounceTimer: NodeJS.Timeout;
+
     const channel = supabase
       .channel(`profile-posts-${userId}`)
       .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'post_likes' },
-        () => { 
-          fetchPosts(); 
-          if (user) fetchUserLikes(); 
-        }
-      )
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'post_comments' },
-        () => fetchPosts()
-      )
-      .on('postgres_changes', 
         { event: 'UPDATE', schema: 'public', table: 'feed_posts', filter: `user_id=eq.${userId}` },
         (payload) => {
+          // Update specific post counts without refetching
           setPosts(prev => prev.map(p => 
             p.id === payload.new.id ? { ...p, ...payload.new } : p
           ));
         }
       )
+      .on('postgres_changes', 
+        { event: 'INSERT', schema: 'public', table: 'post_comments' },
+        () => {
+          // Debounce comment updates to avoid rapid refetches
+          clearTimeout(commentDebounceTimer);
+          commentDebounceTimer = setTimeout(() => fetchPosts(), 500);
+        }
+      )
       .subscribe();
 
     return () => {
+      clearTimeout(commentDebounceTimer);
       supabase.removeChannel(channel);
     };
-  }, [userId, user]);
+  }, [userId]);
 
   const fetchUserLikes = async () => {
     if (!user) return;
@@ -134,7 +135,7 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
   };
 
   const handleLikeToggle = () => {
-    fetchPosts(false);
+    // Only refetch user likes - post counts updated via real-time subscription
     if (user) fetchUserLikes();
   };
 
