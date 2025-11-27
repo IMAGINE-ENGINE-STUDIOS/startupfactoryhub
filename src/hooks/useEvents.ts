@@ -79,11 +79,16 @@ export const useEvents = () => {
   useEffect(() => {
     fetchEvents();
 
-    // Real-time subscription
+    // Real-time subscription for events and attendees
     const channel = supabase
       .channel('events-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, (payload) => {
+        console.log('Event change detected:', payload);
         fetchEvents();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_attendees' }, (payload) => {
+        console.log('Event attendee change detected:', payload);
+        fetchEvents(); // Refetch to update attendee counts
       })
       .subscribe();
 
