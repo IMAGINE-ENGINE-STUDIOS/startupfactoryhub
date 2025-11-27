@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import AvatarUpload from '@/components/AvatarUpload';
+import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { 
   Linkedin,
   Globe,
@@ -390,6 +391,16 @@ export default function StudentProfileView() {
               No interests added yet. Add some to help others understand your passions!
             </p>
           )}
+        </CardContent>
+      </Card>
+
+      {/* Your Posts Section */}
+      <Card className="border-0 shadow-lg">
+        <CardHeader>
+          <CardTitle>Your Posts</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
         </CardContent>
       </Card>
     </div>
