@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
@@ -54,6 +55,7 @@ export default function StudyRooms() {
   const [files, setFiles] = useState<GroupFile[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [newRoom, setNewRoom] = useState({ name: '', description: '' });
 
   useEffect(() => {
@@ -439,7 +441,10 @@ export default function StudyRooms() {
                   </div>
                   {isMember ? (
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={() => setSelectedGroup(group)}>
+                      <Button size="sm" onClick={() => {
+                        setSelectedGroup(group);
+                        setIsSheetOpen(true);
+                      }}>
                         Open
                       </Button>
                       <Button size="sm" variant="outline" onClick={() => handleLeaveRoom(group.id)}>
@@ -458,133 +463,134 @@ export default function StudyRooms() {
         })}
       </div>
 
-      {/* Selected Room View */}
-      {selectedGroup && (
-        <Card>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>{selectedGroup.name}</CardTitle>
-              <Button variant="ghost" size="sm" onClick={() => setSelectedGroup(null)}>
-                Close
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="comments" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="comments">
-                  <MessageSquare className="h-4 w-4 mr-2" />
-                  Comments
-                </TabsTrigger>
-                <TabsTrigger value="documents">
-                  <FileText className="h-4 w-4 mr-2" />
-                  Documents
-                </TabsTrigger>
-                <TabsTrigger value="members">
-                  <Users className="h-4 w-4 mr-2" />
-                  Members
-                </TabsTrigger>
-              </TabsList>
+      {/* Room Details Sheet */}
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+          {selectedGroup && (
+            <>
+              <SheetHeader>
+                <SheetTitle>{selectedGroup.name}</SheetTitle>
+                {selectedGroup.description && (
+                  <p className="text-sm text-muted-foreground">{selectedGroup.description}</p>
+                )}
+              </SheetHeader>
 
-              {/* Comments Tab */}
-              <TabsContent value="comments" className="space-y-4">
-                <ScrollArea className="h-[400px] pr-4">
-                  <div className="space-y-4">
-                    {messages.map((message) => (
-                      <div key={message.id} className="border-b pb-3">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-sm">{message.user_name || 'Unknown User'}</span>
-                          <span className="text-xs text-muted-foreground">
-                            {new Date(message.created_at).toLocaleString()}
-                          </span>
+              <Tabs defaultValue="comments" className="w-full mt-6">
+                <TabsList className="grid w-full grid-cols-3">
+                  <TabsTrigger value="comments">
+                    <MessageSquare className="h-4 w-4 mr-2" />
+                    Comments
+                  </TabsTrigger>
+                  <TabsTrigger value="documents">
+                    <FileText className="h-4 w-4 mr-2" />
+                    Documents
+                  </TabsTrigger>
+                  <TabsTrigger value="members">
+                    <Users className="h-4 w-4 mr-2" />
+                    Members
+                  </TabsTrigger>
+                </TabsList>
+
+                {/* Comments Tab */}
+                <TabsContent value="comments" className="space-y-4">
+                  <ScrollArea className="h-[400px] pr-4">
+                    <div className="space-y-4">
+                      {messages.map((message) => (
+                        <div key={message.id} className="border-b pb-3">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-sm">{message.user_name || 'Unknown User'}</span>
+                            <span className="text-xs text-muted-foreground">
+                              {new Date(message.created_at).toLocaleString()}
+                            </span>
+                          </div>
+                          <p className="text-sm">{message.content}</p>
                         </div>
-                        <p className="text-sm">{message.content}</p>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="Write a comment..."
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  />
-                  <Button onClick={handleSendMessage} size="icon">
-                    <Send className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TabsContent>
-
-              {/* Documents Tab */}
-              <TabsContent value="documents" className="space-y-4">
-                <div className="border-2 border-dashed rounded-lg p-6 text-center">
-                  <Label htmlFor="file-upload" className="cursor-pointer">
-                    <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Click to upload a document
-                    </p>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                  <div className="flex gap-2">
                     <Input
-                      id="file-upload"
-                      type="file"
-                      className="hidden"
-                      onChange={handleFileUpload}
+                      placeholder="Write a comment..."
+                      value={newMessage}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     />
-                  </Label>
-                </div>
+                    <Button onClick={handleSendMessage} size="icon">
+                      <Send className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </TabsContent>
 
-                <ScrollArea className="h-[300px]">
-                  <div className="space-y-2">
-                    {files.map((file) => (
-                      <div
-                        key={file.id}
-                        className="flex items-center justify-between p-3 border rounded-lg"
-                      >
-                        <div className="flex items-center gap-3">
-                          <FileText className="h-5 w-5 text-muted-foreground" />
+                {/* Documents Tab */}
+                <TabsContent value="documents" className="space-y-4">
+                  <div className="border-2 border-dashed rounded-lg p-6 text-center">
+                    <Label htmlFor="file-upload" className="cursor-pointer">
+                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground mb-2">
+                        Click to upload a document
+                      </p>
+                      <Input
+                        id="file-upload"
+                        type="file"
+                        className="hidden"
+                        onChange={handleFileUpload}
+                      />
+                    </Label>
+                  </div>
+
+                  <ScrollArea className="h-[300px]">
+                    <div className="space-y-2">
+                      {files.map((file) => (
+                        <div
+                          key={file.id}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                        >
+                          <div className="flex items-center gap-3">
+                            <FileText className="h-5 w-5 text-muted-foreground" />
+                            <div>
+                              <p className="text-sm font-medium">{file.file_name}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {file.user_name} • {new Date(file.created_at).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                          <a href={file.file_url} download target="_blank" rel="noopener noreferrer">
+                            <Button size="sm" variant="ghost">
+                              <Download className="h-4 w-4" />
+                            </Button>
+                          </a>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+
+                {/* Members Tab */}
+                <TabsContent value="members">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-2">
+                      {members.map((member, idx) => (
+                        <div
+                          key={`${member.user_id}-${idx}`}
+                          className="flex items-center gap-3 p-3 border rounded-lg"
+                        >
+                          <Users className="h-5 w-5 text-muted-foreground" />
                           <div>
-                            <p className="text-sm font-medium">{file.file_name}</p>
+                            <p className="text-sm font-medium">{member.user_name || 'Unknown User'}</p>
                             <p className="text-xs text-muted-foreground">
-                              {file.user_name} • {new Date(file.created_at).toLocaleDateString()}
+                              Joined {new Date(member.joined_at).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
-                        <a href={file.file_url} download target="_blank" rel="noopener noreferrer">
-                          <Button size="sm" variant="ghost">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </a>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </TabsContent>
-
-              {/* Members Tab */}
-              <TabsContent value="members">
-                <ScrollArea className="h-[400px]">
-                  <div className="space-y-2">
-                    {members.map((member, idx) => (
-                      <div
-                        key={`${member.user_id}-${idx}`}
-                        className="flex items-center gap-3 p-3 border rounded-lg"
-                      >
-                        <Users className="h-5 w-5 text-muted-foreground" />
-                        <div>
-                          <p className="text-sm font-medium">{member.user_name || 'Unknown User'}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Joined {new Date(member.joined_at).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      )}
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </TabsContent>
+              </Tabs>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
