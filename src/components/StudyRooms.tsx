@@ -10,13 +10,14 @@ import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { Plus, Users, MessageSquare, FileText, Upload, Download, Send } from 'lucide-react';
+import { Plus, Users, MessageSquare, FileText, Upload, Download, Send, Trash2 } from 'lucide-react';
 
 interface StudyGroup {
   id: string;
   name: string;
   description: string | null;
   created_at: string;
+  created_by: string;
 }
 
 interface GroupMessage {
@@ -317,6 +318,61 @@ export default function StudyRooms() {
     }
   };
 
+  const handleDeleteRoom = async (groupId: string) => {
+    if (!user) return;
+
+    // Confirm deletion
+    if (!window.confirm('Are you sure you want to delete this study room? This action cannot be undone.')) {
+      return;
+    }
+
+    // Delete all related data first (messages, files, members)
+    const { error: messagesError } = await supabase
+      .from('study_group_messages')
+      .delete()
+      .eq('group_id', groupId);
+
+    if (messagesError) {
+      console.error('Error deleting messages:', messagesError);
+    }
+
+    const { error: filesError } = await supabase
+      .from('study_group_files')
+      .delete()
+      .eq('group_id', groupId);
+
+    if (filesError) {
+      console.error('Error deleting files:', filesError);
+    }
+
+    const { error: membersError } = await supabase
+      .from('study_group_members')
+      .delete()
+      .eq('group_id', groupId);
+
+    if (membersError) {
+      console.error('Error deleting members:', membersError);
+    }
+
+    // Delete the study group
+    const { error: groupError } = await supabase
+      .from('study_groups')
+      .delete()
+      .eq('id', groupId)
+      .eq('created_by', user.id); // Only creator can delete
+
+    if (groupError) {
+      toast.error('Failed to delete study room');
+      console.error(groupError);
+      return;
+    }
+
+    toast.success('Study room deleted');
+    setIsDialogOpen(false);
+    fetchStudyGroups();
+    fetchMyGroups();
+  };
+
   const handleSendMessage = async () => {
     if (!user || !selectedGroup || !newMessage.trim()) return;
 
@@ -423,14 +479,29 @@ export default function StudyRooms() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {studyGroups.map((group) => {
           const isMember = myGroups.includes(group.id);
+          const isCreator = user?.id === group.created_by;
 
           return (
             <Card key={group.id}>
               <CardHeader>
-                <CardTitle className="text-lg">{group.name}</CardTitle>
-                {group.description && (
-                  <p className="text-sm text-muted-foreground">{group.description}</p>
-                )}
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <CardTitle className="text-lg">{group.name}</CardTitle>
+                    {group.description && (
+                      <p className="text-sm text-muted-foreground">{group.description}</p>
+                    )}
+                  </div>
+                  {isCreator && (
+                    <Button 
+                      size="icon" 
+                      variant="ghost" 
+                      onClick={() => handleDeleteRoom(group.id)}
+                      className="h-8 w-8 text-destructive hover:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
@@ -446,9 +517,11 @@ export default function StudyRooms() {
                       }}>
                         Open
                       </Button>
-                      <Button size="sm" variant="outline" onClick={() => handleLeaveRoom(group.id)}>
-                        Leave
-                      </Button>
+                      {!isCreator && (
+                        <Button size="sm" variant="outline" onClick={() => handleLeaveRoom(group.id)}>
+                          Leave
+                        </Button>
+                      )}
                     </div>
                   ) : (
                     <Button size="sm" onClick={() => handleJoinRoom(group.id)}>
