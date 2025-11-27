@@ -15,7 +15,9 @@ import {
   Linkedin,
   Globe,
   MapPin,
-  Mail
+  Mail,
+  X,
+  Plus
 } from 'lucide-react';
 
 export default function StudentProfileView() {
@@ -37,6 +39,7 @@ export default function StudentProfileView() {
     graduation_year: '',
     interests: [] as string[],
   });
+  const [newInterest, setNewInterest] = useState('');
 
   useEffect(() => {
     if (user) {
@@ -143,6 +146,31 @@ export default function StudentProfileView() {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAddInterest = () => {
+    const trimmedInterest = newInterest.trim();
+    if (trimmedInterest && !formData.interests.includes(trimmedInterest)) {
+      setFormData({
+        ...formData,
+        interests: [...formData.interests, trimmedInterest]
+      });
+      setNewInterest('');
+    }
+  };
+
+  const handleRemoveInterest = (indexToRemove: number) => {
+    setFormData({
+      ...formData,
+      interests: formData.interests.filter((_, index) => index !== indexToRemove)
+    });
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddInterest();
     }
   };
 
@@ -374,22 +402,70 @@ export default function StudentProfileView() {
           <CardTitle>Interests & Skills</CardTitle>
         </CardHeader>
         <CardContent>
-          {studentProfile?.interests && studentProfile.interests.length > 0 ? (
-            <div className="flex flex-wrap gap-2">
-              {studentProfile.interests.map((interest: string, index: number) => (
-                <Badge 
-                  key={index} 
-                  variant="secondary"
-                  className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 transition-all"
+          {isEditing ? (
+            <div className="space-y-4">
+              <div className="flex gap-2">
+                <Input
+                  value={newInterest}
+                  onChange={(e) => setNewInterest(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Add an interest or skill (e.g., AI, Web Development, Entrepreneurship)"
+                  className="flex-1"
+                />
+                <Button
+                  type="button"
+                  onClick={handleAddInterest}
+                  disabled={!newInterest.trim()}
+                  size="icon"
                 >
-                  {interest}
-                </Badge>
-              ))}
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+              {formData.interests && formData.interests.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {formData.interests.map((interest: string, index: number) => (
+                    <Badge 
+                      key={index} 
+                      variant="secondary"
+                      className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 transition-all group"
+                    >
+                      {interest}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveInterest(index)}
+                        className="ml-2 hover:text-destructive transition-colors"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">
+                  No interests added yet. Start by adding some above!
+                </p>
+              )}
             </div>
           ) : (
-            <p className="text-muted-foreground text-center py-8">
-              No interests added yet. Add some to help others understand your passions!
-            </p>
+            <>
+              {studentProfile?.interests && studentProfile.interests.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {studentProfile.interests.map((interest: string, index: number) => (
+                    <Badge 
+                      key={index} 
+                      variant="secondary"
+                      className="px-4 py-2 text-sm font-medium bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary/20 hover:to-accent/20 transition-all"
+                    >
+                      {interest}
+                    </Badge>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-center py-8">
+                  No interests added yet. Add some to help others understand your passions!
+                </p>
+              )}
+            </>
           )}
         </CardContent>
       </Card>
