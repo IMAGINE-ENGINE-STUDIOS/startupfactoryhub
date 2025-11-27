@@ -692,9 +692,9 @@ export default function InvestorDashboard() {
                               <CalendarIcon className="h-16 w-16 text-purple-500/30" />
                             </div>
                           )}
-                          <div className="p-4">
+                          <div className="p-4 min-h-[120px] flex flex-col">
                             <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
-                            <div className="space-y-1 text-sm text-muted-foreground">
+                            <div className="space-y-1 text-sm text-muted-foreground flex-1">
                               <div className="flex items-center gap-2">
                                 <Clock className="h-3 w-3" />
                                 {format(parseISO(event.start_date), 'MMM d, h:mm a')}
@@ -702,7 +702,19 @@ export default function InvestorDashboard() {
                                {event.location && (
                                  <div className="flex items-center gap-2">
                                    <MapPin className="h-3 w-3" />
-                                   <span className="line-clamp-1">{event.location}</span>
+                                   {event.location.startsWith('http') ? (
+                                     <a 
+                                       href={event.location}
+                                       target="_blank"
+                                       rel="noopener noreferrer"
+                                       className="text-primary hover:underline line-clamp-1"
+                                       onClick={(e) => e.stopPropagation()}
+                                     >
+                                       {event.location}
+                                     </a>
+                                   ) : (
+                                     <span className="line-clamp-1">{event.location}</span>
+                                   )}
                                  </div>
                                )}
                                {event.location?.includes('whereby.com') && (
