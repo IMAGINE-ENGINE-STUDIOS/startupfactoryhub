@@ -23,6 +23,7 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [videoDuration, setVideoDuration] = useState<number | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -219,8 +220,20 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
     }
 
     setIsUploading(true);
+    setUploadProgress(0);
     
     try {
+      // Simulate upload progress (actual progress would require chunked upload implementation)
+      const progressInterval = setInterval(() => {
+        setUploadProgress(prev => {
+          if (prev >= 90) {
+            clearInterval(progressInterval);
+            return 90;
+          }
+          return prev + 10;
+        });
+      }, 500);
+
       await onSave({
         title,
         description,
@@ -229,11 +242,36 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
         postType: 'short'
       });
 
-      handleClose();
-    } catch (error) {
+      clearInterval(progressInterval);
+      setUploadProgress(100);
+      
+      toast({
+        title: "Success!",
+        description: "Your short has been uploaded successfully",
+      });
+
+      setTimeout(() => handleClose(), 500);
+    } catch (error: any) {
       console.error('Error saving short:', error);
+      
+      let errorMessage = "Failed to upload your short. Please try again.";
+      
+      if (error?.message?.includes("storage")) {
+        errorMessage = "Storage error. Please check your connection and try again.";
+      } else if (error?.message?.includes("size")) {
+        errorMessage = "File size too large. Please use a smaller video.";
+      } else if (error?.message?.includes("network")) {
+        errorMessage = "Network error. Please check your internet connection.";
+      }
+      
+      toast({
+        title: "Upload failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } finally {
       setIsUploading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -388,10 +426,10 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
             </Button>
             <Button type="button" onClick={handleSave} disabled={isUploading}>
               {isUploading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                  Creating...
-                </>
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                  <span>Uploading... {uploadProgress}%</span>
+                </div>
               ) : (
                 'Create Short'
               )}
