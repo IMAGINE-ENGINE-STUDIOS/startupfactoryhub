@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Play } from "lucide-react";
+import { Plus, Play, Loader2 } from "lucide-react";
 import ShortsViewer from "./ShortsViewer";
 
 interface Short {
@@ -28,6 +28,10 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [offset, setOffset] = useState(0);
+  const observerTarget = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchShorts();
@@ -44,7 +48,8 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
         },
         () => {
           console.log('Shorts updated, refreshing');
-          fetchShorts();
+          setOffset(0);
+          fetchShorts(false);
         }
       )
       .subscribe();
@@ -53,6 +58,28 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
       supabase.removeChannel(channel);
     };
   }, []);
+
+  // Intersection Observer for infinite scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          loadMoreShorts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [hasMore, loadingMore]);
 
   // Handle new short from parent immediately
   useEffect(() => {
@@ -67,10 +94,13 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
     }
   }, [newShort]);
 
-  const fetchShorts = async () => {
+  const fetchShorts = async (isLoadingMore = false) => {
     try {
-      setIsLoading(true);
-      console.log('[Shorts] Fetching shorts with post_type=short...');
+      if (!isLoadingMore) {
+        setIsLoading(true);
+      }
+      const currentOffset = isLoadingMore ? offset : 0;
+      console.log(`[Shorts] Fetching shorts... offset: ${currentOffset}, isLoadingMore: ${isLoadingMore}`);
       
       // Fetch posts without profiles join
       const { data: postsData, error } = await supabase
@@ -78,7 +108,7 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
         .select('id, content, user_id, media_urls, likes_count, comments_count, created_at')
         .eq('post_type', 'short')
         .order('created_at', { ascending: false })
-        .limit(20);
+        .range(currentOffset, currentOffset + 19);
 
       if (error) {
         console.error('[Shorts] Error fetching shorts:', error);
@@ -114,8 +144,6 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
             // Use first media_urls entry
             const videoUrl = Array.isArray(post.media_urls) && post.media_urls.length > 0 ? post.media_urls[0] : '';
 
-            console.log('[Shorts] Mapped short:', { id: post.id, video_url: videoUrl });
-
             return {
               id: post.id,
               video_url: videoUrl,
@@ -128,13 +156,40 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
             };
           });
 
-        console.log('[Shorts] Final shorts count:', videoShorts.length);
-        setShorts(videoShorts);
+        console.log('[Shorts] Processed shorts count:', videoShorts.length);
+        
+        if (isLoadingMore) {
+          setShorts(prev => [...prev, ...videoShorts]);
+        } else {
+          setShorts(videoShorts);
+        }
+
+        // Check if there are more shorts to load
+        setHasMore(videoShorts.length === 20);
+        if (isLoadingMore) {
+          setOffset(prev => prev + 20);
+        } else {
+          setOffset(20);
+        }
+      } else {
+        if (!isLoadingMore) {
+          setShorts([]);
+        }
+        setHasMore(false);
       }
     } catch (error) {
       console.error('[Shorts] Error in fetchShorts:', error);
     } finally {
       setIsLoading(false);
+      setLoadingMore(false);
+    }
+  };
+
+  const loadMoreShorts = () => {
+    if (!loadingMore && hasMore) {
+      console.log('[Shorts] Loading more shorts...');
+      setLoadingMore(true);
+      fetchShorts(true);
     }
   };
 
@@ -220,7 +275,9 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Shorts</h2>
-          <span className="text-sm text-muted-foreground">{shorts.length} shorts</span>
+          <span className="text-sm text-muted-foreground">
+            {shorts.length}{hasMore ? '+' : ''} shorts
+          </span>
         </div>
 
         <div 
@@ -293,6 +350,20 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
               </CardContent>
             </Card>
           ))}
+
+          {/* Infinite scroll trigger */}
+          {hasMore && (
+            <div ref={observerTarget} className="flex-shrink-0 w-[120px] h-[180px] flex items-center justify-center">
+              {loadingMore && (
+                <Card className="flex-shrink-0 w-[120px] h-[180px]">
+                  <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
+                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                    <span className="text-xs text-muted-foreground">Loading...</span>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -301,6 +372,8 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
         initialIndex={selectedIndex}
         open={viewerOpen}
         onOpenChange={setViewerOpen}
+        onLoadMore={loadMoreShorts}
+        hasMore={hasMore}
       />
     </>
   );

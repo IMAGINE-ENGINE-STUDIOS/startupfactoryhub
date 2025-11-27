@@ -94,7 +94,7 @@ export const useStartupAnalytics = () => {
       const postsQuery = await (supabase as any)
         .from('feed_posts')
         .select('*', { count: 'exact', head: true })
-        .eq('author_id', user.id)
+        .eq('user_id', user.id)
         .gte('created_at', thirtyDaysAgo.toISOString());
 
       const commentsQuery = await (supabase as any)
