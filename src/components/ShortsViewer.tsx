@@ -64,6 +64,9 @@ const ShortsViewer = ({
   const [newComment, setNewComment] = useState("");
   const [commentCounts, setCommentCounts] = useState<Record<string, number>>({});
   const [isLoadingComments, setIsLoadingComments] = useState(false);
+  const [replyToCommentId, setReplyToCommentId] = useState<string | null>(null);
+  const [commentLikes, setCommentLikes] = useState<Record<string, boolean>>({});
+  const [commentLikeCounts, setCommentLikeCounts] = useState<Record<string, number>>({});
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -193,7 +196,7 @@ const ShortsViewer = ({
       // Step 1: Fetch comments
       const { data: commentsData, error: commentsError } = await supabase
         .from('post_comments')
-        .select('id, content, created_at, user_id')
+        .select('id, content, created_at, user_id, parent_comment_id, likes_count')
         .eq('post_id', shortId)
         .order('created_at', { ascending: false });
 
@@ -214,12 +217,55 @@ const ShortsViewer = ({
 
       if (profilesError) throw profilesError;
 
-      // Step 3: Map profiles to comments
+      // Step 3: Fetch comment likes for the current user
+      if (user) {
+        const commentIds = commentsData.map(c => c.id);
+        const { data: likesData } = await supabase
+          .from('comment_likes')
+          .select('comment_id')
+          .eq('user_id', user.id)
+          .in('comment_id', commentIds);
+
+        const likedComments: Record<string, boolean> = {};
+        likesData?.forEach(like => {
+          likedComments[like.comment_id] = true;
+        });
+        setCommentLikes(likedComments);
+      }
+
+      // Step 4: Map profiles to comments and organize by parent/child
       const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
-      const commentsWithProfiles = commentsData.map(comment => ({
+      
+      // Separate top-level comments and replies
+      const topLevelComments = commentsData.filter(c => !c.parent_comment_id);
+      const replies = commentsData.filter(c => c.parent_comment_id);
+      
+      // Build a map of replies by parent comment ID
+      const repliesByParent = new Map<string, any[]>();
+      replies.forEach(reply => {
+        const parentId = reply.parent_comment_id;
+        if (!repliesByParent.has(parentId)) {
+          repliesByParent.set(parentId, []);
+        }
+        repliesByParent.get(parentId)!.push({
+          ...reply,
+          profiles: profilesMap.get(reply.user_id) || null
+        });
+      });
+
+      // Attach replies to their parent comments
+      const commentsWithProfiles = topLevelComments.map(comment => ({
         ...comment,
-        profiles: profilesMap.get(comment.user_id) || null
+        profiles: profilesMap.get(comment.user_id) || null,
+        replies: repliesByParent.get(comment.id) || []
       }));
+
+      // Initialize like counts
+      const likeCounts: Record<string, number> = {};
+      commentsData.forEach(c => {
+        likeCounts[c.id] = c.likes_count || 0;
+      });
+      setCommentLikeCounts(likeCounts);
 
       setComments(commentsWithProfiles);
     } catch (error) {
@@ -236,6 +282,7 @@ const ShortsViewer = ({
 
   const handleComment = () => {
     setShowComments(!showComments);
+    setReplyToCommentId(null);
     if (!showComments) {
       fetchComments(currentShort.id);
     }
@@ -278,12 +325,14 @@ const ShortsViewer = ({
         .insert({
           post_id: currentShort.id,
           user_id: user.id,
-          content: newComment.trim()
+          content: newComment.trim(),
+          parent_comment_id: replyToCommentId
         });
 
       if (error) throw error;
 
       setNewComment("");
+      setReplyToCommentId(null);
       fetchComments(currentShort.id);
       
       // Update comment count
@@ -293,7 +342,7 @@ const ShortsViewer = ({
       }));
 
       toast({
-        title: "Comment added!",
+        title: replyToCommentId ? "Reply added!" : "Comment added!",
       });
     } catch (error) {
       console.error('Error adding comment:', error);
@@ -303,6 +352,66 @@ const ShortsViewer = ({
         variant: "destructive",
       });
     }
+  };
+
+  const toggleCommentLike = async (commentId: string) => {
+    if (!user) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to like comments",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const wasLiked = commentLikes[commentId];
+    
+    // Optimistic update
+    setCommentLikes(prev => ({
+      ...prev,
+      [commentId]: !wasLiked
+    }));
+    
+    setCommentLikeCounts(prev => ({
+      ...prev,
+      [commentId]: (prev[commentId] || 0) + (wasLiked ? -1 : 1)
+    }));
+
+    try {
+      if (wasLiked) {
+        await supabase
+          .from('comment_likes')
+          .delete()
+          .eq('comment_id', commentId)
+          .eq('user_id', user.id);
+      } else {
+        await supabase
+          .from('comment_likes')
+          .insert({ comment_id: commentId, user_id: user.id });
+      }
+    } catch (error) {
+      // Revert on error
+      setCommentLikes(prev => ({
+        ...prev,
+        [commentId]: wasLiked
+      }));
+      
+      setCommentLikeCounts(prev => ({
+        ...prev,
+        [commentId]: (prev[commentId] || 0) + (wasLiked ? 1 : -1)
+      }));
+      
+      toast({
+        title: "Error",
+        description: "Failed to update like",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleReply = (commentId: string) => {
+    setReplyToCommentId(commentId);
+    // Focus the input (will need a ref for this)
   };
 
   const handleShare = async () => {
@@ -655,37 +764,108 @@ const ShortsViewer = ({
                       <p className="text-xs mt-1 opacity-60">Be the first to comment!</p>
                     </div>
                   ) : (
-                    <div className="py-4 space-y-4">
+                    <div className="py-4 space-y-6">
                       {comments.map((comment) => (
-                        <div key={comment.id} className="flex gap-3">
-                          <Avatar className="h-10 w-10 flex-shrink-0 mt-1">
-                            <AvatarImage src={comment.profiles?.avatar_url} />
-                            <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 text-sm">
-                              {comment.profiles?.full_name?.[0] || "U"}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <p className="text-sm font-medium text-white truncate">
-                                {comment.profiles?.full_name || "User"}
+                        <div key={comment.id} className="space-y-3">
+                          {/* Main Comment */}
+                          <div className="flex gap-3">
+                            <Avatar className="h-10 w-10 flex-shrink-0 mt-1">
+                              <AvatarImage src={comment.profiles?.avatar_url} />
+                              <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 text-sm">
+                                {comment.profiles?.full_name?.[0] || "U"}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="text-sm font-medium text-white truncate">
+                                  {comment.profiles?.full_name || "User"}
+                                </p>
+                                <span className="text-xs text-slate-500 flex-shrink-0">
+                                  {formatTimeAgo(comment.created_at)}
+                                </span>
+                              </div>
+                              <p className="text-sm text-slate-200 leading-relaxed break-words">
+                                {comment.content}
                               </p>
-                              <span className="text-xs text-slate-500 flex-shrink-0">
-                                {formatTimeAgo(comment.created_at)}
-                              </span>
-                            </div>
-                            <p className="text-sm text-slate-200 leading-relaxed break-words">
-                              {comment.content}
-                            </p>
-                            <div className="flex items-center gap-4 mt-2">
-                              <button className="flex items-center gap-1 text-slate-400 hover:text-white transition-colors group">
-                                <Heart className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
-                                <span className="text-xs">0</span>
-                              </button>
-                              <button className="text-xs text-slate-400 hover:text-white transition-colors font-medium">
-                                Reply
-                              </button>
+                              <div className="flex items-center gap-4 mt-2">
+                                <button 
+                                  onClick={() => toggleCommentLike(comment.id)}
+                                  className={cn(
+                                    "flex items-center gap-1 transition-colors group",
+                                    commentLikes[comment.id] 
+                                      ? "text-red-500" 
+                                      : "text-slate-400 hover:text-red-500"
+                                  )}
+                                >
+                                  <Heart 
+                                    className={cn(
+                                      "h-3.5 w-3.5 group-hover:scale-110 transition-transform",
+                                      commentLikes[comment.id] && "fill-current"
+                                    )} 
+                                  />
+                                  <span className="text-xs">
+                                    {commentLikeCounts[comment.id] || 0}
+                                  </span>
+                                </button>
+                                <button 
+                                  onClick={() => handleReply(comment.id)}
+                                  className="text-xs text-slate-400 hover:text-cyan-400 transition-colors font-medium"
+                                >
+                                  Reply
+                                </button>
+                              </div>
                             </div>
                           </div>
+
+                          {/* Replies */}
+                          {comment.replies && comment.replies.length > 0 && (
+                            <div className="ml-12 space-y-3 pl-4 border-l-2 border-slate-700/30">
+                              {comment.replies.map((reply: any) => (
+                                <div key={reply.id} className="flex gap-3">
+                                  <Avatar className="h-8 w-8 flex-shrink-0 mt-1">
+                                    <AvatarImage src={reply.profiles?.avatar_url} />
+                                    <AvatarFallback className="bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 text-xs">
+                                      {reply.profiles?.full_name?.[0] || "U"}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      <p className="text-sm font-medium text-white truncate">
+                                        {reply.profiles?.full_name || "User"}
+                                      </p>
+                                      <span className="text-xs text-slate-500 flex-shrink-0">
+                                        {formatTimeAgo(reply.created_at)}
+                                      </span>
+                                    </div>
+                                    <p className="text-sm text-slate-200 leading-relaxed break-words">
+                                      {reply.content}
+                                    </p>
+                                    <div className="flex items-center gap-4 mt-2">
+                                      <button 
+                                        onClick={() => toggleCommentLike(reply.id)}
+                                        className={cn(
+                                          "flex items-center gap-1 transition-colors group",
+                                          commentLikes[reply.id] 
+                                            ? "text-red-500" 
+                                            : "text-slate-400 hover:text-red-500"
+                                        )}
+                                      >
+                                        <Heart 
+                                          className={cn(
+                                            "h-3.5 w-3.5 group-hover:scale-110 transition-transform",
+                                            commentLikes[reply.id] && "fill-current"
+                                          )} 
+                                        />
+                                        <span className="text-xs">
+                                          {commentLikeCounts[reply.id] || 0}
+                                        </span>
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
@@ -694,6 +874,17 @@ const ShortsViewer = ({
 
                 {/* Add Comment Input */}
                 <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-700/50 bg-gradient-to-t from-black/95 to-transparent backdrop-blur-xl">
+                  {replyToCommentId && (
+                    <div className="mb-2 flex items-center gap-2 text-xs text-slate-400">
+                      <span>Replying to comment</span>
+                      <button 
+                        onClick={() => setReplyToCommentId(null)}
+                        className="text-cyan-400 hover:text-cyan-300 underline"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  )}
                   <div className="flex gap-3 items-start">
                     {user && (
                       <Avatar className="h-10 w-10 flex-shrink-0">
@@ -707,7 +898,7 @@ const ShortsViewer = ({
                       <Input
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
-                        placeholder="Add a comment..."
+                        placeholder={replyToCommentId ? "Add a reply..." : "Add a comment..."}
                         className="flex-1 bg-slate-800/80 border-slate-700/50 text-white placeholder:text-slate-500 text-sm focus:ring-2 focus:ring-cyan-500/50 rounded-full px-4"
                         onKeyPress={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
