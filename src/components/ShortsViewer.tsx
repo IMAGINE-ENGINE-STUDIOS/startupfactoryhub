@@ -39,9 +39,18 @@ interface ShortsViewerProps {
   initialIndex: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onLoadMore?: () => void;
+  hasMore?: boolean;
 }
 
-const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewerProps) => {
+const ShortsViewer = ({ 
+  shorts, 
+  initialIndex, 
+  open, 
+  onOpenChange,
+  onLoadMore,
+  hasMore = false 
+}: ShortsViewerProps) => {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isMuted, setIsMuted] = useState(false);
   const [isLiked, setIsLiked] = useState<Record<string, boolean>>({});
@@ -104,6 +113,11 @@ const ShortsViewer = ({ shorts, initialIndex, open, onOpenChange }: ShortsViewer
     if (currentIndex < shorts.length - 1) {
       videoRefs.current[currentIndex]?.pause();
       setCurrentIndex(currentIndex + 1);
+      
+      // Load more when approaching the end (3 items before)
+      if (currentIndex >= shorts.length - 3 && hasMore && onLoadMore) {
+        onLoadMore();
+      }
     }
   };
 
