@@ -10,7 +10,28 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Building, DollarSign, TrendingUp, X } from 'lucide-react';
 
 const STAGES = ['Pre-seed', 'Seed', 'Series A', 'Series B', 'Series C+', 'Growth'];
-const INDUSTRIES = ['Technology', 'Healthcare', 'Finance', 'Education', 'E-commerce', 'SaaS', 'AI/ML', 'Blockchain', 'Other'];
+const INDUSTRIES = [
+  'Aerospace',
+  'AI/ML',
+  'Biotech',
+  'Blockchain',
+  'CleanTech',
+  'Cybersecurity',
+  'Defense',
+  'E-commerce',
+  'EdTech',
+  'FinTech',
+  'Hardware',
+  'HealthTech',
+  'Quantum Computing',
+  'Robotics',
+  'SaaS',
+  'Semiconductors',
+  'Software',
+  'Space Tech',
+  'Telecommunications',
+  'Other'
+];
 
 export default function InvestorProfileForm() {
   const { user } = useAuth();
