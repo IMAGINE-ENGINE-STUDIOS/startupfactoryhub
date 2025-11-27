@@ -33,6 +33,7 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { useMentorDashboard } from '@/hooks/useMentorDashboard';
 import AdvisorProfileView from '@/components/AdvisorProfileView';
 import MenteeSessions from '@/components/MenteeSessions';
+import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
@@ -420,6 +421,18 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="profile" className="space-y-4">
             <AdvisorProfileView />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Your Posts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">

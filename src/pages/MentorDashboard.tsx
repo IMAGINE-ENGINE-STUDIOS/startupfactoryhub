@@ -23,6 +23,7 @@ import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import AdvisorProfileView from "@/components/AdvisorProfileView";
 import MarketIntelligenceWidget from "@/components/MarketIntelligenceWidget";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
+import ProfilePostsMosaic from "@/components/ProfilePostsMosaic";
 import { useProfileWithRole } from "@/hooks/useProfileWithRole";
 import StartupBrowser from "@/components/StartupBrowser";
 import NetworkBrowser from "@/components/NetworkBrowser";
@@ -205,6 +206,18 @@ const MentorDashboard = () => {
 
           <TabsContent value="profile" className="space-y-6">
             <AdvisorProfileView />
+            
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5" />
+                  Your Posts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
