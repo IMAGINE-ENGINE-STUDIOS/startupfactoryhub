@@ -670,17 +670,17 @@ export default function InvestorDashboard() {
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="flex gap-4 overflow-x-auto pb-2">
                     {upcomingEvents.slice(0, 6).map(event => (
                       <div 
                         key={event.id} 
-                        className="group cursor-pointer" 
+                        className="group cursor-pointer flex-shrink-0 w-[300px]" 
                         onClick={() => {
                           setSelectedEvent(event);
                           setShowEventDetails(true);
                         }}
                       >
-                        <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
+                        <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all h-full flex flex-col">
                           {event.banner_url ? (
                             <img 
                               src={event.banner_url} 
@@ -692,7 +692,7 @@ export default function InvestorDashboard() {
                               <CalendarIcon className="h-16 w-16 text-purple-500/30" />
                             </div>
                           )}
-                          <div className="p-4 min-h-[120px] flex flex-col">
+                          <div className="p-4 h-[180px] flex flex-col">
                             <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
                             <div className="space-y-1 text-sm text-muted-foreground flex-1">
                               <div className="flex items-center gap-2">
@@ -717,26 +717,28 @@ export default function InvestorDashboard() {
                                    )}
                                  </div>
                                )}
-                               {event.location?.includes('whereby.com') && (
-                                 <Button
-                                   size="sm"
-                                   variant="outline"
-                                   onClick={(e) => {
-                                     e.stopPropagation();
-                                     setActiveVideoUrl(event.location);
-                                   }}
-                                   className="gap-2 mt-2 w-full"
-                                 >
-                                   <Video className="h-4 w-4" />
-                                   Join Event
-                                 </Button>
-                               )}
                               <div className="flex items-center gap-2">
                                 <Users className="h-3 w-3" />
                                 {event.attendees} attending
                                 {event.max_attendees && ` / ${event.max_attendees}`}
                               </div>
                             </div>
+                            {event.location?.includes('whereby.com') ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setActiveVideoUrl(event.location);
+                                }}
+                                className="gap-2 w-full mt-auto"
+                              >
+                                <Video className="h-4 w-4" />
+                                Join Event
+                              </Button>
+                            ) : (
+                              <div className="h-9 mt-auto" />
+                            )}
                           </div>
                         </div>
                       </div>
