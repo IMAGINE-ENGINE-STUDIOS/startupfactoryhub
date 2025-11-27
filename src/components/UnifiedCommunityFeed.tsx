@@ -519,6 +519,7 @@ export default function UnifiedCommunityFeed({
             user_id: user.id,
             post_type: 'update',
             shared_post_id: postId,
+            media_urls: originalPost.media_urls,
           });
 
         if (error) throw error;
