@@ -6,10 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, Users, Clock, UserPlus, Check, X, Video } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, UserPlus, Check, X, Video, Pencil } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import VideoConferencing from './VideoConferencing';
+import { EditEventDialog } from './EditEventDialog';
 import { cn } from '@/lib/utils';
 
 interface Event {
@@ -42,6 +43,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const [selectedUser, setSelectedUser] = useState<string>('');
   const [showVideo, setShowVideo] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -203,11 +205,22 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>{event.title}</DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="flex flex-row items-center justify-between space-y-0">
+            <DialogTitle>{event.title}</DialogTitle>
+            {isOrganizer && (
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => setShowEditDialog(true)}
+                className="h-8 w-8"
+              >
+                <Pencil className="h-4 w-4" />
+              </Button>
+            )}
+          </DialogHeader>
 
         <div className="space-y-6">
           {/* Banner */}
@@ -249,7 +262,18 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
             {event.location && (
               <div className="flex items-center gap-2 text-muted-foreground">
                 <MapPin className="h-5 w-5" />
-                <span>{event.location}</span>
+                {event.location.startsWith('http') ? (
+                  <a 
+                    href={event.location}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                  >
+                    {event.location}
+                  </a>
+                ) : (
+                  <span>{event.location}</span>
+                )}
               </div>
             )}
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -415,5 +439,18 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
         </div>
       </DialogContent>
     </Dialog>
+    
+    {isOrganizer && (
+      <EditEventDialog
+        open={showEditDialog}
+        onOpenChange={setShowEditDialog}
+        onEventUpdated={() => {
+          setShowEditDialog(false);
+          onEventUpdated();
+        }}
+        event={event}
+      />
+    )}
+    </>
   );
 }
