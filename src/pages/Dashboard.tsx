@@ -403,16 +403,6 @@ const Dashboard = () => {
           {/* Analytics Tab */}
           {activeTab === "analytics" && (
             <TabsContent value="analytics" className="space-y-4">
-              {/* Journey Progress - unique metric not in AnalyticsDashboard */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Journey Progress</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-primary">{roadmapProgress.percentage}%</div>
-                  <p className="text-xs text-muted-foreground">{roadmapProgress.completedSteps} of {roadmapProgress.totalSteps} steps</p>
-                </CardContent>
-              </Card>
               <AnalyticsDashboard />
             </TabsContent>
           )}
