@@ -47,6 +47,38 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
     }
   }, [userId, user]);
 
+  // Real-time subscription for post interactions
+  useEffect(() => {
+    if (!userId) return;
+
+    const channel = supabase
+      .channel(`profile-posts-${userId}`)
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'post_likes' },
+        () => { 
+          fetchPosts(); 
+          if (user) fetchUserLikes(); 
+        }
+      )
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'post_comments' },
+        () => fetchPosts()
+      )
+      .on('postgres_changes', 
+        { event: 'UPDATE', schema: 'public', table: 'feed_posts', filter: `user_id=eq.${userId}` },
+        (payload) => {
+          setPosts(prev => prev.map(p => 
+            p.id === payload.new.id ? { ...p, ...payload.new } : p
+          ));
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [userId, user]);
+
   const fetchUserLikes = async () => {
     if (!user) return;
 
