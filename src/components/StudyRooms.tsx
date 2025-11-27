@@ -25,6 +25,7 @@ interface GroupMessage {
   user_id: string;
   content: string;
   created_at: string;
+  user_name?: string;
 }
 
 interface GroupFile {
@@ -33,11 +34,14 @@ interface GroupFile {
   file_name: string;
   file_url: string;
   created_at: string;
+  user_id: string;
+  user_name?: string;
 }
 
 interface GroupMember {
   user_id: string;
   joined_at: string;
+  user_name?: string;
 }
 
 export default function StudyRooms() {
@@ -76,8 +80,20 @@ export default function StudyRooms() {
             table: 'study_group_messages',
             filter: `group_id=eq.${selectedGroup.id}`
           },
-          (payload) => {
-            setMessages(prev => [...prev, payload.new as GroupMessage]);
+          async (payload) => {
+            const newMessage = payload.new as GroupMessage;
+            
+            // Fetch user profile for the new message
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('full_name')
+              .eq('user_id', newMessage.user_id)
+              .single();
+            
+            setMessages(prev => [...prev, {
+              ...newMessage,
+              user_name: profile?.full_name || 'Unknown User'
+            }]);
           }
         )
         .subscribe();
@@ -132,7 +148,21 @@ export default function StudyRooms() {
       return;
     }
 
-    setMessages(data || []);
+    // Fetch user profiles for all messages
+    const userIds = [...new Set(data?.map(m => m.user_id) || [])];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, full_name')
+      .in('user_id', userIds);
+
+    const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
+    
+    const messagesWithNames = data?.map(msg => ({
+      ...msg,
+      user_name: profileMap.get(msg.user_id) || 'Unknown User'
+    })) || [];
+
+    setMessages(messagesWithNames);
   };
 
   const fetchMembers = async () => {
@@ -149,7 +179,21 @@ export default function StudyRooms() {
       return;
     }
 
-    setMembers(data || []);
+    // Fetch user profiles for all members
+    const userIds = data?.map(m => m.user_id) || [];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, full_name')
+      .in('user_id', userIds);
+
+    const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
+    
+    const membersWithNames = data?.map(member => ({
+      ...member,
+      user_name: profileMap.get(member.user_id) || 'Unknown User'
+    })) || [];
+
+    setMembers(membersWithNames);
   };
 
   const fetchFiles = async () => {
@@ -166,7 +210,21 @@ export default function StudyRooms() {
       return;
     }
 
-    setFiles(data || []);
+    // Fetch user profiles for all file uploaders
+    const userIds = [...new Set(data?.map(f => f.user_id) || [])];
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, full_name')
+      .in('user_id', userIds);
+
+    const profileMap = new Map(profiles?.map(p => [p.user_id, p.full_name]) || []);
+    
+    const filesWithNames = data?.map(file => ({
+      ...file,
+      user_name: profileMap.get(file.user_id) || 'Unknown User'
+    })) || [];
+
+    setFiles(filesWithNames);
   };
 
   const handleCreateRoom = async () => {
@@ -435,7 +493,7 @@ export default function StudyRooms() {
                     {messages.map((message) => (
                       <div key={message.id} className="border-b pb-3">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-medium text-sm">User</span>
+                          <span className="font-medium text-sm">{message.user_name || 'Unknown User'}</span>
                           <span className="text-xs text-muted-foreground">
                             {new Date(message.created_at).toLocaleString()}
                           </span>
@@ -487,7 +545,7 @@ export default function StudyRooms() {
                           <div>
                             <p className="text-sm font-medium">{file.file_name}</p>
                             <p className="text-xs text-muted-foreground">
-                              {new Date(file.created_at).toLocaleDateString()}
+                              {file.user_name} • {new Date(file.created_at).toLocaleDateString()}
                             </p>
                           </div>
                         </div>
@@ -513,7 +571,7 @@ export default function StudyRooms() {
                       >
                         <Users className="h-5 w-5 text-muted-foreground" />
                         <div>
-                          <p className="text-sm font-medium">Member {idx + 1}</p>
+                          <p className="text-sm font-medium">{member.user_name || 'Unknown User'}</p>
                           <p className="text-xs text-muted-foreground">
                             Joined {new Date(member.joined_at).toLocaleDateString()}
                           </p>
