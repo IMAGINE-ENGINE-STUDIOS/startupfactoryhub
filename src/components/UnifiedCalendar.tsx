@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Calendar as CalendarIcon, MapPin, Users, Clock, Video, User, Building, MoreVertical, Pencil, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { EditEventDialog } from '@/components/EditEventDialog';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,6 +25,7 @@ import { format, isSameDay, parseISO } from 'date-fns';
 import { useMentoringSessions } from '@/hooks/useMentoringSessions';
 import { useMentorAvailability } from '@/hooks/useMentorAvailability';
 import { cn } from '@/lib/utils';
+import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
 
 type CalendarItemType = 'event' | 'session' | 'availability' | 'pitch';
 
@@ -72,6 +74,8 @@ export default function UnifiedCalendar({
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
+  const [showPitchDialog, setShowPitchDialog] = useState(false);
+  const [userCompany, setUserCompany] = useState<any>(null);
   const { user } = useAuth();
   const { sessions } = useMentoringSessions();
   const { availability } = useMentorAvailability();
@@ -80,6 +84,9 @@ export default function UnifiedCalendar({
   useEffect(() => {
     fetchEvents();
     fetchPitchMeetings();
+    if (userRole === 'startup') {
+      fetchUserCompany();
+    }
 
     // Real-time subscription for events, pitch meetings, and attendees
     const channel = supabase
@@ -101,7 +108,7 @@ export default function UnifiedCalendar({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [user]);
+  }, [user, userRole]);
 
   const fetchEvents = async () => {
     let query = supabase
@@ -205,6 +212,18 @@ export default function UnifiedCalendar({
     }));
 
     setPitchMeetings(enrichedMeetings);
+  };
+
+  const fetchUserCompany = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('companies')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    setUserCompany(data);
   };
 
   const handleEditEvent = (item: CalendarItem) => {
@@ -414,10 +433,10 @@ export default function UnifiedCalendar({
               Create Event
             </Button>
           )}
-          {userRole === 'startup' && onCreatePitchClick && connectedInvestors && connectedInvestors.length > 0 && (
-            <Button onClick={onCreatePitchClick} variant="outline" className="gap-2">
+          {userRole === 'startup' && userCompany && (
+            <Button onClick={() => setShowPitchDialog(true)} variant="outline" className="gap-2">
               <Users className="h-4 w-4" />
-              Book Pitch
+              Schedule Pitch
             </Button>
           )}
         </div>
@@ -492,8 +511,10 @@ export default function UnifiedCalendar({
                 <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />
                 <p className="text-sm">No items on this day</p>
               </div>
-            ) : (
-              selectedDateItems.map(item => {
+            ) : selectedDateItems.length === 1 ? (
+              // Single item - no carousel
+              (() => {
+                const item = selectedDateItems[0];
                 const event = events.find(e => e.id === item.id);
                 const isOrganizer = item.type === 'event' && user?.id === event?.organizer_id;
                 
@@ -647,8 +668,171 @@ export default function UnifiedCalendar({
                      )}
                    </div>
                   </div>
-               );
-             })
+                );
+              })()
+            ) : (
+              // Multiple items - use carousel
+              <Carousel className="w-full">
+                <CarouselContent>
+                  {selectedDateItems.map(item => {
+                    const event = events.find(e => e.id === item.id);
+                    const isOrganizer = item.type === 'event' && user?.id === event?.organizer_id;
+                    
+                    return (
+                      <CarouselItem key={`${item.type}-${item.id}`}>
+                        <div className="p-3 rounded-lg border hover:border-primary transition-all overflow-hidden">
+                          {/* Event Banner */}
+                          {item.type === 'event' && item.banner_url && (
+                            <img
+                              src={item.banner_url}
+                              alt={item.title}
+                              className="w-full h-24 object-cover rounded-lg mb-3 -mt-3 -mx-3"
+                              style={{ width: 'calc(100% + 1.5rem)' }}
+                            />
+                          )}
+                          
+                          <div className="flex items-start justify-between gap-2 mb-2">
+                            <h3 
+                              className="font-semibold text-sm cursor-pointer hover:text-primary flex-1"
+                              onClick={() => onItemClick?.(item)}
+                            >
+                              {item.title}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className={`text-xs ${getItemTypeColor(item.type)}`}>
+                                {getItemTypeIcon(item.type)}
+                              </Badge>
+                              {isOrganizer && (
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6">
+                                      <MoreVertical className="h-3 w-3" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem onClick={() => handleEditEvent(item)}>
+                                      <Pencil className="h-4 w-4 mr-2" />
+                                      Edit Event
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      onClick={() => handleDeleteEvent(item.id)}
+                                      className="text-destructive"
+                                    >
+                                      <Trash2 className="h-4 w-4 mr-2" />
+                                      Delete Event
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              )}
+                            </div>
+                          </div>
+                        
+                        <div className="space-y-1 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <Clock className="h-3 w-3" />
+                            {format(item.start_date, 'h:mm a')} - {format(item.end_date, 'h:mm a')}
+                          </div>
+                          
+                          {item.type === 'event' && (
+                            <>
+                              {item.organizer && (
+                                <div className="flex items-center gap-2">
+                                  <User className="h-3 w-3" />
+                                  <span className="line-clamp-1">Organizer: {item.organizer}</span>
+                                </div>
+                              )}
+                              {item.location && (
+                                <div className="flex items-center gap-2">
+                                  <MapPin className="h-3 w-3" />
+                                  {item.location.startsWith('http') ? (
+                                    <a 
+                                      href={item.location} 
+                                      target="_blank" 
+                                      rel="noopener noreferrer"
+                                      className="text-primary hover:underline line-clamp-1"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {item.location}
+                                    </a>
+                                  ) : (
+                                    <span className="line-clamp-1">{item.location}</span>
+                                  )}
+                                </div>
+                              )}
+                              <div className="flex items-center gap-2">
+                                <Users className="h-3 w-3" />
+                                {item.attendees} attending
+                                {item.max_attendees && ` / ${item.max_attendees}`}
+                              </div>
+                              {item.location?.includes('whereby.com') && (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onItemClick?.(item);
+                                  }}
+                                  className="gap-2 mt-2 w-full"
+                                >
+                                  <Video className="h-3 w-3" />
+                                  Join Video Call
+                                </Button>
+                              )}
+                            </>
+                          )}
+                          
+                          {item.type === 'session' && (
+                            <>
+                              {item.mentor_name && (
+                                <div className="flex items-center gap-2">
+                                  <User className="h-3 w-3" />
+                                  Mentor: {item.mentor_name}
+                                </div>
+                              )}
+                              {item.meeting_link && (
+                                <div className="flex items-center gap-2">
+                                  <Video className="h-3 w-3" />
+                                  Video call available
+                                </div>
+                              )}
+                              {item.status && (
+                                <Badge variant="secondary" className="text-xs mt-1">
+                                  {item.status}
+                                </Badge>
+                              )}
+                            </>
+                          )}
+
+                          {item.type === 'pitch' && (
+                            <>
+                              {item.description && (
+                                <div className="flex items-center gap-2">
+                                  <User className="h-3 w-3" />
+                                  {item.description}
+                                </div>
+                              )}
+                              {item.meeting_link && (
+                                <div className="flex items-center gap-2">
+                                  <Video className="h-3 w-3" />
+                                  Video call available
+                                </div>
+                              )}
+                              {item.status && (
+                                <Badge variant="secondary" className="text-xs mt-1">
+                                  {item.status}
+                                </Badge>
+                              )}
+                            </>
+                          )}
+                        </div>
+                        </div>
+                      </CarouselItem>
+                    );
+                  })}
+                </CarouselContent>
+                <CarouselPrevious className="left-2" />
+                <CarouselNext className="right-2" />
+              </Carousel>
             )}
           </CardContent>
         </Card>
@@ -682,6 +866,16 @@ export default function UnifiedCalendar({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Pitch Meeting Dialog for Startups */}
+      {userCompany && (
+        <CreatePitchMeetingDialog
+          open={showPitchDialog}
+          onOpenChange={setShowPitchDialog}
+          companyId={userCompany.id}
+          companyName={userCompany.name}
+        />
+      )}
     </div>
   );
 }
