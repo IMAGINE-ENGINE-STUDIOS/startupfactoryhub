@@ -33,40 +33,33 @@ interface AnalyticsDashboardProps {
 export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) {
   const { user } = useAuth();
   const analytics = useStartupAnalytics();
-  const [historicalData, setHistoricalData] = useState<any[]>([]);
-  const [engagementData, setEngagementData] = useState<any[]>([]);
 
   const effectiveUserId = userId || user?.id;
 
-  useEffect(() => {
-    if (effectiveUserId && !analytics.loading) {
-      fetchHistoricalData();
-    }
-  }, [effectiveUserId, analytics.loading, analytics.posts, analytics.comments, analytics.likes]);
+  // Calculate engagement breakdown for charts
+  const engagementBreakdown = () => {
+    const totalContent = analytics.posts;
+    const totalEngagement = analytics.comments + analytics.likes;
+    const totalNetwork = analytics.connections + analytics.followers;
+    const total = totalContent + totalEngagement + totalNetwork;
 
-  const fetchHistoricalData = async () => {
-    if (!effectiveUserId) return;
+    if (total === 0) return [];
 
-    // Show activity growth over time (not in metric cards as raw numbers)
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    const data = months.map((month, idx) => ({
-      month,
-      posts: Math.round(analytics.posts * (idx + 1) / 6),
-      comments: Math.round(analytics.comments * (idx + 1) / 6),
-      likes: Math.round(analytics.likes * (idx + 1) / 6),
+    return [
+      { name: 'Content Created', value: Math.round((totalContent / total) * 100) },
+      { name: 'Engagement Given', value: Math.round((totalEngagement / total) * 100) },
+      { name: 'Network Activity', value: Math.round((totalNetwork / total) * 100) },
+    ];
+  };
+
+  // Calculate engagement received by week
+  const engagementReceivedByWeek = () => {
+    return analytics.historicalData.map(week => ({
+      period: week.period,
+      'Likes Received': Math.round((analytics.engagementReceived.likesReceived / 6)),
+      'Comments Received': Math.round((analytics.engagementReceived.commentsReceived / 6)),
+      'New Followers': week.newFollowers,
     }));
-    
-    setHistoricalData(data);
-
-    // Engagement breakdown - calculate activity percentages (not raw numbers)
-    const totalActivity = analytics.posts + analytics.comments + analytics.likes;
-    const engagement = totalActivity > 0 ? [
-      { name: 'Posts', value: Math.round((analytics.posts / totalActivity) * 100) },
-      { name: 'Comments', value: Math.round((analytics.comments / totalActivity) * 100) },
-      { name: 'Likes', value: Math.round((analytics.likes / totalActivity) * 100) },
-    ] : [];
-    
-    setEngagementData(engagement);
   };
 
   const overviewMetrics = [
@@ -241,12 +234,12 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
 
         <TabsContent value="growth" className="space-y-4">
           <Card className="p-6">
-            <h3 className="font-semibold mb-4">Activity Growth Over Time</h3>
-            {historicalData.length > 0 ? (
+            <h3 className="font-semibold mb-4">Your Activity (Last 6 Weeks)</h3>
+            {analytics.historicalData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
-                <AreaChart data={historicalData}>
+                <AreaChart data={analytics.historicalData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
+                  <XAxis dataKey="period" />
                   <YAxis />
                   <Tooltip />
                   <Legend />
@@ -287,12 +280,12 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
         <TabsContent value="engagement" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
             <Card className="p-6">
-              <h3 className="font-semibold mb-4">Activity Distribution (%)</h3>
-              {engagementData.length > 0 ? (
+              <h3 className="font-semibold mb-4">What You're Doing</h3>
+              {engagementBreakdown().length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
                     <Pie
-                      data={engagementData}
+                      data={engagementBreakdown()}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
@@ -301,7 +294,7 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
                       fill="hsl(var(--primary))"
                       dataKey="value"
                     >
-                      {engagementData.map((entry, index) => (
+                      {engagementBreakdown().map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -316,15 +309,18 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
             </Card>
 
             <Card className="p-6">
-              <h3 className="font-semibold mb-4">Activity Breakdown (%)</h3>
-              {engagementData.length > 0 ? (
+              <h3 className="font-semibold mb-4">Engagement Received (Weekly Avg)</h3>
+              {engagementReceivedByWeek().length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={engagementData}>
+                  <BarChart data={engagementReceivedByWeek()}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
+                    <XAxis dataKey="period" />
                     <YAxis />
-                    <Tooltip formatter={(value) => `${value}%`} />
-                    <Bar dataKey="value" fill="hsl(var(--primary))" />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="Likes Received" fill="hsl(var(--primary))" />
+                    <Bar dataKey="Comments Received" fill="hsl(var(--secondary))" />
+                    <Bar dataKey="New Followers" fill="hsl(var(--accent))" />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
