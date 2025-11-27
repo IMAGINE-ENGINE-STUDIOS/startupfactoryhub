@@ -18,6 +18,7 @@ import NetworkBrowser from '@/components/NetworkBrowser';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import EducationalResources from '@/components/EducationalResources';
 import StudentProfileView from '@/components/StudentProfileView';
+import StudyRooms from '@/components/StudyRooms';
 import FloatingChat from '@/components/FloatingChat';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
