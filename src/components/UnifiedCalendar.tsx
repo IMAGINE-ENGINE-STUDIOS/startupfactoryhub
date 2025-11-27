@@ -81,14 +81,20 @@ export default function UnifiedCalendar({
     fetchEvents();
     fetchPitchMeetings();
 
-    // Real-time subscription for events
+    // Real-time subscription for events, pitch meetings, and attendees
     const channel = supabase
       .channel('unified-calendar-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
+        console.log('Event change detected, refreshing...');
         fetchEvents();
       })
       .on('postgres_changes', { event: '*', schema: 'public', table: 'pitch_meetings' }, () => {
+        console.log('Pitch meeting change detected, refreshing...');
         fetchPitchMeetings();
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_attendees' }, () => {
+        console.log('Event attendee change detected, refreshing...');
+        fetchEvents(); // Refetch to update attendee counts
       })
       .subscribe();
 
