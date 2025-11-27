@@ -131,8 +131,9 @@ export default function StudentDashboard() {
             <NetworkBrowser />
           </TabsContent>
 
-          <TabsContent value="learning" className="space-y-4">
-            <EducationalResources />
+        <TabsContent value="learning" className="space-y-4">
+          <StudyRooms />
+          <EducationalResources />
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-4">
