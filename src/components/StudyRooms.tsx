@@ -465,7 +465,7 @@ export default function StudyRooms() {
 
       {/* Room Details Sheet */}
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl h-full flex flex-col">
+        <SheetContent side="right" className="w-[450px] max-h-[600px] flex flex-col">
           {selectedGroup && (
             <>
               <SheetHeader>
@@ -475,8 +475,7 @@ export default function StudyRooms() {
                 )}
               </SheetHeader>
 
-              <div className="flex-1 flex flex-col overflow-hidden">
-                <Tabs defaultValue="comments" className="flex-1 flex flex-col mt-6 overflow-hidden">
+              <Tabs defaultValue="comments" className="mt-4">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="comments">
                     <MessageSquare className="h-4 w-4 mr-2" />
@@ -493,9 +492,9 @@ export default function StudyRooms() {
                 </TabsList>
 
                 {/* Comments Tab */}
-                <TabsContent value="comments" className="flex-1 flex flex-col overflow-hidden space-y-4 mt-0">
-                  <ScrollArea className="flex-1 pr-4">
-                    <div className="space-y-4 pt-4">
+                <TabsContent value="comments" className="space-y-4">
+                  <ScrollArea className="h-[350px] pr-4">
+                    <div className="space-y-4">
                       {messages.map((message) => (
                         <div key={message.id} className="border-b pb-3">
                           <div className="flex items-center gap-2 mb-1">
@@ -509,7 +508,7 @@ export default function StudyRooms() {
                       ))}
                     </div>
                   </ScrollArea>
-                  <div className="flex gap-2 pt-4 border-t">
+                  <div className="flex gap-2 pt-2">
                     <Input
                       placeholder="Write a comment..."
                       value={newMessage}
@@ -523,13 +522,11 @@ export default function StudyRooms() {
                 </TabsContent>
 
                 {/* Documents Tab */}
-                <TabsContent value="documents" className="flex-1 flex flex-col overflow-hidden mt-0 pt-4">
-                  <div className="border-2 border-dashed rounded-lg p-6 text-center mb-4">
+                <TabsContent value="documents" className="space-y-4">
+                  <div className="border-2 border-dashed rounded-lg p-4 text-center">
                     <Label htmlFor="file-upload" className="cursor-pointer">
-                      <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
-                      <p className="text-sm text-muted-foreground mb-2">
-                        Click to upload a document
-                      </p>
+                      <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                      <p className="text-sm text-muted-foreground">Click to upload</p>
                       <Input
                         id="file-upload"
                         type="file"
@@ -539,7 +536,7 @@ export default function StudyRooms() {
                     </Label>
                   </div>
 
-                  <ScrollArea className="flex-1">
+                  <ScrollArea className="h-[300px]">
                     <div className="space-y-2 pr-4">
                       {files.map((file) => (
                         <div
@@ -567,9 +564,9 @@ export default function StudyRooms() {
                 </TabsContent>
 
                 {/* Members Tab */}
-                <TabsContent value="members" className="flex-1 flex flex-col overflow-hidden mt-0">
-                  <ScrollArea className="flex-1">
-                    <div className="space-y-2 pt-4 pr-4">
+                <TabsContent value="members">
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-2 pr-4">
                       {members.map((member, idx) => (
                         <div
                           key={`${member.user_id}-${idx}`}
@@ -588,7 +585,6 @@ export default function StudyRooms() {
                   </ScrollArea>
                 </TabsContent>
               </Tabs>
-              </div>
             </>
           )}
         </SheetContent>
