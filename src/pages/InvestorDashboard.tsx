@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -663,87 +664,70 @@ export default function InvestorDashboard() {
               </Button>
             </div>
 
-            {/* Upcoming Events with Banners - AT TOP */}
+            {/* Upcoming Events with Banners */}
             {upcomingEvents.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex gap-4 overflow-x-auto pb-2">
-                    {upcomingEvents.slice(0, 6).map(event => (
-                      <div 
-                        key={event.id} 
-                        className="group cursor-pointer flex-shrink-0 w-[300px]" 
-                        onClick={() => {
-                          setSelectedEvent(event);
-                          setShowEventDetails(true);
-                        }}
-                      >
-                        <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all h-full flex flex-col">
-                          {event.banner_url ? (
-                            <img 
-                              src={event.banner_url} 
-                              alt={event.title} 
-                              className="w-full h-48 object-cover group-hover:scale-105 transition-transform" 
-                            />
-                          ) : (
-                            <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
-                              <CalendarIcon className="h-16 w-16 text-purple-500/30" />
-                            </div>
-                          )}
-                          <div className="p-4 h-[180px] flex flex-col">
-                            <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
-                            <div className="space-y-1 text-sm text-muted-foreground flex-1">
-                              <div className="flex items-center gap-2">
-                                <Clock className="h-3 w-3" />
-                                {format(parseISO(event.start_date), 'MMM d, h:mm a')}
-                              </div>
-                               {event.location && (
-                                 <div className="flex items-center gap-2">
-                                   <MapPin className="h-3 w-3" />
-                                   {event.location.startsWith('http') ? (
-                                     <a 
-                                       href={event.location}
-                                       target="_blank"
-                                       rel="noopener noreferrer"
-                                       className="text-primary hover:underline line-clamp-1"
-                                       onClick={(e) => e.stopPropagation()}
-                                     >
-                                       {event.location}
-                                     </a>
-                                   ) : (
-                                     <span className="line-clamp-1">{event.location}</span>
-                                   )}
-                                 </div>
-                               )}
-                              <div className="flex items-center gap-2">
-                                <Users className="h-3 w-3" />
-                                {event.attendees} attending
-                                {event.max_attendees && ` / ${event.max_attendees}`}
-                              </div>
-                            </div>
-                            {event.location?.includes('whereby.com') ? (
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setActiveVideoUrl(event.location);
-                                }}
-                                className="gap-2 w-full mt-auto"
-                              >
-                                <Video className="h-4 w-4" />
-                                Join Event
-                              </Button>
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-4 pb-4">
+                      {upcomingEvents.slice(0, 6).map(event => (
+                        <div 
+                          key={event.id} 
+                          className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]" 
+                          onClick={() => {
+                            setSelectedEvent(event);
+                            setShowEventDetails(true);
+                          }}
+                        >
+                          <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
+                            {event.banner_url ? (
+                              <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" />
                             ) : (
-                              <div className="h-9 mt-auto" />
+                              <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                                <CalendarIcon className="h-16 w-16 text-purple-500/30" />
+                              </div>
                             )}
+                            <div className="p-4 min-h-[120px] flex flex-col">
+                              <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
+                              <div className="space-y-1 text-sm text-muted-foreground flex-1">
+                                <div className="flex items-center gap-2">
+                                  <Clock className="h-3 w-3" />
+                                  {format(parseISO(event.start_date), 'MMM d, h:mm a')}
+                                </div>
+                                {event.location && (
+                                  <div className="flex items-center gap-2">
+                                    <MapPin className="h-3 w-3" />
+                                    {event.location.startsWith('http') ? (
+                                      <a 
+                                        href={event.location}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-primary hover:underline line-clamp-1"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        {event.location}
+                                      </a>
+                                    ) : (
+                                      <span className="line-clamp-1">{event.location}</span>
+                                    )}
+                                  </div>
+                                )}
+                                <div className="flex items-center gap-2">
+                                  <Users className="h-3 w-3" />
+                                  {event.attendees} attending
+                                  {event.max_attendees && ` / ${event.max_attendees}`}
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
                 </CardContent>
               </Card>
             )}
