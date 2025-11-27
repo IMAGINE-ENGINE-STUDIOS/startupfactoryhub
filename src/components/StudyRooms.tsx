@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Label } from '@/components/ui/label';
@@ -55,7 +54,7 @@ export default function StudyRooms() {
   const [files, setFiles] = useState<GroupFile[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newRoom, setNewRoom] = useState({ name: '', description: '' });
 
   useEffect(() => {
@@ -443,7 +442,7 @@ export default function StudyRooms() {
                     <div className="flex gap-2">
                       <Button size="sm" onClick={() => {
                         setSelectedGroup(group);
-                        setIsSheetOpen(true);
+                        setIsDialogOpen(true);
                       }}>
                         Open
                       </Button>
@@ -463,19 +462,19 @@ export default function StudyRooms() {
         })}
       </div>
 
-      {/* Room Details Sheet */}
-      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent side="right" className="w-[450px] max-h-[600px] flex flex-col">
+      {/* Room Details Dialog */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="w-[95vw] max-w-[450px] max-h-[90vh] sm:max-h-[600px] flex flex-col p-6">
           {selectedGroup && (
             <>
-              <SheetHeader>
-                <SheetTitle>{selectedGroup.name}</SheetTitle>
+              <DialogHeader>
+                <DialogTitle>{selectedGroup.name}</DialogTitle>
                 {selectedGroup.description && (
                   <p className="text-sm text-muted-foreground">{selectedGroup.description}</p>
                 )}
-              </SheetHeader>
+              </DialogHeader>
 
-              <Tabs defaultValue="comments" className="mt-4">
+              <Tabs defaultValue="comments" className="mt-4 flex-1 flex flex-col overflow-hidden">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="comments">
                     <MessageSquare className="h-4 w-4 mr-2" />
@@ -492,8 +491,8 @@ export default function StudyRooms() {
                 </TabsList>
 
                 {/* Comments Tab */}
-                <TabsContent value="comments" className="space-y-4">
-                  <ScrollArea className="h-[350px] pr-4">
+                <TabsContent value="comments" className="space-y-4 flex-1 flex flex-col">
+                  <ScrollArea className="h-[250px] sm:h-[350px] pr-4">
                     <div className="space-y-4">
                       {messages.map((message) => (
                         <div key={message.id} className="border-b pb-3">
@@ -522,8 +521,8 @@ export default function StudyRooms() {
                 </TabsContent>
 
                 {/* Documents Tab */}
-                <TabsContent value="documents" className="space-y-4">
-                  <div className="border-2 border-dashed rounded-lg p-4 text-center">
+                <TabsContent value="documents" className="space-y-4 flex-1 flex flex-col">
+                  <div className="border-2 border-dashed rounded-lg p-3 sm:p-4 text-center">
                     <Label htmlFor="file-upload" className="cursor-pointer">
                       <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
                       <p className="text-sm text-muted-foreground">Click to upload</p>
@@ -536,7 +535,7 @@ export default function StudyRooms() {
                     </Label>
                   </div>
 
-                  <ScrollArea className="h-[300px]">
+                  <ScrollArea className="h-[200px] sm:h-[300px] flex-1">
                     <div className="space-y-2 pr-4">
                       {files.map((file) => (
                         <div
@@ -564,8 +563,8 @@ export default function StudyRooms() {
                 </TabsContent>
 
                 {/* Members Tab */}
-                <TabsContent value="members">
-                  <ScrollArea className="h-[400px]">
+                <TabsContent value="members" className="flex-1">
+                  <ScrollArea className="h-[300px] sm:h-[400px]">
                     <div className="space-y-2 pr-4">
                       {members.map((member, idx) => (
                         <div
@@ -587,8 +586,8 @@ export default function StudyRooms() {
               </Tabs>
             </>
           )}
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
