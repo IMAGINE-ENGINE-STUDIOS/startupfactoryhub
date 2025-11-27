@@ -44,9 +44,10 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
       }
 
       if (file.size > 500 * 1024 * 1024) {
+        const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
         toast({
           title: "File too large",
-          description: "Video must be under 500MB for maximum quality",
+          description: `Your video is ${fileSizeMB}MB. Maximum allowed is 500MB. Try compressing it or using a shorter video.`,
           variant: "destructive",
         });
         return;
@@ -293,6 +294,19 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
         <DialogHeader>
           <DialogTitle>Create Short Video (Max 60 seconds)</DialogTitle>
         </DialogHeader>
+
+        {/* File size warning banner */}
+        <div className="bg-primary/10 border border-primary/20 rounded-lg p-3 flex items-start gap-2">
+          <Video className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+          <div className="text-sm space-y-1">
+            <p className="font-medium text-foreground">Video Requirements:</p>
+            <ul className="text-muted-foreground space-y-0.5 ml-4 list-disc">
+              <li><strong>Maximum duration:</strong> 60 seconds</li>
+              <li><strong>Maximum file size:</strong> 500MB</li>
+              <li><strong>Supported formats:</strong> MP4, WebM, MOV</li>
+            </ul>
+          </div>
+        </div>
 
         <div className="space-y-4">
           <div className="border-2 border-dashed rounded-lg p-8 text-center">
