@@ -182,6 +182,7 @@ export default function UnifiedCommunityFeed({
           user_id
         )
       `)
+      .neq('post_type', 'short')
       .order('created_at', { ascending: false })
       .range(currentOffset, currentOffset + limit - 1);
 
