@@ -42,10 +42,10 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
         return;
       }
 
-      if (file.size > 100 * 1024 * 1024) {
+      if (file.size > 500 * 1024 * 1024) {
         toast({
           title: "File too large",
-          description: "Video must be under 100MB",
+          description: "Video must be under 500MB for maximum quality",
           variant: "destructive",
         });
         return;
@@ -83,13 +83,38 @@ const ShortsCreator = ({ isOpen, onClose, onSave }: ShortsCreatorProps) => {
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: true, 
-        audio: true 
+        video: { 
+          width: { ideal: 1920 },
+          height: { ideal: 1080 },
+          frameRate: { ideal: 60 }
+        }, 
+        audio: { 
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 48000
+        } 
       });
       
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'video/webm;codecs=vp8,opus'
-      });
+      // Try best quality codecs in order of preference
+      let options;
+      if (MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')) {
+        options = { 
+          mimeType: 'video/webm;codecs=vp9,opus',
+          videoBitsPerSecond: 8000000 // 8 Mbps for high quality
+        };
+      } else if (MediaRecorder.isTypeSupported('video/webm;codecs=h264,opus')) {
+        options = { 
+          mimeType: 'video/webm;codecs=h264,opus',
+          videoBitsPerSecond: 8000000
+        };
+      } else {
+        options = { 
+          mimeType: 'video/webm;codecs=vp8,opus',
+          videoBitsPerSecond: 5000000 // 5 Mbps fallback
+        };
+      }
+      
+      const mediaRecorder = new MediaRecorder(stream, options);
       
       mediaRecorderRef.current = mediaRecorder;
       chunksRef.current = [];
