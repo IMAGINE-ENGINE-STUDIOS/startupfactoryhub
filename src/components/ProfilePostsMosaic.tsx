@@ -8,6 +8,8 @@ import {
   Image as ImageIcon, FileText, Loader2 
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { PostDetailDialog } from './PostDetailDialog';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface Post {
   id: string;
@@ -18,6 +20,7 @@ interface Post {
   comments_count: number;
   shares_count: number;
   created_at: string;
+  user_id: string;
 }
 
 interface ProfilePostsMosaicProps {
@@ -26,18 +29,36 @@ interface ProfilePostsMosaicProps {
 }
 
 export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: ProfilePostsMosaicProps) {
+  const { user } = useAuth();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
+  const [likedPosts, setLikedPosts] = useState<Set<string>>(new Set());
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const LIMIT = 12;
 
   useEffect(() => {
     if (userId) {
       fetchPosts();
+      if (user) fetchUserLikes();
     }
-  }, [userId]);
+  }, [userId, user]);
+
+  const fetchUserLikes = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('post_likes')
+      .select('post_id')
+      .eq('user_id', user.id);
+
+    if (data) {
+      setLikedPosts(new Set(data.map(like => like.post_id)));
+    }
+  };
 
   const fetchPosts = async (loadMore = false) => {
     if (loadMore) {
@@ -51,7 +72,7 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
       
       const { data, error } = await supabase
         .from('feed_posts')
-        .select('id, content, post_type, media_urls, likes_count, comments_count, shares_count, created_at')
+        .select('id, content, post_type, media_urls, likes_count, comments_count, shares_count, created_at, user_id')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .range(currentOffset, currentOffset + LIMIT - 1);
@@ -73,6 +94,16 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
       setLoading(false);
       setLoadingMore(false);
     }
+  };
+
+  const handlePostClick = (post: Post) => {
+    setSelectedPost(post);
+    setIsDialogOpen(true);
+  };
+
+  const handleLikeToggle = () => {
+    fetchPosts(false);
+    if (user) fetchUserLikes();
   };
 
   const getMosaicClass = (post: Post, index: number) => {
@@ -118,7 +149,10 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
       const isVideo = isVideoUrl(mediaUrl);
       
       return (
-        <div className="relative w-full h-full group">
+        <div 
+          className="relative w-full h-full group cursor-pointer"
+          onClick={() => handlePostClick(post)}
+        >
           {isVideo ? (
             <video 
               src={mediaUrl}
@@ -162,7 +196,10 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
       const isVideo = isVideoUrl(mediaUrl);
       
       return (
-        <div className="relative w-full h-full group">
+        <div 
+          className="relative w-full h-full group cursor-pointer"
+          onClick={() => handlePostClick(post)}
+        >
           {isVideo ? (
             <video 
               src={mediaUrl}
@@ -203,7 +240,10 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
 
     if (isEvent) {
       return (
-        <div className="relative w-full h-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center p-4">
+        <div 
+          className="relative w-full h-full bg-gradient-to-br from-primary/10 to-accent/10 flex items-center justify-center p-4 cursor-pointer"
+          onClick={() => handlePostClick(post)}
+        >
           <Calendar className="h-12 w-12 text-primary mb-2" />
           <p className="text-sm text-center font-medium line-clamp-3 mt-2">
             {post.content}
@@ -215,7 +255,10 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
 
     // Text-only post
     return (
-      <div className="relative w-full h-full bg-gradient-to-br from-muted/50 to-muted flex items-center justify-center p-4">
+      <div 
+        className="relative w-full h-full bg-gradient-to-br from-muted/50 to-muted flex items-center justify-center p-4 cursor-pointer"
+        onClick={() => handlePostClick(post)}
+      >
         <FileText className="absolute top-2 left-2 h-5 w-5 text-muted-foreground" />
         <p className="text-sm text-center line-clamp-4 font-medium">
           {post.content}
@@ -224,29 +267,33 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
     );
   };
 
-  const renderEngagementOverlay = (post: Post) => (
-    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
-      <div className="flex items-center gap-4 text-white text-sm">
-        <div className="flex items-center gap-1">
-          <Heart className="h-4 w-4" />
-          <span>{post.likes_count}</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <MessageCircle className="h-4 w-4" />
-          <span>{post.comments_count}</span>
-        </div>
-        {post.shares_count > 0 && (
+  const renderEngagementOverlay = (post: Post) => {
+    const isLiked = likedPosts.has(post.id);
+    
+    return (
+      <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-4 text-white text-sm">
           <div className="flex items-center gap-1">
-            <Share2 className="h-4 w-4" />
-            <span>{post.shares_count}</span>
+            <Heart className={`h-4 w-4 ${isLiked ? 'fill-red-500 text-red-500' : ''}`} />
+            <span>{post.likes_count}</span>
           </div>
-        )}
+          <div className="flex items-center gap-1">
+            <MessageCircle className="h-4 w-4" />
+            <span>{post.comments_count}</span>
+          </div>
+          {post.shares_count > 0 && (
+            <div className="flex items-center gap-1">
+              <Share2 className="h-4 w-4" />
+              <span>{post.shares_count}</span>
+            </div>
+          )}
+        </div>
+        <p className="text-xs text-white/80 mt-1">
+          {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
+        </p>
       </div>
-      <p className="text-xs text-white/80 mt-1">
-        {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
-      </p>
-    </div>
-  );
+    );
+  };
 
   if (loading) {
     return (
@@ -305,6 +352,13 @@ export default function ProfilePostsMosaic({ userId, isOwnProfile = false }: Pro
           </Button>
         </div>
       )}
+
+      <PostDetailDialog
+        post={selectedPost}
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        onLikeToggle={handleLikeToggle}
+      />
     </div>
   );
 }
