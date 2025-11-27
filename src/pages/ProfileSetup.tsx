@@ -289,13 +289,25 @@ const ProfileSetup = () => {
                         <SelectValue placeholder="Select industry" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="fintech">FinTech</SelectItem>
-                        <SelectItem value="healthtech">HealthTech</SelectItem>
-                        <SelectItem value="edtech">EdTech</SelectItem>
+                        <SelectItem value="aerospace">Aerospace</SelectItem>
                         <SelectItem value="ai">AI/ML</SelectItem>
-                        <SelectItem value="saas">SaaS</SelectItem>
-                        <SelectItem value="ecommerce">E-commerce</SelectItem>
+                        <SelectItem value="biotech">Biotech</SelectItem>
                         <SelectItem value="blockchain">Blockchain</SelectItem>
+                        <SelectItem value="cleantech">CleanTech</SelectItem>
+                        <SelectItem value="cybersecurity">Cybersecurity</SelectItem>
+                        <SelectItem value="defense">Defense</SelectItem>
+                        <SelectItem value="ecommerce">E-commerce</SelectItem>
+                        <SelectItem value="edtech">EdTech</SelectItem>
+                        <SelectItem value="fintech">FinTech</SelectItem>
+                        <SelectItem value="hardware">Hardware</SelectItem>
+                        <SelectItem value="healthtech">HealthTech</SelectItem>
+                        <SelectItem value="quantum">Quantum Computing</SelectItem>
+                        <SelectItem value="robotics">Robotics</SelectItem>
+                        <SelectItem value="saas">SaaS</SelectItem>
+                        <SelectItem value="semiconductor">Semiconductors</SelectItem>
+                        <SelectItem value="software">Software</SelectItem>
+                        <SelectItem value="space">Space Tech</SelectItem>
+                        <SelectItem value="telecommunications">Telecommunications</SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
