@@ -18,6 +18,7 @@ interface StudyGroup {
   description: string | null;
   created_at: string;
   created_by: string;
+  banner_url: string | null;
 }
 
 interface GroupMessage {
@@ -57,6 +58,7 @@ export default function StudyRooms() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newRoom, setNewRoom] = useState({ name: '', description: '' });
+  const [bannerFile, setBannerFile] = useState<File | null>(null);
 
   useEffect(() => {
     fetchStudyGroups();
@@ -235,6 +237,31 @@ export default function StudyRooms() {
       return;
     }
 
+    let bannerUrl = null;
+
+    // Upload banner if provided
+    if (bannerFile) {
+      const fileExt = bannerFile.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `study-room-banners/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('study_rooms')
+        .upload(filePath, bannerFile);
+
+      if (uploadError) {
+        toast.error('Failed to upload banner');
+        console.error(uploadError);
+        return;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('study_rooms')
+        .getPublicUrl(filePath);
+
+      bannerUrl = publicUrl;
+    }
+
     const { data: group, error: groupError } = await supabase
       .from('study_groups')
       .insert({
@@ -243,7 +270,8 @@ export default function StudyRooms() {
         category: 'General',
         max_members: 50,
         is_public: true,
-        created_by: user.id
+        created_by: user.id,
+        banner_url: bannerUrl
       })
       .select()
       .single();
@@ -269,6 +297,7 @@ export default function StudyRooms() {
     toast.success('Study room created!');
     setShowCreateDialog(false);
     setNewRoom({ name: '', description: '' });
+    setBannerFile(null);
     fetchStudyGroups();
     fetchMyGroups();
   };
@@ -467,6 +496,15 @@ export default function StudyRooms() {
                   placeholder="What's this room about?"
                 />
               </div>
+              <div>
+                <Label htmlFor="banner">Banner Image (Optional)</Label>
+                <Input
+                  id="banner"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setBannerFile(e.target.files?.[0] || null)}
+                />
+              </div>
               <Button onClick={handleCreateRoom} className="w-full">
                 Create Room
               </Button>
@@ -482,7 +520,16 @@ export default function StudyRooms() {
           const isCreator = user?.id === group.created_by;
 
           return (
-            <Card key={group.id}>
+            <Card key={group.id} className="overflow-hidden">
+              {group.banner_url && (
+                <div className="h-32 w-full overflow-hidden">
+                  <img 
+                    src={group.banner_url} 
+                    alt={`${group.name} banner`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              )}
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
