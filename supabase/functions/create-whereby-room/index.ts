@@ -10,6 +10,16 @@ function generateShortId(): string {
   return Math.random().toString(36).substring(2, 10);
 }
 
+// Helper function to sanitize room name prefix for Whereby API
+function sanitizeRoomNamePrefix(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '-')  // Replace non-alphanumeric with dashes
+    .replace(/-+/g, '-')           // Replace multiple dashes with single dash
+    .replace(/^-|-$/g, '')         // Remove leading/trailing dashes
+    .substring(0, 30);             // Limit to 30 chars
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -23,8 +33,8 @@ serve(async (req) => {
       throw new Error("Whereby API key not configured");
     }
 
-    // Shorten room name to max 39 characters for Whereby API (using 30 for safety)
-    const shortRoomName = roomName ? roomName.substring(0, 30) : generateShortId();
+    // Sanitize room name for Whereby API (only alphanumeric and dashes allowed)
+    const shortRoomName = roomName ? sanitizeRoomNamePrefix(roomName) : generateShortId();
 
     // Create a Whereby room using their API
     const response = await fetch("https://api.whereby.dev/v1/meetings", {
