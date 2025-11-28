@@ -2509,6 +2509,7 @@ export type Database = {
           investor_id: string
           meeting_link: string | null
           meeting_notes: string | null
+          outcome: string | null
           scheduled_date: string
           startup_id: string
           status: string
@@ -2523,6 +2524,7 @@ export type Database = {
           investor_id: string
           meeting_link?: string | null
           meeting_notes?: string | null
+          outcome?: string | null
           scheduled_date: string
           startup_id: string
           status?: string
@@ -2537,6 +2539,7 @@ export type Database = {
           investor_id?: string
           meeting_link?: string | null
           meeting_notes?: string | null
+          outcome?: string | null
           scheduled_date?: string
           startup_id?: string
           status?: string

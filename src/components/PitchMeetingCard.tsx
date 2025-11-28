@@ -2,8 +2,10 @@ import { format, formatDistanceToNow, isToday, isTomorrow } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Video, Check, X, ArrowRight, Sparkles } from 'lucide-react';
+import { Calendar, Clock, Video, Check, X, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
+export type PitchOutcome = 'follow_up' | 'maybe' | 'not_interested' | 'committed' | 'passed' | null;
 
 interface PitchMeetingCardProps {
   meeting: {
@@ -13,6 +15,7 @@ interface PitchMeetingCardProps {
     meeting_link?: string;
     status: string;
     notes?: string;
+    outcome?: PitchOutcome;
     company?: {
       name: string;
       logo_url?: string;
@@ -31,7 +34,27 @@ interface PitchMeetingCardProps {
   onAccept?: (id: string) => void;
   onReject?: (id: string) => void;
   onJoin?: (meetingLink: string) => void;
+  onOutcomeChange?: (id: string, outcome: PitchOutcome) => void;
 }
+
+const outcomeOptions: { value: PitchOutcome; label: string; colors: string }[] = [
+  { value: 'follow_up', label: 'Follow Up', colors: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/30 hover:bg-blue-500/20' },
+  { value: 'maybe', label: 'Maybe', colors: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30 hover:bg-amber-500/20' },
+  { value: 'committed', label: 'Committed', colors: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20' },
+  { value: 'not_interested', label: 'Not Interested', colors: 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/30 hover:bg-rose-500/20' },
+  { value: 'passed', label: 'Passed', colors: 'bg-muted text-muted-foreground border-muted-foreground/30 hover:bg-muted/80' },
+];
+
+const getSelectedOutcomeStyle = (outcome: PitchOutcome) => {
+  switch (outcome) {
+    case 'follow_up': return 'bg-blue-500 text-white border-blue-600';
+    case 'maybe': return 'bg-amber-500 text-white border-amber-600';
+    case 'committed': return 'bg-emerald-500 text-white border-emerald-600';
+    case 'not_interested': return 'bg-rose-500 text-white border-rose-600';
+    case 'passed': return 'bg-muted-foreground text-background border-muted-foreground';
+    default: return '';
+  }
+};
 
 export const PitchMeetingCard = ({
   meeting,
@@ -40,6 +63,7 @@ export const PitchMeetingCard = ({
   onAccept,
   onReject,
   onJoin,
+  onOutcomeChange,
 }: PitchMeetingCardProps) => {
   const scheduledDate = new Date(meeting.scheduled_date);
   
@@ -224,11 +248,24 @@ export const PitchMeetingCard = ({
           )}
 
           {variant === 'past' && (
-            <div className="flex items-center gap-2 mt-2 sm:mt-3">
-              <Badge variant="secondary" className="text-[10px] sm:text-xs">
-                <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
-                {getTimeUntil()}
-              </Badge>
+            <div className="mt-3 sm:mt-4">
+              <p className="text-[10px] sm:text-xs text-muted-foreground mb-2">Mark outcome:</p>
+              <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                {outcomeOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => onOutcomeChange?.(meeting.id, option.value)}
+                    className={cn(
+                      'px-2 py-1 sm:px-3 sm:py-1.5 text-[10px] sm:text-xs font-medium rounded-full border transition-all duration-200',
+                      meeting.outcome === option.value
+                        ? getSelectedOutcomeStyle(option.value)
+                        : option.colors
+                    )}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
