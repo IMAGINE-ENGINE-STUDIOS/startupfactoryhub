@@ -256,34 +256,34 @@ export default function StartupProfileDialog({
           </TabsContent>
         </Tabs>
 
-        {/* Actions */}
-        <div className="flex gap-3 pt-4 border-t border-border/50">
-          {onSchedulePitch && (
-            <Button 
-              className="flex-1" 
-              size="lg"
-              onClick={() => onSchedulePitch(company.id, company.name)}
-            >
-              <Calendar className="h-4 w-4 mr-2" />
-              Schedule Pitch
+        {/* Actions - only show if callbacks provided */}
+        {(onSchedulePitch || onExpressInterest) && (
+          <div className="flex gap-3 pt-4 border-t border-border/50">
+            {onSchedulePitch && (
+              <Button 
+                className="flex-1" 
+                size="lg"
+                onClick={() => onSchedulePitch(company.id, company.name)}
+              >
+                <Calendar className="h-4 w-4 mr-2" />
+                Schedule Pitch
+              </Button>
+            )}
+            {onExpressInterest && (
+              <Button 
+                className="flex-1" 
+                size="lg"
+                onClick={() => onExpressInterest(company.id)}
+              >
+                <Heart className="h-4 w-4 mr-2" />
+                Express Interest
+              </Button>
+            )}
+            <Button variant="outline" size="lg" onClick={() => onOpenChange(false)}>
+              Close
             </Button>
-          )}
-          <Button 
-            className="flex-1" 
-            size="lg"
-            onClick={() => {
-              if (onExpressInterest) {
-                onExpressInterest(company.id);
-              }
-            }}
-          >
-            <Heart className="h-4 w-4 mr-2" />
-            Express Interest
-          </Button>
-          <Button variant="outline" size="lg" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-        </div>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
