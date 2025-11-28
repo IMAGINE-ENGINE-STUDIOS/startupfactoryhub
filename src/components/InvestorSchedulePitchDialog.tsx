@@ -329,8 +329,8 @@ export default function InvestorSchedulePitchDialog({
             </div>
 
             {selectedStartupId && (
-              <>
-                {/* Date Picker */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Left Column - Calendar */}
                 <div className="space-y-2">
                   <Label className="flex items-center gap-2">
                     <CalendarIcon className="h-4 w-4 text-primary" />
@@ -345,16 +345,17 @@ export default function InvestorSchedulePitchDialog({
                   />
                 </div>
 
-                {/* Time Slot Selection */}
-                {date && (
+                {/* Right Column - Time & Duration */}
+                <div className="space-y-4">
+                  {/* Time Slot Selection */}
                   <div className="space-y-2">
                     <Label className="flex items-center gap-2">
                       <Clock className="h-4 w-4 text-primary" />
                       Select Time
                     </Label>
-                    <Select value={timeSlot} onValueChange={setTimeSlot}>
+                    <Select value={timeSlot} onValueChange={setTimeSlot} disabled={!date}>
                       <SelectTrigger>
-                        <SelectValue placeholder="Choose a time slot" />
+                        <SelectValue placeholder={date ? "Choose a time slot" : "Select a date first"} />
                       </SelectTrigger>
                       <SelectContent className="max-h-[200px]">
                         {generateTimeSlots().map((slot) => (
@@ -365,10 +366,8 @@ export default function InvestorSchedulePitchDialog({
                       </SelectContent>
                     </Select>
                   </div>
-                )}
 
-                {/* Duration Selection */}
-                {timeSlot && (
+                  {/* Duration Selection */}
                   <div className="space-y-2">
                     <Label>Meeting Duration</Label>
                     <Select value={duration.toString()} onValueChange={(v) => setDuration(parseInt(v))}>
@@ -382,19 +381,19 @@ export default function InvestorSchedulePitchDialog({
                       </SelectContent>
                     </Select>
                   </div>
-                )}
 
-                {/* Selected Meeting Summary */}
-                {date && timeSlot && (
-                  <div className="p-4 bg-muted rounded-lg">
-                    <p className="text-sm font-medium mb-2">Proposed Meeting</p>
-                    <p className="text-sm text-muted-foreground">
-                      {format(date, 'EEEE, MMMM d, yyyy')} at {format(new Date(`2000-01-01T${timeSlot}`), 'h:mm a')}
-                    </p>
-                    <p className="text-sm text-muted-foreground">Duration: {duration} minutes</p>
-                  </div>
-                )}
-              </>
+                  {/* Selected Meeting Summary */}
+                  {date && timeSlot && (
+                    <div className="p-4 bg-muted rounded-lg">
+                      <p className="text-sm font-medium mb-2">Proposed Meeting</p>
+                      <p className="text-sm text-muted-foreground">
+                        {format(date, 'EEEE, MMMM d, yyyy')} at {format(new Date(`2000-01-01T${timeSlot}`), 'h:mm a')}
+                      </p>
+                      <p className="text-sm text-muted-foreground">Duration: {duration} minutes</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
 
             {/* Action Buttons */}
