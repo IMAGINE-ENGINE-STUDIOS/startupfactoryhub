@@ -106,10 +106,10 @@ const Dashboard = () => {
       const investorIds = [...new Set(data.map(m => m.investor_id))];
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, full_name, avatar_url')
-        .in('id', investorIds);
+        .select('user_id, full_name, avatar_url')
+        .in('user_id', investorIds);
 
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
       
       const enrichedData = data.map(meeting => ({
         ...meeting,

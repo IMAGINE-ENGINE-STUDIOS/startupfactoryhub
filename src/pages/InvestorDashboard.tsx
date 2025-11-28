@@ -236,10 +236,10 @@ export default function InvestorDashboard() {
       const startupIds = [...new Set(data.map(m => m.startup_id))];
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('id, full_name, avatar_url')
-        .in('id', startupIds);
+        .select('user_id, full_name, avatar_url')
+        .in('user_id', startupIds);
 
-      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
       
       const enrichedData = data.map(meeting => ({
         ...meeting,
