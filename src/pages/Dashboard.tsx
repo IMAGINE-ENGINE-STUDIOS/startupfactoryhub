@@ -26,6 +26,7 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import JobTaskManager from '@/components/JobTaskManager';
 import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
+import PitchMeetingCard from '@/components/PitchMeetingCard';
 import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Video, Bell, Check, X, ExternalLink } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -563,239 +564,159 @@ const Dashboard = () => {
 
           {/* Pitches Tab */}
           {activeTab === "pitches" && (
-            <TabsContent value="pitches" className="space-y-6">
+            <TabsContent value="pitches" className="space-y-8">
               {/* 1. Incoming Pitch Requests (from investors TO startup) */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Bell className="h-5 w-5 text-orange-500" />
-                    Incoming Pitch Requests
-                    {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && (
-                      <Badge variant="destructive">
-                        {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length}
-                      </Badge>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Briefcase className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                      <p>No incoming pitch requests from investors</p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20">
+                      <Bell className="h-5 w-5 text-amber-500" />
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).map((meeting) => (
-                        <Card key={meeting.id} className="border-orange-500/30 bg-orange-500/5">
-                          <CardContent className="p-4">
-                            <div className="flex items-start gap-3">
-                              <Avatar className="h-12 w-12">
-                                <AvatarImage src={meeting.investor?.avatar_url} />
-                                <AvatarFallback>{meeting.investor?.full_name?.[0] || 'I'}</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <h4 className="font-semibold text-lg">{meeting.investor?.full_name}</h4>
-                                <p className="text-sm text-muted-foreground">
-                                  Investor wants to discuss your pitch
-                                </p>
-                                <div className="flex items-center gap-2 mt-2 text-sm">
-                                  <CalendarIcon className="h-4 w-4" />
-                                  {format(new Date(meeting.scheduled_date), 'PPP p')}
-                                </div>
-                                <Badge variant="outline" className="mt-2">
-                                  {meeting.duration_minutes} minutes
-                                </Badge>
-                              </div>
-                            </div>
-                            
-                            <div className="flex gap-2 mt-3">
-                              <Button
-                                className="flex-1 bg-green-600 hover:bg-green-700"
-                                onClick={() => handleAcceptPitch(meeting.id)}
-                              >
-                                <Check className="h-4 w-4 mr-2" />
-                                Accept
-                              </Button>
-                              <Button
-                                variant="destructive"
-                                className="flex-1"
-                                onClick={() => handleRejectPitch(meeting.id)}
-                              >
-                                <X className="h-4 w-4 mr-2" />
-                                Decline
-                              </Button>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                    <div>
+                      <h3 className="font-semibold text-lg">Incoming Requests</h3>
+                      <p className="text-sm text-muted-foreground">Investor pitch meeting requests</p>
                     </div>
+                  </div>
+                  {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && (
+                    <Badge className="bg-amber-500 text-white">
+                      {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length} pending
+                    </Badge>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+                {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length === 0 ? (
+                  <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+                    <Briefcase className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
+                    <p className="text-muted-foreground">No incoming pitch requests</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).map((meeting) => (
+                      <PitchMeetingCard
+                        key={meeting.id}
+                        meeting={meeting}
+                        variant="incoming"
+                        viewerType="startup"
+                        onAccept={handleAcceptPitch}
+                        onReject={handleRejectPitch}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* 2. Sent Pitch Requests (from startup TO investors) */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Presentation className="h-5 w-5 text-blue-500" />
-                    Sent Pitch Requests
-                    {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length > 0 && (
-                      <Badge variant="secondary">
-                        {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length}
-                      </Badge>
-                    )}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Clock className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                      <p>No pending sent requests</p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20">
+                      <Presentation className="h-5 w-5 text-blue-500" />
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).map((meeting) => (
-                        <Card key={meeting.id} className="border-blue-500/30 bg-blue-500/5">
-                          <CardContent className="p-4">
-                            <div className="flex items-start gap-3">
-                              <Avatar className="h-12 w-12">
-                                <AvatarImage src={meeting.investor?.avatar_url} />
-                                <AvatarFallback>{meeting.investor?.full_name?.[0] || 'I'}</AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1">
-                                <h4 className="font-semibold text-lg">{meeting.investor?.full_name}</h4>
-                                <p className="text-sm text-muted-foreground">
-                                  Pitch request sent
-                                </p>
-                                <div className="flex items-center gap-2 mt-2 text-sm">
-                                  <CalendarIcon className="h-4 w-4" />
-                                  {format(new Date(meeting.scheduled_date), 'PPP p')}
-                                </div>
-                                <Badge variant="secondary" className="mt-2">
-                                  <Clock className="h-3 w-3 mr-1" />
-                                  Awaiting Response
-                                </Badge>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
+                    <div>
+                      <h3 className="font-semibold text-lg">Sent Requests</h3>
+                      <p className="text-sm text-muted-foreground">Your pitch requests to investors</p>
                     </div>
+                  </div>
+                  {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length > 0 && (
+                    <Badge variant="secondary">
+                      {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length} pending
+                    </Badge>
                   )}
-                </CardContent>
-              </Card>
+                </div>
+                {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length === 0 ? (
+                  <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+                    <Clock className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
+                    <p className="text-muted-foreground">No pending sent requests</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).map((meeting) => (
+                      <PitchMeetingCard
+                        key={meeting.id}
+                        meeting={meeting}
+                        variant="sent"
+                        viewerType="startup"
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
 
               {/* 3. Upcoming Pitches (scheduled, future date) */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <CalendarIcon className="h-5 w-5 text-green-500" />
-                    Upcoming Pitches
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                      <p>No upcoming pitch meetings</p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20">
+                      <CalendarIcon className="h-5 w-5 text-emerald-500" />
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {pitchMeetings
-                        .filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date())
-                        .sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime())
-                        .map((meeting) => (
-                          <Card key={meeting.id} className="border-green-500/30 bg-green-500/5">
-                            <CardContent className="p-4">
-                              <div className="flex items-start gap-3">
-                                <Avatar className="h-12 w-12">
-                                  <AvatarImage src={meeting.investor?.avatar_url} />
-                                  <AvatarFallback>{meeting.investor?.full_name?.[0] || 'I'}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                  <h4 className="font-semibold text-lg">{meeting.investor?.full_name}</h4>
-                                  <p className="text-sm text-muted-foreground">
-                                    Pitch meeting scheduled
-                                  </p>
-                                  <div className="flex items-center gap-2 mt-2 text-sm">
-                                    <CalendarIcon className="h-4 w-4" />
-                                    {format(new Date(meeting.scheduled_date), 'PPP p')}
-                                  </div>
-                                  <Badge className="mt-2 bg-green-600">Scheduled</Badge>
-                                </div>
-                              </div>
-                              
-                              {meeting.meeting_link && (
-                                <Button
-                                  className="w-full mt-3"
-                                  onClick={() => setActiveVideoUrl(meeting.meeting_link)}
-                                >
-                                  <Video className="h-4 w-4 mr-2" />
-                                  Join Pitch Meeting
-                                </Button>
-                              )}
-                            </CardContent>
-                          </Card>
-                        ))}
+                    <div>
+                      <h3 className="font-semibold text-lg">Upcoming Pitches</h3>
+                      <p className="text-sm text-muted-foreground">Confirmed pitch meetings</p>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </div>
+                </div>
+                {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length === 0 ? (
+                  <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+                    <CalendarIcon className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
+                    <p className="text-muted-foreground">No upcoming pitch meetings</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {pitchMeetings
+                      .filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date())
+                      .sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime())
+                      .map((meeting) => (
+                        <PitchMeetingCard
+                          key={meeting.id}
+                          meeting={meeting}
+                          variant="upcoming"
+                          viewerType="startup"
+                          onJoin={setActiveVideoUrl}
+                        />
+                      ))}
+                  </div>
+                )}
+              </div>
 
               {/* 4. Past Pitches (scheduled/completed, past date) */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-muted-foreground" />
-                    Past Pitches
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {pitchMeetings.filter(m => 
-                    (m.status === 'scheduled' || m.status === 'completed') && 
-                    new Date(m.scheduled_date) < new Date()
-                  ).length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <Clock className="h-12 w-12 mx-auto mb-2 opacity-20" />
-                      <p>No past pitch meetings</p>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-lg bg-muted/50">
+                      <Clock className="h-5 w-5 text-muted-foreground" />
                     </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {pitchMeetings
-                        .filter(m => 
-                          (m.status === 'scheduled' || m.status === 'completed') && 
-                          new Date(m.scheduled_date) < new Date()
-                        )
-                        .sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime())
-                        .map((meeting) => (
-                          <Card key={meeting.id} className="border-muted">
-                            <CardContent className="p-4">
-                              <div className="flex items-start gap-3">
-                                <Avatar className="h-12 w-12">
-                                  <AvatarImage src={meeting.investor?.avatar_url} />
-                                  <AvatarFallback>{meeting.investor?.full_name?.[0] || 'I'}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                  <h4 className="font-semibold text-lg">{meeting.investor?.full_name}</h4>
-                                  <p className="text-sm text-muted-foreground">
-                                    Pitch meeting completed
-                                  </p>
-                                  <div className="flex items-center gap-2 mt-2 text-sm">
-                                    <CalendarIcon className="h-4 w-4" />
-                                    {format(new Date(meeting.scheduled_date), 'PPP p')}
-                                  </div>
-                                  <Badge variant="secondary" className="mt-2">
-                                    {meeting.status === 'completed' ? '✓ Completed' : 'Completed'}
-                                  </Badge>
-                                </div>
-                              </div>
-                            </CardContent>
-                          </Card>
-                        ))}
+                    <div>
+                      <h3 className="font-semibold text-lg">Past Pitches</h3>
+                      <p className="text-sm text-muted-foreground">Completed meetings history</p>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
+                  </div>
+                </div>
+                {pitchMeetings.filter(m => 
+                  (m.status === 'scheduled' || m.status === 'completed') && 
+                  new Date(m.scheduled_date) < new Date()
+                ).length === 0 ? (
+                  <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+                    <Clock className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
+                    <p className="text-muted-foreground">No past pitch meetings</p>
+                  </div>
+                ) : (
+                  <div className="grid gap-4">
+                    {pitchMeetings
+                      .filter(m => 
+                        (m.status === 'scheduled' || m.status === 'completed') && 
+                        new Date(m.scheduled_date) < new Date()
+                      )
+                      .sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime())
+                      .map((meeting) => (
+                        <PitchMeetingCard
+                          key={meeting.id}
+                          meeting={meeting}
+                          variant="past"
+                          viewerType="startup"
+                        />
+                      ))}
+                  </div>
+                )}
+              </div>
             </TabsContent>
           )}
         </Tabs>
