@@ -15,7 +15,6 @@ import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import { format, parseISO } from 'date-fns';
-
 import StartupBrowser from '@/components/StartupBrowser';
 import NetworkBrowser from '@/components/NetworkBrowser';
 import StartupProfileDialog from '@/components/StartupProfileDialog';
@@ -39,9 +38,7 @@ import CreateSessionDialog from '@/components/CreateSessionDialog';
 import InvestorSchedulePitchDialog from '@/components/InvestorSchedulePitchDialog';
 import RecordInvestmentDialog from '@/components/RecordInvestmentDialog';
 import ValuationTracker from '@/components/ValuationTracker';
-
 import { useEvents } from '@/hooks/useEvents';
-
 interface Investment {
   id: string;
   name: string;
@@ -52,7 +49,6 @@ interface Investment {
   user_id: string;
   logo_url?: string | null;
 }
-
 export default function InvestorDashboard() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [opportunities, setOpportunities] = useState<Investment[]>([]);
@@ -72,16 +68,22 @@ export default function InvestorDashboard() {
   const [showPortfolioDialog, setShowPortfolioDialog] = useState(false);
   const [selectedExternalInvestment, setSelectedExternalInvestment] = useState<any>(null);
   const [showExternalDialog, setShowExternalDialog] = useState(false);
-  const { user } = useAuth();
-  const { toast } = useToast();
-  const { profile: profileWithRole } = useProfileWithRole();
-  const { upcomingEvents } = useEvents();
-
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
+  const {
+    profile: profileWithRole
+  } = useProfileWithRole();
+  const {
+    upcomingEvents
+  } = useEvents();
   useEffect(() => {
     const pending = pitchMeetings.filter(m => m.status === 'pending').length;
     setPendingPitchesCount(pending);
   }, [pitchMeetings]);
-
   useEffect(() => {
     if (user) {
       fetchInvestorProfile();
@@ -97,36 +99,24 @@ export default function InvestorDashboard() {
     if (!user || investments.length === 0) return;
 
     // Get platform company IDs from investments
-    const companyIds = investments
-      .filter((inv: any) => !inv.isExternal && inv.id)
-      .map((inv: any) => inv.id);
-
+    const companyIds = investments.filter((inv: any) => !inv.isExternal && inv.id).map((inv: any) => inv.id);
     if (companyIds.length === 0) return;
+    const channel = supabase.channel('portfolio-companies-changes').on('postgres_changes', {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'companies'
+    }, payload => {
+      // Check if the updated company is in our portfolio
+      if (companyIds.includes(payload.new.id)) {
+        // Refresh investments to get latest data
+        fetchInvestments();
 
-    const channel = supabase
-      .channel('portfolio-companies-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'companies'
-        },
-        (payload) => {
-          // Check if the updated company is in our portfolio
-          if (companyIds.includes(payload.new.id)) {
-            // Refresh investments to get latest data
-            fetchInvestments();
-            
-            // If this company's dialog is open, update the selected company
-            if (selectedPortfolioCompany?.id === payload.new.id) {
-              setSelectedPortfolioCompany(payload.new);
-            }
-          }
+        // If this company's dialog is open, update the selected company
+        if (selectedPortfolioCompany?.id === payload.new.id) {
+          setSelectedPortfolioCompany(payload.new);
         }
-      )
-      .subscribe();
-
+      }
+    }).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
@@ -135,56 +125,42 @@ export default function InvestorDashboard() {
   // Real-time subscription for pitch meetings
   useEffect(() => {
     if (!user) return;
-
-    const channel = supabase
-      .channel('pitch-meetings-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'pitch_meetings',
-          filter: `investor_id=eq.${user.id}`
-        },
-        () => {
-          // Refresh pitch meetings on any change
-          fetchPitchMeetings();
-        }
-      )
-      .subscribe();
-
+    const channel = supabase.channel('pitch-meetings-changes').on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'pitch_meetings',
+      filter: `investor_id=eq.${user.id}`
+    }, () => {
+      // Refresh pitch meetings on any change
+      fetchPitchMeetings();
+    }).subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
   }, [user]);
-
   const fetchPortfolioValuations = async () => {
     if (!user) return;
-    
-    // Get all investments
-    const { data: investmentData } = await supabase
-      .from('investments')
-      .select('id, company_id, amount, valuation_at_investment, equity_percentage, external_company_name')
-      .eq('investor_id', user.id);
 
+    // Get all investments
+    const {
+      data: investmentData
+    } = await supabase.from('investments').select('id, company_id, amount, valuation_at_investment, equity_percentage, external_company_name').eq('investor_id', user.id);
     if (!investmentData || investmentData.length === 0) {
       setPortfolioValuations([]);
       return;
     }
 
     // Get company IDs for platform companies only
-    const companyIds = investmentData
-      .filter(i => i.company_id)
-      .map(i => i.company_id);
-    
+    const companyIds = investmentData.filter(i => i.company_id).map(i => i.company_id);
+
     // Get latest valuations for each platform company
     let latestValuations: Record<string, any> = {};
     if (companyIds.length > 0) {
-      const { data: valuations } = await supabase
-        .from('company_valuations')
-        .select('*')
-        .in('company_id', companyIds)
-        .order('valuation_date', { ascending: false });
+      const {
+        data: valuations
+      } = await supabase.from('company_valuations').select('*').in('company_id', companyIds).order('valuation_date', {
+        ascending: false
+      });
 
       // Group valuations by company and get latest
       valuations?.forEach(v => {
@@ -197,71 +173,59 @@ export default function InvestorDashboard() {
     // Combine with investment data
     const portfolioData = investmentData.map(inv => ({
       ...inv,
-      latestValuation: inv.company_id 
-        ? (latestValuations[inv.company_id]?.valuation_amount || inv.valuation_at_investment || 0)
-        : (inv.valuation_at_investment || 0) // External companies use initial valuation
+      latestValuation: inv.company_id ? latestValuations[inv.company_id]?.valuation_amount || inv.valuation_at_investment || 0 : inv.valuation_at_investment || 0 // External companies use initial valuation
     }));
-
     setPortfolioValuations(portfolioData);
   };
-
   const fetchInvestorProfile = async () => {
     if (!user) return;
-
-    const { data, error } = await supabase
-      .from('investor_profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
+    const {
+      data,
+      error
+    } = await supabase.from('investor_profiles').select('*').eq('user_id', user.id).single();
     if (!error && data) {
       setInvestorProfile(data);
     }
   };
-
   const fetchPitchMeetings = async () => {
     if (!user) return;
-
-    const { data, error } = await supabase
-      .from('pitch_meetings')
-      .select(`
+    const {
+      data,
+      error
+    } = await supabase.from('pitch_meetings').select(`
         *,
         company:companies(name, logo_url, pitch_deck_url)
-      `)
-      .eq('investor_id', user.id)
-      .order('scheduled_date', { ascending: true });
-
+      `).eq('investor_id', user.id).order('scheduled_date', {
+      ascending: true
+    });
     if (!error && data) {
       // Fetch startup profiles separately
       const startupIds = [...new Set(data.map(m => m.startup_id))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, full_name, avatar_url')
-        .in('user_id', startupIds);
-
+      const {
+        data: profiles
+      } = await supabase.from('profiles').select('user_id, full_name, avatar_url').in('user_id', startupIds);
       const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
-      
       const enrichedData = data.map(meeting => ({
         ...meeting,
-        startup: profileMap.get(meeting.startup_id) || { full_name: 'Unknown', avatar_url: null }
+        startup: profileMap.get(meeting.startup_id) || {
+          full_name: 'Unknown',
+          avatar_url: null
+        }
       }));
-      
       setPitchMeetings(enrichedData);
     }
   };
-
   const handleAcceptPitch = async (pitchId: string) => {
     try {
-      const { error } = await supabase
-        .from('pitch_meetings')
-        .update({ status: 'scheduled' })
-        .eq('id', pitchId);
-
+      const {
+        error
+      } = await supabase.from('pitch_meetings').update({
+        status: 'scheduled'
+      }).eq('id', pitchId);
       if (error) throw error;
-
       toast({
         title: 'Pitch Accepted',
-        description: 'The startup has been notified',
+        description: 'The startup has been notified'
       });
 
       // Send notification to startup
@@ -271,33 +235,30 @@ export default function InvestorDashboard() {
           user_id: meeting.startup_id,
           title: 'Pitch Meeting Accepted',
           message: `Your pitch meeting has been accepted`,
-          type: 'success',
+          type: 'success'
         });
       }
-
       fetchPitchMeetings();
     } catch (error) {
       console.error('Error accepting pitch:', error);
       toast({
         title: 'Error',
         description: 'Failed to accept pitch meeting',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   };
-
   const handleRejectPitch = async (pitchId: string) => {
     try {
-      const { error } = await supabase
-        .from('pitch_meetings')
-        .update({ status: 'cancelled' })
-        .eq('id', pitchId);
-
+      const {
+        error
+      } = await supabase.from('pitch_meetings').update({
+        status: 'cancelled'
+      }).eq('id', pitchId);
       if (error) throw error;
-
       toast({
         title: 'Pitch Declined',
-        description: 'The startup has been notified',
+        description: 'The startup has been notified'
       });
 
       // Send notification to startup
@@ -307,76 +268,68 @@ export default function InvestorDashboard() {
           user_id: meeting.startup_id,
           title: 'Pitch Meeting Declined',
           message: `Your pitch meeting request was declined`,
-          type: 'info',
+          type: 'info'
         });
       }
-
       fetchPitchMeetings();
     } catch (error) {
       console.error('Error rejecting pitch:', error);
       toast({
         title: 'Error',
         description: 'Failed to decline pitch meeting',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   };
-
   const handleOutcomeChange = async (pitchId: string, outcome: string | null) => {
     try {
-      const { error } = await supabase
-        .from('pitch_meetings')
-        .update({ outcome })
-        .eq('id', pitchId);
-
+      const {
+        error
+      } = await supabase.from('pitch_meetings').update({
+        outcome
+      }).eq('id', pitchId);
       if (error) throw error;
-
       toast({
         title: 'Outcome Updated',
-        description: `Pitch marked as "${outcome?.replace('_', ' ') || 'unmarked'}"`,
+        description: `Pitch marked as "${outcome?.replace('_', ' ') || 'unmarked'}"`
       });
-
-      setPitchMeetings(prev => 
-        prev.map(m => m.id === pitchId ? { ...m, outcome } : m)
-      );
+      setPitchMeetings(prev => prev.map(m => m.id === pitchId ? {
+        ...m,
+        outcome
+      } : m));
     } catch (error) {
       console.error('Error updating outcome:', error);
       toast({
         title: 'Error',
         description: 'Failed to update pitch outcome',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   };
-
   const expressInterest = async (companyId: string, companyName: string) => {
     if (!user) return;
-
     try {
       // Get the company owner's user_id
-      const { data: company, error: companyError } = await supabase
-        .from('companies')
-        .select('user_id')
-        .eq('id', companyId)
-        .single();
-
+      const {
+        data: company,
+        error: companyError
+      } = await supabase.from('companies').select('user_id').eq('id', companyId).single();
       if (companyError) throw companyError;
 
       // Insert investment interest
-      const { error } = await supabase
-        .from('investment_interests')
-        .insert({
-          investor_id: user.id,
-          company_id: companyId,
-          status: 'interested'
-        });
-
+      const {
+        error
+      } = await supabase.from('investment_interests').insert({
+        investor_id: user.id,
+        company_id: companyId,
+        status: 'interested'
+      });
       if (error) {
         if (error.code === '23505') {
           toast({
             title: "Already Interested",
             description: "You've already expressed interest in this startup.",
-            variant: "destructive",
+            variant: "destructive"
           });
         } else {
           throw error;
@@ -385,78 +338,66 @@ export default function InvestorDashboard() {
       }
 
       // Get investor's profile for notification
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('user_id', user.id)
-        .single();
-
+      const {
+        data: profile
+      } = await supabase.from('profiles').select('full_name').eq('user_id', user.id).single();
       const investorName = profile?.full_name || 'An investor';
 
       // Create notification for the startup owner
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: company.user_id,
-          type: 'investment_interest',
-          title: 'New Investor Interest',
-          message: `${investorName} has expressed interest in ${companyName}`,
-          data: {
-            investor_id: user.id,
-            company_id: companyId,
-            company_name: companyName,
-            investor_name: investorName
-          }
-        });
-
+      await supabase.from('notifications').insert({
+        user_id: company.user_id,
+        type: 'investment_interest',
+        title: 'New Investor Interest',
+        message: `${investorName} has expressed interest in ${companyName}`,
+        data: {
+          investor_id: user.id,
+          company_id: companyId,
+          company_name: companyName,
+          investor_name: investorName
+        }
+      });
       toast({
         title: "Interest Registered!",
-        description: `Your interest in ${companyName} has been recorded. The startup owner will be notified.`,
+        description: `Your interest in ${companyName} has been recorded. The startup owner will be notified.`
       });
     } catch (error) {
       console.error('Error expressing interest:', error);
       toast({
         title: "Error",
         description: "Failed to express interest. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
-
     fetchOpportunities();
   };
-
   const startDueDiligence = async (companyId: string, companyName: string) => {
     if (!user) return;
-
-    const { error } = await supabase
-      .from('investment_interests')
-      .upsert({
-        investor_id: user.id,
-        company_id: companyId,
-        status: 'due_diligence'
-      });
-
+    const {
+      error
+    } = await supabase.from('investment_interests').upsert({
+      investor_id: user.id,
+      company_id: companyId,
+      status: 'due_diligence'
+    });
     if (error) {
       toast({
         title: "Error",
         description: "Failed to start due diligence process.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     toast({
       title: "Due Diligence Started",
-      description: `Due diligence process initiated for ${companyName}.`,
+      description: `Due diligence process initiated for ${companyName}.`
     });
   };
-
   const fetchInvestments = async () => {
     if (!user) return;
-
-    const { data, error } = await supabase
-      .from('investments')
-      .select(`
+    const {
+      data,
+      error
+    } = await supabase.from('investments').select(`
         *,
         companies:company_id (
           id,
@@ -467,19 +408,17 @@ export default function InvestorDashboard() {
           user_id,
           logo_url
         )
-      `)
-      .eq('investor_id', user.id)
-      .eq('status', 'active');
-
+      `).eq('investor_id', user.id).eq('status', 'active');
     if (!error && data) {
       const formattedInvestments = data.map((inv: any) => {
         const isExternal = !inv.company_id && inv.external_company_name;
         return {
-          id: inv.company_id || inv.id, // Use investment id for external companies
-          name: isExternal ? inv.external_company_name : (inv.companies?.name || 'Unknown Company'),
+          id: inv.company_id || inv.id,
+          // Use investment id for external companies
+          name: isExternal ? inv.external_company_name : inv.companies?.name || 'Unknown Company',
           description: inv.companies?.description || '',
           stage: inv.companies?.stage || 'External',
-          industry: isExternal ? (inv.external_company_industry || 'General') : (inv.companies?.industry || 'General'),
+          industry: isExternal ? inv.external_company_industry || 'General' : inv.companies?.industry || 'General',
           funding_amount: inv.amount,
           user_id: inv.companies?.user_id || '',
           logo_url: inv.companies?.logo_url || null,
@@ -492,21 +431,18 @@ export default function InvestorDashboard() {
       setInvestments(formattedInvestments);
     }
   };
-
   const fetchOpportunities = async () => {
     if (!user) return;
 
     // Get companies that the investor hasn't invested in yet
-    const { data: existingInvestments } = await supabase
-      .from('investments')
-      .select('company_id')
-      .eq('investor_id', user.id);
-
+    const {
+      data: existingInvestments
+    } = await supabase.from('investments').select('company_id').eq('investor_id', user.id);
     const investedCompanyIds = existingInvestments?.map(i => i.company_id) || [];
-
-    const { data, error } = await supabase
-      .from('companies')
-      .select(`
+    const {
+      data,
+      error
+    } = await supabase.from('companies').select(`
         id,
         name,
         description,
@@ -516,90 +452,76 @@ export default function InvestorDashboard() {
         user_id,
         looking_for,
         logo_url
-      `)
-      .not('id', 'in', `(${investedCompanyIds.join(',') || 'null'})`)
-      .order('created_at', { ascending: false });
-
+      `).not('id', 'in', `(${investedCompanyIds.join(',') || 'null'})`).order('created_at', {
+      ascending: false
+    });
     if (!error && data) {
       setOpportunities(data);
     }
   };
-
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 0,
-      maximumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(amount);
   };
 
   // Calculate ROI based on real investment data and valuations
   const calculateROI = () => {
     if (!portfolioValuations.length || !investorProfile?.total_invested) return '0.0%';
-    
     let totalInvested = 0;
     let totalCurrentValue = 0;
-    
     portfolioValuations.forEach(inv => {
       totalInvested += inv.amount || 0;
-      
+
       // Calculate current value based on equity % and latest valuation
       if (inv.equity_percentage && inv.latestValuation) {
-        totalCurrentValue += (inv.latestValuation * inv.equity_percentage / 100);
+        totalCurrentValue += inv.latestValuation * inv.equity_percentage / 100;
       } else {
         // If no valuation data, assume invested value unchanged
         totalCurrentValue += inv.amount || 0;
       }
     });
-    
     if (totalInvested === 0) return '0.0%';
-    
-    const roi = ((totalCurrentValue - totalInvested) / totalInvested) * 100;
+    const roi = (totalCurrentValue - totalInvested) / totalInvested * 100;
     return `${roi.toFixed(1)}%`;
   };
-
-  const stats = [
-    { 
-      title: 'Total Invested', 
-      value: investorProfile ? formatCurrency(investorProfile.total_invested || 0) : '$0', 
-      icon: DollarSign, 
-      color: 'text-green-500' 
-    },
-    { 
-      title: 'Active Investments', 
-      value: investorProfile?.portfolio_size?.toString() || '0', 
-      icon: Building, 
-      color: 'text-primary' 
-    },
-    { title: 'ROI (Est.)', value: calculateROI(), icon: TrendingUp, color: 'text-accent' },
-    { title: 'Opportunities', value: opportunities.length.toString(), icon: Target, color: 'text-yellow-500' },
-  ];
-
-  return (
-    <div className="min-h-screen bg-gradient-hero pb-6 relative">
+  const stats = [{
+    title: 'Total Invested',
+    value: investorProfile ? formatCurrency(investorProfile.total_invested || 0) : '$0',
+    icon: DollarSign,
+    color: 'text-green-500'
+  }, {
+    title: 'Active Investments',
+    value: investorProfile?.portfolio_size?.toString() || '0',
+    icon: Building,
+    color: 'text-primary'
+  }, {
+    title: 'ROI (Est.)',
+    value: calculateROI(),
+    icon: TrendingUp,
+    color: 'text-accent'
+  }, {
+    title: 'Opportunities',
+    value: opportunities.length.toString(),
+    icon: Target,
+    color: 'text-yellow-500'
+  }];
+  return <div className="min-h-screen bg-gradient-hero pb-6 relative">
       <DashboardHeader />
       <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
           {/* Mobile: Only Avatar */}
           <div className="md:hidden flex justify-start mb-4">
-            <RoleBasedAvatar 
-              avatarUrl={profileWithRole?.avatar_url} 
-              role="investor"
-              fallbackText={user?.email || 'I'}
-              className="h-16 w-16"
-            />
+            <RoleBasedAvatar avatarUrl={profileWithRole?.avatar_url} role="investor" fallbackText={user?.email || 'I'} className="h-16 w-16" />
           </div>
           
           {/* Desktop: Full Welcome Section */}
           <div className="hidden md:flex items-center space-x-4">
-            <RoleBasedAvatar 
-              avatarUrl={profileWithRole?.avatar_url} 
-              role="investor"
-              fallbackText={user?.email || 'I'}
-              className="h-16 w-16"
-            />
+            <RoleBasedAvatar avatarUrl={profileWithRole?.avatar_url} role="investor" fallbackText={user?.email || 'I'} className="h-16 w-16" />
             <div>
               <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                 {profileWithRole?.full_name || 'Investor'} Dashboard
@@ -628,9 +550,7 @@ export default function InvestorDashboard() {
               <TabsTrigger value="pitches" className="flex-shrink-0 gap-2">
                 <Briefcase className="h-4 w-4" />
                 <span className="hidden md:inline">Pitches</span>
-                {pendingPitchesCount > 0 && (
-                  <Badge variant="destructive" className="ml-1">{pendingPitchesCount}</Badge>
-                )}
+                {pendingPitchesCount > 0}
               </TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
                 <CalendarIcon className="h-4 w-4" />
@@ -658,8 +578,7 @@ export default function InvestorDashboard() {
           <TabsContent value="portfolio" className="space-y-4">
             {/* Portfolio Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {stats.map((stat, index) => (
-                <Card key={index} className="tech-card border-0">
+              {stats.map((stat, index) => <Card key={index} className="tech-card border-0">
                   <CardContent className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
@@ -669,8 +588,7 @@ export default function InvestorDashboard() {
                       <stat.icon className={`h-8 w-8 ${stat.color} opacity-80`} />
                     </div>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
 
             {/* Record Investment Button */}
@@ -690,38 +608,24 @@ export default function InvestorDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {investments.length === 0 ? (
-                  <div className="text-center py-8 text-muted-foreground">
+                {investments.length === 0 ? <div className="text-center py-8 text-muted-foreground">
                     <Building className="h-12 w-12 mx-auto mb-2 opacity-20" />
                     <p>No investments recorded yet</p>
                     <p className="text-sm">Click "Record Investment" to add your first investment</p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {investments.map((investment: any) => {
-                      const portfolioItem = portfolioValuations.find(p => p.company_id === investment.id);
-                      const currentValue = portfolioItem?.equity_percentage && portfolioItem?.latestValuation
-                        ? (portfolioItem.latestValuation * portfolioItem.equity_percentage / 100)
-                        : investment.funding_amount;
-                      const investedAmount = portfolioItem?.amount || investment.funding_amount || 0;
-                      const roi = investedAmount > 0 ? ((currentValue - investedAmount) / investedAmount * 100) : 0;
-                      
-                      return (
-                        <Card key={investment.id} className="border border-border/50 hover:border-primary/50 transition-colors">
+                  const portfolioItem = portfolioValuations.find(p => p.company_id === investment.id);
+                  const currentValue = portfolioItem?.equity_percentage && portfolioItem?.latestValuation ? portfolioItem.latestValuation * portfolioItem.equity_percentage / 100 : investment.funding_amount;
+                  const investedAmount = portfolioItem?.amount || investment.funding_amount || 0;
+                  const roi = investedAmount > 0 ? (currentValue - investedAmount) / investedAmount * 100 : 0;
+                  return <Card key={investment.id} className="border border-border/50 hover:border-primary/50 transition-colors">
                           <CardContent className="p-4">
                             <div className="flex items-start space-x-3 mb-3">
-                              <RoleBasedAvatar 
-                                avatarUrl={investment.logo_url}
-                                role="startup"
-                                fallbackText={investment.name}
-                                className="h-10 w-10"
-                              />
+                              <RoleBasedAvatar avatarUrl={investment.logo_url} role="startup" fallbackText={investment.name} className="h-10 w-10" />
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
                                   <h3 className="font-semibold text-foreground truncate">{investment.name}</h3>
-                                  {investment.isExternal && (
-                                    <Badge variant="outline" className="text-xs shrink-0">External</Badge>
-                                  )}
+                                  {investment.isExternal && <Badge variant="outline" className="text-xs shrink-0">External</Badge>}
                                 </div>
                                 <p className="text-xs text-muted-foreground">{investment.industry}</p>
                               </div>
@@ -757,38 +661,28 @@ export default function InvestorDashboard() {
                               </div>
                             </div>
                             
-                            <Button 
-                              size="sm" 
-                              variant="outline" 
-                              className="w-full mt-3"
-                              onClick={() => {
-                                if (investment.isExternal) {
-                                  setSelectedExternalInvestment(investment);
-                                  setShowExternalDialog(true);
-                                } else {
-                                  // Fetch full company data for platform companies
-                                  supabase
-                                    .from('companies')
-                                    .select('*')
-                                    .eq('id', investment.id)
-                                    .single()
-                                    .then(({ data }) => {
-                                      if (data) {
-                                        setSelectedPortfolioCompany(data);
-                                        setShowPortfolioDialog(true);
-                                      }
-                                    });
-                                }
-                              }}
-                            >
+                            <Button size="sm" variant="outline" className="w-full mt-3" onClick={() => {
+                        if (investment.isExternal) {
+                          setSelectedExternalInvestment(investment);
+                          setShowExternalDialog(true);
+                        } else {
+                          // Fetch full company data for platform companies
+                          supabase.from('companies').select('*').eq('id', investment.id).single().then(({
+                            data
+                          }) => {
+                            if (data) {
+                              setSelectedPortfolioCompany(data);
+                              setShowPortfolioDialog(true);
+                            }
+                          });
+                        }
+                      }}>
                               View Details
                             </Button>
                           </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                )}
+                        </Card>;
+                })}
+                  </div>}
               </CardContent>
             </Card>
 
@@ -825,31 +719,16 @@ export default function InvestorDashboard() {
                     <p className="text-xs sm:text-sm text-muted-foreground truncate">Startup pitch meeting requests</p>
                   </div>
                 </div>
-                {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length > 0 && (
-                  <Badge className="bg-amber-500 text-white w-fit text-xs">
+                {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length > 0 && <Badge className="bg-amber-500 text-white w-fit text-xs">
                     {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length} pending
-                  </Badge>
-                )}
+                  </Badge>}
               </div>
-              {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length === 0 ? (
-                <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+              {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length === 0 ? <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
                   <Briefcase className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
                   <p className="text-muted-foreground">No incoming pitch requests</p>
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).map((meeting) => (
-                    <PitchMeetingCard
-                      key={meeting.id}
-                      meeting={meeting}
-                      variant="incoming"
-                      viewerType="investor"
-                      onAccept={handleAcceptPitch}
-                      onReject={handleRejectPitch}
-                    />
-                  ))}
-                </div>
-              )}
+                </div> : <div className="grid gap-4">
+                  {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).map(meeting => <PitchMeetingCard key={meeting.id} meeting={meeting} variant="incoming" viewerType="investor" onAccept={handleAcceptPitch} onReject={handleRejectPitch} />)}
+                </div>}
             </div>
 
             {/* 2. Sent Pitch Requests (from investor TO startups) */}
@@ -864,29 +743,16 @@ export default function InvestorDashboard() {
                     <p className="text-xs sm:text-sm text-muted-foreground truncate">Your pitch requests to startups</p>
                   </div>
                 </div>
-                {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && (
-                  <Badge variant="secondary" className="w-fit text-xs">
+                {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && <Badge variant="secondary" className="w-fit text-xs">
                     {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length} pending
-                  </Badge>
-                )}
+                  </Badge>}
               </div>
-              {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length === 0 ? (
-                <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+              {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length === 0 ? <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
                   <Clock className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
                   <p className="text-muted-foreground">No pending sent requests</p>
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).map((meeting) => (
-                    <PitchMeetingCard
-                      key={meeting.id}
-                      meeting={meeting}
-                      variant="sent"
-                      viewerType="investor"
-                    />
-                  ))}
-                </div>
-              )}
+                </div> : <div className="grid gap-4">
+                  {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).map(meeting => <PitchMeetingCard key={meeting.id} meeting={meeting} variant="sent" viewerType="investor" />)}
+                </div>}
             </div>
 
             {/* 3. Upcoming Pitches (scheduled, future date) */}
@@ -900,27 +766,12 @@ export default function InvestorDashboard() {
                   <p className="text-xs sm:text-sm text-muted-foreground truncate">Confirmed pitch meetings</p>
                 </div>
               </div>
-              {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length === 0 ? (
-                <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+              {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length === 0 ? <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
                   <CalendarIcon className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
                   <p className="text-muted-foreground">No upcoming pitch meetings</p>
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {pitchMeetings
-                    .filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date())
-                    .sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime())
-                    .map((meeting) => (
-                      <PitchMeetingCard
-                        key={meeting.id}
-                        meeting={meeting}
-                        variant="upcoming"
-                        viewerType="investor"
-                        onJoin={setActiveVideoUrl}
-                      />
-                    ))}
-                </div>
-              )}
+                </div> : <div className="grid gap-4">
+                  {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime()).map(meeting => <PitchMeetingCard key={meeting.id} meeting={meeting} variant="upcoming" viewerType="investor" onJoin={setActiveVideoUrl} />)}
+                </div>}
             </div>
 
             {/* 4. Past Pitches (scheduled/completed, past date) */}
@@ -934,33 +785,12 @@ export default function InvestorDashboard() {
                   <p className="text-xs sm:text-sm text-muted-foreground truncate">Completed meetings history</p>
                 </div>
               </div>
-              {pitchMeetings.filter(m => 
-                (m.status === 'scheduled' || m.status === 'completed') && 
-                new Date(m.scheduled_date) < new Date()
-              ).length === 0 ? (
-                <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+              {pitchMeetings.filter(m => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).length === 0 ? <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
                   <Clock className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
                   <p className="text-muted-foreground">No past pitch meetings</p>
-                </div>
-              ) : (
-                <div className="grid gap-4">
-                  {pitchMeetings
-                    .filter(m => 
-                      (m.status === 'scheduled' || m.status === 'completed') && 
-                      new Date(m.scheduled_date) < new Date()
-                    )
-                    .sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime())
-                    .map((meeting) => (
-                      <PitchMeetingCard
-                        key={meeting.id}
-                        meeting={meeting}
-                        variant="past"
-                        viewerType="investor"
-                        onOutcomeChange={handleOutcomeChange}
-                      />
-                    ))}
-                </div>
-              )}
+                </div> : <div className="grid gap-4">
+                  {pitchMeetings.filter(m => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime()).map(meeting => <PitchMeetingCard key={meeting.id} meeting={meeting} variant="past" viewerType="investor" onOutcomeChange={handleOutcomeChange} />)}
+                </div>}
             </div>
           </TabsContent>
 
@@ -983,31 +813,21 @@ export default function InvestorDashboard() {
             </div>
 
             {/* Upcoming Events with Banners */}
-            {upcomingEvents.length > 0 && (
-              <Card>
+            {upcomingEvents.length > 0 && <Card>
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="w-full">
                     <div className="flex gap-4 pb-4">
-                      {upcomingEvents.slice(0, 6).map(event => (
-                        <div 
-                          key={event.id} 
-                          className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]" 
-                          onClick={() => {
-                            setSelectedEvent(event);
-                            setShowEventDetails(true);
-                          }}
-                        >
+                      {upcomingEvents.slice(0, 6).map(event => <div key={event.id} className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]" onClick={() => {
+                    setSelectedEvent(event);
+                    setShowEventDetails(true);
+                  }}>
                           <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
-                            {event.banner_url ? (
-                              <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" />
-                            ) : (
-                              <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                            {event.banner_url ? <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" /> : <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
                                 <CalendarIcon className="h-16 w-16 text-purple-500/30" />
-                              </div>
-                            )}
+                              </div>}
                             <div className="p-4 min-h-[120px] flex flex-col">
                               <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
                               <div className="space-y-1 text-sm text-muted-foreground flex-1">
@@ -1015,24 +835,12 @@ export default function InvestorDashboard() {
                                   <Clock className="h-3 w-3" />
                                   {format(parseISO(event.start_date), 'MMM d, h:mm a')}
                                 </div>
-                                {event.location && (
-                                  <div className="flex items-center gap-2">
+                                {event.location && <div className="flex items-center gap-2">
                                     <MapPin className="h-3 w-3" />
-                                    {event.location.startsWith('http') ? (
-                                      <a 
-                                        href={event.location}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-primary hover:underline line-clamp-1"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
+                                    {event.location.startsWith('http') ? <a href={event.location} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline line-clamp-1" onClick={e => e.stopPropagation()}>
                                         {event.location}
-                                      </a>
-                                    ) : (
-                                      <span className="line-clamp-1">{event.location}</span>
-                                    )}
-                                  </div>
-                                )}
+                                      </a> : <span className="line-clamp-1">{event.location}</span>}
+                                  </div>}
                                 <div className="flex items-center gap-2">
                                   <Users className="h-3 w-3" />
                                   {event.attendees} attending
@@ -1041,29 +849,22 @@ export default function InvestorDashboard() {
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        </div>)}
                     </div>
                     <ScrollBar orientation="horizontal" />
                   </ScrollArea>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
             
             {/* Unified Calendar - IN MIDDLE */}
-            <UnifiedCalendar 
-              showCreateButton={false}
-              userRole="investor"
-              filterTypes={['event', 'session', 'pitch']}
-              onItemClick={(item) => {
-                if (item.type === 'event') {
-                  setSelectedEvent(item);
-                  setShowEventDetails(true);
-                } else if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
-                  setActiveVideoUrl(item.meeting_link);
-                }
-              }}
-            />
+            <UnifiedCalendar showCreateButton={false} userRole="investor" filterTypes={['event', 'session', 'pitch']} onItemClick={item => {
+            if (item.type === 'event') {
+              setSelectedEvent(item);
+              setShowEventDetails(true);
+            } else if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
+              setActiveVideoUrl(item.meeting_link);
+            }
+          }} />
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">
@@ -1116,18 +917,13 @@ export default function InvestorDashboard() {
         </Tabs>
 
         {/* Video Conferencing Dialog */}
-        <Dialog open={!!activeVideoUrl} onOpenChange={(open) => !open && setActiveVideoUrl(undefined)}>
+        <Dialog open={!!activeVideoUrl} onOpenChange={open => !open && setActiveVideoUrl(undefined)}>
           <DialogContent className="max-w-5xl h-[80vh]">
             <DialogHeader>
               <DialogTitle>Video Conference</DialogTitle>
             </DialogHeader>
             <div className="h-full">
-              {activeVideoUrl && (
-                <VideoConferencing
-                  roomUrl={activeVideoUrl}
-                  onLeave={() => setActiveVideoUrl(undefined)}
-                />
-              )}
+              {activeVideoUrl && <VideoConferencing roomUrl={activeVideoUrl} onLeave={() => setActiveVideoUrl(undefined)} />}
             </div>
           </DialogContent>
         </Dialog>
@@ -1138,75 +934,42 @@ export default function InvestorDashboard() {
       <FloatingChat />
 
       {/* Dialogs */}
-      <CreateEventDialog 
-        open={createEventDialogOpen} 
-        onOpenChange={setCreateEventDialogOpen} 
-        onEventCreated={() => {
-          setCreateEventDialogOpen(false);
-        }} 
-      />
-      <CreateSessionDialog 
-        open={createSessionDialogOpen} 
-        onOpenChange={setCreateSessionDialogOpen} 
-        onSessionCreated={() => {
-          setCreateSessionDialogOpen(false);
-        }} 
-      />
-      <InvestorSchedulePitchDialog
-        open={schedulePitchDialogOpen}
-        onOpenChange={setSchedulePitchDialogOpen}
-        onPitchScheduled={() => {
-          fetchPitchMeetings();
-        }}
-      />
-      <RecordInvestmentDialog
-        open={recordInvestmentDialogOpen}
-        onOpenChange={setRecordInvestmentDialogOpen}
-        onInvestmentRecorded={() => {
-          fetchInvestments();
-          fetchInvestorProfile();
-          fetchPortfolioValuations();
-        }}
-      />
-      {selectedEvent && (
-        <EventDetailsDialog 
-          event={selectedEvent} 
-          open={showEventDetails} 
-          onOpenChange={setShowEventDetails} 
-          onEventUpdated={() => {
-            setShowEventDetails(false);
-          }} 
-        />
-      )}
+      <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {
+      setCreateEventDialogOpen(false);
+    }} />
+      <CreateSessionDialog open={createSessionDialogOpen} onOpenChange={setCreateSessionDialogOpen} onSessionCreated={() => {
+      setCreateSessionDialogOpen(false);
+    }} />
+      <InvestorSchedulePitchDialog open={schedulePitchDialogOpen} onOpenChange={setSchedulePitchDialogOpen} onPitchScheduled={() => {
+      fetchPitchMeetings();
+    }} />
+      <RecordInvestmentDialog open={recordInvestmentDialogOpen} onOpenChange={setRecordInvestmentDialogOpen} onInvestmentRecorded={() => {
+      fetchInvestments();
+      fetchInvestorProfile();
+      fetchPortfolioValuations();
+    }} />
+      {selectedEvent && <EventDetailsDialog event={selectedEvent} open={showEventDetails} onOpenChange={setShowEventDetails} onEventUpdated={() => {
+      setShowEventDetails(false);
+    }} />}
 
       {/* Platform Company Profile Dialog */}
-      <StartupProfileDialog
-        company={selectedPortfolioCompany}
-        open={showPortfolioDialog}
-        onOpenChange={(open) => {
-          setShowPortfolioDialog(open);
-          if (!open) setSelectedPortfolioCompany(null);
-        }}
-      />
+      <StartupProfileDialog company={selectedPortfolioCompany} open={showPortfolioDialog} onOpenChange={open => {
+      setShowPortfolioDialog(open);
+      if (!open) setSelectedPortfolioCompany(null);
+    }} />
 
       {/* External Investment Details Dialog */}
-      <Dialog open={showExternalDialog} onOpenChange={(open) => {
-        setShowExternalDialog(open);
-        if (!open) setSelectedExternalInvestment(null);
-      }}>
+      <Dialog open={showExternalDialog} onOpenChange={open => {
+      setShowExternalDialog(open);
+      if (!open) setSelectedExternalInvestment(null);
+    }}>
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Investment Details</DialogTitle>
           </DialogHeader>
-          {selectedExternalInvestment && (
-            <div className="space-y-4">
+          {selectedExternalInvestment && <div className="space-y-4">
               <div className="flex items-center gap-3">
-                <RoleBasedAvatar 
-                  avatarUrl={null}
-                  role="startup"
-                  fallbackText={selectedExternalInvestment.name}
-                  className="h-12 w-12"
-                />
+                <RoleBasedAvatar avatarUrl={null} role="startup" fallbackText={selectedExternalInvestment.name} className="h-12 w-12" />
                 <div>
                   <h3 className="font-semibold text-lg">{selectedExternalInvestment.name}</h3>
                   <Badge variant="outline" className="text-xs">External Company</Badge>
@@ -1231,33 +994,22 @@ export default function InvestorDashboard() {
                 <div className="flex justify-between py-2 border-b border-border/50">
                   <span className="text-sm text-muted-foreground">Investment Date</span>
                   <span className="text-sm font-medium">
-                    {selectedExternalInvestment.investment_date 
-                      ? format(parseISO(selectedExternalInvestment.investment_date), 'MMM d, yyyy')
-                      : 'N/A'}
+                    {selectedExternalInvestment.investment_date ? format(parseISO(selectedExternalInvestment.investment_date), 'MMM d, yyyy') : 'N/A'}
                   </span>
                 </div>
-                {selectedExternalInvestment.external_company_website && (
-                  <div className="flex justify-between py-2 border-b border-border/50">
+                {selectedExternalInvestment.external_company_website && <div className="flex justify-between py-2 border-b border-border/50">
                     <span className="text-sm text-muted-foreground">Website</span>
-                    <a 
-                      href={selectedExternalInvestment.external_company_website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
-                    >
+                    <a href={selectedExternalInvestment.external_company_website} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-primary hover:underline flex items-center gap-1">
                       Visit <ExternalLink className="h-3 w-3" />
                     </a>
-                  </div>
-                )}
+                  </div>}
               </div>
               
               <Button variant="outline" className="w-full mt-4" onClick={() => setShowExternalDialog(false)}>
                 Close
               </Button>
-            </div>
-          )}
+            </div>}
         </DialogContent>
       </Dialog>
-    </div>
-  );
+    </div>;
 }
