@@ -89,10 +89,10 @@ export default function InvestorDashboard() {
   const fetchPortfolioValuations = async () => {
     if (!user) return;
     
-    // Get all company IDs from investments
+    // Get all investments
     const { data: investmentData } = await supabase
       .from('investments')
-      .select('company_id, amount, valuation_at_investment, equity_percentage')
+      .select('id, company_id, amount, valuation_at_investment, equity_percentage, external_company_name')
       .eq('investor_id', user.id);
 
     if (!investmentData || investmentData.length === 0) {
@@ -100,27 +100,34 @@ export default function InvestorDashboard() {
       return;
     }
 
-    const companyIds = investmentData.map(i => i.company_id);
+    // Get company IDs for platform companies only
+    const companyIds = investmentData
+      .filter(i => i.company_id)
+      .map(i => i.company_id);
     
-    // Get latest valuations for each company
-    const { data: valuations } = await supabase
-      .from('company_valuations')
-      .select('*')
-      .in('company_id', companyIds)
-      .order('valuation_date', { ascending: false });
+    // Get latest valuations for each platform company
+    let latestValuations: Record<string, any> = {};
+    if (companyIds.length > 0) {
+      const { data: valuations } = await supabase
+        .from('company_valuations')
+        .select('*')
+        .in('company_id', companyIds)
+        .order('valuation_date', { ascending: false });
 
-    // Group valuations by company and get latest
-    const latestValuations: Record<string, any> = {};
-    valuations?.forEach(v => {
-      if (!latestValuations[v.company_id]) {
-        latestValuations[v.company_id] = v;
-      }
-    });
+      // Group valuations by company and get latest
+      valuations?.forEach(v => {
+        if (!latestValuations[v.company_id]) {
+          latestValuations[v.company_id] = v;
+        }
+      });
+    }
 
     // Combine with investment data
     const portfolioData = investmentData.map(inv => ({
       ...inv,
-      latestValuation: latestValuations[inv.company_id]?.valuation_amount || inv.valuation_at_investment || 0
+      latestValuation: inv.company_id 
+        ? (latestValuations[inv.company_id]?.valuation_amount || inv.valuation_at_investment || 0)
+        : (inv.valuation_at_investment || 0) // External companies use initial valuation
     }));
 
     setPortfolioValuations(portfolioData);
@@ -353,18 +360,23 @@ export default function InvestorDashboard() {
       .eq('status', 'active');
 
     if (!error && data) {
-      const formattedInvestments = data.map((inv: any) => ({
-        id: inv.companies?.id || inv.company_id,
-        name: inv.companies?.name || 'Unknown Company',
-        description: inv.companies?.description || '',
-        stage: inv.companies?.stage || 'Unknown',
-        industry: inv.companies?.industry || 'General',
-        funding_amount: inv.amount,
-        user_id: inv.companies?.user_id || '',
-        logo_url: inv.companies?.logo_url || null,
-        investment_date: inv.investment_date,
-        equity_percentage: inv.equity_percentage
-      }));
+      const formattedInvestments = data.map((inv: any) => {
+        const isExternal = !inv.company_id && inv.external_company_name;
+        return {
+          id: inv.company_id || inv.id, // Use investment id for external companies
+          name: isExternal ? inv.external_company_name : (inv.companies?.name || 'Unknown Company'),
+          description: inv.companies?.description || '',
+          stage: inv.companies?.stage || 'External',
+          industry: isExternal ? (inv.external_company_industry || 'General') : (inv.companies?.industry || 'General'),
+          funding_amount: inv.amount,
+          user_id: inv.companies?.user_id || '',
+          logo_url: inv.companies?.logo_url || null,
+          investment_date: inv.investment_date,
+          equity_percentage: inv.equity_percentage,
+          isExternal,
+          external_company_website: inv.external_company_website
+        };
+      });
       setInvestments(formattedInvestments);
     }
   };
@@ -593,7 +605,12 @@ export default function InvestorDashboard() {
                                 className="h-10 w-10"
                               />
                               <div className="flex-1 min-w-0">
-                                <h3 className="font-semibold text-foreground truncate">{investment.name}</h3>
+                                <div className="flex items-center gap-2">
+                                  <h3 className="font-semibold text-foreground truncate">{investment.name}</h3>
+                                  {investment.isExternal && (
+                                    <Badge variant="outline" className="text-xs shrink-0">External</Badge>
+                                  )}
+                                </div>
                                 <p className="text-xs text-muted-foreground">{investment.industry}</p>
                               </div>
                             </div>

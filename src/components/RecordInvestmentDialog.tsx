@@ -7,11 +7,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { CalendarIcon, Search, CheckCircle, Loader2, Building2 } from 'lucide-react';
+import { CalendarIcon, Search, CheckCircle, Loader2, Building2, Globe } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface RecordInvestmentDialogProps {
@@ -41,6 +42,22 @@ const INVESTMENT_ROUNDS = [
   'Other'
 ];
 
+const INDUSTRIES = [
+  'Technology',
+  'Healthcare',
+  'Finance',
+  'E-commerce',
+  'SaaS',
+  'AI/ML',
+  'Biotech',
+  'Clean Energy',
+  'Real Estate',
+  'Education',
+  'Consumer',
+  'Enterprise',
+  'Other'
+];
+
 export default function RecordInvestmentDialog({ 
   open, 
   onOpenChange,
@@ -49,10 +66,16 @@ export default function RecordInvestmentDialog({
   const { user } = useAuth();
   const { toast } = useToast();
   
+  const [companyType, setCompanyType] = useState<'platform' | 'external'>('platform');
   const [companies, setCompanies] = useState<Company[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [showCompanySearch, setShowCompanySearch] = useState(true);
+  
+  // External company fields
+  const [externalCompanyName, setExternalCompanyName] = useState('');
+  const [externalCompanyIndustry, setExternalCompanyIndustry] = useState('');
+  const [externalCompanyWebsite, setExternalCompanyWebsite] = useState('');
   
   const [amount, setAmount] = useState('');
   const [equityPercentage, setEquityPercentage] = useState('');
@@ -117,14 +140,14 @@ export default function RecordInvestmentDialog({
   };
 
   const handleVerifyWithAPI = async () => {
-    if (!selectedCompany) return;
+    const companyName = companyType === 'platform' ? selectedCompany?.name : externalCompanyName;
+    if (!companyName) return;
     
     setIsVerifying(true);
     try {
-      // Call the validate-investment edge function
       const { data, error } = await supabase.functions.invoke('validate-investment', {
         body: {
-          companyName: selectedCompany.name,
+          companyName,
           investmentAmount: parseFloat(amount) || 0,
           investmentRound: investmentRound
         }
@@ -159,7 +182,7 @@ export default function RecordInvestmentDialog({
   };
 
   const handleSubmit = async () => {
-    if (!user || !selectedCompany || !amount || !investmentDate) {
+    if (!user || !amount || !investmentDate) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -168,29 +191,57 @@ export default function RecordInvestmentDialog({
       return;
     }
 
+    // Validate based on company type
+    if (companyType === 'platform' && !selectedCompany) {
+      toast({
+        title: "Missing Company",
+        description: "Please select a company from the platform.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (companyType === 'external' && !externalCompanyName.trim()) {
+      toast({
+        title: "Missing Company Name",
+        description: "Please enter the external company name.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
     try {
-      // Insert the investment
+      const investmentData: any = {
+        investor_id: user.id,
+        amount: parseFloat(amount),
+        equity_percentage: equityPercentage ? parseFloat(equityPercentage) : null,
+        investment_date: format(investmentDate, 'yyyy-MM-dd'),
+        investment_round: investmentRound || null,
+        valuation_at_investment: valuationAtInvestment ? parseFloat(valuationAtInvestment) : null,
+        source: 'manual',
+        verified: verificationStatus === 'verified',
+        notes: notes || null,
+        status: 'active'
+      };
+
+      if (companyType === 'platform' && selectedCompany) {
+        investmentData.company_id = selectedCompany.id;
+      } else {
+        investmentData.company_id = null;
+        investmentData.external_company_name = externalCompanyName.trim();
+        investmentData.external_company_industry = externalCompanyIndustry || null;
+        investmentData.external_company_website = externalCompanyWebsite || null;
+      }
+
       const { error: investmentError } = await supabase
         .from('investments')
-        .insert({
-          investor_id: user.id,
-          company_id: selectedCompany.id,
-          amount: parseFloat(amount),
-          equity_percentage: equityPercentage ? parseFloat(equityPercentage) : null,
-          investment_date: format(investmentDate, 'yyyy-MM-dd'),
-          investment_round: investmentRound || null,
-          valuation_at_investment: valuationAtInvestment ? parseFloat(valuationAtInvestment) : null,
-          source: 'manual',
-          verified: verificationStatus === 'verified',
-          notes: notes || null,
-          status: 'active'
-        });
+        .insert(investmentData);
 
       if (investmentError) throw investmentError;
 
-      // If valuation was provided, also record it in company_valuations
-      if (valuationAtInvestment && investmentDate) {
+      // If valuation was provided for a platform company, also record it
+      if (valuationAtInvestment && investmentDate && companyType === 'platform' && selectedCompany) {
         await supabase
           .from('company_valuations')
           .insert({
@@ -204,12 +255,12 @@ export default function RecordInvestmentDialog({
           });
       }
 
+      const displayName = companyType === 'platform' ? selectedCompany?.name : externalCompanyName;
       toast({
         title: "Investment Recorded",
-        description: `Successfully recorded $${parseFloat(amount).toLocaleString()} investment in ${selectedCompany.name}.`,
+        description: `Successfully recorded $${parseFloat(amount).toLocaleString()} investment in ${displayName}.`,
       });
 
-      // Reset form
       resetForm();
       onOpenChange(false);
       onInvestmentRecorded?.();
@@ -225,9 +276,13 @@ export default function RecordInvestmentDialog({
   };
 
   const resetForm = () => {
+    setCompanyType('platform');
     setSelectedCompany(null);
     setShowCompanySearch(true);
     setSearchQuery('');
+    setExternalCompanyName('');
+    setExternalCompanyIndustry('');
+    setExternalCompanyWebsite('');
     setAmount('');
     setEquityPercentage('');
     setInvestmentDate(undefined);
@@ -236,6 +291,8 @@ export default function RecordInvestmentDialog({
     setNotes('');
     setVerificationStatus('none');
   };
+
+  const canVerify = companyType === 'platform' ? !!selectedCompany : !!externalCompanyName.trim();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -248,75 +305,137 @@ export default function RecordInvestmentDialog({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Company Selection */}
-          <div className="space-y-2">
-            <Label>Company *</Label>
-            {showCompanySearch ? (
+          {/* Company Type Selection */}
+          <Tabs value={companyType} onValueChange={(v) => setCompanyType(v as 'platform' | 'external')}>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="platform" className="gap-2">
+                <Building2 className="h-4 w-4" />
+                Platform Company
+              </TabsTrigger>
+              <TabsTrigger value="external" className="gap-2">
+                <Globe className="h-4 w-4" />
+                External Company
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="platform" className="space-y-4 mt-4">
+              {/* Platform Company Selection */}
               <div className="space-y-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Search companies..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-                <div className="border rounded-lg max-h-48 overflow-y-auto">
-                  {isSearching ? (
-                    <div className="p-4 text-center text-muted-foreground">
-                      <Loader2 className="h-4 w-4 animate-spin mx-auto" />
+                <Label>Company *</Label>
+                {showCompanySearch ? (
+                  <div className="space-y-2">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search companies..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9"
+                      />
                     </div>
-                  ) : companies.length === 0 ? (
-                    <div className="p-4 text-center text-muted-foreground">
-                      No companies found
-                    </div>
-                  ) : (
-                    companies.map((company) => (
-                      <button
-                        key={company.id}
-                        onClick={() => handleSelectCompany(company)}
-                        className="w-full p-3 text-left hover:bg-accent flex items-center gap-3 border-b last:border-b-0"
-                      >
-                        {company.logo_url ? (
-                          <img src={company.logo_url} alt="" className="h-8 w-8 rounded object-cover" />
-                        ) : (
-                          <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
-                            <Building2 className="h-4 w-4" />
-                          </div>
-                        )}
-                        <div>
-                          <div className="font-medium">{company.name}</div>
-                          <div className="text-sm text-muted-foreground">
-                            {company.industry} {company.stage && `• ${company.stage}`}
-                          </div>
+                    <div className="border rounded-lg max-h-48 overflow-y-auto">
+                      {isSearching ? (
+                        <div className="p-4 text-center text-muted-foreground">
+                          <Loader2 className="h-4 w-4 animate-spin mx-auto" />
                         </div>
-                      </button>
-                    ))
-                  )}
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-3 p-3 border rounded-lg bg-accent/50">
-                {selectedCompany?.logo_url ? (
-                  <img src={selectedCompany.logo_url} alt="" className="h-10 w-10 rounded object-cover" />
+                      ) : companies.length === 0 ? (
+                        <div className="p-4 text-center text-muted-foreground">
+                          <p>No companies found</p>
+                          <Button 
+                            variant="link" 
+                            className="mt-2"
+                            onClick={() => setCompanyType('external')}
+                          >
+                            Add an external company instead
+                          </Button>
+                        </div>
+                      ) : (
+                        companies.map((company) => (
+                          <button
+                            key={company.id}
+                            onClick={() => handleSelectCompany(company)}
+                            className="w-full p-3 text-left hover:bg-accent flex items-center gap-3 border-b last:border-b-0"
+                          >
+                            {company.logo_url ? (
+                              <img src={company.logo_url} alt="" className="h-8 w-8 rounded object-cover" />
+                            ) : (
+                              <div className="h-8 w-8 rounded bg-muted flex items-center justify-center">
+                                <Building2 className="h-4 w-4" />
+                              </div>
+                            )}
+                            <div>
+                              <div className="font-medium">{company.name}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {company.industry} {company.stage && `• ${company.stage}`}
+                              </div>
+                            </div>
+                          </button>
+                        ))
+                      )}
+                    </div>
+                  </div>
                 ) : (
-                  <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
-                    <Building2 className="h-5 w-5" />
+                  <div className="flex items-center gap-3 p-3 border rounded-lg bg-accent/50">
+                    {selectedCompany?.logo_url ? (
+                      <img src={selectedCompany.logo_url} alt="" className="h-10 w-10 rounded object-cover" />
+                    ) : (
+                      <div className="h-10 w-10 rounded bg-muted flex items-center justify-center">
+                        <Building2 className="h-5 w-5" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <div className="font-medium">{selectedCompany?.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {selectedCompany?.industry} {selectedCompany?.stage && `• ${selectedCompany.stage}`}
+                      </div>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={() => setShowCompanySearch(true)}>
+                      Change
+                    </Button>
                   </div>
                 )}
-                <div className="flex-1">
-                  <div className="font-medium">{selectedCompany?.name}</div>
-                  <div className="text-sm text-muted-foreground">
-                    {selectedCompany?.industry} {selectedCompany?.stage && `• ${selectedCompany.stage}`}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="external" className="space-y-4 mt-4">
+              {/* External Company Fields */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="externalName">Company Name *</Label>
+                  <Input
+                    id="externalName"
+                    placeholder="Enter company name"
+                    value={externalCompanyName}
+                    onChange={(e) => setExternalCompanyName(e.target.value)}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label>Industry</Label>
+                    <Select value={externalCompanyIndustry} onValueChange={setExternalCompanyIndustry}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select industry" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {INDUSTRIES.map((industry) => (
+                          <SelectItem key={industry} value={industry}>{industry}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="externalWebsite">Website</Label>
+                    <Input
+                      id="externalWebsite"
+                      placeholder="https://example.com"
+                      value={externalCompanyWebsite}
+                      onChange={(e) => setExternalCompanyWebsite(e.target.value)}
+                    />
                   </div>
                 </div>
-                <Button variant="ghost" size="sm" onClick={() => setShowCompanySearch(true)}>
-                  Change
-                </Button>
               </div>
-            )}
-          </div>
+            </TabsContent>
+          </Tabs>
 
           {/* Investment Details */}
           <div className="grid grid-cols-2 gap-4">
@@ -427,7 +546,7 @@ export default function RecordInvestmentDialog({
                 variant="outline"
                 size="sm"
                 onClick={handleVerifyWithAPI}
-                disabled={!selectedCompany || isVerifying}
+                disabled={!canVerify || isVerifying}
               >
                 {isVerifying ? (
                   <>
