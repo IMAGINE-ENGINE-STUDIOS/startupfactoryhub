@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Loader2 } from 'lucide-react';
 
 interface ConnectedInvestor {
@@ -15,7 +16,7 @@ interface ConnectedInvestor {
   user_id: string;
   name: string;
   avatar_url?: string;
-  connection_type: 'invested' | 'interested';
+  connection_type: 'invested' | 'connected' | 'interested';
 }
 
 interface CreatePitchMeetingDialogProps {
@@ -54,9 +55,13 @@ export default function CreatePitchMeetingDialog({
   }, [selectedInvestorId, selectedDate]);
 
   const fetchConnectedInvestors = async () => {
+    if (!user) return;
     setLoading(true);
+    
     try {
-      // Get investors who invested in this company
+      const investorMap = new Map<string, ConnectedInvestor>();
+
+      // 1. Get investors who invested in this company
       const { data: investments } = await supabase
         .from('investments')
         .select('investor_id')
@@ -65,25 +70,95 @@ export default function CreatePitchMeetingDialog({
 
       const investorIds = investments?.map(i => i.investor_id) || [];
 
-      if (investorIds.length === 0) {
-        setConnectedInvestors([]);
-        setLoading(false);
-        return;
+      if (investorIds.length > 0) {
+        const { data: investorProfiles } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url')
+          .in('user_id', investorIds);
+
+        investorProfiles?.forEach(p => {
+          investorMap.set(p.user_id, {
+            id: p.user_id,
+            user_id: p.user_id,
+            name: p.full_name || 'Unknown',
+            avatar_url: p.avatar_url || undefined,
+            connection_type: 'invested'
+          });
+        });
       }
 
-      // Fetch profiles
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, full_name, avatar_url')
-        .in('user_id', investorIds);
+      // 2. Get investors who expressed interest
+      const { data: interests } = await supabase
+        .from('investment_interests')
+        .select('investor_id')
+        .eq('company_id', companyId);
 
-      const investors: ConnectedInvestor[] = (profiles || []).map(p => ({
-        id: p.user_id,
-        user_id: p.user_id,
-        name: p.full_name || 'Unknown',
-        avatar_url: p.avatar_url,
-        connection_type: 'invested'
-      }));
+      const interestedIds = interests?.map(i => i.investor_id).filter(id => !investorMap.has(id)) || [];
+
+      if (interestedIds.length > 0) {
+        const { data: interestedProfiles } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url')
+          .in('user_id', interestedIds);
+
+        interestedProfiles?.forEach(p => {
+          if (!investorMap.has(p.user_id)) {
+            investorMap.set(p.user_id, {
+              id: p.user_id,
+              user_id: p.user_id,
+              name: p.full_name || 'Unknown',
+              avatar_url: p.avatar_url || undefined,
+              connection_type: 'interested'
+            });
+          }
+        });
+      }
+
+      // 3. Get connected users who are investors (via connections table)
+      const { data: connections } = await supabase
+        .from('connections')
+        .select('requester_id, addressee_id')
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+        .eq('status', 'accepted');
+
+      const connectedUserIds = connections?.map(c => 
+        c.requester_id === user.id ? c.addressee_id : c.requester_id
+      ).filter(id => !investorMap.has(id)) || [];
+
+      if (connectedUserIds.length > 0) {
+        // Check which of these connected users are investors
+        const { data: investorRoles } = await supabase
+          .rpc('get_user_roles_batch', { user_ids: connectedUserIds });
+
+        const investorUserIds = investorRoles
+          ?.filter((r: any) => r.role === 'investor')
+          .map((r: any) => r.user_id) || [];
+
+        if (investorUserIds.length > 0) {
+          const { data: connectedProfiles } = await supabase
+            .from('profiles')
+            .select('user_id, full_name, avatar_url')
+            .in('user_id', investorUserIds);
+
+          connectedProfiles?.forEach(p => {
+            if (!investorMap.has(p.user_id)) {
+              investorMap.set(p.user_id, {
+                id: p.user_id,
+                user_id: p.user_id,
+                name: p.full_name || 'Unknown',
+                avatar_url: p.avatar_url || undefined,
+                connection_type: 'connected'
+              });
+            }
+          });
+        }
+      }
+
+      // Sort by connection type priority: invested > interested > connected
+      const sortOrder = { invested: 0, interested: 1, connected: 2 };
+      const investors = Array.from(investorMap.values()).sort(
+        (a, b) => sortOrder[a.connection_type] - sortOrder[b.connection_type]
+      );
 
       setConnectedInvestors(investors);
     } catch (error) {
@@ -112,11 +187,21 @@ export default function CreatePitchMeetingDialog({
         .eq('is_available', true);
 
       if (!availability || availability.length === 0) {
-        setAvailableSlots([]);
+        // If no availability set, show default slots 9 AM - 5 PM
+        const defaultSlots: string[] = [];
+        for (let hour = 9; hour <= 17; hour++) {
+          for (let minute = 0; minute < 60; minute += 30) {
+            if (hour === 17 && minute > 0) break;
+            const h = hour.toString().padStart(2, '0');
+            const m = minute.toString().padStart(2, '0');
+            defaultSlots.push(`${h}:${m}`);
+          }
+        }
+        setAvailableSlots(defaultSlots);
         return;
       }
 
-      // Generate 30-minute slots
+      // Generate 30-minute slots from availability
       const slots: string[] = [];
       availability.forEach(slot => {
         const start = new Date(`2000-01-01T${slot.start_time}`);
@@ -206,6 +291,15 @@ export default function CreatePitchMeetingDialog({
     }
   };
 
+  const getConnectionBadgeVariant = (type: string) => {
+    switch (type) {
+      case 'invested': return 'default';
+      case 'interested': return 'secondary';
+      case 'connected': return 'outline';
+      default: return 'outline';
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
@@ -240,9 +334,9 @@ export default function CreatePitchMeetingDialog({
                           <AvatarFallback>{investor.name[0]}</AvatarFallback>
                         </Avatar>
                         <span>{investor.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          ({investor.connection_type})
-                        </span>
+                        <Badge variant={getConnectionBadgeVariant(investor.connection_type)} className="text-xs">
+                          {investor.connection_type}
+                        </Badge>
                       </div>
                     </SelectItem>
                   ))}

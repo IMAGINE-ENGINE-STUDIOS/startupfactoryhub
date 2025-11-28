@@ -10,7 +10,7 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Calendar as CalendarIcon, ExternalLink, Video, Plus, Bell, Clock, MapPin, MessageCircle, Network, UserCircle, BarChart, Brain, Wrench, Briefcase, Check, X } from 'lucide-react';
+import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Calendar as CalendarIcon, ExternalLink, Video, Plus, Bell, Clock, MapPin, MessageCircle, Network, UserCircle, BarChart, Brain, Wrench, Briefcase, Check, X, Presentation } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
@@ -34,6 +34,7 @@ import { DashboardHeader } from '@/components/DashboardHeader';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
+import InvestorSchedulePitchDialog from '@/components/InvestorSchedulePitchDialog';
 
 import { useEvents } from '@/hooks/useEvents';
 
@@ -58,6 +59,7 @@ export default function InvestorDashboard() {
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | undefined>();
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
+  const [schedulePitchDialogOpen, setSchedulePitchDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const { user } = useAuth();
@@ -654,6 +656,10 @@ export default function InvestorDashboard() {
           <TabsContent value="calendar" className="space-y-6">
             {/* Action buttons */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
+              <Button onClick={() => setSchedulePitchDialogOpen(true)} variant="outline" className="gap-2 w-full sm:w-auto">
+                <Presentation className="h-4 w-4" />
+                <span className="sm:inline">Schedule Pitch</span>
+              </Button>
               <Button onClick={() => setCreateSessionDialogOpen(true)} variant="outline" className="gap-2 w-full sm:w-auto">
                 <CalendarIcon className="h-4 w-4" />
                 <span className="sm:inline">Schedule Session</span>
@@ -849,6 +855,13 @@ export default function InvestorDashboard() {
         onSessionCreated={() => {
           setCreateSessionDialogOpen(false);
         }} 
+      />
+      <InvestorSchedulePitchDialog
+        open={schedulePitchDialogOpen}
+        onOpenChange={setSchedulePitchDialogOpen}
+        onPitchScheduled={() => {
+          fetchPitchMeetings();
+        }}
       />
       {selectedEvent && (
         <EventDetailsDialog 
