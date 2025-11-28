@@ -18,6 +18,7 @@ import { format, parseISO } from 'date-fns';
 
 import StartupBrowser from '@/components/StartupBrowser';
 import NetworkBrowser from '@/components/NetworkBrowser';
+import StartupProfileDialog from '@/components/StartupProfileDialog';
 import MatchingSystem from '@/components/MatchingSystem';
 import FloatingChat from '@/components/FloatingChat';
 import InvestorProfileForm from '@/components/InvestorProfileForm';
@@ -66,6 +67,10 @@ export default function InvestorDashboard() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [recordInvestmentDialogOpen, setRecordInvestmentDialogOpen] = useState(false);
   const [portfolioValuations, setPortfolioValuations] = useState<any[]>([]);
+  const [selectedPortfolioCompany, setSelectedPortfolioCompany] = useState<any>(null);
+  const [showPortfolioDialog, setShowPortfolioDialog] = useState(false);
+  const [selectedExternalInvestment, setSelectedExternalInvestment] = useState<any>(null);
+  const [showExternalDialog, setShowExternalDialog] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   const { profile: profileWithRole } = useProfileWithRole();
@@ -645,7 +650,30 @@ export default function InvestorDashboard() {
                               </div>
                             </div>
                             
-                            <Button size="sm" variant="outline" className="w-full mt-3">
+                            <Button 
+                              size="sm" 
+                              variant="outline" 
+                              className="w-full mt-3"
+                              onClick={() => {
+                                if (investment.isExternal) {
+                                  setSelectedExternalInvestment(investment);
+                                  setShowExternalDialog(true);
+                                } else {
+                                  // Fetch full company data for platform companies
+                                  supabase
+                                    .from('companies')
+                                    .select('*')
+                                    .eq('id', investment.id)
+                                    .single()
+                                    .then(({ data }) => {
+                                      if (data) {
+                                        setSelectedPortfolioCompany(data);
+                                        setShowPortfolioDialog(true);
+                                      }
+                                    });
+                                }
+                              }}
+                            >
                               View Details
                             </Button>
                           </CardContent>
@@ -1030,6 +1058,94 @@ export default function InvestorDashboard() {
           }} 
         />
       )}
+
+      {/* Platform Company Profile Dialog */}
+      <StartupProfileDialog
+        company={selectedPortfolioCompany}
+        open={showPortfolioDialog}
+        onOpenChange={(open) => {
+          setShowPortfolioDialog(open);
+          if (!open) setSelectedPortfolioCompany(null);
+        }}
+        onExpressInterest={(companyId) => {
+          const company = investments.find(i => i.id === companyId);
+          if (company) expressInterest(companyId, company.name);
+        }}
+        onSchedulePitch={(companyId, companyName) => {
+          setShowPortfolioDialog(false);
+          setSchedulePitchDialogOpen(true);
+        }}
+      />
+
+      {/* External Investment Details Dialog */}
+      <Dialog open={showExternalDialog} onOpenChange={(open) => {
+        setShowExternalDialog(open);
+        if (!open) setSelectedExternalInvestment(null);
+      }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Investment Details</DialogTitle>
+          </DialogHeader>
+          {selectedExternalInvestment && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <RoleBasedAvatar 
+                  avatarUrl={null}
+                  role="startup"
+                  fallbackText={selectedExternalInvestment.name}
+                  className="h-12 w-12"
+                />
+                <div>
+                  <h3 className="font-semibold text-lg">{selectedExternalInvestment.name}</h3>
+                  <Badge variant="outline" className="text-xs">External Company</Badge>
+                </div>
+              </div>
+              
+              <div className="space-y-3 pt-2">
+                <div className="flex justify-between py-2 border-b border-border/50">
+                  <span className="text-sm text-muted-foreground">Industry</span>
+                  <span className="text-sm font-medium">{selectedExternalInvestment.industry || 'N/A'}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-border/50">
+                  <span className="text-sm text-muted-foreground">Investment Amount</span>
+                  <span className="text-sm font-medium">{formatCurrency(selectedExternalInvestment.funding_amount || 0)}</span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-border/50">
+                  <span className="text-sm text-muted-foreground">Equity</span>
+                  <span className="text-sm font-medium">
+                    {selectedExternalInvestment.equity_percentage ? `${selectedExternalInvestment.equity_percentage}%` : 'N/A'}
+                  </span>
+                </div>
+                <div className="flex justify-between py-2 border-b border-border/50">
+                  <span className="text-sm text-muted-foreground">Investment Date</span>
+                  <span className="text-sm font-medium">
+                    {selectedExternalInvestment.investment_date 
+                      ? format(parseISO(selectedExternalInvestment.investment_date), 'MMM d, yyyy')
+                      : 'N/A'}
+                  </span>
+                </div>
+                {selectedExternalInvestment.external_company_website && (
+                  <div className="flex justify-between py-2 border-b border-border/50">
+                    <span className="text-sm text-muted-foreground">Website</span>
+                    <a 
+                      href={selectedExternalInvestment.external_company_website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-primary hover:underline flex items-center gap-1"
+                    >
+                      Visit <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                )}
+              </div>
+              
+              <Button variant="outline" className="w-full mt-4" onClick={() => setShowExternalDialog(false)}>
+                Close
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
