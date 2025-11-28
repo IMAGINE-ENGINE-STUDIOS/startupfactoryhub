@@ -325,14 +325,9 @@ const Dashboard = () => {
                 <Network className="h-4 w-4" />
                 <span className="hidden md:inline">Network</span>
               </TabsTrigger>
-              <TabsTrigger value="pitches" className="flex-shrink-0 gap-2 relative">
+              <TabsTrigger value="pitches" className="flex-shrink-0 gap-2">
                 <Presentation className="h-4 w-4" />
                 <span className="hidden md:inline">Pitches</span>
-                {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && (
-                  <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
-                    {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length}
-                  </Badge>
-                )}
               </TabsTrigger>
               <TabsTrigger value="journey" className="flex-shrink-0 gap-2">
                 <MapIcon className="h-4 w-4" />
