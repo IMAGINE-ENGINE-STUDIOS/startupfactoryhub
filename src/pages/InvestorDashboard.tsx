@@ -225,14 +225,27 @@ export default function InvestorDashboard() {
       .from('pitch_meetings')
       .select(`
         *,
-        company:companies(name, logo_url, pitch_deck_url),
-        startup:profiles!pitch_meetings_startup_id_fkey(full_name, avatar_url)
+        company:companies(name, logo_url, pitch_deck_url)
       `)
       .eq('investor_id', user.id)
       .order('scheduled_date', { ascending: true });
 
     if (!error && data) {
-      setPitchMeetings(data);
+      // Fetch startup profiles separately
+      const startupIds = [...new Set(data.map(m => m.startup_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', startupIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      
+      const enrichedData = data.map(meeting => ({
+        ...meeting,
+        startup: profileMap.get(meeting.startup_id) || { full_name: 'Unknown', avatar_url: null }
+      }));
+      
+      setPitchMeetings(enrichedData);
     }
   };
 

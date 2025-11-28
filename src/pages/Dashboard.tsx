@@ -95,14 +95,27 @@ const Dashboard = () => {
       .from('pitch_meetings')
       .select(`
         *,
-        company:companies(name, logo_url),
-        investor:profiles!pitch_meetings_investor_id_fkey(full_name, avatar_url)
+        company:companies(name, logo_url)
       `)
       .eq('startup_id', user.id)
       .order('scheduled_date', { ascending: true });
 
     if (!error && data) {
-      setPitchMeetings(data);
+      // Fetch investor profiles separately
+      const investorIds = [...new Set(data.map(m => m.investor_id))];
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url')
+        .in('id', investorIds);
+
+      const profileMap = new Map(profiles?.map(p => [p.id, p]) || []);
+      
+      const enrichedData = data.map(meeting => ({
+        ...meeting,
+        investor: profileMap.get(meeting.investor_id) || { full_name: 'Unknown', avatar_url: null }
+      }));
+      
+      setPitchMeetings(enrichedData);
     }
   };
 
