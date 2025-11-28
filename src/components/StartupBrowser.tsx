@@ -7,9 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Search, Building, TrendingUp, DollarSign, Users, Filter, Sparkles, FileText } from 'lucide-react';
+import { Search, Building, TrendingUp, DollarSign, Users, Filter, Sparkles, FileText, Presentation } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import StartupProfileDialog from './StartupProfileDialog';
+import InvestorBookPitchDialog from './InvestorBookPitchDialog';
 
 interface Company {
   id: string;
@@ -37,8 +38,15 @@ export default function StartupBrowser() {
   const [loading, setLoading] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [showBookPitchDialog, setShowBookPitchDialog] = useState(false);
+  const [selectedPitchCompany, setSelectedPitchCompany] = useState<Company | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const handleSchedulePitch = (company: Company) => {
+    setSelectedPitchCompany(company);
+    setShowBookPitchDialog(true);
+  };
 
   useEffect(() => {
     fetchCompanies();
@@ -324,6 +332,13 @@ export default function StartupBrowser() {
                         View Profile
                       </Button>
                       <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleSchedulePitch(company)}
+                      >
+                        <Presentation className="h-3 w-3" />
+                      </Button>
+                      <Button
                         size="sm"
                         className="flex-1"
                         onClick={() => expressInterest(company.id, company.name)}
@@ -366,7 +381,23 @@ export default function StartupBrowser() {
             expressInterest(companyId, selectedCompany.name);
           }
         }}
+        onSchedulePitch={() => {
+          if (selectedCompany) {
+            handleSchedulePitch(selectedCompany);
+          }
+        }}
       />
+
+      {selectedPitchCompany && (
+        <InvestorBookPitchDialog
+          open={showBookPitchDialog}
+          onOpenChange={setShowBookPitchDialog}
+          startupId={selectedPitchCompany.user_id}
+          startupName={selectedPitchCompany.name}
+          companyId={selectedPitchCompany.id}
+          companyName={selectedPitchCompany.name}
+        />
+      )}
     </div>
   );
 }
