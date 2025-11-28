@@ -1655,10 +1655,13 @@ export type Database = {
       investments: {
         Row: {
           amount: number
-          company_id: string
+          company_id: string | null
           created_at: string | null
           current_value: number | null
           equity_percentage: number | null
+          external_company_industry: string | null
+          external_company_name: string | null
+          external_company_website: string | null
           id: string
           investment_date: string | null
           investment_round: string | null
@@ -1673,10 +1676,13 @@ export type Database = {
         }
         Insert: {
           amount: number
-          company_id: string
+          company_id?: string | null
           created_at?: string | null
           current_value?: number | null
           equity_percentage?: number | null
+          external_company_industry?: string | null
+          external_company_name?: string | null
+          external_company_website?: string | null
           id?: string
           investment_date?: string | null
           investment_round?: string | null
@@ -1691,10 +1697,13 @@ export type Database = {
         }
         Update: {
           amount?: number
-          company_id?: string
+          company_id?: string | null
           created_at?: string | null
           current_value?: number | null
           equity_percentage?: number | null
+          external_company_industry?: string | null
+          external_company_name?: string | null
+          external_company_website?: string | null
           id?: string
           investment_date?: string | null
           investment_round?: string | null
