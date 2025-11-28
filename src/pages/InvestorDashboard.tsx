@@ -1103,22 +1103,6 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
-            {/* Investor Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6">
-              {stats.map((stat) => (
-                <Card key={stat.title} className="tech-card border-0">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">{stat.title}</p>
-                        <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                      </div>
-                      <stat.icon className={`h-8 w-8 ${stat.color}`} />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
             <AnalyticsDashboard />
           </TabsContent>
 
