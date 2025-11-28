@@ -10,7 +10,7 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Calendar as CalendarIcon, ExternalLink, Video, Plus, Bell, Clock, MapPin, MessageCircle, Network, UserCircle, BarChart, Brain, Wrench, Briefcase, Check, X, Presentation } from 'lucide-react';
+import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Calendar as CalendarIcon, ExternalLink, Video, Plus, Bell, Clock, MapPin, MessageCircle, Network, UserCircle, BarChart, Brain, Wrench, Briefcase, Check, X, Presentation, LineChart } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
@@ -35,6 +35,8 @@ import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import InvestorSchedulePitchDialog from '@/components/InvestorSchedulePitchDialog';
+import RecordInvestmentDialog from '@/components/RecordInvestmentDialog';
+import ValuationTracker from '@/components/ValuationTracker';
 
 import { useEvents } from '@/hooks/useEvents';
 
@@ -62,6 +64,8 @@ export default function InvestorDashboard() {
   const [schedulePitchDialogOpen, setSchedulePitchDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [recordInvestmentDialogOpen, setRecordInvestmentDialogOpen] = useState(false);
+  const [portfolioValuations, setPortfolioValuations] = useState<any[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
   const { profile: profileWithRole } = useProfileWithRole();
@@ -78,8 +82,49 @@ export default function InvestorDashboard() {
       fetchInvestments();
       fetchOpportunities();
       fetchPitchMeetings();
+      fetchPortfolioValuations();
     }
   }, [user]);
+
+  const fetchPortfolioValuations = async () => {
+    if (!user) return;
+    
+    // Get all company IDs from investments
+    const { data: investmentData } = await supabase
+      .from('investments')
+      .select('company_id, amount, valuation_at_investment, equity_percentage')
+      .eq('investor_id', user.id);
+
+    if (!investmentData || investmentData.length === 0) {
+      setPortfolioValuations([]);
+      return;
+    }
+
+    const companyIds = investmentData.map(i => i.company_id);
+    
+    // Get latest valuations for each company
+    const { data: valuations } = await supabase
+      .from('company_valuations')
+      .select('*')
+      .in('company_id', companyIds)
+      .order('valuation_date', { ascending: false });
+
+    // Group valuations by company and get latest
+    const latestValuations: Record<string, any> = {};
+    valuations?.forEach(v => {
+      if (!latestValuations[v.company_id]) {
+        latestValuations[v.company_id] = v;
+      }
+    });
+
+    // Combine with investment data
+    const portfolioData = investmentData.map(inv => ({
+      ...inv,
+      latestValuation: latestValuations[inv.company_id]?.valuation_amount || inv.valuation_at_investment || 0
+    }));
+
+    setPortfolioValuations(portfolioData);
+  };
 
   const fetchInvestorProfile = async () => {
     if (!user) return;
@@ -365,14 +410,29 @@ export default function InvestorDashboard() {
     }).format(amount);
   };
 
-  // Calculate ROI based on real investment data
+  // Calculate ROI based on real investment data and valuations
   const calculateROI = () => {
-    if (!investments.length || !investorProfile?.total_invested) return '0.0%';
+    if (!portfolioValuations.length || !investorProfile?.total_invested) return '0.0%';
     
-    // Mock calculation - in a real app, you'd fetch current valuations
-    // For now, assume average 25% growth across portfolio
-    const averageGrowth = 25;
-    return `${averageGrowth.toFixed(1)}%`;
+    let totalInvested = 0;
+    let totalCurrentValue = 0;
+    
+    portfolioValuations.forEach(inv => {
+      totalInvested += inv.amount || 0;
+      
+      // Calculate current value based on equity % and latest valuation
+      if (inv.equity_percentage && inv.latestValuation) {
+        totalCurrentValue += (inv.latestValuation * inv.equity_percentage / 100);
+      } else {
+        // If no valuation data, assume invested value unchanged
+        totalCurrentValue += inv.amount || 0;
+      }
+    });
+    
+    if (totalInvested === 0) return '0.0%';
+    
+    const roi = ((totalCurrentValue - totalInvested) / totalInvested) * 100;
+    return `${roi.toFixed(1)}%`;
   };
 
   const stats = [
@@ -472,6 +532,32 @@ export default function InvestorDashboard() {
           </div>
 
           <TabsContent value="portfolio" className="space-y-4">
+            {/* Portfolio Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {stats.map((stat, index) => (
+                <Card key={index} className="tech-card border-0">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs text-muted-foreground">{stat.title}</p>
+                        <p className="text-xl font-bold">{stat.value}</p>
+                      </div>
+                      <stat.icon className={`h-8 w-8 ${stat.color} opacity-80`} />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Record Investment Button */}
+            <div className="flex justify-end">
+              <Button onClick={() => setRecordInvestmentDialogOpen(true)}>
+                <Plus className="h-4 w-4 mr-2" />
+                Record Investment
+              </Button>
+            </div>
+
+            {/* Current Portfolio */}
             <Card className="tech-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
@@ -480,45 +566,92 @@ export default function InvestorDashboard() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {investments.map((investment) => (
-                    <Card key={investment.id} className="border border-border/50 hover:border-primary/50 transition-colors">
-                      <CardContent className="p-4">
-                        <div className="flex items-start space-x-3 mb-3">
-                          <RoleBasedAvatar 
-                            avatarUrl={investment.logo_url}
-                            role="startup"
-                            fallbackText={investment.name}
-                            className="h-10 w-10"
-                          />
-                          <div className="flex-1 min-w-0">
-                            <h3 className="font-semibold text-foreground truncate">{investment.name}</h3>
-                            <p className="text-xs text-muted-foreground">Startup Founder</p>
-                          </div>
-                        </div>
-                        
-                        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{investment.description}</p>
-                        
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground">Funding:</span>
-                            <span className="font-medium text-foreground">
-                              {investment.funding_amount ? formatCurrency(investment.funding_amount) : 'N/A'}
-                            </span>
-                          </div>
-                          <div className="flex space-x-1">
-                            <Badge variant="secondary" className="text-xs">{investment.stage}</Badge>
-                            <Badge variant="outline" className="text-xs">{investment.industry}</Badge>
-                          </div>
-                        </div>
-                        
-                        <Button size="sm" variant="outline" className="w-full mt-3">
-                          View Details
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                {investments.length === 0 ? (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Building className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                    <p>No investments recorded yet</p>
+                    <p className="text-sm">Click "Record Investment" to add your first investment</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {investments.map((investment: any) => {
+                      const portfolioItem = portfolioValuations.find(p => p.company_id === investment.id);
+                      const currentValue = portfolioItem?.equity_percentage && portfolioItem?.latestValuation
+                        ? (portfolioItem.latestValuation * portfolioItem.equity_percentage / 100)
+                        : investment.funding_amount;
+                      const investedAmount = portfolioItem?.amount || investment.funding_amount || 0;
+                      const roi = investedAmount > 0 ? ((currentValue - investedAmount) / investedAmount * 100) : 0;
+                      
+                      return (
+                        <Card key={investment.id} className="border border-border/50 hover:border-primary/50 transition-colors">
+                          <CardContent className="p-4">
+                            <div className="flex items-start space-x-3 mb-3">
+                              <RoleBasedAvatar 
+                                avatarUrl={investment.logo_url}
+                                role="startup"
+                                fallbackText={investment.name}
+                                className="h-10 w-10"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-semibold text-foreground truncate">{investment.name}</h3>
+                                <p className="text-xs text-muted-foreground">{investment.industry}</p>
+                              </div>
+                            </div>
+                            
+                            <div className="space-y-2">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Invested:</span>
+                                <span className="font-medium text-foreground">
+                                  {formatCurrency(investedAmount)}
+                                </span>
+                              </div>
+                              {portfolioItem?.equity_percentage && (
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-muted-foreground">Equity:</span>
+                                  <span className="font-medium text-foreground">
+                                    {portfolioItem.equity_percentage}%
+                                  </span>
+                                </div>
+                              )}
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Est. Value:</span>
+                                <span className="font-medium text-foreground">
+                                  {formatCurrency(currentValue)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">ROI:</span>
+                                <span className={`font-medium ${roi >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                                  {roi >= 0 ? '+' : ''}{roi.toFixed(1)}%
+                                </span>
+                              </div>
+                              <div className="flex space-x-1 pt-1">
+                                <Badge variant="secondary" className="text-xs">{investment.stage}</Badge>
+                              </div>
+                            </div>
+                            
+                            <Button size="sm" variant="outline" className="w-full mt-3">
+                              View Details
+                            </Button>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            {/* Valuation Tracker */}
+            <Card className="tech-card border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <LineChart className="h-5 w-5 text-primary" />
+                  <span>Valuation Tracker</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ValuationTracker />
               </CardContent>
             </Card>
           </TabsContent>
@@ -861,6 +994,15 @@ export default function InvestorDashboard() {
         onOpenChange={setSchedulePitchDialogOpen}
         onPitchScheduled={() => {
           fetchPitchMeetings();
+        }}
+      />
+      <RecordInvestmentDialog
+        open={recordInvestmentDialogOpen}
+        onOpenChange={setRecordInvestmentDialogOpen}
+        onInvestmentRecorded={() => {
+          fetchInvestments();
+          fetchInvestorProfile();
+          fetchPortfolioValuations();
         }}
       />
       {selectedEvent && (

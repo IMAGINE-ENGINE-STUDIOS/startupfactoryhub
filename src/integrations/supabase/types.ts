@@ -644,6 +644,56 @@ export type Database = {
           },
         ]
       }
+      company_valuations: {
+        Row: {
+          company_id: string
+          created_at: string | null
+          created_by: string | null
+          id: string
+          notes: string | null
+          round_name: string | null
+          source: string
+          updated_at: string | null
+          valuation_amount: number
+          valuation_date: string
+          verified: boolean | null
+        }
+        Insert: {
+          company_id: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          round_name?: string | null
+          source?: string
+          updated_at?: string | null
+          valuation_amount: number
+          valuation_date: string
+          verified?: boolean | null
+        }
+        Update: {
+          company_id?: string
+          created_at?: string | null
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          round_name?: string | null
+          source?: string
+          updated_at?: string | null
+          valuation_amount?: number
+          valuation_date?: string
+          verified?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_valuations_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       connections: {
         Row: {
           addressee_id: string
@@ -1607,37 +1657,55 @@ export type Database = {
           amount: number
           company_id: string
           created_at: string | null
+          current_value: number | null
           equity_percentage: number | null
           id: string
           investment_date: string | null
+          investment_round: string | null
           investor_id: string
           notes: string | null
+          source: string | null
           status: string | null
           updated_at: string | null
+          valuation_at_investment: number | null
+          verification_data: Json | null
+          verified: boolean | null
         }
         Insert: {
           amount: number
           company_id: string
           created_at?: string | null
+          current_value?: number | null
           equity_percentage?: number | null
           id?: string
           investment_date?: string | null
+          investment_round?: string | null
           investor_id: string
           notes?: string | null
+          source?: string | null
           status?: string | null
           updated_at?: string | null
+          valuation_at_investment?: number | null
+          verification_data?: Json | null
+          verified?: boolean | null
         }
         Update: {
           amount?: number
           company_id?: string
           created_at?: string | null
+          current_value?: number | null
           equity_percentage?: number | null
           id?: string
           investment_date?: string | null
+          investment_round?: string | null
           investor_id?: string
           notes?: string | null
+          source?: string | null
           status?: string | null
           updated_at?: string | null
+          valuation_at_investment?: number | null
+          verification_data?: Json | null
+          verified?: boolean | null
         }
         Relationships: [
           {
