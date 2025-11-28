@@ -113,17 +113,21 @@ export default function ValuationTracker() {
         return;
       }
 
-      // Get unique company IDs
-      const companyIds = [...new Set(investments.map(i => i.company_id))];
+      // Get unique company IDs, filtering out nulls (external companies)
+      const companyIds = [...new Set(investments.map(i => i.company_id).filter(Boolean))];
 
-      // Fetch valuations for all portfolio companies
-      const { data: valuations, error: valuationsError } = await supabase
-        .from('company_valuations')
-        .select('*')
-        .in('company_id', companyIds)
-        .order('valuation_date', { ascending: true });
+      // Fetch valuations for all portfolio companies (only platform companies)
+      let valuations: Valuation[] = [];
+      if (companyIds.length > 0) {
+        const { data: valuationsData, error: valuationsError } = await supabase
+          .from('company_valuations')
+          .select('*')
+          .in('company_id', companyIds)
+          .order('valuation_date', { ascending: true });
 
-      if (valuationsError) throw valuationsError;
+        if (valuationsError) throw valuationsError;
+        valuations = valuationsData || [];
+      }
 
       // Build portfolio companies with valuation data
       const portfolioData: PortfolioCompany[] = investments

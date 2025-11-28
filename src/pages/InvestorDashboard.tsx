@@ -622,14 +622,12 @@ export default function InvestorDashboard() {
                                   {formatCurrency(investedAmount)}
                                 </span>
                               </div>
-                              {portfolioItem?.equity_percentage && (
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-muted-foreground">Equity:</span>
-                                  <span className="font-medium text-foreground">
-                                    {portfolioItem.equity_percentage}%
-                                  </span>
-                                </div>
-                              )}
+                              <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Equity:</span>
+                                <span className="font-medium text-foreground">
+                                  {portfolioItem?.equity_percentage ? `${portfolioItem.equity_percentage}%` : '-'}
+                                </span>
+                              </div>
                               <div className="flex justify-between text-sm">
                                 <span className="text-muted-foreground">Est. Value:</span>
                                 <span className="font-medium text-foreground">
