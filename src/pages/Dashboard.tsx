@@ -26,7 +26,7 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import JobTaskManager from '@/components/JobTaskManager';
 import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
-import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown } from "lucide-react";
+import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Video, Bell, Check, X, ExternalLink } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
@@ -42,6 +42,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { useUserRole } from '@/hooks/useUserRole';
 import { format, parseISO } from 'date-fns';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 
 const Dashboard = () => {
@@ -69,6 +70,8 @@ const Dashboard = () => {
   const [companyId, setCompanyId] = useState<string>('');
   const [companyName, setCompanyName] = useState<string>('');
   const [connectedInvestors, setConnectedInvestors] = useState<Array<{id: string, name: string}>>([]);
+  const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
+  const [activeVideoUrl, setActiveVideoUrl] = useState<string | undefined>();
 
   // Redirect if wrong role
   useEffect(() => {
@@ -77,12 +80,101 @@ const Dashboard = () => {
     }
   }, [role, roleLoading, navigate]);
 
-  // Fetch company info
+  // Fetch company info and pitch meetings
   useEffect(() => {
     if (user) {
       fetchCompanyInfo();
+      fetchPitchMeetings();
     }
   }, [user]);
+
+  const fetchPitchMeetings = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('pitch_meetings')
+      .select(`
+        *,
+        company:companies(name, logo_url),
+        investor:profiles!pitch_meetings_investor_id_fkey(full_name, avatar_url)
+      `)
+      .eq('startup_id', user.id)
+      .order('scheduled_date', { ascending: true });
+
+    if (!error && data) {
+      setPitchMeetings(data);
+    }
+  };
+
+  const handleAcceptPitch = async (pitchId: string) => {
+    try {
+      const { error } = await supabase
+        .from('pitch_meetings')
+        .update({ status: 'scheduled' })
+        .eq('id', pitchId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Pitch Accepted',
+        description: 'The investor has been notified',
+      });
+
+      const meeting = pitchMeetings.find(m => m.id === pitchId);
+      if (meeting) {
+        await supabase.from('notifications').insert({
+          user_id: meeting.investor_id,
+          title: 'Pitch Meeting Accepted',
+          message: `Your pitch meeting request has been accepted`,
+          type: 'success',
+        });
+      }
+
+      fetchPitchMeetings();
+    } catch (error) {
+      console.error('Error accepting pitch:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to accept pitch meeting',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRejectPitch = async (pitchId: string) => {
+    try {
+      const { error } = await supabase
+        .from('pitch_meetings')
+        .update({ status: 'cancelled' })
+        .eq('id', pitchId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Pitch Declined',
+        description: 'The investor has been notified',
+      });
+
+      const meeting = pitchMeetings.find(m => m.id === pitchId);
+      if (meeting) {
+        await supabase.from('notifications').insert({
+          user_id: meeting.investor_id,
+          title: 'Pitch Meeting Declined',
+          message: `Your pitch meeting request was declined`,
+          type: 'info',
+        });
+      }
+
+      fetchPitchMeetings();
+    } catch (error) {
+      console.error('Error rejecting pitch:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to decline pitch meeting',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const fetchCompanyInfo = async () => {
     if (!user) return;
@@ -183,7 +275,7 @@ const Dashboard = () => {
         {/* Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap">
+            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-11 max-w-7xl whitespace-nowrap">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden md:inline">Social</span>
@@ -191,6 +283,15 @@ const Dashboard = () => {
               <TabsTrigger value="network" className="flex-shrink-0 gap-2">
                 <Network className="h-4 w-4" />
                 <span className="hidden md:inline">Network</span>
+              </TabsTrigger>
+              <TabsTrigger value="pitches" className="flex-shrink-0 gap-2 relative">
+                <Presentation className="h-4 w-4" />
+                <span className="hidden md:inline">Pitches</span>
+                {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && (
+                  <Badge variant="destructive" className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length}
+                  </Badge>
+                )}
               </TabsTrigger>
               <TabsTrigger value="journey" className="flex-shrink-0 gap-2">
                 <MapIcon className="h-4 w-4" />
@@ -446,11 +547,270 @@ const Dashboard = () => {
               <AIFeaturesHub />
             </TabsContent>
           )}
+
+          {/* Pitches Tab */}
+          {activeTab === "pitches" && (
+            <TabsContent value="pitches" className="space-y-6">
+              {/* 1. Incoming Pitch Requests (from investors TO startup) */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Bell className="h-5 w-5 text-orange-500" />
+                    Incoming Pitch Requests
+                    {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && (
+                      <Badge variant="destructive">
+                        {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length}
+                      </Badge>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Briefcase className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                      <p>No incoming pitch requests from investors</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).map((meeting) => (
+                        <Card key={meeting.id} className="border-orange-500/30 bg-orange-500/5">
+                          <CardContent className="p-4">
+                            <div className="flex items-start gap-3">
+                              <Avatar className="h-12 w-12">
+                                <AvatarImage src={meeting.investor?.avatar_url} />
+                                <AvatarFallback>{meeting.investor?.full_name?.[0] || 'I'}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-lg">{meeting.investor?.full_name}</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Investor wants to discuss your pitch
+                                </p>
+                                <div className="flex items-center gap-2 mt-2 text-sm">
+                                  <CalendarIcon className="h-4 w-4" />
+                                  {format(new Date(meeting.scheduled_date), 'PPP p')}
+                                </div>
+                                <Badge variant="outline" className="mt-2">
+                                  {meeting.duration_minutes} minutes
+                                </Badge>
+                              </div>
+                            </div>
+                            
+                            <div className="flex gap-2 mt-3">
+                              <Button
+                                className="flex-1 bg-green-600 hover:bg-green-700"
+                                onClick={() => handleAcceptPitch(meeting.id)}
+                              >
+                                <Check className="h-4 w-4 mr-2" />
+                                Accept
+                              </Button>
+                              <Button
+                                variant="destructive"
+                                className="flex-1"
+                                onClick={() => handleRejectPitch(meeting.id)}
+                              >
+                                <X className="h-4 w-4 mr-2" />
+                                Decline
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* 2. Sent Pitch Requests (from startup TO investors) */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Presentation className="h-5 w-5 text-blue-500" />
+                    Sent Pitch Requests
+                    {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length > 0 && (
+                      <Badge variant="secondary">
+                        {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length}
+                      </Badge>
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Clock className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                      <p>No pending sent requests</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).map((meeting) => (
+                        <Card key={meeting.id} className="border-blue-500/30 bg-blue-500/5">
+                          <CardContent className="p-4">
+                            <div className="flex items-start gap-3">
+                              <Avatar className="h-12 w-12">
+                                <AvatarImage src={meeting.investor?.avatar_url} />
+                                <AvatarFallback>{meeting.investor?.full_name?.[0] || 'I'}</AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-lg">{meeting.investor?.full_name}</h4>
+                                <p className="text-sm text-muted-foreground">
+                                  Pitch request sent
+                                </p>
+                                <div className="flex items-center gap-2 mt-2 text-sm">
+                                  <CalendarIcon className="h-4 w-4" />
+                                  {format(new Date(meeting.scheduled_date), 'PPP p')}
+                                </div>
+                                <Badge variant="secondary" className="mt-2">
+                                  <Clock className="h-3 w-3 mr-1" />
+                                  Awaiting Response
+                                </Badge>
+                              </div>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* 3. Upcoming Pitches (scheduled, future date) */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <CalendarIcon className="h-5 w-5 text-green-500" />
+                    Upcoming Pitches
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <CalendarIcon className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                      <p>No upcoming pitch meetings</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {pitchMeetings
+                        .filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date())
+                        .sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime())
+                        .map((meeting) => (
+                          <Card key={meeting.id} className="border-green-500/30 bg-green-500/5">
+                            <CardContent className="p-4">
+                              <div className="flex items-start gap-3">
+                                <Avatar className="h-12 w-12">
+                                  <AvatarImage src={meeting.investor?.avatar_url} />
+                                  <AvatarFallback>{meeting.investor?.full_name?.[0] || 'I'}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-lg">{meeting.investor?.full_name}</h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    Pitch meeting scheduled
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-2 text-sm">
+                                    <CalendarIcon className="h-4 w-4" />
+                                    {format(new Date(meeting.scheduled_date), 'PPP p')}
+                                  </div>
+                                  <Badge className="mt-2 bg-green-600">Scheduled</Badge>
+                                </div>
+                              </div>
+                              
+                              {meeting.meeting_link && (
+                                <Button
+                                  className="w-full mt-3"
+                                  onClick={() => setActiveVideoUrl(meeting.meeting_link)}
+                                >
+                                  <Video className="h-4 w-4 mr-2" />
+                                  Join Pitch Meeting
+                                </Button>
+                              )}
+                            </CardContent>
+                          </Card>
+                        ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+
+              {/* 4. Past Pitches (scheduled/completed, past date) */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="h-5 w-5 text-muted-foreground" />
+                    Past Pitches
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  {pitchMeetings.filter(m => 
+                    (m.status === 'scheduled' || m.status === 'completed') && 
+                    new Date(m.scheduled_date) < new Date()
+                  ).length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <Clock className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                      <p>No past pitch meetings</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {pitchMeetings
+                        .filter(m => 
+                          (m.status === 'scheduled' || m.status === 'completed') && 
+                          new Date(m.scheduled_date) < new Date()
+                        )
+                        .sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime())
+                        .map((meeting) => (
+                          <Card key={meeting.id} className="border-muted">
+                            <CardContent className="p-4">
+                              <div className="flex items-start gap-3">
+                                <Avatar className="h-12 w-12">
+                                  <AvatarImage src={meeting.investor?.avatar_url} />
+                                  <AvatarFallback>{meeting.investor?.full_name?.[0] || 'I'}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                  <h4 className="font-semibold text-lg">{meeting.investor?.full_name}</h4>
+                                  <p className="text-sm text-muted-foreground">
+                                    Pitch meeting completed
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-2 text-sm">
+                                    <CalendarIcon className="h-4 w-4" />
+                                    {format(new Date(meeting.scheduled_date), 'PPP p')}
+                                  </div>
+                                  <Badge variant="secondary" className="mt-2">
+                                    {meeting.status === 'completed' ? '✓ Completed' : 'Completed'}
+                                  </Badge>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
 
       {/* Floating Buttons */}
       <FloatingChat />
+
+      {/* Video Meeting Dialog */}
+      {activeVideoUrl && (
+        <div className="fixed inset-0 z-50 bg-background">
+          <div className="relative w-full h-full">
+            <Button 
+              variant="outline" 
+              className="absolute top-4 right-4 z-10"
+              onClick={() => setActiveVideoUrl(undefined)}
+            >
+              <X className="h-4 w-4 mr-2" />
+              Leave Meeting
+            </Button>
+            <iframe
+              src={activeVideoUrl}
+              allow="camera; microphone; fullscreen; speaker; display-capture"
+              className="w-full h-full"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Dialogs */}
       <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {
