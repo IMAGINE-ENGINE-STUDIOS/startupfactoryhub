@@ -787,19 +787,19 @@ export default function InvestorDashboard() {
           {/* Pitches Tab - Reorganized into 4 sections */}
           <TabsContent value="pitches" className="space-y-8">
             {/* 1. Incoming Pitch Requests (from startups TO investor) */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20">
-                    <Bell className="h-5 w-5 text-amber-500" />
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex-shrink-0">
+                    <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Incoming Requests</h3>
-                    <p className="text-sm text-muted-foreground">Startup pitch meeting requests</p>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-base sm:text-lg">Incoming Requests</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">Startup pitch meeting requests</p>
                   </div>
                 </div>
                 {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length > 0 && (
-                  <Badge className="bg-amber-500 text-white">
+                  <Badge className="bg-amber-500 text-white w-fit text-xs">
                     {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length} pending
                   </Badge>
                 )}
@@ -826,19 +826,19 @@ export default function InvestorDashboard() {
             </div>
 
             {/* 2. Sent Pitch Requests (from investor TO startups) */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20">
-                    <Presentation className="h-5 w-5 text-blue-500" />
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex-shrink-0">
+                    <Presentation className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Sent Requests</h3>
-                    <p className="text-sm text-muted-foreground">Your pitch requests to startups</p>
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-base sm:text-lg">Sent Requests</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">Your pitch requests to startups</p>
                   </div>
                 </div>
                 {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && (
-                  <Badge variant="secondary">
+                  <Badge variant="secondary" className="w-fit text-xs">
                     {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length} pending
                   </Badge>
                 )}
@@ -863,16 +863,14 @@ export default function InvestorDashboard() {
             </div>
 
             {/* 3. Upcoming Pitches (scheduled, future date) */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20">
-                    <CalendarIcon className="h-5 w-5 text-emerald-500" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Upcoming Pitches</h3>
-                    <p className="text-sm text-muted-foreground">Confirmed pitch meetings</p>
-                  </div>
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex-shrink-0">
+                  <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-base sm:text-lg">Upcoming Pitches</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Confirmed pitch meetings</p>
                 </div>
               </div>
               {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length === 0 ? (
@@ -899,16 +897,14 @@ export default function InvestorDashboard() {
             </div>
 
             {/* 4. Past Pitches (scheduled/completed, past date) */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-muted/50">
-                    <Clock className="h-5 w-5 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg">Past Pitches</h3>
-                    <p className="text-sm text-muted-foreground">Completed meetings history</p>
-                  </div>
+            <div className="space-y-3 sm:space-y-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-muted/50 flex-shrink-0">
+                  <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-base sm:text-lg">Past Pitches</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">Completed meetings history</p>
                 </div>
               </div>
               {pitchMeetings.filter(m => 
