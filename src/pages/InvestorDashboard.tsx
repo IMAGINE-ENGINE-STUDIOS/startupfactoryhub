@@ -91,6 +91,46 @@ export default function InvestorDashboard() {
     }
   }, [user]);
 
+  // Real-time subscription for portfolio company updates
+  useEffect(() => {
+    if (!user || investments.length === 0) return;
+
+    // Get platform company IDs from investments
+    const companyIds = investments
+      .filter((inv: any) => !inv.isExternal && inv.id)
+      .map((inv: any) => inv.id);
+
+    if (companyIds.length === 0) return;
+
+    const channel = supabase
+      .channel('portfolio-companies-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'companies'
+        },
+        (payload) => {
+          // Check if the updated company is in our portfolio
+          if (companyIds.includes(payload.new.id)) {
+            // Refresh investments to get latest data
+            fetchInvestments();
+            
+            // If this company's dialog is open, update the selected company
+            if (selectedPortfolioCompany?.id === payload.new.id) {
+              setSelectedPortfolioCompany(payload.new);
+            }
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, investments, selectedPortfolioCompany]);
+
   const fetchPortfolioValuations = async () => {
     if (!user) return;
     
