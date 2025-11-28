@@ -18,7 +18,8 @@ import {
   Plus, 
   Building2,
   LineChart,
-  Loader2 
+  Loader2,
+  Pencil
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
@@ -75,8 +76,11 @@ export default function ValuationTracker() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAddingValuation, setIsAddingValuation] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingValuation, setEditingValuation] = useState<Valuation | null>(null);
+  const [isEditingValuation, setIsEditingValuation] = useState(false);
   
-  // Form state for adding valuation
+  // Form state for adding/editing valuation
   const [newValuationAmount, setNewValuationAmount] = useState('');
   const [newValuationDate, setNewValuationDate] = useState<Date>();
   const [newValuationRound, setNewValuationRound] = useState('');
@@ -223,6 +227,60 @@ export default function ValuationTracker() {
       });
     }
     setIsAddingValuation(false);
+  };
+
+  const handleEditValuation = async () => {
+    if (!user || !editingValuation || !newValuationAmount || !newValuationDate) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsEditingValuation(true);
+    try {
+      const { error } = await supabase
+        .from('company_valuations')
+        .update({
+          valuation_amount: parseFloat(newValuationAmount),
+          valuation_date: format(newValuationDate, 'yyyy-MM-dd'),
+          round_name: newValuationRound || null,
+        })
+        .eq('id', editingValuation.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Valuation Updated",
+        description: `Updated valuation to $${parseFloat(newValuationAmount).toLocaleString()}.`,
+      });
+
+      // Reset form and refresh data
+      setNewValuationAmount('');
+      setNewValuationDate(undefined);
+      setNewValuationRound('');
+      setEditDialogOpen(false);
+      setEditingValuation(null);
+      fetchPortfolioWithValuations();
+    } catch (error: any) {
+      console.error('Error updating valuation:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update valuation.",
+        variant: "destructive",
+      });
+    }
+    setIsEditingValuation(false);
+  };
+
+  const openEditDialog = (valuation: Valuation) => {
+    setEditingValuation(valuation);
+    setNewValuationAmount(valuation.valuation_amount.toString());
+    setNewValuationDate(new Date(valuation.valuation_date));
+    setNewValuationRound(valuation.round_name || '');
+    setEditDialogOpen(true);
   };
 
   const formatCurrency = (value: number) => {
@@ -381,6 +439,91 @@ export default function ValuationTracker() {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Edit Valuation Dialog */}
+        <Dialog open={editDialogOpen} onOpenChange={(open) => {
+          setEditDialogOpen(open);
+          if (!open) {
+            setEditingValuation(null);
+            setNewValuationAmount('');
+            setNewValuationDate(undefined);
+            setNewValuationRound('');
+          }
+        }}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit Valuation</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="edit-valuation-amount">Valuation Amount ($) *</Label>
+                <Input
+                  id="edit-valuation-amount"
+                  type="number"
+                  placeholder="10000000"
+                  value={newValuationAmount}
+                  onChange={(e) => setNewValuationAmount(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Valuation Date *</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !newValuationDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {newValuationDate ? format(newValuationDate, "PPP") : "Select date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={newValuationDate}
+                      onSelect={setNewValuationDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+
+              <div className="space-y-2">
+                <Label>Round / Event</Label>
+                <Select value={newValuationRound} onValueChange={setNewValuationRound}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select round (optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ROUND_OPTIONS.map((round) => (
+                      <SelectItem key={round} value={round}>{round}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <Button variant="outline" onClick={() => setEditDialogOpen(false)} className="flex-1">
+                  Cancel
+                </Button>
+                <Button onClick={handleEditValuation} disabled={isEditingValuation} className="flex-1">
+                  {isEditingValuation ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {selectedCompany && (
@@ -484,9 +627,18 @@ export default function ValuationTracker() {
                           {valuation.round_name && ` • ${valuation.round_name}`}
                         </div>
                       </div>
-                      <div className="text-sm text-muted-foreground capitalize">
-                        {valuation.source}
-                        {valuation.verified && ' ✓'}
+                      <div className="flex items-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openEditDialog(valuation)}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <div className="text-sm text-muted-foreground capitalize">
+                          {valuation.source}
+                          {valuation.verified && ' ✓'}
+                        </div>
                       </div>
                     </div>
                   ))}
