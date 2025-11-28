@@ -1067,14 +1067,6 @@ export default function InvestorDashboard() {
           setShowPortfolioDialog(open);
           if (!open) setSelectedPortfolioCompany(null);
         }}
-        onExpressInterest={(companyId) => {
-          const company = investments.find(i => i.id === companyId);
-          if (company) expressInterest(companyId, company.name);
-        }}
-        onSchedulePitch={(companyId, companyName) => {
-          setShowPortfolioDialog(false);
-          setSchedulePitchDialogOpen(true);
-        }}
       />
 
       {/* External Investment Details Dialog */}
