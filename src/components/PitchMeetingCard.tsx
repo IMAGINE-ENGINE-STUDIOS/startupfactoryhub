@@ -105,7 +105,7 @@ export const PitchMeetingCard = ({
 
   return (
     <div className={cn(
-      'group relative rounded-xl border p-5 transition-all duration-300',
+      'group relative rounded-xl border p-3 sm:p-5 transition-all duration-300',
       'hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20',
       styles.container
     )}>
@@ -115,35 +115,35 @@ export const PitchMeetingCard = ({
         styles.accent
       )} />
 
-      <div className="flex items-start gap-4">
+      <div className="flex items-start gap-3 sm:gap-4">
         {/* Avatar with Ring */}
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           <div className={cn(
             'absolute -inset-1 rounded-full bg-gradient-to-br opacity-50 blur-sm',
             styles.accent
           )} />
-          <Avatar className="relative h-14 w-14 ring-2 ring-background">
+          <Avatar className="relative h-10 w-10 sm:h-14 sm:w-14 ring-2 ring-background">
             <AvatarImage src={avatarUrl} alt={displayName} />
-            <AvatarFallback className="text-lg font-semibold bg-gradient-to-br from-primary/20 to-primary/10">
+            <AvatarFallback className="text-sm sm:text-lg font-semibold bg-gradient-to-br from-primary/20 to-primary/10">
               {avatarFallback}
             </AvatarFallback>
           </Avatar>
           {variant === 'upcoming' && isToday(scheduledDate) && (
-            <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center">
+            <span className="absolute -bottom-1 -right-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center">
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-              <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
+              <span className="relative inline-flex h-2 w-2 sm:h-3 sm:w-3 rounded-full bg-emerald-500" />
             </span>
           )}
         </div>
 
         {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between gap-2">
-            <div>
-              <h4 className="font-semibold text-foreground truncate">
+        <div className="flex-1 min-w-0 overflow-hidden">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-2">
+            <div className="min-w-0">
+              <h4 className="font-semibold text-foreground truncate text-sm sm:text-base">
                 {displayName}
               </h4>
-              <p className="text-sm text-muted-foreground mt-0.5">
+              <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 line-clamp-1">
                 {variant === 'incoming' && 'Wants to schedule a pitch meeting'}
                 {variant === 'sent' && 'Awaiting response to your request'}
                 {variant === 'upcoming' && 'Pitch meeting scheduled'}
@@ -152,7 +152,7 @@ export const PitchMeetingCard = ({
             </div>
             
             {/* Status Badge */}
-            <Badge variant="outline" className={cn('shrink-0 text-xs font-medium', styles.badge)}>
+            <Badge variant="outline" className={cn('shrink-0 text-[10px] sm:text-xs font-medium w-fit', styles.badge)}>
               {variant === 'incoming' && 'Action Required'}
               {variant === 'sent' && 'Pending'}
               {variant === 'upcoming' && 'Confirmed'}
@@ -161,19 +161,19 @@ export const PitchMeetingCard = ({
           </div>
 
           {/* Date & Time */}
-          <div className="flex flex-wrap items-center gap-3 mt-3">
-            <div className="flex items-center gap-1.5 text-sm">
-              <Calendar className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{getDateDisplay()}</span>
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-2 sm:mt-3">
+            <div className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm">
+              <Calendar className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground flex-shrink-0" />
+              <span className="font-medium truncate">{getDateDisplay()}</span>
             </div>
             {meeting.duration_minutes && (
-              <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                <Clock className="h-4 w-4" />
+              <div className="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-muted-foreground">
+                <Clock className="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" />
                 <span>{meeting.duration_minutes} min</span>
               </div>
             )}
             {variant !== 'past' && (
-              <span className="text-xs text-muted-foreground">
+              <span className="text-[10px] sm:text-xs text-muted-foreground hidden sm:inline">
                 ({getTimeUntil()})
               </span>
             )}
@@ -181,29 +181,29 @@ export const PitchMeetingCard = ({
 
           {/* Actions */}
           {variant === 'incoming' && onAccept && onReject && (
-            <div className="flex items-center gap-2 mt-4">
+            <div className="flex items-center gap-2 mt-3 sm:mt-4">
               <Button
                 size="sm"
                 onClick={() => onAccept(meeting.id)}
-                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/25"
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/25 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
               >
-                <Check className="h-4 w-4 mr-1.5" />
+                <Check className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
                 Accept
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => onReject(meeting.id)}
-                className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50"
+                className="hover:bg-destructive/10 hover:text-destructive hover:border-destructive/50 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
               >
-                <X className="h-4 w-4 mr-1.5" />
+                <X className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
                 Decline
               </Button>
             </div>
           )}
 
           {variant === 'sent' && (
-            <div className="flex items-center gap-2 mt-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 mt-3 sm:mt-4 text-xs sm:text-sm text-muted-foreground">
               <div className="flex items-center gap-1.5">
                 <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
                 Waiting for response...
@@ -215,18 +215,18 @@ export const PitchMeetingCard = ({
             <Button
               size="sm"
               onClick={() => onJoin(meeting.meeting_link!)}
-              className="mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/25 group/btn"
+              className="mt-3 sm:mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-lg shadow-emerald-500/25 group/btn text-xs sm:text-sm h-8 sm:h-9"
             >
-              <Video className="h-4 w-4 mr-1.5" />
+              <Video className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-1.5" />
               Join Meeting
-              <ArrowRight className="h-4 w-4 ml-1.5 transition-transform group-hover/btn:translate-x-0.5" />
+              <ArrowRight className="h-3 w-3 sm:h-4 sm:w-4 ml-1 sm:ml-1.5 transition-transform group-hover/btn:translate-x-0.5" />
             </Button>
           )}
 
           {variant === 'past' && (
-            <div className="flex items-center gap-2 mt-3">
-              <Badge variant="secondary" className="text-xs">
-                <Sparkles className="h-3 w-3 mr-1" />
+            <div className="flex items-center gap-2 mt-2 sm:mt-3">
+              <Badge variant="secondary" className="text-[10px] sm:text-xs">
+                <Sparkles className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1" />
                 {getTimeUntil()}
               </Badge>
             </div>
