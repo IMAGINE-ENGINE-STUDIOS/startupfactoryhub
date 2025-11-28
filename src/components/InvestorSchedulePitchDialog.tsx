@@ -12,14 +12,14 @@ import { useToast } from '@/hooks/use-toast';
 import { Calendar as CalendarIcon, Clock, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 
-interface ConnectedStartup {
+interface StartupOption {
   id: string;
   user_id: string;
   company_id: string;
   company_name: string;
   avatar_url?: string;
   logo_url?: string;
-  connection_type: 'invested' | 'connected' | 'interested';
+  connection_type: 'invested' | 'interested' | 'connected' | 'none';
 }
 
 interface InvestorSchedulePitchDialogProps {
@@ -35,7 +35,7 @@ export default function InvestorSchedulePitchDialog({
 }: InvestorSchedulePitchDialogProps) {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [connectedStartups, setConnectedStartups] = useState<ConnectedStartup[]>([]);
+  const [allStartups, setAllStartups] = useState<StartupOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedStartupId, setSelectedStartupId] = useState<string>('');
   const [date, setDate] = useState<Date>();
@@ -45,55 +45,53 @@ export default function InvestorSchedulePitchDialog({
 
   useEffect(() => {
     if (open && user) {
-      fetchConnectedStartups();
+      fetchAllStartups();
     }
   }, [open, user]);
 
-  const fetchConnectedStartups = async () => {
+  const fetchAllStartups = async () => {
     if (!user) return;
     setLoading(true);
 
     try {
-      const startupMap = new Map<string, ConnectedStartup>();
+      // First get all companies on the platform
+      const { data: allCompanies, error: companiesError } = await supabase
+        .from('companies')
+        .select('id, name, user_id, logo_url')
+        .order('name');
+
+      if (companiesError) throw companiesError;
+      if (!allCompanies || allCompanies.length === 0) {
+        setAllStartups([]);
+        setLoading(false);
+        return;
+      }
+
+      // Build connection type map for sorting
+      const connectionMap = new Map<string, 'invested' | 'interested' | 'connected' | 'none'>();
 
       // 1. Get companies I've invested in
       const { data: investments } = await supabase
         .from('investments')
-        .select('company_id, companies(id, name, user_id, logo_url)')
+        .select('company_id')
         .eq('investor_id', user.id)
         .eq('status', 'active');
 
       investments?.forEach((inv: any) => {
-        if (inv.companies) {
-          const company = inv.companies;
-          startupMap.set(company.id, {
-            id: company.id,
-            user_id: company.user_id,
-            company_id: company.id,
-            company_name: company.name,
-            logo_url: company.logo_url,
-            connection_type: 'invested'
-          });
+        if (inv.company_id) {
+          connectionMap.set(inv.company_id, 'invested');
         }
       });
 
       // 2. Get companies I've expressed interest in
       const { data: interests } = await supabase
         .from('investment_interests')
-        .select('company_id, companies(id, name, user_id, logo_url)')
+        .select('company_id')
         .eq('investor_id', user.id);
 
       interests?.forEach((int: any) => {
-        if (int.companies && !startupMap.has(int.companies.id)) {
-          const company = int.companies;
-          startupMap.set(company.id, {
-            id: company.id,
-            user_id: company.user_id,
-            company_id: company.id,
-            company_name: company.name,
-            logo_url: company.logo_url,
-            connection_type: 'interested'
-          });
+        if (int.company_id && !connectionMap.has(int.company_id)) {
+          connectionMap.set(int.company_id, 'interested');
         }
       });
 
@@ -108,49 +106,35 @@ export default function InvestorSchedulePitchDialog({
         c.requester_id === user.id ? c.addressee_id : c.requester_id
       ) || [];
 
+      // Map connected user IDs to company IDs
       if (connectedUserIds.length > 0) {
-        // Check which of these connected users are startups
-        const { data: startupRoles } = await supabase
-          .rpc('get_user_roles_batch', { user_ids: connectedUserIds });
-
-        const startupUserIds = startupRoles
-          ?.filter((r: any) => r.role === 'startup')
-          .map((r: any) => r.user_id) || [];
-
-        if (startupUserIds.length > 0) {
-          // Get their companies
-          const { data: companies } = await supabase
-            .from('companies')
-            .select('id, name, user_id, logo_url')
-            .in('user_id', startupUserIds);
-
-          companies?.forEach(company => {
-            if (!startupMap.has(company.id)) {
-              startupMap.set(company.id, {
-                id: company.id,
-                user_id: company.user_id,
-                company_id: company.id,
-                company_name: company.name,
-                logo_url: company.logo_url || undefined,
-                connection_type: 'connected'
-              });
-            }
-          });
-        }
+        allCompanies.forEach(company => {
+          if (connectedUserIds.includes(company.user_id) && !connectionMap.has(company.id)) {
+            connectionMap.set(company.id, 'connected');
+          }
+        });
       }
 
-      // Sort by connection type priority
-      const sortOrder = { invested: 0, interested: 1, connected: 2 };
-      const startups = Array.from(startupMap.values()).sort(
-        (a, b) => sortOrder[a.connection_type] - sortOrder[b.connection_type]
-      );
+      // Build the startup options list
+      const startups: StartupOption[] = allCompanies.map(company => ({
+        id: company.id,
+        user_id: company.user_id,
+        company_id: company.id,
+        company_name: company.name,
+        logo_url: company.logo_url || undefined,
+        connection_type: connectionMap.get(company.id) || 'none'
+      }));
 
-      setConnectedStartups(startups);
+      // Sort by connection type priority (invested > interested > connected > none)
+      const sortOrder = { invested: 0, interested: 1, connected: 2, none: 3 };
+      startups.sort((a, b) => sortOrder[a.connection_type] - sortOrder[b.connection_type]);
+
+      setAllStartups(startups);
     } catch (error) {
-      console.error('Error fetching connected startups:', error);
+      console.error('Error fetching startups:', error);
       toast({
         title: 'Error',
-        description: 'Failed to load connected startups',
+        description: 'Failed to load startups',
         variant: 'destructive',
       });
     } finally {
@@ -176,7 +160,18 @@ export default function InvestorSchedulePitchDialog({
       case 'invested': return 'default';
       case 'interested': return 'secondary';
       case 'connected': return 'outline';
+      case 'none': return 'outline';
       default: return 'outline';
+    }
+  };
+
+  const getConnectionLabel = (type: string) => {
+    switch (type) {
+      case 'invested': return 'Invested';
+      case 'interested': return 'Interested';
+      case 'connected': return 'Connected';
+      case 'none': return 'New';
+      default: return '';
     }
   };
 
@@ -190,7 +185,7 @@ export default function InvestorSchedulePitchDialog({
       return;
     }
 
-    const selectedStartup = connectedStartups.find(s => s.id === selectedStartupId);
+    const selectedStartup = allStartups.find(s => s.id === selectedStartupId);
     if (!selectedStartup) return;
 
     setSubmitting(true);
@@ -297,10 +292,10 @@ export default function InvestorSchedulePitchDialog({
           <div className="flex items-center justify-center py-8">
             <Loader2 className="h-8 w-8 animate-spin" />
           </div>
-        ) : connectedStartups.length === 0 ? (
+        ) : allStartups.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-muted-foreground">
-              No connected startups available. Connect with startups or express interest first to schedule pitch meetings.
+              No startups available on the platform yet.
             </p>
           </div>
         ) : (
@@ -312,8 +307,8 @@ export default function InvestorSchedulePitchDialog({
                 <SelectTrigger>
                   <SelectValue placeholder="Choose a startup" />
                 </SelectTrigger>
-                <SelectContent>
-                  {connectedStartups.map((startup) => (
+                <SelectContent className="max-h-[300px]">
+                  {allStartups.map((startup) => (
                     <SelectItem key={startup.id} value={startup.id}>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-6 w-6">
@@ -321,9 +316,11 @@ export default function InvestorSchedulePitchDialog({
                           <AvatarFallback>{startup.company_name[0]}</AvatarFallback>
                         </Avatar>
                         <span>{startup.company_name}</span>
-                        <Badge variant={getConnectionBadgeVariant(startup.connection_type)} className="text-xs">
-                          {startup.connection_type}
-                        </Badge>
+                        {startup.connection_type !== 'none' && (
+                          <Badge variant={getConnectionBadgeVariant(startup.connection_type)} className="text-xs">
+                            {getConnectionLabel(startup.connection_type)}
+                          </Badge>
+                        )}
                       </div>
                     </SelectItem>
                   ))}

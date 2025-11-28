@@ -131,6 +131,32 @@ export default function InvestorDashboard() {
     };
   }, [user, investments, selectedPortfolioCompany]);
 
+  // Real-time subscription for pitch meetings
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('pitch-meetings-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'pitch_meetings',
+          filter: `investor_id=eq.${user.id}`
+        },
+        () => {
+          // Refresh pitch meetings on any change
+          fetchPitchMeetings();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const fetchPortfolioValuations = async () => {
     if (!user) return;
     
