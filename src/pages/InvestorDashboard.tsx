@@ -322,6 +322,33 @@ export default function InvestorDashboard() {
     }
   };
 
+  const handleOutcomeChange = async (pitchId: string, outcome: string | null) => {
+    try {
+      const { error } = await supabase
+        .from('pitch_meetings')
+        .update({ outcome })
+        .eq('id', pitchId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Outcome Updated',
+        description: `Pitch marked as "${outcome?.replace('_', ' ') || 'unmarked'}"`,
+      });
+
+      setPitchMeetings(prev => 
+        prev.map(m => m.id === pitchId ? { ...m, outcome } : m)
+      );
+    } catch (error) {
+      console.error('Error updating outcome:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update pitch outcome',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const expressInterest = async (companyId: string, companyName: string) => {
     if (!user) return;
 
@@ -929,6 +956,7 @@ export default function InvestorDashboard() {
                         meeting={meeting}
                         variant="past"
                         viewerType="investor"
+                        onOutcomeChange={handleOutcomeChange}
                       />
                     ))}
                 </div>
