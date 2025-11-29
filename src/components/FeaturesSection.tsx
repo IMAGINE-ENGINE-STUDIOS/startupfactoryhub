@@ -34,8 +34,8 @@ const features = [
   },
   {
     icon: Brain,
-    title: "AI Power Suggestions",
-    description: "Get smart recommendations for next steps, resources, and connections powered by advanced AI.",
+    title: "AI Recommendations",
+    description: "Get personalized AI-powered recommendations for mentors, investors, resources, and next steps tailored to your startup journey.",
     gradient: "from-orange-500/20 via-amber-500/20 to-yellow-500/20"
   }
 ];
