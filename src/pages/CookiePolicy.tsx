@@ -1,10 +1,12 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import MatrixBackground from "@/components/MatrixBackground";
 import { Cookie, Settings, BarChart, Shield, Eye } from "lucide-react";
 
 const CookiePolicy = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <MatrixBackground />
       <Navigation />
       
       <main className="pt-24 pb-20">

@@ -6,6 +6,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import BlogPostCard from "@/components/blog/BlogPostCard";
 import BlogCreatePost from "@/components/blog/BlogCreatePost";
+import MatrixBackground from "@/components/MatrixBackground";
 import { Loader2, PenSquare } from "lucide-react";
 
 interface BlogPost {
@@ -85,7 +86,8 @@ const Blog = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <MatrixBackground />
       <Navigation />
 
       <main className="container mx-auto px-4 py-8 pt-24">
