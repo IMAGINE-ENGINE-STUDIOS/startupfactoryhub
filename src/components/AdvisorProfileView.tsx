@@ -12,6 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import AvailabilityManager from '@/components/AvailabilityManager';
+import AvatarUpload from '@/components/AvatarUpload';
 import { 
   Briefcase, 
   GraduationCap, 
@@ -54,6 +55,7 @@ export default function AdvisorProfileView() {
   const { toast } = useToast();
 
   const [isEditing, setIsEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [editedBio, setEditedBio] = useState('');
   const [editedLocation, setEditedLocation] = useState('');
   const [editedWebsite, setEditedWebsite] = useState('');
@@ -106,35 +108,44 @@ export default function AdvisorProfileView() {
     }
   };
 
-  const handleSaveProfile = async () => {
-    if (!profile?.user_id) return;
-
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        bio: editedBio,
-        location: editedLocation,
-        website: editedWebsite,
-        linkedin_url: editedLinkedin,
-      })
-      .eq('user_id', profile.user_id);
-
-    if (!error) {
-      toast({ title: 'Profile updated successfully' });
-      setIsEditing(false);
-    } else {
-      toast({ title: 'Error updating profile', variant: 'destructive' });
-    }
-  };
-
-  const toggleEdit = () => {
-    if (!isEditing && profile) {
+  const startEditing = () => {
+    if (profile) {
       setEditedBio(profile.bio || '');
       setEditedLocation(profile.location || '');
       setEditedWebsite(profile.website || '');
       setEditedLinkedin(profile.linkedin_url || '');
     }
-    setIsEditing(!isEditing);
+    setIsEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setIsEditing(false);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!profile?.user_id) return;
+    setSaving(true);
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          bio: editedBio,
+          location: editedLocation,
+          website: editedWebsite,
+          linkedin_url: editedLinkedin,
+        })
+        .eq('user_id', profile.user_id);
+
+      if (error) throw error;
+
+      toast({ title: 'Profile updated successfully' });
+      setIsEditing(false);
+    } catch (error) {
+      toast({ title: 'Error updating profile', variant: 'destructive' });
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (profileLoading || dataLoading) {
@@ -148,22 +159,39 @@ export default function AdvisorProfileView() {
   return (
     <div className="space-y-6">
       {/* Header Section */}
-      <Card className="overflow-hidden">
-        <div className="h-32 bg-gradient-to-r from-primary/20 via-accent/20 to-primary/20" />
-        <CardContent className="relative pt-0 pb-6">
-          <div className="flex flex-col md:flex-row gap-6 items-start md:items-end -mt-16">
-            <Avatar className="h-32 w-32 border-4 border-background">
-              <AvatarImage src={profile?.avatar_url || ''} />
-              <AvatarFallback className="text-2xl">
-                {profile?.full_name?.charAt(0) || 'A'}
-              </AvatarFallback>
-            </Avatar>
-            
-            <div className="flex-1 space-y-2">
+      <Card className="tech-card border-0">
+        <CardContent className="p-8">
+          <div className="flex items-start space-x-6">
+            {isEditing ? (
+              <AvatarUpload
+                currentAvatarUrl={profile?.avatar_url}
+                size="lg"
+                userRole="advisor"
+                showGradientBorder
+              />
+            ) : (
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name} />
+                <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
+                  {profile?.full_name?.charAt(0) || 'A'}
+                </AvatarFallback>
+              </Avatar>
+            )}
+            <div className="flex-1">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold">{profile?.full_name || 'Advisor'}</h1>
-                  <p className="text-muted-foreground">Professional Advisor & Mentor</p>
+                  <h1 className="text-3xl font-bold text-foreground mb-2">{profile?.full_name || 'Advisor'}</h1>
+                  {isEditing ? (
+                    <Textarea
+                      value={editedBio}
+                      onChange={(e) => setEditedBio(e.target.value)}
+                      placeholder="Tell us about yourself..."
+                      className="mb-4 max-w-2xl"
+                      rows={3}
+                    />
+                  ) : (
+                    <p className="text-muted-foreground mb-4 max-w-2xl">{profile?.bio || 'Professional Advisor & Mentor'}</p>
+                  )}
                 </div>
                 <div className="flex gap-2">
                   {mentorProfile?.scheduling_link && !isEditing && (
@@ -171,109 +199,142 @@ export default function AdvisorProfileView() {
                       variant="default" 
                       onClick={() => window.open(mentorProfile.scheduling_link, '_blank')}
                       className="gap-2"
+                      size="sm"
                     >
                       <Calendar className="h-4 w-4" />
                       Schedule Session
                     </Button>
                   )}
-                  <Button onClick={isEditing ? handleSaveProfile : toggleEdit} variant={isEditing ? "default" : "outline"}>
-                    {isEditing ? <><Save className="h-4 w-4 mr-2" /> Save</> : <><Edit className="h-4 w-4 mr-2" /> Edit</>}
-                  </Button>
+                  {isEditing ? (
+                    <>
+                      <Button onClick={cancelEditing} variant="outline" size="sm">
+                        <X className="h-4 w-4 mr-2" /> Cancel
+                      </Button>
+                      <Button onClick={handleSaveProfile} disabled={saving} size="sm">
+                        <Save className="h-4 w-4 mr-2" /> {saving ? 'Saving...' : 'Save'}
+                      </Button>
+                    </>
+                  ) : (
+                    <Button onClick={startEditing} variant="outline" size="sm">
+                      <Edit className="h-4 w-4 mr-2" /> Edit Profile
+                    </Button>
+                  )}
                 </div>
               </div>
-
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground">
-                {(isEditing ? editedLocation : profile?.location) && (
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-4 w-4" />
-                    {isEditing ? (
+              <div className="flex flex-wrap items-center gap-3">
+                <Badge variant="secondary">Advisor</Badge>
+                {isEditing ? (
+                  <>
+                    <div className="flex items-center gap-1">
+                      <MapPin className="h-4 w-4 text-muted-foreground" />
                       <Input 
                         value={editedLocation} 
                         onChange={(e) => setEditedLocation(e.target.value)}
-                        className="h-7 w-40"
+                        placeholder="Location"
+                        className="h-8 w-32"
                       />
-                    ) : (
-                      <span>{profile?.location}</span>
-                    )}
-                  </div>
-                )}
-                {(isEditing ? editedWebsite : profile?.website) && (
-                  <div className="flex items-center gap-1">
-                    <Globe className="h-4 w-4" />
-                    {isEditing ? (
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Globe className="h-4 w-4 text-muted-foreground" />
                       <Input 
                         value={editedWebsite} 
                         onChange={(e) => setEditedWebsite(e.target.value)}
-                        className="h-7 w-40"
+                        placeholder="Website"
+                        className="h-8 w-40"
                       />
-                    ) : (
-                      <a href={profile?.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                        {profile?.website}
-                      </a>
-                    )}
-                  </div>
-                )}
-                {(isEditing ? editedLinkedin : profile?.linkedin_url) && (
-                  <div className="flex items-center gap-1">
-                    <Linkedin className="h-4 w-4" />
-                    {isEditing ? (
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <Linkedin className="h-4 w-4 text-muted-foreground" />
                       <Input 
                         value={editedLinkedin} 
                         onChange={(e) => setEditedLinkedin(e.target.value)}
-                        className="h-7 w-40"
+                        placeholder="LinkedIn URL"
+                        className="h-8 w-40"
                       />
-                    ) : (
-                      <a href={profile?.linkedin_url} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
-                        LinkedIn
-                      </a>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {profile?.location && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        {profile.location}
+                      </div>
                     )}
-                  </div>
+                    {profile?.website && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Globe className="h-4 w-4 mr-1" />
+                        <a href={profile.website} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                          Website
+                        </a>
+                      </div>
+                    )}
+                    {profile?.linkedin_url && (
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Linkedin className="h-4 w-4 mr-1" />
+                        <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                          LinkedIn
+                        </a>
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             </div>
           </div>
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-            <Card>
-              <CardContent className="p-4 flex items-center gap-3">
-                <Calendar className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">{mentorProfile?.total_sessions || 0}</p>
-                  <p className="text-xs text-muted-foreground">Sessions</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex items-center gap-3">
-                <Users className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">{mentorProfile?.total_mentees || 0}</p>
-                  <p className="text-xs text-muted-foreground">Mentees</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex items-center gap-3">
-                <Star className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">{mentorProfile?.average_rating || 0}</p>
-                  <p className="text-xs text-muted-foreground">Rating</p>
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4 flex items-center gap-3">
-                <TrendingUp className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">{mentorProfile?.years_of_experience || 0}</p>
-                  <p className="text-xs text-muted-foreground">Years Exp</p>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </CardContent>
       </Card>
+
+      {/* Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <Card className="tech-card border-0">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Sessions</p>
+                <p className="text-2xl font-bold text-foreground">{mentorProfile?.total_sessions || 0}</p>
+              </div>
+              <Calendar className="h-8 w-8 text-primary" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="tech-card border-0">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Mentees</p>
+                <p className="text-2xl font-bold text-foreground">{mentorProfile?.total_mentees || 0}</p>
+              </div>
+              <Users className="h-8 w-8 text-green-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="tech-card border-0">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Rating</p>
+                <p className="text-2xl font-bold text-foreground">{mentorProfile?.average_rating || 0}</p>
+              </div>
+              <Star className="h-8 w-8 text-yellow-500" />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="tech-card border-0">
+          <CardContent className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-muted-foreground">Years Exp</p>
+                <p className="text-2xl font-bold text-foreground">{mentorProfile?.years_of_experience || 0}</p>
+              </div>
+              <TrendingUp className="h-8 w-8 text-purple-500" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Professional Settings */}
       <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
