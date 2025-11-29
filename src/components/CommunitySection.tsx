@@ -62,14 +62,14 @@ const CommunitySection = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 max-w-6xl mx-auto">
           {userTypes.map((type, index) => (
             <div 
               key={index}
               className="group relative"
               style={{
                 transformStyle: 'preserve-3d',
-                transform: hoveredIndex === index ? 'rotateY(5deg) rotateX(5deg)' : 'rotateY(0deg) rotateX(0deg)',
+                transform: hoveredIndex === index ? 'rotateY(3deg) rotateX(3deg)' : 'rotateY(0deg) rotateX(0deg)',
                 transition: 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
               }}
               onMouseEnter={() => setHoveredIndex(index)}
@@ -77,55 +77,55 @@ const CommunitySection = () => {
             >
               {/* 3D Shadow layer */}
               <div 
-                className="absolute inset-0 bg-ocean-primary/20 rounded-2xl blur-xl"
+                className="absolute inset-0 bg-ocean-primary/20 rounded-xl blur-lg"
                 style={{
-                  transform: 'translateZ(-50px)',
+                  transform: 'translateZ(-30px)',
                   opacity: hoveredIndex === index ? 1 : 0,
                   transition: 'opacity 0.6s ease'
                 }}
               />
               
               {/* Animated border glow */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-ocean-primary/40 via-ocean-secondary/40 to-ocean-primary/40 rounded-2xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500" 
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-ocean-primary/40 via-ocean-secondary/40 to-ocean-primary/40 rounded-xl opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500" 
                 style={{ transform: 'translateZ(-10px)' }}
               />
               
               {/* Main card - elevated */}
               <div 
-                className="relative glass-morphism p-6 sm:p-8 rounded-2xl border-2 border-ocean-primary/20 group-hover:border-ocean-primary/50 transition-all duration-500"
+                className="relative glass-morphism p-3 sm:p-4 rounded-xl border border-ocean-primary/20 group-hover:border-ocean-primary/50 transition-all duration-500 h-full"
                 style={{
                   transform: 'translateZ(20px)',
                   boxShadow: hoveredIndex === index 
-                    ? '0 25px 50px -12px rgba(22, 199, 132, 0.3), inset 0 0 30px rgba(22, 199, 132, 0.1)' 
-                    : '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
+                    ? '0 15px 30px -8px rgba(22, 199, 132, 0.3), inset 0 0 20px rgba(22, 199, 132, 0.1)' 
+                    : '0 5px 15px -3px rgba(0, 0, 0, 0.1)'
                 }}
               >
                 {/* Top energy line */}
-                <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-ocean-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-ocean-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                 
-                <div className="flex items-start space-x-6">
+                <div className="flex flex-col items-center text-center">
                   {/* 3D Floating Icon */}
                   <div 
-                    className="flex-shrink-0"
+                    className="flex-shrink-0 mb-2 sm:mb-3"
                     style={{
-                      transform: hoveredIndex === index ? 'translateZ(40px) scale(1.1)' : 'translateZ(20px)',
+                      transform: hoveredIndex === index ? 'translateZ(30px) scale(1.1)' : 'translateZ(10px)',
                       transition: 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)'
                     }}
                   >
-                    <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+                    <div className="relative w-12 h-12 sm:w-14 sm:h-14">
                       {/* Outer glowing ring */}
                       <div className="absolute inset-0 rounded-full bg-gradient-to-br from-ocean-primary/30 to-ocean-secondary/30 blur-md group-hover:blur-lg transition-all duration-500" />
                       
                       {/* Hexagon container */}
-                      <div className="hexagon w-full h-full bg-gradient-to-br from-ocean-primary/20 via-ocean-secondary/20 to-ocean-primary/10 backdrop-blur-sm group-hover:from-ocean-primary/40 group-hover:to-ocean-secondary/40 transition-all duration-500 border-2 border-ocean-primary/40 relative">
+                      <div className="hexagon w-full h-full bg-gradient-to-br from-ocean-primary/20 via-ocean-secondary/20 to-ocean-primary/10 backdrop-blur-sm group-hover:from-ocean-primary/40 group-hover:to-ocean-secondary/40 transition-all duration-500 border border-ocean-primary/40 relative">
                         {/* Icon */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                          <type.icon className="w-10 h-10 sm:w-12 sm:h-12 text-ocean-primary drop-shadow-[0_0_10px_rgba(22,199,132,0.5)]" />
+                          <type.icon className="w-6 h-6 sm:w-7 sm:h-7 text-ocean-primary drop-shadow-[0_0_8px_rgba(22,199,132,0.5)]" />
                         </div>
                         
                         {/* Rotating orbit ring */}
-                        <div className={`absolute inset-[-4px] border-2 border-dashed border-ocean-primary/30 rounded-full ${hoveredIndex === index ? 'animate-spin' : ''}`} style={{ animationDuration: '8s' }}>
-                          <div className="absolute top-0 left-1/2 w-2 h-2 bg-ocean-secondary rounded-full -translate-x-1/2 -translate-y-1/2 shadow-[0_0_10px_rgba(22,199,132,0.8)]" />
+                        <div className={`absolute inset-[-2px] border border-dashed border-ocean-primary/30 rounded-full ${hoveredIndex === index ? 'animate-spin' : ''}`} style={{ animationDuration: '8s' }}>
+                          <div className="absolute top-0 left-1/2 w-1.5 h-1.5 bg-ocean-secondary rounded-full -translate-x-1/2 -translate-y-1/2 shadow-[0_0_8px_rgba(22,199,132,0.8)]" />
                         </div>
                       </div>
                     </div>
@@ -134,63 +134,54 @@ const CommunitySection = () => {
                   <div 
                     className="flex-1 min-w-0"
                     style={{
-                      transform: 'translateZ(30px)',
+                      transform: 'translateZ(20px)',
                       transition: 'transform 0.6s ease'
                     }}
                   >
-                    <h3 className="text-xl sm:text-2xl font-bold mb-3 group-hover:text-ocean-primary transition-colors duration-300">
+                    <h3 className="text-sm sm:text-base font-bold mb-1 sm:mb-2 group-hover:text-ocean-primary transition-colors duration-300">
                       {type.title}
                     </h3>
                     
-                    <p className="text-sm sm:text-base text-muted-foreground mb-6 leading-relaxed">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mb-2 sm:mb-3 leading-relaxed line-clamp-2">
                       {type.description}
                     </p>
                     
-                    {/* Features with tech styling */}
-                    <div className="grid grid-cols-2 gap-3 mb-6">
-                      {type.features.map((feature, idx) => (
+                    {/* Features with tech styling - hidden on mobile, compact on desktop */}
+                    <div className="hidden sm:flex flex-col gap-1 mb-3">
+                      {type.features.slice(0, 2).map((feature, idx) => (
                         <div 
                           key={idx} 
-                          className="flex items-center text-xs sm:text-sm group/feature"
+                          className="flex items-center text-[10px] group/feature justify-center"
                           style={{
-                            transform: hoveredIndex === index ? `translateZ(${10 + idx * 5}px)` : 'translateZ(0)',
+                            transform: hoveredIndex === index ? `translateZ(${5 + idx * 3}px)` : 'translateZ(0)',
                             transition: 'transform 0.6s ease',
                             transitionDelay: `${idx * 50}ms`
                           }}
                         >
-                          <div className="w-2 h-2 bg-ocean-primary rounded-full mr-2 flex-shrink-0 group-hover/feature:shadow-[0_0_10px_rgba(22,199,132,0.8)] transition-all duration-300" />
+                          <div className="w-1.5 h-1.5 bg-ocean-primary rounded-full mr-1.5 flex-shrink-0 group-hover/feature:shadow-[0_0_6px_rgba(22,199,132,0.8)] transition-all duration-300" />
                           <span className="text-muted-foreground truncate">{feature}</span>
                         </div>
                       ))}
                     </div>
                     
                     <Button 
-                      className="w-full bg-gradient-to-r from-ocean-primary to-ocean-secondary hover:from-ocean-secondary hover:to-ocean-primary text-primary-foreground border-0 shadow-[0_0_20px_rgba(22,199,132,0.3)] hover:shadow-[0_0_30px_rgba(22,199,132,0.5)] transition-all duration-300 relative overflow-hidden"
+                      size="sm"
+                      className="w-full text-[10px] sm:text-xs py-1.5 sm:py-2 bg-gradient-to-r from-ocean-primary to-ocean-secondary hover:from-ocean-secondary hover:to-ocean-primary text-primary-foreground border-0 shadow-[0_0_12px_rgba(22,199,132,0.3)] hover:shadow-[0_0_20px_rgba(22,199,132,0.5)] transition-all duration-300 relative overflow-hidden"
                       onClick={() => navigate("/auth")}
                       style={{
-                        transform: 'translateZ(40px)'
+                        transform: 'translateZ(30px)'
                       }}
                     >
-                      <span className="relative z-10">Join as {type.title}</span>
+                      <span className="relative z-10">Join</span>
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
                     </Button>
                   </div>
                 </div>
                 
-                {/* 3D Corner decorations */}
-                <div 
-                  className="absolute top-4 right-4 w-10 h-10 border-t-2 border-r-2 border-ocean-primary/20 group-hover:border-ocean-primary transition-all duration-300"
-                  style={{ transform: 'translateZ(50px)' }}
-                />
-                <div 
-                  className="absolute bottom-4 left-4 w-10 h-10 border-b-2 border-l-2 border-ocean-primary/20 group-hover:border-ocean-primary transition-all duration-300"
-                  style={{ transform: 'translateZ(50px)' }}
-                />
-                
                 {/* Energy particles */}
-                <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-                  <div className={`absolute top-1/4 left-1/4 w-1 h-1 bg-ocean-primary rounded-full ${hoveredIndex === index ? 'animate-ping' : 'opacity-0'}`} />
-                  <div className={`absolute top-3/4 right-1/4 w-1 h-1 bg-ocean-secondary rounded-full ${hoveredIndex === index ? 'animate-ping' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }} />
+                <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+                  <div className={`absolute top-1/4 left-1/4 w-0.5 h-0.5 bg-ocean-primary rounded-full ${hoveredIndex === index ? 'animate-ping' : 'opacity-0'}`} />
+                  <div className={`absolute top-3/4 right-1/4 w-0.5 h-0.5 bg-ocean-secondary rounded-full ${hoveredIndex === index ? 'animate-ping' : 'opacity-0'}`} style={{ animationDelay: '0.3s' }} />
                 </div>
               </div>
             </div>
