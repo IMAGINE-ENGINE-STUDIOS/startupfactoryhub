@@ -9,7 +9,7 @@ const NasdaqFeature = () => {
         className="w-full h-full object-cover"
         loading="lazy"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-background/30 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent pointer-events-none" />
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
         <div className="inline-block px-4 py-2 bg-background/20 backdrop-blur-sm rounded-full mb-4 border border-white/20">
           <span className="text-white font-semibold text-sm">AS FEATURED IN</span>
