@@ -19,8 +19,8 @@ const Navigation = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 sm:space-x-3">
             <img src={logo} alt="Startup Factory Hub" className="w-8 h-8 sm:w-10 sm:h-10 glow-effect" />
-            <span className="text-base sm:text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-              Startup Factory Hub
+            <span className="font-futuristic text-sm sm:text-base font-bold bg-gradient-primary bg-clip-text text-transparent tracking-wide">
+              STARTUP FACTORY HUB
             </span>
           </div>
           

@@ -11,8 +11,8 @@ const Footer = () => {
           <div className="col-span-1 sm:col-span-2 lg:col-span-4">
             <div className="flex items-center space-x-3 mb-4 sm:mb-6">
               <img src={logo} alt="Startup Factory Hub" className="w-8 h-8 sm:w-10 sm:h-10 glow-effect" />
-              <span className="text-lg sm:text-xl font-bold bg-gradient-primary bg-clip-text text-transparent">
-                Startup Factory Hub
+              <span className="font-futuristic text-sm sm:text-base font-bold bg-gradient-primary bg-clip-text text-transparent tracking-wide">
+                STARTUP FACTORY HUB
               </span>
             </div>
             <p className="text-sm sm:text-base text-muted-foreground max-w-md">
