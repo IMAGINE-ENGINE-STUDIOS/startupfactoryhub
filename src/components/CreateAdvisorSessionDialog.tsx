@@ -9,9 +9,10 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, Clock, Calendar, AlertCircle, Building2 } from 'lucide-react';
+import { Loader2, Clock, Calendar, AlertCircle, Building2, Users, Globe } from 'lucide-react';
 import { format, addDays, setHours, setMinutes, startOfWeek } from 'date-fns';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface CreateAdvisorSessionDialogProps {
   open: boolean;
@@ -20,11 +21,12 @@ interface CreateAdvisorSessionDialogProps {
   preSelectedMenteeId?: string;
 }
 
-interface MenteeOption {
-  mentee_id: string;
+interface StartupOption {
+  user_id: string;
   full_name: string;
   company_name: string | null;
   company_stage: string | null;
+  is_mentee: boolean;
 }
 
 interface AvailabilitySlot {
@@ -50,17 +52,20 @@ export default function CreateAdvisorSessionDialog({
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [mentees, setMentees] = useState<MenteeOption[]>([]);
+  const [mentees, setMentees] = useState<StartupOption[]>([]);
+  const [allStartups, setAllStartups] = useState<StartupOption[]>([]);
   const [loadingMentees, setLoadingMentees] = useState(true);
+  const [loadingStartups, setLoadingStartups] = useState(true);
   const [availability, setAvailability] = useState<AvailabilitySlot[]>([]);
   const [loadingAvailability, setLoadingAvailability] = useState(false);
   const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedTime, setSelectedTime] = useState('');
   const [manualDateTime, setManualDateTime] = useState('');
+  const [startupSource, setStartupSource] = useState<'mentees' | 'all'>('all');
   
   const [formData, setFormData] = useState({
-    mentee_id: preSelectedMenteeId || '',
+    startup_id: preSelectedMenteeId || '',
     duration_minutes: '60',
     topic: '',
     description: '',
@@ -69,13 +74,14 @@ export default function CreateAdvisorSessionDialog({
   useEffect(() => {
     if (open && user) {
       fetchMentees();
+      fetchAllStartups();
       fetchMyAvailability();
     }
   }, [open, user]);
 
   useEffect(() => {
     if (preSelectedMenteeId) {
-      setFormData(prev => ({ ...prev, mentee_id: preSelectedMenteeId }));
+      setFormData(prev => ({ ...prev, startup_id: preSelectedMenteeId }));
     }
   }, [preSelectedMenteeId]);
 
@@ -106,7 +112,7 @@ export default function CreateAdvisorSessionDialog({
       }
 
       // Get company info for each mentee
-      const menteeOptions: MenteeOption[] = await Promise.all(
+      const menteeOptions: StartupOption[] = await Promise.all(
         relationships.map(async (rel: any) => {
           const { data: company } = await supabase
             .from('companies')
@@ -115,10 +121,11 @@ export default function CreateAdvisorSessionDialog({
             .maybeSingle();
 
           return {
-            mentee_id: rel.mentee_id,
+            user_id: rel.mentee_id,
             full_name: rel.mentee?.full_name || 'Unknown',
             company_name: company?.name || null,
             company_stage: company?.stage || null,
+            is_mentee: true,
           };
         })
       );
@@ -133,6 +140,55 @@ export default function CreateAdvisorSessionDialog({
       });
     } finally {
       setLoadingMentees(false);
+    }
+  };
+
+  const fetchAllStartups = async () => {
+    if (!user) return;
+    
+    try {
+      setLoadingStartups(true);
+      
+      // Fetch all companies (startups) on the platform
+      const { data: companies, error } = await supabase
+        .from('companies')
+        .select(`
+          id,
+          name,
+          stage,
+          user_id,
+          profiles:user_id (
+            full_name
+          )
+        `)
+        .neq('user_id', user.id)
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+
+      if (!companies || companies.length === 0) {
+        setAllStartups([]);
+        return;
+      }
+
+      const startupOptions: StartupOption[] = companies.map((company: any) => ({
+        user_id: company.user_id,
+        full_name: company.profiles?.full_name || 'Unknown Founder',
+        company_name: company.name,
+        company_stage: company.stage,
+        is_mentee: false,
+      }));
+
+      setAllStartups(startupOptions);
+    } catch (error) {
+      console.error('Error fetching startups:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to load startups',
+        variant: 'destructive',
+      });
+    } finally {
+      setLoadingStartups(false);
     }
   };
 
@@ -253,7 +309,7 @@ export default function CreateAdvisorSessionDialog({
         .from('mentoring_sessions')
         .insert({
           mentor_id: user.id,
-          mentee_id: formData.mentee_id,
+          mentee_id: formData.startup_id,
           scheduled_at: scheduledAt.toISOString(),
           duration_minutes: parseInt(formData.duration_minutes),
           topic: formData.topic,
@@ -265,15 +321,19 @@ export default function CreateAdvisorSessionDialog({
 
       if (error) throw error;
 
-      // Send notification to mentee
-      const selectedMentee = mentees.find(m => m.mentee_id === formData.mentee_id);
+      // Get the selected startup info for notification
+      const selectedStartup = startupSource === 'mentees' 
+        ? mentees.find(m => m.user_id === formData.startup_id)
+        : allStartups.find(s => s.user_id === formData.startup_id);
+
+      // Send notification to startup
       await supabase
         .from('notifications')
         .insert({
-          user_id: formData.mentee_id,
+          user_id: formData.startup_id,
           type: 'info',
           title: 'New Session Scheduled',
-          message: `Your advisor has scheduled a session: ${formData.topic || 'Mentoring Session'}`,
+          message: `An advisor has scheduled a session with you: ${formData.topic || 'Advisory Session'}`,
           data: {
             scheduled_at: scheduledAt.toISOString(),
             mentor_id: user.id
@@ -282,7 +342,7 @@ export default function CreateAdvisorSessionDialog({
 
       toast({
         title: 'Session Scheduled!',
-        description: `Session with ${selectedMentee?.full_name || 'mentee'} has been scheduled.`,
+        description: `Session with ${selectedStartup?.full_name || selectedStartup?.company_name || 'startup'} has been scheduled.`,
       });
 
       onSessionCreated();
@@ -290,7 +350,7 @@ export default function CreateAdvisorSessionDialog({
       
       // Reset form
       setFormData({
-        mentee_id: '',
+        startup_id: '',
         duration_minutes: '60',
         topic: '',
         description: '',
@@ -310,49 +370,77 @@ export default function CreateAdvisorSessionDialog({
     }
   };
 
+  const currentStartups = startupSource === 'mentees' ? mentees : allStartups;
+  const isLoadingStartups = startupSource === 'mentees' ? loadingMentees : loadingStartups;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Schedule Session with Mentee</DialogTitle>
+          <DialogTitle>Schedule Advisory Session</DialogTitle>
           <DialogDescription>
-            Schedule a mentoring session with one of your active mentees
+            Schedule a session with a startup from your network or the platform
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="mentee">Select Mentee</Label>
-            {loadingMentees ? (
+            <Label>Select Startup From</Label>
+            <Tabs value={startupSource} onValueChange={(v) => {
+              setStartupSource(v as 'mentees' | 'all');
+              setFormData(prev => ({ ...prev, startup_id: '' }));
+            }}>
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="all" className="flex items-center gap-2">
+                  <Globe className="h-4 w-4" />
+                  All Startups
+                </TabsTrigger>
+                <TabsTrigger value="mentees" className="flex items-center gap-2">
+                  <Users className="h-4 w-4" />
+                  My Mentees
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="startup">Select {startupSource === 'mentees' ? 'Mentee' : 'Startup'}</Label>
+            {isLoadingStartups ? (
               <div className="flex items-center justify-center py-4">
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
-            ) : mentees.length === 0 ? (
+            ) : currentStartups.length === 0 ? (
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  You don't have any active mentees yet. Accept mentorship requests to start scheduling sessions.
+                  {startupSource === 'mentees' 
+                    ? "You don't have any active mentees yet. Switch to 'All Startups' to schedule with any startup on the platform."
+                    : "No startups found on the platform yet."
+                  }
                 </AlertDescription>
               </Alert>
             ) : (
               <Select
-                value={formData.mentee_id}
-                onValueChange={(value) => setFormData(prev => ({ ...prev, mentee_id: value }))}
+                value={formData.startup_id}
+                onValueChange={(value) => setFormData(prev => ({ ...prev, startup_id: value }))}
                 required
               >
-                <SelectTrigger id="mentee">
-                  <SelectValue placeholder="Select a mentee" />
+                <SelectTrigger id="startup">
+                  <SelectValue placeholder={`Select a ${startupSource === 'mentees' ? 'mentee' : 'startup'}`} />
                 </SelectTrigger>
                 <SelectContent>
-                  {mentees.map((mentee) => (
-                    <SelectItem key={mentee.mentee_id} value={mentee.mentee_id}>
+                  {currentStartups.map((startup) => (
+                    <SelectItem key={startup.user_id} value={startup.user_id}>
                       <div className="flex items-center gap-2">
-                        <span>{mentee.full_name}</span>
-                        {mentee.company_name && (
+                        <span>{startup.full_name}</span>
+                        {startup.company_name && (
                           <span className="text-xs text-muted-foreground flex items-center gap-1">
                             <Building2 className="h-3 w-3" />
-                            {mentee.company_name}
+                            {startup.company_name}
                           </span>
+                        )}
+                        {startup.is_mentee && (
+                          <Badge variant="secondary" className="text-xs">Mentee</Badge>
                         )}
                       </div>
                     </SelectItem>
@@ -489,7 +577,7 @@ export default function CreateAdvisorSessionDialog({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || mentees.length === 0}>
+            <Button type="submit" disabled={loading || currentStartups.length === 0 || !formData.startup_id}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Schedule Session
             </Button>
