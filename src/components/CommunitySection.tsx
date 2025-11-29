@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Rocket, GraduationCap, DollarSign, Lightbulb } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import WebGLBackground from "./WebGLBackground";
 
 const userTypes = [
   {
@@ -40,8 +41,13 @@ const CommunitySection = () => {
   
   return (
     <section id="community" className="py-12 sm:py-20 relative overflow-hidden" style={{ perspective: '2000px' }}>
+      {/* WebGL Globe Background */}
+      <div className="absolute inset-0 opacity-40">
+        <WebGLBackground />
+      </div>
+      
       {/* Radial gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-ocean-primary/5 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/60 to-background/80" />
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center mb-12 sm:mb-16">

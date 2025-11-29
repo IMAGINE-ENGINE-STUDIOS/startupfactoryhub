@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import WebGLBackground from "./WebGLBackground";
+import VideoBackground from "./VideoBackground";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -10,8 +10,8 @@ const HeroSection = () => {
 
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* WebGL Background */}
-      <WebGLBackground />
+      {/* Video Background */}
+      <VideoBackground />
       
       {/* Background Image Overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/95 to-background/90 z-[1]" />
