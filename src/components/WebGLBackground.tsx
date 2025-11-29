@@ -45,11 +45,11 @@ const WebGLBackground = () => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
 
-    // Colors based on theme - Green, Turquoise, Ocean Blue palette
-    const primaryColor = isDark ? 0x10b981 : 0x14b8a6; // Emerald/Teal
+    // Colors based on theme - Turquoise palette
+    const primaryColor = 0x40E0D0; // Turquoise
     const secondaryColor = isDark ? 0x06b6d4 : 0x22d3ee; // Cyan/Ocean blue
-    const accentColor = isDark ? 0x34d399 : 0x2dd4bf; // Light green/Turquoise
-    const glowColor = isDark ? 0x059669 : 0x0d9488; // Deep emerald/Teal for glow
+    const accentColor = isDark ? 0x40E0D0 : 0x40E0D0; // Turquoise
+    const glowColor = 0x40E0D0; // Turquoise for glow
 
     // Create globe group
     const globeGroup = new THREE.Group();
@@ -401,7 +401,7 @@ const WebGLBackground = () => {
     const innerGlowGeometry = new THREE.SphereGeometry(globeRadius * 1.05, 32, 32);
     const innerGlowMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        uColor: { value: new THREE.Color(0x10b981) }, // Emerald green
+        uColor: { value: new THREE.Color(0x40E0D0) }, // Turquoise
       },
       vertexShader: `
         varying vec3 vNormal;
