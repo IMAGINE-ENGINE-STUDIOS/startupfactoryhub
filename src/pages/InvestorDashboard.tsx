@@ -20,12 +20,10 @@ import NetworkBrowser from '@/components/NetworkBrowser';
 import StartupProfileDialog from '@/components/StartupProfileDialog';
 import MatchingSystem from '@/components/MatchingSystem';
 import FloatingChat from '@/components/FloatingChat';
-import InvestorProfileForm from '@/components/InvestorProfileForm';
 import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
-import InvestorAvailabilityManager from '@/components/InvestorAvailabilityManager';
 import InvestorProfileView from '@/components/InvestorProfileView';
 import PitchMeetingCard from '@/components/PitchMeetingCard';
 import VideoConferencing from '@/components/VideoConferencing';
@@ -869,22 +867,6 @@ export default function InvestorDashboard() {
 
           <TabsContent value="profile" className="space-y-4">
             <InvestorProfileView />
-            <Card>
-              <CardHeader>
-                <CardTitle>Investment Preferences</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <InvestorProfileForm />
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Availability Schedule</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <InvestorAvailabilityManager />
-              </CardContent>
-            </Card>
             
             <Card>
               <CardHeader>
