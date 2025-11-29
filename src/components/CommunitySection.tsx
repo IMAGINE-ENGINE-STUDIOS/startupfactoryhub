@@ -8,29 +8,29 @@ const userTypes = [
   {
     icon: Rocket,
     title: "Startups",
-    description: "Build your dream company with AI-powered roadmaps and instant access to mentors and resources.",
-    features: ["Personalized roadmaps", "Mentor matching", "Resource discovery", "Progress tracking"],
+    description: "Build your dream with AI roadmaps and mentor access.",
+    features: ["Roadmaps", "Mentors", "Resources"],
     color: "ocean-primary"
   },
   {
     icon: Lightbulb,
-    title: "Mentors & Advisors",
-    description: "Share your expertise and guide the next generation of entrepreneurs while building your network.",
-    features: ["Find promising startups", "Share expertise", "Build network", "Track impact"],
+    title: "Mentors",
+    description: "Guide entrepreneurs and grow your network.",
+    features: ["Find startups", "Share expertise", "Track impact"],
     color: "ocean-secondary"
   },
   {
     icon: DollarSign,
     title: "Investors",
-    description: "Discover high-potential startups and connect with founders at the perfect moment.",
-    features: ["Deal flow pipeline", "Startup analytics", "Direct connections", "Portfolio tracking"],
+    description: "Discover high-potential startups and founders.",
+    features: ["Deal flow", "Analytics", "Connections"],
     color: "accent"
   },
   {
     icon: GraduationCap,
     title: "Students",
-    description: "Learn from real entrepreneurs, gain experience, and find internship opportunities.",
-    features: ["Learning resources", "Internship matching", "Skill development", "Career guidance"],
+    description: "Learn, gain experience, find internships.",
+    features: ["Resources", "Internships", "Career growth"],
     color: "primary"
   }
 ];
@@ -142,16 +142,16 @@ const CommunitySection = () => {
                       {type.title}
                     </h3>
                     
-                    <p className="text-[10px] sm:text-sm text-muted-foreground mb-3 sm:mb-4 leading-relaxed line-clamp-3">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mb-2 sm:mb-3 leading-relaxed">
                       {type.description}
                     </p>
                     
                     {/* Features with tech styling */}
-                    <div className="hidden sm:flex flex-col gap-1.5 mb-4">
-                      {type.features.slice(0, 2).map((feature, idx) => (
+                    <div className="flex flex-col gap-1 sm:gap-1.5 mb-3 sm:mb-4">
+                      {type.features.map((feature, idx) => (
                         <div 
                           key={idx} 
-                          className="flex items-center text-xs group/feature justify-center"
+                          className="flex items-center text-[9px] sm:text-xs group/feature justify-center"
                           style={{
                             transform: hoveredIndex === index ? `translateZ(${5 + idx * 3}px)` : 'translateZ(0)',
                             transition: 'transform 0.6s ease',
