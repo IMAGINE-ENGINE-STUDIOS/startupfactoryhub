@@ -98,7 +98,7 @@ const FeaturesSection = () => {
               >
                 {/* Card */}
                 <div className={`
-                  h-full p-4 sm:p-5 rounded-xl
+                  h-full p-3 sm:p-5 rounded-xl
                   bg-gradient-to-br ${feature.gradient}
                   backdrop-blur-xl border border-border/50
                   transition-all duration-300 ease-out
@@ -106,20 +106,20 @@ const FeaturesSection = () => {
                 `}>
                   {/* Icon */}
                   <div className={`
-                    w-10 h-10 sm:w-11 sm:h-11 rounded-lg mb-3
+                    w-8 h-8 sm:w-11 sm:h-11 rounded-lg mb-2 sm:mb-3
                     bg-gradient-to-br from-primary/20 to-primary/5
                     flex items-center justify-center
                     transition-all duration-300
                     ${isHovered ? 'scale-110 rotate-6' : 'scale-100 rotate-0'}
                   `}>
-                    <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                    <Icon className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
                   </div>
 
                   {/* Content */}
-                  <h3 className="text-sm sm:text-base font-bold mb-1.5 text-foreground">
+                  <h3 className="text-xs sm:text-base font-bold mb-1 sm:mb-1.5 text-foreground">
                     {feature.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed line-clamp-2">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground leading-snug sm:leading-relaxed line-clamp-2">
                     {feature.description}
                   </p>
 
