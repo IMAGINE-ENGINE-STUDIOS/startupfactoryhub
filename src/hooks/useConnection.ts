@@ -26,11 +26,11 @@ export const useConnection = (userId: string | null) => {
     }
 
     try {
+      // Check both directions: user->target OR target->user
       const { data, error } = await supabase
         .from('connections')
         .select('id, requester_id, addressee_id, status')
-        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
-        .or(`requester_id.eq.${userId},addressee_id.eq.${userId}`)
+        .or(`and(requester_id.eq.${user.id},addressee_id.eq.${userId}),and(requester_id.eq.${userId},addressee_id.eq.${user.id})`)
         .maybeSingle();
 
       if (error) throw error;
@@ -46,6 +46,7 @@ export const useConnection = (userId: string | null) => {
         }
       } else {
         setStatus('none');
+        setConnectionId(null);
       }
     } catch (error) {
       console.error('Error checking connection status:', error);
