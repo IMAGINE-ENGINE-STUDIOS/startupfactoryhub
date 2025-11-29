@@ -243,18 +243,18 @@ const WebGLBackground = () => {
     ];
 
     connectionPairs.forEach(([i, j]) => {
-      const start = nodeVectors[i];
-      const end = nodeVectors[j];
+      const start = nodeVectors[i].clone();
+      const end = nodeVectors[j].clone();
       
-      // Create curved arc
+      // Create curved arc - higher arc for better visibility
       const midPoint = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
       const distance = start.distanceTo(end);
-      midPoint.normalize().multiplyScalar(globeRadius + distance * 0.2);
+      midPoint.normalize().multiplyScalar(globeRadius + distance * 0.35);
 
       const curve = new THREE.QuadraticBezierCurve3(start, midPoint, end);
-      const curvePoints = curve.getPoints(40);
+      const curvePoints = curve.getPoints(60);
 
-      // Draw the arc line with dots (dotted line effect)
+      // Draw the arc as a visible dotted line
       const lineGeometry = new THREE.BufferGeometry();
       const linePositions = new Float32Array(curvePoints.length * 3);
       const lineSizes = new Float32Array(curvePoints.length);
@@ -263,7 +263,7 @@ const WebGLBackground = () => {
         linePositions[idx * 3] = point.x;
         linePositions[idx * 3 + 1] = point.y;
         linePositions[idx * 3 + 2] = point.z;
-        lineSizes[idx] = 1.2;
+        lineSizes[idx] = 2.0;
       });
 
       lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
@@ -280,7 +280,7 @@ const WebGLBackground = () => {
           
           void main() {
             vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-            gl_PointSize = size * uPixelRatio * (150.0 / -mvPosition.z);
+            gl_PointSize = size * uPixelRatio * (180.0 / -mvPosition.z);
             gl_Position = projectionMatrix * mvPosition;
           }
         `,
@@ -290,7 +290,7 @@ const WebGLBackground = () => {
           void main() {
             float dist = length(gl_PointCoord - vec2(0.5));
             if (dist > 0.5) discard;
-            float alpha = 0.4 * (1.0 - smoothstep(0.0, 0.5, dist));
+            float alpha = 0.7 * (1.0 - smoothstep(0.0, 0.5, dist));
             gl_FragColor = vec4(uColor, alpha);
           }
         `,
@@ -302,14 +302,14 @@ const WebGLBackground = () => {
       const line = new THREE.Points(lineGeometry, lineMaterial) as unknown as THREE.Line;
       globeGroup.add(line);
 
-      // Traveling particles along the arc
-      const particleCount = 8;
+      // Bright traveling particles along the arc
+      const particleCount = 12;
       const particleGeometry = new THREE.BufferGeometry();
       const particlePositions = new Float32Array(particleCount * 3);
       const particleSizes = new Float32Array(particleCount);
 
       for (let p = 0; p < particleCount; p++) {
-        particleSizes[p] = Math.random() * 2.5 + 1.5;
+        particleSizes[p] = Math.random() * 3 + 2.5;
       }
 
       particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
@@ -317,7 +317,7 @@ const WebGLBackground = () => {
 
       const particleMaterial = new THREE.ShaderMaterial({
         uniforms: {
-          uColor: { value: accentColor },
+          uColor: { value: new THREE.Color(0xffffff) },
           uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
         },
         vertexShader: `
@@ -326,7 +326,7 @@ const WebGLBackground = () => {
           
           void main() {
             vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-            gl_PointSize = size * uPixelRatio * (180.0 / -mvPosition.z);
+            gl_PointSize = size * uPixelRatio * (200.0 / -mvPosition.z);
             gl_Position = projectionMatrix * mvPosition;
           }
         `,
