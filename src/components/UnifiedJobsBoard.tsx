@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye, Copy, MoreVertical, XCircle, Search, ChevronDown, ChevronUp } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye, Copy, MoreVertical, XCircle, Search, ChevronDown, ChevronUp, GraduationCap, Target, Gift, ClipboardList } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -44,6 +44,10 @@ interface Job {
   external_application_url: string | null;
   applications_count: number;
   created_at: string;
+  experience_level: string | null;
+  requirements: string[] | null;
+  responsibilities: string[] | null;
+  benefits: string[] | null;
   companies: {
     id: string;
     name: string;
@@ -296,6 +300,21 @@ export default function UnifiedJobsBoard() {
     const category = formData.get('category') as 'full-time' | 'part-time' | 'contract' | 'internship';
     const externalUrl = (formData.get('external_url') as string)?.trim();
     
+    // Parse array fields from textareas (each line becomes an item)
+    const requirementsText = formData.get('requirements') as string;
+    const responsibilitiesText = formData.get('responsibilities') as string;
+    const benefitsText = formData.get('benefits') as string;
+    
+    const requirements = requirementsText?.trim() 
+      ? requirementsText.split('\n').map(r => r.trim()).filter(Boolean) 
+      : null;
+    const responsibilities = responsibilitiesText?.trim() 
+      ? responsibilitiesText.split('\n').map(r => r.trim()).filter(Boolean) 
+      : null;
+    const benefits = benefitsText?.trim() 
+      ? benefitsText.split('\n').map(b => b.trim()).filter(Boolean) 
+      : null;
+    
     try {
       const { data, error } = await supabase
         .from('jobs')
@@ -312,6 +331,10 @@ export default function UnifiedJobsBoard() {
           salary_range_max: formData.get('salary_max') ? Number(formData.get('salary_max')) : null,
           is_task_based: formData.get('is_task_based') === 'true',
           external_application_url: externalUrl || null,
+          experience_level: formData.get('experience_level') as string || null,
+          requirements,
+          responsibilities,
+          benefits,
           status: 'active',
         }] as any)
         .select()
@@ -732,7 +755,7 @@ export default function UnifiedJobsBoard() {
 
                     <div className="space-y-2">
                       <Label htmlFor="description">Description *</Label>
-                      <Textarea id="description" name="description" rows={4} required />
+                      <Textarea id="description" name="description" rows={4} required placeholder="Describe the role and what the candidate will be doing..." />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -741,7 +764,7 @@ export default function UnifiedJobsBoard() {
                         <Input id="location" name="location" placeholder="e.g., Remote, New York, NY" />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="job_type">Type</Label>
+                        <Label htmlFor="job_type">Work Type</Label>
                         <Select name="job_type">
                           <SelectTrigger>
                             <SelectValue placeholder="Select type" />
@@ -757,9 +780,28 @@ export default function UnifiedJobsBoard() {
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
+                        <Label htmlFor="experience_level">Experience Level</Label>
+                        <Select name="experience_level">
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select level" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="entry-level">Entry-Level</SelectItem>
+                            <SelectItem value="junior">Junior</SelectItem>
+                            <SelectItem value="mid-level">Mid-Level</SelectItem>
+                            <SelectItem value="senior">Senior</SelectItem>
+                            <SelectItem value="lead">Lead</SelectItem>
+                            <SelectItem value="executive">Executive</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
                         <Label htmlFor="duration">Duration (for internships/contracts)</Label>
                         <Input id="duration" name="duration" placeholder="e.g., 3 months" />
                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="compensation_type">Compensation Type</Label>
                         <Select name="compensation_type" defaultValue="salary">
@@ -773,18 +815,67 @@ export default function UnifiedJobsBoard() {
                           </SelectContent>
                         </Select>
                       </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="salary_min">Min Salary/Rate</Label>
                         <Input id="salary_min" name="salary_min" type="number" placeholder="50000" />
                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="salary_max">Max Salary/Rate</Label>
                         <Input id="salary_max" name="salary_max" type="number" placeholder="80000" />
                       </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="is_task_based">Task Management</Label>
+                        <Select name="is_task_based" defaultValue="false">
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="false">No</SelectItem>
+                            <SelectItem value="true">Yes (assign tasks)</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
+
+                    <Separator />
+
+                    <div className="space-y-2">
+                      <Label htmlFor="requirements">Requirements</Label>
+                      <Textarea 
+                        id="requirements" 
+                        name="requirements" 
+                        rows={4} 
+                        placeholder="Enter each requirement on a new line:&#10;• Bachelor's degree in CS or related field&#10;• 3+ years of React experience&#10;• Strong communication skills" 
+                      />
+                      <p className="text-xs text-muted-foreground">Enter each requirement on a new line</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="responsibilities">Responsibilities</Label>
+                      <Textarea 
+                        id="responsibilities" 
+                        name="responsibilities" 
+                        rows={4} 
+                        placeholder="Enter each responsibility on a new line:&#10;• Lead frontend development&#10;• Mentor junior developers&#10;• Participate in code reviews" 
+                      />
+                      <p className="text-xs text-muted-foreground">Enter each responsibility on a new line</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="benefits">Benefits</Label>
+                      <Textarea 
+                        id="benefits" 
+                        name="benefits" 
+                        rows={4} 
+                        placeholder="Enter each benefit on a new line:&#10;• Health, dental, vision insurance&#10;• 401k with company matching&#10;• Flexible work schedule" 
+                      />
+                      <p className="text-xs text-muted-foreground">Enter each benefit on a new line</p>
+                    </div>
+
+                    <Separator />
 
                     <div className="space-y-2">
                       <Label htmlFor="external_url">External Application URL (optional)</Label>
@@ -794,19 +885,7 @@ export default function UnifiedJobsBoard() {
                         type="url" 
                         placeholder="https://company.com/apply" 
                       />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="is_task_based">Enable Task Management?</Label>
-                      <Select name="is_task_based" defaultValue="false">
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="false">No</SelectItem>
-                          <SelectItem value="true">Yes (assign tasks to accepted applicants)</SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <p className="text-xs text-muted-foreground">If set, applicants will be redirected to this URL</p>
                     </div>
 
                     <Button type="submit" className="w-full">Post Job</Button>
@@ -920,48 +999,107 @@ export default function UnifiedJobsBoard() {
                 
                 {/* Expanded details */}
                 {isExpanded && (
-                  <div className="space-y-3 border-t pt-3">
-                    {job.job_type && (
-                      <div className="text-sm">
-                        <span className="font-medium">Work Type:</span> {job.job_type}
+                  <div className="space-y-4 border-t pt-4">
+                    {/* Job Info Grid */}
+                    <div className="grid grid-cols-2 gap-3">
+                      {job.job_type && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Briefcase className="w-4 h-4 text-muted-foreground" />
+                          <span><span className="font-medium">Work Type:</span> {job.job_type}</span>
+                        </div>
+                      )}
+                      {job.experience_level && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                          <span><span className="font-medium">Level:</span> {job.experience_level}</span>
+                        </div>
+                      )}
+                      {job.duration && (
+                        <div className="flex items-center gap-2 text-sm">
+                          <Clock className="w-4 h-4 text-muted-foreground" />
+                          <span><span className="font-medium">Duration:</span> {job.duration}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-2 text-sm">
+                        <DollarSign className="w-4 h-4 text-muted-foreground" />
+                        <span><span className="font-medium">Pay:</span> {getCompensationDisplay(job)}</span>
                       </div>
-                    )}
-                    {job.duration && (
-                      <div className="text-sm">
-                        <span className="font-medium">Duration:</span> {job.duration}
-                      </div>
-                    )}
-                    <div className="text-sm">
-                      <span className="font-medium">Compensation:</span> {getCompensationDisplay(job)}
                     </div>
+                    
+                    {/* Requirements */}
+                    {job.requirements && job.requirements.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <ClipboardList className="w-4 h-4 text-primary" />
+                          Requirements
+                        </div>
+                        <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-6">
+                          {job.requirements.map((req, idx) => (
+                            <li key={idx}>{req}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Responsibilities */}
+                    {job.responsibilities && job.responsibilities.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <Target className="w-4 h-4 text-primary" />
+                          Responsibilities
+                        </div>
+                        <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-6">
+                          {job.responsibilities.map((resp, idx) => (
+                            <li key={idx}>{resp}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
+                    {/* Benefits */}
+                    {job.benefits && job.benefits.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2 text-sm font-medium">
+                          <Gift className="w-4 h-4 text-primary" />
+                          Benefits
+                        </div>
+                        <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-6">
+                          {job.benefits.map((benefit, idx) => (
+                            <li key={idx}>{benefit}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                    
                     {job.is_task_based && (
-                      <div className="text-sm text-primary">
-                        This is a task-based position where you'll be assigned specific tasks to complete.
+                      <div className="text-sm text-primary bg-primary/10 p-2 rounded-md">
+                        ✓ This is a task-based position where you'll be assigned specific tasks to complete.
                       </div>
                     )}
                   </div>
                 )}
                 
-                <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
-                  {job.location && (
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="truncate max-w-[120px] sm:max-w-none">{job.location}</span>
-                    </div>
-                  )}
-                  {job.duration && !isExpanded && (
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="truncate">{job.duration}</span>
-                    </div>
-                  )}
-                  {!isExpanded && (
+                {/* Quick info when collapsed */}
+                {!isExpanded && (
+                  <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
+                    {job.location && (
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <span className="truncate max-w-[120px] sm:max-w-none">{job.location}</span>
+                      </div>
+                    )}
+                    {job.duration && (
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <span className="truncate">{job.duration}</span>
+                      </div>
+                    )}
                     <div className="flex items-center gap-1">
                       <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                       <span className="truncate">{getCompensationDisplay(job)}</span>
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
 
                 {/* Expand/Collapse button */}
                 <Button
