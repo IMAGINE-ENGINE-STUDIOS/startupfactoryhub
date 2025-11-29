@@ -93,7 +93,7 @@ const Blog = () => {
         <div className="max-w-3xl mx-auto mb-8">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-3xl font-futuristic font-bold text-foreground mb-2">
+              <h1 className="text-3xl font-bold text-foreground mb-2">
                 Community Blog
               </h1>
               <p className="text-muted-foreground">
