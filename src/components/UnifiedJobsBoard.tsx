@@ -87,7 +87,7 @@ export default function UnifiedJobsBoard() {
   const [closedJobs, setClosedJobs] = useState<Job[]>([]);
   const [closeJobId, setCloseJobId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [displayCount, setDisplayCount] = useState(9);
+  const [displayCount, setDisplayCount] = useState(6);
   const [expandedJobs, setExpandedJobs] = useState<Set<string>>(new Set());
 
   // Filter and deduplicate jobs
@@ -826,7 +826,7 @@ export default function UnifiedJobsBoard() {
           value={searchQuery}
           onChange={(e) => {
             setSearchQuery(e.target.value);
-            setDisplayCount(9); // Reset pagination on search
+            setDisplayCount(6); // Reset pagination on search
           }}
           className="pl-10"
         />
@@ -1082,7 +1082,7 @@ export default function UnifiedJobsBoard() {
         <div className="flex justify-center pt-4">
           <Button
             variant="outline"
-            onClick={() => setDisplayCount(prev => prev + 9)}
+            onClick={() => setDisplayCount(prev => prev + 6)}
             className="gap-2"
           >
             Load More Jobs ({filteredJobs.length - displayCount} remaining)

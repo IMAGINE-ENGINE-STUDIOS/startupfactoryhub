@@ -10,8 +10,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Plus, CheckCircle2, Clock, Users } from 'lucide-react';
+import { Plus, CheckCircle2, Clock, Users, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface Job {
   id: string;
@@ -45,6 +55,7 @@ export default function JobTaskManager() {
   const [tasks, setTasks] = useState<JobTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
 
   useEffect(() => {
     if (user) {
@@ -155,6 +166,44 @@ export default function JobTaskManager() {
     if (total === 0) return 0;
     const completed = task.student_job_tasks.filter(st => st.completed).length;
     return Math.round((completed / total) * 100);
+  };
+
+  const handleDeleteTask = async () => {
+    if (!deleteTaskId) return;
+
+    try {
+      // First delete student_job_tasks related to this task
+      const { error: studentTasksError } = await supabase
+        .from('student_job_tasks')
+        .delete()
+        .eq('task_id', deleteTaskId);
+
+      if (studentTasksError) throw studentTasksError;
+
+      // Then delete the task itself
+      const { error } = await supabase
+        .from('job_tasks')
+        .delete()
+        .eq('id', deleteTaskId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Task deleted',
+        description: 'The task has been removed successfully',
+      });
+
+      fetchTasks();
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete task',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleteTaskId(null);
+    }
   };
 
   if (loading) {
@@ -280,29 +329,60 @@ export default function JobTaskManager() {
                   <Progress value={progress} />
                 </div>
 
-                <div className="flex items-center gap-4 text-sm text-muted-foreground pt-2">
-                  {task.due_date && (
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    {task.due_date && (
+                      <div className="flex items-center gap-1">
+                        <Clock className="w-4 h-4" />
+                        Due: {new Date(task.due_date).toLocaleDateString()}
+                      </div>
+                    )}
                     <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      Due: {new Date(task.due_date).toLocaleDateString()}
+                      <Users className="w-4 h-4" />
+                      {totalAssignees} assignees
                     </div>
-                  )}
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4" />
-                    {totalAssignees} assignees
+                    {progress === 100 && (
+                      <div className="flex items-center gap-1 text-green-600">
+                        <CheckCircle2 className="w-4 h-4" />
+                        All Complete
+                      </div>
+                    )}
                   </div>
-                  {progress === 100 && (
-                    <div className="flex items-center gap-1 text-green-600">
-                      <CheckCircle2 className="w-4 h-4" />
-                      All Complete
-                    </div>
-                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setDeleteTaskId(task.id)}
+                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
                 </div>
               </CardContent>
             </Card>
           );
         })}
       </div>
+
+      {/* Delete Task Confirmation Dialog */}
+      <AlertDialog open={deleteTaskId !== null} onOpenChange={(open) => !open && setDeleteTaskId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Task</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this task? This will also remove all student assignments for this task. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteTask}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Task
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
