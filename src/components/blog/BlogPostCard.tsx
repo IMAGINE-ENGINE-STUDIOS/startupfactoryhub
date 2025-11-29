@@ -158,7 +158,7 @@ const BlogPostCard = ({ post }: BlogPostCardProps) => {
       </div>
 
       {/* Content */}
-      <h2 className="text-xl font-semibold text-foreground mb-2">
+      <h2 className="text-xl font-futuristic font-semibold text-foreground mb-2">
         {post.title}
       </h2>
       <p className="text-muted-foreground whitespace-pre-wrap mb-4">
