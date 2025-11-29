@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -24,49 +24,53 @@ export const useProfileWithRole = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  useEffect(() => {
+  const fetchProfileWithRole = useCallback(async () => {
     if (!user) {
       setProfile(null);
       setLoading(false);
       return;
     }
 
-    const fetchProfileWithRole = async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    try {
+      setLoading(true);
+      setError(null);
 
-        // Fetch profile
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
+      // Fetch profile
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
 
-        if (profileError) throw profileError;
+      if (profileError) throw profileError;
 
-        // Fetch role using the secure function
-        const { data: roleData, error: roleError } = await supabase
-          .rpc('get_user_role', { _user_id: user.id });
+      // Fetch role using the secure function
+      const { data: roleData, error: roleError } = await supabase
+        .rpc('get_user_role', { _user_id: user.id });
 
-        if (roleError) {
-          console.error('Error fetching role:', roleError);
-        }
-
-        setProfile({
-          ...profileData,
-          role: roleData as AppRole,
-        });
-      } catch (err) {
-        console.error('Error fetching profile with role:', err);
-        setError(err instanceof Error ? err : new Error('Failed to fetch profile'));
-      } finally {
-        setLoading(false);
+      if (roleError) {
+        console.error('Error fetching role:', roleError);
       }
-    };
 
-    fetchProfileWithRole();
+      setProfile({
+        ...profileData,
+        role: roleData as AppRole,
+      });
+    } catch (err) {
+      console.error('Error fetching profile with role:', err);
+      setError(err instanceof Error ? err : new Error('Failed to fetch profile'));
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
-  return { profile, loading, error };
+  useEffect(() => {
+    fetchProfileWithRole();
+  }, [fetchProfileWithRole]);
+
+  const refetch = useCallback(() => {
+    fetchProfileWithRole();
+  }, [fetchProfileWithRole]);
+
+  return { profile, loading, error, refetch };
 };
