@@ -189,7 +189,7 @@ export default function Auth() {
             <div className="flex justify-center mb-4">
               <img src={logo} alt="Startup Factory Hub" className="w-16 h-16 glow-effect" />
             </div>
-            <CardTitle className="font-futuristic text-xl tracking-wide bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            <CardTitle className="text-xl tracking-wide bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               STARTUP FACTORY HUB
             </CardTitle>
             <CardDescription>

@@ -42,7 +42,7 @@ const HeroSection = () => {
 
           {/* Main Heading */}
           <div className="text-center mb-8 sm:mb-12 animate-fade-in" style={{ animationDelay: '0.1s' }}>
-            <h1 className="font-futuristic text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 leading-tight tracking-wider">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 leading-tight tracking-wider">
               <span className="bg-gradient-to-r from-primary via-[#40E0D0] to-primary bg-clip-text text-transparent">
                 STARTUP FACTORY HUB
               </span>

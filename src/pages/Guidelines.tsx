@@ -31,7 +31,7 @@ export default function Guidelines() {
             <div className="flex items-center gap-2 sm:gap-3">
               <BookOpen className="h-6 w-6 sm:h-8 sm:w-8 text-primary flex-shrink-0" />
               <div>
-                <h1 className="font-futuristic text-lg sm:text-xl font-bold tracking-wide">USER GUIDELINES</h1>
+                <h1 className="text-lg sm:text-xl font-bold tracking-wide">USER GUIDELINES</h1>
                 <p className="text-xs sm:text-sm text-muted-foreground">Complete platform documentation</p>
               </div>
             </div>
