@@ -222,7 +222,7 @@ export default function PublicJobApplicationPage() {
               className="h-12 w-12"
             />
             <div>
-              <h1 className="font-futuristic text-xl font-bold text-white tracking-wide">STARTUP FACTORY HUB</h1>
+              <h1 className="text-xl font-bold text-white tracking-wide">STARTUP FACTORY HUB</h1>
               <p className="text-white/90 text-sm">AI-Powered Startup Accelerator Platform</p>
             </div>
           </div>
