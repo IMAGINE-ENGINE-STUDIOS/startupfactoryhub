@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye, Copy, MoreVertical, XCircle } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye, Copy, MoreVertical, XCircle, Search, ChevronDown, ChevronUp } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -86,6 +86,43 @@ export default function UnifiedJobsBoard() {
   const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
   const [closedJobs, setClosedJobs] = useState<Job[]>([]);
   const [closeJobId, setCloseJobId] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [displayCount, setDisplayCount] = useState(9);
+  const [expandedJobs, setExpandedJobs] = useState<Set<string>>(new Set());
+
+  // Filter and deduplicate jobs
+  const filteredJobs = useMemo(() => {
+    // Deduplicate by ID
+    const uniqueJobs = Array.from(
+      new Map(jobs.map(job => [job.id, job])).values()
+    );
+    
+    // Filter by search query
+    if (!searchQuery.trim()) return uniqueJobs;
+    
+    const query = searchQuery.toLowerCase();
+    return uniqueJobs.filter(job =>
+      job.title.toLowerCase().includes(query) ||
+      job.companies?.name?.toLowerCase().includes(query) ||
+      job.description?.toLowerCase().includes(query) ||
+      job.location?.toLowerCase().includes(query)
+    );
+  }, [jobs, searchQuery]);
+
+  const displayedJobs = filteredJobs.slice(0, displayCount);
+  const hasMoreJobs = displayCount < filteredJobs.length;
+
+  const toggleExpand = (jobId: string) => {
+    setExpandedJobs(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(jobId)) {
+        newSet.delete(jobId);
+      } else {
+        newSet.add(jobId);
+      }
+      return newSet;
+    });
+  };
 
   useEffect(() => {
     if (user) {
@@ -781,6 +818,20 @@ export default function UnifiedJobsBoard() {
         </CardHeader>
       </Card>
 
+      {/* Search Input */}
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search jobs by title, company, location, or description..."
+          value={searchQuery}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            setDisplayCount(9); // Reset pagination on search
+          }}
+          className="pl-10"
+        />
+      </div>
+
       {/* Filters */}
       <div className="flex gap-2 flex-wrap">
         <Button
@@ -815,18 +866,29 @@ export default function UnifiedJobsBoard() {
         </Button>
       </div>
 
+      {/* Results count */}
+      {filteredJobs.length > 0 && (
+        <p className="text-sm text-muted-foreground">
+          Showing {displayedJobs.length} of {filteredJobs.length} jobs
+        </p>
+      )}
+
       {/* Jobs Grid */}
-      <div className="grid gap-4 md:grid-cols-2">
-        {jobs.length === 0 ? (
-          <Card className="col-span-2">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {displayedJobs.length === 0 ? (
+          <Card className="col-span-full">
             <CardContent className="py-8">
-              <p className="text-center text-muted-foreground">No jobs found</p>
+              <p className="text-center text-muted-foreground">
+                {searchQuery ? 'No jobs match your search' : 'No jobs found'}
+              </p>
             </CardContent>
           </Card>
         ) : (
-          jobs.map((job) => (
-            <Card key={job.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
+          displayedJobs.map((job) => {
+            const isExpanded = expandedJobs.has(job.id);
+            return (
+            <Card key={job.id} className="hover:shadow-lg transition-shadow flex flex-col">
+              <CardHeader className="pb-2">
                 <div className="flex items-start gap-3 sm:gap-4">
                   {job.companies?.logo_url && (
                     <img 
@@ -848,8 +910,37 @@ export default function UnifiedJobsBoard() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4">
-                <p className="text-sm text-muted-foreground line-clamp-3 break-words">{job.description}</p>
+              <CardContent className="space-y-3 sm:space-y-4 flex-1 flex flex-col">
+                {/* Description - expandable */}
+                <div>
+                  <p className={`text-sm text-muted-foreground break-words ${isExpanded ? '' : 'line-clamp-3'}`}>
+                    {job.description}
+                  </p>
+                </div>
+                
+                {/* Expanded details */}
+                {isExpanded && (
+                  <div className="space-y-3 border-t pt-3">
+                    {job.job_type && (
+                      <div className="text-sm">
+                        <span className="font-medium">Work Type:</span> {job.job_type}
+                      </div>
+                    )}
+                    {job.duration && (
+                      <div className="text-sm">
+                        <span className="font-medium">Duration:</span> {job.duration}
+                      </div>
+                    )}
+                    <div className="text-sm">
+                      <span className="font-medium">Compensation:</span> {getCompensationDisplay(job)}
+                    </div>
+                    {job.is_task_based && (
+                      <div className="text-sm text-primary">
+                        This is a task-based position where you'll be assigned specific tasks to complete.
+                      </div>
+                    )}
+                  </div>
+                )}
                 
                 <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
                   {job.location && (
@@ -858,19 +949,41 @@ export default function UnifiedJobsBoard() {
                       <span className="truncate max-w-[120px] sm:max-w-none">{job.location}</span>
                     </div>
                   )}
-                  {job.duration && (
+                  {job.duration && !isExpanded && (
                     <div className="flex items-center gap-1">
                       <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                       <span className="truncate">{job.duration}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-1">
-                    <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                    <span className="truncate">{getCompensationDisplay(job)}</span>
-                  </div>
+                  {!isExpanded && (
+                    <div className="flex items-center gap-1">
+                      <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="truncate">{getCompensationDisplay(job)}</span>
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
+                {/* Expand/Collapse button */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => toggleExpand(job.id)}
+                  className="w-full justify-center gap-1 text-xs h-8"
+                >
+                  {isExpanded ? (
+                    <>
+                      <ChevronUp className="w-4 h-4" />
+                      Show Less
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown className="w-4 h-4" />
+                      Show More Details
+                    </>
+                  )}
+                </Button>
+
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2 mt-auto">
                   <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground w-full sm:w-auto">
                     {job.is_task_based && (
                       <Badge variant="outline" className="gap-1 text-xs">
@@ -960,9 +1073,22 @@ export default function UnifiedJobsBoard() {
                 </div>
               </CardContent>
             </Card>
-          ))
+          )})
         )}
       </div>
+
+      {/* Load More Button */}
+      {hasMoreJobs && (
+        <div className="flex justify-center pt-4">
+          <Button
+            variant="outline"
+            onClick={() => setDisplayCount(prev => prev + 9)}
+            className="gap-2"
+          >
+            Load More Jobs ({filteredJobs.length - displayCount} remaining)
+          </Button>
+        </div>
+      )}
 
       {/* Closed Jobs Section (Company Owners Only) */}
       {isCompanyUser && closedJobs.length > 0 && (
