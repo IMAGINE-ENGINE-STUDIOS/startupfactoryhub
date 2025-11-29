@@ -45,11 +45,11 @@ const WebGLBackground = () => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
 
-    // Colors based on theme
-    const primaryColor = isDark ? 0x6366f1 : 0x0ea5e9;
-    const secondaryColor = isDark ? 0x8b5cf6 : 0x10b981;
-    const accentColor = isDark ? 0xec4899 : 0xf59e0b;
-    const glowColor = isDark ? 0x4f46e5 : 0x0284c7;
+    // Colors based on theme - Green, Turquoise, Ocean Blue palette
+    const primaryColor = isDark ? 0x10b981 : 0x14b8a6; // Emerald/Teal
+    const secondaryColor = isDark ? 0x06b6d4 : 0x22d3ee; // Cyan/Ocean blue
+    const accentColor = isDark ? 0x34d399 : 0x2dd4bf; // Light green/Turquoise
+    const glowColor = isDark ? 0x059669 : 0x0d9488; // Deep emerald/Teal for glow
 
     // Create globe group
     const globeGroup = new THREE.Group();
@@ -363,11 +363,45 @@ const WebGLBackground = () => {
       connections.push(createArc(start, end, colorHex));
     });
 
-    // Create outer glow
-    const glowGeometry = new THREE.SphereGeometry(globeRadius * 1.15, 32, 32);
+    // Create outer glow - more solid green/turquoise
+    const glowGeometry = new THREE.SphereGeometry(globeRadius * 1.12, 32, 32);
     const glowMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uColor: { value: new THREE.Color(glowColor) },
+        uTime: { value: 0 },
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 uColor;
+        uniform float uTime;
+        varying vec3 vNormal;
+        
+        void main() {
+          float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.5);
+          float pulse = 0.85 + sin(uTime * 0.5) * 0.15;
+          gl_FragColor = vec4(uColor, intensity * 0.7 * pulse);
+        }
+      `,
+      transparent: true,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+    globeGroup.add(glow);
+
+    // Add inner glow layer for more solid effect
+    const innerGlowGeometry = new THREE.SphereGeometry(globeRadius * 1.05, 32, 32);
+    const innerGlowMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: { value: new THREE.Color(0x10b981) }, // Emerald green
       },
       vertexShader: `
         varying vec3 vNormal;
@@ -381,8 +415,8 @@ const WebGLBackground = () => {
         varying vec3 vNormal;
         
         void main() {
-          float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 4.0);
-          gl_FragColor = vec4(uColor, intensity * 0.4);
+          float intensity = pow(0.6 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
+          gl_FragColor = vec4(uColor, intensity * 0.5);
         }
       `,
       transparent: true,
@@ -391,8 +425,8 @@ const WebGLBackground = () => {
       depthWrite: false,
     });
 
-    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
-    globeGroup.add(glow);
+    const innerGlow = new THREE.Mesh(innerGlowGeometry, innerGlowMaterial);
+    globeGroup.add(innerGlow);
 
     // Create background particles
     const bgParticleCount = 500;
@@ -464,6 +498,7 @@ const WebGLBackground = () => {
 
       // Update shader uniforms
       dotMaterial.uniforms.uTime.value = elapsedTime;
+      glowMaterial.uniforms.uTime.value = elapsedTime;
       
       nodes.forEach((node) => {
         if (node.material instanceof THREE.ShaderMaterial) {
@@ -529,6 +564,8 @@ const WebGLBackground = () => {
       bgParticleMaterial.dispose();
       glowGeometry.dispose();
       glowMaterial.dispose();
+      innerGlowGeometry.dispose();
+      innerGlowMaterial.dispose();
     };
   }, [isDark]);
 
