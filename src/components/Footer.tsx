@@ -43,10 +43,10 @@ const Footer = () => {
               </li>
               <li>
                 <Link 
-                  to="/#community" 
+                  to="/blog" 
                   className="text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
-                  Community
+                  Community Blog
                 </Link>
               </li>
               <li>

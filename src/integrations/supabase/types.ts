@@ -506,6 +506,109 @@ export type Database = {
           },
         ]
       }
+      blog_comments: {
+        Row: {
+          content: string
+          created_at: string
+          guest_name: string | null
+          id: string
+          post_id: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          guest_name?: string | null
+          id?: string
+          post_id: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          guest_name?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_likes: {
+        Row: {
+          created_at: string
+          guest_identifier: string | null
+          id: string
+          post_id: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          guest_identifier?: string | null
+          id?: string
+          post_id: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          guest_identifier?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blog_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "blog_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      blog_posts: {
+        Row: {
+          comments_count: number
+          content: string
+          created_at: string
+          guest_name: string | null
+          id: string
+          likes_count: number
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          comments_count?: number
+          content: string
+          created_at?: string
+          guest_name?: string | null
+          id?: string
+          likes_count?: number
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          comments_count?: number
+          content?: string
+          created_at?: string
+          guest_name?: string | null
+          id?: string
+          likes_count?: number
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       certificates: {
         Row: {
           certificate_url: string | null
