@@ -361,9 +361,19 @@ export default function InvestorProfileView() {
               <CardTitle>About</CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-muted-foreground">
-                {profile?.bio || 'No bio provided yet.'}
-              </p>
+              {isEditing ? (
+                <Textarea
+                  value={editedBio}
+                  onChange={(e) => setEditedBio(e.target.value)}
+                  placeholder="Tell us about yourself, your investment philosophy, and experience..."
+                  rows={5}
+                  className="w-full"
+                />
+              ) : (
+                <p className="text-muted-foreground">
+                  {profile?.bio || 'No bio provided yet.'}
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -372,10 +382,45 @@ export default function InvestorProfileView() {
               <CardTitle>Key Information</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
-                <div className="flex justify-between">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
                   <span className="text-muted-foreground">Location:</span>
-                  <span className="font-medium">{profile?.location || 'Not specified'}</span>
+                  {isEditing ? (
+                    <Input
+                      value={editedLocation}
+                      onChange={(e) => setEditedLocation(e.target.value)}
+                      placeholder="e.g., New York, NY"
+                      className="w-48"
+                    />
+                  ) : (
+                    <span className="font-medium">{profile?.location || 'Not specified'}</span>
+                  )}
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">Website:</span>
+                  {isEditing ? (
+                    <Input
+                      value={editedWebsite}
+                      onChange={(e) => setEditedWebsite(e.target.value)}
+                      placeholder="https://example.com"
+                      className="w-48"
+                    />
+                  ) : (
+                    <span className="font-medium">{profile?.website || 'Not specified'}</span>
+                  )}
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-muted-foreground">LinkedIn:</span>
+                  {isEditing ? (
+                    <Input
+                      value={editedLinkedin}
+                      onChange={(e) => setEditedLinkedin(e.target.value)}
+                      placeholder="https://linkedin.com/in/..."
+                      className="w-48"
+                    />
+                  ) : (
+                    <span className="font-medium">{profile?.linkedin_url || 'Not specified'}</span>
+                  )}
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Portfolio Size:</span>
