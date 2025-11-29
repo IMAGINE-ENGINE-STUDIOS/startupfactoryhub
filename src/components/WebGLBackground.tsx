@@ -34,7 +34,7 @@ const WebGLBackground = () => {
       0.1,
       1000
     );
-    camera.position.z = 280;
+    camera.position.z = 250;
 
     // Renderer setup
     const renderer = new THREE.WebGLRenderer({
@@ -45,10 +45,11 @@ const WebGLBackground = () => {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     containerRef.current.appendChild(renderer.domElement);
 
-    // Colors - Turquoise palette
-    const primaryColor = new THREE.Color(0x40E0D0);
-    const secondaryColor = new THREE.Color(isDark ? 0x06b6d4 : 0x22d3ee);
-    const accentColor = new THREE.Color(0x40E0D0);
+    // Colors based on theme - Turquoise palette
+    const primaryColor = 0x40E0D0; // Turquoise
+    const secondaryColor = isDark ? 0x06b6d4 : 0x22d3ee; // Cyan/Ocean blue
+    const accentColor = isDark ? 0x40E0D0 : 0x40E0D0; // Turquoise
+    const glowColor = 0x40E0D0; // Turquoise for glow
 
     // Create globe group
     const globeGroup = new THREE.Group();
@@ -57,49 +58,39 @@ const WebGLBackground = () => {
     // Globe radius
     const globeRadius = 100;
 
-    // ========== POINT CLOUD GLOBE (GitHub Style) ==========
-    
-    // Generate points on sphere surface using golden ratio spiral
-    const pointCount = 2000;
-    const pointPositions = new Float32Array(pointCount * 3);
-    const pointColors = new Float32Array(pointCount * 3);
-    const pointSizes = new Float32Array(pointCount);
-    const pointAlphas = new Float32Array(pointCount);
+    // Create dotted sphere (globe)
+    const dotGeometry = new THREE.BufferGeometry();
+    const dotCount = 3000;
+    const positions = new Float32Array(dotCount * 3);
+    const colors = new Float32Array(dotCount * 3);
+    const sizes = new Float32Array(dotCount);
 
-    const goldenRatio = (1 + Math.sqrt(5)) / 2;
+    const color = new THREE.Color(primaryColor);
 
-    for (let i = 0; i < pointCount; i++) {
-      // Golden ratio spiral distribution for even coverage
-      const y = 1 - (i / (pointCount - 1)) * 2;
-      const radiusAtY = Math.sqrt(1 - y * y);
-      const theta = 2 * Math.PI * i / goldenRatio;
+    for (let i = 0; i < dotCount; i++) {
+      const phi = Math.acos(-1 + (2 * i) / dotCount);
+      const theta = Math.sqrt(dotCount * Math.PI) * phi;
 
-      const x = Math.cos(theta) * radiusAtY;
-      const z = Math.sin(theta) * radiusAtY;
+      const x = globeRadius * Math.sin(phi) * Math.cos(theta);
+      const y = globeRadius * Math.sin(phi) * Math.sin(theta);
+      const z = globeRadius * Math.cos(phi);
 
-      pointPositions[i * 3] = x * globeRadius;
-      pointPositions[i * 3 + 1] = y * globeRadius;
-      pointPositions[i * 3 + 2] = z * globeRadius;
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
 
-      // Vary colors slightly
-      const colorMix = Math.random();
-      const color = colorMix > 0.7 ? secondaryColor : primaryColor;
-      pointColors[i * 3] = color.r;
-      pointColors[i * 3 + 1] = color.g;
-      pointColors[i * 3 + 2] = color.b;
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
 
-      // Random sizes for variety
-      pointSizes[i] = Math.random() * 2.5 + 0.8;
-      pointAlphas[i] = Math.random() * 0.5 + 0.5;
+      sizes[i] = Math.random() * 2 + 1;
     }
 
-    const pointGeometry = new THREE.BufferGeometry();
-    pointGeometry.setAttribute('position', new THREE.BufferAttribute(pointPositions, 3));
-    pointGeometry.setAttribute('color', new THREE.BufferAttribute(pointColors, 3));
-    pointGeometry.setAttribute('size', new THREE.BufferAttribute(pointSizes, 1));
-    pointGeometry.setAttribute('alpha', new THREE.BufferAttribute(pointAlphas, 1));
+    dotGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    dotGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    dotGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-    const pointMaterial = new THREE.ShaderMaterial({
+    const dotMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
         uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
@@ -107,36 +98,25 @@ const WebGLBackground = () => {
       vertexShader: `
         attribute float size;
         attribute vec3 color;
-        attribute float alpha;
         varying vec3 vColor;
-        varying float vAlpha;
         uniform float uTime;
         uniform float uPixelRatio;
         
         void main() {
           vColor = color;
-          vAlpha = alpha;
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          
-          // Subtle size pulsing
-          float pulse = 1.0 + sin(uTime * 2.0 + position.x * 0.1) * 0.1;
-          gl_PointSize = size * uPixelRatio * pulse * (180.0 / -mvPosition.z);
+          gl_PointSize = size * uPixelRatio * (200.0 / -mvPosition.z);
           gl_Position = projectionMatrix * mvPosition;
         }
       `,
       fragmentShader: `
         varying vec3 vColor;
-        varying float vAlpha;
         
         void main() {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
-          
-          // Soft circular point with glow
-          float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
-          alpha *= vAlpha;
-          
-          gl_FragColor = vec4(vColor, alpha * 0.85);
+          float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
+          gl_FragColor = vec4(vColor, alpha * 0.8);
         }
       `,
       transparent: true,
@@ -144,23 +124,94 @@ const WebGLBackground = () => {
       blending: THREE.AdditiveBlending,
     });
 
-    const pointCloud = new THREE.Points(pointGeometry, pointMaterial);
-    globeGroup.add(pointCloud);
+    const dots = new THREE.Points(dotGeometry, dotMaterial);
+    globeGroup.add(dots);
 
-    // ========== CONNECTION NODES (Cities) ==========
+    // Create wireframe rings
+    const ringCount = 8;
+    for (let i = 0; i < ringCount; i++) {
+      const ringGeometry = new THREE.RingGeometry(
+        globeRadius - 2 + (i * 3),
+        globeRadius - 1 + (i * 3),
+        64
+      );
+      const ringMaterial = new THREE.MeshBasicMaterial({
+        color: primaryColor,
+        transparent: true,
+        opacity: 0.1 - i * 0.01,
+        side: THREE.DoubleSide,
+      });
+      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+      ring.rotation.x = Math.PI / 2;
+      ring.rotation.y = (i * Math.PI) / ringCount;
+      globeGroup.add(ring);
+    }
+
+    // Create latitude/longitude lines
+    const createLatLongLines = () => {
+      const lineMaterial = new THREE.LineBasicMaterial({
+        color: primaryColor,
+        transparent: true,
+        opacity: 0.15,
+      });
+
+      // Latitude lines
+      for (let lat = -60; lat <= 60; lat += 30) {
+        const latRad = (lat * Math.PI) / 180;
+        const radius = globeRadius * Math.cos(latRad);
+        const y = globeRadius * Math.sin(latRad);
+
+        const points: THREE.Vector3[] = [];
+        for (let lon = 0; lon <= 360; lon += 5) {
+          const lonRad = (lon * Math.PI) / 180;
+          points.push(new THREE.Vector3(
+            radius * Math.cos(lonRad),
+            y,
+            radius * Math.sin(lonRad)
+          ));
+        }
+
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(geometry, lineMaterial);
+        globeGroup.add(line);
+      }
+
+      // Longitude lines
+      for (let lon = 0; lon < 180; lon += 30) {
+        const lonRad = (lon * Math.PI) / 180;
+        const points: THREE.Vector3[] = [];
+
+        for (let lat = -90; lat <= 90; lat += 5) {
+          const latRad = (lat * Math.PI) / 180;
+          points.push(new THREE.Vector3(
+            globeRadius * Math.cos(latRad) * Math.cos(lonRad),
+            globeRadius * Math.sin(latRad),
+            globeRadius * Math.cos(latRad) * Math.sin(lonRad)
+          ));
+        }
+
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(geometry, lineMaterial);
+        globeGroup.add(line);
+      }
+    };
+
+    createLatLongLines();
+
+    // Create connection points (cities/nodes)
     const nodePositions = [
-      { lat: 40.7128, lon: -74.006 },   // New York
-      { lat: 51.5074, lon: -0.1278 },   // London
-      { lat: 35.6762, lon: 139.6503 },  // Tokyo
-      { lat: -33.8688, lon: 151.2093 }, // Sydney
-      { lat: 1.3521, lon: 103.8198 },   // Singapore
-      { lat: 37.7749, lon: -122.4194 }, // San Francisco
-      { lat: 48.8566, lon: 2.3522 },    // Paris
-      { lat: 55.7558, lon: 37.6173 },   // Moscow
-      { lat: 22.3193, lon: 114.1694 },  // Hong Kong
-      { lat: -23.5505, lon: -46.6333 }, // São Paulo
-      { lat: 25.2048, lon: 55.2708 },   // Dubai
-      { lat: 19.076, lon: 72.8777 },    // Mumbai
+      { lat: 40.7128, lon: -74.006 },
+      { lat: 51.5074, lon: -0.1278 },
+      { lat: 35.6762, lon: 139.6503 },
+      { lat: -33.8688, lon: 151.2093 },
+      { lat: 1.3521, lon: 103.8198 },
+      { lat: 37.7749, lon: -122.4194 },
+      { lat: 48.8566, lon: 2.3522 },
+      { lat: 55.7558, lon: 37.6173 },
+      { lat: 22.3193, lon: 114.1694 },
+      { lat: -23.5505, lon: -46.6333 },
+      { lat: 25.2048, lon: 55.2708 },
+      { lat: 19.076, lon: 72.8777 },
     ];
 
     const latLonToVector3 = (lat: number, lon: number, radius: number) => {
@@ -173,143 +224,90 @@ const WebGLBackground = () => {
       );
     };
 
-    // Create glowing node points
-    const nodeVectors: THREE.Vector3[] = [];
-    const nodePointPositions = new Float32Array(nodePositions.length * 3);
-    const nodePointSizes = new Float32Array(nodePositions.length);
-
-    nodePositions.forEach((pos, i) => {
-      const vec = latLonToVector3(pos.lat, pos.lon, globeRadius);
-      nodeVectors.push(vec);
-      nodePointPositions[i * 3] = vec.x;
-      nodePointPositions[i * 3 + 1] = vec.y;
-      nodePointPositions[i * 3 + 2] = vec.z;
-      nodePointSizes[i] = 6;
-    });
-
-    const nodeGeometry = new THREE.BufferGeometry();
-    nodeGeometry.setAttribute('position', new THREE.BufferAttribute(nodePointPositions, 3));
-    nodeGeometry.setAttribute('size', new THREE.BufferAttribute(nodePointSizes, 1));
-
-    const nodeMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: { value: 0 },
-        uColor: { value: accentColor },
-        uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
-      },
-      vertexShader: `
-        attribute float size;
-        uniform float uTime;
-        uniform float uPixelRatio;
-        varying float vPulse;
-        
-        void main() {
-          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          vPulse = 0.7 + sin(uTime * 3.0 + position.y * 0.1) * 0.3;
-          gl_PointSize = size * uPixelRatio * vPulse * (180.0 / -mvPosition.z);
-          gl_Position = projectionMatrix * mvPosition;
-        }
-      `,
-      fragmentShader: `
-        uniform vec3 uColor;
-        varying float vPulse;
-        
-        void main() {
-          float dist = length(gl_PointCoord - vec2(0.5));
-          if (dist > 0.5) discard;
-          
-          // Glowing point with soft edges
-          float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
-          float glow = exp(-dist * 4.0);
-          
-          gl_FragColor = vec4(uColor, (alpha + glow * 0.5) * vPulse);
-        }
-      `,
-      transparent: true,
-      depthWrite: false,
-      blending: THREE.AdditiveBlending,
-    });
-
-    const nodePoints = new THREE.Points(nodeGeometry, nodeMaterial);
-    globeGroup.add(nodePoints);
-
-    // ========== CONNECTIONS BETWEEN NODES ==========
-    const connections: { line: THREE.Line; particles: THREE.Points; curve: THREE.QuadraticBezierCurve3 }[] = [];
-
-    const connectionPairs = [
-      [0, 1], [0, 5], [1, 2], [1, 6], [2, 4], [2, 8],
-      [3, 4], [4, 8], [5, 6], [6, 7], [7, 8], [9, 0],
-      [10, 11], [10, 8], [11, 2], [3, 9], [5, 9], [6, 10]
-    ];
-
-    connectionPairs.forEach(([i, j]) => {
-      const start = nodeVectors[i].clone();
-      const end = nodeVectors[j].clone();
-      
-      // Create curved arc - higher arc for better visibility
-      const midPoint = new THREE.Vector3().addVectors(start, end).multiplyScalar(0.5);
-      const distance = start.distanceTo(end);
-      midPoint.normalize().multiplyScalar(globeRadius + distance * 0.35);
-
-      const curve = new THREE.QuadraticBezierCurve3(start, midPoint, end);
-      const curvePoints = curve.getPoints(60);
-
-      // Draw the arc as a visible dotted line
-      const lineGeometry = new THREE.BufferGeometry();
-      const linePositions = new Float32Array(curvePoints.length * 3);
-      const lineSizes = new Float32Array(curvePoints.length);
-
-      curvePoints.forEach((point, idx) => {
-        linePositions[idx * 3] = point.x;
-        linePositions[idx * 3 + 1] = point.y;
-        linePositions[idx * 3 + 2] = point.z;
-        lineSizes[idx] = 2.0;
-      });
-
-      lineGeometry.setAttribute('position', new THREE.BufferAttribute(linePositions, 3));
-      lineGeometry.setAttribute('size', new THREE.BufferAttribute(lineSizes, 1));
-
-      const lineMaterial = new THREE.ShaderMaterial({
+    // Create glowing nodes
+    const nodes: THREE.Mesh[] = [];
+    nodePositions.forEach((pos, index) => {
+      const nodeGeometry = new THREE.SphereGeometry(2.5, 16, 16);
+      const nodeMaterial = new THREE.ShaderMaterial({
         uniforms: {
-          uColor: { value: primaryColor },
-          uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+          uTime: { value: 0 },
+          uColor: { value: new THREE.Color(index % 2 === 0 ? secondaryColor : accentColor) },
         },
         vertexShader: `
-          attribute float size;
-          uniform float uPixelRatio;
-          
+          varying vec3 vNormal;
           void main() {
-            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-            gl_PointSize = size * uPixelRatio * (180.0 / -mvPosition.z);
-            gl_Position = projectionMatrix * mvPosition;
+            vNormal = normalize(normalMatrix * normal);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
           }
         `,
         fragmentShader: `
           uniform vec3 uColor;
+          uniform float uTime;
+          varying vec3 vNormal;
           
           void main() {
-            float dist = length(gl_PointCoord - vec2(0.5));
-            if (dist > 0.5) discard;
-            float alpha = 0.7 * (1.0 - smoothstep(0.0, 0.5, dist));
-            gl_FragColor = vec4(uColor, alpha);
+            float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
+            float pulse = 0.7 + sin(uTime * 3.0) * 0.3;
+            gl_FragColor = vec4(uColor, intensity * pulse);
           }
         `,
         transparent: true,
-        depthWrite: false,
         blending: THREE.AdditiveBlending,
+        depthWrite: false,
       });
 
-      const line = new THREE.Points(lineGeometry, lineMaterial) as unknown as THREE.Line;
+      const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+      const position = latLonToVector3(pos.lat, pos.lon, globeRadius);
+      node.position.copy(position);
+      globeGroup.add(node);
+      nodes.push(node);
+
+      // Add glow ring around node
+      const ringGeometry = new THREE.RingGeometry(3, 5, 32);
+      const ringMaterial = new THREE.MeshBasicMaterial({
+        color: index % 2 === 0 ? secondaryColor : accentColor,
+        transparent: true,
+        opacity: 0.3,
+        side: THREE.DoubleSide,
+      });
+      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+      ring.position.copy(position);
+      ring.lookAt(new THREE.Vector3(0, 0, 0));
+      globeGroup.add(ring);
+    });
+
+    // Create connection arcs between nodes
+    const connections: { curve: THREE.CubicBezierCurve3; line: THREE.Line; particles: THREE.Points }[] = [];
+
+    const createArc = (start: THREE.Vector3, end: THREE.Vector3, colorHex: number) => {
+      const distance = start.distanceTo(end);
+
+      const curve = new THREE.CubicBezierCurve3(
+        start,
+        new THREE.Vector3().copy(start).normalize().multiplyScalar(globeRadius + distance * 0.25),
+        new THREE.Vector3().copy(end).normalize().multiplyScalar(globeRadius + distance * 0.25),
+        end
+      );
+
+      const points = curve.getPoints(50);
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const material = new THREE.LineBasicMaterial({
+        color: colorHex,
+        transparent: true,
+        opacity: 0.4,
+      });
+
+      const line = new THREE.Line(geometry, material);
       globeGroup.add(line);
 
-      // Bright traveling particles along the arc
-      const particleCount = 12;
+      // Create particles that travel along the arc
+      const particleCount = 15;
       const particleGeometry = new THREE.BufferGeometry();
       const particlePositions = new Float32Array(particleCount * 3);
       const particleSizes = new Float32Array(particleCount);
 
-      for (let p = 0; p < particleCount; p++) {
-        particleSizes[p] = Math.random() * 3 + 2.5;
+      for (let i = 0; i < particleCount; i++) {
+        particleSizes[i] = Math.random() * 3 + 1;
       }
 
       particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
@@ -317,7 +315,7 @@ const WebGLBackground = () => {
 
       const particleMaterial = new THREE.ShaderMaterial({
         uniforms: {
-          uColor: { value: new THREE.Color(0xffffff) },
+          uColor: { value: new THREE.Color(colorHex) },
           uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
         },
         vertexShader: `
@@ -326,7 +324,7 @@ const WebGLBackground = () => {
           
           void main() {
             vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-            gl_PointSize = size * uPixelRatio * (200.0 / -mvPosition.z);
+            gl_PointSize = size * uPixelRatio * (150.0 / -mvPosition.z);
             gl_Position = projectionMatrix * mvPosition;
           }
         `,
@@ -341,21 +339,35 @@ const WebGLBackground = () => {
           }
         `,
         transparent: true,
-        depthWrite: false,
         blending: THREE.AdditiveBlending,
+        depthWrite: false,
       });
 
       const particles = new THREE.Points(particleGeometry, particleMaterial);
       globeGroup.add(particles);
 
-      connections.push({ line, particles, curve });
+      return { curve, line, particles };
+    };
+
+    // Create connections between random pairs of nodes
+    const connectionPairs = [
+      [0, 1], [0, 5], [1, 2], [1, 6], [2, 4], [2, 8],
+      [3, 4], [4, 8], [5, 6], [6, 7], [7, 8], [9, 0],
+      [10, 11], [10, 8], [11, 2], [3, 9], [5, 9], [6, 10]
+    ];
+
+    connectionPairs.forEach(([i, j], index) => {
+      const start = latLonToVector3(nodePositions[i].lat, nodePositions[i].lon, globeRadius);
+      const end = latLonToVector3(nodePositions[j].lat, nodePositions[j].lon, globeRadius);
+      const colorHex = index % 3 === 0 ? primaryColor : index % 3 === 1 ? secondaryColor : accentColor;
+      connections.push(createArc(start, end, colorHex));
     });
 
-    // ========== SUBTLE GLOW EFFECT ==========
-    const glowGeometry = new THREE.SphereGeometry(globeRadius * 1.08, 32, 32);
+    // Create outer glow - more solid green/turquoise
+    const glowGeometry = new THREE.SphereGeometry(globeRadius * 1.12, 32, 32);
     const glowMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        uColor: { value: primaryColor },
+        uColor: { value: new THREE.Color(glowColor) },
         uTime: { value: 0 },
       },
       vertexShader: `
@@ -371,9 +383,9 @@ const WebGLBackground = () => {
         varying vec3 vNormal;
         
         void main() {
-          float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
-          float pulse = 0.9 + sin(uTime * 0.5) * 0.1;
-          gl_FragColor = vec4(uColor, intensity * 0.4 * pulse);
+          float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.5);
+          float pulse = 0.85 + sin(uTime * 0.5) * 0.15;
+          gl_FragColor = vec4(uColor, intensity * 0.7 * pulse);
         }
       `,
       transparent: true,
@@ -385,49 +397,75 @@ const WebGLBackground = () => {
     const glow = new THREE.Mesh(glowGeometry, glowMaterial);
     globeGroup.add(glow);
 
-    // ========== BACKGROUND STARS ==========
-    const starCount = 600;
-    const starGeometry = new THREE.BufferGeometry();
-    const starPositions = new Float32Array(starCount * 3);
-    const starSizes = new Float32Array(starCount);
+    // Add inner glow layer for more solid effect
+    const innerGlowGeometry = new THREE.SphereGeometry(globeRadius * 1.05, 32, 32);
+    const innerGlowMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: { value: new THREE.Color(0x40E0D0) }, // Turquoise
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 uColor;
+        varying vec3 vNormal;
+        
+        void main() {
+          float intensity = pow(0.6 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.0);
+          gl_FragColor = vec4(uColor, intensity * 0.5);
+        }
+      `,
+      transparent: true,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
 
-    for (let i = 0; i < starCount; i++) {
-      starPositions[i * 3] = (Math.random() - 0.5) * 1000;
-      starPositions[i * 3 + 1] = (Math.random() - 0.5) * 1000;
-      starPositions[i * 3 + 2] = (Math.random() - 0.5) * 500 - 250;
-      starSizes[i] = Math.random() * 1.5 + 0.3;
+    const innerGlow = new THREE.Mesh(innerGlowGeometry, innerGlowMaterial);
+    globeGroup.add(innerGlow);
+
+    // Create background particles
+    const bgParticleCount = 500;
+    const bgParticleGeometry = new THREE.BufferGeometry();
+    const bgPositions = new Float32Array(bgParticleCount * 3);
+    const bgSizes = new Float32Array(bgParticleCount);
+
+    for (let i = 0; i < bgParticleCount; i++) {
+      bgPositions[i * 3] = (Math.random() - 0.5) * 800;
+      bgPositions[i * 3 + 1] = (Math.random() - 0.5) * 800;
+      bgPositions[i * 3 + 2] = (Math.random() - 0.5) * 400 - 200;
+      bgSizes[i] = Math.random() * 2 + 0.5;
     }
 
-    starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-    starGeometry.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
+    bgParticleGeometry.setAttribute('position', new THREE.BufferAttribute(bgPositions, 3));
+    bgParticleGeometry.setAttribute('size', new THREE.BufferAttribute(bgSizes, 1));
 
-    const starMaterial = new THREE.ShaderMaterial({
+    const bgParticleMaterial = new THREE.ShaderMaterial({
       uniforms: {
-        uColor: { value: primaryColor },
-        uTime: { value: 0 },
+        uColor: { value: new THREE.Color(primaryColor) },
         uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
       },
       vertexShader: `
         attribute float size;
         uniform float uPixelRatio;
-        uniform float uTime;
-        varying float vTwinkle;
         
         void main() {
           vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-          vTwinkle = 0.5 + sin(uTime * 2.0 + position.x * 0.05) * 0.5;
-          gl_PointSize = size * uPixelRatio * (80.0 / -mvPosition.z);
+          gl_PointSize = size * uPixelRatio * (100.0 / -mvPosition.z);
           gl_Position = projectionMatrix * mvPosition;
         }
       `,
       fragmentShader: `
         uniform vec3 uColor;
-        varying float vTwinkle;
         
         void main() {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
-          float alpha = 0.3 * vTwinkle * (1.0 - smoothstep(0.0, 0.5, dist));
+          float alpha = 0.3 * (1.0 - smoothstep(0.0, 0.5, dist));
           gl_FragColor = vec4(uColor, alpha);
         }
       `,
@@ -436,10 +474,10 @@ const WebGLBackground = () => {
       depthWrite: false,
     });
 
-    const stars = new THREE.Points(starGeometry, starMaterial);
-    scene.add(stars);
+    const bgParticles = new THREE.Points(bgParticleGeometry, bgParticleMaterial);
+    scene.add(bgParticles);
 
-    // ========== MOUSE INTERACTION ==========
+    // Mouse interaction
     let mouseX = 0;
     let mouseY = 0;
     let targetRotationX = 0;
@@ -452,17 +490,21 @@ const WebGLBackground = () => {
 
     window.addEventListener('mousemove', handleMouseMove);
 
-    // ========== ANIMATION LOOP ==========
+    // Animation
     const clock = new THREE.Clock();
 
     const animate = () => {
       const elapsedTime = clock.getElapsedTime();
 
       // Update shader uniforms
-      pointMaterial.uniforms.uTime.value = elapsedTime;
-      nodeMaterial.uniforms.uTime.value = elapsedTime;
+      dotMaterial.uniforms.uTime.value = elapsedTime;
       glowMaterial.uniforms.uTime.value = elapsedTime;
-      starMaterial.uniforms.uTime.value = elapsedTime;
+      
+      nodes.forEach((node) => {
+        if (node.material instanceof THREE.ShaderMaterial) {
+          node.material.uniforms.uTime.value = elapsedTime;
+        }
+      });
 
       // Animate particles along connection arcs
       connections.forEach((connection, connIndex) => {
@@ -470,7 +512,7 @@ const WebGLBackground = () => {
         const particleCount = positions.length / 3;
 
         for (let i = 0; i < particleCount; i++) {
-          const t = ((elapsedTime * 0.25 + i / particleCount + connIndex * 0.15) % 1);
+          const t = ((elapsedTime * 0.3 + i / particleCount + connIndex * 0.1) % 1);
           const point = connection.curve.getPoint(t);
           positions[i * 3] = point.x;
           positions[i * 3 + 1] = point.y;
@@ -481,15 +523,15 @@ const WebGLBackground = () => {
       });
 
       // Smooth rotation based on mouse
-      targetRotationY += (mouseX * 0.4 - targetRotationY) * 0.02;
-      targetRotationX += (mouseY * 0.25 - targetRotationX) * 0.02;
+      targetRotationY += (mouseX * 0.5 - targetRotationY) * 0.02;
+      targetRotationX += (mouseY * 0.3 - targetRotationX) * 0.02;
 
       // Auto rotation + mouse influence
-      globeGroup.rotation.y = elapsedTime * 0.08 + targetRotationY;
-      globeGroup.rotation.x = targetRotationX * 0.4;
+      globeGroup.rotation.y = elapsedTime * 0.1 + targetRotationY;
+      globeGroup.rotation.x = targetRotationX * 0.5;
 
-      // Gentle star rotation
-      stars.rotation.y = elapsedTime * 0.01;
+      // Animate background particles
+      bgParticles.rotation.y = elapsedTime * 0.02;
 
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
@@ -502,10 +544,8 @@ const WebGLBackground = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      const pixelRatio = Math.min(window.devicePixelRatio, 2);
-      pointMaterial.uniforms.uPixelRatio.value = pixelRatio;
-      nodeMaterial.uniforms.uPixelRatio.value = pixelRatio;
-      starMaterial.uniforms.uPixelRatio.value = pixelRatio;
+      dotMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
+      bgParticleMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
     };
 
     window.addEventListener('resize', handleResize);
@@ -518,18 +558,14 @@ const WebGLBackground = () => {
         containerRef.current.removeChild(renderer.domElement);
       }
       renderer.dispose();
-      pointGeometry.dispose();
-      pointMaterial.dispose();
-      nodeGeometry.dispose();
-      nodeMaterial.dispose();
+      dotGeometry.dispose();
+      dotMaterial.dispose();
+      bgParticleGeometry.dispose();
+      bgParticleMaterial.dispose();
       glowGeometry.dispose();
       glowMaterial.dispose();
-      starGeometry.dispose();
-      starMaterial.dispose();
-      connections.forEach(conn => {
-        conn.particles.geometry.dispose();
-        (conn.particles.material as THREE.Material).dispose();
-      });
+      innerGlowGeometry.dispose();
+      innerGlowMaterial.dispose();
     };
   }, [isDark]);
 
