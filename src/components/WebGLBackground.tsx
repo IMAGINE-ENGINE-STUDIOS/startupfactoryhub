@@ -34,7 +34,7 @@ const WebGLBackground = () => {
       0.1,
       1000
     );
-    camera.position.z = 30;
+    camera.position.z = 250;
 
     // Renderer setup
     const renderer = new THREE.WebGLRenderer({
@@ -46,199 +46,67 @@ const WebGLBackground = () => {
     containerRef.current.appendChild(renderer.domElement);
 
     // Colors based on theme
-    const primaryColor = isDark ? new THREE.Color(0x6366f1) : new THREE.Color(0x0ea5e9);
-    const secondaryColor = isDark ? new THREE.Color(0x8b5cf6) : new THREE.Color(0x10b981);
-    const accentColor = isDark ? new THREE.Color(0xec4899) : new THREE.Color(0xf59e0b);
+    const primaryColor = isDark ? 0x6366f1 : 0x0ea5e9;
+    const secondaryColor = isDark ? 0x8b5cf6 : 0x10b981;
+    const accentColor = isDark ? 0xec4899 : 0xf59e0b;
+    const glowColor = isDark ? 0x4f46e5 : 0x0284c7;
 
-    // Create flowing gradient blob
-    const blobGeometry = new THREE.IcosahedronGeometry(12, 6);
-    const blobMaterial = new THREE.ShaderMaterial({
-      uniforms: {
-        uTime: { value: 0 },
-        uColorA: { value: primaryColor },
-        uColorB: { value: secondaryColor },
-        uColorC: { value: accentColor },
-      },
-      vertexShader: `
-        uniform float uTime;
-        varying vec3 vNormal;
-        varying vec3 vPosition;
-        varying float vDisplacement;
-        
-        // Simplex noise function
-        vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-        vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
-        vec4 permute(vec4 x) { return mod289(((x*34.0)+1.0)*x); }
-        vec4 taylorInvSqrt(vec4 r) { return 1.79284291400159 - 0.85373472095314 * r; }
-        
-        float snoise(vec3 v) {
-          const vec2 C = vec2(1.0/6.0, 1.0/3.0);
-          const vec4 D = vec4(0.0, 0.5, 1.0, 2.0);
-          vec3 i  = floor(v + dot(v, C.yyy));
-          vec3 x0 = v - i + dot(i, C.xxx);
-          vec3 g = step(x0.yzx, x0.xyz);
-          vec3 l = 1.0 - g;
-          vec3 i1 = min(g.xyz, l.zxy);
-          vec3 i2 = max(g.xyz, l.zxy);
-          vec3 x1 = x0 - i1 + C.xxx;
-          vec3 x2 = x0 - i2 + C.yyy;
-          vec3 x3 = x0 - D.yyy;
-          i = mod289(i);
-          vec4 p = permute(permute(permute(
-            i.z + vec4(0.0, i1.z, i2.z, 1.0))
-            + i.y + vec4(0.0, i1.y, i2.y, 1.0))
-            + i.x + vec4(0.0, i1.x, i2.x, 1.0));
-          float n_ = 0.142857142857;
-          vec3 ns = n_ * D.wyz - D.xzx;
-          vec4 j = p - 49.0 * floor(p * ns.z * ns.z);
-          vec4 x_ = floor(j * ns.z);
-          vec4 y_ = floor(j - 7.0 * x_);
-          vec4 x = x_ *ns.x + ns.yyyy;
-          vec4 y = y_ *ns.x + ns.yyyy;
-          vec4 h = 1.0 - abs(x) - abs(y);
-          vec4 b0 = vec4(x.xy, y.xy);
-          vec4 b1 = vec4(x.zw, y.zw);
-          vec4 s0 = floor(b0)*2.0 + 1.0;
-          vec4 s1 = floor(b1)*2.0 + 1.0;
-          vec4 sh = -step(h, vec4(0.0));
-          vec4 a0 = b0.xzyw + s0.xzyw*sh.xxyy;
-          vec4 a1 = b1.xzyw + s1.xzyw*sh.zzww;
-          vec3 p0 = vec3(a0.xy, h.x);
-          vec3 p1 = vec3(a0.zw, h.y);
-          vec3 p2 = vec3(a1.xy, h.z);
-          vec3 p3 = vec3(a1.zw, h.w);
-          vec4 norm = taylorInvSqrt(vec4(dot(p0,p0), dot(p1,p1), dot(p2,p2), dot(p3,p3)));
-          p0 *= norm.x;
-          p1 *= norm.y;
-          p2 *= norm.z;
-          p3 *= norm.w;
-          vec4 m = max(0.6 - vec4(dot(x0,x0), dot(x1,x1), dot(x2,x2), dot(x3,x3)), 0.0);
-          m = m * m;
-          return 42.0 * dot(m*m, vec4(dot(p0,x0), dot(p1,x1), dot(p2,x2), dot(p3,x3)));
-        }
-        
-        void main() {
-          vNormal = normal;
-          vPosition = position;
-          
-          float noise = snoise(position * 0.15 + uTime * 0.3);
-          float noise2 = snoise(position * 0.3 + uTime * 0.2);
-          vDisplacement = noise * 0.5 + noise2 * 0.3;
-          
-          vec3 newPosition = position + normal * vDisplacement * 2.5;
-          
-          gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
-        }
-      `,
-      fragmentShader: `
-        uniform float uTime;
-        uniform vec3 uColorA;
-        uniform vec3 uColorB;
-        uniform vec3 uColorC;
-        varying vec3 vNormal;
-        varying vec3 vPosition;
-        varying float vDisplacement;
-        
-        void main() {
-          float fresnel = pow(1.0 - abs(dot(vNormal, vec3(0.0, 0.0, 1.0))), 2.0);
-          
-          vec3 color = mix(uColorA, uColorB, vDisplacement + 0.5);
-          color = mix(color, uColorC, fresnel * 0.5);
-          
-          float alpha = 0.15 + fresnel * 0.25 + vDisplacement * 0.1;
-          
-          gl_FragColor = vec4(color, alpha);
-        }
-      `,
-      transparent: true,
-      side: THREE.DoubleSide,
-      depthWrite: false,
-    });
+    // Create globe group
+    const globeGroup = new THREE.Group();
+    scene.add(globeGroup);
 
-    const blob = new THREE.Mesh(blobGeometry, blobMaterial);
-    blob.position.set(-15, 5, -10);
-    scene.add(blob);
+    // Globe radius
+    const globeRadius = 100;
 
-    // Create second smaller blob
-    const blob2Geometry = new THREE.IcosahedronGeometry(8, 5);
-    const blob2Material = blobMaterial.clone();
-    blob2Material.uniforms.uColorA.value = secondaryColor;
-    blob2Material.uniforms.uColorB.value = accentColor;
-    blob2Material.uniforms.uColorC.value = primaryColor;
-    
-    const blob2 = new THREE.Mesh(blob2Geometry, blob2Material);
-    blob2.position.set(18, -8, -15);
-    scene.add(blob2);
+    // Create dotted sphere (globe)
+    const dotGeometry = new THREE.BufferGeometry();
+    const dotCount = 3000;
+    const positions = new Float32Array(dotCount * 3);
+    const colors = new Float32Array(dotCount * 3);
+    const sizes = new Float32Array(dotCount);
 
-    // Create floating rings
-    const rings: THREE.Mesh[] = [];
-    const ringCount = 3;
-    
-    for (let i = 0; i < ringCount; i++) {
-      const ringGeometry = new THREE.TorusGeometry(6 + i * 3, 0.1, 16, 100);
-      const ringMaterial = new THREE.MeshBasicMaterial({
-        color: i === 0 ? primaryColor : i === 1 ? secondaryColor : accentColor,
-        transparent: true,
-        opacity: 0.2,
-      });
-      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-      ring.position.set(0, 0, -20 - i * 5);
-      ring.rotation.x = Math.PI * 0.3 * i;
-      scene.add(ring);
-      rings.push(ring);
+    const color = new THREE.Color(primaryColor);
+
+    for (let i = 0; i < dotCount; i++) {
+      const phi = Math.acos(-1 + (2 * i) / dotCount);
+      const theta = Math.sqrt(dotCount * Math.PI) * phi;
+
+      const x = globeRadius * Math.sin(phi) * Math.cos(theta);
+      const y = globeRadius * Math.sin(phi) * Math.sin(theta);
+      const z = globeRadius * Math.cos(phi);
+
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
+
+      colors[i * 3] = color.r;
+      colors[i * 3 + 1] = color.g;
+      colors[i * 3 + 2] = color.b;
+
+      sizes[i] = Math.random() * 2 + 1;
     }
 
-    // Create particle field
-    const particleCount = 800;
-    const particleGeometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const scales = new Float32Array(particleCount);
-    const colors = new Float32Array(particleCount * 3);
+    dotGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    dotGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+    dotGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
-    for (let i = 0; i < particleCount; i++) {
-      const i3 = i * 3;
-      positions[i3] = (Math.random() - 0.5) * 100;
-      positions[i3 + 1] = (Math.random() - 0.5) * 100;
-      positions[i3 + 2] = (Math.random() - 0.5) * 60 - 20;
-      scales[i] = Math.random();
-      
-      const colorChoice = Math.random();
-      const chosenColor = colorChoice < 0.33 ? primaryColor : colorChoice < 0.66 ? secondaryColor : accentColor;
-      colors[i3] = chosenColor.r;
-      colors[i3 + 1] = chosenColor.g;
-      colors[i3 + 2] = chosenColor.b;
-    }
-
-    particleGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    particleGeometry.setAttribute('aScale', new THREE.BufferAttribute(scales, 1));
-    particleGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-    const particleMaterial = new THREE.ShaderMaterial({
+    const dotMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
         uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
       },
       vertexShader: `
-        attribute float aScale;
+        attribute float size;
         attribute vec3 color;
+        varying vec3 vColor;
         uniform float uTime;
         uniform float uPixelRatio;
-        varying vec3 vColor;
         
         void main() {
-          vec3 pos = position;
-          pos.y += sin(uTime * 0.5 + position.x * 0.1) * 2.0;
-          pos.x += cos(uTime * 0.3 + position.z * 0.1) * 1.5;
-          
-          vec4 modelPosition = modelMatrix * vec4(pos, 1.0);
-          vec4 viewPosition = viewMatrix * modelPosition;
-          vec4 projectedPosition = projectionMatrix * viewPosition;
-          
-          gl_Position = projectedPosition;
-          gl_PointSize = aScale * 20.0 * uPixelRatio;
-          gl_PointSize *= (1.0 / -viewPosition.z);
-          
           vColor = color;
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = size * uPixelRatio * (200.0 / -mvPosition.z);
+          gl_Position = projectionMatrix * mvPosition;
         }
       `,
       fragmentShader: `
@@ -247,11 +115,8 @@ const WebGLBackground = () => {
         void main() {
           float dist = length(gl_PointCoord - vec2(0.5));
           if (dist > 0.5) discard;
-          
-          float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
-          alpha *= 0.6;
-          
-          gl_FragColor = vec4(vColor, alpha);
+          float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
+          gl_FragColor = vec4(vColor, alpha * 0.8);
         }
       `,
       transparent: true,
@@ -259,23 +124,114 @@ const WebGLBackground = () => {
       blending: THREE.AdditiveBlending,
     });
 
-    const particles = new THREE.Points(particleGeometry, particleMaterial);
-    scene.add(particles);
+    const dots = new THREE.Points(dotGeometry, dotMaterial);
+    globeGroup.add(dots);
 
-    // Create glowing orbs
-    const orbs: THREE.Mesh[] = [];
-    const orbPositions = [
-      { x: -25, y: 15, z: -30 },
-      { x: 30, y: -12, z: -25 },
-      { x: 5, y: 20, z: -35 },
+    // Create wireframe rings
+    const ringCount = 8;
+    for (let i = 0; i < ringCount; i++) {
+      const ringGeometry = new THREE.RingGeometry(
+        globeRadius - 2 + (i * 3),
+        globeRadius - 1 + (i * 3),
+        64
+      );
+      const ringMaterial = new THREE.MeshBasicMaterial({
+        color: primaryColor,
+        transparent: true,
+        opacity: 0.1 - i * 0.01,
+        side: THREE.DoubleSide,
+      });
+      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+      ring.rotation.x = Math.PI / 2;
+      ring.rotation.y = (i * Math.PI) / ringCount;
+      globeGroup.add(ring);
+    }
+
+    // Create latitude/longitude lines
+    const createLatLongLines = () => {
+      const lineMaterial = new THREE.LineBasicMaterial({
+        color: primaryColor,
+        transparent: true,
+        opacity: 0.15,
+      });
+
+      // Latitude lines
+      for (let lat = -60; lat <= 60; lat += 30) {
+        const latRad = (lat * Math.PI) / 180;
+        const radius = globeRadius * Math.cos(latRad);
+        const y = globeRadius * Math.sin(latRad);
+
+        const points: THREE.Vector3[] = [];
+        for (let lon = 0; lon <= 360; lon += 5) {
+          const lonRad = (lon * Math.PI) / 180;
+          points.push(new THREE.Vector3(
+            radius * Math.cos(lonRad),
+            y,
+            radius * Math.sin(lonRad)
+          ));
+        }
+
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(geometry, lineMaterial);
+        globeGroup.add(line);
+      }
+
+      // Longitude lines
+      for (let lon = 0; lon < 180; lon += 30) {
+        const lonRad = (lon * Math.PI) / 180;
+        const points: THREE.Vector3[] = [];
+
+        for (let lat = -90; lat <= 90; lat += 5) {
+          const latRad = (lat * Math.PI) / 180;
+          points.push(new THREE.Vector3(
+            globeRadius * Math.cos(latRad) * Math.cos(lonRad),
+            globeRadius * Math.sin(latRad),
+            globeRadius * Math.cos(latRad) * Math.sin(lonRad)
+          ));
+        }
+
+        const geometry = new THREE.BufferGeometry().setFromPoints(points);
+        const line = new THREE.Line(geometry, lineMaterial);
+        globeGroup.add(line);
+      }
+    };
+
+    createLatLongLines();
+
+    // Create connection points (cities/nodes)
+    const nodePositions = [
+      { lat: 40.7128, lon: -74.006 },
+      { lat: 51.5074, lon: -0.1278 },
+      { lat: 35.6762, lon: 139.6503 },
+      { lat: -33.8688, lon: 151.2093 },
+      { lat: 1.3521, lon: 103.8198 },
+      { lat: 37.7749, lon: -122.4194 },
+      { lat: 48.8566, lon: 2.3522 },
+      { lat: 55.7558, lon: 37.6173 },
+      { lat: 22.3193, lon: 114.1694 },
+      { lat: -23.5505, lon: -46.6333 },
+      { lat: 25.2048, lon: 55.2708 },
+      { lat: 19.076, lon: 72.8777 },
     ];
 
-    orbPositions.forEach((pos, i) => {
-      const orbGeometry = new THREE.SphereGeometry(2, 32, 32);
-      const orbMaterial = new THREE.ShaderMaterial({
+    const latLonToVector3 = (lat: number, lon: number, radius: number) => {
+      const phi = (90 - lat) * (Math.PI / 180);
+      const theta = (lon + 180) * (Math.PI / 180);
+      return new THREE.Vector3(
+        -radius * Math.sin(phi) * Math.cos(theta),
+        radius * Math.cos(phi),
+        radius * Math.sin(phi) * Math.sin(theta)
+      );
+    };
+
+    // Create glowing nodes
+    const nodes: THREE.Mesh[] = [];
+    nodePositions.forEach((pos, index) => {
+      const nodeGeometry = new THREE.SphereGeometry(2.5, 16, 16);
+      const nodeMaterial = new THREE.ShaderMaterial({
         uniforms: {
           uTime: { value: 0 },
-          uColor: { value: i === 0 ? primaryColor : i === 1 ? secondaryColor : accentColor },
+          uColor: { value: new THREE.Color(index % 2 === 0 ? secondaryColor : accentColor) },
         },
         vertexShader: `
           varying vec3 vNormal;
@@ -291,26 +247,207 @@ const WebGLBackground = () => {
           
           void main() {
             float intensity = pow(0.7 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 2.0);
-            float pulse = 0.8 + sin(uTime * 2.0) * 0.2;
-            gl_FragColor = vec4(uColor, intensity * pulse * 0.5);
+            float pulse = 0.7 + sin(uTime * 3.0) * 0.3;
+            gl_FragColor = vec4(uColor, intensity * pulse);
           }
         `,
         transparent: true,
         blending: THREE.AdditiveBlending,
         depthWrite: false,
       });
-      
-      const orb = new THREE.Mesh(orbGeometry, orbMaterial);
-      orb.position.set(pos.x, pos.y, pos.z);
-      scene.add(orb);
-      orbs.push(orb);
+
+      const node = new THREE.Mesh(nodeGeometry, nodeMaterial);
+      const position = latLonToVector3(pos.lat, pos.lon, globeRadius);
+      node.position.copy(position);
+      globeGroup.add(node);
+      nodes.push(node);
+
+      // Add glow ring around node
+      const ringGeometry = new THREE.RingGeometry(3, 5, 32);
+      const ringMaterial = new THREE.MeshBasicMaterial({
+        color: index % 2 === 0 ? secondaryColor : accentColor,
+        transparent: true,
+        opacity: 0.3,
+        side: THREE.DoubleSide,
+      });
+      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+      ring.position.copy(position);
+      ring.lookAt(new THREE.Vector3(0, 0, 0));
+      globeGroup.add(ring);
     });
+
+    // Create connection arcs between nodes
+    const connections: { curve: THREE.CubicBezierCurve3; line: THREE.Line; particles: THREE.Points }[] = [];
+
+    const createArc = (start: THREE.Vector3, end: THREE.Vector3, colorHex: number) => {
+      const distance = start.distanceTo(end);
+
+      const curve = new THREE.CubicBezierCurve3(
+        start,
+        new THREE.Vector3().copy(start).normalize().multiplyScalar(globeRadius + distance * 0.25),
+        new THREE.Vector3().copy(end).normalize().multiplyScalar(globeRadius + distance * 0.25),
+        end
+      );
+
+      const points = curve.getPoints(50);
+      const geometry = new THREE.BufferGeometry().setFromPoints(points);
+      const material = new THREE.LineBasicMaterial({
+        color: colorHex,
+        transparent: true,
+        opacity: 0.4,
+      });
+
+      const line = new THREE.Line(geometry, material);
+      globeGroup.add(line);
+
+      // Create particles that travel along the arc
+      const particleCount = 15;
+      const particleGeometry = new THREE.BufferGeometry();
+      const particlePositions = new Float32Array(particleCount * 3);
+      const particleSizes = new Float32Array(particleCount);
+
+      for (let i = 0; i < particleCount; i++) {
+        particleSizes[i] = Math.random() * 3 + 1;
+      }
+
+      particleGeometry.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3));
+      particleGeometry.setAttribute('size', new THREE.BufferAttribute(particleSizes, 1));
+
+      const particleMaterial = new THREE.ShaderMaterial({
+        uniforms: {
+          uColor: { value: new THREE.Color(colorHex) },
+          uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+        },
+        vertexShader: `
+          attribute float size;
+          uniform float uPixelRatio;
+          
+          void main() {
+            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+            gl_PointSize = size * uPixelRatio * (150.0 / -mvPosition.z);
+            gl_Position = projectionMatrix * mvPosition;
+          }
+        `,
+        fragmentShader: `
+          uniform vec3 uColor;
+          
+          void main() {
+            float dist = length(gl_PointCoord - vec2(0.5));
+            if (dist > 0.5) discard;
+            float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
+            gl_FragColor = vec4(uColor, alpha);
+          }
+        `,
+        transparent: true,
+        blending: THREE.AdditiveBlending,
+        depthWrite: false,
+      });
+
+      const particles = new THREE.Points(particleGeometry, particleMaterial);
+      globeGroup.add(particles);
+
+      return { curve, line, particles };
+    };
+
+    // Create connections between random pairs of nodes
+    const connectionPairs = [
+      [0, 1], [0, 5], [1, 2], [1, 6], [2, 4], [2, 8],
+      [3, 4], [4, 8], [5, 6], [6, 7], [7, 8], [9, 0],
+      [10, 11], [10, 8], [11, 2], [3, 9], [5, 9], [6, 10]
+    ];
+
+    connectionPairs.forEach(([i, j], index) => {
+      const start = latLonToVector3(nodePositions[i].lat, nodePositions[i].lon, globeRadius);
+      const end = latLonToVector3(nodePositions[j].lat, nodePositions[j].lon, globeRadius);
+      const colorHex = index % 3 === 0 ? primaryColor : index % 3 === 1 ? secondaryColor : accentColor;
+      connections.push(createArc(start, end, colorHex));
+    });
+
+    // Create outer glow
+    const glowGeometry = new THREE.SphereGeometry(globeRadius * 1.15, 32, 32);
+    const glowMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: { value: new THREE.Color(glowColor) },
+      },
+      vertexShader: `
+        varying vec3 vNormal;
+        void main() {
+          vNormal = normalize(normalMatrix * normal);
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 uColor;
+        varying vec3 vNormal;
+        
+        void main() {
+          float intensity = pow(0.65 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 4.0);
+          gl_FragColor = vec4(uColor, intensity * 0.4);
+        }
+      `,
+      transparent: true,
+      side: THREE.BackSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const glow = new THREE.Mesh(glowGeometry, glowMaterial);
+    globeGroup.add(glow);
+
+    // Create background particles
+    const bgParticleCount = 500;
+    const bgParticleGeometry = new THREE.BufferGeometry();
+    const bgPositions = new Float32Array(bgParticleCount * 3);
+    const bgSizes = new Float32Array(bgParticleCount);
+
+    for (let i = 0; i < bgParticleCount; i++) {
+      bgPositions[i * 3] = (Math.random() - 0.5) * 800;
+      bgPositions[i * 3 + 1] = (Math.random() - 0.5) * 800;
+      bgPositions[i * 3 + 2] = (Math.random() - 0.5) * 400 - 200;
+      bgSizes[i] = Math.random() * 2 + 0.5;
+    }
+
+    bgParticleGeometry.setAttribute('position', new THREE.BufferAttribute(bgPositions, 3));
+    bgParticleGeometry.setAttribute('size', new THREE.BufferAttribute(bgSizes, 1));
+
+    const bgParticleMaterial = new THREE.ShaderMaterial({
+      uniforms: {
+        uColor: { value: new THREE.Color(primaryColor) },
+        uPixelRatio: { value: Math.min(window.devicePixelRatio, 2) },
+      },
+      vertexShader: `
+        attribute float size;
+        uniform float uPixelRatio;
+        
+        void main() {
+          vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+          gl_PointSize = size * uPixelRatio * (100.0 / -mvPosition.z);
+          gl_Position = projectionMatrix * mvPosition;
+        }
+      `,
+      fragmentShader: `
+        uniform vec3 uColor;
+        
+        void main() {
+          float dist = length(gl_PointCoord - vec2(0.5));
+          if (dist > 0.5) discard;
+          float alpha = 0.3 * (1.0 - smoothstep(0.0, 0.5, dist));
+          gl_FragColor = vec4(uColor, alpha);
+        }
+      `,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+
+    const bgParticles = new THREE.Points(bgParticleGeometry, bgParticleMaterial);
+    scene.add(bgParticles);
 
     // Mouse interaction
     let mouseX = 0;
     let mouseY = 0;
-    let targetX = 0;
-    let targetY = 0;
+    let targetRotationX = 0;
+    let targetRotationY = 0;
 
     const handleMouseMove = (event: MouseEvent) => {
       mouseX = (event.clientX / window.innerWidth) * 2 - 1;
@@ -326,39 +463,40 @@ const WebGLBackground = () => {
       const elapsedTime = clock.getElapsedTime();
 
       // Update shader uniforms
-      blobMaterial.uniforms.uTime.value = elapsedTime;
-      blob2Material.uniforms.uTime.value = elapsedTime + 10;
-      particleMaterial.uniforms.uTime.value = elapsedTime;
+      dotMaterial.uniforms.uTime.value = elapsedTime;
       
-      orbs.forEach((orb, i) => {
-        if (orb.material instanceof THREE.ShaderMaterial) {
-          orb.material.uniforms.uTime.value = elapsedTime + i;
+      nodes.forEach((node) => {
+        if (node.material instanceof THREE.ShaderMaterial) {
+          node.material.uniforms.uTime.value = elapsedTime;
         }
-        orb.position.y += Math.sin(elapsedTime * 0.5 + i) * 0.01;
       });
 
-      // Animate blobs
-      blob.rotation.x = elapsedTime * 0.1;
-      blob.rotation.y = elapsedTime * 0.15;
-      blob.position.y = 5 + Math.sin(elapsedTime * 0.5) * 2;
-      
-      blob2.rotation.x = elapsedTime * -0.12;
-      blob2.rotation.y = elapsedTime * 0.1;
-      blob2.position.y = -8 + Math.cos(elapsedTime * 0.4) * 3;
+      // Animate particles along connection arcs
+      connections.forEach((connection, connIndex) => {
+        const positions = connection.particles.geometry.attributes.position.array as Float32Array;
+        const particleCount = positions.length / 3;
 
-      // Animate rings
-      rings.forEach((ring, i) => {
-        ring.rotation.x += 0.002 * (i + 1);
-        ring.rotation.z += 0.001 * (i + 1);
+        for (let i = 0; i < particleCount; i++) {
+          const t = ((elapsedTime * 0.3 + i / particleCount + connIndex * 0.1) % 1);
+          const point = connection.curve.getPoint(t);
+          positions[i * 3] = point.x;
+          positions[i * 3 + 1] = point.y;
+          positions[i * 3 + 2] = point.z;
+        }
+
+        connection.particles.geometry.attributes.position.needsUpdate = true;
       });
 
-      // Smooth camera follow
-      targetX += (mouseX * 8 - targetX) * 0.02;
-      targetY += (mouseY * 5 - targetY) * 0.02;
-      
-      camera.position.x = targetX;
-      camera.position.y = targetY;
-      camera.lookAt(scene.position);
+      // Smooth rotation based on mouse
+      targetRotationY += (mouseX * 0.5 - targetRotationY) * 0.02;
+      targetRotationX += (mouseY * 0.3 - targetRotationX) * 0.02;
+
+      // Auto rotation + mouse influence
+      globeGroup.rotation.y = elapsedTime * 0.1 + targetRotationY;
+      globeGroup.rotation.x = targetRotationX * 0.5;
+
+      // Animate background particles
+      bgParticles.rotation.y = elapsedTime * 0.02;
 
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
@@ -371,7 +509,8 @@ const WebGLBackground = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
-      particleMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
+      dotMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
+      bgParticleMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2);
     };
 
     window.addEventListener('resize', handleResize);
@@ -384,20 +523,12 @@ const WebGLBackground = () => {
         containerRef.current.removeChild(renderer.domElement);
       }
       renderer.dispose();
-      blobGeometry.dispose();
-      blobMaterial.dispose();
-      blob2Geometry.dispose();
-      blob2Material.dispose();
-      particleGeometry.dispose();
-      particleMaterial.dispose();
-      rings.forEach(ring => {
-        ring.geometry.dispose();
-        if (ring.material instanceof THREE.Material) ring.material.dispose();
-      });
-      orbs.forEach(orb => {
-        orb.geometry.dispose();
-        if (orb.material instanceof THREE.Material) orb.material.dispose();
-      });
+      dotGeometry.dispose();
+      dotMaterial.dispose();
+      bgParticleGeometry.dispose();
+      bgParticleMaterial.dispose();
+      glowGeometry.dispose();
+      glowMaterial.dispose();
     };
   }, [isDark]);
 
