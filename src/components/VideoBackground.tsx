@@ -1,19 +1,18 @@
 const VideoBackground = () => {
+  // Supabase storage URL for the video
+  const videoUrl = "https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/videos/hero-background.mp4";
+
   return (
     <div className="absolute inset-0 w-full h-full overflow-hidden z-0">
-      <iframe
-        src="https://drive.google.com/file/d/1ZlWoxOIMb6qPOK3KHUx_zh2Rp3GOAb6_/preview?autoplay=1"
-        title="Background Video"
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-        style={{
-          width: '300vw',
-          height: '300vh',
-          minWidth: '100%',
-          minHeight: '100%',
-        }}
-        allow="autoplay; encrypted-media"
-        frameBorder="0"
-      />
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute top-1/2 left-1/2 min-w-full min-h-full w-auto h-auto -translate-x-1/2 -translate-y-1/2 object-cover"
+      >
+        <source src={videoUrl} type="video/mp4" />
+      </video>
     </div>
   );
 };
