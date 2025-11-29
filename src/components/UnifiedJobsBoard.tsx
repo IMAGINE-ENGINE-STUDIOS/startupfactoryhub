@@ -953,7 +953,7 @@ export default function UnifiedJobsBoard() {
       )}
 
       {/* Jobs Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 items-start">
         {displayedJobs.length === 0 ? (
           <Card className="col-span-full">
             <CardContent className="py-8">
