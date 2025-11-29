@@ -25,6 +25,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import InvestorAvailabilityManager from './InvestorAvailabilityManager';
+import AvatarUpload from './AvatarUpload';
 
 const STAGES = ['Pre-Seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'IPO'];
 const INDUSTRIES = ['Technology', 'Healthcare', 'Fintech', 'E-commerce', 'AI/ML', 'SaaS', 'Biotech', 'Clean Energy', 'Education', 'Real Estate'];
@@ -177,12 +178,21 @@ export default function InvestorProfileView() {
       <Card className="tech-card border-0">
         <CardContent className="p-8">
           <div className="flex items-start space-x-6">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name} />
-              <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
-                {profile?.full_name?.charAt(0) || 'I'}
-              </AvatarFallback>
-            </Avatar>
+            {isEditing ? (
+              <AvatarUpload
+                currentAvatarUrl={profile?.avatar_url}
+                size="lg"
+                userRole="investor"
+                showGradientBorder
+              />
+            ) : (
+              <Avatar className="h-20 w-20">
+                <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name} />
+                <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
+                  {profile?.full_name?.charAt(0) || 'I'}
+                </AvatarFallback>
+              </Avatar>
+            )}
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 <div>
