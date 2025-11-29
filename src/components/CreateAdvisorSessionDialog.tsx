@@ -149,35 +149,40 @@ export default function CreateAdvisorSessionDialog({
     try {
       setLoadingStartups(true);
       
-      // Fetch all companies (startups) on the platform
-      const { data: companies, error } = await supabase
+      // Step 1: Fetch all companies (startups) on the platform
+      const { data: companies, error: companiesError } = await supabase
         .from('companies')
-        .select(`
-          id,
-          name,
-          stage,
-          user_id,
-          profiles:user_id (
-            full_name
-          )
-        `)
+        .select('id, name, stage, user_id')
         .neq('user_id', user.id)
         .order('name', { ascending: true });
 
-      if (error) throw error;
+      if (companiesError) throw companiesError;
 
       if (!companies || companies.length === 0) {
         setAllStartups([]);
         return;
       }
 
-      const startupOptions: StartupOption[] = companies.map((company: any) => ({
-        user_id: company.user_id,
-        full_name: company.profiles?.full_name || 'Unknown Founder',
-        company_name: company.name,
-        company_stage: company.stage,
-        is_mentee: false,
-      }));
+      // Step 2: Get unique user_ids and fetch profiles separately
+      const userIds = [...new Set(companies.map(c => c.user_id))];
+      const { data: profiles, error: profilesError } = await supabase
+        .from('profiles')
+        .select('user_id, full_name')
+        .in('user_id', userIds);
+
+      if (profilesError) throw profilesError;
+
+      // Step 3: Map companies with their founder names
+      const startupOptions: StartupOption[] = companies.map((company) => {
+        const profile = profiles?.find(p => p.user_id === company.user_id);
+        return {
+          user_id: company.user_id,
+          full_name: profile?.full_name || 'Unknown Founder',
+          company_name: company.name,
+          company_stage: company.stage,
+          is_mentee: false,
+        };
+      });
 
       setAllStartups(startupOptions);
     } catch (error) {
