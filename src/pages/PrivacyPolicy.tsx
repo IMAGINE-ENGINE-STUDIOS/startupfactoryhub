@@ -14,9 +14,9 @@ const PrivacyPolicy = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-primary/20 mb-6">
               <Shield className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-4xl sm:text-5xl font-bold mb-4">
+            <h1 className="font-futuristic text-2xl sm:text-3xl font-bold mb-4 tracking-wide">
               <span className="bg-gradient-primary bg-clip-text text-transparent">
-                Privacy Policy
+                PRIVACY POLICY
               </span>
             </h1>
             <p className="text-muted-foreground text-lg">

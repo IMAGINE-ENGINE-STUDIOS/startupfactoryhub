@@ -14,9 +14,9 @@ const About = () => {
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
           {/* Header */}
           <div className="text-center mb-16 animate-fade-in">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-6">
+            <h1 className="font-futuristic text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 tracking-wide">
               <span className="bg-gradient-primary bg-clip-text text-transparent">
-                About Startup Factory Hub
+                ABOUT STARTUP FACTORY HUB
               </span>
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
