@@ -40,14 +40,14 @@ const CommunitySection = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   
   return (
-    <section id="community" className="py-16 sm:py-28 relative overflow-hidden min-h-[600px] sm:min-h-[700px]" style={{ perspective: '2000px' }}>
+    <section id="community" className="py-20 sm:py-32 md:py-40 relative overflow-hidden min-h-[700px] sm:min-h-[850px] md:min-h-[900px]" style={{ perspective: '2000px' }}>
       {/* WebGL Globe Background - More visible */}
-      <div className="absolute inset-0 opacity-60">
+      <div className="absolute inset-0 opacity-70">
         <WebGLBackground />
       </div>
       
       {/* Lighter gradient overlay to show more of the globe */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/30 to-background/60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background/50 via-background/20 to-background/50" />
       
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="text-center mb-10 sm:mb-14">
