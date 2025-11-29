@@ -65,7 +65,7 @@ const App = () => (
                   <Route path="/profile-setup" element={<ProfileSetup />} />
                   <Route path="/dashboard" element={<DashboardRouter />} />
                   <Route path="/tools" element={<Tools />} />
-                  <Route path="/lightpaper" element={<LightPaper />} />
+                  <Route path="/lightpaper" element={<NotFound />} />
                   <Route path="/guidelines" element={<Guidelines />} />
                   <Route path="/jobs/:jobId/apply" element={<PublicJobApplicationPage />} />
                   <Route path="/internships/:internshipId/apply" element={<PublicInternshipApplication />} />

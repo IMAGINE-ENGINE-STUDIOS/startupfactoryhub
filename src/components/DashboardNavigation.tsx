@@ -101,15 +101,6 @@ const DashboardNavigation = () => {
                 variant="ghost" 
                 size="sm"
                 className="flex items-center space-x-2"
-                onClick={() => navigate("/lightpaper")}
-              >
-                <FileText className="w-4 h-4" />
-                <span>LightPaper</span>
-              </Button>
-              <Button 
-                variant="ghost" 
-                size="sm"
-                className="flex items-center space-x-2"
                 onClick={() => navigate("/guidelines")}
               >
                 <BookOpen className="w-4 h-4" />
@@ -208,10 +199,10 @@ const DashboardNavigation = () => {
             variant="ghost"
             size="sm"
             className="flex flex-col items-center space-y-1 h-auto py-2"
-            onClick={() => navigate("/lightpaper")}
+            onClick={() => navigate("/guidelines")}
           >
-            <FileText className="w-5 h-5" />
-            <span className="text-xs">LightPaper</span>
+            <Brain className="w-5 h-5" />
+            <span className="text-xs">AI Tips</span>
           </Button>
           <Button
             variant="ghost"

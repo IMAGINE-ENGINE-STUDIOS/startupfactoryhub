@@ -1,8 +1,7 @@
 import { useState } from "react";
-import { FileText, TrendingUp, Languages, Image, Workflow, FileEdit } from "lucide-react";
+import { FileText, TrendingUp, Languages, Image, Workflow, Brain } from "lucide-react";
 import AIAssistant from "./AIAssistant";
 import MatrixBackground from "./MatrixBackground";
-import { useNavigate } from "react-router-dom";
 
 interface AIFeature {
   icon: any;
@@ -14,7 +13,6 @@ interface AIFeature {
 export default function AIAssistantPreview() {
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-  const navigate = useNavigate();
 
   const features: AIFeature[] = [
     {
@@ -48,10 +46,10 @@ export default function AIAssistantPreview() {
       color: "from-cyan-500/20 to-blue-500/20"
     },
     {
-      icon: FileEdit,
-      title: "LightPaper",
-      description: "Create, edit, and sign documents and PDFs with ease",
-      color: "from-blue-500/20 to-indigo-500/20"
+      icon: Brain,
+      title: "AI Recommendations",
+      description: "Get personalized AI-powered recommendations for mentors, investors, and resources",
+      color: "from-orange-500/20 to-amber-500/20"
     }
   ];
 
@@ -83,7 +81,7 @@ export default function AIAssistantPreview() {
                 className="group relative"
                 onMouseEnter={() => setHoveredIndex(index)}
                 onMouseLeave={() => setHoveredIndex(null)}
-                onClick={() => feature.title === "LightPaper" && navigate("/lightpaper")}
+                
               >
                 {/* Glow effect */}
                 <div className={`absolute -inset-0.5 bg-gradient-to-r ${feature.color} rounded-xl opacity-0 group-hover:opacity-100 blur transition-all duration-500`} />
