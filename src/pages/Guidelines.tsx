@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { BookOpen, FileText, Table, Presentation, Lightbulb, Search, Keyboard, Sparkles, BarChart3, Languages, FileSearch, Workflow, Users, Calendar, Briefcase, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import MatrixBackground from "@/components/MatrixBackground";
 
 export default function Guidelines() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -23,7 +24,8 @@ export default function Guidelines() {
   );
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <MatrixBackground />
       {/* Header */}
       <div className="border-b bg-card sticky top-0 z-10">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
