@@ -13,8 +13,6 @@ const HeroSection = () => {
       {/* Video Background */}
       <VideoBackground />
       
-      {/* Background Image Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-background/95 to-background/90 z-[1]" />
       
       {/* Animated Grid Pattern */}
       <div className="absolute inset-0 z-[2] opacity-20">
