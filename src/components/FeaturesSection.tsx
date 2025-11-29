@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Map, Calendar, Briefcase, Sparkles, TrendingUp, Brain } from "lucide-react";
+import { Map, Calendar, Briefcase, Sparkles, TrendingUp, FileText } from "lucide-react";
 
 const features = [
   {
@@ -33,10 +33,10 @@ const features = [
     gradient: "from-pink-500/20 via-rose-500/20 to-orange-500/20"
   },
   {
-    icon: Brain,
-    title: "AI Recommendations",
-    description: "Get personalized AI-powered recommendations for mentors, investors, resources, and next steps tailored to your startup journey.",
-    gradient: "from-orange-500/20 via-amber-500/20 to-yellow-500/20"
+    icon: FileText,
+    title: "LightPaper",
+    description: "Create, edit, and sign documents and PDFs with our enterprise-grade professional workspace.",
+    gradient: "from-blue-500/20 via-indigo-500/20 to-purple-500/20"
   }
 ];
 const FeaturesSection = () => {
