@@ -31,7 +31,7 @@ const AboutHero = () => {
             </div>
 
             {/* Right: Key points in a connected flow */}
-            <div className="flex flex-row lg:flex-col gap-3 sm:gap-4">
+            <div className="grid grid-cols-3 lg:grid-cols-1 gap-2 sm:gap-3 w-full lg:w-auto">
               {[
                 { icon: Cpu, title: "Deep Tech", desc: "AI, Biotech, Quantum", color: "text-primary", bg: "bg-primary/10" },
                 { icon: Zap, title: "Accelerate", desc: "Growth methodology", color: "text-cyan-500", bg: "bg-cyan-500/10" },
@@ -39,14 +39,14 @@ const AboutHero = () => {
               ].map((item, i) => (
                 <div 
                   key={i}
-                  className="group flex items-center gap-3 p-3 rounded-lg bg-card/30 border border-border/30 hover:border-primary/30 transition-all duration-300 hover:bg-card/50"
+                  className="group flex flex-col sm:flex-row items-center gap-1.5 sm:gap-3 p-2 sm:p-3 rounded-lg bg-card/30 border border-border/30 hover:border-primary/30 transition-all duration-300 hover:bg-card/50"
                 >
-                  <div className={`w-9 h-9 rounded-lg ${item.bg} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
-                    <item.icon className={`w-4 h-4 ${item.color}`} />
+                  <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-lg ${item.bg} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+                    <item.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${item.color}`} />
                   </div>
-                  <div className="min-w-0">
-                    <h3 className="text-xs sm:text-sm font-semibold">{item.title}</h3>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{item.desc}</p>
+                  <div className="min-w-0 text-center sm:text-left">
+                    <h3 className="text-[10px] sm:text-sm font-semibold leading-tight">{item.title}</h3>
+                    <p className="text-[8px] sm:text-xs text-muted-foreground truncate hidden sm:block">{item.desc}</p>
                   </div>
                 </div>
               ))}
