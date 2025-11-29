@@ -26,7 +26,7 @@ import NetworkBrowser from '@/components/NetworkBrowser';
 import MatchingSystem from '@/components/MatchingSystem';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { DashboardHeader } from '@/components/DashboardHeader';
-import CreateSessionDialog from '@/components/CreateSessionDialog';
+import CreateAdvisorSessionDialog from '@/components/CreateAdvisorSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 
@@ -882,11 +882,12 @@ export default function AdvisorDashboard() {
         </DialogContent>
       </Dialog>
 
-      <CreateSessionDialog
+      <CreateAdvisorSessionDialog
         open={createSessionDialogOpen}
         onOpenChange={setCreateSessionDialogOpen}
         onSessionCreated={() => {
           setCreateSessionDialogOpen(false);
+          refetch();
         }}
       />
       <CreateEventDialog 
