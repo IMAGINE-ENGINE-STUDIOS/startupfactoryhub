@@ -122,14 +122,25 @@ export default function StartupActiveMentors({ onSessionScheduled, onJoin }: Sta
       .order('scheduled_at', { ascending: true });
 
     const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
-    const roleMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
+    
+    // Create a map that stores all roles for each user
+    const roleMap = new Map<string, string[]>();
+    roles?.forEach(r => {
+      const existingRoles = roleMap.get(r.user_id) || [];
+      roleMap.set(r.user_id, [...existingRoles, r.role]);
+    });
 
     const mentorsWithSessions = relationships.map((rel) => {
       const nextSession = sessions?.find(s => s.mentor_id === rel.mentor_id);
+      const userRoles = roleMap.get(rel.mentor_id) || [];
+      // Prefer 'advisor' role over 'mentor'
+      const displayRole = userRoles.includes('advisor') ? 'advisor' : 
+                         userRoles.includes('mentor') ? 'mentor' : 
+                         userRoles[0] || 'mentor';
       return {
         ...rel,
         mentor: profileMap.get(rel.mentor_id) || { full_name: 'Unknown', avatar_url: null, bio: null },
-        role: roleMap.get(rel.mentor_id) || 'mentor',
+        role: displayRole,
         nextSession: nextSession || null
       };
     });
