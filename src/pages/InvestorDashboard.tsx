@@ -565,10 +565,6 @@ export default function InvestorDashboard() {
                 <CalendarIcon className="h-4 w-4" />
                 <span className="hidden md:inline">Calendar</span>
               </TabsTrigger>
-              <TabsTrigger value="profile" className="flex-shrink-0 gap-2">
-                <UserCircle className="h-4 w-4" />
-                <span className="hidden md:inline">Profile</span>
-              </TabsTrigger>
               <TabsTrigger value="analytics" className="flex-shrink-0 gap-2">
                 <BarChart className="h-4 w-4" />
                 <span className="hidden md:inline">Analytics</span>
