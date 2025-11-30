@@ -595,7 +595,7 @@ const Dashboard = () => {
           {/* Meetings Tab */}
           {activeTab === "meetings" && (
             <TabsContent value="meetings" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 {/* Left Column: Investor Pitches */}
                 <div className="space-y-6">
                   <div className="flex items-center gap-4">
