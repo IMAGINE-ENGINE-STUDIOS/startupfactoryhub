@@ -57,14 +57,7 @@ export const useMentorDashboard = () => {
 
     const { data, error } = await supabase
       .from('mentorship_relationships')
-      .select(`
-        *,
-        mentee:profiles!mentorship_relationships_mentee_id_fkey (
-          full_name,
-          avatar_url,
-          user_id
-        )
-      `)
+      .select('*')
       .eq('mentor_id', user.id)
       .in('status', ['pending', 'active'])
       .order('status', { ascending: true })
@@ -75,15 +68,22 @@ export const useMentorDashboard = () => {
       return;
     }
 
-    // Fetch company info and session data for each mentee
+    // Fetch mentee profiles, company info and session data for each mentee
     if (data) {
       const mentorshipsWithData = await Promise.all(
         data.map(async (mentorship: any) => {
+          // Fetch mentee profile
+          const { data: menteeData } = await supabase
+            .from('profiles')
+            .select('full_name, avatar_url, user_id')
+            .eq('user_id', mentorship.mentee_id)
+            .maybeSingle();
+
           // Fetch company info
           const { data: companyData } = await supabase
             .from('companies')
             .select('id, name, description, stage, industry, logo_url, location, website, team_size')
-            .eq('user_id', mentorship.mentee?.user_id)
+            .eq('user_id', mentorship.mentee_id)
             .maybeSingle();
           
           // Check for upcoming sessions
@@ -108,6 +108,7 @@ export const useMentorDashboard = () => {
           
           return {
             ...mentorship,
+            mentee: menteeData || { full_name: 'Unknown', avatar_url: null, user_id: mentorship.mentee_id },
             companies: companyData || null,
             hasUpcomingSessions: (upcomingSessions?.length || 0) > 0,
             hasRecentSessions: (recentSessions?.length || 0) > 0,
@@ -129,13 +130,7 @@ export const useMentorDashboard = () => {
 
     const { data, error } = await supabase
       .from('mentoring_sessions')
-      .select(`
-        *,
-        mentee:profiles!mentoring_sessions_mentee_id_fkey (
-          full_name,
-          user_id
-        )
-      `)
+      .select('*')
       .eq('mentor_id', user.id)
       .eq('status', 'scheduled')
       .gte('scheduled_at', today.toISOString())
@@ -147,24 +142,33 @@ export const useMentorDashboard = () => {
       return;
     }
 
-    // Fetch company info for each mentee
+    // Fetch mentee profile and company info for each session
     if (data) {
-      const sessionsWithCompanies = await Promise.all(
+      const sessionsWithData = await Promise.all(
         data.map(async (session: any) => {
+          // Fetch mentee profile
+          const { data: menteeData } = await supabase
+            .from('profiles')
+            .select('full_name, user_id')
+            .eq('user_id', session.mentee_id)
+            .maybeSingle();
+
+          // Fetch company info
           const { data: companyData } = await supabase
             .from('companies')
             .select('name')
-            .eq('user_id', session.mentee?.user_id)
+            .eq('user_id', session.mentee_id)
             .maybeSingle();
           
           return {
             ...session,
+            mentee: menteeData || { full_name: 'Unknown', user_id: session.mentee_id },
             companies: companyData || null
           };
         })
       );
 
-      setTodaySessions(sessionsWithCompanies as MentoringSession[]);
+      setTodaySessions(sessionsWithData as MentoringSession[]);
     }
   };
 
