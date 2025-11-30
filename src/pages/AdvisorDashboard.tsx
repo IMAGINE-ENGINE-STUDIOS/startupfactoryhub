@@ -34,6 +34,7 @@ import { useMentorDashboard } from '@/hooks/useMentorDashboard';
 import AdvisorProfileView from '@/components/AdvisorProfileView';
 import MenteeSessions from '@/components/MenteeSessions';
 import MentorSessionHistory from '@/components/MentorSessionHistory';
+import ActiveMenteesCards from '@/components/ActiveMenteesCards';
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
@@ -543,57 +544,11 @@ export default function AdvisorDashboard() {
               </Card>}
 
             {/* Active Mentees */}
-            <Card className="tech-card border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  <span>Active Mentees</span>
-                  {activeMentees.length > 0 && <Badge variant="secondary">{activeMentees.length}</Badge>}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {activeMentees.length > 0 ? activeMentees.map((mentorship: any) => <Card key={mentorship.id} className="border border-border/50 hover:border-primary/50 transition-colors">
-                        <CardContent className="p-4">
-                          <div className="flex items-start space-x-3">
-                            <Avatar className="h-10 w-10">
-                              <AvatarImage src={mentorship.mentee?.avatar_url} />
-                              <AvatarFallback className="bg-gradient-primary text-primary-foreground">
-                                {mentorship.mentee?.full_name?.charAt(0) || 'U'}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1 min-w-0">
-                              <h3 className="font-semibold text-sm text-foreground truncate">
-                                {mentorship.mentee?.full_name || 'Anonymous'}
-                              </h3>
-                              <p className="text-xs text-muted-foreground">
-                                {mentorship.companies?.name || 'Startup Founder'}
-                              </p>
-                              {mentorship.companies && <div className="flex space-x-1 mt-2">
-                                  <Badge variant="secondary" className="text-xs">{mentorship.companies.stage}</Badge>
-                                  <Badge variant="outline" className="text-xs">{mentorship.companies.industry}</Badge>
-                                </div>}
-                            </div>
-                          </div>
-                          <div className="flex gap-2 mt-3">
-                            <Button size="sm" variant="outline" className="flex-1">
-                              <MessageSquare className="h-4 w-4 mr-1" />
-                              Message
-                            </Button>
-                            <Button size="sm" variant="outline" className="flex-1" onClick={() => setCreateSessionDialogOpen(true)}>
-                              <CalendarIcon className="h-4 w-4 mr-1" />
-                              Schedule
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>) : <div className="col-span-3 text-center py-12">
-                      <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-lg font-semibold mb-2">No active mentees yet</h3>
-                      <p className="text-muted-foreground mb-4">Find startups seeking mentorship below</p>
-                    </div>}
-                </div>
-              </CardContent>
-            </Card>
+            <ActiveMenteesCards 
+              mentees={activeMentees}
+              onScheduleSession={() => setCreateSessionDialogOpen(true)}
+              onMessage={(menteeId) => navigate('/messages')}
+            />
 
             {/* Session History with Ratings */}
             <MentorSessionHistory showStats={false} />
