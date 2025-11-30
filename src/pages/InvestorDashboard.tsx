@@ -10,6 +10,7 @@ import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useSearchParams } from 'react-router-dom';
 import { DollarSign, TrendingUp, Building, PieChart, Target, Users, Calendar as CalendarIcon, ExternalLink, Video, Plus, Bell, Clock, MapPin, MessageCircle, Network, UserCircle, BarChart, Brain, Wrench, Briefcase, Check, X, Presentation, LineChart } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
@@ -51,7 +52,9 @@ export default function InvestorDashboard() {
   const [investments, setInvestments] = useState<Investment[]>([]);
   const [opportunities, setOpportunities] = useState<Investment[]>([]);
   const [investorProfile, setInvestorProfile] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState('social');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(urlTab || 'social');
   const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
   const [pendingPitchesCount, setPendingPitchesCount] = useState(0);
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | undefined>();
@@ -72,6 +75,14 @@ export default function InvestorDashboard() {
   const {
     toast
   } = useToast();
+
+  // Sync URL tab param to activeTab
+  useEffect(() => {
+    if (urlTab && urlTab !== activeTab) {
+      setActiveTab(urlTab);
+      setSearchParams({});
+    }
+  }, [urlTab, activeTab, setSearchParams]);
   const {
     profile: profileWithRole
   } = useProfileWithRole();

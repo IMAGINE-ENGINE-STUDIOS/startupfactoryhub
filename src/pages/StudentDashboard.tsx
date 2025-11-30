@@ -4,7 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
@@ -32,12 +32,22 @@ export default function StudentDashboard() {
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState("social");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(urlTab || "social");
   const { user } = useAuth();
   const navigate = useNavigate();
   const { role, loading: roleLoading } = useUserRole();
   const { profile: profileWithRole } = useProfileWithRole();
   const { upcomingEvents } = useEvents();
+
+  // Sync URL tab param to activeTab
+  useEffect(() => {
+    if (urlTab && urlTab !== activeTab) {
+      setActiveTab(urlTab);
+      setSearchParams({});
+    }
+  }, [urlTab, activeTab, setSearchParams]);
 
   // Redirect if wrong role
   useEffect(() => {
