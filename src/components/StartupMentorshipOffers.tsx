@@ -97,16 +97,30 @@ export default function StartupMentorshipOffers({ onOfferHandled }: StartupMento
       .in('user_id', mentorIds);
 
     const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
-    const roleMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
+    
+    // Create a map that stores all roles for each user (not just the last one)
+    const roleMap = new Map<string, string[]>();
+    roles?.forEach(r => {
+      const existingRoles = roleMap.get(r.user_id) || [];
+      roleMap.set(r.user_id, [...existingRoles, r.role]);
+    });
 
-    // Filter to only show offers from mentors and advisors
+    // Filter to only show offers from users who have mentor or advisor role
     const enrichedOffers = relationships
-      .map(rel => ({
-        ...rel,
-        mentor: profileMap.get(rel.mentor_id) || { full_name: 'Unknown', avatar_url: null, bio: null },
-        role: roleMap.get(rel.mentor_id) || 'mentor'
-      }))
-      .filter(offer => offer.role === 'mentor' || offer.role === 'advisor');
+      .map(rel => {
+        const userRoles = roleMap.get(rel.mentor_id) || [];
+        // Prefer 'advisor' role over 'mentor', then use first available
+        const displayRole = userRoles.includes('advisor') ? 'advisor' : 
+                           userRoles.includes('mentor') ? 'mentor' : 
+                           userRoles[0] || 'mentor';
+        return {
+          ...rel,
+          mentor: profileMap.get(rel.mentor_id) || { full_name: 'Unknown', avatar_url: null, bio: null },
+          role: displayRole,
+          allRoles: userRoles
+        };
+      })
+      .filter(offer => offer.allRoles.includes('mentor') || offer.allRoles.includes('advisor'));
 
     setOffers(enrichedOffers as MentorOffer[]);
   };
