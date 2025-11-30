@@ -29,8 +29,10 @@ import {
   Calendar,
   TrendingUp,
   Settings as SettingsIcon,
-  ChevronDown
+  ChevronDown,
+  FileText
 } from 'lucide-react';
+import ResumeUpload from '@/components/ResumeUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -418,6 +420,27 @@ export default function AdvisorProfileView() {
           </CollapsibleContent>
         </Card>
       </Collapsible>
+
+      {/* Resume Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Resume / CV
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResumeUpload
+            currentResumeUrl={profile?.resume_url}
+            onUploadComplete={() => {
+              // Profile will be refreshed automatically
+            }}
+          />
+          <p className="text-xs text-muted-foreground mt-3">
+            Your resume will be shared with employers when you apply for jobs.
+          </p>
+        </CardContent>
+      </Card>
 
       {/* About Section */}
       <Card>

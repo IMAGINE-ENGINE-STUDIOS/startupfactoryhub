@@ -93,6 +93,17 @@ export default function UnifiedJobsBoard() {
 const [searchQuery, setSearchQuery] = useState('');
   const [displayCount, setDisplayCount] = useState(6);
   const [selectedJobForDetails, setSelectedJobForDetails] = useState<Job | null>(null);
+  
+  // Apply dialog state
+  const [showApplyDialog, setShowApplyDialog] = useState(false);
+  const [applyingToJob, setApplyingToJob] = useState<Job | null>(null);
+  const [applicationCoverLetter, setApplicationCoverLetter] = useState('');
+  const [applicationResumeUrl, setApplicationResumeUrl] = useState<string | null>(null);
+  const [userProfileResume, setUserProfileResume] = useState<string | null>(null);
+  const [userProfileData, setUserProfileData] = useState<{ full_name: string | null; email: string | null; location: string | null } | null>(null);
+  const [submittingApplication, setSubmittingApplication] = useState(false);
+  const [useProfileResume, setUseProfileResume] = useState(true);
+  const [uploadingNewResume, setUploadingNewResume] = useState(false);
 
   // Filter and deduplicate jobs
   const filteredJobs = useMemo(() => {
@@ -363,13 +374,103 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
       return;
     }
 
+    // Find the job
+    const job = jobs.find(j => j.id === jobId);
+    if (!job) return;
+
+    // Fetch user's profile data including resume
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('resume_url, full_name, email, location')
+      .eq('user_id', user.id)
+      .single();
+
+    setUserProfileResume(profile?.resume_url || null);
+    setUserProfileData({
+      full_name: profile?.full_name || null,
+      email: profile?.email || user.email || null,
+      location: profile?.location || null
+    });
+    setApplicationResumeUrl(profile?.resume_url || null);
+    setUseProfileResume(!!profile?.resume_url);
+    setApplicationCoverLetter('');
+    setApplyingToJob(job);
+    setShowApplyDialog(true);
+  };
+
+  const handleUploadApplicationResume = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: 'Invalid file type',
+        description: 'Please upload a PDF, DOC, or DOCX file',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: 'File too large',
+        description: 'Please upload a file smaller than 10MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUploadingNewResume(true);
     try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `application_resume_${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('public-resumes')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('public-resumes')
+        .getPublicUrl(filePath);
+
+      setApplicationResumeUrl(publicUrl);
+      setUseProfileResume(false);
+
+      toast({
+        title: 'Resume uploaded',
+        description: 'Resume uploaded for this application',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Upload failed',
+        description: error.message || 'Failed to upload resume',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploadingNewResume(false);
+      e.target.value = '';
+    }
+  };
+
+  const submitApplication = async () => {
+    if (!user || !applyingToJob) return;
+
+    setSubmittingApplication(true);
+    try {
+      const resumeToUse = useProfileResume ? userProfileResume : applicationResumeUrl;
+      
       const { error } = await supabase
         .from('job_applications')
         .insert({
-          job_id: jobId,
+          job_id: applyingToJob.id,
           user_id: user.id,
           status: 'pending',
+          cover_letter: applicationCoverLetter || null,
+          resume_url: resumeToUse || null,
         });
 
       if (error) {
@@ -379,25 +480,29 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
             description: 'You have already applied to this job',
             variant: 'destructive',
           });
+          setShowApplyDialog(false);
           return;
         }
         throw error;
       }
 
       // Add to applied jobs set immediately (optimistic update)
-      setAppliedJobs(prev => new Set([...prev, jobId]));
+      setAppliedJobs(prev => new Set([...prev, applyingToJob.id]));
 
       // Update the applications count optimistically
       setJobs(prev => prev.map(job => 
-        job.id === jobId 
+        job.id === applyingToJob.id 
           ? { ...job, applications_count: (job.applications_count || 0) + 1 }
           : job
       ));
 
       toast({
-        title: 'Success!',
-        description: 'Application submitted successfully. The company will review your application.',
+        title: 'Application Submitted!',
+        description: 'Your application has been sent to the company.',
       });
+
+      setShowApplyDialog(false);
+      setSelectedJobForDetails(null);
     } catch (error) {
       console.error('Error applying:', error);
       toast({
@@ -405,6 +510,8 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
         description: 'Failed to submit application',
         variant: 'destructive',
       });
+    } finally {
+      setSubmittingApplication(false);
     }
   };
 
@@ -1535,6 +1642,203 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Apply Dialog */}
+      <Dialog open={showApplyDialog} onOpenChange={setShowApplyDialog}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Apply to {applyingToJob?.title}</DialogTitle>
+            <DialogDescription>
+              at {applyingToJob?.companies?.name}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 py-4">
+            {/* Profile Info */}
+            <div className="space-y-2">
+              <h4 className="text-sm font-medium flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Your Information
+              </h4>
+              <div className="p-3 bg-muted/50 rounded-lg text-sm space-y-1">
+                <p><span className="text-muted-foreground">Name:</span> {userProfileData?.full_name || 'Not set'}</p>
+                <p><span className="text-muted-foreground">Email:</span> {userProfileData?.email || 'Not set'}</p>
+                {userProfileData?.location && (
+                  <p><span className="text-muted-foreground">Location:</span> {userProfileData.location}</p>
+                )}
+              </div>
+            </div>
+
+            {/* Resume Section */}
+            <div className="space-y-3">
+              <h4 className="text-sm font-medium flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Resume
+              </h4>
+              
+              {userProfileResume ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      id="use-profile-resume"
+                      checked={useProfileResume}
+                      onChange={() => {
+                        setUseProfileResume(true);
+                        setApplicationResumeUrl(userProfileResume);
+                      }}
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="use-profile-resume" className="flex-1 cursor-pointer">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">Use my profile resume</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(userProfileResume, '_blank')}
+                        >
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
+                      </div>
+                    </label>
+                  </div>
+                  
+                  <div className="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      id="use-different-resume"
+                      checked={!useProfileResume}
+                      onChange={() => setUseProfileResume(false)}
+                      className="h-4 w-4"
+                    />
+                    <label htmlFor="use-different-resume" className="text-sm cursor-pointer">
+                      Upload a different resume
+                    </label>
+                  </div>
+                  
+                  {!useProfileResume && (
+                    <div className="ml-7">
+                      {applicationResumeUrl && applicationResumeUrl !== userProfileResume ? (
+                        <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                          <span className="text-sm truncate">Resume uploaded</span>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(applicationResumeUrl, '_blank')}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button variant="outline" size="sm" asChild disabled={uploadingNewResume}>
+                          <label className="cursor-pointer">
+                            {uploadingNewResume ? (
+                              <>
+                                <Clock className="h-4 w-4 mr-2 animate-spin" />
+                                Uploading...
+                              </>
+                            ) : (
+                              <>
+                                <FileText className="h-4 w-4 mr-2" />
+                                Upload Resume
+                              </>
+                            )}
+                            <input
+                              type="file"
+                              accept=".pdf,.doc,.docx"
+                              onChange={handleUploadApplicationResume}
+                              className="hidden"
+                              disabled={uploadingNewResume}
+                            />
+                          </label>
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground">
+                    No resume in your profile. Upload one for this application (optional).
+                  </p>
+                  {applicationResumeUrl ? (
+                    <div className="flex items-center justify-between p-2 bg-muted/50 rounded">
+                      <span className="text-sm truncate">Resume uploaded</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => window.open(applicationResumeUrl, '_blank')}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button variant="outline" size="sm" asChild disabled={uploadingNewResume}>
+                      <label className="cursor-pointer">
+                        {uploadingNewResume ? (
+                          <>
+                            <Clock className="h-4 w-4 mr-2 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <FileText className="h-4 w-4 mr-2" />
+                            Upload Resume
+                          </>
+                        )}
+                        <input
+                          type="file"
+                          accept=".pdf,.doc,.docx"
+                          onChange={handleUploadApplicationResume}
+                          className="hidden"
+                          disabled={uploadingNewResume}
+                        />
+                      </label>
+                    </Button>
+                  )}
+                  <p className="text-xs text-muted-foreground">
+                    Tip: Add a resume to your profile to auto-fill this field for future applications.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Cover Letter */}
+            <div className="space-y-2">
+              <Label htmlFor="cover-letter" className="text-sm font-medium">
+                Cover Letter (Optional)
+              </Label>
+              <Textarea
+                id="cover-letter"
+                placeholder="Write a brief cover letter explaining why you're a great fit for this role..."
+                value={applicationCoverLetter}
+                onChange={(e) => setApplicationCoverLetter(e.target.value)}
+                rows={4}
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowApplyDialog(false)}>
+              Cancel
+            </Button>
+            <Button 
+              onClick={submitApplication} 
+              disabled={submittingApplication}
+            >
+              {submittingApplication ? (
+                <>
+                  <Clock className="h-4 w-4 mr-2 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                'Submit Application'
+              )}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

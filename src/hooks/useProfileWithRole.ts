@@ -13,6 +13,7 @@ interface ProfileWithRole {
   website: string | null;
   avatar_url: string | null;
   linkedin_url: string | null;
+  resume_url: string | null;
   created_at: string;
   updated_at: string;
   role: AppRole | null;
