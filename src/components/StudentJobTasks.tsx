@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle2, Clock, Briefcase, Building2 } from 'lucide-react';
+import { CheckCircle2, Clock, Briefcase, Building2, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface StudentTask {
@@ -43,11 +43,53 @@ export default function StudentJobTasks() {
   const [tasks, setTasks] = useState<StudentTask[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedTask, setExpandedTask] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
     if (user) {
       fetchTasks();
     }
+  }, [user]);
+
+  // Real-time subscription for task updates from job poster
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('student-task-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_tasks'
+        },
+        (payload) => {
+          console.log('Job task update from poster:', payload);
+          setLastUpdate(new Date());
+          fetchTasks(); // Refresh when poster adds/updates/deletes tasks
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'student_job_tasks'
+        },
+        (payload) => {
+          console.log('Student task update:', payload);
+          // Check if this update is for the current user
+          if (payload.new && (payload.new as any).student_id === user.id) {
+            fetchTasks();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const fetchTasks = async () => {

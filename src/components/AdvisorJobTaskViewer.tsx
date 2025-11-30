@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, Clock, ListTodo } from 'lucide-react';
+import { CheckCircle2, Clock, ListTodo, RefreshCw } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 
@@ -32,11 +32,53 @@ export default function AdvisorJobTaskViewer() {
   const { toast } = useToast();
   const [tasks, setTasks] = useState<JobTask[]>([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
     if (user) {
       fetchTasks();
     }
+  }, [user]);
+
+  // Real-time subscription for task updates from job poster
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('advisor-task-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_tasks'
+        },
+        (payload) => {
+          console.log('Job task update from poster:', payload);
+          setLastUpdate(new Date());
+          fetchTasks(); // Refresh when poster adds/updates/deletes tasks
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'advisor_job_tasks'
+        },
+        (payload) => {
+          console.log('Advisor task update:', payload);
+          // Check if this update is for the current user
+          if (payload.new && (payload.new as any).advisor_id === user.id) {
+            fetchTasks();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   const fetchTasks = async () => {
