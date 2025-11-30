@@ -139,12 +139,20 @@ export default function StartupMentoringSessions({ type, onSessionUpdated, onJoi
     const roleMap = new Map(roles?.map(r => [r.user_id, r.role]) || []);
     const ratedSessionIds = new Set(feedbackData.map(f => f.session_id));
 
-    const enrichedSessions = sessionsData.map((session) => ({
-      ...session,
-      mentor: profileMap.get(session.mentor_id) || { full_name: 'Unknown', avatar_url: null },
-      role: roleMap.get(session.mentor_id) || 'mentor',
-      hasRated: ratedSessionIds.has(session.id),
-    }));
+    const enrichedSessions = sessionsData
+      .map((session) => {
+        const profile = profileMap.get(session.mentor_id);
+        // Skip if no valid profile exists
+        if (!profile || !profile.full_name) return null;
+        
+        return {
+          ...session,
+          mentor: profile,
+          role: roleMap.get(session.mentor_id) || 'mentor',
+          hasRated: ratedSessionIds.has(session.id),
+        };
+      })
+      .filter(Boolean); // Remove null entries
 
     // Filter out already rated sessions for past view
     const filteredSessions = type === 'past' 
