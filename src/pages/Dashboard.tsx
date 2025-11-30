@@ -595,44 +595,44 @@ const Dashboard = () => {
           {/* Meetings Tab */}
           {activeTab === "meetings" && (
             <TabsContent value="meetings" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                 {/* Left Column: Investor Pitches */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-                      <Presentation className="h-6 w-6 text-white" />
+                <div className="space-y-5">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                      <Presentation className="h-5 w-5 text-primary" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Investor Pitches</h2>
-                      <p className="text-sm text-muted-foreground">Manage meetings with investors</p>
+                      <h2 className="text-lg font-semibold text-foreground">Investor Pitches</h2>
+                      <p className="text-xs text-muted-foreground">Manage meetings with investors</p>
                     </div>
                   </div>
 
                   {/* 1. Incoming Pitch Requests (from investors TO startup) */}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                           <Bell className="h-4 w-4 text-amber-500" />
                         </div>
                         <div>
-                          <h3 className="font-semibold">Incoming Requests</h3>
+                          <h3 className="text-sm font-medium">Incoming Requests</h3>
                           <p className="text-xs text-muted-foreground">From investors</p>
                         </div>
                       </div>
                       {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && (
-                        <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-sm">
+                        <Badge className="bg-amber-500 text-white border-0 text-xs">
                           {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length} new
                         </Badge>
                       )}
                     </div>
                     {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length === 0 ? (
-                      <div className="relative overflow-hidden rounded-2xl border border-dashed border-muted-foreground/20 bg-gradient-to-br from-muted/30 to-muted/10 p-8">
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[140px] flex items-center justify-center">
                         <div className="text-center">
                           <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
                             <Briefcase className="h-5 w-5 text-muted-foreground/50" />
                           </div>
-                          <p className="text-muted-foreground text-sm">No incoming requests</p>
+                          <p className="text-sm font-medium text-muted-foreground">No incoming requests</p>
                         </div>
                       </div>
                     ) : (
@@ -652,14 +652,14 @@ const Dashboard = () => {
                   </div>
 
                   {/* 2. Sent Pitch Requests (from startup TO investors) */}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center">
-                          <Presentation className="h-4 w-4 text-blue-500" />
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                          <Presentation className="h-4 w-4 text-primary" />
                         </div>
                         <div>
-                          <h3 className="font-semibold">Sent Requests</h3>
+                          <h3 className="text-sm font-medium">Sent Requests</h3>
                           <p className="text-xs text-muted-foreground">Awaiting response</p>
                         </div>
                       </div>
@@ -670,12 +670,12 @@ const Dashboard = () => {
                       )}
                     </div>
                     {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length === 0 ? (
-                      <div className="relative overflow-hidden rounded-2xl border border-dashed border-muted-foreground/20 bg-gradient-to-br from-muted/30 to-muted/10 p-8">
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[140px] flex items-center justify-center">
                         <div className="text-center">
                           <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
                             <Clock className="h-5 w-5 text-muted-foreground/50" />
                           </div>
-                          <p className="text-muted-foreground text-sm">No pending requests</p>
+                          <p className="text-sm font-medium text-muted-foreground">No pending requests</p>
                         </div>
                       </div>
                     ) : (
@@ -693,23 +693,23 @@ const Dashboard = () => {
                   </div>
 
                   {/* 3. Upcoming Pitches (scheduled, future date) */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                         <CalendarIcon className="h-4 w-4 text-emerald-500" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Upcoming Pitches</h3>
+                        <h3 className="text-sm font-medium">Upcoming Pitches</h3>
                         <p className="text-xs text-muted-foreground">Confirmed meetings</p>
                       </div>
                     </div>
                     {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length === 0 ? (
-                      <div className="relative overflow-hidden rounded-2xl border border-dashed border-muted-foreground/20 bg-gradient-to-br from-muted/30 to-muted/10 p-8">
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[140px] flex items-center justify-center">
                         <div className="text-center">
                           <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
                             <CalendarIcon className="h-5 w-5 text-muted-foreground/50" />
                           </div>
-                          <p className="text-muted-foreground text-sm">No upcoming pitches</p>
+                          <p className="text-sm font-medium text-muted-foreground">No upcoming pitches</p>
                         </div>
                       </div>
                     ) : (
@@ -731,13 +731,13 @@ const Dashboard = () => {
                   </div>
 
                   {/* 4. Past Pitches (scheduled/completed, past date) */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-xl bg-muted/50 flex items-center justify-center">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
                         <Clock className="h-4 w-4 text-muted-foreground" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Past Pitches</h3>
+                        <h3 className="text-sm font-medium">Past Pitches</h3>
                         <p className="text-xs text-muted-foreground">Meeting history</p>
                       </div>
                     </div>
@@ -745,12 +745,12 @@ const Dashboard = () => {
                       (m.status === 'scheduled' || m.status === 'completed') && 
                       new Date(m.scheduled_date) < new Date()
                     ).length === 0 ? (
-                      <div className="relative overflow-hidden rounded-2xl border border-dashed border-muted-foreground/20 bg-gradient-to-br from-muted/30 to-muted/10 p-8">
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[140px] flex items-center justify-center">
                         <div className="text-center">
                           <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
                             <Clock className="h-5 w-5 text-muted-foreground/50" />
                           </div>
-                          <p className="text-muted-foreground text-sm">No past meetings</p>
+                          <p className="text-sm font-medium text-muted-foreground">No past meetings</p>
                         </div>
                       </div>
                     ) : (
@@ -776,25 +776,25 @@ const Dashboard = () => {
                 </div>
 
                 {/* Right Column: Mentorship */}
-                <div className="space-y-6">
-                  <div className="flex items-center gap-4">
-                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
-                      <GraduationCap className="h-6 w-6 text-white" />
+                <div className="space-y-5">
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                      <GraduationCap className="h-5 w-5 text-emerald-500" />
                     </div>
                     <div>
-                      <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Mentorship</h2>
-                      <p className="text-sm text-muted-foreground">Your mentor & advisor network</p>
+                      <h2 className="text-lg font-semibold text-foreground">Mentorship</h2>
+                      <p className="text-xs text-muted-foreground">Your mentor & advisor network</p>
                     </div>
                   </div>
 
                   {/* Mentor Offers Section */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                         <Sparkles className="h-4 w-4 text-amber-500" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Pending Offers</h3>
+                        <h3 className="text-sm font-medium">Pending Offers</h3>
                         <p className="text-xs text-muted-foreground">From mentors & advisors</p>
                       </div>
                     </div>
@@ -802,13 +802,13 @@ const Dashboard = () => {
                   </div>
 
                   {/* Active Mentors Section */}
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center">
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                         <Users className="h-4 w-4 text-emerald-500" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Active Mentors</h3>
+                        <h3 className="text-sm font-medium">Active Mentors</h3>
                         <p className="text-xs text-muted-foreground">Your current mentors</p>
                       </div>
                     </div>
