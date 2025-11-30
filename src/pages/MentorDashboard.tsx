@@ -30,6 +30,7 @@ import NetworkBrowser from "@/components/NetworkBrowser";
 import MatchingSystem from "@/components/MatchingSystem";
 import MentorOffersBoard from "@/components/MentorOffersBoard";
 import MenteeSessions from "@/components/MenteeSessions";
+import MentorSessionHistory from "@/components/MentorSessionHistory";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { 
   Users, 
@@ -241,6 +242,9 @@ const MentorDashboard = () => {
             <MentorshipRequests />
             <MentorOffersBoard />
             
+            {/* Session History with Ratings */}
+            <MentorSessionHistory showStats={false} />
+            
             {/* Past Mentees Section */}
             {pastMentees && pastMentees.length > 0 && (
               <Card>
@@ -382,48 +386,9 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
-            {/* Mentor Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6">
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Active Mentees</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{activeMentees.length}</div>
-                  <p className="text-xs text-muted-foreground">Currently mentoring</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Sessions Today</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">{todaySessions.length}</div>
-                  <p className="text-xs text-muted-foreground">{todaySessions.reduce((sum, s) => sum + s.duration_minutes, 0)} min scheduled</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Success Stories</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">-</div>
-                  <p className="text-xs text-muted-foreground">Coming soon</p>
-                </CardContent>
-              </Card>
-              
-              <Card>
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-sm font-medium text-muted-foreground">Impact Score</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-ocean-primary">-</div>
-                  <p className="text-xs text-muted-foreground">Coming soon</p>
-                </CardContent>
-              </Card>
-            </div>
+            {/* Mentor Rating Stats */}
+            <MentorSessionHistory showStats={true} />
+            
             <AnalyticsDashboard />
           </TabsContent>
 
