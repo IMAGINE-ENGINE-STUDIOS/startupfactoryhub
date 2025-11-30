@@ -130,20 +130,26 @@ export default function StartupActiveMentors({ onSessionScheduled, onJoin }: Sta
       roleMap.set(r.user_id, [...existingRoles, r.role]);
     });
 
-    const mentorsWithSessions = relationships.map((rel) => {
-      const nextSession = sessions?.find(s => s.mentor_id === rel.mentor_id);
-      const userRoles = roleMap.get(rel.mentor_id) || [];
-      // Prefer 'advisor' role over 'mentor'
-      const displayRole = userRoles.includes('advisor') ? 'advisor' : 
-                         userRoles.includes('mentor') ? 'mentor' : 
-                         userRoles[0] || 'mentor';
-      return {
-        ...rel,
-        mentor: profileMap.get(rel.mentor_id) || { full_name: 'Unknown', avatar_url: null, bio: null },
-        role: displayRole,
-        nextSession: nextSession || null
-      };
-    });
+    const mentorsWithSessions = relationships
+      .map((rel) => {
+        const profile = profileMap.get(rel.mentor_id);
+        // Skip if no valid profile exists
+        if (!profile || !profile.full_name) return null;
+        
+        const nextSession = sessions?.find(s => s.mentor_id === rel.mentor_id);
+        const userRoles = roleMap.get(rel.mentor_id) || [];
+        // Prefer 'advisor' role over 'mentor'
+        const displayRole = userRoles.includes('advisor') ? 'advisor' : 
+                           userRoles.includes('mentor') ? 'mentor' : 
+                           userRoles[0] || 'mentor';
+        return {
+          ...rel,
+          mentor: profile,
+          role: displayRole,
+          nextSession: nextSession || null
+        };
+      })
+      .filter(Boolean); // Remove null entries
 
     setMentors(mentorsWithSessions as ActiveMentor[]);
   };

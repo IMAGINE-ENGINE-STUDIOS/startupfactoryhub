@@ -105,9 +105,13 @@ export default function StartupMentorshipOffers({ onOfferHandled }: StartupMento
       roleMap.set(r.user_id, [...existingRoles, r.role]);
     });
 
-    // Filter to only show offers from users who have mentor or advisor role
+    // Filter to only show offers from users who have mentor or advisor role AND valid profile
     const enrichedOffers = relationships
       .map(rel => {
+        const profile = profileMap.get(rel.mentor_id);
+        // Skip if no valid profile exists
+        if (!profile || !profile.full_name) return null;
+        
         const userRoles = roleMap.get(rel.mentor_id) || [];
         // Prefer 'advisor' role over 'mentor', then use first available
         const displayRole = userRoles.includes('advisor') ? 'advisor' : 
@@ -115,12 +119,12 @@ export default function StartupMentorshipOffers({ onOfferHandled }: StartupMento
                            userRoles[0] || 'mentor';
         return {
           ...rel,
-          mentor: profileMap.get(rel.mentor_id) || { full_name: 'Unknown', avatar_url: null, bio: null },
+          mentor: profile,
           role: displayRole,
           allRoles: userRoles
         };
       })
-      .filter(offer => offer.allRoles.includes('mentor') || offer.allRoles.includes('advisor'));
+      .filter(offer => offer !== null && (offer.allRoles.includes('mentor') || offer.allRoles.includes('advisor')));
 
     setOffers(enrichedOffers as MentorOffer[]);
   };
