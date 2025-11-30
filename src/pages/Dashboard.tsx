@@ -29,7 +29,7 @@ import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
 import PitchMeetingCard from '@/components/PitchMeetingCard';
 import StartupMentorshipOffers from '@/components/StartupMentorshipOffers';
 import StartupActiveMentors from '@/components/StartupActiveMentors';
-import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Video, Bell, Check, X, ExternalLink } from "lucide-react";
+import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Video, Bell, Check, X, ExternalLink, Sparkles } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
@@ -595,44 +595,48 @@ const Dashboard = () => {
           {/* Meetings Tab */}
           {activeTab === "meetings" && (
             <TabsContent value="meetings" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 {/* Left Column: Investor Pitches */}
                 <div className="space-y-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20">
-                      <Presentation className="h-5 w-5 text-blue-500" />
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
+                      <Presentation className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h2 className="font-semibold text-lg">Investor Pitches</h2>
-                      <p className="text-sm text-muted-foreground">Manage pitch meetings with investors</p>
+                      <h2 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">Investor Pitches</h2>
+                      <p className="text-sm text-muted-foreground">Manage meetings with investors</p>
                     </div>
                   </div>
 
                   {/* 1. Incoming Pitch Requests (from investors TO startup) */}
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex-shrink-0">
-                          <Bell className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
+                          <Bell className="h-4 w-4 text-amber-500" />
                         </div>
-                        <div className="min-w-0">
-                          <h3 className="font-semibold text-base sm:text-lg">Incoming Requests</h3>
-                          <p className="text-xs sm:text-sm text-muted-foreground truncate">Investor pitch meeting requests</p>
+                        <div>
+                          <h3 className="font-semibold">Incoming Requests</h3>
+                          <p className="text-xs text-muted-foreground">From investors</p>
                         </div>
                       </div>
                       {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && (
-                        <Badge className="bg-amber-500 text-white w-fit text-xs">
-                          {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length} pending
+                        <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-sm">
+                          {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length} new
                         </Badge>
                       )}
                     </div>
                     {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length === 0 ? (
-                      <div className="text-center py-8 rounded-xl border border-dashed border-muted-foreground/20">
-                        <Briefcase className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30" />
-                        <p className="text-muted-foreground text-sm">No incoming pitch requests</p>
+                      <div className="relative overflow-hidden rounded-2xl border border-dashed border-muted-foreground/20 bg-gradient-to-br from-muted/30 to-muted/10 p-8">
+                        <div className="text-center">
+                          <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
+                            <Briefcase className="h-5 w-5 text-muted-foreground/50" />
+                          </div>
+                          <p className="text-muted-foreground text-sm">No incoming requests</p>
+                        </div>
                       </div>
                     ) : (
-                      <div className="grid gap-4">
+                      <div className="grid gap-3">
                         {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).map((meeting) => (
                           <PitchMeetingCard
                             key={meeting.id}
@@ -648,30 +652,34 @@ const Dashboard = () => {
                   </div>
 
                   {/* 2. Sent Pitch Requests (from startup TO investors) */}
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                      <div className="flex items-center gap-2 sm:gap-3">
-                        <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex-shrink-0">
-                          <Presentation className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/20 flex items-center justify-center">
+                          <Presentation className="h-4 w-4 text-blue-500" />
                         </div>
-                        <div className="min-w-0">
-                          <h3 className="font-semibold text-base sm:text-lg">Sent Requests</h3>
-                          <p className="text-xs sm:text-sm text-muted-foreground truncate">Your pitch requests to investors</p>
+                        <div>
+                          <h3 className="font-semibold">Sent Requests</h3>
+                          <p className="text-xs text-muted-foreground">Awaiting response</p>
                         </div>
                       </div>
                       {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length > 0 && (
-                        <Badge variant="secondary" className="w-fit text-xs">
+                        <Badge variant="secondary" className="text-xs">
                           {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length} pending
                         </Badge>
                       )}
                     </div>
                     {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length === 0 ? (
-                      <div className="text-center py-8 rounded-xl border border-dashed border-muted-foreground/20">
-                        <Clock className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30" />
-                        <p className="text-muted-foreground text-sm">No pending sent requests</p>
+                      <div className="relative overflow-hidden rounded-2xl border border-dashed border-muted-foreground/20 bg-gradient-to-br from-muted/30 to-muted/10 p-8">
+                        <div className="text-center">
+                          <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
+                            <Clock className="h-5 w-5 text-muted-foreground/50" />
+                          </div>
+                          <p className="text-muted-foreground text-sm">No pending requests</p>
+                        </div>
                       </div>
                     ) : (
-                      <div className="grid gap-4">
+                      <div className="grid gap-3">
                         {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).map((meeting) => (
                           <PitchMeetingCard
                             key={meeting.id}
@@ -685,23 +693,27 @@ const Dashboard = () => {
                   </div>
 
                   {/* 3. Upcoming Pitches (scheduled, future date) */}
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex-shrink-0">
-                        <CalendarIcon className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center">
+                        <CalendarIcon className="h-4 w-4 text-emerald-500" />
                       </div>
-                      <div className="min-w-0">
-                        <h3 className="font-semibold text-base sm:text-lg">Upcoming Pitches</h3>
-                        <p className="text-xs sm:text-sm text-muted-foreground truncate">Confirmed pitch meetings</p>
+                      <div>
+                        <h3 className="font-semibold">Upcoming Pitches</h3>
+                        <p className="text-xs text-muted-foreground">Confirmed meetings</p>
                       </div>
                     </div>
                     {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length === 0 ? (
-                      <div className="text-center py-8 rounded-xl border border-dashed border-muted-foreground/20">
-                        <CalendarIcon className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30" />
-                        <p className="text-muted-foreground text-sm">No upcoming pitch meetings</p>
+                      <div className="relative overflow-hidden rounded-2xl border border-dashed border-muted-foreground/20 bg-gradient-to-br from-muted/30 to-muted/10 p-8">
+                        <div className="text-center">
+                          <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
+                            <CalendarIcon className="h-5 w-5 text-muted-foreground/50" />
+                          </div>
+                          <p className="text-muted-foreground text-sm">No upcoming pitches</p>
+                        </div>
                       </div>
                     ) : (
-                      <div className="grid gap-4">
+                      <div className="grid gap-3">
                         {pitchMeetings
                           .filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date())
                           .sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime())
@@ -719,26 +731,30 @@ const Dashboard = () => {
                   </div>
 
                   {/* 4. Past Pitches (scheduled/completed, past date) */}
-                  <div className="space-y-3 sm:space-y-4">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      <div className="p-1.5 sm:p-2 rounded-lg bg-muted/50 flex-shrink-0">
-                        <Clock className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-xl bg-muted/50 flex items-center justify-center">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
                       </div>
-                      <div className="min-w-0">
-                        <h3 className="font-semibold text-base sm:text-lg">Past Pitches</h3>
-                        <p className="text-xs sm:text-sm text-muted-foreground truncate">Completed meetings history</p>
+                      <div>
+                        <h3 className="font-semibold">Past Pitches</h3>
+                        <p className="text-xs text-muted-foreground">Meeting history</p>
                       </div>
                     </div>
                     {pitchMeetings.filter(m => 
                       (m.status === 'scheduled' || m.status === 'completed') && 
                       new Date(m.scheduled_date) < new Date()
                     ).length === 0 ? (
-                      <div className="text-center py-8 rounded-xl border border-dashed border-muted-foreground/20">
-                        <Clock className="h-10 w-10 mx-auto mb-3 text-muted-foreground/30" />
-                        <p className="text-muted-foreground text-sm">No past pitch meetings</p>
+                      <div className="relative overflow-hidden rounded-2xl border border-dashed border-muted-foreground/20 bg-gradient-to-br from-muted/30 to-muted/10 p-8">
+                        <div className="text-center">
+                          <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
+                            <Clock className="h-5 w-5 text-muted-foreground/50" />
+                          </div>
+                          <p className="text-muted-foreground text-sm">No past meetings</p>
+                        </div>
                       </div>
                     ) : (
-                      <div className="grid gap-4">
+                      <div className="grid gap-3">
                         {pitchMeetings
                           .filter(m => 
                             (m.status === 'scheduled' || m.status === 'completed') && 
@@ -761,30 +777,40 @@ const Dashboard = () => {
 
                 {/* Right Column: Mentorship */}
                 <div className="space-y-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500/20 to-teal-500/20">
-                      <GraduationCap className="h-5 w-5 text-emerald-500" />
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+                      <GraduationCap className="h-6 w-6 text-white" />
                     </div>
                     <div>
-                      <h2 className="font-semibold text-lg">Mentorship</h2>
-                      <p className="text-sm text-muted-foreground">Manage your mentor relationships</p>
+                      <h2 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Mentorship</h2>
+                      <p className="text-sm text-muted-foreground">Your mentor & advisor network</p>
                     </div>
                   </div>
 
                   {/* Mentor Offers Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Bell className="h-4 w-4 text-amber-500" />
-                      <h3 className="font-semibold text-sm">Mentor Offers</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center">
+                        <Sparkles className="h-4 w-4 text-amber-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Pending Offers</h3>
+                        <p className="text-xs text-muted-foreground">From mentors & advisors</p>
+                      </div>
                     </div>
                     <StartupMentorshipOffers onOfferHandled={fetchPitchMeetings} />
                   </div>
 
                   {/* Active Mentors Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-emerald-500" />
-                      <h3 className="font-semibold text-sm">Active Mentors</h3>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-emerald-500/20 to-teal-500/20 flex items-center justify-center">
+                        <Users className="h-4 w-4 text-emerald-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold">Active Mentors</h3>
+                        <p className="text-xs text-muted-foreground">Your current mentors</p>
+                      </div>
                     </div>
                     <StartupActiveMentors />
                   </div>
