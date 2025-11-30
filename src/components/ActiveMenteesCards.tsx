@@ -163,15 +163,14 @@ export default function ActiveMenteesCards({ mentees, onScheduleSession, onMessa
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-primary" />
-          Active Startups
-          <Badge variant="secondary">{mentees.length}</Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className="space-y-4">
+      <div className="flex items-center gap-2">
+        <Building2 className="h-5 w-5 text-primary" />
+        <h3 className="font-semibold text-lg">Active Startups</h3>
+        <Badge variant="secondary">{mentees.length}</Badge>
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {mentees.map((mentee) => {
           const isExpanded = expandedMentee === mentee.mentee_id;
           const history = sessionHistory[mentee.mentee_id] || [];
@@ -187,68 +186,80 @@ export default function ActiveMenteesCards({ mentees, onScheduleSession, onMessa
               onOpenChange={() => handleToggleExpand(mentee.mentee_id)}
             >
               <div className={cn(
-                "rounded-xl border transition-all duration-300 overflow-hidden",
+                "rounded-xl border transition-all duration-300 overflow-hidden aspect-square flex flex-col",
                 isExpanded 
-                  ? "border-primary/30 shadow-lg" 
+                  ? "border-primary/30 shadow-lg aspect-auto col-span-1 md:col-span-2 lg:col-span-3" 
                   : "border-border hover:border-primary/20 hover:shadow-md"
               )}>
                 {/* Startup Profile Card */}
                 <CollapsibleTrigger asChild>
-                  <div className="cursor-pointer">
+                  <div className={cn("cursor-pointer flex flex-col", !isExpanded && "h-full")}>
                     {/* Company Header with Logo */}
-                    <div className="bg-gradient-to-br from-primary/5 via-transparent to-transparent p-4">
-                      <div className="flex items-start gap-4">
-                        {/* Company Logo */}
-                        <div className="relative flex-shrink-0">
-                          <div className="h-16 w-16 rounded-xl bg-background border-2 border-border overflow-hidden flex items-center justify-center">
-                            {company?.logo_url ? (
-                              <img 
-                                src={company.logo_url} 
-                                alt={company.name} 
-                                className="h-full w-full object-cover"
-                              />
-                            ) : (
-                              <Building2 className="h-8 w-8 text-muted-foreground/50" />
-                            )}
+                    <div className={cn(
+                      "bg-gradient-to-br from-primary/5 via-transparent to-transparent p-4 flex-1 flex flex-col",
+                      !isExpanded && "justify-between"
+                    )}>
+                      {/* Top Section */}
+                      <div>
+                        <div className="flex items-start gap-3">
+                          {/* Company Logo */}
+                          <div className="relative flex-shrink-0">
+                            <div className={cn(
+                              "rounded-xl bg-background border-2 border-border overflow-hidden flex items-center justify-center",
+                              isExpanded ? "h-16 w-16" : "h-14 w-14"
+                            )}>
+                              {company?.logo_url ? (
+                                <img 
+                                  src={company.logo_url} 
+                                  alt={company.name} 
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <Building2 className={cn("text-muted-foreground/50", isExpanded ? "h-8 w-8" : "h-6 w-6")} />
+                              )}
+                            </div>
+                            <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-background">
+                              <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                            </span>
                           </div>
-                          <span className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-background">
-                            <span className="h-2 w-2 rounded-full bg-white" />
-                          </span>
-                        </div>
 
-                        {/* Company Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-2">
-                            <div>
-                              <h4 className="font-bold text-lg text-foreground">
+                          {/* Company Info */}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-1">
+                              <h4 className={cn("font-bold text-foreground truncate", isExpanded ? "text-lg" : "text-base")}>
                                 {company?.name || 'Startup'}
                               </h4>
-                              <div className="flex flex-wrap items-center gap-2 mt-1">
-                                {company?.stage && (
-                                  <Badge variant="outline" className={cn("text-xs font-medium", getStageColor(company.stage))}>
-                                    {company.stage}
-                                  </Badge>
-                                )}
-                                {company?.industry && (
-                                  <Badge variant="outline" className="text-xs">
-                                    {company.industry}
-                                  </Badge>
-                                )}
-                              </div>
+                              <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0 -mr-1 -mt-1">
+                                {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                              </Button>
                             </div>
-                            <Button variant="ghost" size="icon" className="h-8 w-8 flex-shrink-0">
-                              {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                            </Button>
+                            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                              {company?.stage && (
+                                <Badge variant="outline" className={cn("text-[10px] font-medium px-1.5 py-0", getStageColor(company.stage))}>
+                                  {company.stage}
+                                </Badge>
+                              )}
+                              {company?.industry && (
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                                  {company.industry}
+                                </Badge>
+                              )}
+                            </div>
                           </div>
+                        </div>
 
-                          {/* Company Description */}
-                          {company?.description && (
-                            <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                              {company.description}
-                            </p>
-                          )}
+                        {/* Company Description - only show if expanded or in compact form */}
+                        {company?.description && (
+                          <p className={cn(
+                            "text-xs text-muted-foreground mt-2",
+                            isExpanded ? "line-clamp-2" : "line-clamp-2"
+                          )}>
+                            {company.description}
+                          </p>
+                        )}
 
-                          {/* Company Meta */}
+                        {/* Company Meta - compact on square view */}
+                        {isExpanded && (
                           <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-muted-foreground">
                             {company?.location && (
                               <div className="flex items-center gap-1">
@@ -277,36 +288,34 @@ export default function ActiveMenteesCards({ mentees, onScheduleSession, onMessa
                               </div>
                             )}
                           </div>
-                        </div>
+                        )}
                       </div>
 
-                      {/* Founder Info & Stats */}
-                      <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/50">
+                      {/* Bottom Section - Founder Info & Stats */}
+                      <div className={cn(
+                        "flex items-center justify-between pt-2 border-t border-border/50",
+                        isExpanded ? "mt-4" : "mt-auto"
+                      )}>
                         <div className="flex items-center gap-2">
-                          <Avatar className="h-8 w-8">
+                          <Avatar className="h-6 w-6">
                             <AvatarImage src={mentee.mentee.avatar_url} />
-                            <AvatarFallback className="text-xs">
+                            <AvatarFallback className="text-[10px]">
                               {mentee.mentee.full_name?.[0] || 'F'}
                             </AvatarFallback>
                           </Avatar>
                           <div>
-                            <p className="text-sm font-medium">{mentee.mentee.full_name}</p>
-                            <p className="text-xs text-muted-foreground">Founder</p>
+                            <p className="text-xs font-medium truncate max-w-[80px]">{mentee.mentee.full_name}</p>
                           </div>
                         </div>
-                        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                          <div className="flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            <span>Since {mentee.start_date ? format(new Date(mentee.start_date), 'MMM yyyy') : 'N/A'}</span>
-                          </div>
+                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                           {completedSessions > 0 && (
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-0.5">
                               <History className="h-3 w-3" />
-                              <span>{completedSessions} sessions</span>
+                              <span>{completedSessions}</span>
                             </div>
                           )}
                           {avgRating && (
-                            <div className="flex items-center gap-1 text-amber-500">
+                            <div className="flex items-center gap-0.5 text-amber-500">
                               <Star className="h-3 w-3 fill-current" />
                               <span>{avgRating}</span>
                             </div>
@@ -316,28 +325,31 @@ export default function ActiveMenteesCards({ mentees, onScheduleSession, onMessa
                     </div>
 
                     {/* Quick Actions */}
-                    <div className="flex items-center gap-2 px-4 py-3 bg-muted/30 border-t border-border/50">
+                    <div className={cn(
+                      "flex items-center gap-2 px-3 py-2 bg-muted/30 border-t border-border/50",
+                      isExpanded ? "px-4 py-3" : ""
+                    )}>
                       <Button 
                         size="sm" 
-                        className="flex-1 h-9"
+                        className={cn("flex-1", isExpanded ? "h-9" : "h-7 text-xs")}
                         onClick={(e) => {
                           e.stopPropagation();
                           onScheduleSession?.(mentee.mentee_id);
                         }}
                       >
-                        <Video className="h-4 w-4 mr-1.5" />
-                        Schedule Session
+                        <Video className={cn("mr-1", isExpanded ? "h-4 w-4" : "h-3 w-3")} />
+                        {isExpanded ? "Schedule Session" : "Schedule"}
                       </Button>
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="flex-1 h-9"
+                        className={cn("flex-1", isExpanded ? "h-9" : "h-7 text-xs")}
                         onClick={(e) => {
                           e.stopPropagation();
                           onMessage?.(mentee.mentee_id);
                         }}
                       >
-                        <MessageSquare className="h-4 w-4 mr-1.5" />
+                        <MessageSquare className={cn("mr-1", isExpanded ? "h-4 w-4" : "h-3 w-3")} />
                         Message
                       </Button>
                     </div>
@@ -428,7 +440,7 @@ export default function ActiveMenteesCards({ mentees, onScheduleSession, onMessa
             </Collapsible>
           );
         })}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
