@@ -1356,8 +1356,8 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
                 </div>
               </DialogHeader>
               
-              <ScrollArea className="flex-1 pr-4">
-                <div className="space-y-6 py-4">
+              <ScrollArea className="flex-1 max-h-[60vh] pr-4">
+                <div className="space-y-6 py-4 pr-2">
                   {/* Quick Info */}
                   <div className="grid grid-cols-2 gap-3">
                     {selectedJobForDetails.location && (
