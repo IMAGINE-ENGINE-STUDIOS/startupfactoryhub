@@ -90,14 +90,10 @@ export default function StudentDashboard() {
         {/* Main Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl whitespace-nowrap">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-7xl whitespace-nowrap">
               <TabsTrigger value="social" className="gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden md:inline">Social</span>
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="gap-2">
-                <UserCircle className="h-4 w-4" />
-                <span className="hidden md:inline">Profile</span>
               </TabsTrigger>
               <TabsTrigger value="network" className="gap-2">
                 <Network className="h-4 w-4" />

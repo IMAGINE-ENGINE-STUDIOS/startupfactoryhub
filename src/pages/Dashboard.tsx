@@ -326,7 +326,7 @@ const Dashboard = () => {
         {/* Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-11 max-w-7xl whitespace-nowrap">
+            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap">
               <TabsTrigger value="social" className="flex-shrink-0 gap-2">
                 <MessageCircle className="h-4 w-4" />
                 <span className="hidden md:inline">Social</span>
@@ -346,10 +346,6 @@ const Dashboard = () => {
               <TabsTrigger value="calendar" className="flex-shrink-0 gap-2">
                 <CalendarIcon className="h-4 w-4" />
                 <span className="hidden md:inline">Calendar</span>
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="flex-shrink-0 gap-2">
-                <UserCircle className="h-4 w-4" />
-                <span className="hidden md:inline">Profile</span>
               </TabsTrigger>
               <TabsTrigger value="jobs" className="flex-shrink-0 gap-2">
                 <Briefcase className="h-4 w-4" />
