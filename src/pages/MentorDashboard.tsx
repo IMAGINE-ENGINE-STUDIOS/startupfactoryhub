@@ -31,6 +31,7 @@ import MatchingSystem from "@/components/MatchingSystem";
 import MentorOffersBoard from "@/components/MentorOffersBoard";
 import MenteeSessions from "@/components/MenteeSessions";
 import MentorSessionHistory from "@/components/MentorSessionHistory";
+import ActiveMenteesCards from "@/components/ActiveMenteesCards";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { 
   Users, 
@@ -240,6 +241,14 @@ const MentorDashboard = () => {
           <TabsContent value="mentees" className="space-y-6">
             <MenteeSessions onJoinMeeting={(link, sessionData) => setActiveVideoSession(sessionData)} />
             <MentorshipRequests />
+            
+            {/* Active Mentees with Expandable History */}
+            <ActiveMenteesCards 
+              mentees={activeMentees}
+              onScheduleSession={() => setCreateSessionDialogOpen(true)}
+              onMessage={(menteeId) => navigate('/messages')}
+            />
+            
             <MentorOffersBoard />
             
             {/* Session History with Ratings */}
