@@ -29,7 +29,8 @@ import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
 import PitchMeetingCard from '@/components/PitchMeetingCard';
 import StartupMentorshipOffers from '@/components/StartupMentorshipOffers';
 import StartupActiveMentors from '@/components/StartupActiveMentors';
-import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Video, Bell, Check, X, ExternalLink, Sparkles } from "lucide-react";
+import StartupMentoringSessions from '@/components/StartupMentoringSessions';
+import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Video, Bell, Check, X, ExternalLink, Sparkles, History, Star } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
@@ -595,7 +596,7 @@ const Dashboard = () => {
           {/* Meetings Tab */}
           {activeTab === "meetings" && (
             <TabsContent value="meetings" className="space-y-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
                 {/* Left Column: Investor Pitches */}
                 <div className="space-y-5">
                   <div className="flex items-center gap-3">
@@ -787,7 +788,7 @@ const Dashboard = () => {
                     </div>
                   </div>
 
-                  {/* Mentor Offers Section */}
+                  {/* 1. Pending Offers Section */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2.5">
                       <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
@@ -801,7 +802,7 @@ const Dashboard = () => {
                     <StartupMentorshipOffers onOfferHandled={fetchPitchMeetings} />
                   </div>
 
-                  {/* Active Mentors Section */}
+                  {/* 2. Active Mentors Section */}
                   <div className="space-y-3">
                     <div className="flex items-center gap-2.5">
                       <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -813,6 +814,34 @@ const Dashboard = () => {
                       </div>
                     </div>
                     <StartupActiveMentors />
+                  </div>
+
+                  {/* 3. Upcoming Sessions Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                        <CalendarIcon className="h-4 w-4 text-emerald-500" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium">Upcoming Sessions</h3>
+                        <p className="text-xs text-muted-foreground">Scheduled mentoring</p>
+                      </div>
+                    </div>
+                    <StartupMentoringSessions type="upcoming" />
+                  </div>
+
+                  {/* 4. Past Sessions Section */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
+                        <History className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium">Past Sessions</h3>
+                        <p className="text-xs text-muted-foreground">Rate your experience</p>
+                      </div>
+                    </div>
+                    <StartupMentoringSessions type="past" />
                   </div>
                 </div>
               </div>
