@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useRealtime } from '@/hooks/useRealtime';
 import { Calendar as CalendarIcon, Users, MessageSquare, TrendingUp, Star, Clock, Award, Plus, MapPin, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Settings, CheckCircle, XCircle, ExternalLink, Video, User, BookOpen } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
@@ -32,6 +33,7 @@ import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { useMentorDashboard } from '@/hooks/useMentorDashboard';
 import AdvisorProfileView from '@/components/AdvisorProfileView';
 import MenteeSessions from '@/components/MenteeSessions';
+import MentorSessionHistory from '@/components/MentorSessionHistory';
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
@@ -117,11 +119,6 @@ export default function AdvisorDashboard() {
   const fetchMentorStats = async () => {
     if (!user) return;
     try {
-      // Get mentor profile
-      const {
-        data: mentorProfile
-      } = await supabase.from('mentor_profiles').select('*').eq('user_id', user.id).maybeSingle();
-
       // Get active mentorships count
       const {
         count: activeMenteesCount
@@ -148,17 +145,53 @@ export default function AdvisorDashboard() {
         count: 'exact',
         head: true
       }).eq('mentor_id', user.id).eq('status', 'completed').gte('scheduled_at', startOfMonth.toISOString());
+
+      // Get total sessions count
+      const {
+        count: totalSessionsCount
+      } = await supabase.from('mentoring_sessions').select('*', {
+        count: 'exact',
+        head: true
+      }).eq('mentor_id', user.id).in('status', ['completed', 'scheduled']);
+
+      // Calculate average rating from session_feedback
+      const { data: sessionIds } = await supabase
+        .from('mentoring_sessions')
+        .select('id')
+        .eq('mentor_id', user.id);
+
+      let averageRating = 0;
+      if (sessionIds && sessionIds.length > 0) {
+        const { data: feedback } = await supabase
+          .from('session_feedback')
+          .select('rating')
+          .in('session_id', sessionIds.map(s => s.id));
+
+        if (feedback && feedback.length > 0) {
+          const totalRating = feedback.reduce((sum, f) => sum + (f.rating || 0), 0);
+          averageRating = totalRating / feedback.length;
+        }
+      }
+
       setMentorStats({
         activeMentees: activeMenteesCount || 0,
-        totalSessions: mentorProfile?.total_sessions || 0,
+        totalSessions: totalSessionsCount || 0,
         sessionsThisMonth: sessionsThisMonth || 0,
         pendingRequests: pendingCount || 0,
-        averageRating: mentorProfile?.average_rating || 0
+        averageRating: averageRating
       });
     } catch (error) {
       console.error('Error fetching mentor stats:', error);
     }
   };
+
+  // Real-time subscription for rating updates
+  useRealtime({
+    table: 'session_feedback',
+    onInsert: fetchMentorStats,
+    onUpdate: fetchMentorStats,
+  });
+
   const fetchMentorProfile = async () => {
     if (!user) return;
     const {
@@ -562,6 +595,9 @@ export default function AdvisorDashboard() {
               </CardContent>
             </Card>
 
+            {/* Session History with Ratings */}
+            <MentorSessionHistory showStats={false} />
+
             {/* Past Mentees Section */}
             {pastMentees && pastMentees.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
@@ -710,6 +746,10 @@ export default function AdvisorDashboard() {
                   </CardContent>
                 </Card>)}
             </div>
+            
+            {/* Session History with Ratings */}
+            <MentorSessionHistory showStats={false} />
+            
             <AnalyticsDashboard />
           </TabsContent>
 
