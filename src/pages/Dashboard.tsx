@@ -31,7 +31,7 @@ import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCi
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import GuestPrompt from '@/components/GuestPrompt';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
@@ -53,7 +53,17 @@ const Dashboard = () => {
   } = useAuth();
   const { toast } = useToast();
   const { role, loading: roleLoading } = useUserRole();
-  const [activeTab, setActiveTab] = useState("social");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(urlTab || "social");
+
+  // Sync URL tab param to activeTab
+  useEffect(() => {
+    if (urlTab && urlTab !== activeTab) {
+      setActiveTab(urlTab);
+      setSearchParams({});
+    }
+  }, [urlTab, activeTab, setSearchParams]);
   const {
     profile: profileWithRole
   } = useProfileWithRole();

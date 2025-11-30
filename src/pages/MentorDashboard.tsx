@@ -16,7 +16,7 @@ import FloatingChat from "@/components/FloatingChat";
 import UnifiedJobsBoard from "@/components/UnifiedJobsBoard";
 import AdvisorJobTaskViewer from "@/components/AdvisorJobTaskViewer";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useMentorDashboard } from "@/hooks/useMentorDashboard";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
@@ -73,9 +73,19 @@ const MentorDashboard = () => {
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const [activeTab, setActiveTab] = useState("social");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(urlTab || "social");
   const [activeVideoSession, setActiveVideoSession] = useState<any>(null);
   const { upcomingEvents } = useEvents();
+
+  // Sync URL tab param to activeTab
+  useEffect(() => {
+    if (urlTab && urlTab !== activeTab) {
+      setActiveTab(urlTab);
+      setSearchParams({});
+    }
+  }, [urlTab, activeTab, setSearchParams]);
 
   // Redirect if wrong role
   useEffect(() => {

@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Home, Brain } from "lucide-react";
+import { Home, Brain, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import NotificationCenter from "@/components/NotificationCenter";
 import {
   Popover,
@@ -13,6 +13,7 @@ import RecommendationPopup from "@/components/RecommendationPopup";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
   const [recommendationCount, setRecommendationCount] = useState(0);
   const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
 
@@ -34,6 +35,16 @@ export function DashboardHeader() {
         title="Home"
       >
         <Home className="h-4 w-4 sm:h-5 sm:w-5" />
+      </Button>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setSearchParams({ tab: 'profile' })}
+        className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
+        title="Profile"
+      >
+        <User className="h-4 w-4 sm:h-5 sm:w-5" />
       </Button>
       
       <NotificationCenter className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10" />
