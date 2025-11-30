@@ -28,6 +28,8 @@ interface MentorshipRelationship {
   } | null;
   hasUpcomingSessions?: boolean;
   hasRecentSessions?: boolean;
+  hasSessions?: boolean;
+  totalSessions?: number;
 }
 
 interface MentoringSession {
@@ -105,6 +107,14 @@ export const useMentorDashboard = () => {
             .gte('scheduled_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString())
             .order('scheduled_at', { ascending: false })
             .limit(1);
+
+          // Fetch ALL sessions (scheduled or completed) for this mentee
+          const { data: allSessions } = await supabase
+            .from('mentoring_sessions')
+            .select('id')
+            .eq('mentor_id', user.id)
+            .eq('mentee_id', mentorship.mentee_id)
+            .in('status', ['scheduled', 'completed']);
           
           return {
             ...mentorship,
@@ -112,6 +122,8 @@ export const useMentorDashboard = () => {
             companies: companyData || null,
             hasUpcomingSessions: (upcomingSessions?.length || 0) > 0,
             hasRecentSessions: (recentSessions?.length || 0) > 0,
+            hasSessions: (allSessions?.length || 0) > 0,
+            totalSessions: allSessions?.length || 0,
           };
         })
       );
@@ -199,7 +211,7 @@ export const useMentorDashboard = () => {
   });
 
   const pendingRequests = mentorships.filter(m => m.status === 'pending');
-  const activeMentees = mentorships.filter(m => m.status === 'active');
+  const activeMentees = mentorships.filter(m => m.status === 'active' && m.hasSessions === true);
   const pastMentees = mentorships.filter(m => m.status === 'completed' || m.status === 'ended');
 
   return {
