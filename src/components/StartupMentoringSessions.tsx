@@ -146,7 +146,12 @@ export default function StartupMentoringSessions({ type, onSessionUpdated, onJoi
       hasRated: ratedSessionIds.has(session.id),
     }));
 
-    setSessions(enrichedSessions as MentoringSession[]);
+    // Filter out already rated sessions for past view
+    const filteredSessions = type === 'past' 
+      ? enrichedSessions.filter(s => !s.hasRated)
+      : enrichedSessions;
+
+    setSessions(filteredSessions as MentoringSession[]);
   };
 
   const handleRateSession = (session: MentoringSession) => {
