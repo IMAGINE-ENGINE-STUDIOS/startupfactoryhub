@@ -813,7 +813,7 @@ const Dashboard = () => {
                         <p className="text-xs text-muted-foreground">Your current mentors</p>
                       </div>
                     </div>
-                    <StartupActiveMentors />
+                    <StartupActiveMentors onJoin={setActiveVideoUrl} />
                   </div>
 
                   {/* 3. Upcoming Sessions Section */}
@@ -827,7 +827,7 @@ const Dashboard = () => {
                         <p className="text-xs text-muted-foreground">Scheduled mentoring</p>
                       </div>
                     </div>
-                    <StartupMentoringSessions type="upcoming" />
+                    <StartupMentoringSessions type="upcoming" onJoin={setActiveVideoUrl} />
                   </div>
 
                   {/* 4. Past Sessions Section */}
@@ -841,7 +841,7 @@ const Dashboard = () => {
                         <p className="text-xs text-muted-foreground">Rate your experience</p>
                       </div>
                     </div>
-                    <StartupMentoringSessions type="past" />
+                    <StartupMentoringSessions type="past" onSessionUpdated={fetchPitchMeetings} />
                   </div>
                 </div>
               </div>
