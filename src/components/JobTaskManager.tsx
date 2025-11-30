@@ -10,7 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Plus, CheckCircle2, Clock, Users, Trash2 } from 'lucide-react';
+import { Plus, CheckCircle2, Clock, Users, Trash2, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import {
   AlertDialog,
@@ -56,27 +56,82 @@ export default function JobTaskManager() {
   const [loading, setLoading] = useState(true);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [deleteTaskId, setDeleteTaskId] = useState<string | null>(null);
+  const [companyId, setCompanyId] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date>(new Date());
 
   useEffect(() => {
     if (user) {
-      fetchJobs();
-      fetchTasks();
+      fetchCompanyId();
     }
   }, [user]);
 
-  const fetchJobs = async () => {
+  useEffect(() => {
+    if (companyId) {
+      fetchJobs();
+      fetchTasks();
+    }
+  }, [companyId]);
+
+  // Real-time subscription for student task completions
+  useEffect(() => {
+    if (!companyId) return;
+
+    const channel = supabase
+      .channel('job-task-updates')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'student_job_tasks'
+        },
+        (payload) => {
+          console.log('Student task update:', payload);
+          setLastUpdate(new Date());
+          fetchTasks(); // Refresh tasks when student updates their progress
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'job_tasks'
+        },
+        (payload) => {
+          console.log('Job task update:', payload);
+          fetchTasks();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [companyId]);
+
+  const fetchCompanyId = async () => {
     if (!user) return;
+
+    const { data } = await supabase
+      .from('companies')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    if (data) {
+      setCompanyId(data.id);
+    }
+  };
+
+  const fetchJobs = async () => {
+    if (!companyId) return;
 
     try {
       const { data, error } = await supabase
         .from('jobs')
         .select('id, title, category, is_task_based')
-        .eq('company_id', (await supabase
-          .from('companies')
-          .select('id')
-          .eq('user_id', user.id)
-          .single()
-        ).data?.id!)
+        .eq('company_id', companyId)
         .eq('is_task_based', true)
         .eq('status', 'active');
 
@@ -88,17 +143,10 @@ export default function JobTaskManager() {
   };
 
   const fetchTasks = async () => {
-    if (!user) return;
+    if (!companyId) return;
 
     try {
       setLoading(true);
-      const { data: companyData } = await supabase
-        .from('companies')
-        .select('id')
-        .eq('user_id', user.id)
-        .single();
-
-      if (!companyData) return;
 
       const { data, error } = await supabase
         .from('job_tasks')
@@ -115,7 +163,7 @@ export default function JobTaskManager() {
             student_id
           )
         `)
-        .eq('jobs.company_id', companyData.id)
+        .eq('jobs.company_id', companyId)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
