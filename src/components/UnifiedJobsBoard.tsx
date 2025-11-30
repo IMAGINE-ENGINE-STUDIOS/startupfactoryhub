@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye, Copy, MoreVertical, XCircle, Search, ChevronDown, ChevronUp, GraduationCap, Target, Gift, ClipboardList } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye, Copy, MoreVertical, XCircle, Search, GraduationCap, Target, Gift, ClipboardList } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -90,9 +90,9 @@ export default function UnifiedJobsBoard() {
   const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
   const [closedJobs, setClosedJobs] = useState<Job[]>([]);
   const [closeJobId, setCloseJobId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+const [searchQuery, setSearchQuery] = useState('');
   const [displayCount, setDisplayCount] = useState(6);
-  const [expandedJobs, setExpandedJobs] = useState<Set<string>>(new Set());
+  const [selectedJobForDetails, setSelectedJobForDetails] = useState<Job | null>(null);
 
   // Filter and deduplicate jobs
   const filteredJobs = useMemo(() => {
@@ -113,20 +113,8 @@ export default function UnifiedJobsBoard() {
     );
   }, [jobs, searchQuery]);
 
-  const displayedJobs = filteredJobs.slice(0, displayCount);
+const displayedJobs = filteredJobs.slice(0, displayCount);
   const hasMoreJobs = displayCount < filteredJobs.length;
-
-  const toggleExpand = (jobId: string) => {
-    setExpandedJobs(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(jobId)) {
-        newSet.delete(jobId);
-      } else {
-        newSet.add(jobId);
-      }
-      return newSet;
-    });
-  };
 
   useEffect(() => {
     if (user) {
@@ -963,10 +951,8 @@ export default function UnifiedJobsBoard() {
             </CardContent>
           </Card>
         ) : (
-          displayedJobs.map((job) => {
-            const isExpanded = expandedJobs.has(job.id);
-            return (
-            <Card key={job.id} className="hover:shadow-lg transition-shadow flex flex-col">
+          displayedJobs.map((job) => (
+            <Card key={job.id} className="hover:shadow-lg transition-shadow flex flex-col h-[300px]">
               <CardHeader className="pb-2">
                 <div className="flex items-start gap-3 sm:gap-4">
                   {job.companies?.logo_url && (
@@ -979,7 +965,7 @@ export default function UnifiedJobsBoard() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex-1 min-w-0">
-                      <CardTitle className="text-base sm:text-lg break-words">{job.title}</CardTitle>
+                        <CardTitle className="text-base sm:text-lg break-words line-clamp-1">{job.title}</CardTitle>
                         <CardDescription className="text-sm truncate">{job.companies?.name}</CardDescription>
                       </div>
                       <Badge className={getCategoryColor(job.category)}>
@@ -989,157 +975,60 @@ export default function UnifiedJobsBoard() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4 flex-1 flex flex-col">
-                {/* Description - expandable */}
-                <div>
-                  <p className={`text-sm text-muted-foreground break-words ${isExpanded ? '' : 'line-clamp-3'}`}>
-                    {job.description}
-                  </p>
-                </div>
+              <CardContent className="space-y-3 flex-1 flex flex-col">
+                {/* Description - always truncated */}
+                <p className="text-sm text-muted-foreground break-words line-clamp-2 flex-shrink-0">
+                  {job.description}
+                </p>
                 
-                {/* Expanded details */}
-                {isExpanded && (
-                  <div className="space-y-4 border-t pt-4">
-                    {/* Job Info Grid */}
-                    <div className="grid grid-cols-2 gap-3">
-                      {job.job_type && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Briefcase className="w-4 h-4 text-muted-foreground" />
-                          <span><span className="font-medium">Work Type:</span> {job.job_type}</span>
-                        </div>
-                      )}
-                      {job.experience_level && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <GraduationCap className="w-4 h-4 text-muted-foreground" />
-                          <span><span className="font-medium">Level:</span> {job.experience_level}</span>
-                        </div>
-                      )}
-                      {job.duration && (
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="w-4 h-4 text-muted-foreground" />
-                          <span><span className="font-medium">Duration:</span> {job.duration}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-2 text-sm">
-                        <DollarSign className="w-4 h-4 text-muted-foreground" />
-                        <span><span className="font-medium">Pay:</span> {getCompensationDisplay(job)}</span>
-                      </div>
-                    </div>
-                    
-                    {/* Requirements */}
-                    {job.requirements && job.requirements.length > 0 && (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm font-medium">
-                          <ClipboardList className="w-4 h-4 text-primary" />
-                          Requirements
-                        </div>
-                        <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-6">
-                          {job.requirements.map((req, idx) => (
-                            <li key={idx}>{req}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {/* Responsibilities */}
-                    {job.responsibilities && job.responsibilities.length > 0 && (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm font-medium">
-                          <Target className="w-4 h-4 text-primary" />
-                          Responsibilities
-                        </div>
-                        <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-6">
-                          {job.responsibilities.map((resp, idx) => (
-                            <li key={idx}>{resp}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {/* Benefits */}
-                    {job.benefits && job.benefits.length > 0 && (
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-2 text-sm font-medium">
-                          <Gift className="w-4 h-4 text-primary" />
-                          Benefits
-                        </div>
-                        <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-6">
-                          {job.benefits.map((benefit, idx) => (
-                            <li key={idx}>{benefit}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    
-                    {job.is_task_based && (
-                      <div className="text-sm text-primary bg-primary/10 p-2 rounded-md">
-                        ✓ This is a task-based position where you'll be assigned specific tasks to complete.
-                      </div>
-                    )}
-                  </div>
-                )}
-                
-                {/* Quick info when collapsed */}
-                {!isExpanded && (
-                  <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground">
-                    {job.location && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                        <span className="truncate max-w-[120px] sm:max-w-none">{job.location}</span>
-                      </div>
-                    )}
-                    {job.duration && (
-                      <div className="flex items-center gap-1">
-                        <Clock className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                        <span className="truncate">{job.duration}</span>
-                      </div>
-                    )}
+                {/* Quick info */}
+                <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground flex-shrink-0">
+                  {job.location && (
                     <div className="flex items-center gap-1">
-                      <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="truncate">{getCompensationDisplay(job)}</span>
+                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                      <span className="truncate max-w-[100px]">{job.location}</span>
                     </div>
-                  </div>
-                )}
-
-                {/* Expand/Collapse button */}
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => toggleExpand(job.id)}
-                  className="w-full justify-center gap-1 text-xs h-8"
-                >
-                  {isExpanded ? (
-                    <>
-                      <ChevronUp className="w-4 h-4" />
-                      Show Less
-                    </>
-                  ) : (
-                    <>
-                      <ChevronDown className="w-4 h-4" />
-                      Show More Details
-                    </>
                   )}
-                </Button>
+                  <div className="flex items-center gap-1">
+                    <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                    <span className="truncate max-w-[120px]">{getCompensationDisplay(job)}</span>
+                  </div>
+                  {job.is_task_based && (
+                    <Badge variant="outline" className="gap-1 text-xs h-5">
+                      <CheckCircle className="w-3 h-3" />
+                      Task-Based
+                    </Badge>
+                  )}
+                </div>
 
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2 mt-auto">
-                  <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-muted-foreground w-full sm:w-auto">
-                    {job.is_task_based && (
-                      <Badge variant="outline" className="gap-1 text-xs">
-                        <CheckCircle className="w-3 h-3" />
-                        Task-Based
-                      </Badge>
-                    )}
-                    {isCompanyUser && job.companies?.id === userCompanyId && (
-                      <>
+                {/* Spacer */}
+                <div className="flex-1" />
+
+                {/* Action buttons - always at bottom */}
+                <div className="flex flex-col gap-2 pt-2 mt-auto">
+                  {/* View Details button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedJobForDetails(job)}
+                    className="w-full justify-center gap-1 text-xs h-8"
+                  >
+                    <Eye className="w-4 h-4" />
+                    View Details
+                  </Button>
+                  
+                  {/* Company controls or apply button */}
+                  <div className="flex items-center justify-between gap-2">
+                    {isCompanyUser && job.companies?.id === userCompanyId ? (
+                      <div className="flex flex-wrap items-center gap-1 w-full">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() => handleViewApplications(job.id)}
-                          className="gap-1 text-xs sm:text-sm h-8 sm:h-9"
+                          className="gap-1 text-xs h-8 flex-1"
                         >
-                          <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                          <span className="hidden sm:inline">View Applications</span>
-                          <span className="sm:hidden">Apps</span> ({job.applications_count})
+                          <Users className="w-3 h-3" />
+                          Apps ({job.applications_count})
                         </Button>
                         <Button
                           variant="outline"
@@ -1148,12 +1037,10 @@ export default function UnifiedJobsBoard() {
                             e.stopPropagation();
                             handleCopyPublicLink(job.id);
                           }}
-                          className="gap-1 text-xs sm:text-sm h-8 sm:h-9"
-                          title="Copy public application link - anyone can apply via this link"
+                          className="gap-1 text-xs h-8"
+                          title="Copy public application link"
                         >
                           <Copy className="w-3 h-3" />
-                          <span className="hidden sm:inline">Copy Public Link</span>
-                          <span className="sm:hidden">Copy Link</span>
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -1168,50 +1055,49 @@ export default function UnifiedJobsBoard() {
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
-                      </>
-                    )}
-                    {!isCompanyUser && (
-                      <div className="flex items-center gap-1">
-                        <Users className="w-3 h-3 sm:w-4 sm:h-4" />
-                        {job.applications_count} applicants
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between w-full gap-2">
+                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Users className="w-3 h-3" />
+                          {job.applications_count} applicants
+                        </div>
+                        {canApply && (
+                          appliedJobs.has(job.id) ? (
+                            <Button
+                              disabled
+                              variant="secondary"
+                              size="sm"
+                              className="h-8 text-xs"
+                            >
+                              <CheckCircle className="mr-1 h-3 w-3" />
+                              Applied
+                            </Button>
+                          ) : (
+                            <Button
+                              onClick={() => handleApply(job.id, job.external_application_url)}
+                              variant={job.external_application_url ? 'outline' : 'default'}
+                              size="sm"
+                              className="h-8 text-xs"
+                            >
+                              {job.external_application_url ? (
+                                <>
+                                  Apply
+                                  <ExternalLink className="ml-1 h-3 w-3" />
+                                </>
+                              ) : (
+                                'Apply Now'
+                              )}
+                            </Button>
+                          )
+                        )}
                       </div>
                     )}
                   </div>
-                  
-                  {canApply && (
-                    appliedJobs.has(job.id) ? (
-                      <Button
-                        disabled
-                        variant="secondary"
-                        size="sm"
-                        className="w-full sm:w-auto h-9 text-sm"
-                      >
-                        <CheckCircle className="mr-2 h-3 w-3 sm:h-4 sm:w-4" />
-                        Applied
-                      </Button>
-                    ) : (
-                      <Button
-                        onClick={() => handleApply(job.id, job.external_application_url)}
-                        variant={job.external_application_url ? 'outline' : 'default'}
-                        size="sm"
-                        className="w-full sm:w-auto h-9 text-sm"
-                      >
-                        {job.external_application_url ? (
-                          <>
-                            <span className="hidden sm:inline">Apply Externally</span>
-                            <span className="sm:hidden">Apply</span>
-                            <ExternalLink className="ml-2 h-3 w-3 sm:h-4 sm:w-4" />
-                          </>
-                        ) : (
-                          'Apply Now'
-                        )}
-                      </Button>
-                    )
-                  )}
                 </div>
               </CardContent>
             </Card>
-          )})
+          ))
         )}
       </div>
 
@@ -1435,6 +1321,222 @@ export default function UnifiedJobsBoard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Job Details Dialog */}
+      <Dialog open={!!selectedJobForDetails} onOpenChange={(open) => !open && setSelectedJobForDetails(null)}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+          {selectedJobForDetails && (
+            <>
+              <DialogHeader className="flex-shrink-0">
+                <div className="flex items-start gap-4">
+                  {selectedJobForDetails.companies?.logo_url && (
+                    <img 
+                      src={selectedJobForDetails.companies.logo_url} 
+                      alt={selectedJobForDetails.companies.name} 
+                      className="w-14 h-14 rounded object-cover"
+                    />
+                  )}
+                  <div className="flex-1">
+                    <DialogTitle className="text-xl">{selectedJobForDetails.title}</DialogTitle>
+                    <DialogDescription className="text-base">
+                      {selectedJobForDetails.companies?.name}
+                    </DialogDescription>
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      <Badge className={getCategoryColor(selectedJobForDetails.category)}>
+                        {selectedJobForDetails.category}
+                      </Badge>
+                      {selectedJobForDetails.is_task_based && (
+                        <Badge variant="outline" className="gap-1">
+                          <CheckCircle className="w-3 h-3" />
+                          Task-Based
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </DialogHeader>
+              
+              <ScrollArea className="flex-1 pr-4">
+                <div className="space-y-6 py-4">
+                  {/* Quick Info */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {selectedJobForDetails.location && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <MapPin className="w-4 h-4 text-muted-foreground" />
+                        <span>{selectedJobForDetails.location}</span>
+                      </div>
+                    )}
+                    {selectedJobForDetails.job_type && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Briefcase className="w-4 h-4 text-muted-foreground" />
+                        <span>{selectedJobForDetails.job_type}</span>
+                      </div>
+                    )}
+                    {selectedJobForDetails.experience_level && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <GraduationCap className="w-4 h-4 text-muted-foreground" />
+                        <span>{selectedJobForDetails.experience_level}</span>
+                      </div>
+                    )}
+                    {selectedJobForDetails.duration && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="w-4 h-4 text-muted-foreground" />
+                        <span>{selectedJobForDetails.duration}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center gap-2 text-sm">
+                      <DollarSign className="w-4 h-4 text-muted-foreground" />
+                      <span>{getCompensationDisplay(selectedJobForDetails)}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Users className="w-4 h-4 text-muted-foreground" />
+                      <span>{selectedJobForDetails.applications_count} applicants</span>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Description */}
+                  <div className="space-y-2">
+                    <h4 className="font-semibold flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-primary" />
+                      Description
+                    </h4>
+                    <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                      {selectedJobForDetails.description}
+                    </p>
+                  </div>
+
+                  {/* Requirements */}
+                  {selectedJobForDetails.requirements && selectedJobForDetails.requirements.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold flex items-center gap-2">
+                        <ClipboardList className="w-4 h-4 text-primary" />
+                        Requirements
+                      </h4>
+                      <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-2">
+                        {selectedJobForDetails.requirements.map((req, idx) => (
+                          <li key={idx}>{req}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Responsibilities */}
+                  {selectedJobForDetails.responsibilities && selectedJobForDetails.responsibilities.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold flex items-center gap-2">
+                        <Target className="w-4 h-4 text-primary" />
+                        Responsibilities
+                      </h4>
+                      <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-2">
+                        {selectedJobForDetails.responsibilities.map((resp, idx) => (
+                          <li key={idx}>{resp}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Benefits */}
+                  {selectedJobForDetails.benefits && selectedJobForDetails.benefits.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold flex items-center gap-2">
+                        <Gift className="w-4 h-4 text-primary" />
+                        Benefits
+                      </h4>
+                      <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground ml-2">
+                        {selectedJobForDetails.benefits.map((benefit, idx) => (
+                          <li key={idx}>{benefit}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Task-based notice */}
+                  {selectedJobForDetails.is_task_based && (
+                    <div className="text-sm text-primary bg-primary/10 p-3 rounded-md">
+                      ✓ This is a task-based position where you'll be assigned specific tasks to complete.
+                    </div>
+                  )}
+
+                  {/* Posted date */}
+                  <div className="text-xs text-muted-foreground">
+                    Posted on {new Date(selectedJobForDetails.created_at).toLocaleDateString()}
+                  </div>
+                </div>
+              </ScrollArea>
+
+              {/* Footer Actions */}
+              <div className="flex items-center justify-between gap-3 pt-4 border-t flex-shrink-0">
+                {isCompanyUser && selectedJobForDetails.companies?.id === userCompanyId ? (
+                  <div className="flex items-center gap-2 w-full">
+                    <Button
+                      variant="outline"
+                      onClick={() => handleCopyPublicLink(selectedJobForDetails.id)}
+                      className="gap-2"
+                    >
+                      <Copy className="w-4 h-4" />
+                      Copy Public Link
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        setSelectedJobForDetails(null);
+                        handleViewApplications(selectedJobForDetails.id);
+                      }}
+                      className="gap-2"
+                    >
+                      <Users className="w-4 h-4" />
+                      View Applications ({selectedJobForDetails.applications_count})
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {selectedJobForDetails.external_application_url && (
+                      <Button
+                        variant="outline"
+                        onClick={() => handleCopyExternalLink(selectedJobForDetails.external_application_url!)}
+                        className="gap-2"
+                      >
+                        <Copy className="w-4 h-4" />
+                        Copy Link
+                      </Button>
+                    )}
+                    {canApply && (
+                      appliedJobs.has(selectedJobForDetails.id) ? (
+                        <Button disabled variant="secondary" className="gap-2 ml-auto">
+                          <CheckCircle className="w-4 h-4" />
+                          Applied
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={() => {
+                            handleApply(selectedJobForDetails.id, selectedJobForDetails.external_application_url);
+                            if (!selectedJobForDetails.external_application_url) {
+                              setSelectedJobForDetails(null);
+                            }
+                          }}
+                          variant={selectedJobForDetails.external_application_url ? 'outline' : 'default'}
+                          className="gap-2 ml-auto"
+                        >
+                          {selectedJobForDetails.external_application_url ? (
+                            <>
+                              Apply Externally
+                              <ExternalLink className="w-4 h-4" />
+                            </>
+                          ) : (
+                            'Apply Now'
+                          )}
+                        </Button>
+                      )
+                    )}
+                  </>
+                )}
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
