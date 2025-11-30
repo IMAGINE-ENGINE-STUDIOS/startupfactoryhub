@@ -2849,6 +2849,7 @@ export type Database = {
           linkedin_url: string | null
           location: string | null
           profile_views_count: number | null
+          resume_url: string | null
           update_count: number | null
           updated_at: string
           user_id: string
@@ -2869,6 +2870,7 @@ export type Database = {
           linkedin_url?: string | null
           location?: string | null
           profile_views_count?: number | null
+          resume_url?: string | null
           update_count?: number | null
           updated_at?: string
           user_id: string
@@ -2889,6 +2891,7 @@ export type Database = {
           linkedin_url?: string | null
           location?: string | null
           profile_views_count?: number | null
+          resume_url?: string | null
           update_count?: number | null
           updated_at?: string
           user_id?: string

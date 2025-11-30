@@ -11,13 +11,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import AvatarUpload from '@/components/AvatarUpload';
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
+import ResumeUpload from '@/components/ResumeUpload';
 import { 
   Linkedin,
   Globe,
   MapPin,
   Mail,
   X,
-  Plus
+  Plus,
+  FileText
 } from 'lucide-react';
 
 export default function StudentProfileView() {
@@ -393,6 +395,27 @@ export default function StudentProfileView() {
               )}
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Resume Section */}
+      <Card className="border-0 shadow-lg">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            Resume / CV
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ResumeUpload
+            currentResumeUrl={profile?.resume_url}
+            onUploadComplete={() => {
+              // Profile will be refreshed automatically
+            }}
+          />
+          <p className="text-xs text-muted-foreground mt-3">
+            Your resume will be shared with employers when you apply for jobs.
+          </p>
         </CardContent>
       </Card>
 
