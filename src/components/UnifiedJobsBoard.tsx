@@ -1356,7 +1356,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
                 </div>
               </DialogHeader>
               
-              <ScrollArea className="flex-1 max-h-[60vh] pr-4">
+              <div className="flex-1 max-h-[60vh] overflow-y-auto pr-4 overscroll-contain">
                 <div className="space-y-6 py-4 pr-2">
                   {/* Quick Info */}
                   <div className="grid grid-cols-2 gap-3">
@@ -1464,7 +1464,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
                     Posted on {new Date(selectedJobForDetails.created_at).toLocaleDateString()}
                   </div>
                 </div>
-              </ScrollArea>
+              </div>
 
               {/* Footer Actions */}
               <div className="flex items-center justify-between gap-3 pt-4 border-t flex-shrink-0">
