@@ -21,6 +21,10 @@ interface MentorshipRelationship {
     stage: string;
     industry: string;
     description: string;
+    logo_url?: string;
+    location?: string;
+    website?: string;
+    team_size?: number;
   } | null;
   hasUpcomingSessions?: boolean;
   hasRecentSessions?: boolean;
@@ -78,7 +82,7 @@ export const useMentorDashboard = () => {
           // Fetch company info
           const { data: companyData } = await supabase
             .from('companies')
-            .select('id, name, description, stage, industry')
+            .select('id, name, description, stage, industry, logo_url, location, website, team_size')
             .eq('user_id', mentorship.mentee?.user_id)
             .maybeSingle();
           
