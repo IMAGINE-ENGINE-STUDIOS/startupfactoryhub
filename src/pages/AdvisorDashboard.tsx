@@ -29,18 +29,15 @@ import { DashboardHeader } from '@/components/DashboardHeader';
 import CreateAdvisorSessionDialog from '@/components/CreateAdvisorSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
-
 import { useMentorDashboard } from '@/hooks/useMentorDashboard';
 import AdvisorProfileView from '@/components/AdvisorProfileView';
 import MenteeSessions from '@/components/MenteeSessions';
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
-
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import VideoConferencing from '@/components/VideoConferencing';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-
 interface Startup {
   id: string;
   name: string;
@@ -50,7 +47,6 @@ interface Startup {
   user_id: string;
   logo_url?: string | null;
 }
-
 export default function AdvisorDashboard() {
   const [startups, setStartups] = useState<Startup[]>([]);
   const [mentorProfile, setMentorProfile] = useState<any>(null);
@@ -64,10 +60,17 @@ export default function AdvisorDashboard() {
   const urlTab = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(urlTab || "social");
   const [activeVideoSession, setActiveVideoSession] = useState<any>(null);
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const {
+    user
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const navigate = useNavigate();
-  const { role, loading: roleLoading } = useUserRole();
+  const {
+    role,
+    loading: roleLoading
+  } = useUserRole();
 
   // Sync URL tab param to activeTab
   useEffect(() => {
@@ -76,10 +79,20 @@ export default function AdvisorDashboard() {
       setSearchParams({});
     }
   }, [urlTab, activeTab, setSearchParams]);
-  const { profile: profileWithRole } = useProfileWithRole();
-  const { upcomingEvents } = useEvents();
-  const { pendingRequests, activeMentees, pastMentees, todaySessions, loading: dashboardLoading, refetch } = useMentorDashboard();
-  
+  const {
+    profile: profileWithRole
+  } = useProfileWithRole();
+  const {
+    upcomingEvents
+  } = useEvents();
+  const {
+    pendingRequests,
+    activeMentees,
+    pastMentees,
+    todaySessions,
+    loading: dashboardLoading,
+    refetch
+  } = useMentorDashboard();
   const [mentorStats, setMentorStats] = useState({
     activeMentees: 0,
     totalSessions: 0,
@@ -87,7 +100,6 @@ export default function AdvisorDashboard() {
     pendingRequests: 0,
     averageRating: 0
   });
-
   useEffect(() => {
     if (user) {
       fetchMentorProfile();
@@ -95,51 +107,47 @@ export default function AdvisorDashboard() {
       fetchMentorStats();
     }
   }, [user]);
-  
+
   // Redirect if wrong role
   useEffect(() => {
     if (!roleLoading && role && role !== 'advisor' && role !== 'mentor') {
       navigate('/dashboard');
     }
   }, [role, roleLoading, navigate]);
-  
   const fetchMentorStats = async () => {
     if (!user) return;
-
     try {
       // Get mentor profile
-      const { data: mentorProfile } = await supabase
-        .from('mentor_profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+      const {
+        data: mentorProfile
+      } = await supabase.from('mentor_profiles').select('*').eq('user_id', user.id).maybeSingle();
 
       // Get active mentorships count
-      const { count: activeMenteesCount } = await supabase
-        .from('mentorship_relationships')
-        .select('*', { count: 'exact', head: true })
-        .eq('mentor_id', user.id)
-        .eq('status', 'active');
+      const {
+        count: activeMenteesCount
+      } = await supabase.from('mentorship_relationships').select('*', {
+        count: 'exact',
+        head: true
+      }).eq('mentor_id', user.id).eq('status', 'active');
 
       // Get pending mentorship requests
-      const { count: pendingCount } = await supabase
-        .from('mentorship_relationships')
-        .select('*', { count: 'exact', head: true })
-        .eq('mentor_id', user.id)
-        .eq('status', 'pending');
+      const {
+        count: pendingCount
+      } = await supabase.from('mentorship_relationships').select('*', {
+        count: 'exact',
+        head: true
+      }).eq('mentor_id', user.id).eq('status', 'pending');
 
       // Get sessions this month
       const startOfMonth = new Date();
       startOfMonth.setDate(1);
       startOfMonth.setHours(0, 0, 0, 0);
-      
-      const { count: sessionsThisMonth } = await supabase
-        .from('mentoring_sessions')
-        .select('*', { count: 'exact', head: true })
-        .eq('mentor_id', user.id)
-        .eq('status', 'completed')
-        .gte('scheduled_at', startOfMonth.toISOString());
-
+      const {
+        count: sessionsThisMonth
+      } = await supabase.from('mentoring_sessions').select('*', {
+        count: 'exact',
+        head: true
+      }).eq('mentor_id', user.id).eq('status', 'completed').gte('scheduled_at', startOfMonth.toISOString());
       setMentorStats({
         activeMentees: activeMenteesCount || 0,
         totalSessions: mentorProfile?.total_sessions || 0,
@@ -151,70 +159,56 @@ export default function AdvisorDashboard() {
       console.error('Error fetching mentor stats:', error);
     }
   };
-
   const fetchMentorProfile = async () => {
     if (!user) return;
-
-    const { data, error } = await supabase
-      .from('mentor_profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-
+    const {
+      data,
+      error
+    } = await supabase.from('mentor_profiles').select('*').eq('user_id', user.id).single();
     if (!error && data) {
       setMentorProfile(data);
     }
   };
-
   const handleMentorshipRequest = async (requestId: string, action: 'accept' | 'decline') => {
-    const { error } = await supabase
-      .from('mentorship_relationships')
-      .update({ 
-        status: action === 'accept' ? 'active' : 'declined',
-        start_date: action === 'accept' ? new Date().toISOString() : null
-      })
-      .eq('id', requestId);
-
+    const {
+      error
+    } = await supabase.from('mentorship_relationships').update({
+      status: action === 'accept' ? 'active' : 'declined',
+      start_date: action === 'accept' ? new Date().toISOString() : null
+    }).eq('id', requestId);
     if (error) {
       toast({
         title: "Error",
         description: `Failed to ${action} mentorship request`,
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     toast({
       title: action === 'accept' ? "Request Accepted!" : "Request Declined",
-      description: action === 'accept' 
-        ? "You can now schedule sessions with your new mentee."
-        : "The mentorship request has been declined.",
+      description: action === 'accept' ? "You can now schedule sessions with your new mentee." : "The mentorship request has been declined."
     });
-
     refetch();
     fetchStartups();
     fetchMentorStats();
   };
-
   const offerMentorship = async (companyId: string, menteeUserId: string, startupName: string) => {
     if (!user) return;
-
     try {
-      const { error } = await supabase
-        .from('mentorship_relationships')
-        .insert({
-          mentor_id: user.id,
-          mentee_id: menteeUserId,
-          status: 'pending',
-          goals: `Mentorship offer for ${startupName}`
-        });
-
+      const {
+        error
+      } = await supabase.from('mentorship_relationships').insert({
+        mentor_id: user.id,
+        mentee_id: menteeUserId,
+        status: 'pending',
+        goals: `Mentorship offer for ${startupName}`
+      });
       if (error) {
         if (error.code === '23505') {
           toast({
             title: "Already Offered",
             description: "You've already offered mentorship to this startup.",
-            variant: "destructive",
+            variant: "destructive"
           });
         } else {
           throw error;
@@ -223,54 +217,46 @@ export default function AdvisorDashboard() {
       }
 
       // Get advisor profile for notification
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('full_name')
-        .eq('user_id', user.id)
-        .single();
-
+      const {
+        data: profile
+      } = await supabase.from('profiles').select('full_name').eq('user_id', user.id).single();
       const advisorName = profile?.full_name || 'An advisor';
 
       // Send notification to startup
-      await supabase
-        .from('notifications')
-        .insert({
-          user_id: menteeUserId,
-          type: 'connection',
-          title: 'New Mentorship Offer',
-          message: `${advisorName} has offered to mentor your startup!`,
-          data: {
-            mentor_id: user.id,
-            startup_name: startupName
-          }
-        });
-
+      await supabase.from('notifications').insert({
+        user_id: menteeUserId,
+        type: 'connection',
+        title: 'New Mentorship Offer',
+        message: `${advisorName} has offered to mentor your startup!`,
+        data: {
+          mentor_id: user.id,
+          startup_name: startupName
+        }
+      });
       toast({
         title: "Mentorship Offered!",
-        description: `Your mentorship offer to ${startupName} has been sent.`,
+        description: `Your mentorship offer to ${startupName} has been sent.`
       });
 
       // Remove the startup from the list immediately
-      setStartups(prevStartups => 
-        prevStartups.filter(s => s.id !== companyId)
-      );
+      setStartups(prevStartups => prevStartups.filter(s => s.id !== companyId));
     } catch (error) {
       console.error('Error offering mentorship:', error);
       toast({
         title: "Error",
         description: "Failed to offer mentorship. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const fetchStartups = async () => {
     if (!user) return;
 
     // Fetch all companies
-    const { data: allCompanies, error } = await supabase
-      .from('companies')
-      .select(`
+    const {
+      data: allCompanies,
+      error
+    } = await supabase.from('companies').select(`
         id,
         name,
         description,
@@ -284,69 +270,53 @@ export default function AdvisorDashboard() {
         team_size,
         funding_amount,
         looking_for
-      `)
-      .order('created_at', { ascending: false });
-
+      `).order('created_at', {
+      ascending: false
+    });
     if (error) {
       console.error('Error fetching startups:', error);
       return;
     }
 
     // Fetch existing mentorship relationships for this advisor
-    const { data: existingRelationships } = await supabase
-      .from('mentorship_relationships')
-      .select('mentee_id')
-      .eq('mentor_id', user.id);
+    const {
+      data: existingRelationships
+    } = await supabase.from('mentorship_relationships').select('mentee_id').eq('mentor_id', user.id);
 
     // Filter out companies where mentorship already exists
-    const existingMenteeIds = new Set(
-      (existingRelationships || []).map(r => r.mentee_id)
-    );
-
-    const availableStartups = (allCompanies || []).filter(
-      company => !existingMenteeIds.has(company.user_id)
-    );
-
+    const existingMenteeIds = new Set((existingRelationships || []).map(r => r.mentee_id));
+    const availableStartups = (allCompanies || []).filter(company => !existingMenteeIds.has(company.user_id));
     setStartups(availableStartups);
   };
-
-  const stats = [
-    { 
-      title: 'Active Mentees', 
-      value: mentorStats.activeMentees.toString(), 
-      icon: Users, 
-      color: 'text-primary' 
-    },
-    { 
-      title: 'Sessions This Month', 
-      value: mentorStats.sessionsThisMonth.toString(), 
-      icon: CalendarIcon, 
-      color: 'text-accent' 
-    },
-    { 
-      title: 'Total Sessions', 
-      value: mentorStats.totalSessions.toString(), 
-      icon: TrendingUp, 
-      color: 'text-green-500' 
-    },
-    { 
-      title: 'Rating', 
-      value: mentorStats.averageRating.toFixed(1), 
-      icon: Star, 
-      color: 'text-yellow-500' 
-    },
-  ];
-
+  const stats = [{
+    title: 'Active Mentees',
+    value: mentorStats.activeMentees.toString(),
+    icon: Users,
+    color: 'text-primary'
+  }, {
+    title: 'Sessions This Month',
+    value: mentorStats.sessionsThisMonth.toString(),
+    icon: CalendarIcon,
+    color: 'text-accent'
+  }, {
+    title: 'Total Sessions',
+    value: mentorStats.totalSessions.toString(),
+    icon: TrendingUp,
+    color: 'text-green-500'
+  }, {
+    title: 'Rating',
+    value: mentorStats.averageRating.toFixed(1),
+    icon: Star,
+    color: 'text-yellow-500'
+  }];
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
+    return new Date(dateString).toLocaleTimeString('en-US', {
+      hour: 'numeric',
       minute: '2-digit',
-      hour12: true 
+      hour12: true
     });
   };
-
-  return (
-    <div className="min-h-screen bg-gradient-hero pb-6 relative">
+  return <div className="min-h-screen bg-gradient-hero pb-6 relative">
       <DashboardHeader />
       <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 space-y-4 sm:space-y-6">
         {/* Header */}
@@ -355,22 +325,12 @@ export default function AdvisorDashboard() {
             <div className="flex items-center space-x-4">
               {/* Mobile: Only Avatar */}
               <div className="md:hidden">
-                <RoleBasedAvatar 
-                  avatarUrl={profileWithRole?.avatar_url} 
-                  role="advisor"
-                  fallbackText={user?.email || 'A'}
-                  className="h-16 w-16"
-                />
+                <RoleBasedAvatar avatarUrl={profileWithRole?.avatar_url} role="advisor" fallbackText={user?.email || 'A'} className="h-16 w-16" />
               </div>
               
               {/* Desktop: Full Welcome Section */}
               <div className="hidden md:flex items-center space-x-4">
-                <RoleBasedAvatar 
-                  avatarUrl={profileWithRole?.avatar_url} 
-                  role="advisor"
-                  fallbackText={user?.email || 'A'}
-                  className="h-16 w-16"
-                />
+                <RoleBasedAvatar avatarUrl={profileWithRole?.avatar_url} role="advisor" fallbackText={user?.email || 'A'} className="h-16 w-16" />
                 <div>
                   <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
                     {profileWithRole?.full_name || 'Advisor'} Dashboard
@@ -455,8 +415,7 @@ export default function AdvisorDashboard() {
             <MenteeSessions onJoinMeeting={(link, sessionData) => setActiveVideoSession(sessionData)} />
             
             {/* Today's Sessions */}
-            {todaySessions.length > 0 && (
-              <Card className="tech-card border-0">
+            {todaySessions.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Clock className="h-5 w-5 text-primary" />
@@ -465,8 +424,7 @@ export default function AdvisorDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-3">
-                    {todaySessions.map((session: any) => (
-                      <div key={session.id} className="flex items-center justify-between p-4 rounded-lg border border-primary/20 bg-primary/5">
+                    {todaySessions.map((session: any) => <div key={session.id} className="flex items-center justify-between p-4 rounded-lg border border-primary/20 bg-primary/5">
                         <div className="flex items-center space-x-3">
                           <Video className="h-5 w-5 text-primary" />
                           <div>
@@ -482,16 +440,13 @@ export default function AdvisorDashboard() {
                           <Video className="h-4 w-4" />
                           Join
                         </Button>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* Pending Requests */}
-            {pendingRequests.length > 0 && (
-              <Card className="tech-card border-0">
+            {pendingRequests.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Users className="h-5 w-5 text-primary" />
@@ -501,8 +456,7 @@ export default function AdvisorDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {pendingRequests.map((request: any) => (
-                      <Card key={request.id} className="hover:border-primary/50 transition-colors">
+                    {pendingRequests.map((request: any) => <Card key={request.id} className="hover:border-primary/50 transition-colors">
                         <CardContent className="p-4">
                           <div className="flex flex-col md:flex-row gap-4">
                             <div className="flex items-start space-x-4 flex-1">
@@ -516,8 +470,7 @@ export default function AdvisorDashboard() {
                                 <h3 className="font-semibold text-foreground">
                                   {request.mentee?.full_name || 'Anonymous User'}
                                 </h3>
-                                {request.companies && (
-                                  <>
+                                {request.companies && <>
                                     <p className="text-sm text-muted-foreground">
                                       {request.companies.name}
                                     </p>
@@ -528,52 +481,33 @@ export default function AdvisorDashboard() {
                                     <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
                                       {request.companies.description}
                                     </p>
-                                  </>
-                                )}
+                                  </>}
                               </div>
                             </div>
 
                             <div className="flex flex-col gap-2 md:w-48 flex-shrink-0">
-                              {request.companies && (
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  className="w-full"
-                                  onClick={() => {
-                                    setSelectedStartup(request.companies);
-                                    setDialogOpen(true);
-                                  }}
-                                >
+                              {request.companies && <Button variant="outline" size="sm" className="w-full" onClick={() => {
+                          setSelectedStartup(request.companies);
+                          setDialogOpen(true);
+                        }}>
                                   <ExternalLink className="h-4 w-4 mr-2" />
                                   View Profile
-                                </Button>
-                              )}
+                                </Button>}
                               <div className="flex gap-2">
-                                <Button 
-                                  variant="outline" 
-                                  size="sm"
-                                  className="flex-1"
-                                  onClick={() => handleMentorshipRequest(request.id, 'decline')}
-                                >
+                                <Button variant="outline" size="sm" className="flex-1" onClick={() => handleMentorshipRequest(request.id, 'decline')}>
                                   <XCircle className="h-4 w-4" />
                                 </Button>
-                                <Button 
-                                  size="sm" 
-                                  className="flex-1"
-                                  onClick={() => handleMentorshipRequest(request.id, 'accept')}
-                                >
+                                <Button size="sm" className="flex-1" onClick={() => handleMentorshipRequest(request.id, 'accept')}>
                                   <CheckCircle className="h-4 w-4" />
                                 </Button>
                               </div>
                             </div>
                           </div>
                         </CardContent>
-                      </Card>
-                    ))}
+                      </Card>)}
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* Active Mentees */}
             <Card className="tech-card border-0">
@@ -586,9 +520,7 @@ export default function AdvisorDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {activeMentees.length > 0 ? (
-                    activeMentees.map((mentorship: any) => (
-                      <Card key={mentorship.id} className="border border-border/50 hover:border-primary/50 transition-colors">
+                  {activeMentees.length > 0 ? activeMentees.map((mentorship: any) => <Card key={mentorship.id} className="border border-border/50 hover:border-primary/50 transition-colors">
                         <CardContent className="p-4">
                           <div className="flex items-start space-x-3">
                             <Avatar className="h-10 w-10">
@@ -604,12 +536,10 @@ export default function AdvisorDashboard() {
                               <p className="text-xs text-muted-foreground">
                                 {mentorship.companies?.name || 'Startup Founder'}
                               </p>
-                              {mentorship.companies && (
-                                <div className="flex space-x-1 mt-2">
+                              {mentorship.companies && <div className="flex space-x-1 mt-2">
                                   <Badge variant="secondary" className="text-xs">{mentorship.companies.stage}</Badge>
                                   <Badge variant="outline" className="text-xs">{mentorship.companies.industry}</Badge>
-                                </div>
-                              )}
+                                </div>}
                             </div>
                           </div>
                           <div className="flex gap-2 mt-3">
@@ -623,30 +553,24 @@ export default function AdvisorDashboard() {
                             </Button>
                           </div>
                         </CardContent>
-                      </Card>
-                    ))
-                  ) : (
-                    <div className="col-span-3 text-center py-12">
+                      </Card>) : <div className="col-span-3 text-center py-12">
                       <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                       <h3 className="text-lg font-semibold mb-2">No active mentees yet</h3>
                       <p className="text-muted-foreground mb-4">Find startups seeking mentorship below</p>
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </CardContent>
             </Card>
 
             {/* Past Mentees Section */}
-            {pastMentees && pastMentees.length > 0 && (
-              <Card className="tech-card border-0">
+            {pastMentees && pastMentees.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle>Past Mentees</CardTitle>
                   <CardDescription>Previous mentorship relationships</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {pastMentees.map(mentee => (
-                      <div key={mentee.id} className="flex items-center gap-3 p-3 rounded-lg border">
+                    {pastMentees.map(mentee => <div key={mentee.id} className="flex items-center gap-3 p-3 rounded-lg border">
                         <Avatar>
                           <AvatarImage src={mentee.mentee.avatar_url} />
                           <AvatarFallback>{mentee.mentee.full_name?.[0] || 'M'}</AvatarFallback>
@@ -658,16 +582,13 @@ export default function AdvisorDashboard() {
                           </p>
                         </div>
                         <Badge variant="secondary">Completed</Badge>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* New Opportunities */}
-            {startups.length > 0 && (
-              <Card className="tech-card border-0">
+            {startups.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <TrendingUp className="h-5 w-5 text-primary" />
@@ -676,15 +597,9 @@ export default function AdvisorDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {startups.map((startup) => (
-                      <div key={startup.id} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
+                    {startups.map(startup => <div key={startup.id} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
                         <div className="flex items-center space-x-4">
-                          <RoleBasedAvatar 
-                            avatarUrl={startup.logo_url}
-                            role="startup"
-                            fallbackText={startup.name}
-                            className="h-12 w-12"
-                          />
+                          <RoleBasedAvatar avatarUrl={startup.logo_url} role="startup" fallbackText={startup.name} className="h-12 w-12" />
                           <div>
                             <h3 className="font-semibold text-foreground">{startup.name}</h3>
                             <p className="text-sm text-muted-foreground line-clamp-2">{startup.description}</p>
@@ -695,31 +610,20 @@ export default function AdvisorDashboard() {
                           </div>
                         </div>
                         <div className="flex space-x-2 w-full md:w-auto">
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            className="flex-1 md:flex-initial"
-                            onClick={() => {
-                              setSelectedStartup(startup);
-                              setDialogOpen(true);
-                            }}
-                          >
+                          <Button variant="outline" size="sm" className="flex-1 md:flex-initial" onClick={() => {
+                      setSelectedStartup(startup);
+                      setDialogOpen(true);
+                    }}>
                             View Details
                           </Button>
-                          <Button 
-                            size="sm" 
-                            className="flex-1 md:flex-initial"
-                            onClick={() => offerMentorship(startup.id, startup.user_id, startup.name)}
-                          >
+                          <Button size="sm" className="flex-1 md:flex-initial" onClick={() => offerMentorship(startup.id, startup.user_id, startup.name)}>
                             Offer Mentorship
                           </Button>
                         </div>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-4">
@@ -735,35 +639,21 @@ export default function AdvisorDashboard() {
             </div>
 
             {/* Upcoming Events with Banners */}
-            {upcomingEvents.length > 0 && (
-              <Card>
+            {upcomingEvents.length > 0 && <Card>
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="w-full">
                     <div className="flex gap-4 pb-4">
-                      {upcomingEvents.slice(0, 6).map((event) => (
-                        <div
-                          key={event.id}
-                          className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]"
-                          onClick={() => {
-                            setSelectedEvent(event);
-                            setShowEventDetails(true);
-                          }}
-                        >
+                      {upcomingEvents.slice(0, 6).map(event => <div key={event.id} className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]" onClick={() => {
+                    setSelectedEvent(event);
+                    setShowEventDetails(true);
+                  }}>
                           <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
-                            {event.banner_url ? (
-                              <img
-                                src={event.banner_url}
-                                alt={event.title}
-                                className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                              />
-                            ) : (
-                              <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                            {event.banner_url ? <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" /> : <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
                                 <CalendarIcon className="h-16 w-16 text-purple-500/30" />
-                              </div>
-                            )}
+                              </div>}
                             <div className="p-4 min-h-[120px] flex flex-col">
                               <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
                               <div className="space-y-1 text-sm text-muted-foreground flex-1">
@@ -771,24 +661,12 @@ export default function AdvisorDashboard() {
                                   <Clock className="h-3 w-3" />
                                   {format(parseISO(event.start_date), 'MMM d, h:mm a')}
                                 </div>
-                                {event.location && (
-                                  <div className="flex items-center gap-2">
+                                {event.location && <div className="flex items-center gap-2">
                                     <MapPin className="h-3 w-3" />
-                                    {event.location.startsWith('http') ? (
-                                      <a 
-                                        href={event.location}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-primary hover:underline line-clamp-1"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
+                                    {event.location.startsWith('http') ? <a href={event.location} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline line-clamp-1" onClick={e => e.stopPropagation()}>
                                         {event.location}
-                                      </a>
-                                    ) : (
-                                      <span className="line-clamp-1">{event.location}</span>
-                                    )}
-                                  </div>
-                                )}
+                                      </a> : <span className="line-clamp-1">{event.location}</span>}
+                                  </div>}
                                 <div className="flex items-center gap-2">
                                   <Users className="h-3 w-3" />
                                   {event.attendees} attending
@@ -797,46 +675,30 @@ export default function AdvisorDashboard() {
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        </div>)}
                     </div>
                     <ScrollBar orientation="horizontal" />
                   </ScrollArea>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
             
-            <UnifiedCalendar
-              showCreateButton={false}
-              userRole="advisor"
-              onItemClick={(item) => {
-                if (item.type === 'event') {
-                  setSelectedEvent(item);
-                  setShowEventDetails(true);
-                } else if (item.type === 'session' && item.meeting_link) {
-                  setActiveVideoSession(item);
-                }
-              }}
-              filterTypes={['event', 'session', 'availability']}
-            />
+            <UnifiedCalendar showCreateButton={false} userRole="advisor" onItemClick={item => {
+            if (item.type === 'event') {
+              setSelectedEvent(item);
+              setShowEventDetails(true);
+            } else if (item.type === 'session' && item.meeting_link) {
+              setActiveVideoSession(item);
+            }
+          }} filterTypes={['event', 'session', 'availability']} />
 
             {/* Availability Manager - Bottom of Calendar Tab */}
-            <div className="pt-6 border-t">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold">Availability Schedule</h3>
-                <p className="text-sm text-muted-foreground">
-                  Set your recurring weekly availability for mentoring sessions
-                </p>
-              </div>
-              <AvailabilityManager />
-            </div>
+            
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
             {/* Advisor Stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6 mb-6">
-              {stats.map((stat) => (
-                <Card key={stat.title} className="tech-card border-0">
+              {stats.map(stat => <Card key={stat.title} className="tech-card border-0">
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div>
@@ -846,8 +708,7 @@ export default function AdvisorDashboard() {
                       <stat.icon className={`h-8 w-8 ${stat.color}`} />
                     </div>
                   </CardContent>
-                </Card>
-              ))}
+                </Card>)}
             </div>
             <AnalyticsDashboard />
           </TabsContent>
@@ -862,57 +723,28 @@ export default function AdvisorDashboard() {
         </Tabs>
       </div>
 
-      <StartupProfileDialog
-        company={selectedStartup}
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-      />
+      <StartupProfileDialog company={selectedStartup} open={dialogOpen} onOpenChange={setDialogOpen} />
 
 
       {/* Floating Chat with AI */}
       <FloatingChat />
 
       {/* Video Conferencing Dialog */}
-      <Dialog open={!!activeVideoSession} onOpenChange={(open) => !open && setActiveVideoSession(null)}>
+      <Dialog open={!!activeVideoSession} onOpenChange={open => !open && setActiveVideoSession(null)}>
         <DialogContent className="max-w-6xl h-[90vh] p-0">
-          {activeVideoSession && (
-            <VideoConferencing
-              roomUrl={activeVideoSession.meeting_link}
-              userId={user?.id}
-              hostId={activeVideoSession.host_id || activeVideoSession.mentor_id}
-              userName={profileWithRole?.full_name || user?.email || 'User'}
-              meetingTitle={activeVideoSession.topic || 'Mentoring Session'}
-              onLeave={() => setActiveVideoSession(null)}
-            />
-          )}
+          {activeVideoSession && <VideoConferencing roomUrl={activeVideoSession.meeting_link} userId={user?.id} hostId={activeVideoSession.host_id || activeVideoSession.mentor_id} userName={profileWithRole?.full_name || user?.email || 'User'} meetingTitle={activeVideoSession.topic || 'Mentoring Session'} onLeave={() => setActiveVideoSession(null)} />}
         </DialogContent>
       </Dialog>
 
-      <CreateAdvisorSessionDialog
-        open={createSessionDialogOpen}
-        onOpenChange={setCreateSessionDialogOpen}
-        onSessionCreated={() => {
-          setCreateSessionDialogOpen(false);
-          refetch();
-        }}
-      />
-      <CreateEventDialog 
-        open={createEventDialogOpen}
-        onOpenChange={setCreateEventDialogOpen}
-        onEventCreated={() => {
-          setCreateEventDialogOpen(false);
-        }}
-      />
-      {selectedEvent && (
-        <EventDetailsDialog 
-          event={selectedEvent}
-          open={showEventDetails}
-          onOpenChange={setShowEventDetails}
-          onEventUpdated={() => {
-            setShowEventDetails(false);
-          }}
-        />
-      )}
-    </div>
-  );
+      <CreateAdvisorSessionDialog open={createSessionDialogOpen} onOpenChange={setCreateSessionDialogOpen} onSessionCreated={() => {
+      setCreateSessionDialogOpen(false);
+      refetch();
+    }} />
+      <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {
+      setCreateEventDialogOpen(false);
+    }} />
+      {selectedEvent && <EventDetailsDialog event={selectedEvent} open={showEventDetails} onOpenChange={setShowEventDetails} onEventUpdated={() => {
+      setShowEventDetails(false);
+    }} />}
+    </div>;
 }
