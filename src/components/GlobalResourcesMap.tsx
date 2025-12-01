@@ -29,9 +29,14 @@ import {
   Plus,
   X,
   Menu,
-  ChevronRight
+  ChevronRight,
+  Pause,
+  Play,
+  Locate,
+  Loader2
 } from 'lucide-react';
 import { AddResourceDialog } from './AddResourceDialog';
+import { toast } from '@/hooks/use-toast';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
@@ -56,16 +61,37 @@ export const GlobalResourcesMap = () => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
+  const userMarker = useRef<mapboxgl.Marker | null>(null);
   const [selectedType, setSelectedType] = useState<ResourceType | null>(null);
   const [search, setSearch] = useState('');
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(false);
+  const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
+  const [isLocating, setIsLocating] = useState(false);
+  const [isRotating, setIsRotating] = useState(true);
 
   const { data: resources, isLoading } = useResources({ 
     type: selectedType || undefined,
     search: search || undefined
   });
+
+  const requestUserLocation = () => {
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+        setUserLocation(coords);
+        map.current?.flyTo({ center: [coords.lng, coords.lat], zoom: 10, duration: 2000 });
+        setIsLocating(false);
+        toast({ title: "Location found", description: "Showing your current location" });
+      },
+      (error) => {
+        toast({ title: "Location unavailable", description: "Unable to get your location", variant: "destructive" });
+        setIsLocating(false);
+      }
+    );
+  };
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -103,7 +129,7 @@ export const GlobalResourcesMap = () => {
     // Auto-rotate globe
     let userInteracting = false;
     const spinGlobe = () => {
-      if (!map.current || userInteracting) return;
+      if (!map.current || userInteracting || !isRotating) return;
       const center = map.current.getCenter();
       center.lng -= 0.15;
       map.current.easeTo({ center, duration: 1000, easing: (n) => n });
@@ -123,7 +149,40 @@ export const GlobalResourcesMap = () => {
       map.current?.remove();
       map.current = null;
     };
-  }, []);
+  }, [isRotating]);
+
+  // User location marker
+  useEffect(() => {
+    if (!map.current || !userLocation) return;
+    
+    // Remove existing user marker
+    if (userMarker.current) {
+      userMarker.current.remove();
+    }
+    
+    // Create pulsing blue dot marker for user
+    const el = document.createElement('div');
+    el.innerHTML = `
+      <style>
+        @keyframes pulse-location {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.3; transform: scale(1.5); }
+        }
+      </style>
+      <div style="position: relative;">
+        <div style="width: 16px; height: 16px; background: #3b82f6; border: 3px solid white; border-radius: 50%; box-shadow: 0 0 10px rgba(59,130,246,0.5);"></div>
+        <div style="position: absolute; top: -4px; left: -4px; width: 24px; height: 24px; background: rgba(59,130,246,0.3); border-radius: 50%; animation: pulse-location 2s infinite;"></div>
+      </div>
+    `;
+    
+    userMarker.current = new mapboxgl.Marker(el)
+      .setLngLat([userLocation.lng, userLocation.lat])
+      .addTo(map.current);
+    
+    return () => {
+      userMarker.current?.remove();
+    };
+  }, [userLocation]);
 
   useEffect(() => {
     if (!map.current || !resources) return;
@@ -144,8 +203,16 @@ export const GlobalResourcesMap = () => {
         el.className = 'resource-marker';
         
         if (isPartner) {
-          // Partner marker with logo
+          // Partner marker with logo + golden star
           el.style.cssText = `
+            width: 28px;
+            height: 28px;
+            position: relative;
+          `;
+          
+          // Logo container
+          const logoEl = document.createElement('div');
+          logoEl.style.cssText = `
             width: 28px;
             height: 28px;
             background: url(${resource.logo_url}) center/cover, white;
@@ -155,6 +222,21 @@ export const GlobalResourcesMap = () => {
             box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30;
             transition: all 0.2s;
           `;
+          
+          // Golden star badge (small, discrete, elegant)
+          const starEl = document.createElement('div');
+          starEl.innerHTML = '⭐';
+          starEl.style.cssText = `
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            font-size: 12px;
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+            pointer-events: none;
+          `;
+          
+          el.appendChild(logoEl);
+          el.appendChild(starEl);
         } else {
           // Regular discrete marker
           el.style.cssText = `
@@ -188,8 +270,11 @@ export const GlobalResourcesMap = () => {
         // Hover effect
         el.addEventListener('mouseenter', () => {
           if (isPartner) {
-            el.style.transform = 'scale(1.15)';
-            el.style.boxShadow = `0 4px 12px rgba(0,0,0,0.4), 0 0 0 3px ${config.color}50`;
+            const logoEl = el.querySelector('div');
+            if (logoEl) {
+              logoEl.style.transform = 'scale(1.15)';
+              logoEl.style.boxShadow = `0 4px 12px rgba(0,0,0,0.4), 0 0 0 3px ${config.color}50`;
+            }
           } else {
             el.style.transform = 'rotate(-45deg) scale(1.15)';
             el.style.boxShadow = '0 3px 10px rgba(0,0,0,0.35)';
@@ -197,8 +282,11 @@ export const GlobalResourcesMap = () => {
         });
         el.addEventListener('mouseleave', () => {
           if (isPartner) {
-            el.style.transform = 'scale(1)';
-            el.style.boxShadow = `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`;
+            const logoEl = el.querySelector('div');
+            if (logoEl) {
+              logoEl.style.transform = 'scale(1)';
+              logoEl.style.boxShadow = `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`;
+            }
           } else {
             el.style.transform = 'rotate(-45deg) scale(1)';
             el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.25)';
@@ -235,6 +323,27 @@ export const GlobalResourcesMap = () => {
     <div className="absolute inset-0 w-full h-full bg-background">
       {/* Full Viewport Map */}
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
+      
+      {/* Rotation Toggle Button */}
+      <Button
+        size="icon"
+        onClick={() => setIsRotating(!isRotating)}
+        className="absolute top-4 right-16 z-20 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all"
+        title={isRotating ? "Pause rotation" : "Resume rotation"}
+      >
+        {isRotating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+      </Button>
+
+      {/* My Location Button */}
+      <Button
+        size="icon"
+        onClick={requestUserLocation}
+        disabled={isLocating}
+        className="absolute top-16 right-16 z-20 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all disabled:opacity-50"
+        title="Show my location"
+      >
+        {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Locate className="w-4 h-4" />}
+      </Button>
       
       {/* Single Toggle Button - works for both open and closed states */}
       <Button
