@@ -88,10 +88,7 @@ const Sponsorship = () => {
           {/* Header with Become Sponsor Button */}
           <div className="text-center mb-12 animate-fade-in">
             
-            <Button size="lg" className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-white font-semibold mb-4" onClick={() => window.location.href = 'mailto:info@startupfactoryhub.com'}>
-              <Rocket className="mr-2 h-5 w-5" />
-              Become a Sponsor
-            </Button>
+            
             <div className="flex items-center justify-center gap-2 text-muted-foreground">
               <Mail className="h-4 w-4" />
               <a href="mailto:info@startupfactoryhub.com" className="hover:text-primary transition-colors">
@@ -106,9 +103,7 @@ const Sponsorship = () => {
               <div className="inline-block mb-4 px-4 py-2 bg-primary/10 rounded-full">
                 <span className="text-primary font-semibold text-sm uppercase tracking-wider">Why Partner With Us</span>
               </div>
-              <h2 className="text-5xl font-bold mb-6 bg-gradient-to-r from-primary via-primary to-primary/70 bg-clip-text text-transparent">
-                Why Invest in Startup Factory Hub as a Sponsor?
-              </h2>
+              
               <p className="text-xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
                 As a sponsor of Startup Factory Hub, your organization aligns itself with one of the world's most forward-thinking deep-tech accelerators.
               </p>
@@ -116,7 +111,9 @@ const Sponsorship = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Benefit 1 */}
-              <div className="group animate-fade-in" style={{ animationDelay: '0.1s' }}>
+              <div className="group animate-fade-in" style={{
+              animationDelay: '0.1s'
+            }}>
                 <Card className="h-full bg-gradient-to-br from-card/40 to-card/20 border-2 border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 backdrop-blur-sm">
                   <CardHeader className="pb-4">
                     <div className="flex items-start gap-4 mb-4">
@@ -156,7 +153,9 @@ const Sponsorship = () => {
               </div>
 
               {/* Benefit 2 */}
-              <div className="group animate-fade-in" style={{ animationDelay: '0.2s' }}>
+              <div className="group animate-fade-in" style={{
+              animationDelay: '0.2s'
+            }}>
                 <Card className="h-full bg-gradient-to-br from-card/40 to-card/20 border-2 border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 backdrop-blur-sm">
                   <CardHeader className="pb-4">
                     <div className="flex items-start gap-4 mb-4">
@@ -208,7 +207,9 @@ const Sponsorship = () => {
               </div>
 
               {/* Benefit 3 */}
-              <div className="group animate-fade-in" style={{ animationDelay: '0.3s' }}>
+              <div className="group animate-fade-in" style={{
+              animationDelay: '0.3s'
+            }}>
                 <Card className="h-full bg-gradient-to-br from-card/40 to-card/20 border-2 border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 backdrop-blur-sm">
                   <CardHeader className="pb-4">
                     <div className="flex items-start gap-4 mb-4">
@@ -255,7 +256,9 @@ const Sponsorship = () => {
               </div>
 
               {/* Benefit 4 */}
-              <div className="group animate-fade-in" style={{ animationDelay: '0.4s' }}>
+              <div className="group animate-fade-in" style={{
+              animationDelay: '0.4s'
+            }}>
                 <Card className="h-full bg-gradient-to-br from-card/40 to-card/20 border-2 border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 backdrop-blur-sm">
                   <CardHeader className="pb-4">
                     <div className="flex items-start gap-4 mb-4">
@@ -299,7 +302,9 @@ const Sponsorship = () => {
               </div>
 
               {/* Benefit 5 */}
-              <div className="group animate-fade-in" style={{ animationDelay: '0.5s' }}>
+              <div className="group animate-fade-in" style={{
+              animationDelay: '0.5s'
+            }}>
                 <Card className="h-full bg-gradient-to-br from-card/40 to-card/20 border-2 border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 backdrop-blur-sm">
                   <CardHeader className="pb-4">
                     <div className="flex items-start gap-4 mb-4">
@@ -345,7 +350,9 @@ const Sponsorship = () => {
               </div>
 
               {/* Benefit 6 */}
-              <div className="group animate-fade-in" style={{ animationDelay: '0.6s' }}>
+              <div className="group animate-fade-in" style={{
+              animationDelay: '0.6s'
+            }}>
                 <Card className="h-full bg-gradient-to-br from-card/40 to-card/20 border-2 border-border/50 hover:border-primary/50 transition-all duration-500 hover:shadow-2xl hover:shadow-primary/10 backdrop-blur-sm">
                   <CardHeader className="pb-4">
                     <div className="flex items-start gap-4 mb-4">
