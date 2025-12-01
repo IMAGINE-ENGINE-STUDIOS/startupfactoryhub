@@ -1,4 +1,4 @@
-import { Rocket, Globe, Star, Sparkles, Award, MapPin, Users, Briefcase, Zap, CheckCircle2, Building2, Megaphone, Target, TrendingUp, ChevronDown, Mail } from "lucide-react";
+import { Rocket, Globe, Star, Sparkles, Award, MapPin, Users, Briefcase, Zap, CheckCircle2, Building2, Megaphone, Target, TrendingUp, ChevronDown, Mail, Eye, Lightbulb, Handshake, Network, TrendingUpIcon, Presentation } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import MatrixBackground from "@/components/MatrixBackground";
@@ -97,6 +97,240 @@ const Sponsorship = () => {
               <a href="mailto:info@startupfactoryhub.com" className="hover:text-primary transition-colors">
                 info@startupfactoryhub.com
               </a>
+            </div>
+          </div>
+
+          {/* Why Invest Section */}
+          <div className="mb-20 max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl font-bold mb-4">Why Invest in Startup Factory Hub Accelerator as a Sponsor?</h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                As a sponsor of Startup Factory Hub, your organization aligns itself with one of the world's most forward-thinking deep-tech accelerators.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Benefit 1 */}
+              <Card className="bg-card/30 border border-border/30 hover:border-primary/50 transition-all duration-300 hover:bg-card/50">
+                <CardHeader>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      <Eye className="h-6 w-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl">Unmatched Visibility & Global Recognition</CardTitle>
+                  </div>
+                  <CardDescription className="text-sm leading-relaxed">
+                    Your brand is showcased across:
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">All accelerator materials</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Global events in NY, SF, Orlando, Tokyo, Chile</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Digital platforms and Demo Days</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground pt-2">
+                    This positions your company as a leader in innovation, advanced technology, and entrepreneurial development.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Benefit 2 */}
+              <Card className="bg-card/30 border border-border/30 hover:border-primary/50 transition-all duration-300 hover:bg-card/50">
+                <CardHeader>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      <TrendingUpIcon className="h-6 w-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl">Direct Access to Elite Founders & High-Value Deal Flow</CardTitle>
+                  </div>
+                  <CardDescription className="text-sm leading-relaxed">
+                    SFH provides a pipeline of highly vetted, frontier-technology startups solving major challenges in:
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Aerospace & space infrastructure</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Photonics & telecom</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Quantum & advanced computing</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">AI/ML automation</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Materials & energy systems</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Climate & sustainability tech</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground pt-2">
+                    Sponsors gain early insight into startups, pilot-ready technologies, and investment-grade companies before they hit the market.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Benefit 3 */}
+              <Card className="bg-card/30 border border-border/30 hover:border-primary/50 transition-all duration-300 hover:bg-card/50">
+                <CardHeader>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      <Presentation className="h-6 w-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl">Showcase Your Technology to Future Industry Leaders</CardTitle>
+                  </div>
+                  <CardDescription className="text-sm leading-relaxed">
+                    Sponsors can present their solutions directly to hundreds of deep-tech founders:
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">APIs & Cloud credits</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Hardware & Photonics/quantum tools</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Robotics systems & AI models</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground pt-2 font-semibold">This drives:</p>
+                  <div className="space-y-1 text-sm text-muted-foreground pl-4">
+                    <p>• Product adoption</p>
+                    <p>• Technical partnerships</p>
+                    <p>• Industry awareness</p>
+                    <p>• Pilot programs</p>
+                    <p>• Co-innovation deals</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Benefit 4 */}
+              <Card className="bg-card/30 border border-border/30 hover:border-primary/50 transition-all duration-300 hover:bg-card/50">
+                <CardHeader>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      <Lightbulb className="h-6 w-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl">Thought Leadership Opportunities</CardTitle>
+                  </div>
+                  <CardDescription className="text-sm leading-relaxed">
+                    Depending on the sponsorship tier, partners receive:
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Speaking opportunities at SFH Summits, Demo Days, and global events</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Participation in expert panels and roundtables</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Co-branded fireside chats</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Mentor/guest lecture slots</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground pt-2">
+                    This positions your organization as a global thought leader in frontier innovation.
+                  </p>
+                </CardContent>
+              </Card>
+
+              {/* Benefit 5 */}
+              <Card className="bg-card/30 border border-border/30 hover:border-primary/50 transition-all duration-300 hover:bg-card/50">
+                <CardHeader>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      <Handshake className="h-6 w-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl">Align with a Globally Recognized Innovation Ecosystem</CardTitle>
+                  </div>
+                  <CardDescription className="text-sm leading-relaxed">
+                    Startup Factory Hub is integrated with:
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Research centers & University labs</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Corporate partners & Government programs</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">NASA Tech Transfer & International innovation hubs</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground pt-2 font-semibold">Sponsorship signals corporate leadership in:</p>
+                  <div className="space-y-1 text-sm text-muted-foreground pl-4">
+                    <p>• Sustainable development</p>
+                    <p>• Advanced engineering</p>
+                    <p>• Global technology commercialization</p>
+                    <p>• Frontier-tech innovation</p>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Benefit 6 */}
+              <Card className="bg-card/30 border border-border/30 hover:border-primary/50 transition-all duration-300 hover:bg-card/50">
+                <CardHeader>
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="p-3 rounded-lg bg-primary/10">
+                      <Network className="h-6 w-6 text-primary" />
+                    </div>
+                    <CardTitle className="text-xl">High-Impact Networking Across Continents</CardTitle>
+                  </div>
+                  <CardDescription className="text-sm leading-relaxed">
+                    SFH hosts exclusive events where sponsors interact with:
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Deep-tech founders & Investors/VCs</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Researchers & Corporate innovation teams</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-primary flex-shrink-0 mt-1" />
+                    <span className="text-sm">Government tech directors</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground pt-2 font-semibold">Networking across all SFH global hubs:</p>
+                  <div className="space-y-1 text-sm text-muted-foreground pl-4">
+                    <p>• New York (Finance & Enterprise Tech)</p>
+                    <p>• San Francisco (AI & Cloud Capital)</p>
+                    <p>• Orlando/Lake Nona (Space & Photonics)</p>
+                    <p>• Tokyo (Advanced Manufacturing & Quantum)</p>
+                    <p>• Santiago (LATAM Deep-Tech Gateway)</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
 
