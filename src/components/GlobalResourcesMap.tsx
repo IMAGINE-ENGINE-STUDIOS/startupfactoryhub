@@ -70,6 +70,7 @@ export const GlobalResourcesMap = () => {
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
   const [isLocating, setIsLocating] = useState(false);
   const [isRotating, setIsRotating] = useState(true);
+  const isRotatingRef = useRef(true);
 
   const { data: resources, isLoading } = useResources({ 
     type: selectedType || undefined,
@@ -89,6 +90,11 @@ export const GlobalResourcesMap = () => {
       (error) => {
         toast({ title: "Location unavailable", description: "Unable to get your location", variant: "destructive" });
         setIsLocating(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0
       }
     );
   };
@@ -129,7 +135,7 @@ export const GlobalResourcesMap = () => {
     // Auto-rotate globe
     let userInteracting = false;
     const spinGlobe = () => {
-      if (!map.current || userInteracting || !isRotating) return;
+      if (!map.current || userInteracting || !isRotatingRef.current) return;
       const center = map.current.getCenter();
       center.lng -= 0.15;
       map.current.easeTo({ center, duration: 1000, easing: (n) => n });
@@ -150,6 +156,11 @@ export const GlobalResourcesMap = () => {
       map.current = null;
     };
   }, []);
+
+  // Sync isRotating state with ref for spinGlobe closure
+  useEffect(() => {
+    isRotatingRef.current = isRotating;
+  }, [isRotating]);
 
   // User location marker
   useEffect(() => {
@@ -351,7 +362,7 @@ export const GlobalResourcesMap = () => {
         onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
         className={cn(
           "absolute top-4 z-20 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-white/20 dark:hover:bg-black/30 rounded-2xl",
-          isLeftPanelOpen ? "left-[340px]" : "left-4"
+          isLeftPanelOpen ? "left-[348px]" : "left-4"
         )}
         variant="ghost"
       >
@@ -361,8 +372,8 @@ export const GlobalResourcesMap = () => {
       {/* Left Side Sliding Panel */}
       <div 
         className={cn(
-          "absolute left-2 top-2 bottom-2 w-80 z-10 transition-all duration-300",
-          isLeftPanelOpen ? "translate-x-0" : "-translate-x-full"
+          "absolute top-2 bottom-2 w-80 z-10 transition-all duration-300",
+          isLeftPanelOpen ? "left-2" : "-left-[330px]"
         )}
       >
         <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col rounded-3xl">
