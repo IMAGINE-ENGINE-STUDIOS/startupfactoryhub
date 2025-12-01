@@ -201,19 +201,19 @@ export default function StartupInvestorNetwork() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeInvestors.map((investor) => (
-                <Card key={investor.id} className="hover:shadow-md transition-shadow border-green-500/20">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3 mb-3">
-                      <Avatar className="h-12 w-12">
+                <Card key={investor.id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <Avatar className="h-16 w-16">
                         <AvatarImage src={investor.avatar_url} alt={investor.full_name} />
-                        <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                        <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg">
                           {investor.full_name?.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold truncate">{investor.full_name}</h4>
+                        <h4 className="font-semibold text-foreground truncate">{investor.full_name}</h4>
                         <Badge className="bg-green-500/10 text-green-500 text-xs mt-1">
                           <DollarSign className="h-3 w-3 mr-1" />
                           Invested
@@ -222,7 +222,7 @@ export default function StartupInvestorNetwork() {
                     </div>
 
                     {investor.investment_amount && (
-                      <div className="mb-3 p-3 bg-green-500/5 rounded-lg">
+                      <div className="mb-4 p-3 bg-green-500/5 rounded-lg">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Investment</span>
                           <span className="font-semibold text-green-500">
@@ -243,7 +243,7 @@ export default function StartupInvestorNetwork() {
                       </p>
                     )}
 
-                    <div className="flex flex-wrap gap-1 mb-3">
+                    <div className="flex flex-wrap gap-1 mb-4">
                       {investor.preferred_industries?.slice(0, 2).map((industry, idx) => (
                         <Badge key={idx} variant="secondary" className="text-xs">
                           {industry}
@@ -251,14 +251,14 @@ export default function StartupInvestorNetwork() {
                       ))}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <Button
                         size="sm"
                         variant="outline"
                         className="flex-1"
                         onClick={() => handleViewProfile(investor)}
                       >
-                        <Eye className="h-3 w-3 mr-1" />
+                        <Eye className="h-4 w-4 mr-1" />
                         View
                       </Button>
                       <Button
@@ -267,7 +267,7 @@ export default function StartupInvestorNetwork() {
                         className="flex-1"
                         onClick={() => handleBookPitch(investor)}
                       >
-                        <Calendar className="h-3 w-3 mr-1" />
+                        <Calendar className="h-4 w-4 mr-1" />
                         Pitch
                       </Button>
                       <Button
@@ -275,13 +275,13 @@ export default function StartupInvestorNetwork() {
                         className="flex-1"
                         onClick={() => handleMessageInvestor(investor.user_id)}
                       >
-                        <MessageSquare className="h-3 w-3 mr-1" />
+                        <MessageSquare className="h-4 w-4 mr-1" />
                         Message
                       </Button>
                     </div>
 
                     {investor.portfolio_size && (
-                      <p className="text-xs text-muted-foreground mt-2 text-center">
+                      <p className="text-xs text-muted-foreground mt-3 text-center">
                         Portfolio: {investor.portfolio_size} companies
                       </p>
                     )}
@@ -302,19 +302,19 @@ export default function StartupInvestorNetwork() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {interestedInvestors.map((investor) => (
-                <Card key={investor.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3 mb-3">
-                      <Avatar className="h-12 w-12">
+                <Card key={investor.id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <Avatar className="h-16 w-16">
                         <AvatarImage src={investor.avatar_url} alt={investor.full_name} />
-                        <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                        <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg">
                           {investor.full_name?.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold truncate">{investor.full_name}</h4>
+                        <h4 className="font-semibold text-foreground truncate">{investor.full_name}</h4>
                         <Badge variant="outline" className="text-xs mt-1">
                           Interested
                         </Badge>
@@ -322,7 +322,7 @@ export default function StartupInvestorNetwork() {
                     </div>
 
                     {investor.investment_range_min && investor.investment_range_max && (
-                      <div className="mb-3 p-3 bg-muted rounded-lg">
+                      <div className="mb-4 p-3 bg-muted rounded-lg">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-muted-foreground">Range</span>
                           <span className="font-semibold">
@@ -338,7 +338,7 @@ export default function StartupInvestorNetwork() {
                       </p>
                     )}
 
-                    <div className="flex flex-wrap gap-1 mb-3">
+                    <div className="flex flex-wrap gap-1 mb-4">
                       {investor.preferred_industries?.slice(0, 2).map((industry, idx) => (
                         <Badge key={idx} variant="secondary" className="text-xs">
                           {industry}
@@ -346,14 +346,14 @@ export default function StartupInvestorNetwork() {
                       ))}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <Button
                         size="sm"
                         variant="outline"
                         className="flex-1"
                         onClick={() => handleViewProfile(investor)}
                       >
-                        <Eye className="h-3 w-3 mr-1" />
+                        <Eye className="h-4 w-4 mr-1" />
                         View
                       </Button>
                       <Button
@@ -362,7 +362,7 @@ export default function StartupInvestorNetwork() {
                         className="flex-1"
                         onClick={() => handleBookPitch(investor)}
                       >
-                        <Calendar className="h-3 w-3 mr-1" />
+                        <Calendar className="h-4 w-4 mr-1" />
                         Pitch
                       </Button>
                       <Button
@@ -371,7 +371,7 @@ export default function StartupInvestorNetwork() {
                         className="flex-1"
                         onClick={() => handleMessageInvestor(investor.user_id)}
                       >
-                        <MessageSquare className="h-3 w-3 mr-1" />
+                        <MessageSquare className="h-4 w-4 mr-1" />
                         Message
                       </Button>
                     </div>

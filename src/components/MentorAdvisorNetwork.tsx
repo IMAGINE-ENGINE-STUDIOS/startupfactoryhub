@@ -159,30 +159,30 @@ export default function MentorAdvisorNetwork() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {activeMentors.map((mentor) => (
-                <Card key={mentor.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3 mb-3">
-                      <Avatar className="h-12 w-12">
+                <Card key={mentor.id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <Avatar className="h-16 w-16">
                         <AvatarImage src={mentor.avatar_url} alt={mentor.full_name} />
-                        <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                        <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg">
                           {mentor.full_name?.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold truncate">{mentor.full_name}</h4>
+                        <h4 className="font-semibold text-foreground truncate">{mentor.full_name}</h4>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           {mentor.years_of_experience && (
-                            <span>{mentor.years_of_experience}+ years exp</span>
-                          )}
-                          {mentor.average_rating && (
-                            <div className="flex items-center gap-1">
-                              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                              <span>{mentor.average_rating.toFixed(1)}</span>
-                            </div>
+                            <span>{mentor.years_of_experience}+ years</span>
                           )}
                         </div>
+                        {mentor.average_rating && (
+                          <div className="flex items-center gap-1 mt-1 text-yellow-500">
+                            <Star className="h-4 w-4 fill-current" />
+                            <span className="text-sm font-medium">{mentor.average_rating.toFixed(1)}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -192,7 +192,7 @@ export default function MentorAdvisorNetwork() {
                       </p>
                     )}
 
-                    <div className="flex flex-wrap gap-1 mb-3">
+                    <div className="flex flex-wrap gap-1 mb-4">
                       {mentor.expertise_areas?.slice(0, 3).map((area, idx) => (
                         <Badge key={idx} variant="secondary" className="text-xs">
                           {area}
@@ -200,14 +200,14 @@ export default function MentorAdvisorNetwork() {
                       ))}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <Button
                         size="sm"
                         variant="outline"
                         className="flex-1"
                         onClick={() => handleViewProfile(mentor.user_id)}
                       >
-                        <Eye className="h-3 w-3 mr-1" />
+                        <Eye className="h-4 w-4 mr-1" />
                         View
                       </Button>
                       <Button
@@ -216,7 +216,7 @@ export default function MentorAdvisorNetwork() {
                         className="flex-1"
                         onClick={() => handleMessageMentor(mentor.user_id)}
                       >
-                        <MessageSquare className="h-3 w-3 mr-1" />
+                        <MessageSquare className="h-4 w-4 mr-1" />
                         Message
                       </Button>
                       <Button
@@ -224,13 +224,13 @@ export default function MentorAdvisorNetwork() {
                         className="flex-1"
                         onClick={() => handleScheduleSession(mentor.user_id)}
                       >
-                        <Calendar className="h-3 w-3 mr-1" />
+                        <Calendar className="h-4 w-4 mr-1" />
                         Schedule
                       </Button>
                     </div>
 
                     {mentor.total_sessions && (
-                      <p className="text-xs text-muted-foreground mt-2 text-center">
+                      <p className="text-xs text-muted-foreground mt-3 text-center">
                         {mentor.total_sessions} sessions completed
                       </p>
                     )}
@@ -251,26 +251,26 @@ export default function MentorAdvisorNetwork() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pastMentors.map((mentor) => (
-                <Card key={mentor.id} className="opacity-75 hover:opacity-100 transition-opacity">
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-3 mb-3">
-                      <Avatar className="h-12 w-12">
+                <Card key={mentor.id} className="tech-card border-0 opacity-75 hover:opacity-100 hover:scale-[1.02] transition-all">
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <Avatar className="h-16 w-16">
                         <AvatarImage src={mentor.avatar_url} alt={mentor.full_name} />
-                        <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                        <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg">
                           {mentor.full_name?.charAt(0)}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-semibold truncate">{mentor.full_name}</h4>
+                        <h4 className="font-semibold text-foreground truncate">{mentor.full_name}</h4>
                         <Badge variant="outline" className="text-xs">
                           Past Mentor
                         </Badge>
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap gap-1 mb-3">
+                    <div className="flex flex-wrap gap-1 mb-4">
                       {mentor.expertise_areas?.slice(0, 3).map((area, idx) => (
                         <Badge key={idx} variant="secondary" className="text-xs">
                           {area}
@@ -278,14 +278,14 @@ export default function MentorAdvisorNetwork() {
                       ))}
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-3">
                       <Button
                         size="sm"
                         variant="outline"
                         className="flex-1"
                         onClick={() => handleViewProfile(mentor.user_id)}
                       >
-                        <Eye className="h-3 w-3 mr-1" />
+                        <Eye className="h-4 w-4 mr-1" />
                         View
                       </Button>
                       <Button
@@ -294,7 +294,7 @@ export default function MentorAdvisorNetwork() {
                         className="flex-1"
                         onClick={() => handleMessageMentor(mentor.user_id)}
                       >
-                        <MessageSquare className="h-3 w-3 mr-1" />
+                        <MessageSquare className="h-4 w-4 mr-1" />
                         Message
                       </Button>
                     </div>
