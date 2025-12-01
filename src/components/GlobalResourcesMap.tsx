@@ -206,7 +206,7 @@ export const GlobalResourcesMap = () => {
 
       {/* Collapsed Toolbar Bar - vertical glassmorphism bar with icons */}
       {!isLeftPanelOpen && (
-        <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20 backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] rounded-2xl p-2 flex flex-col gap-2">
+        <div className="absolute left-2 top-2 z-20 backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] rounded-2xl p-2 flex flex-col gap-1">
           <Button 
             size="icon" 
             variant="ghost" 
