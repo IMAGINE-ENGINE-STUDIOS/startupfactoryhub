@@ -884,8 +884,8 @@ const Dashboard = () => {
 
           {/* Resources Tab */}
           {activeTab === "resources" && (
-            <TabsContent value="resources" className="space-y-0">
-              <div className="h-[calc(100vh-16rem)]">
+            <TabsContent value="resources" className="absolute inset-0 p-0 m-0">
+              <div className="absolute inset-0">
                 <GlobalResourcesMap />
               </div>
             </TabsContent>
