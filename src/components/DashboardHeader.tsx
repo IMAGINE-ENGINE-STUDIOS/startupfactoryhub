@@ -26,7 +26,7 @@ export function DashboardHeader() {
   };
 
   return (
-    <div className="absolute sm:fixed top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-1.5 sm:gap-2 z-40">
+    <div className="absolute sm:fixed top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-1.5 sm:gap-2 z-40 tech-card border-0 rounded-full p-1 sm:p-1.5">
       <Button
         variant="ghost"
         size="icon"
@@ -65,7 +65,7 @@ export function DashboardHeader() {
             )}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-96 p-0" align="center">
+        <PopoverContent className="tech-card border-0 w-[calc(100vw-2rem)] sm:w-96 p-0" align="center">
           <div className="p-3 sm:p-4 border-b">
             <div className="flex items-center gap-2">
               <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
