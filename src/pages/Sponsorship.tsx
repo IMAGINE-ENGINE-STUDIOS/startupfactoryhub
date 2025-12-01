@@ -1,6 +1,7 @@
-import { Rocket, Globe, Star, Sparkles, Award, MapPin, Users, Briefcase, Zap, CheckCircle2, Building2, Megaphone, Target, TrendingUp, ChevronDown } from "lucide-react";
+import { Rocket, Globe, Star, Sparkles, Award, MapPin, Users, Briefcase, Zap, CheckCircle2, Building2, Megaphone, Target, TrendingUp, ChevronDown, Mail } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import MatrixBackground from "@/components/MatrixBackground";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
@@ -138,25 +139,31 @@ const Sponsorship = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen bg-background text-foreground relative">
+      <MatrixBackground />
       <Navigation />
       
-      <main className="pt-24 pb-20">
+      <main className="pt-24 pb-20 relative z-10">
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
-          {/* Header */}
-          <div className="text-center mb-16 animate-fade-in">
-            <div className="flex justify-center mb-6">
-              <div className="relative">
-                <Rocket className="h-20 w-20 text-primary" />
-                <div className="absolute inset-0 blur-xl bg-primary/20 animate-pulse" />
-              </div>
-            </div>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-4">
-              STARTUP FACTORY HUB
+          {/* Header with Become Sponsor Button */}
+          <div className="text-center mb-12 animate-fade-in">
+            <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">
+              Sponsorship Program
             </h1>
-            <p className="text-xl sm:text-2xl text-muted-foreground font-light tracking-wide">
-              SPONSORSHIP PROGRAM
-            </p>
+            <Button 
+              size="lg"
+              className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-white font-semibold mb-4"
+              onClick={() => window.location.href = 'mailto:info@startupfactoryhub.com'}
+            >
+              <Rocket className="mr-2 h-5 w-5" />
+              Become a Sponsor
+            </Button>
+            <div className="flex items-center justify-center gap-2 text-muted-foreground">
+              <Mail className="h-4 w-4" />
+              <a href="mailto:info@startupfactoryhub.com" className="hover:text-primary transition-colors">
+                info@startupfactoryhub.com
+              </a>
+            </div>
           </div>
 
           {/* Tier Cards - Expandable */}
@@ -172,7 +179,7 @@ const Sponsorship = () => {
                   className="animate-fade-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <Card className={`border-2 ${tier.borderColor} hover:${tier.glowColor} shadow-lg transition-all duration-300 overflow-hidden ${isOpen ? 'ring-2 ring-primary/20' : ''}`}>
+                  <Card className={`border-2 ${tier.borderColor} hover:${tier.glowColor} shadow-lg transition-all duration-300 overflow-hidden ${isOpen ? 'ring-2 ring-primary/20' : ''} min-h-[280px] flex flex-col`}>
                     <CollapsibleTrigger className="w-full text-left">
                       <CardHeader className="cursor-pointer hover:bg-accent/5 transition-colors">
                         <div className="flex items-center justify-between">
@@ -268,9 +275,9 @@ const Sponsorship = () => {
 
                         <Button 
                           className={`w-full bg-gradient-to-br ${tier.color} hover:opacity-90 transition-opacity text-white font-semibold py-6 text-lg`}
-                          onClick={() => window.location.href = 'mailto:partnerships@startupfactoryhub.com'}
+                          onClick={() => window.location.href = 'mailto:info@startupfactoryhub.com'}
                         >
-                          Become a Sponsor
+                          Contact Us
                         </Button>
                       </CardContent>
                     </CollapsibleContent>
