@@ -192,60 +192,18 @@ export const GlobalResourcesMap = () => {
       {/* Full Viewport Map */}
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
       
-      {/* Close button when panel is open */}
-      {isLeftPanelOpen && (
-        <Button
-          size="icon"
-          onClick={() => setIsLeftPanelOpen(false)}
-          className="absolute left-[340px] top-4 z-20 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-white/20 dark:hover:bg-black/30 rounded-2xl"
-          variant="ghost"
-        >
-          <X className="w-5 h-5" />
-        </Button>
-      )}
-
-      {/* Collapsed Toolbar Bar - vertical glassmorphism bar with icons */}
-      {!isLeftPanelOpen && (
-        <div className="absolute left-2 top-2 z-20 backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] rounded-2xl p-2 flex flex-col gap-1">
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={() => setIsLeftPanelOpen(true)}
-            className="rounded-xl bg-white/5 hover:bg-white/15"
-          >
-            <Search className="w-5 h-5" />
-          </Button>
-          
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={() => setIsLeftPanelOpen(true)}
-            className="rounded-xl bg-white/5 hover:bg-white/15"
-          >
-            <MapPin className="w-5 h-5" />
-          </Button>
-          
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={() => setShowAddDialog(true)}
-            className="rounded-xl bg-white/5 hover:bg-white/15"
-          >
-            <Plus className="w-5 h-5" />
-          </Button>
-          
-          <div className="h-px bg-white/20 my-1" />
-          
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={() => setIsLeftPanelOpen(true)}
-            className="rounded-xl bg-white/5 hover:bg-white/15"
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
-        </div>
-      )}
+      {/* Single Toggle Button - works for both open and closed states */}
+      <Button
+        size="icon"
+        onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+        className={cn(
+          "absolute top-4 z-20 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-white/20 dark:hover:bg-black/30 rounded-2xl",
+          isLeftPanelOpen ? "left-[340px]" : "left-4"
+        )}
+        variant="ghost"
+      >
+        {isLeftPanelOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      </Button>
 
       {/* Left Side Sliding Panel */}
       <div 
