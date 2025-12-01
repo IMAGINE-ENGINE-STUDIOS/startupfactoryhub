@@ -145,7 +145,7 @@ export default function ActiveMenteesCards({
         <Badge variant="secondary">{mentees.length}</Badge>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {mentees.map(mentee => {
         const isExpanded = expandedMentee === mentee.mentee_id;
         const history = sessionHistory[mentee.mentee_id] || [];
@@ -154,7 +154,7 @@ export default function ActiveMenteesCards({
         const upcomingSessions = history.filter(s => s.status === 'scheduled' && new Date(s.scheduled_at) > new Date()).length;
         const company = mentee.companies;
         return <Collapsible key={mentee.id} open={isExpanded} onOpenChange={() => handleToggleExpand(mentee.mentee_id)}>
-              <div className={cn("rounded-xl border transition-all duration-300 overflow-hidden aspect-square flex flex-col", isExpanded ? "border-primary/30 shadow-lg aspect-auto col-span-1 md:col-span-2 lg:col-span-3" : "border-border hover:border-primary/20 hover:shadow-md")}>
+              <div className={cn("tech-card rounded-xl border-0 transition-all duration-300 overflow-hidden aspect-square flex flex-col", isExpanded ? "shadow-lg aspect-auto col-span-1 md:col-span-2 lg:col-span-3" : "hover:scale-[1.02]")}>
                 {/* Startup Profile Card */}
                 <CollapsibleTrigger asChild>
                   <div className={cn("cursor-pointer flex flex-col", !isExpanded && "h-full")}>
