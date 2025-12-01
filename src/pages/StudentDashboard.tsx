@@ -90,38 +90,38 @@ export default function StudentDashboard() {
         {/* Main Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-7xl whitespace-nowrap">
-              <TabsTrigger value="social" className="gap-2">
-                <MessageCircle className="h-4 w-4" />
-                <span className="hidden md:inline">Social</span>
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-7xl whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+              <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Social</span>
               </TabsTrigger>
-              <TabsTrigger value="network" className="gap-2">
-                <Network className="h-4 w-4" />
-                <span className="hidden md:inline">Network</span>
+              <TabsTrigger value="network" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Network className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Network</span>
               </TabsTrigger>
-              <TabsTrigger value="learning" className="gap-2">
-                <BookOpen className="h-4 w-4" />
-                <span className="hidden md:inline">Learning</span>
+              <TabsTrigger value="learning" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <BookOpen className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Learning</span>
               </TabsTrigger>
-              <TabsTrigger value="jobs" className="gap-2">
-                <Briefcase className="h-4 w-4" />
-                <span className="hidden md:inline">Jobs</span>
+              <TabsTrigger value="jobs" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Briefcase className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Jobs</span>
               </TabsTrigger>
-              <TabsTrigger value="calendar" className="gap-2">
-                <CalendarIcon className="h-4 w-4" />
-                <span className="hidden md:inline">Calendar</span>
+              <TabsTrigger value="calendar" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <CalendarIcon className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Calendar</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="gap-2">
-                <BarChart className="h-4 w-4" />
-                <span className="hidden md:inline">Analytics</span>
+              <TabsTrigger value="analytics" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <BarChart className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Analytics</span>
               </TabsTrigger>
-              <TabsTrigger value="intelligence" className="gap-2">
-                <Brain className="h-4 w-4" />
-                <span className="hidden md:inline">Intelligence</span>
+              <TabsTrigger value="intelligence" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Brain className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Intelligence</span>
               </TabsTrigger>
-              <TabsTrigger value="tools" className="gap-2">
-                <Wrench className="h-4 w-4" />
-                <span className="hidden md:inline">Tools</span>
+              <TabsTrigger value="tools" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Wrench className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Tools</span>
               </TabsTrigger>
             </TabsList>
           </div>
