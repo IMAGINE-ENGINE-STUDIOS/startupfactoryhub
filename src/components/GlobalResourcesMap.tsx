@@ -33,7 +33,8 @@ import {
   Pause,
   Play,
   Locate,
-  Loader2
+  Loader2,
+  Mail
 } from 'lucide-react';
 import { AddResourceDialog } from './AddResourceDialog';
 import { toast } from '@/hooks/use-toast';
@@ -613,6 +614,57 @@ export const GlobalResourcesMap = () => {
                       <Bookmark className="w-4 h-4" />
                       Bookmark
                     </Button>
+
+                    {/* Contact Information */}
+                    {selectedResource.contact_email && (
+                      <div className="mt-4 p-4 rounded-2xl backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20">
+                        <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                          <Mail className="w-4 h-4" />
+                          Contact Information
+                        </h4>
+                        <div className="space-y-2 text-sm">
+                          {selectedResource.title === 'Nasdaq Interns Match' && (
+                            <>
+                              <div>
+                                <p className="text-muted-foreground text-xs mb-1">Media Inquiries:</p>
+                                <a 
+                                  href="mailto:media@theCenter.nasdaq.org" 
+                                  className="text-primary hover:underline"
+                                >
+                                  media@theCenter.nasdaq.org
+                                </a>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground text-xs mb-1">Partnership Opportunities:</p>
+                                <a 
+                                  href="mailto:partners@theCenter.nasdaq.org" 
+                                  className="text-primary hover:underline"
+                                >
+                                  partners@theCenter.nasdaq.org
+                                </a>
+                              </div>
+                              <div>
+                                <p className="text-muted-foreground text-xs mb-1">Event Inquiries:</p>
+                                <a 
+                                  href="mailto:events@theCenter.nasdaq.org" 
+                                  className="text-primary hover:underline"
+                                >
+                                  events@theCenter.nasdaq.org
+                                </a>
+                              </div>
+                            </>
+                          )}
+                          {selectedResource.title !== 'Nasdaq Interns Match' && (
+                            <a 
+                              href={`mailto:${selectedResource.contact_email}`} 
+                              className="text-primary hover:underline"
+                            >
+                              {selectedResource.contact_email}
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </ScrollArea>
