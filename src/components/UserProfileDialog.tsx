@@ -384,7 +384,7 @@ export default function UserProfileDialog({
                     onClick={() => {
                       onOpenChange(false);
                       setTimeout(() => {
-                        window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { recipientId: userId } }));
+                        window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { userId } }));
                       }, 150);
                     }}
                   >
