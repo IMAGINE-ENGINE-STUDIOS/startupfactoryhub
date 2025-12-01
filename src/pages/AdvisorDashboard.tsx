@@ -156,24 +156,19 @@ export default function AdvisorDashboard() {
       }).eq('mentor_id', user.id).in('status', ['completed', 'scheduled']);
 
       // Calculate average rating from session_feedback
-      const { data: sessionIds } = await supabase
-        .from('mentoring_sessions')
-        .select('id')
-        .eq('mentor_id', user.id);
-
+      const {
+        data: sessionIds
+      } = await supabase.from('mentoring_sessions').select('id').eq('mentor_id', user.id);
       let averageRating = 0;
       if (sessionIds && sessionIds.length > 0) {
-        const { data: feedback } = await supabase
-          .from('session_feedback')
-          .select('rating')
-          .in('session_id', sessionIds.map(s => s.id));
-
+        const {
+          data: feedback
+        } = await supabase.from('session_feedback').select('rating').in('session_id', sessionIds.map(s => s.id));
         if (feedback && feedback.length > 0) {
           const totalRating = feedback.reduce((sum, f) => sum + (f.rating || 0), 0);
           averageRating = totalRating / feedback.length;
         }
       }
-
       setMentorStats({
         activeMentees: activeMenteesCount || 0,
         totalSessions: totalSessionsCount || 0,
@@ -190,9 +185,8 @@ export default function AdvisorDashboard() {
   useRealtime({
     table: 'session_feedback',
     onInsert: fetchMentorStats,
-    onUpdate: fetchMentorStats,
+    onUpdate: fetchMentorStats
   });
-
   const fetchMentorProfile = async () => {
     if (!user) return;
     const {
@@ -355,7 +349,7 @@ export default function AdvisorDashboard() {
       <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <div className="flex items-center justify-between">
+          <div className="flex items-start justify-between">
             <div className="flex items-center space-x-4">
               {/* Mobile: Only Avatar */}
               <div className="md:hidden">
@@ -378,7 +372,7 @@ export default function AdvisorDashboard() {
 
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
+          <div className="overflow-x-auto scrollbar-thin px-2 sm:mx-0 sm:px-0 mx-0">
             <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-5xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -544,11 +538,7 @@ export default function AdvisorDashboard() {
               </Card>}
 
             {/* Active Mentees */}
-            <ActiveMenteesCards 
-              mentees={activeMentees}
-              onScheduleSession={() => setCreateSessionDialogOpen(true)}
-              onMessage={(menteeId) => navigate('/messages')}
-            />
+            <ActiveMenteesCards mentees={activeMentees} onScheduleSession={() => setCreateSessionDialogOpen(true)} onMessage={menteeId => navigate('/messages')} />
 
             {/* Session History with Ratings */}
             <MentorSessionHistory showStats={false} />
