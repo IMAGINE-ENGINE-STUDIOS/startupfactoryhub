@@ -132,7 +132,7 @@ const Sponsorship = () => {
   const hubs = [
     { name: "New York", icon: Building2 },
     { name: "San Francisco", icon: TrendingUp },
-    { name: "Orlando / Lake Nona (HQ)", icon: Target },
+    { name: "Orlando (HQ)", icon: Target },
     { name: "Santiago, Chile", icon: MapPin },
     { name: "Tokyo, Japan", icon: Globe }
   ];
