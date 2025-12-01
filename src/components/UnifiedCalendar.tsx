@@ -462,9 +462,9 @@ export default function UnifiedCalendar({
         </Badge>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         {/* Calendar */}
-        <Card className="lg:col-span-2">
+        <Card className="tech-card border-0 lg:col-span-2">
           <CardHeader>
             <CardTitle>Calendar View</CardTitle>
           </CardHeader>
@@ -499,7 +499,7 @@ export default function UnifiedCalendar({
         </Card>
 
         {/* Items List */}
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="text-base sm:text-lg">
               {selectedDate ? format(selectedDate, 'MMM d, yyyy') : 'Select a date'}
@@ -518,10 +518,11 @@ export default function UnifiedCalendar({
                   const isOrganizer = item.type === 'event' && user?.id === event?.organizer_id;
                   
                   return (
-                    <div
+                    <Card
                       key={`${item.type}-${item.id}`}
-                      className="p-3 rounded-lg border hover:border-primary transition-all overflow-hidden"
+                      className="tech-card border-0 hover:scale-[1.02] transition-transform overflow-hidden"
                     >
+                      <CardContent className="p-4">
                       {/* Event Banner */}
                       {item.type === 'event' && item.banner_url && (
                         <img
@@ -666,7 +667,8 @@ export default function UnifiedCalendar({
                           </>
                         )}
                       </div>
-                    </div>
+                      </CardContent>
+                    </Card>
                   );
                 })}
               </div>

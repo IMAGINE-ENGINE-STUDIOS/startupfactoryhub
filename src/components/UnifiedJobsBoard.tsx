@@ -1048,7 +1048,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
       )}
 
       {/* Jobs Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 items-start">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-start">
         {displayedJobs.length === 0 ? (
           <Card className="col-span-full">
             <CardContent className="py-8">
@@ -1059,7 +1059,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
           </Card>
         ) : (
           displayedJobs.map((job) => (
-            <Card key={job.id} className="hover:shadow-lg transition-shadow flex flex-col h-[300px]">
+            <Card key={job.id} className="tech-card border-0 hover:scale-[1.02] transition-transform flex flex-col h-[300px]">
               <CardHeader className="pb-2">
                 <div className="flex items-start gap-3 sm:gap-4">
                   {job.companies?.logo_url && (

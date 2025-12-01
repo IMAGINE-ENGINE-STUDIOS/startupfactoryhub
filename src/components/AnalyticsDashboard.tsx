@@ -150,9 +150,9 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
               <h2 className="text-xl font-semibold">Overview</h2>
               <p className="text-sm text-muted-foreground ml-2">Your impact at a glance</p>
             </div>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2">
               {overviewMetrics.map((metric) => (
-                <Card key={metric.title} className="p-6">
+                <Card key={metric.title} className="tech-card border-0 hover:scale-[1.02] transition-transform p-6">
                   <div className="flex items-start justify-between">
                     <div className="space-y-2">
                       <p className="text-sm text-muted-foreground">{metric.title}</p>
@@ -184,9 +184,9 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
               <h2 className="text-xl font-semibold">Your Activity</h2>
               <p className="text-sm text-muted-foreground ml-2">Content you've created and shared</p>
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-3">
               {activityMetrics.map((metric) => (
-                <Card key={metric.title} className="p-6">
+                <Card key={metric.title} className="tech-card border-0 hover:scale-[1.02] transition-transform p-6">
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <p className="text-sm font-medium text-muted-foreground">{metric.title}</p>
@@ -207,9 +207,9 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
               <h2 className="text-xl font-semibold">Network Growth</h2>
               <p className="text-sm text-muted-foreground ml-2">Your community connections</p>
             </div>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-6 md:grid-cols-3">
               {networkMetrics.map((metric) => (
-                <Card key={metric.title} className="p-6">
+                <Card key={metric.title} className="tech-card border-0 hover:scale-[1.02] transition-transform p-6">
                   <div className="space-y-3">
                     <div className="flex items-start justify-between">
                       <p className="text-sm font-medium text-muted-foreground">{metric.title}</p>
@@ -233,7 +233,7 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
         </TabsList>
 
         <TabsContent value="growth" className="space-y-4">
-          <Card className="p-6">
+          <Card className="tech-card border-0 p-6">
             <h3 className="font-semibold mb-4">Your Activity (Last 6 Weeks)</h3>
             {analytics.historicalData.length > 0 ? (
               <ResponsiveContainer width="100%" height={300}>
@@ -279,7 +279,7 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
 
         <TabsContent value="engagement" className="space-y-4">
           <div className="grid md:grid-cols-2 gap-4">
-            <Card className="p-6">
+            <Card className="tech-card border-0 p-6">
               <h3 className="font-semibold mb-4">What You're Doing</h3>
               {engagementBreakdown().length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
@@ -308,7 +308,7 @@ export default function AnalyticsDashboard({ userId }: AnalyticsDashboardProps) 
               )}
             </Card>
 
-            <Card className="p-6">
+            <Card className="tech-card border-0 p-6">
               <h3 className="font-semibold mb-4">Engagement Received (Weekly Avg)</h3>
               {engagementReceivedByWeek().length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
