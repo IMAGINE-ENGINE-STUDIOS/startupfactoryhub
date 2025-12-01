@@ -126,7 +126,7 @@ export default function ActiveMenteesCards({
     return (ratedSessions.reduce((sum, s) => sum + (s.rating || 0), 0) / ratedSessions.length).toFixed(1);
   };
   if (mentees.length === 0) {
-    return <Card>
+    return <Card className="tech-card border-0">
         <CardContent className="py-12 text-center">
           <div className="mx-auto mb-4 h-12 w-12 rounded-full bg-muted/50 flex items-center justify-center">
             <Building2 className="h-6 w-6 text-muted-foreground/50" />
