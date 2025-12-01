@@ -30,7 +30,8 @@ import PitchMeetingCard from '@/components/PitchMeetingCard';
 import StartupMentorshipOffers from '@/components/StartupMentorshipOffers';
 import StartupActiveMentors from '@/components/StartupActiveMentors';
 import StartupMentoringSessions from '@/components/StartupMentoringSessions';
-import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Video, Bell, Check, X, ExternalLink, Sparkles, History, Star } from "lucide-react";
+import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, ChevronRight, Presentation, Video, Bell, Check, X, ExternalLink, Sparkles, History, Star } from "lucide-react";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
@@ -789,60 +790,80 @@ const Dashboard = () => {
                   </div>
 
                   {/* 1. Pending Offers Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                        <Sparkles className="h-4 w-4 text-amber-500" />
+                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                          <Sparkles className="h-4 w-4 text-amber-500" />
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-sm font-medium">Pending Offers</h3>
+                          <p className="text-xs text-muted-foreground">From mentors & advisors</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-sm font-medium">Pending Offers</h3>
-                        <p className="text-xs text-muted-foreground">From mentors & advisors</p>
-                      </div>
-                    </div>
-                    <StartupMentorshipOffers onOfferHandled={fetchPitchMeetings} />
-                  </div>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 pb-4">
+                      <StartupMentorshipOffers onOfferHandled={fetchPitchMeetings} />
+                    </CollapsibleContent>
+                  </Collapsible>
 
                   {/* 2. Active Mentors Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                        <Users className="h-4 w-4 text-emerald-500" />
+                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                          <Users className="h-4 w-4 text-emerald-500" />
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-sm font-medium">Active Mentors</h3>
+                          <p className="text-xs text-muted-foreground">Your current mentors</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-sm font-medium">Active Mentors</h3>
-                        <p className="text-xs text-muted-foreground">Your current mentors</p>
-                      </div>
-                    </div>
-                    <StartupActiveMentors onJoin={setActiveVideoUrl} />
-                  </div>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 pb-4">
+                      <StartupActiveMentors onJoin={setActiveVideoUrl} />
+                    </CollapsibleContent>
+                  </Collapsible>
 
                   {/* 3. Upcoming Sessions Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                        <CalendarIcon className="h-4 w-4 text-emerald-500" />
+                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                          <CalendarIcon className="h-4 w-4 text-emerald-500" />
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-sm font-medium">Upcoming Sessions</h3>
+                          <p className="text-xs text-muted-foreground">Scheduled mentoring</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-sm font-medium">Upcoming Sessions</h3>
-                        <p className="text-xs text-muted-foreground">Scheduled mentoring</p>
-                      </div>
-                    </div>
-                    <StartupMentoringSessions type="upcoming" onJoin={setActiveVideoUrl} />
-                  </div>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 pb-4">
+                      <StartupMentoringSessions type="upcoming" onJoin={setActiveVideoUrl} />
+                    </CollapsibleContent>
+                  </Collapsible>
 
                   {/* 4. Past Sessions Section */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
-                        <History className="h-4 w-4 text-muted-foreground" />
+                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
+                          <History className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-sm font-medium">Past Sessions</h3>
+                          <p className="text-xs text-muted-foreground">Rate your experience</p>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-sm font-medium">Past Sessions</h3>
-                        <p className="text-xs text-muted-foreground">Rate your experience</p>
-                      </div>
-                    </div>
-                    <StartupMentoringSessions type="past" onSessionUpdated={fetchPitchMeetings} />
-                  </div>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 pb-4">
+                      <StartupMentoringSessions type="past" onSessionUpdated={fetchPitchMeetings} />
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
               </div>
             </TabsContent>
