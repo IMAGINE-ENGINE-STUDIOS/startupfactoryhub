@@ -136,7 +136,7 @@ const Footer = () => {
               © 2025 Startup Factory Hub. All rights reserved.
             </p>
             <p className="text-xs text-muted-foreground text-center sm:text-right">
-              Built with ❤️ for the startup community
+              Built with <span className="text-green-500">❤️</span> for the startup community
             </p>
           </div>
         </div>
