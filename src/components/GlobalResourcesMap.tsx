@@ -36,20 +36,20 @@ import { AddResourceDialog } from './AddResourceDialog';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 const RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: string }> = {
-  office: { icon: Building2, color: 'hsl(var(--chart-1))', label: 'Office' },
-  lab: { icon: Beaker, color: 'hsl(var(--chart-2))', label: 'Laboratory' },
-  venue: { icon: MapPin, color: 'hsl(var(--chart-3))', label: 'Venue' },
-  perk: { icon: Gift, color: 'hsl(var(--chart-4))', label: 'Perk' },
-  chamber_of_commerce: { icon: Landmark, color: 'hsl(var(--chart-5))', label: 'Chamber' },
-  technology_transfer: { icon: RefreshCw, color: 'hsl(var(--accent))', label: 'Tech Transfer' },
-  community: { icon: Users, color: 'hsl(var(--primary))', label: 'Community' },
-  government_grant: { icon: DollarSign, color: 'hsl(220, 80%, 55%)', label: 'Gov Grant' },
-  accelerator_incubator: { icon: Rocket, color: 'hsl(var(--primary))', label: 'Accelerator' },
-  entrepreneur_center: { icon: GraduationCap, color: 'hsl(280, 70%, 60%)', label: 'Entrepreneur' },
-  university: { icon: School, color: 'hsl(0, 70%, 60%)', label: 'University' },
-  coworking: { icon: Briefcase, color: 'hsl(180, 60%, 50%)', label: 'Coworking' },
-  investor_network: { icon: TrendingUp, color: 'hsl(50, 90%, 55%)', label: 'Investor Net' },
-  other: { icon: MapPin, color: 'hsl(var(--muted-foreground))', label: 'Other' },
+  office: { icon: Building2, color: '#ef4444', label: 'Office' },
+  lab: { icon: Beaker, color: '#f97316', label: 'Laboratory' },
+  venue: { icon: MapPin, color: '#eab308', label: 'Venue' },
+  perk: { icon: Gift, color: '#22c55e', label: 'Perk' },
+  chamber_of_commerce: { icon: Landmark, color: '#06b6d4', label: 'Chamber' },
+  technology_transfer: { icon: RefreshCw, color: '#8b5cf6', label: 'Tech Transfer' },
+  community: { icon: Users, color: '#ec4899', label: 'Community' },
+  government_grant: { icon: DollarSign, color: '#3b82f6', label: 'Gov Grant' },
+  accelerator_incubator: { icon: Rocket, color: '#6366f1', label: 'Accelerator' },
+  entrepreneur_center: { icon: GraduationCap, color: '#a855f7', label: 'Entrepreneur' },
+  university: { icon: School, color: '#dc2626', label: 'University' },
+  coworking: { icon: Briefcase, color: '#14b8a6', label: 'Coworking' },
+  investor_network: { icon: TrendingUp, color: '#facc15', label: 'Investor Net' },
+  other: { icon: MapPin, color: '#64748b', label: 'Other' },
 };
 
 export const GlobalResourcesMap = () => {
@@ -74,8 +74,8 @@ export const GlobalResourcesMap = () => {
       container: mapContainer.current,
       style: 'mapbox://styles/imagineengine/cmhfkp1ie001d01qi2hyg82lp',
       projection: { name: 'globe' },
-      zoom: 1.5,
-      center: [0, 20],
+      zoom: 2.5,
+      center: [-122.4, 37.8],
       pitch: 45,
       antialias: true,
     });
@@ -137,31 +137,75 @@ export const GlobalResourcesMap = () => {
       .filter(r => r.latitude && r.longitude)
       .forEach(resource => {
         const config = RESOURCE_CONFIG[resource.resource_type];
+        const isPartner = !!resource.logo_url;
+        
+        // Create marker element
         const el = document.createElement('div');
         el.className = 'resource-marker';
-        el.style.cssText = `
-          width: 32px;
-          height: 32px;
-          background: ${config.color};
-          border: 2px solid hsl(var(--background));
-          border-radius: 50%;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-          transition: all 0.2s;
-        `;
-        el.innerHTML = `<svg width="18" height="18" fill="white" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/></svg>`;
         
+        if (isPartner) {
+          // Partner marker with logo
+          el.style.cssText = `
+            width: 28px;
+            height: 28px;
+            background: url(${resource.logo_url}) center/cover, white;
+            border: 2px solid ${config.color};
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30;
+            transition: all 0.2s;
+          `;
+        } else {
+          // Regular discrete marker
+          el.style.cssText = `
+            width: 24px;
+            height: 24px;
+            background-color: ${config.color};
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            border-radius: 50% 50% 50% 0;
+            cursor: pointer;
+            transform: rotate(-45deg);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+            transition: all 0.2s;
+          `;
+
+          // Add icon inside for regular markers
+          const iconEl = document.createElement('div');
+          iconEl.style.cssText = `
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: rotate(45deg);
+            color: white;
+            font-size: 10px;
+          `;
+          iconEl.innerHTML = '📍';
+          el.appendChild(iconEl);
+        }
+
+        // Hover effect
         el.addEventListener('mouseenter', () => {
-          el.style.transform = 'scale(1.3)';
-          el.style.boxShadow = `0 6px 20px ${config.color}50`;
+          if (isPartner) {
+            el.style.transform = 'scale(1.15)';
+            el.style.boxShadow = `0 4px 12px rgba(0,0,0,0.4), 0 0 0 3px ${config.color}50`;
+          } else {
+            el.style.transform = 'rotate(-45deg) scale(1.15)';
+            el.style.boxShadow = '0 3px 10px rgba(0,0,0,0.35)';
+          }
         });
         el.addEventListener('mouseleave', () => {
-          el.style.transform = 'scale(1)';
-          el.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)';
+          if (isPartner) {
+            el.style.transform = 'scale(1)';
+            el.style.boxShadow = `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`;
+          } else {
+            el.style.transform = 'rotate(-45deg) scale(1)';
+            el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.25)';
+          }
         });
+
+        // Click handler
         el.addEventListener('click', () => {
           setSelectedResource(resource);
           if (map.current && resource.latitude && resource.longitude) {
