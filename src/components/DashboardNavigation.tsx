@@ -184,34 +184,31 @@ const DashboardNavigation = () => {
       </nav>
 
       {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-ocean-border pb-safe">
-        <div className="grid grid-cols-3 gap-1 px-2 py-2">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 tech-card border-t-2 border-accent/30 pb-safe rounded-t-2xl">
+        <div className="grid grid-cols-3 gap-2 px-4 py-4">
           <Button
             variant="ghost"
-            size="sm"
-            className="flex flex-col items-center space-y-1 h-auto py-2"
+            className="flex flex-col items-center justify-center gap-1.5 h-16 rounded-xl tech-card border-0 hover:bg-primary/20 hover:shadow-[var(--pulse-glow)] transition-all duration-300"
             onClick={() => navigate("/dashboard")}
           >
-            <Home className="w-5 h-5" />
-            <span className="text-xs">Home</span>
+            <Home className="w-7 h-7 text-primary" />
+            <span className="text-xs font-medium">Home</span>
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="flex flex-col items-center space-y-1 h-auto py-2"
+            className="flex flex-col items-center justify-center gap-1.5 h-16 rounded-xl tech-card border-0 hover:bg-primary/20 hover:shadow-[var(--pulse-glow)] transition-all duration-300"
             onClick={() => navigate("/guidelines")}
           >
-            <Brain className="w-5 h-5" />
-            <span className="text-xs">AI Tips</span>
+            <Brain className="w-7 h-7 text-primary" />
+            <span className="text-xs font-medium">AI Tips</span>
           </Button>
           <Button
             variant="ghost"
-            size="sm"
-            className="flex flex-col items-center space-y-1 h-auto py-2"
+            className="flex flex-col items-center justify-center gap-1.5 h-16 rounded-xl tech-card border-0 hover:bg-primary/20 hover:shadow-[var(--pulse-glow)] transition-all duration-300"
             onClick={() => navigate("/guidelines")}
           >
-            <BookOpen className="w-5 h-5" />
-            <span className="text-xs">Help</span>
+            <BookOpen className="w-7 h-7 text-primary" />
+            <span className="text-xs font-medium">Help</span>
           </Button>
         </div>
       </div>
