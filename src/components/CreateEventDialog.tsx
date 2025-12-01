@@ -227,37 +227,12 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
               <Checkbox
                 id="online_event"
                 checked={isOnlineEvent}
-                onCheckedChange={async (checked) => {
+                onCheckedChange={(checked) => {
                   setIsOnlineEvent(checked as boolean);
-                  if (checked && user) {
-                    setUploading(true);
-                    try {
-                      const { data, error } = await supabase.functions.invoke('create-whereby-room', {
-                        body: { 
-                          roomName: `evt-${Math.random().toString(36).substring(2, 10)}`,
-                          startDate: formData.start_date && formData.start_time 
-                            ? new Date(`${formData.start_date}T${formData.start_time}`).toISOString() 
-                            : undefined,
-                          endDate: formData.end_date && formData.end_time
-                            ? new Date(`${formData.end_date}T${formData.end_time}`).toISOString()
-                            : undefined
-                        }
-                      });
-                      
-                      if (error) throw error;
-                      
-                      setFormData(prev => ({ ...prev, location: data.roomUrl }));
-                      toast({ title: 'Video conference room created!' });
-                    } catch (error) {
-                      console.error('Failed to create Whereby room:', error);
-                      toast({ title: 'Failed to create meeting room', variant: 'destructive' });
-                      setIsOnlineEvent(false);
-                    } finally {
-                      setUploading(false);
-                    }
-                  } else {
+                  if (!checked) {
                     setFormData(prev => ({ ...prev, location: '' }));
                   }
+                  // Room will be created on form submit when dates are available
                 }}
               />
               <span>Online Event (Generate video conference link)</span>
@@ -266,13 +241,13 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
 
           <div className="space-y-2">
             <Label htmlFor="location">
-              {isOnlineEvent ? 'Meeting Link (Auto-generated)' : 'Location'}
+              {isOnlineEvent ? 'Meeting Link (Generated on submit)' : 'Location'}
             </Label>
             <Input
               id="location"
               value={formData.location}
               onChange={e => !isOnlineEvent && setFormData(prev => ({ ...prev, location: e.target.value }))}
-              placeholder={isOnlineEvent ? 'Whereby meeting link will be generated' : 'Event location or virtual link'}
+              placeholder={isOnlineEvent ? 'Video meeting link will be created when you submit' : 'Event location or virtual link'}
               readOnly={isOnlineEvent}
               className={isOnlineEvent ? 'bg-muted' : ''}
             />

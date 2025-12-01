@@ -1,4 +1,5 @@
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import VideoConferencing from './VideoConferencing';
 
 interface VideoMeetingDialogProps {
@@ -22,7 +23,10 @@ export default function VideoMeetingDialog({
 }: VideoMeetingDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl h-[90vh] p-0">
+      <DialogContent className="max-w-6xl h-[90vh] p-0" aria-describedby={undefined}>
+        <VisuallyHidden>
+          <DialogTitle>{meetingTitle || 'Video Meeting'}</DialogTitle>
+        </VisuallyHidden>
         <VideoConferencing
           roomUrl={meetingLink}
           userId={userId}
