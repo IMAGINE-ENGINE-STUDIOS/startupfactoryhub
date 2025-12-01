@@ -77,7 +77,7 @@ const DashboardNavigation = () => {
   return (
     <>
       {/* Desktop Navigation */}
-      <nav className="bg-background/80 backdrop-blur-sm border-b border-ocean-border sticky top-0 z-50">
+      <nav className="tech-card border-0 rounded-none bg-background/80 backdrop-blur-sm border-b border-ocean-border sticky top-0 z-50">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-14 sm:h-16">
             {/* Logo */}
@@ -184,7 +184,7 @@ const DashboardNavigation = () => {
       </nav>
 
       {/* Mobile Bottom Navigation */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-ocean-border pb-safe">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 tech-card border-0 rounded-none bg-background/95 backdrop-blur-sm border-t border-ocean-border pb-safe">
         <div className="grid grid-cols-3 gap-1 px-2 py-2">
           <Button
             variant="ghost"
