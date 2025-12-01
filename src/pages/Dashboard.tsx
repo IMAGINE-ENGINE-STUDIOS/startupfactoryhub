@@ -611,170 +611,178 @@ const Dashboard = () => {
                   </div>
 
                   {/* 1. Incoming Pitch Requests (from investors TO startup) */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
+                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                           <Bell className="h-4 w-4 text-amber-500" />
                         </div>
-                        <div>
+                        <div className="text-left">
                           <h3 className="text-sm font-medium">Incoming Requests</h3>
                           <p className="text-xs text-muted-foreground">From investors</p>
                         </div>
                       </div>
-                      {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && (
-                        <Badge className="bg-amber-500 text-white border-0 text-xs">
-                          {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length} new
-                        </Badge>
-                      )}
-                    </div>
-                    {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[140px] flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
-                            <Briefcase className="h-5 w-5 text-muted-foreground/50" />
+                      <div className="flex items-center gap-2">
+                        {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && (
+                          <Badge className="bg-amber-500 text-white border-0 text-xs">
+                            {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length} new
+                          </Badge>
+                        )}
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 pb-4">
+                      {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                          <div className="text-center">
+                            <p className="text-sm text-muted-foreground">No incoming requests</p>
                           </div>
-                          <p className="text-sm font-medium text-muted-foreground">No incoming requests</p>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="grid gap-3">
-                        {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).map((meeting) => (
-                          <PitchMeetingCard
-                            key={meeting.id}
-                            meeting={meeting}
-                            variant="incoming"
-                            viewerType="startup"
-                            onAccept={handleAcceptPitch}
-                            onReject={handleRejectPitch}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                      ) : (
+                        <div className="grid gap-3">
+                          {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).map((meeting) => (
+                            <PitchMeetingCard
+                              key={meeting.id}
+                              meeting={meeting}
+                              variant="incoming"
+                              viewerType="startup"
+                              onAccept={handleAcceptPitch}
+                              onReject={handleRejectPitch}
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
 
                   {/* 2. Sent Pitch Requests (from startup TO investors) */}
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
+                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                           <Presentation className="h-4 w-4 text-primary" />
                         </div>
-                        <div>
+                        <div className="text-left">
                           <h3 className="text-sm font-medium">Sent Requests</h3>
                           <p className="text-xs text-muted-foreground">Awaiting response</p>
                         </div>
                       </div>
-                      {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length > 0 && (
-                        <Badge variant="secondary" className="text-xs">
-                          {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length} pending
-                        </Badge>
-                      )}
-                    </div>
-                    {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[140px] flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
-                            <Clock className="h-5 w-5 text-muted-foreground/50" />
+                      <div className="flex items-center gap-2">
+                        {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length > 0 && (
+                          <Badge variant="secondary" className="text-xs">
+                            {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length} pending
+                          </Badge>
+                        )}
+                        <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </div>
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 pb-4">
+                      {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                          <div className="text-center">
+                            <p className="text-sm text-muted-foreground">No pending requests</p>
                           </div>
-                          <p className="text-sm font-medium text-muted-foreground">No pending requests</p>
                         </div>
-                      </div>
-                    ) : (
-                      <div className="grid gap-3">
-                        {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).map((meeting) => (
-                          <PitchMeetingCard
-                            key={meeting.id}
-                            meeting={meeting}
-                            variant="sent"
-                            viewerType="startup"
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
+                      ) : (
+                        <div className="grid gap-3">
+                          {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).map((meeting) => (
+                            <PitchMeetingCard
+                              key={meeting.id}
+                              meeting={meeting}
+                              variant="sent"
+                              viewerType="startup"
+                            />
+                          ))}
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
 
                   {/* 3. Upcoming Pitches (scheduled, future date) */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                        <CalendarIcon className="h-4 w-4 text-emerald-500" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-medium">Upcoming Pitches</h3>
-                        <p className="text-xs text-muted-foreground">Confirmed meetings</p>
-                      </div>
-                    </div>
-                    {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[140px] flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
-                            <CalendarIcon className="h-5 w-5 text-muted-foreground/50" />
-                          </div>
-                          <p className="text-sm font-medium text-muted-foreground">No upcoming pitches</p>
+                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                          <CalendarIcon className="h-4 w-4 text-emerald-500" />
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-sm font-medium">Upcoming Pitches</h3>
+                          <p className="text-xs text-muted-foreground">Confirmed meetings</p>
                         </div>
                       </div>
-                    ) : (
-                      <div className="grid gap-3">
-                        {pitchMeetings
-                          .filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date())
-                          .sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime())
-                          .map((meeting) => (
-                            <PitchMeetingCard
-                              key={meeting.id}
-                              meeting={meeting}
-                              variant="upcoming"
-                              viewerType="startup"
-                              onJoin={setActiveVideoUrl}
-                            />
-                          ))}
-                      </div>
-                    )}
-                  </div>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 pb-4">
+                      {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                          <div className="text-center">
+                            <p className="text-sm text-muted-foreground">No upcoming pitches</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid gap-3">
+                          {pitchMeetings
+                            .filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date())
+                            .sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime())
+                            .map((meeting) => (
+                              <PitchMeetingCard
+                                key={meeting.id}
+                                meeting={meeting}
+                                variant="upcoming"
+                                viewerType="startup"
+                                onJoin={setActiveVideoUrl}
+                              />
+                            ))}
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
 
                   {/* 4. Past Pitches (scheduled/completed, past date) */}
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2.5">
-                      <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-medium">Past Pitches</h3>
-                        <p className="text-xs text-muted-foreground">Meeting history</p>
-                      </div>
-                    </div>
-                    {pitchMeetings.filter(m => 
-                      (m.status === 'scheduled' || m.status === 'completed') && 
-                      new Date(m.scheduled_date) < new Date()
-                    ).length === 0 ? (
-                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[140px] flex items-center justify-center">
-                        <div className="text-center">
-                          <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
-                            <Clock className="h-5 w-5 text-muted-foreground/50" />
-                          </div>
-                          <p className="text-sm font-medium text-muted-foreground">No past meetings</p>
+                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                      <div className="flex items-center gap-2.5">
+                        <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <div className="text-left">
+                          <h3 className="text-sm font-medium">Past Pitches</h3>
+                          <p className="text-xs text-muted-foreground">Meeting history</p>
                         </div>
                       </div>
-                    ) : (
-                      <div className="grid gap-3">
-                        {pitchMeetings
-                          .filter(m => 
-                            (m.status === 'scheduled' || m.status === 'completed') && 
-                            new Date(m.scheduled_date) < new Date()
-                          )
-                          .sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime())
-                          .map((meeting) => (
-                            <PitchMeetingCard
-                              key={meeting.id}
-                              meeting={meeting}
-                              variant="past"
-                              viewerType="startup"
-                              onOutcomeChange={handleOutcomeChange}
-                            />
-                          ))}
-                      </div>
-                    )}
-                  </div>
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="px-4 pb-4">
+                      {pitchMeetings.filter(m => 
+                        (m.status === 'scheduled' || m.status === 'completed') && 
+                        new Date(m.scheduled_date) < new Date()
+                      ).length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                          <div className="text-center">
+                            <p className="text-sm text-muted-foreground">No past meetings</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="grid gap-3">
+                          {pitchMeetings
+                            .filter(m => 
+                              (m.status === 'scheduled' || m.status === 'completed') && 
+                              new Date(m.scheduled_date) < new Date()
+                            )
+                            .sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime())
+                            .map((meeting) => (
+                              <PitchMeetingCard
+                                key={meeting.id}
+                                meeting={meeting}
+                                variant="past"
+                                viewerType="startup"
+                                onOutcomeChange={handleOutcomeChange}
+                              />
+                            ))}
+                        </div>
+                      )}
+                    </CollapsibleContent>
+                  </Collapsible>
                 </div>
 
                 {/* Right Column: Mentorship */}
