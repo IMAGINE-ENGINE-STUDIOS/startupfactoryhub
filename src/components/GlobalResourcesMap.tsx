@@ -2,12 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useResources, Resource, ResourceType } from '@/hooks/useResources';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { 
   Building2, 
@@ -29,8 +28,8 @@ import {
   Bookmark,
   Plus,
   X,
-  ChevronUp,
-  ChevronDown
+  Menu,
+  ChevronRight
 } from 'lucide-react';
 import { AddResourceDialog } from './AddResourceDialog';
 
@@ -61,7 +60,7 @@ export const GlobalResourcesMap = () => {
   const [search, setSearch] = useState('');
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [isResourceListOpen, setIsResourceListOpen] = useState(false);
+  const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(false);
 
   const { data: resources, isLoading } = useResources({ 
     type: selectedType || undefined,
@@ -179,86 +178,163 @@ export const GlobalResourcesMap = () => {
       {/* Full Viewport Map */}
       <div ref={mapContainer} className="absolute inset-0" />
       
-      {/* Top Overlay - Search & Add Button */}
-      <div className="absolute top-4 left-4 right-4 md:left-6 md:right-6 z-10">
-        <div className="backdrop-blur-xl bg-background/40 border border-white/20 dark:border-white/10 rounded-2xl p-3 shadow-2xl">
-          <div className="flex gap-2">
-            <div className="relative flex-1">
+      {/* Left Side Panel Toggle (Always Visible) */}
+      <Button
+        size="icon"
+        onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+        className={cn(
+          "absolute top-4 z-20 transition-all duration-300",
+          isLeftPanelOpen ? "left-[340px]" : "left-4"
+        )}
+        variant="default"
+      >
+        {isLeftPanelOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      </Button>
+
+      {/* Left Side Sliding Panel */}
+      <div 
+        className={cn(
+          "absolute left-0 top-0 bottom-0 w-80 z-10 transition-all duration-300",
+          isLeftPanelOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        <div className="h-full backdrop-blur-2xl bg-background/30 border-r border-white/20 dark:border-white/10 shadow-2xl flex flex-col">
+          {/* Header */}
+          <div className="p-4 border-b border-white/10">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-primary" />
+              Resources Map
+            </h2>
+          </div>
+
+          {/* Search */}
+          <div className="p-4 border-b border-white/10">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search resources by name, city, or country..."
+                placeholder="Search resources..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 className="pl-10 bg-background/50 backdrop-blur border-white/10"
               />
             </div>
+          </div>
+
+          {/* Categories */}
+          <div className="p-4 border-b border-white/10">
+            <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Categories</h3>
+            <ScrollArea className="h-64">
+              <div className="space-y-1">
+                <Button
+                  variant={selectedType === null ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setSelectedType(null)}
+                  className="w-full justify-start gap-2"
+                >
+                  <div className="w-2 h-2 rounded-full bg-current" />
+                  All Resources
+                </Button>
+                {(Object.keys(RESOURCE_CONFIG) as ResourceType[]).map((type) => {
+                  const config = RESOURCE_CONFIG[type];
+                  const Icon = config.icon;
+                  const isSelected = selectedType === type;
+                  return (
+                    <Button
+                      key={type}
+                      variant={isSelected ? 'default' : 'ghost'}
+                      size="sm"
+                      onClick={() => setSelectedType(type)}
+                      className="w-full justify-start gap-2"
+                      style={isSelected ? { 
+                        backgroundColor: config.color + '20',
+                        borderLeft: `3px solid ${config.color}`
+                      } : {}}
+                    >
+                      <Icon className="w-4 h-4" style={{ color: config.color }} />
+                      {config.label}
+                    </Button>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* Resource List */}
+          <div className="flex-1 overflow-hidden flex flex-col">
+            <div className="p-4 border-b border-white/10">
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                Resources ({resources?.length || 0})
+              </h3>
+            </div>
+            <ScrollArea className="flex-1 px-4">
+              <div className="space-y-2 py-2">
+                {resources?.map((resource) => {
+                  const config = RESOURCE_CONFIG[resource.resource_type];
+                  const Icon = config.icon;
+                  const isSelected = selectedResource?.id === resource.id;
+                  return (
+                    <Card
+                      key={resource.id}
+                      className={cn(
+                        "cursor-pointer transition-all backdrop-blur-lg bg-background/60 hover:bg-background/80 border-white/10",
+                        isSelected && "ring-2 ring-primary shadow-lg shadow-primary/20"
+                      )}
+                      onClick={() => {
+                        setSelectedResource(resource);
+                        if (map.current && resource.latitude && resource.longitude) {
+                          map.current.flyTo({
+                            center: [resource.longitude, resource.latitude],
+                            zoom: 12,
+                            duration: 2000,
+                          });
+                        }
+                      }}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-start gap-3">
+                          <div
+                            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                            style={{ backgroundColor: config.color + '20', color: config.color }}
+                          >
+                            <Icon className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm truncate">{resource.title}</h4>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {resource.city}, {resource.country}
+                            </p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* Add Resource Button */}
+          <div className="p-4 border-t border-white/10">
             <Button 
               onClick={() => setShowAddDialog(true)} 
-              className="gap-2 shrink-0"
-              size="default"
+              className="w-full gap-2"
             >
               <Plus className="w-4 h-4" />
-              <span className="hidden sm:inline">Add Resource</span>
+              Add Resource
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Category Pills - Horizontal Scroll Menu */}
-      <div className="absolute top-24 left-4 right-4 md:left-6 md:right-6 z-10">
-        <div className="backdrop-blur-xl bg-background/30 border border-white/20 dark:border-white/10 rounded-xl shadow-lg overflow-hidden">
-          <ScrollArea className="w-full">
-            <div className="flex gap-2 p-2">
-              <Button
-                variant={selectedType === null ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setSelectedType(null)}
-                className={cn(
-                  "shrink-0 transition-all duration-200",
-                  selectedType === null && "shadow-lg shadow-primary/20"
-                )}
-              >
-                All
-              </Button>
-              {(Object.keys(RESOURCE_CONFIG) as ResourceType[]).map((type) => {
-                const config = RESOURCE_CONFIG[type];
-                const Icon = config.icon;
-                const isSelected = selectedType === type;
-                return (
-                  <Button
-                    key={type}
-                    variant={isSelected ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => setSelectedType(type)}
-                    className={cn(
-                      "gap-2 shrink-0 transition-all duration-200 backdrop-blur",
-                      isSelected && "shadow-lg shadow-primary/20"
-                    )}
-                    style={isSelected ? { 
-                      backgroundColor: config.color,
-                      borderColor: config.color,
-                      color: 'white'
-                    } : {}}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {config.label}
-                  </Button>
-                );
-              })}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </div>
-      </div>
-
-      {/* Resource Details Card - Side Panel (Slide In) */}
+      {/* Right Side Panel - Resource Details (Slide In) */}
       <div 
         className={cn(
-          "absolute right-4 top-40 bottom-24 md:w-96 w-80 z-10 transition-all duration-300",
+          "absolute right-0 top-0 bottom-0 w-96 z-10 transition-all duration-300",
           selectedResource ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
         )}
       >
-        <div className="backdrop-blur-2xl bg-background/50 border border-white/20 dark:border-white/10 rounded-2xl h-full shadow-2xl overflow-hidden flex flex-col">
+        <div className="h-full backdrop-blur-2xl bg-background/30 border-l border-white/20 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col">
           {selectedResource && (
             <>
               <div className="p-4 border-b border-white/10">
@@ -356,81 +432,9 @@ export const GlobalResourcesMap = () => {
         </div>
       </div>
 
-      {/* Bottom Drawer - Resource List (Collapsible) */}
-      <div className="absolute bottom-4 left-4 right-4 md:left-6 md:right-6 z-10">
-        <Collapsible open={isResourceListOpen} onOpenChange={setIsResourceListOpen}>
-          <div className="backdrop-blur-xl bg-background/40 border border-white/20 dark:border-white/10 rounded-2xl shadow-2xl overflow-hidden">
-            <CollapsibleTrigger className="w-full p-3 flex items-center justify-between hover:bg-white/5 transition-colors">
-              <div className="flex items-center gap-2">
-                <div className="w-1 h-6 bg-primary rounded-full" />
-                <span className="font-semibold">
-                  {resources?.length || 0} Resources Found
-                </span>
-              </div>
-              {isResourceListOpen ? (
-                <ChevronDown className="w-5 h-5" />
-              ) : (
-                <ChevronUp className="w-5 h-5" />
-              )}
-            </CollapsibleTrigger>
-            
-            <CollapsibleContent>
-              <div className="p-2 border-t border-white/10">
-                <ScrollArea className="w-full">
-                  <div className="flex gap-3 pb-2">
-                    {resources?.map((resource) => {
-                      const config = RESOURCE_CONFIG[resource.resource_type];
-                      const Icon = config.icon;
-                      const isSelected = selectedResource?.id === resource.id;
-                      return (
-                        <Card
-                          key={resource.id}
-                          className={cn(
-                            "cursor-pointer transition-all shrink-0 w-64 backdrop-blur-lg bg-background/60 hover:bg-background/80",
-                            isSelected && "ring-2 ring-primary shadow-lg shadow-primary/20"
-                          )}
-                          onClick={() => {
-                            setSelectedResource(resource);
-                            if (map.current && resource.latitude && resource.longitude) {
-                              map.current.flyTo({
-                                center: [resource.longitude, resource.latitude],
-                                zoom: 12,
-                                duration: 2000,
-                              });
-                            }
-                          }}
-                        >
-                          <CardContent className="p-4">
-                            <div className="flex items-start gap-3">
-                              <div
-                                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                                style={{ backgroundColor: config.color + '20', color: config.color }}
-                              >
-                                <Icon className="w-5 h-5" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <h4 className="font-medium truncate">{resource.title}</h4>
-                                <p className="text-xs text-muted-foreground truncate">
-                                  {resource.city}, {resource.country}
-                                </p>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      );
-                    })}
-                  </div>
-                  <ScrollBar orientation="horizontal" />
-                </ScrollArea>
-              </div>
-            </CollapsibleContent>
-          </div>
-        </Collapsible>
-      </div>
-
       {/* Loading Overlay */}
       {isLoading && (
-        <div className="absolute inset-0 bg-background/30 backdrop-blur-sm flex items-center justify-center z-20 pointer-events-none">
+        <div className="absolute inset-0 bg-background/30 backdrop-blur-sm flex items-center justify-center z-30 pointer-events-none">
           <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
         </div>
       )}
