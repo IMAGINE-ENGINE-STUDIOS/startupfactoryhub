@@ -208,14 +208,15 @@ export const GlobalResourcesMap = () => {
       .filter(r => r.latitude && r.longitude)
       .forEach(resource => {
         const config = RESOURCE_CONFIG[resource.resource_type];
-        const isPartner = !!resource.logo_url;
+        const isOfficialPartner = resource.is_official_partner === true;
+        const hasLogo = !!resource.logo_url;
         
         // Create marker element
         const el = document.createElement('div');
         el.className = 'resource-marker';
         
-        if (isPartner) {
-          // Partner marker with logo + golden star
+        if (hasLogo) {
+          // Resource with logo (partner or not)
           el.style.cssText = `
             width: 28px;
             height: 28px;
@@ -235,20 +236,22 @@ export const GlobalResourcesMap = () => {
             transition: all 0.2s;
           `;
           
-          // Golden star badge (small, discrete, elegant)
-          const starEl = document.createElement('div');
-          starEl.innerHTML = '⭐';
-          starEl.style.cssText = `
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            font-size: 12px;
-            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
-            pointer-events: none;
-          `;
-          
           el.appendChild(logoEl);
-          el.appendChild(starEl);
+          
+          // Only add golden star for official partners
+          if (isOfficialPartner) {
+            const starEl = document.createElement('div');
+            starEl.innerHTML = '⭐';
+            starEl.style.cssText = `
+              position: absolute;
+              top: -6px;
+              right: -6px;
+              font-size: 12px;
+              filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+              pointer-events: none;
+            `;
+            el.appendChild(starEl);
+          }
         } else {
           // Regular discrete marker
           el.style.cssText = `
@@ -281,7 +284,7 @@ export const GlobalResourcesMap = () => {
 
         // Hover effect
         el.addEventListener('mouseenter', () => {
-          if (isPartner) {
+          if (hasLogo) {
             const logoEl = el.querySelector('div');
             if (logoEl) {
               logoEl.style.transform = 'scale(1.15)';
@@ -293,7 +296,7 @@ export const GlobalResourcesMap = () => {
           }
         });
         el.addEventListener('mouseleave', () => {
-          if (isPartner) {
+          if (hasLogo) {
             const logoEl = el.querySelector('div');
             if (logoEl) {
               logoEl.style.transform = 'scale(1)';

@@ -3064,6 +3064,7 @@ export type Database = {
           description: string | null
           id: string
           is_featured: boolean | null
+          is_official_partner: boolean | null
           is_verified: boolean | null
           latitude: number | null
           location_type: string
@@ -3087,6 +3088,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_featured?: boolean | null
+          is_official_partner?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
           location_type?: string
@@ -3110,6 +3112,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_featured?: boolean | null
+          is_official_partner?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
           location_type?: string
