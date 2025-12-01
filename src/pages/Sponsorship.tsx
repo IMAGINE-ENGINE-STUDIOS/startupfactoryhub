@@ -179,7 +179,7 @@ const Sponsorship = () => {
                   className="animate-fade-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <Card className={`group bg-card/30 border border-border/30 hover:border-${tier.borderColor.split('-')[1]}/50 transition-all duration-300 overflow-hidden hover:bg-card/50 min-h-[280px] flex flex-col ${isOpen ? 'border-primary/50' : ''}`}>
+                  <Card className={`group bg-card/30 border-2 ${tier.borderColor} hover:${tier.glowColor} transition-all duration-300 overflow-hidden hover:bg-card/50 min-h-[280px] flex flex-col ${isOpen ? `${tier.glowColor} shadow-2xl` : 'shadow-lg'}`}>
                     <CollapsibleTrigger className="w-full text-left">
                       <CardHeader className="cursor-pointer">
                         <div className="flex items-center justify-between">
