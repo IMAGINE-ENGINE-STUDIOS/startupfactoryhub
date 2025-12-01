@@ -218,13 +218,9 @@ export default function StartupMentorshipOffers({ onOfferHandled }: StartupMento
 
   if (offers.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[140px] flex items-center justify-center">
+      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
         <div className="text-center">
-          <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
-            <UserCheck className="h-5 w-5 text-muted-foreground/50" />
-          </div>
-          <p className="text-sm font-medium text-muted-foreground">No pending offers</p>
-          <p className="text-xs text-muted-foreground/70 mt-0.5">Mentor and advisor offers will appear here</p>
+          <p className="text-sm text-muted-foreground">No pending offers</p>
         </div>
       </div>
     );

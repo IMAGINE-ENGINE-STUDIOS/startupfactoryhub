@@ -179,20 +179,10 @@ export default function StartupMentoringSessions({ type, onSessionUpdated, onJoi
   };
 
   const EmptyState = () => (
-    <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[140px] flex items-center justify-center">
+    <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
       <div className="text-center">
-        <div className="mx-auto mb-3 h-10 w-10 rounded-full bg-muted/50 flex items-center justify-center">
-          {type === 'upcoming' ? (
-            <Calendar className="h-5 w-5 text-muted-foreground/50" />
-          ) : (
-            <History className="h-5 w-5 text-muted-foreground/50" />
-          )}
-        </div>
-        <p className="text-sm font-medium text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           {type === 'upcoming' ? 'No upcoming sessions' : 'No past sessions'}
-        </p>
-        <p className="text-xs text-muted-foreground/70 mt-0.5">
-          {type === 'upcoming' ? 'Schedule sessions with your mentors' : 'Completed sessions will appear here'}
         </p>
       </div>
     </div>
