@@ -1,11 +1,22 @@
-import { Rocket, Globe, Star, Sparkles, Award, MapPin, Users, Briefcase, Zap, CheckCircle2, Building2, Megaphone, Target, TrendingUp } from "lucide-react";
+import { Rocket, Globe, Star, Sparkles, Award, MapPin, Users, Briefcase, Zap, CheckCircle2, Building2, Megaphone, Target, TrendingUp, ChevronDown } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-import MatrixBackground from "@/components/MatrixBackground";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { useState } from "react";
 
 const Sponsorship = () => {
+  const [openTiers, setOpenTiers] = useState<string[]>([]);
+
+  const toggleTier = (tierName: string) => {
+    setOpenTiers(prev => 
+      prev.includes(tierName) 
+        ? prev.filter(name => name !== tierName)
+        : [...prev, tierName]
+    );
+  };
+
   const tiers = [
     {
       name: "EARTHLING",
@@ -127,151 +138,188 @@ const Sponsorship = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground relative">
-      <MatrixBackground />
+    <div className="min-h-screen bg-background text-foreground">
       <Navigation />
       
-      <main className="relative z-10 pt-24 pb-20">
-        <div className="container mx-auto px-4 sm:px-6">
+      <main className="pt-24 pb-20">
+        <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
           {/* Header */}
           <div className="text-center mb-16 animate-fade-in">
             <div className="flex justify-center mb-6">
-              <Rocket className="h-16 w-16 text-primary animate-pulse" />
+              <div className="relative">
+                <Rocket className="h-20 w-20 text-primary" />
+                <div className="absolute inset-0 blur-xl bg-primary/20 animate-pulse" />
+              </div>
             </div>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold bg-gradient-primary bg-clip-text text-transparent mb-4">
               STARTUP FACTORY HUB
             </h1>
-            <p className="text-xl sm:text-2xl text-muted-foreground">
+            <p className="text-xl sm:text-2xl text-muted-foreground font-light tracking-wide">
               SPONSORSHIP PROGRAM
             </p>
           </div>
 
-          {/* Tier Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {/* Tier Cards - Expandable */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20 max-w-6xl mx-auto">
             {tiers.map((tier, index) => {
               const Icon = tier.icon;
+              const isOpen = openTiers.includes(tier.name);
               return (
-                <Card 
+                <Collapsible
                   key={tier.name}
-                  className={`glass-morphism border-2 ${tier.borderColor} hover:scale-105 transition-all duration-300 ${tier.glowColor} shadow-xl animate-fade-in`}
+                  open={isOpen}
+                  onOpenChange={() => toggleTier(tier.name)}
+                  className="animate-fade-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <CardHeader>
-                    <div className="flex items-center justify-between mb-4">
-                      <Icon className={`h-8 w-8 bg-gradient-to-br ${tier.color} rounded-lg p-1.5 text-white`} />
-                      <span className={`text-2xl font-bold bg-gradient-to-br ${tier.color} bg-clip-text text-transparent`}>
-                        {tier.price}
-                      </span>
-                    </div>
-                    <CardTitle className="text-2xl">{tier.name}</CardTitle>
-                    <CardDescription>
-                      {tier.name === "EARTHLING" && "Entry tier supporting the global SFH startup ecosystem"}
-                      {tier.name === "STAR" && "For organizations ready to engage deeper with founders and cohorts"}
-                      {tier.name === "NEBULA" && "High-engagement tier for companies seeking pilots, visibility, and deeper integration"}
-                      {tier.name === "GALAXY" && "Top-tier, highest-impact partnership level"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Brand Visibility */}
-                    <div>
-                      <h4 className="font-semibold text-sm flex items-center gap-2 mb-2 text-primary">
-                        <Megaphone className="h-4 w-4" />
-                        Brand Visibility
-                      </h4>
-                      <ul className="space-y-1.5">
-                        {tier.benefits.visibility.map((benefit, i) => (
-                          <li key={i} className="flex gap-2 text-xs text-muted-foreground">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
-                            <span>{benefit}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                  <Card className={`border-2 ${tier.borderColor} hover:${tier.glowColor} shadow-lg transition-all duration-300 overflow-hidden ${isOpen ? 'ring-2 ring-primary/20' : ''}`}>
+                    <CollapsibleTrigger className="w-full text-left">
+                      <CardHeader className="cursor-pointer hover:bg-accent/5 transition-colors">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-4">
+                            <div className={`p-3 rounded-xl bg-gradient-to-br ${tier.color}`}>
+                              <Icon className="h-8 w-8 text-white" />
+                            </div>
+                            <div>
+                              <CardTitle className="text-2xl mb-1">{tier.name}</CardTitle>
+                              <span className={`text-3xl font-bold bg-gradient-to-br ${tier.color} bg-clip-text text-transparent`}>
+                                {tier.price}
+                              </span>
+                            </div>
+                          </div>
+                          <ChevronDown className={`h-6 w-6 text-muted-foreground transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
+                        </div>
+                        <CardDescription className="mt-4 text-base">
+                          {tier.name === "EARTHLING" && "Entry tier supporting the global SFH startup ecosystem"}
+                          {tier.name === "STAR" && "For organizations ready to engage deeper with founders and cohorts"}
+                          {tier.name === "NEBULA" && "High-engagement tier for companies seeking pilots, visibility, and deeper integration"}
+                          {tier.name === "GALAXY" && "Top-tier, highest-impact partnership level"}
+                        </CardDescription>
+                      </CardHeader>
+                    </CollapsibleTrigger>
 
-                    {/* Thought Leadership */}
-                    {tier.benefits.thought && (
-                      <div>
-                        <h4 className="font-semibold text-sm flex items-center gap-2 mb-2 text-primary">
-                          <Briefcase className="h-4 w-4" />
-                          Thought Leadership
-                        </h4>
-                        <ul className="space-y-1.5">
-                          {tier.benefits.thought.map((benefit, i) => (
-                            <li key={i} className="flex gap-2 text-xs text-muted-foreground">
-                              <CheckCircle2 className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
-                              <span>{benefit}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                    <CollapsibleContent>
+                      <CardContent className="space-y-6 pt-0 pb-6">
+                        {/* Brand Visibility */}
+                        <div className="bg-accent/20 rounded-lg p-4">
+                          <h4 className="font-semibold text-sm flex items-center gap-2 mb-3 text-primary">
+                            <Megaphone className="h-5 w-5" />
+                            Brand Visibility
+                          </h4>
+                          <ul className="space-y-2">
+                            {tier.benefits.visibility.map((benefit, i) => (
+                              <li key={i} className="flex gap-2 text-sm text-foreground">
+                                <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span>{benefit}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
 
-                    {/* Ecosystem Access */}
-                    <div>
-                      <h4 className="font-semibold text-sm flex items-center gap-2 mb-2 text-primary">
-                        <Users className="h-4 w-4" />
-                        Ecosystem Access
-                      </h4>
-                      <ul className="space-y-1.5">
-                        {tier.benefits.access.map((benefit, i) => (
-                          <li key={i} className="flex gap-2 text-xs text-muted-foreground">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
-                            <span>{benefit}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                        {/* Thought Leadership */}
+                        {tier.benefits.thought && (
+                          <div className="bg-accent/20 rounded-lg p-4">
+                            <h4 className="font-semibold text-sm flex items-center gap-2 mb-3 text-primary">
+                              <Briefcase className="h-5 w-5" />
+                              Thought Leadership
+                            </h4>
+                            <ul className="space-y-2">
+                              {tier.benefits.thought.map((benefit, i) => (
+                                <li key={i} className="flex gap-2 text-sm text-foreground">
+                                  <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                  <span>{benefit}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
 
-                    {/* SFH Platform Benefits */}
-                    <div>
-                      <h4 className="font-semibold text-sm flex items-center gap-2 mb-2 text-primary">
-                        <Zap className="h-4 w-4" />
-                        SFH Platform Benefits
-                      </h4>
-                      <ul className="space-y-1.5">
-                        {tier.benefits.platform.map((benefit, i) => (
-                          <li key={i} className="flex gap-2 text-xs text-muted-foreground">
-                            <CheckCircle2 className="h-3.5 w-3.5 text-primary flex-shrink-0 mt-0.5" />
-                            <span>{benefit}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
+                        {/* Ecosystem Access */}
+                        <div className="bg-accent/20 rounded-lg p-4">
+                          <h4 className="font-semibold text-sm flex items-center gap-2 mb-3 text-primary">
+                            <Users className="h-5 w-5" />
+                            Ecosystem Access
+                          </h4>
+                          <ul className="space-y-2">
+                            {tier.benefits.access.map((benefit, i) => (
+                              <li key={i} className="flex gap-2 text-sm text-foreground">
+                                <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span>{benefit}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
 
-                    <Button 
-                      className={`w-full mt-4 bg-gradient-to-br ${tier.color} hover:opacity-90 transition-opacity`}
-                      onClick={() => window.location.href = 'mailto:partnerships@startupfactoryhub.com'}
-                    >
-                      Become a Sponsor
-                    </Button>
-                  </CardContent>
-                </Card>
+                        {/* SFH Platform Benefits */}
+                        <div className="bg-accent/20 rounded-lg p-4">
+                          <h4 className="font-semibold text-sm flex items-center gap-2 mb-3 text-primary">
+                            <Zap className="h-5 w-5" />
+                            SFH Platform Benefits
+                          </h4>
+                          <ul className="space-y-2">
+                            {tier.benefits.platform.map((benefit, i) => (
+                              <li key={i} className="flex gap-2 text-sm text-foreground">
+                                <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                                <span>{benefit}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+
+                        <Button 
+                          className={`w-full bg-gradient-to-br ${tier.color} hover:opacity-90 transition-opacity text-white font-semibold py-6 text-lg`}
+                          onClick={() => window.location.href = 'mailto:partnerships@startupfactoryhub.com'}
+                        >
+                          Become a Sponsor
+                        </Button>
+                      </CardContent>
+                    </CollapsibleContent>
+                  </Card>
+                </Collapsible>
               );
             })}
           </div>
 
           {/* Global Hubs Section */}
-          <div className="text-center">
-            <h2 className="text-3xl font-bold mb-8 flex items-center justify-center gap-3">
-              <Globe className="h-8 w-8 text-primary" />
-              Global Hubs
-            </h2>
-            <div className="flex flex-wrap justify-center gap-6">
-              {hubs.map((hub, index) => {
-                const Icon = hub.icon;
-                return (
-                  <div 
-                    key={hub.name}
-                    className="flex items-center gap-2 glass-morphism px-6 py-3 rounded-full border border-primary/30 hover:border-primary/60 transition-all animate-fade-in"
-                    style={{ animationDelay: `${index * 0.1}s` }}
-                  >
-                    <CheckCircle2 className="h-5 w-5 text-primary" />
-                    <Icon className="h-4 w-4 text-muted-foreground" />
-                    <span className="font-medium">{hub.name}</span>
+          <div className="max-w-5xl mx-auto">
+            <Card className="border-2 border-primary/30 shadow-xl bg-gradient-to-br from-background via-background to-primary/5">
+              <CardHeader className="text-center pb-8">
+                <div className="flex justify-center mb-4">
+                  <div className="relative">
+                    <Globe className="h-12 w-12 text-primary" />
+                    <div className="absolute inset-0 blur-xl bg-primary/30 animate-pulse" />
                   </div>
-                );
-              })}
-            </div>
+                </div>
+                <CardTitle className="text-3xl font-bold">Global Hubs</CardTitle>
+                <CardDescription className="text-base mt-2">
+                  Our worldwide presence across key innovation ecosystems
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                  {hubs.map((hub, index) => {
+                    const Icon = hub.icon;
+                    return (
+                      <div 
+                        key={hub.name}
+                        className="flex flex-col items-center gap-3 p-6 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-accent/10 transition-all duration-300 animate-fade-in group"
+                        style={{ animationDelay: `${index * 0.1}s` }}
+                      >
+                        <div className="p-3 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                          <Icon className="h-6 w-6 text-primary" />
+                        </div>
+                        <div className="text-center">
+                          <div className="flex items-center justify-center gap-1 mb-1">
+                            <CheckCircle2 className="h-4 w-4 text-primary" />
+                          </div>
+                          <span className="font-semibold text-sm">{hub.name}</span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </main>
