@@ -381,7 +381,12 @@ export default function UserProfileDialog({
                     variant="outline"
                     size="sm"
                     className="ml-auto tech-card"
-                    onClick={() => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { recipientId: userId } }))}
+                    onClick={() => {
+                      onOpenChange(false);
+                      setTimeout(() => {
+                        window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { recipientId: userId } }));
+                      }, 150);
+                    }}
                   >
                     <MessageCircle className="h-4 w-4 mr-2" />
                     Message
