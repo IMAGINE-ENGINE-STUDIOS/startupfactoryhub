@@ -179,13 +179,13 @@ const Sponsorship = () => {
                   className="animate-fade-in"
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
-                  <Card className={`border-2 ${tier.borderColor} hover:${tier.glowColor} shadow-lg transition-all duration-300 overflow-hidden ${isOpen ? 'ring-2 ring-primary/20' : ''} min-h-[280px] flex flex-col`}>
+                  <Card className={`group bg-card/30 border border-border/30 hover:border-${tier.borderColor.split('-')[1]}/50 transition-all duration-300 overflow-hidden hover:bg-card/50 min-h-[280px] flex flex-col ${isOpen ? 'border-primary/50' : ''}`}>
                     <CollapsibleTrigger className="w-full text-left">
-                      <CardHeader className="cursor-pointer hover:bg-accent/5 transition-colors">
+                      <CardHeader className="cursor-pointer">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-4">
-                            <div className={`p-3 rounded-xl bg-gradient-to-br ${tier.color}`}>
-                              <Icon className="h-8 w-8 text-white" />
+                            <div className={`p-3 rounded-lg bg-gradient-to-br ${tier.color.replace('from-', 'from-').replace('to-', 'to-')}/10 group-hover:scale-110 transition-transform`}>
+                              <Icon className={`h-8 w-8 text-${tier.color.split('-')[1]}-500`} />
                             </div>
                             <div>
                               <CardTitle className="text-2xl mb-1">{tier.name}</CardTitle>
@@ -196,7 +196,7 @@ const Sponsorship = () => {
                           </div>
                           <ChevronDown className={`h-6 w-6 text-muted-foreground transition-transform duration-300 ${isOpen ? 'rotate-180' : ''}`} />
                         </div>
-                        <CardDescription className="mt-4 text-base">
+                        <CardDescription className="mt-4 text-base text-muted-foreground">
                           {tier.name === "EARTHLING" && "Entry tier supporting the global SFH startup ecosystem"}
                           {tier.name === "STAR" && "For organizations ready to engage deeper with founders and cohorts"}
                           {tier.name === "NEBULA" && "High-engagement tier for companies seeking pilots, visibility, and deeper integration"}
@@ -208,7 +208,7 @@ const Sponsorship = () => {
                     <CollapsibleContent>
                       <CardContent className="space-y-6 pt-0 pb-6">
                         {/* Brand Visibility */}
-                        <div className="bg-accent/20 rounded-lg p-4">
+                        <div className="bg-card/50 rounded-lg p-4 border border-border/30">
                           <h4 className="font-semibold text-sm flex items-center gap-2 mb-3 text-primary">
                             <Megaphone className="h-5 w-5" />
                             Brand Visibility
@@ -225,7 +225,7 @@ const Sponsorship = () => {
 
                         {/* Thought Leadership */}
                         {tier.benefits.thought && (
-                          <div className="bg-accent/20 rounded-lg p-4">
+                          <div className="bg-card/50 rounded-lg p-4 border border-border/30">
                             <h4 className="font-semibold text-sm flex items-center gap-2 mb-3 text-primary">
                               <Briefcase className="h-5 w-5" />
                               Thought Leadership
@@ -242,7 +242,7 @@ const Sponsorship = () => {
                         )}
 
                         {/* Ecosystem Access */}
-                        <div className="bg-accent/20 rounded-lg p-4">
+                        <div className="bg-card/50 rounded-lg p-4 border border-border/30">
                           <h4 className="font-semibold text-sm flex items-center gap-2 mb-3 text-primary">
                             <Users className="h-5 w-5" />
                             Ecosystem Access
@@ -258,7 +258,7 @@ const Sponsorship = () => {
                         </div>
 
                         {/* SFH Platform Benefits */}
-                        <div className="bg-accent/20 rounded-lg p-4">
+                        <div className="bg-card/50 rounded-lg p-4 border border-border/30">
                           <h4 className="font-semibold text-sm flex items-center gap-2 mb-3 text-primary">
                             <Zap className="h-5 w-5" />
                             SFH Platform Benefits
@@ -289,7 +289,7 @@ const Sponsorship = () => {
 
           {/* Global Hubs Section */}
           <div className="max-w-5xl mx-auto">
-            <Card className="border-2 border-primary/30 shadow-xl bg-gradient-to-br from-background via-background to-primary/5">
+            <Card className="bg-card/30 border border-border/30 hover:border-primary/50 transition-all duration-300 hover:bg-card/50">
               <CardHeader className="text-center pb-8">
                 <div className="flex justify-center mb-4">
                   <div className="relative">
@@ -309,7 +309,7 @@ const Sponsorship = () => {
                     return (
                       <div 
                         key={hub.name}
-                        className="flex flex-col items-center gap-3 p-6 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-accent/10 transition-all duration-300 animate-fade-in group"
+                        className="flex flex-col items-center gap-3 p-6 rounded-lg bg-card/30 border border-border/30 hover:border-primary/50 hover:bg-card/50 transition-all duration-300 animate-fade-in group"
                         style={{ animationDelay: `${index * 0.1}s` }}
                       >
                         <div className="p-3 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
