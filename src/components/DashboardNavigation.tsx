@@ -79,11 +79,11 @@ const DashboardNavigation = () => {
       {/* Desktop Navigation */}
       <nav className="bg-background/80 backdrop-blur-sm border-b border-ocean-border sticky top-0 z-50">
         <div className="container mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-14 sm:h-16">
+          <div className="flex items-center justify-between h-12 sm:h-14">
             {/* Logo */}
             <div className="flex items-center space-x-2">
-              <img src={logo} alt="Startup Factory Hub" className="w-7 h-7 sm:w-8 sm:h-8 glow-effect" />
-              <span className="font-bold text-base sm:text-lg hidden sm:inline">Startup Factory Hub</span>
+              <img src={logo} alt="Startup Factory Hub" className="w-6 h-6 sm:w-7 sm:h-7 glow-effect" />
+              <span className="font-bold text-sm sm:text-base hidden sm:inline">Startup Factory Hub</span>
             </div>
 
             {/* Navigation Links - Desktop Only */}
