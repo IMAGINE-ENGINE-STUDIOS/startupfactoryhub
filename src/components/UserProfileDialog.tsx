@@ -382,12 +382,14 @@ export default function UserProfileDialog({
             {/* Content Section - Scrollable */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               {/* Overview Section */}
-              <div>
-                <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                  <Users className="h-5 w-5 text-primary" />
-                  About
-                </h3>
-                <div className="space-y-3">
+              <Card className="tech-card border-0">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <Users className="h-5 w-5 text-primary" />
+                    About
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
                   {profile.bio && (
                     <p className="text-muted-foreground">{profile.bio}</p>
                   )}
@@ -408,8 +410,8 @@ export default function UserProfileDialog({
                       </div>
                     )}
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
 
               <Separator />
 
@@ -419,203 +421,203 @@ export default function UserProfileDialog({
               )}
 
               {profile.role === 'startup' && roleData?.company && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                    <Building className="h-5 w-5 text-primary" />
-                    Company Information
-                  </h3>
-                  <Card>
-                    <CardHeader>
-                      <CardTitle>{roleData.company.name}</CardTitle>
-                      {roleData.company.description && (
-                        <p className="text-sm text-muted-foreground mt-2">{roleData.company.description}</p>
-                      )}
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        {roleData.company.industry && (
-                          <div className="flex items-center gap-2">
-                            <Briefcase className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-xs text-muted-foreground">Industry</p>
-                              <p className="text-sm font-medium">{roleData.company.industry}</p>
-                            </div>
-                          </div>
-                        )}
-                        {roleData.company.stage && (
-                          <div className="flex items-center gap-2">
-                            <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-xs text-muted-foreground">Stage</p>
-                              <Badge variant="outline" className={getStageColor(roleData.company.stage)}>
-                                {roleData.company.stage.replace('_', ' ')}
-                              </Badge>
-                            </div>
-                          </div>
-                        )}
-                        {roleData.company.team_size && (
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-xs text-muted-foreground">Team Size</p>
-                              <p className="text-sm font-medium">{roleData.company.team_size} people</p>
-                            </div>
-                          </div>
-                        )}
-                        {roleData.company.funding_amount && (
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="h-4 w-4 text-muted-foreground" />
-                            <div>
-                              <p className="text-xs text-muted-foreground">Funding</p>
-                              <p className="text-sm font-medium">{formatCurrency(roleData.company.funding_amount)}</p>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-
-                      {roleData.company.pitch_deck_url && (
-                        <>
-                          <Separator />
+                <Card className="tech-card border-0">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Building className="h-5 w-5 text-primary" />
+                      {roleData.company.name}
+                    </CardTitle>
+                    {roleData.company.description && (
+                      <p className="text-sm text-muted-foreground mt-2">{roleData.company.description}</p>
+                    )}
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      {roleData.company.industry && (
+                        <div className="flex items-center gap-2">
+                          <Briefcase className="h-4 w-4 text-muted-foreground" />
                           <div>
-                            <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
-                              <FileText className="h-4 w-4" />
-                              Pitch Deck
-                            </h4>
-                            <Button
-                              onClick={() => window.open(roleData.company.pitch_deck_url, '_blank')}
-                              variant="outline"
-                              className="w-full gap-2"
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                              View Pitch Deck
-                            </Button>
+                            <p className="text-xs text-muted-foreground">Industry</p>
+                            <p className="text-sm font-medium">{roleData.company.industry}</p>
                           </div>
-                        </>
+                        </div>
                       )}
-                    </CardContent>
-                  </Card>
-                </div>
+                      {roleData.company.stage && (
+                        <div className="flex items-center gap-2">
+                          <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="text-xs text-muted-foreground">Stage</p>
+                            <Badge variant="outline" className={getStageColor(roleData.company.stage)}>
+                              {roleData.company.stage.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                        </div>
+                      )}
+                      {roleData.company.team_size && (
+                        <div className="flex items-center gap-2">
+                          <Users className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="text-xs text-muted-foreground">Team Size</p>
+                            <p className="text-sm font-medium">{roleData.company.team_size} people</p>
+                          </div>
+                        </div>
+                      )}
+                      {roleData.company.funding_amount && (
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-muted-foreground" />
+                          <div>
+                            <p className="text-xs text-muted-foreground">Funding</p>
+                            <p className="text-sm font-medium">{formatCurrency(roleData.company.funding_amount)}</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {roleData.company.pitch_deck_url && (
+                      <>
+                        <Separator />
+                        <div>
+                          <h4 className="text-sm font-semibold mb-2 flex items-center gap-2">
+                            <FileText className="h-4 w-4" />
+                            Pitch Deck
+                          </h4>
+                          <Button
+                            onClick={() => window.open(roleData.company.pitch_deck_url, '_blank')}
+                            variant="outline"
+                            className="w-full gap-2"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            View Pitch Deck
+                          </Button>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
               )}
 
               {profile.role === 'investor' && roleData?.investorProfile && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-primary" />
-                    Investment Focus
-                  </h3>
-                  <Card>
-                    <CardContent className="pt-6 space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        {roleData.investorProfile.portfolio_size > 0 && (
-                          <div>
-                            <p className="text-xs text-muted-foreground">Portfolio Size</p>
-                            <p className="text-2xl font-bold">{roleData.investorProfile.portfolio_size}</p>
-                          </div>
-                        )}
-                        {roleData.investorProfile.investment_range_min && roleData.investorProfile.investment_range_max && (
-                          <div>
-                            <p className="text-xs text-muted-foreground">Check Size</p>
-                            <p className="text-sm font-medium">
-                              {formatCurrency(roleData.investorProfile.investment_range_min)} - {formatCurrency(roleData.investorProfile.investment_range_max)}
-                            </p>
-                          </div>
-                        )}
-                        {roleData.investorProfile.total_invested > 0 && (
-                          <div className="col-span-2">
-                            <p className="text-xs text-muted-foreground">Total Invested</p>
-                            <p className="text-2xl font-bold">{formatCurrency(roleData.investorProfile.total_invested)}</p>
-                          </div>
-                        )}
-                      </div>
-
-                      {roleData.portfolio && roleData.portfolio.length > 0 && (
-                        <>
-                          <Separator />
-                          <div>
-                            <h4 className="text-sm font-semibold mb-3">Portfolio Companies</h4>
-                            <div className="grid grid-cols-2 gap-3">
-                              {roleData.portfolio.slice(0, 4).map((company: any) => (
-                                <div key={company.id} className="p-3 border rounded-lg">
-                                  <p className="font-medium text-sm">{company.company_name}</p>
-                                  <p className="text-xs text-muted-foreground">{company.industry}</p>
-                                </div>
-                              ))}
-                            </div>
-                            {roleData.portfolio.length > 4 && (
-                              <p className="text-xs text-muted-foreground mt-2">
-                                +{roleData.portfolio.length - 4} more companies
-                              </p>
-                            )}
-                          </div>
-                        </>
+                <Card className="tech-card border-0">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <DollarSign className="h-5 w-5 text-primary" />
+                      Investment Focus
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      {roleData.investorProfile.portfolio_size > 0 && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Portfolio Size</p>
+                          <p className="text-2xl font-bold">{roleData.investorProfile.portfolio_size}</p>
+                        </div>
                       )}
-                    </CardContent>
-                  </Card>
-                </div>
+                      {roleData.investorProfile.investment_range_min && roleData.investorProfile.investment_range_max && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Check Size</p>
+                          <p className="text-sm font-medium">
+                            {formatCurrency(roleData.investorProfile.investment_range_min)} - {formatCurrency(roleData.investorProfile.investment_range_max)}
+                          </p>
+                        </div>
+                      )}
+                      {roleData.investorProfile.total_invested > 0 && (
+                        <div className="col-span-2">
+                          <p className="text-xs text-muted-foreground">Total Invested</p>
+                          <p className="text-2xl font-bold">{formatCurrency(roleData.investorProfile.total_invested)}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {roleData.portfolio && roleData.portfolio.length > 0 && (
+                      <>
+                        <Separator />
+                        <div>
+                          <h4 className="text-sm font-semibold mb-3">Portfolio Companies</h4>
+                          <div className="grid grid-cols-2 gap-3">
+                            {roleData.portfolio.slice(0, 4).map((company: any) => (
+                              <div key={company.id} className="p-3 border border-border/30 rounded-lg bg-background/50">
+                                <p className="font-medium text-sm">{company.company_name}</p>
+                                <p className="text-xs text-muted-foreground">{company.industry}</p>
+                              </div>
+                            ))}
+                          </div>
+                          {roleData.portfolio.length > 4 && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              +{roleData.portfolio.length - 4} more companies
+                            </p>
+                          )}
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
               )}
 
               {profile.role === 'mentor' && roleData?.mentorProfile && (
-                <div>
-                  <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
-                    <Award className="h-5 w-5 text-primary" />
-                    Mentorship Profile
-                  </h3>
-                  <Card>
-                    <CardContent className="pt-6 space-y-4">
-                      <div className="grid grid-cols-2 gap-4">
-                        {roleData.mentorProfile.years_of_experience && (
-                          <div>
-                            <p className="text-xs text-muted-foreground">Experience</p>
-                            <p className="text-2xl font-bold">{roleData.mentorProfile.years_of_experience} years</p>
-                          </div>
-                        )}
-                        {roleData.mentorProfile.total_sessions > 0 && (
-                          <div>
-                            <p className="text-xs text-muted-foreground">Sessions</p>
-                            <p className="text-2xl font-bold">{roleData.mentorProfile.total_sessions}</p>
-                          </div>
-                        )}
-                        {roleData.mentorProfile.average_rating > 0 && (
-                          <div>
-                            <p className="text-xs text-muted-foreground">Rating</p>
-                            <p className="text-2xl font-bold">⭐ {roleData.mentorProfile.average_rating.toFixed(1)}</p>
-                          </div>
-                        )}
-                        {roleData.mentorProfile.hourly_rate && (
-                          <div>
-                            <p className="text-xs text-muted-foreground">Hourly Rate</p>
-                            <p className="text-lg font-bold">{formatCurrency(roleData.mentorProfile.hourly_rate)}</p>
-                          </div>
-                        )}
-                      </div>
-
-                      {roleData.mentorProfile.expertise_areas && roleData.mentorProfile.expertise_areas.length > 0 && (
-                        <>
-                          <Separator />
-                          <div>
-                            <h4 className="text-sm font-semibold mb-2">Expertise Areas</h4>
-                            <div className="flex flex-wrap gap-2">
-                              {roleData.mentorProfile.expertise_areas.map((area: string, index: number) => (
-                                <Badge key={index} variant="secondary">{area}</Badge>
-                              ))}
-                            </div>
-                          </div>
-                        </>
+                <Card className="tech-card border-0">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Award className="h-5 w-5 text-primary" />
+                      Mentorship Profile
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      {roleData.mentorProfile.years_of_experience && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Experience</p>
+                          <p className="text-2xl font-bold">{roleData.mentorProfile.years_of_experience} years</p>
+                        </div>
                       )}
-                    </CardContent>
-                  </Card>
-                </div>
+                      {roleData.mentorProfile.total_sessions > 0 && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Sessions</p>
+                          <p className="text-2xl font-bold">{roleData.mentorProfile.total_sessions}</p>
+                        </div>
+                      )}
+                      {roleData.mentorProfile.average_rating > 0 && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Rating</p>
+                          <p className="text-2xl font-bold">⭐ {roleData.mentorProfile.average_rating.toFixed(1)}</p>
+                        </div>
+                      )}
+                      {roleData.mentorProfile.hourly_rate && (
+                        <div>
+                          <p className="text-xs text-muted-foreground">Hourly Rate</p>
+                          <p className="text-lg font-bold">{formatCurrency(roleData.mentorProfile.hourly_rate)}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {roleData.mentorProfile.expertise_areas && roleData.mentorProfile.expertise_areas.length > 0 && (
+                      <>
+                        <Separator />
+                        <div>
+                          <h4 className="text-sm font-semibold mb-2">Expertise Areas</h4>
+                          <div className="flex flex-wrap gap-2">
+                            {roleData.mentorProfile.expertise_areas.map((area: string, index: number) => (
+                              <Badge key={index} variant="secondary">{area}</Badge>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
               )}
 
               {/* Posts Section */}
-              <Separator />
-              <div>
-                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-primary" />
-                  Posts
-                </h3>
-                <ProfilePostsMosaic userId={userId!} isOwnProfile={isOwnProfile} />
-              </div>
+              <Card className="tech-card border-0">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg flex items-center gap-2">
+                    <FileText className="h-5 w-5 text-primary" />
+                    Posts
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ProfilePostsMosaic userId={userId!} isOwnProfile={isOwnProfile} />
+                </CardContent>
+              </Card>
             </div>
           </div>
         )}
