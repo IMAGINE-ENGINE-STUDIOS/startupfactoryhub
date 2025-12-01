@@ -80,7 +80,7 @@ export default function SentimentAnalyzer() {
       </Button>
 
       {sentimentResult && (
-        <Card className="border-primary/20 bg-muted/50">
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="text-base flex items-center gap-2">
               {sentimentResult.sentiment === 'positive' ? (

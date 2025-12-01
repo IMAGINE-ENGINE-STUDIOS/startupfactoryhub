@@ -55,7 +55,7 @@ export default function LightPaper() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
   return <div className="h-screen flex flex-col bg-background overflow-hidden">
-      <div className="border-b bg-card flex-shrink-0">
+      <div className="border-b tech-card border-0 flex-shrink-0">
         <div className="container mx-auto px-3 sm:px-4 py-1.5 sm:py-2">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <div className="flex items-center justify-between sm:justify-start gap-2 sm:gap-3">
@@ -229,7 +229,7 @@ export default function LightPaper() {
         </Button>
         
         {showAIFeaturesMenu && (
-          <div className="absolute bottom-16 right-0 bg-card border rounded-lg shadow-2xl p-3 space-y-2 min-w-[200px]">
+          <div className="absolute bottom-16 right-0 tech-card border-0 rounded-lg shadow-2xl p-3 space-y-2 min-w-[200px]">
             <Button 
               variant="ghost" 
               className="w-full justify-start gap-2" 
@@ -303,7 +303,7 @@ export default function LightPaper() {
       {/* AI Feature Dialogs */}
       {showSummary && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card border rounded-lg shadow-xl p-6 max-w-2xl w-full">
+          <div className="tech-card border-0 rounded-lg shadow-xl p-6 max-w-2xl w-full">
             <AISummaryCard 
               text="Enter your text to summarize" 
               sourceType="document"
@@ -321,7 +321,7 @@ export default function LightPaper() {
 
       {showTranslate && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card border rounded-lg shadow-xl p-6 max-w-2xl w-full">
+          <div className="tech-card border-0 rounded-lg shadow-xl p-6 max-w-2xl w-full">
             <AITranslator 
               text="Enter text to translate"
             />
@@ -338,7 +338,7 @@ export default function LightPaper() {
 
       {showSentiment && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card border rounded-lg shadow-xl p-6 max-w-2xl w-full">
+          <div className="tech-card border-0 rounded-lg shadow-xl p-6 max-w-2xl w-full">
             <SentimentAnalyzer />
             <Button 
               variant="outline" 
@@ -353,7 +353,7 @@ export default function LightPaper() {
 
       {showDocAnalyzer && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card border rounded-lg shadow-xl p-6 max-w-2xl w-full">
+          <div className="tech-card border-0 rounded-lg shadow-xl p-6 max-w-2xl w-full">
             <DocumentAnalyzer />
             <Button 
               variant="outline" 
@@ -368,7 +368,7 @@ export default function LightPaper() {
 
       {showTaskAutomation && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-card border rounded-lg shadow-xl p-6 max-w-2xl w-full">
+          <div className="tech-card border-0 rounded-lg shadow-xl p-6 max-w-2xl w-full">
             <TaskAutomation />
             <Button 
               variant="outline" 

@@ -179,7 +179,7 @@ export default function StudentProfileView() {
   return (
     <div className="space-y-6 pb-8">
       {/* Profile Header Card */}
-      <Card className="overflow-hidden border-0 bg-gradient-to-br from-primary/5 via-background to-accent/5">
+      <Card className="overflow-hidden tech-card border-0 bg-gradient-to-br from-primary/5 via-background to-accent/5">
         <div className="relative h-32 bg-gradient-to-r from-primary/20 to-accent/20" />
         <CardContent className="relative -mt-16 space-y-6 pb-8">
           <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
@@ -225,7 +225,7 @@ export default function StudentProfileView() {
       </Card>
 
       {/* About Section */}
-      <Card className="border-0 shadow-lg">
+      <Card className="tech-card border-0 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             About Me
@@ -251,7 +251,7 @@ export default function StudentProfileView() {
 
       <div className="grid md:grid-cols-2 gap-6">
         {/* Personal Information */}
-        <Card className="border-0 shadow-lg">
+        <Card className="tech-card border-0 shadow-lg">
           <CardHeader>
             <CardTitle>Personal Information</CardTitle>
           </CardHeader>
@@ -291,7 +291,7 @@ export default function StudentProfileView() {
         </Card>
 
         {/* Social Links */}
-        <Card className="border-0 shadow-lg">
+        <Card className="tech-card border-0 shadow-lg">
           <CardHeader>
             <CardTitle>Social Links</CardTitle>
           </CardHeader>
@@ -338,7 +338,7 @@ export default function StudentProfileView() {
       </div>
 
       {/* Education Section */}
-      <Card className="border-0 shadow-lg">
+      <Card className="tech-card border-0 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             Education
@@ -399,7 +399,7 @@ export default function StudentProfileView() {
       </Card>
 
       {/* Resume Section */}
-      <Card className="border-0 shadow-lg">
+      <Card className="tech-card border-0 shadow-lg">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -420,7 +420,7 @@ export default function StudentProfileView() {
       </Card>
 
       {/* Interests Section */}
-      <Card className="border-0 shadow-lg">
+      <Card className="tech-card border-0 shadow-lg">
         <CardHeader>
           <CardTitle>Interests & Skills</CardTitle>
         </CardHeader>

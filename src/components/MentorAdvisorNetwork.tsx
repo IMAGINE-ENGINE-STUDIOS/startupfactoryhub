@@ -118,7 +118,7 @@ export default function MentorAdvisorNetwork() {
 
   if (loading) {
     return (
-      <Card>
+      <Card className="tech-card border-0">
         <CardContent className="p-8 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
           <p className="mt-4 text-muted-foreground">Loading your mentor network...</p>
@@ -129,7 +129,7 @@ export default function MentorAdvisorNetwork() {
 
   if (mentors.length === 0) {
     return (
-      <Card>
+      <Card className="tech-card border-0">
         <CardContent className="p-8 text-center">
           <UserCheck className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-30" />
           <h3 className="text-lg font-semibold mb-2">No Mentors or Advisors Yet</h3>
@@ -151,7 +151,7 @@ export default function MentorAdvisorNetwork() {
   return (
     <div className="space-y-6">
       {activeMentors.length > 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserCheck className="h-5 w-5 text-primary" />
@@ -243,7 +243,7 @@ export default function MentorAdvisorNetwork() {
       )}
 
       {pastMentors.length > 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5 text-muted-foreground" />

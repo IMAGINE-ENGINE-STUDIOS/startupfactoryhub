@@ -212,7 +212,7 @@ export default function AdvisorProfileView() {
 
       {/* Professional Settings */}
       <Collapsible open={settingsOpen} onOpenChange={setSettingsOpen}>
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <CollapsibleTrigger asChild>
               <Button variant="ghost" className="w-full justify-between p-0 hover:bg-transparent">
@@ -271,7 +271,7 @@ export default function AdvisorProfileView() {
       </Collapsible>
 
       {/* Resume Section */}
-      <Card>
+      <Card className="tech-card border-0">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5" />
@@ -289,7 +289,7 @@ export default function AdvisorProfileView() {
       </Card>
 
       {/* About Section */}
-      <Card>
+      <Card className="tech-card border-0">
         <CardHeader>
           <CardTitle>About</CardTitle>
         </CardHeader>
@@ -299,7 +299,7 @@ export default function AdvisorProfileView() {
       </Card>
 
       {/* Experience Section */}
-      <Card>
+      <Card className="tech-card border-0">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
@@ -336,7 +336,7 @@ export default function AdvisorProfileView() {
       </Card>
 
       {/* Education Section */}
-      <Card>
+      <Card className="tech-card border-0">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
@@ -373,7 +373,7 @@ export default function AdvisorProfileView() {
       </Card>
 
       {/* Achievements Section */}
-      <Card>
+      <Card className="tech-card border-0">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2">
@@ -394,7 +394,7 @@ export default function AdvisorProfileView() {
           {achievements.length === 0 && !showAchForm && <p className="text-muted-foreground text-sm">No achievements added yet.</p>}
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {achievements.map(ach => <Card key={ach.id} className="relative group">
+            {achievements.map(ach => <Card key={ach.id} className="relative group tech-card border-0">
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
                     <Award className="h-8 w-8 text-primary flex-shrink-0" />
@@ -414,7 +414,7 @@ export default function AdvisorProfileView() {
       </Card>
 
       {/* Skills Section */}
-      <Card>
+      <Card className="tech-card border-0">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Skills & Expertise</CardTitle>
@@ -444,7 +444,7 @@ export default function AdvisorProfileView() {
       </Card>
 
       {/* Expertise Areas */}
-      {mentorProfile?.expertise_areas && mentorProfile.expertise_areas.length > 0 && <Card>
+      {mentorProfile?.expertise_areas && mentorProfile.expertise_areas.length > 0 && <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle>Areas of Expertise</CardTitle>
           </CardHeader>
