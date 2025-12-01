@@ -122,7 +122,7 @@ const Sponsorship = () => {
           "Co-designing pilot programs with cohort startups"
         ],
         platform: [
-          "Full integration of sponsor technology into: The Dojo, AI Builder, Digital Twin, Startup Matching Engine",
+          "Full integration of sponsor technology into: Global Resources managing dashboards",
           "A dedicated Sponsor Pavilion (virtual or physical)",
           "Custom analytics dashboard showing founder engagement"
         ]
