@@ -130,7 +130,7 @@ export default function StartupProfileDialog({
 
           {/* Quick Stats */}
           <div className="grid grid-cols-3 gap-3">
-            <Card className="border-border/50">
+            <Card className="tech-card border-0">
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
                   <Users className="h-4 w-4 text-primary" />
@@ -141,7 +141,7 @@ export default function StartupProfileDialog({
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-border/50">
+            <Card className="tech-card border-0">
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
                   <DollarSign className="h-4 w-4 text-green-500" />
@@ -154,7 +154,7 @@ export default function StartupProfileDialog({
                 </div>
               </CardContent>
             </Card>
-            <Card className="border-border/50">
+            <Card className="tech-card border-0">
               <CardContent className="p-3">
                 <div className="flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-accent" />
