@@ -349,7 +349,7 @@ export default function AdvisorDashboard() {
       <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 space-y-4 sm:space-y-6">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
-          <div className="flex items-start justify-between">
+          <div className="items-start justify-between flex flex-row">
             <div className="flex items-center space-x-4">
               {/* Mobile: Only Avatar */}
               <div className="md:hidden">
