@@ -36,6 +36,7 @@ export interface Resource {
   contact_email: string | null;
   logo_url: string | null;
   is_verified: boolean;
+  is_official_partner: boolean | null;
   author_id: string | null;
   created_at: string;
   updated_at: string;
