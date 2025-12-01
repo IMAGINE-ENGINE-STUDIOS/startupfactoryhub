@@ -99,13 +99,27 @@ export default function FloatingChat() {
 
   // Handle opening chat from Network tab
   useEffect(() => {
-    const handleOpenChat = (event: Event) => {
+    const handleOpenChat = async (event: Event) => {
       const customEvent = event as CustomEvent;
       const { userId } = customEvent.detail;
       setIsOpen(true);
       setActiveTab('messages');
       setSelectedConversation(userId);
       fetchMessages(userId);
+      
+      // Fetch user profile if not already in the list
+      const existingUser = allUsers.find(u => u.user_id === userId);
+      if (!existingUser && userId) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url')
+          .eq('user_id', userId)
+          .single();
+        
+        if (data) {
+          setAllUsers(prev => [...prev, data]);
+        }
+      }
     };
 
     window.addEventListener('openFloatingChat', handleOpenChat);
@@ -113,7 +127,7 @@ export default function FloatingChat() {
     return () => {
       window.removeEventListener('openFloatingChat', handleOpenChat);
     };
-  }, []);
+  }, [allUsers]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
