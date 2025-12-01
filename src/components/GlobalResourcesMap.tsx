@@ -86,11 +86,18 @@ export const GlobalResourcesMap = () => {
     );
 
     map.current.on('style.load', () => {
-      map.current?.setFog({
+      if (!map.current) return;
+      
+      map.current.setFog({
         color: 'hsl(var(--background))',
         'high-color': 'hsl(var(--muted))',
-        'horizon-blend': 0.2,
+        'horizon-blend': 0.02,
+        'space-color': 'hsl(var(--background))',
+        'star-intensity': 0.15
       });
+      
+      // Ensure the map is visible
+      map.current.resize();
     });
 
     // Auto-rotate globe
@@ -103,12 +110,18 @@ export const GlobalResourcesMap = () => {
     };
 
     map.current.on('mousedown', () => { userInteracting = true; });
-    map.current.on('mouseup', () => { userInteracting = false; spinGlobe(); });
+    map.current.on('mouseup', () => { 
+      userInteracting = false; 
+      setTimeout(spinGlobe, 100);
+    });
     map.current.on('moveend', spinGlobe);
-    spinGlobe();
+    
+    // Initial spin
+    setTimeout(spinGlobe, 500);
 
     return () => {
       map.current?.remove();
+      map.current = null;
     };
   }, []);
 
@@ -184,7 +197,7 @@ export const GlobalResourcesMap = () => {
         size="icon"
         onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
         className={cn(
-          "absolute top-4 z-20 transition-all duration-300 backdrop-blur-xl bg-background/30 border border-white/20 dark:border-white/10 shadow-2xl hover:bg-background/40",
+          "absolute top-4 z-20 transition-all duration-300 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-white/20 dark:hover:bg-black/30 rounded-2xl",
           isLeftPanelOpen ? "left-[340px]" : "left-4"
         )}
         variant="ghost"
@@ -199,30 +212,30 @@ export const GlobalResourcesMap = () => {
           isLeftPanelOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="h-full backdrop-blur-3xl bg-background/20 border-r border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col">
+        <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border-r border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col rounded-r-3xl">
           {/* Header */}
-          <div className="p-4 border-b border-white/20 dark:border-white/10 backdrop-blur">
+          <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
             <h2 className="text-lg font-semibold flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-primary" />
+              <MapPin className="w-5 h-5" />
               Resources Map
             </h2>
           </div>
 
           {/* Search */}
-          <div className="p-4 border-b border-white/20 dark:border-white/10 backdrop-blur">
+          <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search resources..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 bg-white/10 dark:bg-black/20 backdrop-blur-xl border-white/30 dark:border-white/20 focus:bg-white/20 dark:focus:bg-black/30"
+                className="pl-10 bg-white/10 dark:bg-black/20 backdrop-blur-xl border-white/30 dark:border-white/20 focus:bg-white/20 dark:focus:bg-black/30 rounded-2xl"
               />
             </div>
           </div>
 
           {/* Categories */}
-          <div className="p-4 border-b border-white/20 dark:border-white/10 backdrop-blur">
+          <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
             <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Categories</h3>
             <ScrollArea className="h-64">
               <div className="space-y-1">
@@ -230,7 +243,10 @@ export const GlobalResourcesMap = () => {
                   variant={selectedType === null ? 'default' : 'ghost'}
                   size="sm"
                   onClick={() => setSelectedType(null)}
-                  className="w-full justify-start gap-2"
+                  className={cn(
+                    "w-full justify-start gap-2 rounded-xl backdrop-blur-xl",
+                    selectedType === null ? "bg-primary/90" : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
+                  )}
                 >
                   <div className="w-2 h-2 rounded-full bg-current" />
                   All Resources
@@ -242,16 +258,20 @@ export const GlobalResourcesMap = () => {
                   return (
                     <Button
                       key={type}
-                      variant={isSelected ? 'default' : 'ghost'}
+                      variant="ghost"
                       size="sm"
                       onClick={() => setSelectedType(type)}
-                      className="w-full justify-start gap-2"
+                      className={cn(
+                        "w-full justify-start gap-2 rounded-xl backdrop-blur-xl",
+                        isSelected 
+                          ? "bg-white/20 dark:bg-black/30 border-l-4" 
+                          : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
+                      )}
                       style={isSelected ? { 
-                        backgroundColor: config.color + '20',
-                        borderLeft: `3px solid ${config.color}`
+                        borderLeftColor: config.color
                       } : {}}
                     >
-                      <Icon className="w-4 h-4" style={{ color: config.color }} />
+                      <Icon className="w-4 h-4" />
                       {config.label}
                     </Button>
                   );
@@ -262,7 +282,7 @@ export const GlobalResourcesMap = () => {
 
           {/* Resource List */}
           <div className="flex-1 overflow-hidden flex flex-col backdrop-blur">
-            <div className="p-4 border-b border-white/20 dark:border-white/10">
+            <div className="p-4 border-b border-white/30 dark:border-white/20">
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                 Resources ({resources?.length || 0})
               </h3>
@@ -277,7 +297,7 @@ export const GlobalResourcesMap = () => {
                     <Card
                       key={resource.id}
                       className={cn(
-                        "cursor-pointer transition-all backdrop-blur-xl bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/30 border-white/30 dark:border-white/20",
+                        "cursor-pointer transition-all backdrop-blur-2xl bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/30 border-white/30 dark:border-white/20 rounded-2xl",
                         isSelected && "ring-2 ring-primary shadow-lg shadow-primary/20 bg-white/20 dark:bg-black/30"
                       )}
                       onClick={() => {
@@ -294,8 +314,8 @@ export const GlobalResourcesMap = () => {
                       <CardContent className="p-3">
                         <div className="flex items-start gap-3">
                           <div
-                            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                            style={{ backgroundColor: config.color + '20', color: config.color }}
+                            className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 backdrop-blur-xl"
+                            style={{ backgroundColor: config.color + '20' }}
                           >
                             <Icon className="w-5 h-5" />
                           </div>
@@ -316,10 +336,10 @@ export const GlobalResourcesMap = () => {
           </div>
 
           {/* Add Resource Button */}
-          <div className="p-4 border-t border-white/20 dark:border-white/10 backdrop-blur">
+          <div className="p-4 border-t border-white/30 dark:border-white/20 backdrop-blur">
             <Button 
               onClick={() => setShowAddDialog(true)} 
-              className="w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20"
+              className="w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20 rounded-2xl"
             >
               <Plus className="w-4 h-4" />
               Add Resource
@@ -335,14 +355,14 @@ export const GlobalResourcesMap = () => {
           selectedResource ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
         )}
       >
-        <div className="h-full backdrop-blur-3xl bg-background/20 border-l border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col">
+        <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border-l border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-l-3xl">
           {selectedResource && (
             <>
-              <div className="p-4 border-b border-white/20 dark:border-white/10 backdrop-blur">
+              <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex-1">
                     <Badge 
-                      className="mb-2 backdrop-blur" 
+                      className="mb-2 backdrop-blur-xl rounded-xl" 
                       style={{ 
                         backgroundColor: RESOURCE_CONFIG[selectedResource.resource_type].color,
                         color: 'white'
@@ -356,7 +376,7 @@ export const GlobalResourcesMap = () => {
                     variant="ghost"
                     size="icon"
                     onClick={() => setSelectedResource(null)}
-                    className="shrink-0"
+                    className="shrink-0 backdrop-blur-xl bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/30 rounded-xl"
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -365,7 +385,7 @@ export const GlobalResourcesMap = () => {
                   <img 
                     src={selectedResource.logo_url} 
                     alt="" 
-                    className="w-full h-32 rounded-lg object-cover mb-3" 
+                    className="w-full h-32 rounded-2xl object-cover mb-3" 
                   />
                 )}
               </div>
@@ -389,7 +409,7 @@ export const GlobalResourcesMap = () => {
                   )}
                   
                   {selectedResource.location_type !== 'physical' && (
-                    <Badge variant="outline" className="backdrop-blur">Online Resource</Badge>
+                    <Badge variant="outline" className="backdrop-blur-xl rounded-xl">Online Resource</Badge>
                   )}
 
                   <div className="flex flex-col gap-2 pt-2">
@@ -397,7 +417,7 @@ export const GlobalResourcesMap = () => {
                        <Button 
                         size="sm" 
                         variant="outline" 
-                        className="gap-2 backdrop-blur-xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start" 
+                        className="gap-2 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start rounded-xl" 
                         onClick={() => getDirections(selectedResource)}
                       >
                         <Navigation className="w-4 h-4" />
@@ -408,7 +428,7 @@ export const GlobalResourcesMap = () => {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="gap-2 backdrop-blur-xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start" 
+                        className="gap-2 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start rounded-xl" 
                         asChild
                       >
                         <a href={selectedResource.website_url} target="_blank" rel="noopener noreferrer">
@@ -420,7 +440,7 @@ export const GlobalResourcesMap = () => {
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="gap-2 backdrop-blur-xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start"
+                      className="gap-2 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start rounded-xl"
                     >
                       <Bookmark className="w-4 h-4" />
                       Bookmark
