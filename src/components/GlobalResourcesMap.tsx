@@ -340,26 +340,29 @@ export const GlobalResourcesMap = () => {
       {/* Full Viewport Map */}
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
       
-      {/* Rotation Toggle Button */}
-      <Button
-        size="icon"
-        onClick={() => setIsRotating(!isRotating)}
-        className="absolute top-4 right-16 z-20 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all"
-        title={isRotating ? "Pause rotation" : "Resume rotation"}
-      >
-        {isRotating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-      </Button>
+      {/* Control Buttons - Top Center */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+        {/* Rotation Toggle Button */}
+        <Button
+          size="icon"
+          onClick={() => setIsRotating(!isRotating)}
+          className="backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all"
+          title={isRotating ? "Pause rotation" : "Resume rotation"}
+        >
+          {isRotating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+        </Button>
 
-      {/* My Location Button */}
-      <Button
-        size="icon"
-        onClick={requestUserLocation}
-        disabled={isLocating}
-        className="absolute top-16 right-16 z-20 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all disabled:opacity-50"
-        title="Show my location"
-      >
-        {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Locate className="w-4 h-4" />}
-      </Button>
+        {/* My Location Button */}
+        <Button
+          size="icon"
+          onClick={requestUserLocation}
+          disabled={isLocating}
+          className="backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all disabled:opacity-50"
+          title="Show my location"
+        >
+          {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Locate className="w-4 h-4" />}
+        </Button>
+      </div>
       
       {/* Single Toggle Button - works for both open and closed states */}
       <Button
