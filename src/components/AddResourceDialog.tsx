@@ -1,0 +1,246 @@
+import { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useCreateResource, ResourceType, LocationType } from '@/hooks/useResources';
+import { toast } from 'sonner';
+
+interface AddResourceDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export const AddResourceDialog = ({ open, onOpenChange }: AddResourceDialogProps) => {
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [resourceType, setResourceType] = useState<ResourceType>('other');
+  const [locationType, setLocationType] = useState<LocationType>('physical');
+  const [address, setAddress] = useState('');
+  const [city, setCity] = useState('');
+  const [country, setCountry] = useState('');
+  const [websiteUrl, setWebsiteUrl] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
+  const [isGeocoding, setIsGeocoding] = useState(false);
+
+  const createResource = useCreateResource();
+
+  const geocodeAddress = async () => {
+    if (!address || locationType !== 'physical') return { lat: null, lng: null };
+
+    setIsGeocoding(true);
+    try {
+      const fullAddress = `${address}, ${city}, ${country}`;
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(fullAddress)}.json?access_token=pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ`
+      );
+      const data = await response.json();
+      
+      if (data.features && data.features.length > 0) {
+        const [lng, lat] = data.features[0].center;
+        return { lat, lng };
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      toast.error('Could not find location coordinates');
+    } finally {
+      setIsGeocoding(false);
+    }
+    
+    return { lat: null, lng: null };
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!title || !resourceType) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    let coordinates = { lat: null, lng: null };
+    if (locationType === 'physical' && address) {
+      coordinates = await geocodeAddress();
+    }
+
+    createResource.mutate(
+      {
+        title,
+        description,
+        resource_type: resourceType,
+        location_type: locationType,
+        address: locationType === 'physical' ? address : null,
+        city: locationType === 'physical' ? city : null,
+        country: locationType === 'physical' ? country : null,
+        latitude: coordinates.lat,
+        longitude: coordinates.lng,
+        website_url: websiteUrl || null,
+        contact_email: contactEmail || null,
+      },
+      {
+        onSuccess: () => {
+          onOpenChange(false);
+          // Reset form
+          setTitle('');
+          setDescription('');
+          setResourceType('other');
+          setLocationType('physical');
+          setAddress('');
+          setCity('');
+          setCountry('');
+          setWebsiteUrl('');
+          setContactEmail('');
+        },
+      }
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Submit a New Resource</DialogTitle>
+          <DialogDescription>
+            Add a global resource to help the startup community. Your submission will be reviewed before appearing on the map.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="title">Resource Name *</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="e.g., NASA Tech Transfer Office"
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">Description</Label>
+            <Textarea
+              id="description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Brief description of the resource..."
+              rows={3}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="resourceType">Resource Type *</Label>
+            <Select value={resourceType} onValueChange={(value) => setResourceType(value as ResourceType)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="office">Office</SelectItem>
+                <SelectItem value="lab">Laboratory</SelectItem>
+                <SelectItem value="venue">Venue</SelectItem>
+                <SelectItem value="perk">Perk</SelectItem>
+                <SelectItem value="chamber_of_commerce">Chamber of Commerce</SelectItem>
+                <SelectItem value="technology_transfer">Technology Transfer</SelectItem>
+                <SelectItem value="community">Community</SelectItem>
+                <SelectItem value="government_grant">Government Grant</SelectItem>
+                <SelectItem value="accelerator_incubator">Accelerator/Incubator</SelectItem>
+                <SelectItem value="entrepreneur_center">Entrepreneur Center</SelectItem>
+                <SelectItem value="university">University</SelectItem>
+                <SelectItem value="coworking">Coworking Space</SelectItem>
+                <SelectItem value="investor_network">Investor Network</SelectItem>
+                <SelectItem value="other">Other</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label>Location Type *</Label>
+            <RadioGroup value={locationType} onValueChange={(value) => setLocationType(value as LocationType)}>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="physical" id="physical" />
+                <Label htmlFor="physical" className="font-normal">Physical Location</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="online" id="online" />
+                <Label htmlFor="online" className="font-normal">Online Only</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="hybrid" id="hybrid" />
+                <Label htmlFor="hybrid" className="font-normal">Hybrid (Physical + Online)</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
+          {(locationType === 'physical' || locationType === 'hybrid') && (
+            <>
+              <div className="space-y-2">
+                <Label htmlFor="address">Street Address</Label>
+                <Input
+                  id="address"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                  placeholder="123 Main Street"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    placeholder="San Francisco"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Input
+                    id="country"
+                    value={country}
+                    onChange={(e) => setCountry(e.target.value)}
+                    placeholder="United States"
+                  />
+                </div>
+              </div>
+            </>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="website">Website URL</Label>
+            <Input
+              id="website"
+              type="url"
+              value={websiteUrl}
+              onChange={(e) => setWebsiteUrl(e.target.value)}
+              placeholder="https://example.com"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Contact Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={contactEmail}
+              onChange={(e) => setContactEmail(e.target.value)}
+              placeholder="contact@example.com"
+            />
+          </div>
+
+          <div className="flex gap-2 justify-end">
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={createResource.isPending || isGeocoding}>
+              {createResource.isPending || isGeocoding ? 'Submitting...' : 'Submit Resource'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};

@@ -3053,40 +3053,73 @@ export type Database = {
       }
       resources: {
         Row: {
+          address: string | null
           author_id: string | null
           category: string | null
+          city: string | null
+          contact_email: string | null
           content: string | null
+          country: string | null
           created_at: string
           description: string | null
           id: string
           is_featured: boolean | null
+          is_verified: boolean | null
+          latitude: number | null
+          location_type: string
+          logo_url: string | null
+          longitude: number | null
+          resource_type: string
           tags: string[] | null
           title: string
           updated_at: string
+          website_url: string | null
         }
         Insert: {
+          address?: string | null
           author_id?: string | null
           category?: string | null
+          city?: string | null
+          contact_email?: string | null
           content?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           id?: string
           is_featured?: boolean | null
+          is_verified?: boolean | null
+          latitude?: number | null
+          location_type?: string
+          logo_url?: string | null
+          longitude?: number | null
+          resource_type?: string
           tags?: string[] | null
           title: string
           updated_at?: string
+          website_url?: string | null
         }
         Update: {
+          address?: string | null
           author_id?: string | null
           category?: string | null
+          city?: string | null
+          contact_email?: string | null
           content?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           id?: string
           is_featured?: boolean | null
+          is_verified?: boolean | null
+          latitude?: number | null
+          location_type?: string
+          logo_url?: string | null
+          longitude?: number | null
+          resource_type?: string
           tags?: string[] | null
           title?: string
           updated_at?: string
+          website_url?: string | null
         }
         Relationships: []
       }
