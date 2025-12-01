@@ -147,7 +147,7 @@ export default function AIFeaturesHub() {
       </Card>
 
       {/* AI-Powered Tools */}
-      <Card className="mt-6">
+      <Card className="mt-6 tech-card border-0">
         <CardHeader className="pb-4">
           <CardTitle className="flex items-center gap-2 text-lg">
             <Sparkles className="h-5 w-5 text-primary" />
