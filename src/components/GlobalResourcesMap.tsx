@@ -54,6 +54,7 @@ const RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: s
   university: { icon: School, color: '#dc2626', label: 'University' },
   coworking: { icon: Briefcase, color: '#14b8a6', label: 'Coworking' },
   investor_network: { icon: TrendingUp, color: '#facc15', label: 'Investor Net' },
+  human_capital: { icon: Users, color: '#0ea5e9', label: 'Human Capital' },
   other: { icon: MapPin, color: '#64748b', label: 'Other' },
 };
 
