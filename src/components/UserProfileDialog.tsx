@@ -17,7 +17,7 @@ import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { 
   UserPlus, UserMinus, MapPin, Globe, Briefcase, UserCheck, Clock,
   Building, TrendingUp, Users, DollarSign, FileText, ExternalLink,
-  Star, Award, Calendar, Loader2
+  Star, Award, Calendar, Loader2, MessageCircle
 } from 'lucide-react';
 
 interface UserProfile {
@@ -367,7 +367,7 @@ export default function UserProfileDialog({
               </div>
 
               {/* Stats */}
-              <div className="flex gap-6 mt-4">
+              <div className="flex items-center gap-6 mt-4">
                 <div className="text-center">
                   <p className="text-2xl font-bold">{followersCount}</p>
                   <p className="text-sm text-muted-foreground">Followers</p>
@@ -376,6 +376,17 @@ export default function UserProfileDialog({
                   <p className="text-2xl font-bold">{followingCount}</p>
                   <p className="text-sm text-muted-foreground">Following</p>
                 </div>
+                {!isOwnProfile && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="ml-auto tech-card"
+                    onClick={() => window.dispatchEvent(new CustomEvent('openFloatingChat', { detail: { recipientId: userId } }))}
+                  >
+                    <MessageCircle className="h-4 w-4 mr-2" />
+                    Message
+                  </Button>
+                )}
               </div>
             </div>
 
