@@ -1,8 +1,10 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
-import { Plus, Play, Loader2 } from "lucide-react";
+import { Plus, Play, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import ShortsViewer from "./ShortsViewer";
+import useEmblaCarousel from "embla-carousel-react";
+import { Button } from "@/components/ui/button";
 
 interface Short {
   id: string;
@@ -32,6 +34,35 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
   const observerTarget = useRef<HTMLDivElement>(null);
+  
+  const [emblaRef, emblaApi] = useEmblaCarousel({
+    align: 'start',
+    containScroll: 'trimSnaps',
+    dragFree: true,
+  });
+  
+  const [canScrollPrev, setCanScrollPrev] = useState(false);
+  const [canScrollNext, setCanScrollNext] = useState(false);
+  
+  const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
+  const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+  
+  const onSelect = useCallback(() => {
+    if (!emblaApi) return;
+    setCanScrollPrev(emblaApi.canScrollPrev());
+    setCanScrollNext(emblaApi.canScrollNext());
+  }, [emblaApi]);
+  
+  useEffect(() => {
+    if (!emblaApi) return;
+    onSelect();
+    emblaApi.on('select', onSelect);
+    emblaApi.on('reInit', onSelect);
+    return () => {
+      emblaApi.off('select', onSelect);
+      emblaApi.off('reInit', onSelect);
+    };
+  }, [emblaApi, onSelect]);
 
   useEffect(() => {
     fetchShorts();
@@ -203,38 +234,31 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
     return (
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Shorts</h2>
+          <h2 className="text-xl font-semibold text-foreground">Shorts</h2>
         </div>
 
-        <div 
-          className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          <style>{`
-            .scrollbar-hide::-webkit-scrollbar {
-              display: none;
-            }
-          `}</style>
-          
-          {/* Create Short Card - Always show */}
-          <Card
-            className="flex-shrink-0 w-[120px] h-[180px] cursor-pointer hover:shadow-lg transition-all hover:scale-105 border-2 border-dashed border-primary/30"
-            onClick={onCreateShort}
-          >
-            <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                <Plus className="h-7 w-7 text-primary" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-sm font-semibold">Create</h3>
-                <p className="text-xs text-muted-foreground">Short</p>
-              </div>
-            </CardContent>
-          </Card>
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex gap-3 touch-pan-y">
+            {/* Create Short Card - Always show */}
+            <Card
+              className="flex-shrink-0 w-[120px] h-[180px] cursor-pointer hover:shadow-lg transition-all hover:scale-105 border-2 border-dashed border-primary/30 tech-card"
+              onClick={onCreateShort}
+            >
+              <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                  <Plus className="h-7 w-7 text-primary" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-sm font-semibold text-foreground">Create</h3>
+                  <p className="text-xs text-muted-foreground">Short</p>
+                </div>
+              </CardContent>
+            </Card>
 
-          {/* Placeholder message */}
-          <div className="flex items-center justify-center text-muted-foreground text-sm px-4">
-            No shorts yet. Create your first one!
+            {/* Placeholder message */}
+            <div className="flex items-center justify-center text-muted-foreground text-sm px-4">
+              No shorts yet. Create your first one!
+            </div>
           </div>
         </div>
       </div>
@@ -246,25 +270,27 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
     return (
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Shorts</h2>
+          <h2 className="text-xl font-semibold text-foreground">Shorts</h2>
         </div>
-        <div className="flex gap-3 overflow-x-auto pb-4">
-          <Card className="flex-shrink-0 w-[120px] h-[180px] border-2 border-dashed border-primary/30">
-            <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                <Plus className="h-7 w-7 text-primary" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-sm font-semibold">Create</h3>
-                <p className="text-xs text-muted-foreground">Short</p>
-              </div>
-            </CardContent>
-          </Card>
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="flex-shrink-0 w-[120px] h-[180px] animate-pulse">
-              <CardContent className="h-full p-0 bg-muted" />
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex gap-3 touch-pan-y">
+            <Card className="flex-shrink-0 w-[120px] h-[180px] border-2 border-dashed border-primary/30 tech-card">
+              <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                  <Plus className="h-7 w-7 text-primary" />
+                </div>
+                <div className="text-center">
+                  <h3 className="text-sm font-semibold text-foreground">Create</h3>
+                  <p className="text-xs text-muted-foreground">Short</p>
+                </div>
+              </CardContent>
             </Card>
-          ))}
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="flex-shrink-0 w-[120px] h-[180px] animate-pulse tech-card border-0">
+                <CardContent className="h-full p-0 bg-muted rounded-lg" />
+              </Card>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -274,96 +300,111 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
     <>
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Shorts</h2>
-          <span className="text-sm text-muted-foreground">
-            {shorts.length}{hasMore ? '+' : ''} shorts
-          </span>
+          <h2 className="text-xl font-semibold text-foreground">Shorts</h2>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              {shorts.length}{hasMore ? '+' : ''} shorts
+            </span>
+            <div className="hidden sm:flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full bg-muted/50 hover:bg-muted"
+                onClick={scrollPrev}
+                disabled={!canScrollPrev}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full bg-muted/50 hover:bg-muted"
+                onClick={scrollNext}
+                disabled={!canScrollNext}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         </div>
 
-        <div 
-          className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
-        >
-          <style>{`
-            .scrollbar-hide::-webkit-scrollbar {
-              display: none;
-            }
-          `}</style>
-          
-          {/* Create Short Card */}
-          <Card
-            className="flex-shrink-0 w-[120px] h-[180px] cursor-pointer hover:shadow-lg transition-all hover:scale-105 border-2 border-dashed border-primary/30"
-            onClick={onCreateShort}
-          >
-            <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
-              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
-                <Plus className="h-7 w-7 text-primary" />
-              </div>
-              <div className="text-center">
-                <h3 className="text-sm font-semibold">Create</h3>
-                <p className="text-xs text-muted-foreground">Short</p>
-              </div>
-            </CardContent>
-          </Card>
-          
-          {/* Existing Shorts */}
-          {shorts.map((short, index) => (
-            <Card 
-              key={short.id} 
-              className="flex-shrink-0 w-[120px] h-[180px] overflow-hidden cursor-pointer hover:shadow-xl transition-all hover:scale-105 group"
-              onClick={() => openViewer(index)}
+        <div className="overflow-hidden" ref={emblaRef}>
+          <div className="flex gap-3 touch-pan-y">
+            {/* Create Short Card */}
+            <Card
+              className="flex-shrink-0 w-[120px] h-[180px] cursor-pointer hover:shadow-lg transition-all hover:scale-105 border-2 border-dashed border-primary/30 tech-card"
+              onClick={onCreateShort}
             >
-              <CardContent className="p-0 h-full relative">
-                <video
-                  src={short.video_url}
-                  className="w-full h-full object-cover"
-                  muted
-                  playsInline
-                />
-                
-                {/* Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/20" />
-                
-                {/* Play Icon Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <div className="w-12 h-12 rounded-full bg-white/30 backdrop-blur-sm flex items-center justify-center">
-                    <Play className="h-6 w-6 text-white fill-white ml-0.5" />
-                  </div>
+              <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
+                  <Plus className="h-7 w-7 text-primary" />
                 </div>
-                
-                {/* Content */}
-                <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
-                  <p className="text-white text-xs line-clamp-2 font-medium">
-                    {short.content}
-                  </p>
-                  <div className="flex items-center gap-1 mt-1">
-                    <div className="w-5 h-5 rounded-full bg-primary/20 backdrop-blur-sm flex items-center justify-center">
-                      <span className="text-[10px] text-white font-semibold">
-                        {short.profiles?.full_name?.[0] || "U"}
-                      </span>
-                    </div>
-                    <span className="text-white/80 text-[10px] truncate">
-                      {short.profiles?.full_name || "User"}
-                    </span>
-                  </div>
+                <div className="text-center">
+                  <h3 className="text-sm font-semibold text-foreground">Create</h3>
+                  <p className="text-xs text-muted-foreground">Short</p>
                 </div>
               </CardContent>
             </Card>
-          ))}
+            
+            {/* Existing Shorts */}
+            {shorts.map((short, index) => (
+              <Card 
+                key={short.id} 
+                className="flex-shrink-0 w-[120px] h-[180px] overflow-hidden cursor-pointer hover:shadow-xl transition-all hover:scale-105 group tech-card border-0"
+                onClick={() => openViewer(index)}
+              >
+                <CardContent className="p-0 h-full relative">
+                  <video
+                    src={short.video_url}
+                    className="w-full h-full object-cover"
+                    muted
+                    playsInline
+                  />
+                  
+                  {/* Gradient Overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-background/30" />
+                  
+                  {/* Play Icon Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="w-12 h-12 rounded-full bg-primary/30 backdrop-blur-sm flex items-center justify-center">
+                      <Play className="h-6 w-6 text-primary-foreground fill-primary-foreground ml-0.5" />
+                    </div>
+                  </div>
+                  
+                  {/* Content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
+                    <p className="text-foreground text-xs line-clamp-2 font-medium">
+                      {short.content}
+                    </p>
+                    <div className="flex items-center gap-1 mt-1">
+                      <div className="w-5 h-5 rounded-full bg-primary/30 backdrop-blur-sm flex items-center justify-center">
+                        <span className="text-[10px] text-primary-foreground font-semibold">
+                          {short.profiles?.full_name?.[0] || "U"}
+                        </span>
+                      </div>
+                      <span className="text-muted-foreground text-[10px] truncate">
+                        {short.profiles?.full_name || "User"}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
 
-          {/* Infinite scroll trigger */}
-          {hasMore && (
-            <div ref={observerTarget} className="flex-shrink-0 w-[120px] h-[180px] flex items-center justify-center">
-              {loadingMore && (
-                <Card className="flex-shrink-0 w-[120px] h-[180px]">
-                  <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
-                    <Loader2 className="w-6 h-6 animate-spin text-primary" />
-                    <span className="text-xs text-muted-foreground">Loading...</span>
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          )}
+            {/* Infinite scroll trigger */}
+            {hasMore && (
+              <div ref={observerTarget} className="flex-shrink-0 w-[120px] h-[180px] flex items-center justify-center">
+                {loadingMore && (
+                  <Card className="flex-shrink-0 w-[120px] h-[180px] tech-card border-0">
+                    <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
+                      <Loader2 className="w-6 h-6 animate-spin text-primary" />
+                      <span className="text-xs text-muted-foreground">Loading...</span>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
