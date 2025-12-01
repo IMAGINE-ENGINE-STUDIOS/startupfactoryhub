@@ -15,7 +15,8 @@ export type ResourceType =
   | 'entrepreneur_center' 
   | 'university' 
   | 'coworking' 
-  | 'investor_network' 
+  | 'investor_network'
+  | 'human_capital'
   | 'other';
 
 export type LocationType = 'physical' | 'online' | 'hybrid';
