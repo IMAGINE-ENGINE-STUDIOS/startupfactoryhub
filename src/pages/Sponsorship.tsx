@@ -6,140 +6,80 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useState } from "react";
-
 const Sponsorship = () => {
   const [openTiers, setOpenTiers] = useState<string[]>([]);
-
   const toggleTier = (tierName: string) => {
-    setOpenTiers(prev => 
-      prev.includes(tierName) 
-        ? prev.filter(name => name !== tierName)
-        : [...prev, tierName]
-    );
+    setOpenTiers(prev => prev.includes(tierName) ? prev.filter(name => name !== tierName) : [...prev, tierName]);
   };
-
-  const tiers = [
-    {
-      name: "EARTHLING",
-      icon: Globe,
-      price: "$5,000",
-      color: "from-emerald-500 to-green-600",
-      borderColor: "border-emerald-500/50",
-      glowColor: "shadow-emerald-500/20",
-      benefits: {
-        visibility: [
-          "Recognition as an EARTHLING Sponsor across Startup Factory Hub communications",
-          "Logo displayed on the SFH website in the EARTHLING tier",
-          "Welcome shoutout on LinkedIn and community updates"
-        ],
-        access: [
-          "Access to selected virtual accelerator events",
-          "Opportunity to offer perks, discounts, API credits, or tools to founders",
-          "Access to the SFH Partner Resource Hub"
-        ],
-        platform: [
-          "Listing as a partner in the Startup Factory Hub platform",
-          "Ability to join the mentor/community network"
-        ]
-      }
-    },
-    {
-      name: "STAR",
-      icon: Star,
-      price: "$15,000",
-      color: "from-amber-500 to-orange-600",
-      borderColor: "border-amber-500/50",
-      glowColor: "shadow-amber-500/20",
-      benefits: {
-        visibility: [
-          "Recognition as a STAR Sponsor at events and on digital materials",
-          "Elevated logo position on the SFH website",
-          "Monthly ecosystem spotlight in SFH newsletter"
-        ],
-        thought: [
-          "Opportunity to host a guest workshop, AMA, or technical talk",
-          "Direct mentoring opportunities with founders"
-        ],
-        access: [
-          "Invitations to SFH networking events in New York, San Francisco, Orlando/Lake Nona, Santiago Chile, and Tokyo Japan",
-          "Access to curated scouting reports and early-stage deal flow previews"
-        ],
-        platform: [
-          "Mentor access in the platform",
-          "Feature article or interview inside the SFH Media Hub"
-        ]
-      }
-    },
-    {
-      name: "NEBULA",
-      icon: Sparkles,
-      price: "$30,000",
-      color: "from-purple-500 to-indigo-600",
-      borderColor: "border-purple-500/50",
-      glowColor: "shadow-purple-500/20",
-      benefits: {
-        visibility: [
-          "Recognition as a NEBULA Sponsor",
-          "Premium visibility across all SFH touchpoints: Website, Platform dashboard, Cohort materials, Demo Day"
-        ],
-        thought: [
-          "Guaranteed speaking opportunity at one SFH flagship event: Demo Day, Global Deep-Tech Roundtable, or Industry Vertical Summit",
-          "Co-branded campaign: SFH × Sponsor"
-        ],
-        access: [
-          "Full access to all global SFH networking events: New York, San Francisco, Orlando/Lake Nona, Santiago Chile, Tokyo",
-          "Structured 1:1 startup matching sessions",
-          "Ability to run pilot programs with startups"
-        ],
-        platform: [
-          "Partner tools/demo integration into the SFH Marketplace",
-          "A dedicated NEBULA Sponsor Resource Page for founders",
-          "Access to non-sensitive startup data rooms (with permissions)"
-        ]
-      }
-    },
-    {
-      name: "GALAXY",
-      icon: Award,
-      price: "$50,000",
-      color: "from-pink-500 via-purple-500 to-cyan-500",
-      borderColor: "border-primary/50",
-      glowColor: "shadow-primary/20",
-      benefits: {
-        visibility: [
-          "Recognition as GALAXY Strategic Partner (top tier)",
-          "Premier logo placement across: Website, All major SFH events, Global summits, PR activations, Demo Day",
-          "Joint PR announcement distributed globally: East Coast (New York), West Coast (San Francisco), LATAM (Chile), APAC (Japan)"
-        ],
-        thought: [
-          "Keynote-level speaking slot at: SFH Global Summit, Demo Day, Frontier-Tech Conference",
-          "Lead role in one innovation track: Space & Satellite Systems, Photonics & Quantum, AI & Cloud, Robotics & Automation, Advanced Materials"
-        ],
-        access: [
-          "VIP access to every global SFH event",
-          "Priority deal-flow access + curated startup introductions",
-          "Private investor–startup dinners in: New York, San Francisco, Orlando, Tokyo, Santiago",
-          "Co-designing pilot programs with cohort startups"
-        ],
-        platform: [
-          "Full integration of sponsor technology into: Global Resources managing dashboards",
-          "A dedicated Sponsor Pavilion (virtual or physical)",
-          "Custom analytics dashboard showing founder engagement"
-        ]
-      }
+  const tiers = [{
+    name: "EARTHLING",
+    icon: Globe,
+    price: "$5,000",
+    color: "from-emerald-500 to-green-600",
+    borderColor: "border-emerald-500/50",
+    glowColor: "shadow-emerald-500/20",
+    benefits: {
+      visibility: ["Recognition as an EARTHLING Sponsor across Startup Factory Hub communications", "Logo displayed on the SFH website in the EARTHLING tier", "Welcome shoutout on LinkedIn and community updates"],
+      access: ["Access to selected virtual accelerator events", "Opportunity to offer perks, discounts, API credits, or tools to founders", "Access to the SFH Partner Resource Hub"],
+      platform: ["Listing as a partner in the Startup Factory Hub platform", "Ability to join the mentor/community network"]
     }
-  ];
-
-  const hubs = [
-    { name: "New York", icon: Building2 },
-    { name: "San Francisco", icon: TrendingUp },
-    { name: "Orlando (HQ)", icon: Target },
-    { name: "Santiago, Chile", icon: MapPin },
-    { name: "Tokyo, Japan", icon: Globe }
-  ];
-
-  return (
-    <div className="min-h-screen bg-background text-foreground relative">
+  }, {
+    name: "STAR",
+    icon: Star,
+    price: "$15,000",
+    color: "from-amber-500 to-orange-600",
+    borderColor: "border-amber-500/50",
+    glowColor: "shadow-amber-500/20",
+    benefits: {
+      visibility: ["Recognition as a STAR Sponsor at events and on digital materials", "Elevated logo position on the SFH website", "Monthly ecosystem spotlight in SFH newsletter"],
+      thought: ["Opportunity to host a guest workshop, AMA, or technical talk", "Direct mentoring opportunities with founders"],
+      access: ["Invitations to SFH networking events in New York, San Francisco, Orlando/Lake Nona, Santiago Chile, and Tokyo Japan", "Access to curated scouting reports and early-stage deal flow previews"],
+      platform: ["Mentor access in the platform", "Feature article or interview inside the SFH Media Hub"]
+    }
+  }, {
+    name: "NEBULA",
+    icon: Sparkles,
+    price: "$30,000",
+    color: "from-purple-500 to-indigo-600",
+    borderColor: "border-purple-500/50",
+    glowColor: "shadow-purple-500/20",
+    benefits: {
+      visibility: ["Recognition as a NEBULA Sponsor", "Premium visibility across all SFH touchpoints: Website, Platform dashboard, Cohort materials, Demo Day"],
+      thought: ["Guaranteed speaking opportunity at one SFH flagship event: Demo Day, Global Deep-Tech Roundtable, or Industry Vertical Summit", "Co-branded campaign: SFH × Sponsor"],
+      access: ["Full access to all global SFH networking events: New York, San Francisco, Orlando/Lake Nona, Santiago Chile, Tokyo", "Structured 1:1 startup matching sessions", "Ability to run pilot programs with startups"],
+      platform: ["Partner tools/demo integration into the SFH Marketplace", "A dedicated NEBULA Sponsor Resource Page for founders", "Access to non-sensitive startup data rooms (with permissions)"]
+    }
+  }, {
+    name: "GALAXY",
+    icon: Award,
+    price: "$50,000",
+    color: "from-pink-500 via-purple-500 to-cyan-500",
+    borderColor: "border-primary/50",
+    glowColor: "shadow-primary/20",
+    benefits: {
+      visibility: ["Recognition as GALAXY Strategic Partner (top tier)", "Premier logo placement across: Website, All major SFH events, Global summits, PR activations, Demo Day", "Joint PR announcement distributed globally: East Coast (New York), West Coast (San Francisco), LATAM (Chile), APAC (Japan)"],
+      thought: ["Keynote-level speaking slot at: SFH Global Summit, Demo Day, Frontier-Tech Conference", "Lead role in one innovation track: Space & Satellite Systems, Photonics & Quantum, AI & Cloud, Robotics & Automation, Advanced Materials"],
+      access: ["VIP access to every global SFH event", "Priority deal-flow access + curated startup introductions", "Private investor–startup dinners in: New York, San Francisco, Orlando, Tokyo, Santiago", "Co-designing pilot programs with cohort startups"],
+      platform: ["Full integration of sponsor technology into: Global Resources managing dashboards", "A dedicated Sponsor Pavilion (virtual or physical)", "Custom analytics dashboard showing founder engagement"]
+    }
+  }];
+  const hubs = [{
+    name: "New York",
+    icon: Building2
+  }, {
+    name: "San Francisco",
+    icon: TrendingUp
+  }, {
+    name: "Orlando (HQ)",
+    icon: Target
+  }, {
+    name: "Santiago, Chile",
+    icon: MapPin
+  }, {
+    name: "Tokyo, Japan",
+    icon: Globe
+  }];
+  return <div className="min-h-screen bg-background text-foreground relative">
       <MatrixBackground />
       <Navigation />
       
@@ -147,14 +87,8 @@ const Sponsorship = () => {
         <div className="container mx-auto px-4 sm:px-6 max-w-7xl">
           {/* Header with Become Sponsor Button */}
           <div className="text-center mb-12 animate-fade-in">
-            <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-6">
-              Sponsorship Program
-            </h1>
-            <Button 
-              size="lg"
-              className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-white font-semibold mb-4"
-              onClick={() => window.location.href = 'mailto:info@startupfactoryhub.com'}
-            >
+            
+            <Button size="lg" className="bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-white font-semibold mb-4" onClick={() => window.location.href = 'mailto:info@startupfactoryhub.com'}>
               <Rocket className="mr-2 h-5 w-5" />
               Become a Sponsor
             </Button>
@@ -169,16 +103,11 @@ const Sponsorship = () => {
           {/* Tier Cards - Expandable */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-20 max-w-6xl mx-auto">
             {tiers.map((tier, index) => {
-              const Icon = tier.icon;
-              const isOpen = openTiers.includes(tier.name);
-              return (
-                <Collapsible
-                  key={tier.name}
-                  open={isOpen}
-                  onOpenChange={() => toggleTier(tier.name)}
-                  className="animate-fade-in"
-                  style={{ animationDelay: `${index * 0.1}s` }}
-                >
+            const Icon = tier.icon;
+            const isOpen = openTiers.includes(tier.name);
+            return <Collapsible key={tier.name} open={isOpen} onOpenChange={() => toggleTier(tier.name)} className="animate-fade-in" style={{
+              animationDelay: `${index * 0.1}s`
+            }}>
                   <Card className={`group bg-card/30 border-2 ${tier.borderColor} hover:${tier.glowColor} transition-all duration-300 overflow-hidden hover:bg-card/50 min-h-[280px] flex flex-col ${isOpen ? `${tier.glowColor} shadow-2xl` : 'shadow-lg'}`}>
                     <CollapsibleTrigger className="w-full text-left">
                       <CardHeader className="cursor-pointer">
@@ -214,32 +143,26 @@ const Sponsorship = () => {
                             Brand Visibility
                           </h4>
                           <ul className="space-y-2">
-                            {tier.benefits.visibility.map((benefit, i) => (
-                              <li key={i} className="flex gap-2 text-sm text-foreground">
+                            {tier.benefits.visibility.map((benefit, i) => <li key={i} className="flex gap-2 text-sm text-foreground">
                                 <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                                 <span>{benefit}</span>
-                              </li>
-                            ))}
+                              </li>)}
                           </ul>
                         </div>
 
                         {/* Thought Leadership */}
-                        {tier.benefits.thought && (
-                          <div className="bg-card/50 rounded-lg p-4 border border-border/30">
+                        {tier.benefits.thought && <div className="bg-card/50 rounded-lg p-4 border border-border/30">
                             <h4 className="font-semibold text-sm flex items-center gap-2 mb-3 text-primary">
                               <Briefcase className="h-5 w-5" />
                               Thought Leadership
                             </h4>
                             <ul className="space-y-2">
-                              {tier.benefits.thought.map((benefit, i) => (
-                                <li key={i} className="flex gap-2 text-sm text-foreground">
+                              {tier.benefits.thought.map((benefit, i) => <li key={i} className="flex gap-2 text-sm text-foreground">
                                   <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                                   <span>{benefit}</span>
-                                </li>
-                              ))}
+                                </li>)}
                             </ul>
-                          </div>
-                        )}
+                          </div>}
 
                         {/* Ecosystem Access */}
                         <div className="bg-card/50 rounded-lg p-4 border border-border/30">
@@ -248,12 +171,10 @@ const Sponsorship = () => {
                             Ecosystem Access
                           </h4>
                           <ul className="space-y-2">
-                            {tier.benefits.access.map((benefit, i) => (
-                              <li key={i} className="flex gap-2 text-sm text-foreground">
+                            {tier.benefits.access.map((benefit, i) => <li key={i} className="flex gap-2 text-sm text-foreground">
                                 <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                                 <span>{benefit}</span>
-                              </li>
-                            ))}
+                              </li>)}
                           </ul>
                         </div>
 
@@ -264,27 +185,21 @@ const Sponsorship = () => {
                             SFH Platform Benefits
                           </h4>
                           <ul className="space-y-2">
-                            {tier.benefits.platform.map((benefit, i) => (
-                              <li key={i} className="flex gap-2 text-sm text-foreground">
+                            {tier.benefits.platform.map((benefit, i) => <li key={i} className="flex gap-2 text-sm text-foreground">
                                 <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                                 <span>{benefit}</span>
-                              </li>
-                            ))}
+                              </li>)}
                           </ul>
                         </div>
 
-                        <Button 
-                          className={`w-full bg-gradient-to-br ${tier.color} hover:opacity-90 transition-opacity text-white font-semibold py-6 text-lg`}
-                          onClick={() => window.location.href = 'mailto:info@startupfactoryhub.com'}
-                        >
+                        <Button className={`w-full bg-gradient-to-br ${tier.color} hover:opacity-90 transition-opacity text-white font-semibold py-6 text-lg`} onClick={() => window.location.href = 'mailto:info@startupfactoryhub.com'}>
                           Contact Us
                         </Button>
                       </CardContent>
                     </CollapsibleContent>
                   </Card>
-                </Collapsible>
-              );
-            })}
+                </Collapsible>;
+          })}
           </div>
 
           {/* Global Hubs Section */}
@@ -305,13 +220,10 @@ const Sponsorship = () => {
               <CardContent>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                   {hubs.map((hub, index) => {
-                    const Icon = hub.icon;
-                    return (
-                      <div 
-                        key={hub.name}
-                        className="flex flex-col items-center gap-3 p-6 rounded-lg bg-card/30 border border-border/30 hover:border-primary/50 hover:bg-card/50 transition-all duration-300 animate-fade-in group"
-                        style={{ animationDelay: `${index * 0.1}s` }}
-                      >
+                  const Icon = hub.icon;
+                  return <div key={hub.name} className="flex flex-col items-center gap-3 p-6 rounded-lg bg-card/30 border border-border/30 hover:border-primary/50 hover:bg-card/50 transition-all duration-300 animate-fade-in group" style={{
+                    animationDelay: `${index * 0.1}s`
+                  }}>
                         <div className="p-3 rounded-full bg-primary/10 group-hover:bg-primary/20 transition-colors">
                           <Icon className="h-6 w-6 text-primary" />
                         </div>
@@ -321,9 +233,8 @@ const Sponsorship = () => {
                           </div>
                           <span className="font-semibold text-sm">{hub.name}</span>
                         </div>
-                      </div>
-                    );
-                  })}
+                      </div>;
+                })}
                 </div>
               </CardContent>
             </Card>
@@ -332,8 +243,6 @@ const Sponsorship = () => {
       </main>
 
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default Sponsorship;
