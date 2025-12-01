@@ -30,7 +30,7 @@ export default function MentorCalendarWidget({ onJoinMeeting }: MentorCalendarWi
   };
 
   return (
-    <Card className="tech-card">
+    <Card className="tech-card border-0 hover:scale-[1.02] transition-transform">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5 text-primary" />

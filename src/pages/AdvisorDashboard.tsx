@@ -422,7 +422,7 @@ export default function AdvisorDashboard() {
           <TabsContent value="profile" className="space-y-4">
             <AdvisorProfileView />
             
-            <Card>
+            <Card className="tech-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5" />
@@ -490,7 +490,7 @@ export default function AdvisorDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {pendingRequests.map((request: any) => <Card key={request.id} className="hover:border-primary/50 transition-colors">
+                    {pendingRequests.map((request: any) => <Card key={request.id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
                         <CardContent className="p-4">
                           <div className="flex flex-col md:flex-row gap-4">
                             <div className="flex items-start space-x-4 flex-1">
@@ -630,7 +630,7 @@ export default function AdvisorDashboard() {
             </div>
 
             {/* Upcoming Events with Banners */}
-            {upcomingEvents.length > 0 && <Card>
+            {upcomingEvents.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>

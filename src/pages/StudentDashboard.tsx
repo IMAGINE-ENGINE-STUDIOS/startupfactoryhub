@@ -160,7 +160,7 @@ export default function StudentDashboard() {
             </div>
 
             {/* Upcoming Events with Banners */}
-            {upcomingEvents.length > 0 && <Card>
+            {upcomingEvents.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>

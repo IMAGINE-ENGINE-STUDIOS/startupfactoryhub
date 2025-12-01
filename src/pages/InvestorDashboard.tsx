@@ -623,8 +623,8 @@ export default function InvestorDashboard() {
                   const currentValue = portfolioItem?.equity_percentage && portfolioItem?.latestValuation ? portfolioItem.latestValuation * portfolioItem.equity_percentage / 100 : investment.funding_amount;
                   const investedAmount = portfolioItem?.amount || investment.funding_amount || 0;
                   const roi = investedAmount > 0 ? (currentValue - investedAmount) / investedAmount * 100 : 0;
-                  return <Card key={investment.id} className="border border-border/50 hover:border-primary/50 transition-colors">
-                          <CardContent className="p-4">
+                  return <Card key={investment.id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
+                           <CardContent className="p-4">
                             <div className="flex items-start space-x-3 mb-3">
                               <RoleBasedAvatar avatarUrl={investment.logo_url} role="startup" fallbackText={investment.name} className="h-10 w-10" />
                               <div className="flex-1 min-w-0">
@@ -818,7 +818,7 @@ export default function InvestorDashboard() {
             </div>
 
             {/* Upcoming Events with Banners */}
-            {upcomingEvents.length > 0 && <Card>
+            {upcomingEvents.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>

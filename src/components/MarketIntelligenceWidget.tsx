@@ -119,7 +119,7 @@ export default function MarketIntelligenceWidget() {
   return (
     <div className="space-y-6">
       {/* Modern Search Section */}
-      <Card className="p-4 sm:p-6 bg-gradient-to-br from-primary/5 via-background to-background border-primary/10">
+      <Card className="tech-card border-0 p-4 sm:p-6 bg-gradient-to-br from-primary/5 via-background to-background">
         <div className="space-y-4 sm:space-y-6">
           <div className="text-center space-y-2">
             <h2 className="text-xl sm:text-2xl font-bold">Market Intelligence</h2>
@@ -201,7 +201,7 @@ export default function MarketIntelligenceWidget() {
       {/* Loading State */}
       {loading && (
         <div className="space-y-4 sm:space-y-6">
-          <Card className="p-4 sm:p-6">
+          <Card className="tech-card border-0 p-4 sm:p-6">
             <Skeleton className="h-6 sm:h-8 w-48 sm:w-64 mb-4" />
             <Skeleton className="h-3 sm:h-4 w-full mb-2" />
             <Skeleton className="h-3 sm:h-4 w-3/4" />
@@ -218,7 +218,7 @@ export default function MarketIntelligenceWidget() {
       {!loading && results && (
         <div className="space-y-6">
           {/* Overview Card */}
-          <Card className="p-4 sm:p-6">
+          <Card className="tech-card border-0 p-4 sm:p-6">
             <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4 mb-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -234,7 +234,7 @@ export default function MarketIntelligenceWidget() {
           {/* Key Metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
             {Object.entries(results.metrics).slice(0, 4).map(([key, value]) => (
-              <Card key={key} className="p-3 sm:p-4">
+              <Card key={key} className="tech-card border-0 p-3 sm:p-4 hover:scale-[1.02] transition-transform">
                 <div className="flex items-center justify-between mb-2">
                   <span className="text-xs sm:text-sm text-muted-foreground capitalize">
                     {key.replace(/_/g, ' ')}
@@ -266,7 +266,7 @@ export default function MarketIntelligenceWidget() {
             <TabsContent value="insights">
               <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
                 {results.insights.map((insight, idx) => (
-                  <Card key={idx} className="p-3 sm:p-4 bg-primary/5 border-primary/20">
+                  <Card key={idx} className="tech-card border-0 p-3 sm:p-4 bg-primary/5 hover:scale-[1.02] transition-transform">
                     <div className="flex items-start gap-2 sm:gap-3">
                       <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-primary mt-0.5 flex-shrink-0" />
                       <p className="text-xs sm:text-sm">{insight}</p>
@@ -279,7 +279,7 @@ export default function MarketIntelligenceWidget() {
             <TabsContent value="predictions">
               <div className="space-y-2 sm:space-y-3">
                 {results.predictions.map((prediction, idx) => (
-                  <Card key={idx} className="p-3 sm:p-4 bg-blue-500/5 border-blue-500/20">
+                  <Card key={idx} className="tech-card border-0 p-3 sm:p-4 bg-blue-500/5 hover:scale-[1.02] transition-transform">
                     <div className="flex items-start gap-2 sm:gap-3">
                       <Target className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500 mt-0.5 flex-shrink-0" />
                       <p className="text-xs sm:text-sm">{prediction}</p>
@@ -292,7 +292,7 @@ export default function MarketIntelligenceWidget() {
             <TabsContent value="trends">
               <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
                 {results.trends.map((trend, idx) => (
-                  <Card key={idx} className="p-3 sm:p-4">
+                  <Card key={idx} className="tech-card border-0 p-3 sm:p-4 hover:scale-[1.02] transition-transform">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs sm:text-sm font-medium">{trend.label}</span>
                       <Badge variant={trend.change >= 0 ? 'default' : 'secondary'} className="text-xs">
@@ -333,7 +333,7 @@ export default function MarketIntelligenceWidget() {
           ) : (
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
               {predictions.map((pred, idx) => (
-                <Card key={idx} className="p-4 sm:p-5 hover:border-primary/50 transition-colors">
+                <Card key={idx} className="tech-card border-0 p-4 sm:p-5 hover:scale-[1.02] transition-transform">
                   <div className="space-y-2 sm:space-y-3">
                     <div className="flex items-start justify-between gap-2">
                       <h4 className="font-semibold text-sm sm:text-base">{pred.title}</h4>
