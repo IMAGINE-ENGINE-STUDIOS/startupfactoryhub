@@ -449,7 +449,7 @@ const Dashboard = () => {
             </div>
 
             {/* Upcoming Events with Banners */}
-            {upcomingEvents.length > 0 && <Card>
+            {upcomingEvents.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
@@ -543,7 +543,7 @@ const Dashboard = () => {
             <TabsContent value="profile" className="space-y-4">
               <CompanyProfileManager />
               
-              <Card>
+              <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <MessageCircle className="h-5 w-5" />
@@ -611,7 +611,7 @@ const Dashboard = () => {
                   </div>
 
                   {/* 1. Incoming Pitch Requests (from investors TO startup) */}
-                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                  <Collapsible defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
@@ -656,7 +656,7 @@ const Dashboard = () => {
                   </Collapsible>
 
                   {/* 2. Sent Pitch Requests (from startup TO investors) */}
-                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                  <Collapsible defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -699,7 +699,7 @@ const Dashboard = () => {
                   </Collapsible>
 
                   {/* 3. Upcoming Pitches (scheduled, future date) */}
-                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                  <Collapsible defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -739,7 +739,7 @@ const Dashboard = () => {
                   </Collapsible>
 
                   {/* 4. Past Pitches (scheduled/completed, past date) */}
-                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                  <Collapsible defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
@@ -798,7 +798,7 @@ const Dashboard = () => {
                   </div>
 
                   {/* 1. Pending Offers Section */}
-                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                  <Collapsible defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
@@ -817,7 +817,7 @@ const Dashboard = () => {
                   </Collapsible>
 
                   {/* 2. Active Mentors Section */}
-                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                  <Collapsible defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -836,7 +836,7 @@ const Dashboard = () => {
                   </Collapsible>
 
                   {/* 3. Upcoming Sessions Section */}
-                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                  <Collapsible defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -855,7 +855,7 @@ const Dashboard = () => {
                   </Collapsible>
 
                   {/* 4. Past Sessions Section */}
-                  <Collapsible defaultOpen className="rounded-xl border border-border bg-card">
+                  <Collapsible defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">

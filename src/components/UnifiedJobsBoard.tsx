@@ -806,7 +806,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card>
+      <Card className="tech-card border-0">
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
@@ -993,18 +993,22 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
       </Card>
 
       {/* Search Input */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search jobs by title, company, location, or description..."
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setDisplayCount(6); // Reset pagination on search
-          }}
-          className="pl-10"
-        />
-      </div>
+      <Card className="tech-card border-0">
+        <CardContent className="p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search jobs by title, company, location, or description..."
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setDisplayCount(6); // Reset pagination on search
+              }}
+              className="pl-10 bg-background/50"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Filters */}
       <div className="flex gap-2 flex-wrap">
@@ -1050,7 +1054,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
       {/* Jobs Grid */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-start">
         {displayedJobs.length === 0 ? (
-          <Card className="col-span-full">
+          <Card className="col-span-full tech-card border-0">
             <CardContent className="py-8">
               <p className="text-center text-muted-foreground">
                 {searchQuery ? 'No jobs match your search' : 'No jobs found'}

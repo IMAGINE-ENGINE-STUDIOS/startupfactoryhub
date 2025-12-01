@@ -256,7 +256,7 @@ const MentorDashboard = () => {
             
             {/* Past Mentees Section */}
             {pastMentees && pastMentees.length > 0 && (
-              <Card>
+              <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle>Past Mentees</CardTitle>
                   <CardDescription>Previous mentorship relationships</CardDescription>
@@ -298,7 +298,7 @@ const MentorDashboard = () => {
 
             {/* Upcoming Events with Banners */}
             {upcomingEvents.length > 0 && (
-              <Card>
+              <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
