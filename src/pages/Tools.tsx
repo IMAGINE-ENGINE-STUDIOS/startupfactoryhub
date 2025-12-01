@@ -156,7 +156,7 @@ const Tools = () => {
     <div className="h-screen flex flex-col bg-background overflow-hidden">
       <div className="container mx-auto px-4 sm:px-6 py-6 sm:py-8 flex-shrink-0">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 tech-card border-0 p-4">
           <div className="flex items-center gap-3 mb-2">
             <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
               <Sparkles className="h-6 w-6 text-primary" />
@@ -175,7 +175,7 @@ const Tools = () => {
         <div className="container mx-auto px-4 sm:px-6 h-full flex flex-col">
           {/* CRM Board Section */}
           <div className="mb-6 flex-shrink-0">
-            <Card>
+            <Card className="tech-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Kanban className="h-5 w-5 text-primary" />
@@ -193,7 +193,7 @@ const Tools = () => {
 
           {/* Main Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 h-auto flex-shrink-0 mb-4">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 h-auto flex-shrink-0 mb-4 tech-card border-0 p-1">
               <TabsTrigger value="chatbot" className="gap-2 py-3">
                 <Bot className="h-4 w-4" />
                 <span className="hidden sm:inline">Assistant</span>
@@ -222,7 +222,7 @@ const Tools = () => {
 
             {/* AI Chatbot */}
             <TabsContent value="chatbot" className="flex-1 overflow-y-auto">
-            <Card>
+            <Card className="tech-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Bot className="h-5 w-5 text-primary" />
@@ -242,7 +242,7 @@ const Tools = () => {
 
             {/* Text Summarizer */}
             <TabsContent value="summary" className="flex-1 overflow-y-auto">
-            <Card>
+            <Card className="tech-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5 text-primary" />
@@ -260,7 +260,7 @@ const Tools = () => {
                     value={summaryText}
                     onChange={(e) => setSummaryText(e.target.value)}
                     rows={8}
-                    className="resize-none"
+                    className="resize-none tech-card border-0"
                   />
                 </div>
                 {summaryText && (
@@ -277,7 +277,7 @@ const Tools = () => {
 
             {/* Sentiment Analyzer */}
             <TabsContent value="sentiment" className="flex-1 overflow-y-auto">
-            <Card>
+            <Card className="tech-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
@@ -295,7 +295,7 @@ const Tools = () => {
                     value={sentimentText}
                     onChange={(e) => setSentimentText(e.target.value)}
                     rows={8}
-                    className="resize-none"
+                    className="resize-none tech-card border-0"
                   />
                 </div>
                 <Button
@@ -315,7 +315,7 @@ const Tools = () => {
                 </Button>
 
                 {sentimentResult && (
-                  <Card className="border-primary/20 bg-muted/50">
+                  <Card className="tech-card border-0">
                     <CardHeader>
                       <CardTitle className="text-base flex items-center gap-2">
                         {sentimentResult.sentiment === 'positive' ? (
@@ -378,7 +378,7 @@ const Tools = () => {
 
             {/* Translator */}
             <TabsContent value="translate" className="flex-1 overflow-y-auto">
-            <Card>
+            <Card className="tech-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Languages className="h-5 w-5 text-primary" />
@@ -396,7 +396,7 @@ const Tools = () => {
                     value={translationText}
                     onChange={(e) => setTranslationText(e.target.value)}
                     rows={8}
-                    className="resize-none"
+                    className="resize-none tech-card border-0"
                   />
                 </div>
                 {translationText && (
@@ -408,7 +408,7 @@ const Tools = () => {
 
             {/* Document Analyzer */}
             <TabsContent value="document" className="flex-1 overflow-y-auto">
-            <Card>
+            <Card className="tech-card border-0">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Image className="h-5 w-5 text-primary" />
@@ -426,6 +426,7 @@ const Tools = () => {
                     placeholder="https://example.com/image.jpg"
                     value={imageUrl}
                     onChange={(e) => setImageUrl(e.target.value)}
+                    className="tech-card border-0"
                   />
                   <p className="text-xs text-muted-foreground">
                     Enter a publicly accessible image URL (JPG, PNG, WEBP). PDFs are not supported.
@@ -433,7 +434,7 @@ const Tools = () => {
                 </div>
 
                 {imageUrl && (
-                  <div className="border rounded-lg overflow-hidden bg-muted">
+                  <div className="tech-card border-0 rounded-lg overflow-hidden">
                     <img
                       src={imageUrl}
                       alt="Document to analyze"
@@ -462,7 +463,7 @@ const Tools = () => {
                 </Button>
 
                 {documentResult && (
-                  <Card className="border-primary/20 bg-muted/50">
+                  <Card className="tech-card border-0">
                     <CardHeader>
                       <CardTitle className="text-base">Analysis Result</CardTitle>
                     </CardHeader>
