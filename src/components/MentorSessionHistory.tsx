@@ -149,7 +149,7 @@ export default function MentorSessionHistory({
   }
   return <div className="space-y-6">
       {/* Rating Stats */}
-      {showStats && stats.totalRatings > 0 && <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
+      {showStats && stats.totalRatings > 0 && <Card className="tech-card border-0 bg-gradient-to-br from-primary/5 to-transparent">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <TrendingUp className="h-5 w-5 text-primary" />
@@ -193,7 +193,7 @@ export default function MentorSessionHistory({
         </Card>}
 
       {/* Session History */}
-      <Card>
+      <Card className="tech-card border-0">
         
         
       </Card>

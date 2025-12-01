@@ -15,6 +15,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface MenteeSessionsProps {
   onJoinMeeting?: (meetingLink: string, sessionData?: any) => void;
@@ -122,7 +123,7 @@ export default function MenteeSessions({ onJoinMeeting }: MenteeSessionsProps = 
     <div className="space-y-6">
       {/* Requested Sessions */}
       {requestedSessions.length > 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <MessageSquare className="h-5 w-5 text-primary" />
@@ -131,9 +132,9 @@ export default function MenteeSessions({ onJoinMeeting }: MenteeSessionsProps = 
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {requestedSessions.map((session) => (
-                <Card key={session.id} className="border-primary/20">
+                <Card key={session.id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
                   <CardContent className="p-4">
                     <div className="flex flex-col sm:flex-row gap-4">
                       <div className="flex items-start gap-3 flex-1">
@@ -203,7 +204,7 @@ export default function MenteeSessions({ onJoinMeeting }: MenteeSessionsProps = 
 
       {/* Scheduled Sessions */}
       {scheduledSessions.length > 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Video className="h-5 w-5 text-primary" />
@@ -212,7 +213,7 @@ export default function MenteeSessions({ onJoinMeeting }: MenteeSessionsProps = 
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {scheduledSessions.map((session) => {
                 const sessionDate = new Date(session.scheduled_at);
                 const now = new Date();
@@ -222,7 +223,7 @@ export default function MenteeSessions({ onJoinMeeting }: MenteeSessionsProps = 
                 return (
                   <Card 
                     key={session.id} 
-                    className={isWithin2Hours ? 'border-primary' : 'border-muted'}
+                    className={cn("tech-card border-0 hover:scale-[1.02] transition-transform", isWithin2Hours && 'ring-2 ring-primary')}
                   >
                     <CardContent className="p-4">
                       <div className="flex flex-col sm:flex-row gap-4">
@@ -302,7 +303,7 @@ export default function MenteeSessions({ onJoinMeeting }: MenteeSessionsProps = 
 
       {/* Empty State */}
       {requestedSessions.length === 0 && scheduledSessions.length === 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardContent className="py-12 text-center">
             <Video className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
             <h3 className="text-lg font-semibold mb-2">No Sessions Yet</h3>

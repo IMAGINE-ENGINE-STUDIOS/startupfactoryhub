@@ -121,8 +121,8 @@ export const MentorshipSessionCard = ({
 
   return (
     <div className={cn(
-      'group relative rounded-xl border p-3 sm:p-5 transition-all duration-300',
-      'hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20',
+      'tech-card group relative rounded-xl border-0 p-3 sm:p-5 transition-all duration-300',
+      'hover:scale-[1.02] hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/20',
       styles.container
     )}>
       {/* Accent Line */}
