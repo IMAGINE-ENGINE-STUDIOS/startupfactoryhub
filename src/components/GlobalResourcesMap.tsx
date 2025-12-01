@@ -89,10 +89,10 @@ export const GlobalResourcesMap = () => {
       if (!map.current) return;
       
       map.current.setFog({
-        color: '#0f172a',
-        'high-color': '#1e293b',
+        color: 'hsl(var(--background))',
+        'high-color': 'hsl(var(--muted))',
         'horizon-blend': 0.02,
-        'space-color': '#020617',
+        'space-color': 'hsl(var(--background))',
         'star-intensity': 0.15
       });
       
@@ -192,74 +192,27 @@ export const GlobalResourcesMap = () => {
       {/* Full Viewport Map */}
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
       
-      {/* Collapsed Toolbar Bar - Show when left panel is closed */}
-      {!isLeftPanelOpen && (
-        <div className="absolute left-2 top-1/2 -translate-y-1/2 z-20 backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] rounded-2xl p-2 flex flex-col gap-2">
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            className="rounded-xl bg-white/5 hover:bg-white/15"
-            onClick={() => {
-              setIsLeftPanelOpen(true);
-              setTimeout(() => {
-                document.querySelector<HTMLInputElement>('input[placeholder="Search resources..."]')?.focus();
-              }, 100);
-            }}
-          >
-            <Search className="w-5 h-5" />
-          </Button>
-          
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            className="rounded-xl bg-white/5 hover:bg-white/15"
-            onClick={() => setIsLeftPanelOpen(true)}
-          >
-            <MapPin className="w-5 h-5" />
-          </Button>
-          
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={() => setShowAddDialog(true)} 
-            className="rounded-xl bg-white/5 hover:bg-white/15"
-          >
-            <Plus className="w-5 h-5" />
-          </Button>
-          
-          <div className="h-px bg-white/20 my-1" />
-          
-          <Button 
-            size="icon" 
-            variant="ghost" 
-            onClick={() => setIsLeftPanelOpen(true)} 
-            className="rounded-xl bg-white/5 hover:bg-white/15"
-          >
-            <Menu className="w-5 h-5" />
-          </Button>
-        </div>
-      )}
-
-      {/* Panel Toggle (Show when panel is open) */}
-      {isLeftPanelOpen && (
-        <Button
-          size="icon"
-          onClick={() => setIsLeftPanelOpen(false)}
-          className="absolute left-[332px] top-4 z-20 transition-all duration-300 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-white/20 dark:hover:bg-black/30 rounded-2xl"
-          variant="ghost"
-        >
-          <X className="w-5 h-5" />
-        </Button>
-      )}
+      {/* Left Side Panel Toggle (Always Visible) */}
+      <Button
+        size="icon"
+        onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+        className={cn(
+          "absolute top-4 z-20 transition-all duration-300 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-white/20 dark:hover:bg-black/30 rounded-2xl",
+          isLeftPanelOpen ? "left-[340px]" : "left-4"
+        )}
+        variant="ghost"
+      >
+        {isLeftPanelOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+      </Button>
 
       {/* Left Side Sliding Panel */}
       <div 
         className={cn(
-          "absolute left-2 top-2 bottom-2 w-80 z-10 transition-all duration-300",
+          "absolute left-0 top-0 bottom-0 w-80 z-10 transition-all duration-300",
           isLeftPanelOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col rounded-3xl">
+        <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border-r border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col rounded-r-3xl">
           {/* Header */}
           <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
             <h2 className="text-lg font-semibold flex items-center gap-2">
@@ -398,11 +351,11 @@ export const GlobalResourcesMap = () => {
       {/* Right Side Panel - Resource Details (Slide In) */}
       <div 
         className={cn(
-          "absolute right-2 top-2 bottom-2 w-96 z-10 transition-all duration-300",
+          "absolute right-0 top-0 bottom-0 w-96 z-10 transition-all duration-300",
           selectedResource ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
         )}
       >
-        <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl">
+        <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border-l border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-l-3xl">
           {selectedResource && (
             <>
               <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
