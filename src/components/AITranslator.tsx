@@ -97,7 +97,7 @@ export default function AITranslator({ text, onTranslate, className }: AITransla
       </div>
 
       {showTranslation && translatedText && (
-        <div className="mt-4 p-4 bg-muted rounded-lg">
+        <div className="mt-4 p-4 tech-card border-0 rounded-lg">
           <p className="text-sm font-medium mb-2">Translation:</p>
           <p className="text-sm">{translatedText}</p>
         </div>

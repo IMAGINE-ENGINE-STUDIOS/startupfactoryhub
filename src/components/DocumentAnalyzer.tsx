@@ -75,7 +75,7 @@ export default function DocumentAnalyzer() {
       </div>
 
       {imageUrl && (
-        <div className="border rounded-lg overflow-hidden bg-muted">
+        <div className="tech-card border-0 rounded-lg overflow-hidden">
           <img
             src={imageUrl}
             alt="Document to analyze"
@@ -104,7 +104,7 @@ export default function DocumentAnalyzer() {
       </Button>
 
       {documentResult && (
-        <Card className="border-primary/20 bg-muted/50">
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="text-base">Analysis Result</CardTitle>
           </CardHeader>

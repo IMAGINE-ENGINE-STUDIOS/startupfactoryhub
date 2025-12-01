@@ -62,7 +62,7 @@ export default function AISummaryCard({ text, sourceType, sourceId, title }: AIS
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="tech-card border-0">
         <CardContent className="pt-6 flex items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-primary" />
           <span className="ml-2 text-sm text-muted-foreground">Generating summary...</span>
@@ -72,7 +72,7 @@ export default function AISummaryCard({ text, sourceType, sourceId, title }: AIS
   }
 
   return (
-    <Card className="border-primary/20">
+    <Card className="tech-card border-0">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">

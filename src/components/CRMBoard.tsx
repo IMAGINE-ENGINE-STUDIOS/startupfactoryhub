@@ -602,7 +602,7 @@ export default function CRMBoard() {
             onDragOver={handleDragOver}
             onDrop={() => handleDrop(stage.id)}
           >
-            <Card className="h-full">
+            <Card className="h-full tech-card border-0">
               <CardHeader className="pb-3">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-base sm:text-lg">{stage.name}</CardTitle>
@@ -616,7 +616,7 @@ export default function CRMBoard() {
                   stage.cards.map((card) => (
                     <Card
                       key={card.id}
-                      className="cursor-move hover:shadow-md transition-shadow"
+                      className="cursor-move tech-card border-0 hover:shadow-md hover:scale-[1.02] transition-all"
                       draggable
                       onDragStart={() => handleDragStart(card)}
                     >
