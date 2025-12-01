@@ -149,7 +149,7 @@ export const GlobalResourcesMap = () => {
       map.current?.remove();
       map.current = null;
     };
-  }, [isRotating]);
+  }, []);
 
   // User location marker
   useEffect(() => {
