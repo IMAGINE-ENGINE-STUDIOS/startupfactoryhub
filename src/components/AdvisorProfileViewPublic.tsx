@@ -126,28 +126,28 @@ export default function AdvisorProfileViewPublic({ userId, onMessage }: AdvisorP
       {/* Professional Summary */}
       {mentorProfile && (
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
+          <Card className="tech-card border-0">
             <CardContent className="p-4 text-center">
               <Calendar className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p className="text-2xl font-bold">{mentorProfile.years_of_experience || 0}</p>
               <p className="text-sm text-muted-foreground">Years Experience</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="tech-card border-0">
             <CardContent className="p-4 text-center">
               <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p className="text-2xl font-bold">{mentorProfile.total_sessions || 0}</p>
               <p className="text-sm text-muted-foreground">Sessions</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="tech-card border-0">
             <CardContent className="p-4 text-center">
               <Star className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p className="text-2xl font-bold">{mentorProfile.average_rating?.toFixed(1) || '0.0'}</p>
               <p className="text-sm text-muted-foreground">Rating</p>
             </CardContent>
           </Card>
-          <Card>
+          <Card className="tech-card border-0">
             <CardContent className="p-4 text-center">
               <Users className="h-8 w-8 mx-auto mb-2 text-primary" />
               <p className="text-2xl font-bold">{mentorProfile.total_mentees || 0}</p>
@@ -159,7 +159,7 @@ export default function AdvisorProfileViewPublic({ userId, onMessage }: AdvisorP
 
       {/* About */}
       {profile.bio && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle>About</CardTitle>
           </CardHeader>
@@ -171,7 +171,7 @@ export default function AdvisorProfileViewPublic({ userId, onMessage }: AdvisorP
 
       {/* Expertise Areas */}
       {mentorProfile?.expertise_areas && mentorProfile.expertise_areas.length > 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Award className="h-5 w-5" />
@@ -190,7 +190,7 @@ export default function AdvisorProfileViewPublic({ userId, onMessage }: AdvisorP
 
       {/* Experience */}
       {experiences.length > 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Briefcase className="h-5 w-5" />
@@ -226,7 +226,7 @@ export default function AdvisorProfileViewPublic({ userId, onMessage }: AdvisorP
 
       {/* Education */}
       {education.length > 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <GraduationCap className="h-5 w-5" />
@@ -262,7 +262,7 @@ export default function AdvisorProfileViewPublic({ userId, onMessage }: AdvisorP
 
       {/* Achievements */}
       {achievements.length > 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Award className="h-5 w-5" />
@@ -293,7 +293,7 @@ export default function AdvisorProfileViewPublic({ userId, onMessage }: AdvisorP
 
       {/* Skills */}
       {skills.length > 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Code2 className="h-5 w-5" />
