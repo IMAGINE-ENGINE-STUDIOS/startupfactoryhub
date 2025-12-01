@@ -175,7 +175,7 @@ const Tools = () => {
         <div className="container mx-auto px-4 sm:px-6 h-full flex flex-col">
           {/* CRM Board Section */}
           <div className="mb-6 flex-shrink-0">
-            <Card className="tech-card border-0">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Kanban className="h-5 w-5 text-primary" />
@@ -193,7 +193,7 @@ const Tools = () => {
 
           {/* Main Tabs */}
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
-            <TabsList className="tech-card border-0 grid w-full grid-cols-2 lg:grid-cols-6 h-auto flex-shrink-0 mb-4">
+            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-6 h-auto flex-shrink-0 mb-4">
               <TabsTrigger value="chatbot" className="gap-2 py-3">
                 <Bot className="h-4 w-4" />
                 <span className="hidden sm:inline">Assistant</span>
@@ -222,7 +222,7 @@ const Tools = () => {
 
             {/* AI Chatbot */}
             <TabsContent value="chatbot" className="flex-1 overflow-y-auto">
-            <Card className="tech-card border-0">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Bot className="h-5 w-5 text-primary" />
@@ -242,7 +242,7 @@ const Tools = () => {
 
             {/* Text Summarizer */}
             <TabsContent value="summary" className="flex-1 overflow-y-auto">
-            <Card className="tech-card border-0">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <FileText className="h-5 w-5 text-primary" />
@@ -277,7 +277,7 @@ const Tools = () => {
 
             {/* Sentiment Analyzer */}
             <TabsContent value="sentiment" className="flex-1 overflow-y-auto">
-            <Card className="tech-card border-0">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5 text-primary" />
@@ -315,7 +315,7 @@ const Tools = () => {
                 </Button>
 
                 {sentimentResult && (
-                  <Card className="tech-card border-0 border-primary/20 bg-muted/50">
+                  <Card className="border-primary/20 bg-muted/50">
                     <CardHeader>
                       <CardTitle className="text-base flex items-center gap-2">
                         {sentimentResult.sentiment === 'positive' ? (
@@ -378,7 +378,7 @@ const Tools = () => {
 
             {/* Translator */}
             <TabsContent value="translate" className="flex-1 overflow-y-auto">
-            <Card className="tech-card border-0">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Languages className="h-5 w-5 text-primary" />
@@ -408,7 +408,7 @@ const Tools = () => {
 
             {/* Document Analyzer */}
             <TabsContent value="document" className="flex-1 overflow-y-auto">
-            <Card className="tech-card border-0">
+            <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Image className="h-5 w-5 text-primary" />
@@ -462,7 +462,7 @@ const Tools = () => {
                 </Button>
 
                 {documentResult && (
-                  <Card className="tech-card border-0 border-primary/20 bg-muted/50">
+                  <Card className="border-primary/20 bg-muted/50">
                     <CardHeader>
                       <CardTitle className="text-base">Analysis Result</CardTitle>
                     </CardHeader>

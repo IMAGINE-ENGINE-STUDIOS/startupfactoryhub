@@ -94,7 +94,7 @@ export default function TaskAutomation() {
   };
 
   return (
-    <Card className="tech-card border-0">
+    <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <Workflow className="h-5 w-5 text-primary" />
@@ -181,7 +181,7 @@ export default function TaskAutomation() {
           </>
         ) : (
           <div className="space-y-4">
-            <Card className="tech-card border-0 border-primary/20 bg-muted/50">
+            <Card className="border-primary/20 bg-muted/50">
               <CardHeader>
                 <CardTitle className="text-base flex items-center gap-2">
                   <CheckCircle className="h-5 w-5 text-green-500" />
