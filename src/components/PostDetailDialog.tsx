@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
-import { Dialog, DialogContent, DialogHeader } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -267,7 +268,10 @@ export const PostDetailDialog = ({ post, open, onOpenChange, onLikeToggle, onDel
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0 gap-0">
+      <DialogContent className="max-w-4xl max-h-[90vh] p-0 gap-0" aria-describedby={undefined}>
+        <VisuallyHidden>
+          <DialogTitle>Post Details</DialogTitle>
+        </VisuallyHidden>
         <div className={`grid ${hasMedia ? 'md:grid-cols-2' : 'grid-cols-1'} gap-0 h-full`}>
           {/* Media Section - Only show if post has media */}
           {hasMedia && (
