@@ -86,7 +86,7 @@ export default function AIFeaturesHub() {
   return (
     <>
       {/* LightPaper Professional Workspace */}
-      <Card>
+      <Card className="tech-card border-0">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
