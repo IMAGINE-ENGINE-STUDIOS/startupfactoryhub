@@ -488,16 +488,16 @@ export function OpportunitiesBoard() {
               </Button>
             </div>
 
-            <div className="grid gap-4">
+            <div className="grid gap-6">
               {filteredOpportunities.length === 0 ? (
-                <Card>
+                <Card className="tech-card border-0">
                   <CardContent className="p-8 text-center text-muted-foreground">
                     No opportunities posted yet
                   </CardContent>
                 </Card>
               ) : (
                 filteredOpportunities.map((opp) => (
-                  <Card key={`${opp.type}-${opp.id}`} className="hover:shadow-lg transition-shadow">
+                  <Card key={`${opp.type}-${opp.id}`} className="tech-card border-0 hover:scale-[1.02] transition-transform">
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div className="flex gap-4">
@@ -611,16 +611,16 @@ export function OpportunitiesBoard() {
             </Button>
           </div>
 
-          <div className="grid gap-4">
+          <div className="grid gap-6">
             {filteredOpportunities.length === 0 ? (
-              <Card>
+              <Card className="tech-card border-0">
                 <CardContent className="p-8 text-center text-muted-foreground">
                   No opportunities available yet
                 </CardContent>
               </Card>
             ) : (
               filteredOpportunities.map((opp) => (
-                <Card key={`${opp.type}-${opp.id}`} className="hover:shadow-lg transition-shadow">
+                <Card key={`${opp.type}-${opp.id}`} className="tech-card border-0 hover:scale-[1.02] transition-transform">
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div className="flex gap-4">
