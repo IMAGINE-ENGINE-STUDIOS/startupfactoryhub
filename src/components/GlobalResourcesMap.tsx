@@ -77,6 +77,7 @@ export const GlobalResourcesMap = () => {
       zoom: 1.5,
       center: [0, 20],
       pitch: 45,
+      antialias: true,
     });
 
     map.current.addControl(
@@ -174,19 +175,19 @@ export const GlobalResourcesMap = () => {
   };
 
   return (
-    <div className="absolute inset-0 w-full h-full">
+    <div className="absolute inset-0 w-full h-full bg-background">
       {/* Full Viewport Map */}
-      <div ref={mapContainer} className="absolute inset-0" />
+      <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
       
       {/* Left Side Panel Toggle (Always Visible) */}
       <Button
         size="icon"
         onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
         className={cn(
-          "absolute top-4 z-20 transition-all duration-300",
+          "absolute top-4 z-20 transition-all duration-300 backdrop-blur-xl bg-background/30 border border-white/20 dark:border-white/10 shadow-2xl hover:bg-background/40",
           isLeftPanelOpen ? "left-[340px]" : "left-4"
         )}
-        variant="default"
+        variant="ghost"
       >
         {isLeftPanelOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </Button>
@@ -198,9 +199,9 @@ export const GlobalResourcesMap = () => {
           isLeftPanelOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="h-full backdrop-blur-2xl bg-background/30 border-r border-white/20 dark:border-white/10 shadow-2xl flex flex-col">
+        <div className="h-full backdrop-blur-3xl bg-background/20 border-r border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col">
           {/* Header */}
-          <div className="p-4 border-b border-white/10">
+          <div className="p-4 border-b border-white/20 dark:border-white/10 backdrop-blur">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <MapPin className="w-5 h-5 text-primary" />
               Resources Map
@@ -208,20 +209,20 @@ export const GlobalResourcesMap = () => {
           </div>
 
           {/* Search */}
-          <div className="p-4 border-b border-white/10">
+          <div className="p-4 border-b border-white/20 dark:border-white/10 backdrop-blur">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search resources..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 bg-background/50 backdrop-blur border-white/10"
+                className="pl-10 bg-white/10 dark:bg-black/20 backdrop-blur-xl border-white/30 dark:border-white/20 focus:bg-white/20 dark:focus:bg-black/30"
               />
             </div>
           </div>
 
           {/* Categories */}
-          <div className="p-4 border-b border-white/10">
+          <div className="p-4 border-b border-white/20 dark:border-white/10 backdrop-blur">
             <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Categories</h3>
             <ScrollArea className="h-64">
               <div className="space-y-1">
@@ -260,8 +261,8 @@ export const GlobalResourcesMap = () => {
           </div>
 
           {/* Resource List */}
-          <div className="flex-1 overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-white/10">
+          <div className="flex-1 overflow-hidden flex flex-col backdrop-blur">
+            <div className="p-4 border-b border-white/20 dark:border-white/10">
               <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                 Resources ({resources?.length || 0})
               </h3>
@@ -276,8 +277,8 @@ export const GlobalResourcesMap = () => {
                     <Card
                       key={resource.id}
                       className={cn(
-                        "cursor-pointer transition-all backdrop-blur-lg bg-background/60 hover:bg-background/80 border-white/10",
-                        isSelected && "ring-2 ring-primary shadow-lg shadow-primary/20"
+                        "cursor-pointer transition-all backdrop-blur-xl bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/30 border-white/30 dark:border-white/20",
+                        isSelected && "ring-2 ring-primary shadow-lg shadow-primary/20 bg-white/20 dark:bg-black/30"
                       )}
                       onClick={() => {
                         setSelectedResource(resource);
@@ -315,10 +316,10 @@ export const GlobalResourcesMap = () => {
           </div>
 
           {/* Add Resource Button */}
-          <div className="p-4 border-t border-white/10">
+          <div className="p-4 border-t border-white/20 dark:border-white/10 backdrop-blur">
             <Button 
               onClick={() => setShowAddDialog(true)} 
-              className="w-full gap-2"
+              className="w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20"
             >
               <Plus className="w-4 h-4" />
               Add Resource
@@ -334,10 +335,10 @@ export const GlobalResourcesMap = () => {
           selectedResource ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
         )}
       >
-        <div className="h-full backdrop-blur-2xl bg-background/30 border-l border-white/20 dark:border-white/10 shadow-2xl overflow-hidden flex flex-col">
+        <div className="h-full backdrop-blur-3xl bg-background/20 border-l border-white/20 dark:border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col">
           {selectedResource && (
             <>
-              <div className="p-4 border-b border-white/10">
+              <div className="p-4 border-b border-white/20 dark:border-white/10 backdrop-blur">
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex-1">
                     <Badge 
@@ -393,10 +394,10 @@ export const GlobalResourcesMap = () => {
 
                   <div className="flex flex-col gap-2 pt-2">
                     {selectedResource.latitude && selectedResource.longitude && (
-                      <Button 
+                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="gap-2 backdrop-blur w-full justify-start" 
+                        className="gap-2 backdrop-blur-xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start" 
                         onClick={() => getDirections(selectedResource)}
                       >
                         <Navigation className="w-4 h-4" />
@@ -407,7 +408,7 @@ export const GlobalResourcesMap = () => {
                       <Button 
                         size="sm" 
                         variant="outline" 
-                        className="gap-2 backdrop-blur w-full justify-start" 
+                        className="gap-2 backdrop-blur-xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start" 
                         asChild
                       >
                         <a href={selectedResource.website_url} target="_blank" rel="noopener noreferrer">
@@ -419,7 +420,7 @@ export const GlobalResourcesMap = () => {
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      className="gap-2 backdrop-blur w-full justify-start"
+                      className="gap-2 backdrop-blur-xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start"
                     >
                       <Bookmark className="w-4 h-4" />
                       Bookmark
