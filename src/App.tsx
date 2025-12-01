@@ -27,6 +27,7 @@ const TermsOfService = lazy(() => import("./pages/TermsOfService"));
 const CookiePolicy = lazy(() => import("./pages/CookiePolicy"));
 const About = lazy(() => import("./pages/About"));
 const Blog = lazy(() => import("./pages/Blog"));
+const Sponsorship = lazy(() => import("./pages/Sponsorship"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -75,6 +76,7 @@ const App = () => (
                   <Route path="/cookie-policy" element={<CookiePolicy />} />
                   <Route path="/about" element={<About />} />
                   <Route path="/blog" element={<Blog />} />
+                  <Route path="/sponsorship" element={<Sponsorship />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </Suspense>

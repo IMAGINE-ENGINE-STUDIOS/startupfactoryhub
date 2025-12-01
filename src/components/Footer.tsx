@@ -1,6 +1,6 @@
 import logo from "@/assets/logo.png";
 import { Link } from "react-router-dom";
-import { BookOpen, Mail, FileText, Shield, Cookie } from "lucide-react";
+import { BookOpen, Mail, FileText, Shield, Cookie, Rocket } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -56,6 +56,15 @@ const Footer = () => {
                 >
                   <BookOpen className="h-3 w-3" />
                   Guidelines
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/sponsorship" 
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
+                >
+                  <Rocket className="h-3 w-3" />
+                  Sponsorship Program
                 </Link>
               </li>
             </ul>
