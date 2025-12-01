@@ -422,18 +422,18 @@ export default function NetworkBrowser() {
   };
 
   const renderUserCard = (connection: Connection, isConnected: boolean = false) => (
-    <Card key={connection.user_id} className="hover:border-primary transition-colors">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3 mb-3">
-          <Avatar className="h-12 w-12">
+    <Card key={connection.user_id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
+      <CardContent className="p-6">
+        <div className="flex items-center gap-4 mb-4">
+          <Avatar className="h-16 w-16">
             <AvatarImage src={connection.avatar_url || undefined} alt={connection.full_name || 'User'} />
-            <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+            <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg">
               {connection.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
             </AvatarFallback>
           </Avatar>
           
           <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-sm truncate">{connection.full_name || 'User'}</h4>
+            <h4 className="font-semibold text-foreground truncate">{connection.full_name || 'User'}</h4>
             <Badge variant="secondary" className={`text-xs ${getRoleBadgeColor(connection.role)}`}>
               {getRoleLabel(connection.role)}
             </Badge>
@@ -441,25 +441,25 @@ export default function NetworkBrowser() {
         </div>
 
         {connection.bio && (
-          <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+          <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
             {connection.bio}
           </p>
         )}
 
         {connection.location && (
-          <p className="text-xs text-muted-foreground mb-3">
+          <p className="text-xs text-muted-foreground mb-4">
             📍 {connection.location}
           </p>
         )}
 
-        <div className="flex gap-2">
+        <div className="flex gap-3">
           <Button 
             variant="outline" 
             size="sm" 
             className="flex-1"
             onClick={() => viewProfile(connection)}
           >
-            <Eye className="w-3 h-3 mr-1" />
+            <Eye className="w-4 h-4 mr-1" />
             View
           </Button>
           
@@ -469,7 +469,7 @@ export default function NetworkBrowser() {
               className="flex-1"
               onClick={() => handleMessage(connection.user_id)}
             >
-              <MessageSquare className="w-3 h-3 mr-1" />
+              <MessageSquare className="w-4 h-4 mr-1" />
               Message
             </Button>
           ) : connection.status === 'pending' ? (
@@ -484,10 +484,10 @@ export default function NetworkBrowser() {
           ) : (
             <Button 
               size="sm" 
-              className="flex-1"
+              className="flex-1 pulse-primary"
               onClick={() => handleConnect(connection.user_id, connection.full_name || 'this user')}
             >
-              <UserPlus className="w-3 h-3 mr-1" />
+              <UserPlus className="w-4 h-4 mr-1" />
               Connect
             </Button>
           )}

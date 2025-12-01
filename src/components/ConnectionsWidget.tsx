@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Users, MessageSquare, UserPlus, Loader2 } from "lucide-react";
+import { Users, Loader2, Star, X, Heart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface RecommendedConnection {
@@ -15,7 +15,33 @@ interface RecommendedConnection {
   bio: string | null;
   role: string | null;
   location: string | null;
+  compatibility_score: number;
 }
+
+const getCompatibilityColor = (score: number) => {
+  if (score >= 90) return 'text-green-500';
+  if (score >= 80) return 'text-primary';
+  if (score >= 70) return 'text-yellow-500';
+  return 'text-orange-500';
+};
+
+const getCompatibilityLabel = (score: number) => {
+  if (score >= 90) return 'Excellent';
+  if (score >= 80) return 'Great';
+  if (score >= 70) return 'Good';
+  return 'Fair';
+};
+
+const getRoleBadgeColor = (role: string | null) => {
+  switch (role) {
+    case 'startup': return 'bg-blue-500/10 text-blue-500';
+    case 'investor': return 'bg-green-500/10 text-green-500';
+    case 'mentor': return 'bg-purple-500/10 text-purple-500';
+    case 'advisor': return 'bg-yellow-500/10 text-yellow-500';
+    case 'student': return 'bg-pink-500/10 text-pink-500';
+    default: return '';
+  }
+};
 
 const ConnectionsWidget = () => {
   const [connections, setConnections] = useState<RecommendedConnection[]>([]);
@@ -89,15 +115,26 @@ const ConnectionsWidget = () => {
         .from('profiles')
         .select('user_id, full_name, avatar_url, bio, location')
         .in('user_id', potentialUserIds)
-        .limit(5);
+        .limit(6);
 
       if (profiles) {
-        // Add role information
+        // Add role information and generate compatibility score
         const profilesWithRoles = profiles.map(profile => {
           const userRole = userRoles.find(ur => ur.user_id === profile.user_id);
+          // Generate compatibility score based on role complementarity
+          let baseScore = 70;
+          if (roleData === 'startup' && userRole?.role === 'investor') baseScore = 90;
+          else if (roleData === 'startup' && userRole?.role === 'mentor') baseScore = 85;
+          else if (roleData === 'student' && userRole?.role === 'mentor') baseScore = 92;
+          else if (roleData === 'investor' && userRole?.role === 'startup') baseScore = 88;
+          
+          // Add some randomness
+          const compatibility_score = Math.min(99, baseScore + Math.floor(Math.random() * 10));
+          
           return {
             ...profile,
-            role: userRole?.role || null
+            role: userRole?.role || null,
+            compatibility_score
           };
         });
         setConnections(profilesWithRoles);
@@ -146,6 +183,11 @@ const ConnectionsWidget = () => {
     fetchRecommendedConnections();
   };
 
+  const handlePass = (connectionUserId: string) => {
+    // Remove from list locally
+    setConnections(prev => prev.filter(c => c.user_id !== connectionUserId));
+  };
+
   const getRoleLabel = (role: string | null) => {
     if (!role) return 'User';
     return role.charAt(0).toUpperCase() + role.slice(1);
@@ -175,54 +217,76 @@ const ConnectionsWidget = () => {
           Recommended Connections
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent>
         {connections.length > 0 ? (
           <>
-            {connections.map((connection) => (
-              <div key={connection.user_id} className="flex items-start space-x-3 p-3 rounded-lg border border-border/50 hover:bg-accent/5 transition-colors">
-                <Avatar className="h-10 w-10">
-                  <AvatarImage src={connection.avatar_url || undefined} alt={connection.full_name || 'User'} />
-                  <AvatarFallback>
-                    {connection.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
-                  </AvatarFallback>
-                </Avatar>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between mb-1">
-                    <h4 className="font-medium text-sm truncate">{connection.full_name || 'User'}</h4>
-                    <Badge variant="secondary" className="text-xs">
-                      {getRoleLabel(connection.role)}
-                    </Badge>
-                  </div>
-                  
-                  {connection.bio && (
-                    <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
-                      {connection.bio}
-                    </p>
-                  )}
-                  
-                  {connection.location && (
-                    <p className="text-xs text-muted-foreground mb-2">
-                      📍 {connection.location}
-                    </p>
-                  )}
-                  
-                  <div className="flex space-x-2 mt-2">
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="flex-1"
-                      onClick={() => handleConnect(connection.user_id, connection.full_name || 'this user')}
-                    >
-                      <UserPlus className="w-3 h-3 mr-1" />
-                      Connect
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {connections.map((connection) => (
+                <Card 
+                  key={connection.user_id} 
+                  className="tech-card border-0 hover:scale-[1.02] transition-transform"
+                >
+                  <CardContent className="p-6">
+                    <div className="flex items-center gap-4 mb-4">
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={connection.avatar_url || undefined} alt={connection.full_name || 'User'} />
+                        <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg">
+                          {connection.full_name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'U'}
+                        </AvatarFallback>
+                      </Avatar>
+                      
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-semibold text-foreground truncate">{connection.full_name || 'User'}</h4>
+                        <Badge variant="secondary" className={`text-xs ${getRoleBadgeColor(connection.role)}`}>
+                          {getRoleLabel(connection.role)}
+                        </Badge>
+                        <div className={`flex items-center gap-1 mt-1 ${getCompatibilityColor(connection.compatibility_score)}`}>
+                          <Star className="h-4 w-4 fill-current" />
+                          <span className="text-sm font-medium">{connection.compatibility_score}%</span>
+                          <span className="text-xs text-muted-foreground ml-1">
+                            {getCompatibilityLabel(connection.compatibility_score)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {connection.bio && (
+                      <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+                        {connection.bio}
+                      </p>
+                    )}
+                    
+                    {connection.location && (
+                      <p className="text-xs text-muted-foreground mb-4">
+                        📍 {connection.location}
+                      </p>
+                    )}
+                    
+                    <div className="flex gap-3">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="flex-1"
+                        onClick={() => handlePass(connection.user_id)}
+                      >
+                        <X className="w-4 h-4 mr-1" />
+                        Pass
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        className="flex-1 pulse-primary"
+                        onClick={() => handleConnect(connection.user_id, connection.full_name || 'this user')}
+                      >
+                        <Heart className="w-4 h-4 mr-1" />
+                        Connect
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
             
-            <Button variant="outline" className="w-full mt-4">
+            <Button variant="outline" className="w-full mt-6">
               View All Recommendations
             </Button>
           </>

@@ -144,16 +144,16 @@ export default function InvestorStartupNetwork() {
             <p className="text-sm mt-1">Start by expressing interest in startups</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {startups.map((startup) => (
-              <Card key={startup.id} className="border border-border/50 hover:border-primary/50 transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-start gap-3 mb-3">
-                    <Avatar className="h-10 w-10">
+              <Card key={startup.id} className="tech-card border-0 hover:scale-[1.02] transition-transform">
+                <CardContent className="p-6">
+                  <div className="flex items-center gap-4 mb-4">
+                    <Avatar className="h-16 w-16">
                       {startup.logo_url ? (
                         <AvatarImage src={startup.logo_url} alt={startup.name} />
                       ) : (
-                        <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                        <AvatarFallback className="bg-gradient-primary text-primary-foreground text-lg">
                           {startup.name.charAt(0)}
                         </AvatarFallback>
                       )}
@@ -179,28 +179,28 @@ export default function InvestorStartupNetwork() {
                     {startup.description}
                   </p>
                   
-                  <div className="flex gap-2 mb-3">
-                  <Badge variant="outline" className="text-xs">{startup.stage}</Badge>
-                  <Badge variant="outline" className="text-xs">{startup.industry}</Badge>
-                </div>
-                
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => {
-                    setSelectedStartup(startup);
-                    setDialogOpen(true);
-                  }}
-                >
-                  <ExternalLink className="h-3 w-3 mr-2" />
-                  View Details
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                  <div className="flex gap-2 mb-4">
+                    <Badge variant="outline" className="text-xs">{startup.stage}</Badge>
+                    <Badge variant="outline" className="text-xs">{startup.industry}</Badge>
+                  </div>
+                  
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    className="w-full"
+                    onClick={() => {
+                      setSelectedStartup(startup);
+                      setDialogOpen(true);
+                    }}
+                  >
+                    <ExternalLink className="h-4 w-4 mr-2" />
+                    View Details
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
       <StartupProfileDialog 
         company={selectedStartup}
