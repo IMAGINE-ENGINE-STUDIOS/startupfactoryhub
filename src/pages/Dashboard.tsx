@@ -884,7 +884,7 @@ const Dashboard = () => {
 
           {/* Resources Tab */}
           {activeTab === "resources" && (
-            <TabsContent value="resources" className="mt-0 relative h-[calc(100vh-12rem)]">
+            <TabsContent value="resources" className="mt-0 relative h-[calc(100vh-12rem)] overflow-hidden">
               <GlobalResourcesMap />
             </TabsContent>
           )}

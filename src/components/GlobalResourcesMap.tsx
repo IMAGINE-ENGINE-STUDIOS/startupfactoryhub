@@ -415,7 +415,7 @@ export const GlobalResourcesMap = () => {
   };
 
   return (
-    <div className="absolute inset-0 w-full h-full bg-background">
+    <div className="relative w-full h-full bg-background overflow-hidden">
       {/* Full Viewport Map */}
       <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
       
