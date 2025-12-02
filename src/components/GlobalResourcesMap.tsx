@@ -74,6 +74,25 @@ export const GlobalResourcesMap = () => {
   const [isRotating, setIsRotating] = useState(true);
   const isRotatingRef = useRef(true);
 
+  // Add pulsing glow animation for flagship hubs
+  useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes pulse-glow {
+        0%, 100% {
+          box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(0,0,0,0.3);
+        }
+        50% {
+          box-shadow: 0 6px 24px rgba(16, 185, 129, 0.7), 0 0 30px rgba(16, 185, 129, 0.5), 0 4px 12px rgba(0,0,0,0.4);
+        }
+      }
+    `;
+    document.head.appendChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   const { data: resources, isLoading } = useResources({ 
     type: selectedType || undefined,
     search: search || undefined
@@ -338,40 +357,63 @@ export const GlobalResourcesMap = () => {
     resourcesWithLogos.forEach(resource => {
       const config = RESOURCE_CONFIG[resource.resource_type];
       const isOfficialPartner = resource.is_official_partner === true;
+      const isFlagshipHub = resource.title?.includes('Startup Factory Hub') && isOfficialPartner;
+      
+      const markerSize = isFlagshipHub ? 44 : 28;
+      const badgeEmoji = isFlagshipHub ? '👑' : '⭐';
       
       // Create marker element
       const el = document.createElement('div');
       el.className = 'resource-marker';
       el.style.cssText = `
-        width: 28px;
-        height: 28px;
+        width: ${markerSize}px;
+        height: ${markerSize + 12}px;
         position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       `;
       
       // Logo container
       const logoEl = document.createElement('div');
       logoEl.style.cssText = `
-        width: 28px;
-        height: 28px;
+        width: ${markerSize}px;
+        height: ${markerSize}px;
         background: url(${resource.logo_url}) center/cover, white;
-        border: 2px solid ${config.color};
+        border: ${isFlagshipHub ? '3px solid #FFD700' : `2px solid ${config.color}`};
         border-radius: 50%;
         cursor: pointer;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30;
+        box-shadow: ${isFlagshipHub 
+          ? '0 4px 16px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(0,0,0,0.3)' 
+          : `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`};
         transition: all 0.2s;
+        ${isFlagshipHub ? 'animation: pulse-glow 2s ease-in-out infinite;' : ''}
+      `;
+      
+      // Pin pointer at bottom
+      const pinEl = document.createElement('div');
+      pinEl.style.cssText = `
+        width: 0;
+        height: 0;
+        border-left: ${markerSize / 4.67}px solid transparent;
+        border-right: ${markerSize / 4.67}px solid transparent;
+        border-top: ${markerSize / 2.33}px solid ${isFlagshipHub ? '#FFD700' : config.color};
+        margin-top: -2px;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
       `;
       
       el.appendChild(logoEl);
+      el.appendChild(pinEl);
       
-      // Only add golden star for official partners
+      // Only add badge for official partners or flagship hubs
       if (isOfficialPartner) {
         const starEl = document.createElement('div');
-        starEl.innerHTML = '⭐';
+        starEl.innerHTML = badgeEmoji;
         starEl.style.cssText = `
           position: absolute;
           top: -6px;
-          right: -6px;
-          font-size: 12px;
+          right: ${isFlagshipHub ? '-8px' : '-6px'};
+          font-size: ${isFlagshipHub ? '16px' : '12px'};
           filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
           pointer-events: none;
         `;
@@ -381,11 +423,15 @@ export const GlobalResourcesMap = () => {
       // Hover effect
       el.addEventListener('mouseenter', () => {
         logoEl.style.transform = 'scale(1.15)';
-        logoEl.style.boxShadow = `0 4px 12px rgba(0,0,0,0.4), 0 0 0 3px ${config.color}50`;
+        logoEl.style.boxShadow = isFlagshipHub
+          ? '0 6px 24px rgba(16, 185, 129, 0.7), 0 0 30px rgba(16, 185, 129, 0.5), 0 4px 12px rgba(0,0,0,0.4)'
+          : `0 4px 12px rgba(0,0,0,0.4), 0 0 0 3px ${config.color}50`;
       });
       el.addEventListener('mouseleave', () => {
         logoEl.style.transform = 'scale(1)';
-        logoEl.style.boxShadow = `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`;
+        logoEl.style.boxShadow = isFlagshipHub
+          ? '0 4px 16px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(0,0,0,0.3)'
+          : `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`;
       });
 
       // Click handler
@@ -400,7 +446,7 @@ export const GlobalResourcesMap = () => {
         }
       });
 
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
         .setLngLat([resource.longitude!, resource.latitude!])
         .addTo(map.current!);
 
