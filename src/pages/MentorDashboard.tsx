@@ -52,7 +52,8 @@ import {
   Wrench,
   BookOpen,
   Briefcase,
-  User
+  User,
+  Globe
 } from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
@@ -64,6 +65,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import VideoConferencing from '@/components/VideoConferencing';
 import { Video } from 'lucide-react';
+import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 
 const MentorDashboard = () => {
   const { user } = useAuth();
@@ -144,7 +146,7 @@ const MentorDashboard = () => {
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-5xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Social</span>
@@ -176,6 +178,10 @@ const MentorDashboard = () => {
               <TabsTrigger value="tools" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Wrench className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Tools</span>
+              </TabsTrigger>
+              <TabsTrigger value="resources" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Resources</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -407,6 +413,10 @@ const MentorDashboard = () => {
 
           <TabsContent value="tools" className="space-y-6">
             <AIFeaturesHub />
+          </TabsContent>
+
+          <TabsContent value="resources" className="space-y-6">
+            <GlobalResourcesMap />
           </TabsContent>
         </Tabs>
       </div>

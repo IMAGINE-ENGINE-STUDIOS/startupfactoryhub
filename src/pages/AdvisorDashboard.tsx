@@ -11,7 +11,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useRealtime } from '@/hooks/useRealtime';
-import { Calendar as CalendarIcon, Users, MessageSquare, TrendingUp, Star, Clock, Award, Plus, MapPin, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Settings, CheckCircle, XCircle, ExternalLink, Video, User, BookOpen } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, MessageSquare, TrendingUp, Star, Clock, Award, Plus, MapPin, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Settings, CheckCircle, XCircle, ExternalLink, Video, User, BookOpen, Globe } from 'lucide-react';
 import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import FloatingChat from '@/components/FloatingChat';
@@ -41,6 +41,7 @@ import { format, parseISO } from 'date-fns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import VideoConferencing from '@/components/VideoConferencing';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 interface Startup {
   id: string;
   name: string;
@@ -373,7 +374,7 @@ export default function AdvisorDashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin px-2 sm:mx-0 sm:px-0 mx-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-5xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-5xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Social</span>
@@ -405,6 +406,10 @@ export default function AdvisorDashboard() {
               <TabsTrigger value="tools" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Wrench className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Tools</span>
+              </TabsTrigger>
+              <TabsTrigger value="resources" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Resources</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -704,6 +709,10 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="tools" className="space-y-4">
             <AIFeaturesHub />
+          </TabsContent>
+
+          <TabsContent value="resources" className="space-y-4">
+            <GlobalResourcesMap />
           </TabsContent>
         </Tabs>
       </div>
