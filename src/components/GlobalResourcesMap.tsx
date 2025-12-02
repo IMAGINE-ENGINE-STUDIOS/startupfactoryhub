@@ -362,16 +362,16 @@ export const GlobalResourcesMap = () => {
       const markerSize = isFlagshipHub ? 44 : 28;
       const badgeEmoji = isFlagshipHub ? '👑' : '⭐';
       
-      // Create marker element
+      // Create marker element - positioned so the center of the logo is at the coordinate
       const el = document.createElement('div');
       el.className = 'resource-marker';
       el.style.cssText = `
         width: ${markerSize}px;
-        height: ${markerSize + 12}px;
+        height: ${markerSize}px;
         position: relative;
         display: flex;
-        flex-direction: column;
         align-items: center;
+        justify-content: center;
       `;
       
       // Logo container
@@ -390,20 +390,7 @@ export const GlobalResourcesMap = () => {
         ${isFlagshipHub ? 'animation: pulse-glow 2s ease-in-out infinite;' : ''}
       `;
       
-      // Pin pointer at bottom
-      const pinEl = document.createElement('div');
-      pinEl.style.cssText = `
-        width: 0;
-        height: 0;
-        border-left: ${markerSize / 4.67}px solid transparent;
-        border-right: ${markerSize / 4.67}px solid transparent;
-        border-top: ${markerSize / 2.33}px solid ${isFlagshipHub ? '#FFD700' : config.color};
-        margin-top: -2px;
-        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-      `;
-      
       el.appendChild(logoEl);
-      el.appendChild(pinEl);
       
       // Only add badge for official partners or flagship hubs
       if (isOfficialPartner) {
@@ -412,10 +399,11 @@ export const GlobalResourcesMap = () => {
         starEl.style.cssText = `
           position: absolute;
           top: -6px;
-          right: ${isFlagshipHub ? '-8px' : '-6px'};
+          right: -6px;
           font-size: ${isFlagshipHub ? '16px' : '12px'};
           filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
           pointer-events: none;
+          z-index: 10;
         `;
         el.appendChild(starEl);
       }
@@ -446,7 +434,7 @@ export const GlobalResourcesMap = () => {
         }
       });
 
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
         .setLngLat([resource.longitude!, resource.latitude!])
         .addTo(map.current!);
 
