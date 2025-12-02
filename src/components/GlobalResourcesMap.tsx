@@ -101,6 +101,49 @@ export const GlobalResourcesMap = () => {
     );
   };
 
+  // Helper: Create marker icon for native markers
+  const createMarkerIcon = (color: string, type: ResourceType) => {
+    const size = 48;
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      return { width: size, height: size, data: new Uint8Array(size * size * 4) };
+    }
+
+    // Draw teardrop pin shape
+    ctx.save();
+    ctx.translate(size / 2, size / 2);
+    ctx.beginPath();
+    ctx.arc(0, -6, 12, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    
+    // Draw pin tip
+    ctx.beginPath();
+    ctx.moveTo(-6, 2);
+    ctx.lineTo(0, 12);
+    ctx.lineTo(6, 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    
+    // Add white center dot
+    ctx.beginPath();
+    ctx.arc(0, -6, 4, 0, Math.PI * 2);
+    ctx.fillStyle = 'white';
+    ctx.fill();
+    
+    ctx.restore();
+    
+    // Convert to ImageData
+    return ctx.getImageData(0, 0, size, size);
+  };
+
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
@@ -128,6 +171,67 @@ export const GlobalResourcesMap = () => {
         'horizon-blend': 0.02,
         'space-color': '#020617',
         'star-intensity': 0.15
+      });
+      
+      // Add marker icons for each resource type
+      Object.entries(RESOURCE_CONFIG).forEach(([type, config]) => {
+        const canvas = createMarkerIcon(config.color, type as ResourceType);
+        map.current!.addImage(`marker-${type}`, canvas);
+      });
+
+      // Add GeoJSON source for markers
+      map.current.addSource('resources', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: []
+        }
+      });
+
+      // Add symbol layer for native markers
+      map.current.addLayer({
+        id: 'resource-markers',
+        type: 'symbol',
+        source: 'resources',
+        layout: {
+          'icon-image': ['concat', 'marker-', ['get', 'resourceType']],
+          'icon-size': [
+            'interpolate',
+            ['linear'],
+            ['zoom'],
+            0, 0.4,
+            5, 0.6,
+            10, 0.8,
+            15, 1.0
+          ],
+          'icon-anchor': 'bottom',
+          'icon-allow-overlap': true,
+          'icon-ignore-placement': true
+        }
+      });
+
+      // Click handler for native markers
+      map.current.on('click', 'resource-markers', (e) => {
+        if (!e.features || e.features.length === 0) return;
+        const feature = e.features[0];
+        const resourceId = feature.properties?.id;
+        const resource = resources?.find(r => r.id === resourceId);
+        if (resource) {
+          setSelectedResource(resource);
+          map.current?.flyTo({
+            center: [resource.longitude!, resource.latitude!],
+            zoom: 12,
+            duration: 2000,
+          });
+        }
+      });
+
+      // Cursor pointer on hover
+      map.current.on('mouseenter', 'resource-markers', () => {
+        if (map.current) map.current.getCanvas().style.cursor = 'pointer';
+      });
+      map.current.on('mouseleave', 'resource-markers', () => {
+        if (map.current) map.current.getCanvas().style.cursor = '';
       });
       
       // Ensure the map is visible
@@ -200,133 +304,108 @@ export const GlobalResourcesMap = () => {
   useEffect(() => {
     if (!map.current || !resources) return;
 
-    // Clear existing markers
+    // Clear existing HTML markers
     markers.current.forEach(marker => marker.remove());
     markers.current = [];
 
-    // Add new markers
-    resources
-      .filter(r => r.latitude && r.longitude)
-      .forEach(resource => {
-        const config = RESOURCE_CONFIG[resource.resource_type];
-        const isOfficialPartner = resource.is_official_partner === true;
-        const hasLogo = !!resource.logo_url;
-        
-        // Create marker element
-        const el = document.createElement('div');
-        el.className = 'resource-marker';
-        
-        if (hasLogo) {
-          // Resource with logo (partner or not)
-          el.style.cssText = `
-            width: 28px;
-            height: 28px;
-            position: relative;
-          `;
-          
-          // Logo container
-          const logoEl = document.createElement('div');
-          logoEl.style.cssText = `
-            width: 28px;
-            height: 28px;
-            background: url(${resource.logo_url}) center/cover, white;
-            border: 2px solid ${config.color};
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30;
-            transition: all 0.2s;
-          `;
-          
-          el.appendChild(logoEl);
-          
-          // Only add golden star for official partners
-          if (isOfficialPartner) {
-            const starEl = document.createElement('div');
-            starEl.innerHTML = '⭐';
-            starEl.style.cssText = `
-              position: absolute;
-              top: -6px;
-              right: -6px;
-              font-size: 12px;
-              filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
-              pointer-events: none;
-            `;
-            el.appendChild(starEl);
-          }
-        } else {
-          // Regular discrete marker
-          el.style.cssText = `
-            width: 24px;
-            height: 24px;
-            background-color: ${config.color};
-            border: 2px solid rgba(255, 255, 255, 0.9);
-            border-radius: 50% 50% 50% 0;
-            cursor: pointer;
-            transform: rotate(-45deg);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-            transition: all 0.2s;
-          `;
+    // Separate resources: with logos (HTML markers) vs without (native markers)
+    const resourcesWithLogos = resources.filter(r => r.logo_url && r.latitude && r.longitude);
+    const resourcesWithoutLogos = resources.filter(r => !r.logo_url && r.latitude && r.longitude);
 
-          // Add icon inside for regular markers
-          const iconEl = document.createElement('div');
-          iconEl.style.cssText = `
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transform: rotate(45deg);
-            color: white;
-            font-size: 10px;
-          `;
-          iconEl.innerHTML = '📍';
-          el.appendChild(iconEl);
+    // Update GeoJSON source with resources WITHOUT logos (native markers)
+    const geojsonData = {
+      type: 'FeatureCollection' as const,
+      features: resourcesWithoutLogos.map(resource => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [resource.longitude!, resource.latitude!]
+        },
+        properties: {
+          id: resource.id,
+          title: resource.title,
+          resourceType: resource.resource_type
         }
+      }))
+    };
 
-        // Hover effect
-        el.addEventListener('mouseenter', () => {
-          if (hasLogo) {
-            const logoEl = el.querySelector('div');
-            if (logoEl) {
-              logoEl.style.transform = 'scale(1.15)';
-              logoEl.style.boxShadow = `0 4px 12px rgba(0,0,0,0.4), 0 0 0 3px ${config.color}50`;
-            }
-          } else {
-            el.style.transform = 'rotate(-45deg) scale(1.15)';
-            el.style.boxShadow = '0 3px 10px rgba(0,0,0,0.35)';
-          }
-        });
-        el.addEventListener('mouseleave', () => {
-          if (hasLogo) {
-            const logoEl = el.querySelector('div');
-            if (logoEl) {
-              logoEl.style.transform = 'scale(1)';
-              logoEl.style.boxShadow = `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`;
-            }
-          } else {
-            el.style.transform = 'rotate(-45deg) scale(1)';
-            el.style.boxShadow = '0 2px 6px rgba(0,0,0,0.25)';
-          }
-        });
+    const source = map.current.getSource('resources') as mapboxgl.GeoJSONSource;
+    if (source) {
+      source.setData(geojsonData);
+    }
 
-        // Click handler
-        el.addEventListener('click', () => {
-          setSelectedResource(resource);
-          if (map.current && resource.latitude && resource.longitude) {
-            map.current.flyTo({
-              center: [resource.longitude, resource.latitude],
-              zoom: 12,
-              duration: 2000,
-            });
-          }
-        });
+    // Add HTML markers for resources WITH logos
+    resourcesWithLogos.forEach(resource => {
+      const config = RESOURCE_CONFIG[resource.resource_type];
+      const isOfficialPartner = resource.is_official_partner === true;
+      
+      // Create marker element
+      const el = document.createElement('div');
+      el.className = 'resource-marker';
+      el.style.cssText = `
+        width: 28px;
+        height: 28px;
+        position: relative;
+      `;
+      
+      // Logo container
+      const logoEl = document.createElement('div');
+      logoEl.style.cssText = `
+        width: 28px;
+        height: 28px;
+        background: url(${resource.logo_url}) center/cover, white;
+        border: 2px solid ${config.color};
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30;
+        transition: all 0.2s;
+      `;
+      
+      el.appendChild(logoEl);
+      
+      // Only add golden star for official partners
+      if (isOfficialPartner) {
+        const starEl = document.createElement('div');
+        starEl.innerHTML = '⭐';
+        starEl.style.cssText = `
+          position: absolute;
+          top: -6px;
+          right: -6px;
+          font-size: 12px;
+          filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+          pointer-events: none;
+        `;
+        el.appendChild(starEl);
+      }
 
-        const marker = new mapboxgl.Marker(el)
-          .setLngLat([resource.longitude!, resource.latitude!])
-          .addTo(map.current!);
-
-        markers.current.push(marker);
+      // Hover effect
+      el.addEventListener('mouseenter', () => {
+        logoEl.style.transform = 'scale(1.15)';
+        logoEl.style.boxShadow = `0 4px 12px rgba(0,0,0,0.4), 0 0 0 3px ${config.color}50`;
       });
+      el.addEventListener('mouseleave', () => {
+        logoEl.style.transform = 'scale(1)';
+        logoEl.style.boxShadow = `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`;
+      });
+
+      // Click handler
+      el.addEventListener('click', () => {
+        setSelectedResource(resource);
+        if (map.current && resource.latitude && resource.longitude) {
+          map.current.flyTo({
+            center: [resource.longitude, resource.latitude],
+            zoom: 12,
+            duration: 2000,
+          });
+        }
+      });
+
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([resource.longitude!, resource.latitude!])
+        .addTo(map.current!);
+
+      markers.current.push(marker);
+    });
   }, [resources]);
 
   const getDirections = (resource: Resource) => {
