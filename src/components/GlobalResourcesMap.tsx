@@ -362,27 +362,23 @@ export const GlobalResourcesMap = () => {
       const markerSize = isFlagshipHub ? 44 : 28;
       const badgeEmoji = isFlagshipHub ? '👑' : '⭐';
       
-      // Create marker element - positioned so the center of the logo is at the coordinate
+      // Create marker element
       const el = document.createElement('div');
       el.className = 'resource-marker';
       el.style.cssText = `
         width: ${markerSize}px;
         height: ${markerSize}px;
-        position: relative;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        cursor: pointer;
       `;
       
-      // Logo container
+      // Logo container - perfectly centered
       const logoEl = document.createElement('div');
       logoEl.style.cssText = `
-        width: ${markerSize}px;
-        height: ${markerSize}px;
+        width: 100%;
+        height: 100%;
         background: url(${resource.logo_url}) center/cover, white;
         border: ${isFlagshipHub ? '3px solid #FFD700' : `2px solid ${config.color}`};
         border-radius: 50%;
-        cursor: pointer;
         box-shadow: ${isFlagshipHub 
           ? '0 4px 16px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(0,0,0,0.3)' 
           : `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`};
@@ -392,7 +388,7 @@ export const GlobalResourcesMap = () => {
       
       el.appendChild(logoEl);
       
-      // Only add badge for official partners or flagship hubs
+      // Badge for official partners
       if (isOfficialPartner) {
         const starEl = document.createElement('div');
         starEl.innerHTML = badgeEmoji;
@@ -434,7 +430,12 @@ export const GlobalResourcesMap = () => {
         }
       });
 
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+      // Create marker with center anchor and no offset
+      const marker = new mapboxgl.Marker({ 
+        element: el, 
+        anchor: 'center',
+        offset: [0, 0]
+      })
         .setLngLat([resource.longitude!, resource.latitude!])
         .addTo(map.current!);
 
