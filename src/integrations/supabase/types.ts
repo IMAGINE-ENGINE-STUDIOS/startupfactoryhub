@@ -3055,6 +3055,7 @@ export type Database = {
         Row: {
           address: string | null
           author_id: string | null
+          banner_url: string | null
           category: string | null
           city: string | null
           contact_email: string | null
@@ -3079,6 +3080,7 @@ export type Database = {
         Insert: {
           address?: string | null
           author_id?: string | null
+          banner_url?: string | null
           category?: string | null
           city?: string | null
           contact_email?: string | null
@@ -3103,6 +3105,7 @@ export type Database = {
         Update: {
           address?: string | null
           author_id?: string | null
+          banner_url?: string | null
           category?: string | null
           city?: string | null
           contact_email?: string | null
