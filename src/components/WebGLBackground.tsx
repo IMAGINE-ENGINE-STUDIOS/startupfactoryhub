@@ -4,6 +4,7 @@ import * as THREE from 'three';
 const WebGLBackground = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isDark, setIsDark] = useState(false);
+  const [webGLAvailable, setWebGLAvailable] = useState(true);
 
   useEffect(() => {
     const checkTheme = () => {
@@ -22,7 +23,11 @@ const WebGLBackground = () => {
   }, []);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !webGLAvailable) return;
+
+    let renderer: THREE.WebGLRenderer | null = null;
+
+    try {
 
     // Scene setup
     const scene = new THREE.Scene();
@@ -36,14 +41,14 @@ const WebGLBackground = () => {
     );
     camera.position.z = 250;
 
-    // Renderer setup
-    const renderer = new THREE.WebGLRenderer({
-      alpha: true,
-      antialias: true,
-    });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    containerRef.current.appendChild(renderer.domElement);
+      // Renderer setup
+      renderer = new THREE.WebGLRenderer({
+        alpha: true,
+        antialias: true,
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      containerRef.current.appendChild(renderer.domElement);
 
     // Colors based on theme - Turquoise palette
     const primaryColor = 0x40E0D0; // Turquoise
@@ -534,13 +539,16 @@ const WebGLBackground = () => {
       bgParticles.rotation.y = elapsedTime * 0.02;
 
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
+      if (renderer) {
+        requestAnimationFrame(animate);
+      }
     };
 
     animate();
 
     // Resize handler
     const handleResize = () => {
+      if (!renderer) return;
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -554,10 +562,12 @@ const WebGLBackground = () => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('resize', handleResize);
-      if (containerRef.current && renderer.domElement) {
-        containerRef.current.removeChild(renderer.domElement);
+      if (renderer) {
+        if (containerRef.current && renderer.domElement) {
+          containerRef.current.removeChild(renderer.domElement);
+        }
+        renderer.dispose();
       }
-      renderer.dispose();
       dotGeometry.dispose();
       dotMaterial.dispose();
       bgParticleGeometry.dispose();
@@ -567,7 +577,16 @@ const WebGLBackground = () => {
       innerGlowGeometry.dispose();
       innerGlowMaterial.dispose();
     };
-  }, [isDark]);
+    } catch (error) {
+      console.warn('WebGL not available, skipping 3D background:', error);
+      setWebGLAvailable(false);
+      return () => {};
+    }
+  }, [isDark, webGLAvailable]);
+
+  if (!webGLAvailable) {
+    return null;
+  }
 
   return (
     <div
