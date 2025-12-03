@@ -451,15 +451,6 @@ export const GlobalResourcesMap = () => {
 
   return (
     <div className="relative w-full h-full bg-background overflow-hidden rounded-2xl">
-      {/* Loading Overlay */}
-      {isLoading && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-2xl">
-          <div className="flex flex-col items-center gap-3">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
-            <p className="text-sm text-muted-foreground">Loading resources...</p>
-          </div>
-        </div>
-      )}
       {/* Full Viewport Map */}
       <div ref={mapContainer} className="absolute inset-0 w-full h-full rounded-2xl" />
       
