@@ -64,7 +64,7 @@ const ResourcesWidget = () => {
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1">
                 <div className="flex items-center space-x-2 mb-1">
-                  <h4 className="font-medium text-sm">{resource.title}</h4>
+                  <h4 className="font-medium text-sm text-foreground">{resource.title}</h4>
                   {resource.featured && (
                     <Badge variant="secondary" className="text-xs bg-ocean-primary text-white">
                       Recommended
