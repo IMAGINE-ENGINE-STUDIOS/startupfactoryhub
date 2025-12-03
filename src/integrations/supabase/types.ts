@@ -3221,6 +3221,74 @@ export type Database = {
           },
         ]
       }
+      public_cohort_applications: {
+        Row: {
+          applied_at: string | null
+          cohort_id: string | null
+          created_at: string | null
+          email: string
+          founder_name: string
+          id: string
+          industry: string | null
+          phone: string | null
+          pitch_deck_url: string | null
+          reviewed_at: string | null
+          reviewer_notes: string | null
+          stage: string | null
+          startup_name: string
+          status: string | null
+          video_pitch_url: string | null
+          website: string | null
+          why_applying: string | null
+        }
+        Insert: {
+          applied_at?: string | null
+          cohort_id?: string | null
+          created_at?: string | null
+          email: string
+          founder_name: string
+          id?: string
+          industry?: string | null
+          phone?: string | null
+          pitch_deck_url?: string | null
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          stage?: string | null
+          startup_name: string
+          status?: string | null
+          video_pitch_url?: string | null
+          website?: string | null
+          why_applying?: string | null
+        }
+        Update: {
+          applied_at?: string | null
+          cohort_id?: string | null
+          created_at?: string | null
+          email?: string
+          founder_name?: string
+          id?: string
+          industry?: string | null
+          phone?: string | null
+          pitch_deck_url?: string | null
+          reviewed_at?: string | null
+          reviewer_notes?: string | null
+          stage?: string | null
+          startup_name?: string
+          status?: string | null
+          video_pitch_url?: string | null
+          website?: string | null
+          why_applying?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "public_cohort_applications_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "accelerator_cohorts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       public_internship_applications: {
         Row: {
           applicant_email: string

@@ -233,8 +233,9 @@ export const useAcceleratorProfile = () => {
 
       if (createError) throw createError;
 
-      // Auto-create a social post announcing the cohort
+      // Auto-create a social post announcing the cohort with application URL
       if (data && user) {
+        const applicationUrl = `${window.location.origin}/cohorts/${data.id}/apply`;
         await supabase.from('feed_posts').insert({
           user_id: user.id,
           post_type: 'cohort',
@@ -249,7 +250,8 @@ export const useAcceleratorProfile = () => {
             industries: data.focus_industries,
             accelerator_name: profile.organization_name,
             accelerator_logo: profile.logo_url,
-            accelerator_id: profile.id
+            accelerator_id: profile.id,
+            application_url: applicationUrl
           }
         });
       }
