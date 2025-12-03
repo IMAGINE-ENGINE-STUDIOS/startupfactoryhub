@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Rocket, Users, FileText, Briefcase, Calendar as CalendarIcon, BarChart3, Globe, MessageSquare, Building2, Target, TrendingUp, Plus, Bell, Clock, MapPin, MessageCircle, Network, BarChart } from 'lucide-react';
+import { Rocket, Users, FileText, Briefcase, Calendar as CalendarIcon, BarChart3, Globe, MessageSquare, Building2, Target, TrendingUp, Plus, Bell, Clock, MapPin, MessageCircle, Network, BarChart, User } from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useAuth } from '@/contexts/AuthContext';
@@ -33,6 +33,7 @@ import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import AcceleratorRoadmapWidget from '@/components/accelerator/AcceleratorRoadmapWidget';
 import ConnectionsWidget from '@/components/ConnectionsWidget';
+import AcceleratorProfileView from '@/components/AcceleratorProfileView';
 
 const AcceleratorDashboard = () => {
   const {
@@ -142,7 +143,7 @@ const AcceleratorDashboard = () => {
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Social</span>
@@ -175,6 +176,10 @@ const AcceleratorDashboard = () => {
               <TabsTrigger value="resources" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Resources</span>
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <User className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Profile</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -281,6 +286,11 @@ const AcceleratorDashboard = () => {
             <div className="absolute inset-0">
               <GlobalResourcesMap />
             </div>
+          </TabsContent>
+
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="space-y-6">
+            <AcceleratorProfileView />
           </TabsContent>
         </Tabs>
       </div>
