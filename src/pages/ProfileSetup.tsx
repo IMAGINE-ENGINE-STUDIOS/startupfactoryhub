@@ -26,6 +26,7 @@ const ProfileSetup = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     company_name: "",
+    organization_name: "",
     bio: "",
     industry: "",
     location: "",
@@ -37,7 +38,10 @@ const ProfileSetup = () => {
     goals: [] as string[],
     looking_for: "",
     avatar_url: "",
-    logo_url: ""
+    logo_url: "",
+    program_duration: "",
+    equity_percentage: "",
+    funding_offered: "",
   });
   
   const { user } = useAuth();
@@ -151,6 +155,28 @@ const ProfileSetup = () => {
         if (companyError) throw companyError;
       }
 
+      // Create or update accelerator profile if accelerator
+      if (selectedRole === 'accelerator') {
+        const acceleratorData = {
+          user_id: user.id,
+          organization_name: formData.organization_name || 'My Accelerator',
+          description: formData.bio,
+          location: formData.location,
+          website: formData.website,
+          logo_url: formData.logo_url || null,
+          industries_focus: formData.industry ? [formData.industry] : [],
+          program_duration: formData.program_duration || null,
+          equity_percentage: formData.equity_percentage ? parseFloat(formData.equity_percentage) : null,
+          funding_offered: formData.funding_offered ? parseInt(formData.funding_offered) : null,
+        };
+
+        const { error: acceleratorError } = await supabase
+          .from('accelerator_profiles')
+          .upsert(acceleratorData, { onConflict: 'user_id' });
+
+        if (acceleratorError) throw acceleratorError;
+      }
+
       toast({
         title: "Profile saved!",
         description: "Your profile has been updated successfully.",
@@ -256,18 +282,29 @@ const ProfileSetup = () => {
                 </div>
 
                 {selectedRole === 'startup' && (
-                  <>
-                    <div>
-                      <Label htmlFor="companyName">Company Name</Label>
-                      <Input 
-                        id="companyName" 
-                        placeholder="Your company name"
-                        value={formData.company_name}
-                        onChange={(e) => updateFormData('company_name', e.target.value)}
-                        className="mt-2"
-                      />
-                    </div>
-                  </>
+                  <div>
+                    <Label htmlFor="companyName">Company Name</Label>
+                    <Input 
+                      id="companyName" 
+                      placeholder="Your company name"
+                      value={formData.company_name}
+                      onChange={(e) => updateFormData('company_name', e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                )}
+
+                {selectedRole === 'accelerator' && (
+                  <div>
+                    <Label htmlFor="organizationName">Organization Name</Label>
+                    <Input 
+                      id="organizationName" 
+                      placeholder="Your accelerator/incubator name"
+                      value={formData.organization_name}
+                      onChange={(e) => updateFormData('organization_name', e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
                 )}
                 
                 <div>
@@ -424,7 +461,106 @@ const ProfileSetup = () => {
               </>
             )}
 
-            {step === 2 && selectedRole !== 'startup' && (
+            {step === 2 && selectedRole === 'accelerator' && (
+              <>
+                <div className="mb-6">
+                  <Label className="mb-4 block">Organization Logo</Label>
+                  <CompanyLogoUpload
+                    currentLogoUrl={formData.logo_url}
+                    onUploadComplete={(url) => updateFormData('logo_url', url)}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="bio">About Your Program</Label>
+                  <Textarea 
+                    id="bio" 
+                    placeholder="Describe your accelerator program, mission, and what makes it unique..."
+                    value={formData.bio}
+                    onChange={(e) => updateFormData('bio', e.target.value)}
+                    className="mt-2"
+                    rows={4}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Program Duration</Label>
+                    <Select value={formData.program_duration} onValueChange={(value) => updateFormData('program_duration', value)}>
+                      <SelectTrigger className="mt-2">
+                        <SelectValue placeholder="Select duration" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="6 weeks">6 weeks</SelectItem>
+                        <SelectItem value="8 weeks">8 weeks</SelectItem>
+                        <SelectItem value="12 weeks">12 weeks</SelectItem>
+                        <SelectItem value="16 weeks">16 weeks</SelectItem>
+                        <SelectItem value="6 months">6 months</SelectItem>
+                        <SelectItem value="1 year">1 year</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="equity">Typical Equity (%)</Label>
+                    <Input 
+                      id="equity" 
+                      type="number"
+                      placeholder="e.g., 6"
+                      value={formData.equity_percentage}
+                      onChange={(e) => updateFormData('equity_percentage', e.target.value)}
+                      className="mt-2"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="funding">Funding Per Startup ($)</Label>
+                  <div className="relative mt-2">
+                    <DollarSign className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input 
+                      id="funding" 
+                      type="number"
+                      placeholder="e.g., 150000"
+                      value={formData.funding_offered}
+                      onChange={(e) => updateFormData('funding_offered', e.target.value)}
+                      className="pl-10"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="location">Location</Label>
+                    <div className="relative mt-2">
+                      <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        id="location" 
+                        placeholder="City, Country" 
+                        value={formData.location}
+                        onChange={(e) => updateFormData('location', e.target.value)}
+                        className="pl-10" 
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="website">Website</Label>
+                    <Input 
+                      id="website" 
+                      placeholder="https://..." 
+                      value={formData.website}
+                      onChange={(e) => updateFormData('website', e.target.value)}
+                      className="mt-2" 
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            {step === 2 && selectedRole !== 'startup' && selectedRole !== 'accelerator' && (
               <>
                 <div>
                   <Label htmlFor="bio">Tell us about yourself</Label>
@@ -472,7 +608,16 @@ const ProfileSetup = () => {
                 <div>
                   <Label>Primary Goals (Select all that apply)</Label>
                   <div className="mt-2 space-y-2">
-                    {[
+                    {(selectedRole === 'accelerator' ? [
+                      "Discover promising startups",
+                      "Connect startups with mentors/advisors",
+                      "Organize Demo Days",
+                      "Track portfolio performance",
+                      "Source investors for cohort",
+                      "Build industry partnerships",
+                      "Expand to new markets",
+                      "Increase program visibility"
+                    ] : [
                       "Find mentors and advisors",
                       "Connect with investors",
                       "Recruit team members",
@@ -481,7 +626,7 @@ const ProfileSetup = () => {
                       "Network with other founders",
                       "Get customer feedback",
                       "Learn and develop skills"
-                     ].map((goal) => (
+                     ]).map((goal) => (
                        <label key={goal} className="flex items-center space-x-2 cursor-pointer">
                          <input 
                            type="checkbox" 
