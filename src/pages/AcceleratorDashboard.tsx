@@ -116,14 +116,8 @@ const AcceleratorDashboard = () => {
               </div>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
-                <Bell className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Notifications</span>
-              </Button>
-              <Button variant="hero" size="sm" className="flex-1 sm:flex-none" onClick={() => setCreateEventDialogOpen(true)}>
-                <Plus className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Create Event</span>
-              </Button>
+              
+              
             </div>
           </div>
         </div>
