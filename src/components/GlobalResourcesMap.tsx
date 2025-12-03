@@ -450,9 +450,9 @@ export const GlobalResourcesMap = () => {
   };
 
   return (
-    <div className="relative w-full h-full bg-background overflow-hidden">
+    <div className="relative w-full h-full bg-background overflow-hidden rounded-2xl">
       {/* Full Viewport Map */}
-      <div ref={mapContainer} className="absolute inset-0 w-full h-full" />
+      <div ref={mapContainer} className="absolute inset-0 w-full h-full rounded-2xl" />
       
       {/* Control Buttons - Top Center */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
