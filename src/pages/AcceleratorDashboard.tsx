@@ -5,29 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { 
-  Rocket, 
-  Users, 
-  FileText, 
-  Briefcase, 
-  Calendar as CalendarIcon,
-  BarChart3,
-  Globe,
-  MessageSquare,
-  Building2,
-  Target,
-  TrendingUp,
-  Plus,
-  Bell,
-  Clock,
-  MapPin,
-  MessageCircle,
-  Network,
-  BarChart,
-  Brain,
-  Wrench,
-  User
-} from 'lucide-react';
+import { Rocket, Users, FileText, Briefcase, Calendar as CalendarIcon, BarChart3, Globe, MessageSquare, Building2, Target, TrendingUp, Plus, Bell, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, User } from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useAuth } from '@/contexts/AuthContext';
@@ -58,20 +36,27 @@ import ConnectionsWidget from '@/components/ConnectionsWidget';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import AcceleratorRoadmapWidget from '@/components/accelerator/AcceleratorRoadmapWidget';
-
 const AcceleratorDashboard = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
-  const { role, loading: roleLoading } = useUserRole();
-  const { profile: profileWithRole } = useProfileWithRole();
+  const {
+    role,
+    loading: roleLoading
+  } = useUserRole();
+  const {
+    profile: profileWithRole
+  } = useProfileWithRole();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(urlTab || 'social');
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const { upcomingEvents } = useEvents();
-
+  const {
+    upcomingEvents
+  } = useEvents();
   const {
     profile,
     cohorts,
@@ -87,7 +72,6 @@ const AcceleratorDashboard = () => {
     addMilestone,
     updateMilestone
   } = useAcceleratorProfile();
-
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
 
   // Sync URL tab param to activeTab
@@ -104,25 +88,20 @@ const AcceleratorDashboard = () => {
       navigate('/dashboard');
     }
   }, [role, roleLoading, navigate]);
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+    return <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading accelerator dashboard...</p>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Stats
   const pendingApplications = applications.filter(a => a.status === 'pending').length;
   const activeStartups = portfolioStartups.filter(s => s.current_stage === 'active').length;
   const activeCohorts = cohorts.filter(c => c.status === 'in_progress' || c.status === 'applications_open').length;
-
-  return (
-    <div className="min-h-screen bg-background pb-6 relative">
+  return <div className="min-h-screen bg-background pb-6 relative">
       <DashboardHeader />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4 sm:pb-8">
@@ -130,23 +109,13 @@ const AcceleratorDashboard = () => {
         <div className="mb-6 sm:mb-8">
           {/* Mobile: Only Avatar */}
           <div className="md:hidden flex justify-start mb-4">
-            <RoleBasedAvatar 
-              avatarUrl={profile?.logo_url || profileWithRole?.avatar_url} 
-              role="accelerator"
-              fallbackText={profile?.organization_name || 'A'}
-              className="h-16 w-16"
-            />
+            <RoleBasedAvatar avatarUrl={profile?.logo_url || profileWithRole?.avatar_url} role="accelerator" fallbackText={profile?.organization_name || 'A'} className="h-16 w-16" />
           </div>
           
           {/* Desktop: Full Welcome Section */}
           <div className="hidden md:flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
-              <RoleBasedAvatar 
-                avatarUrl={profile?.logo_url || profileWithRole?.avatar_url} 
-                role="accelerator"
-                fallbackText={profile?.organization_name || 'A'}
-                className="h-16 w-16"
-              />
+              <RoleBasedAvatar avatarUrl={profile?.logo_url || profileWithRole?.avatar_url} role="accelerator" fallbackText={profile?.organization_name || 'A'} className="h-16 w-16" />
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-foreground">Welcome back, {profile?.organization_name || 'Accelerator'}! 👋</h1>
                 <p className="text-sm text-muted-foreground mt-1">Manage your cohorts, applications, and portfolio companies</p>
@@ -188,9 +157,7 @@ const AcceleratorDashboard = () => {
               <TabsTrigger value="applications" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <FileText className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Apps</span>
-                {pendingApplications > 0 && (
-                  <Badge className="ml-1 bg-emerald-500 text-xs">{pendingApplications}</Badge>
-                )}
+                {pendingApplications > 0 && <Badge className="ml-1 bg-emerald-500 text-xs">{pendingApplications}</Badge>}
               </TabsTrigger>
               <TabsTrigger value="portfolio" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Building2 className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -223,37 +190,11 @@ const AcceleratorDashboard = () => {
           <TabsContent value="social" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
-                <AcceleratorRoadmapWidget 
-                  activeCohorts={activeCohorts}
-                  pendingApplications={pendingApplications}
-                  activeStartups={activeStartups}
-                  totalSupported={profile?.total_startups_supported || 0}
-                />
+                <AcceleratorRoadmapWidget activeCohorts={activeCohorts} pendingApplications={pendingApplications} activeStartups={activeStartups} totalSupported={profile?.total_startups_supported || 0} />
                 <UnifiedCommunityFeed showCreatePost={false} limit={5} />
               </div>
               
-              <div className="space-y-6">
-                <Card className="tech-card border-0">
-                  <CardHeader>
-                    <CardTitle className="text-lg">Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start" onClick={() => setActiveTab('cohorts')}>
-                      <Users className="w-4 h-4 mr-2" />
-                      Manage Cohorts
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => setActiveTab('applications')}>
-                      <FileText className="w-4 h-4 mr-2" />
-                      Review Applications
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => setActiveTab('portfolio')}>
-                      <Building2 className="w-4 h-4 mr-2" />
-                      View Portfolio
-                    </Button>
-                  </CardContent>
-                </Card>
-                <ConnectionsWidget />
-              </div>
+              
             </div>
           </TabsContent>
 
@@ -282,42 +223,19 @@ const AcceleratorDashboard = () => {
 
           {/* Cohorts Tab */}
           <TabsContent value="cohorts">
-            <CohortManagement
-              cohorts={cohorts}
-              onCreateCohort={createCohort}
-              onUpdateCohort={updateCohort}
-              onSelectCohort={setSelectedCohort}
-            />
+            <CohortManagement cohorts={cohorts} onCreateCohort={createCohort} onUpdateCohort={updateCohort} onSelectCohort={setSelectedCohort} />
           </TabsContent>
 
           {/* Applications Tab */}
           <TabsContent value="applications">
-            <CohortApplicationsManager
-              applications={applications}
-              cohorts={cohorts}
-              onUpdateStatus={updateApplicationStatus}
-              onAcceptStartup={acceptStartupToCohort}
-            />
+            <CohortApplicationsManager applications={applications} cohorts={cohorts} onUpdateStatus={updateApplicationStatus} onAcceptStartup={acceptStartupToCohort} />
           </TabsContent>
 
           {/* Portfolio Tab */}
           <TabsContent value="portfolio" className="space-y-6">
-            <AcceleratorPortfolio
-              startups={portfolioStartups}
-              cohorts={cohorts}
-              totalFundingRaised={profile?.total_funding_raised || 0}
-              onViewStartup={(startup) => {}}
-            />
-            <StartupJourneyTracker
-              startups={portfolioStartups}
-              onAddMilestone={addMilestone}
-              onUpdateMilestone={updateMilestone}
-            />
-            <MentorAdvisorAssignment
-              startups={portfolioStartups}
-              onAssignMentor={assignMentor}
-              onAssignAdvisor={assignAdvisor}
-            />
+            <AcceleratorPortfolio startups={portfolioStartups} cohorts={cohorts} totalFundingRaised={profile?.total_funding_raised || 0} onViewStartup={startup => {}} />
+            <StartupJourneyTracker startups={portfolioStartups} onAddMilestone={addMilestone} onUpdateMilestone={updateMilestone} />
+            <MentorAdvisorAssignment startups={portfolioStartups} onAssignMentor={assignMentor} onAssignAdvisor={assignAdvisor} />
           </TabsContent>
 
           {/* Calendar Tab */}
@@ -330,35 +248,21 @@ const AcceleratorDashboard = () => {
             </div>
 
             {/* Upcoming Events with Banners */}
-            {upcomingEvents.length > 0 && (
-              <Card className="tech-card border-0">
+            {upcomingEvents.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="w-full">
                     <div className="flex gap-4 pb-4">
-                      {upcomingEvents.slice(0, 6).map((event) => (
-                        <div
-                          key={event.id}
-                          className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]"
-                          onClick={() => {
-                            setSelectedEvent(event);
-                            setShowEventDetails(true);
-                          }}
-                        >
+                      {upcomingEvents.slice(0, 6).map(event => <div key={event.id} className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]" onClick={() => {
+                    setSelectedEvent(event);
+                    setShowEventDetails(true);
+                  }}>
                           <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
-                            {event.banner_url ? (
-                              <img
-                                src={event.banner_url}
-                                alt={event.title}
-                                className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                              />
-                            ) : (
-                              <div className="w-full h-48 bg-gradient-to-br from-emerald-500/20 to-teal-500/5 flex items-center justify-center">
+                            {event.banner_url ? <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" /> : <div className="w-full h-48 bg-gradient-to-br from-emerald-500/20 to-teal-500/5 flex items-center justify-center">
                                 <CalendarIcon className="h-16 w-16 text-emerald-500/30" />
-                              </div>
-                            )}
+                              </div>}
                             <div className="p-4 min-h-[120px] flex flex-col">
                               <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
                               <div className="space-y-1 text-sm text-muted-foreground flex-1">
@@ -366,23 +270,19 @@ const AcceleratorDashboard = () => {
                                   <Clock className="h-3 w-3" />
                                   {format(parseISO(event.start_date), 'MMM d, h:mm a')}
                                 </div>
-                                {event.location && (
-                                  <div className="flex items-center gap-2">
+                                {event.location && <div className="flex items-center gap-2">
                                     <MapPin className="h-3 w-3" />
                                     <span className="line-clamp-1">{event.location}</span>
-                                  </div>
-                                )}
+                                  </div>}
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        </div>)}
                     </div>
                     <ScrollBar orientation="horizontal" />
                   </ScrollArea>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             <UnifiedCalendar userRole="accelerator" />
           </TabsContent>
@@ -403,7 +303,10 @@ const AcceleratorDashboard = () => {
           </TabsContent>
 
           {/* Resources Tab */}
-          <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{ height: 'calc(100vh - 12rem)', minHeight: '500px' }}>
+          <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{
+          height: 'calc(100vh - 12rem)',
+          minHeight: '500px'
+        }}>
             <div className="absolute inset-0">
               <GlobalResourcesMap />
             </div>
@@ -413,22 +316,9 @@ const AcceleratorDashboard = () => {
 
       <FloatingChat />
       
-      <CreateEventDialog 
-        open={createEventDialogOpen} 
-        onOpenChange={setCreateEventDialogOpen}
-        onEventCreated={() => {}}
-      />
+      <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {}} />
       
-      {selectedEvent && (
-        <EventDetailsDialog
-          event={selectedEvent}
-          open={showEventDetails}
-          onOpenChange={setShowEventDetails}
-          onEventUpdated={() => {}}
-        />
-      )}
-    </div>
-  );
+      {selectedEvent && <EventDetailsDialog event={selectedEvent} open={showEventDetails} onOpenChange={setShowEventDetails} onEventUpdated={() => {}} />}
+    </div>;
 };
-
 export default AcceleratorDashboard;
