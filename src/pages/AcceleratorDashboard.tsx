@@ -18,6 +18,8 @@ import { CohortApplicationsManager } from '@/components/accelerator/CohortApplic
 import { StartupJourneyTracker } from '@/components/accelerator/StartupJourneyTracker';
 import { AcceleratorPortfolio } from '@/components/accelerator/AcceleratorPortfolio';
 import { MentorAdvisorAssignment } from '@/components/accelerator/MentorAdvisorAssignment';
+import { StartupDetailDialog } from '@/components/accelerator/StartupDetailDialog';
+import { CohortDetailsDialog } from '@/components/accelerator/CohortDetailsDialog';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
@@ -30,6 +32,8 @@ import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import AcceleratorRoadmapWidget from '@/components/accelerator/AcceleratorRoadmapWidget';
+import ConnectionsWidget from '@/components/ConnectionsWidget';
+
 const AcceleratorDashboard = () => {
   const {
     user
@@ -67,6 +71,19 @@ const AcceleratorDashboard = () => {
     updateMilestone
   } = useAcceleratorProfile();
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
+  const [showCohortDetails, setShowCohortDetails] = useState(false);
+  const [selectedStartup, setSelectedStartup] = useState<any>(null);
+  const [showStartupDetails, setShowStartupDetails] = useState(false);
+
+  const handleSelectCohort = (cohort: any) => {
+    setSelectedCohort(cohort);
+    setShowCohortDetails(true);
+  };
+
+  const handleViewStartup = (startup: any) => {
+    setSelectedStartup(startup);
+    setShowStartupDetails(true);
+  };
 
   // Sync URL tab param to activeTab
   useEffect(() => {
@@ -167,10 +184,49 @@ const AcceleratorDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
                 <AcceleratorRoadmapWidget activeCohorts={activeCohorts} pendingApplications={pendingApplications} activeStartups={activeStartups} totalSupported={profile?.total_startups_supported || 0} />
-                <UnifiedCommunityFeed showCreatePost={false} limit={5} />
+                <UnifiedCommunityFeed showCreatePost={true} limit={10} />
               </div>
               
-              
+              {/* Right Sidebar */}
+              <div className="space-y-6">
+                {/* Quick Actions */}
+                <Card className="tech-card border-0">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">Quick Actions</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => setActiveTab('cohorts')}
+                    >
+                      <Users className="w-4 h-4 mr-2" />
+                      View Cohorts
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => setActiveTab('applications')}
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      Review Applications
+                      {pendingApplications > 0 && (
+                        <Badge className="ml-auto bg-emerald-500">{pendingApplications}</Badge>
+                      )}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-start"
+                      onClick={() => setActiveTab('portfolio')}
+                    >
+                      <Building2 className="w-4 h-4 mr-2" />
+                      Portfolio
+                    </Button>
+                  </CardContent>
+                </Card>
+                
+                <ConnectionsWidget />
+              </div>
             </div>
           </TabsContent>
 
@@ -183,7 +239,7 @@ const AcceleratorDashboard = () => {
 
           {/* Cohorts Tab */}
           <TabsContent value="cohorts">
-            <CohortManagement cohorts={cohorts} onCreateCohort={createCohort} onUpdateCohort={updateCohort} onSelectCohort={setSelectedCohort} />
+            <CohortManagement cohorts={cohorts} onCreateCohort={createCohort} onUpdateCohort={updateCohort} onSelectCohort={handleSelectCohort} />
           </TabsContent>
 
           {/* Applications Tab */}
@@ -193,7 +249,7 @@ const AcceleratorDashboard = () => {
 
           {/* Portfolio Tab */}
           <TabsContent value="portfolio" className="space-y-6">
-            <AcceleratorPortfolio startups={portfolioStartups} cohorts={cohorts} totalFundingRaised={profile?.total_funding_raised || 0} onViewStartup={startup => {}} />
+            <AcceleratorPortfolio startups={portfolioStartups} cohorts={cohorts} totalFundingRaised={profile?.total_funding_raised || 0} onViewStartup={handleViewStartup} />
             <StartupJourneyTracker startups={portfolioStartups} onAddMilestone={addMilestone} onUpdateMilestone={updateMilestone} />
             <MentorAdvisorAssignment startups={portfolioStartups} onAssignMentor={assignMentor} onAssignAdvisor={assignAdvisor} />
           </TabsContent>
@@ -270,6 +326,28 @@ const AcceleratorDashboard = () => {
       <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {}} />
       
       {selectedEvent && <EventDetailsDialog event={selectedEvent} open={showEventDetails} onOpenChange={setShowEventDetails} onEventUpdated={() => {}} />}
+
+      {/* Cohort Details Dialog */}
+      <CohortDetailsDialog
+        cohort={selectedCohort}
+        open={showCohortDetails}
+        onOpenChange={setShowCohortDetails}
+        onUpdateCohort={updateCohort}
+        onViewApplications={() => {
+          setShowCohortDetails(false);
+          setActiveTab('applications');
+        }}
+      />
+
+      {/* Startup Detail Dialog */}
+      <StartupDetailDialog
+        startup={selectedStartup}
+        open={showStartupDetails}
+        onOpenChange={setShowStartupDetails}
+        onAddMilestone={addMilestone}
+        onUpdateMilestone={updateMilestone}
+        cohortName={cohorts.find(c => c.id === selectedStartup?.cohort_id)?.name}
+      />
     </div>;
 };
 export default AcceleratorDashboard;

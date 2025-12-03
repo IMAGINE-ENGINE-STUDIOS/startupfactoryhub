@@ -1,0 +1,198 @@
+import { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { format, differenceInDays } from 'date-fns';
+import { Rocket, Calendar, DollarSign, Percent, Clock, Users, Heart, MessageCircle, Share, Bookmark } from 'lucide-react';
+import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
+
+interface CohortData {
+  cohort_id: string;
+  name: string;
+  description?: string;
+  deadline?: string;
+  funding?: number;
+  equity?: number;
+  industries?: string[];
+  accelerator_name?: string;
+  accelerator_logo?: string;
+  accelerator_id?: string;
+}
+
+interface CohortPostCardProps {
+  post: {
+    id: string;
+    content: string;
+    created_at: string;
+    user_id: string;
+    cohort_data: CohortData;
+    profiles?: {
+      full_name: string;
+      avatar_url?: string;
+    } | null;
+  };
+  isLiked: boolean;
+  isBookmarked: boolean;
+  likesCount: number;
+  commentsCount: number;
+  onLike: () => void;
+  onBookmark: () => void;
+  onComment: () => void;
+  onShare: () => void;
+  onUserClick?: (userId: string) => void;
+}
+
+export const CohortPostCard = ({
+  post,
+  isLiked,
+  isBookmarked,
+  likesCount,
+  commentsCount,
+  onLike,
+  onBookmark,
+  onComment,
+  onShare,
+  onUserClick
+}: CohortPostCardProps) => {
+  const [showApplicationDialog, setShowApplicationDialog] = useState(false);
+  const cohortData = post.cohort_data;
+
+  if (!cohortData) return null;
+
+  const daysUntilDeadline = cohortData.deadline 
+    ? differenceInDays(new Date(cohortData.deadline), new Date())
+    : null;
+
+  return (
+    <>
+      <Card className="tech-card border-0 overflow-hidden hover:shadow-lg transition-all">
+        {/* Gradient Header */}
+        <div className="h-24 bg-gradient-to-r from-emerald-500/20 via-teal-500/20 to-cyan-500/20 relative">
+          <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10" />
+          <div className="absolute top-4 right-4">
+            <Badge className="bg-emerald-500 text-white">
+              <Rocket className="w-3 h-3 mr-1" />
+              Accelerator Program
+            </Badge>
+          </div>
+        </div>
+
+        <CardContent className="p-5 -mt-8 relative">
+          {/* Accelerator Info */}
+          <div className="flex items-center gap-3 mb-4">
+            <Avatar 
+              className="w-14 h-14 border-4 border-background cursor-pointer"
+              onClick={() => onUserClick?.(post.user_id)}
+            >
+              <AvatarImage src={cohortData.accelerator_logo || post.profiles?.avatar_url} />
+              <AvatarFallback className="bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+                {cohortData.accelerator_name?.charAt(0) || 'A'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <h3 
+                className="font-bold text-lg hover:text-primary cursor-pointer"
+                onClick={() => onUserClick?.(post.user_id)}
+              >
+                {cohortData.accelerator_name || post.profiles?.full_name}
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Posted {format(new Date(post.created_at), 'MMM d, yyyy')}
+              </p>
+            </div>
+          </div>
+
+          {/* Cohort Info */}
+          <div className="space-y-3">
+            <h2 className="text-xl font-bold text-foreground">{cohortData.name}</h2>
+            
+            {cohortData.description && (
+              <p className="text-muted-foreground">{cohortData.description}</p>
+            )}
+
+            {/* Key Details */}
+            <div className="flex flex-wrap gap-3">
+              {cohortData.deadline && daysUntilDeadline !== null && daysUntilDeadline > 0 && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-500/10 text-amber-500">
+                  <Clock className="w-4 h-4" />
+                  <span className="font-medium">{daysUntilDeadline} days left</span>
+                </div>
+              )}
+              {cohortData.funding && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-500/10 text-emerald-500">
+                  <DollarSign className="w-4 h-4" />
+                  <span className="font-medium">${(cohortData.funding / 1000).toFixed(0)}K</span>
+                </div>
+              )}
+              {cohortData.equity && (
+                <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-500/10 text-purple-500">
+                  <Percent className="w-4 h-4" />
+                  <span className="font-medium">{cohortData.equity}% equity</span>
+                </div>
+              )}
+            </div>
+
+            {/* Industries */}
+            {cohortData.industries && cohortData.industries.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {cohortData.industries.map((industry) => (
+                  <Badge key={industry} variant="outline" className="bg-background/50">
+                    {industry}
+                  </Badge>
+                ))}
+              </div>
+            )}
+
+            {/* Apply Button */}
+            <Button 
+              className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
+              onClick={() => setShowApplicationDialog(true)}
+            >
+              <Rocket className="w-4 h-4 mr-2" />
+              Apply Now
+            </Button>
+          </div>
+
+          {/* Actions */}
+          <div className="flex items-center justify-between mt-5 pt-4 border-t border-border/50">
+            <div className="flex items-center gap-1">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onLike}
+                className={isLiked ? 'text-red-500' : ''}
+              >
+                <Heart className={`w-4 h-4 mr-1 ${isLiked ? 'fill-current' : ''}`} />
+                {likesCount}
+              </Button>
+              <Button variant="ghost" size="sm" onClick={onComment}>
+                <MessageCircle className="w-4 h-4 mr-1" />
+                {commentsCount}
+              </Button>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button variant="ghost" size="sm" onClick={onShare}>
+                <Share className="w-4 h-4" />
+              </Button>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={onBookmark}
+                className={isBookmarked ? 'text-amber-500' : ''}
+              >
+                <Bookmark className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <CohortApplicationDialog
+        open={showApplicationDialog}
+        onOpenChange={setShowApplicationDialog}
+        cohortData={cohortData}
+      />
+    </>
+  );
+};
