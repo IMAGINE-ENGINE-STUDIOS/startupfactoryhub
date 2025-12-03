@@ -29,6 +29,12 @@ interface CohortStartup {
   funding_received: number | null;
   equity_given: number | null;
   graduation_date: string | null;
+  is_manual_entry?: boolean;
+  external_company_name?: string | null;
+  external_company_industry?: string | null;
+  external_company_website?: string | null;
+  external_company_logo?: string | null;
+  graduation_year?: number | null;
   company?: {
     id: string;
     name: string;
@@ -72,10 +78,33 @@ export const AcceleratorPortfolio = ({
   const [selectedStage, setSelectedStage] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+  // Helper to get startup name (platform or manual entry)
+  const getStartupName = (startup: CohortStartup) => {
+    if (startup.is_manual_entry) return startup.external_company_name || 'Unknown';
+    return startup.company?.name || 'Unknown';
+  };
+
+  const getStartupIndustry = (startup: CohortStartup) => {
+    if (startup.is_manual_entry) return startup.external_company_industry || 'Technology';
+    return startup.company?.industry || 'Technology';
+  };
+
+  const getStartupLogo = (startup: CohortStartup) => {
+    if (startup.is_manual_entry) return startup.external_company_logo;
+    return startup.company?.logo_url;
+  };
+
+  const getStartupDescription = (startup: CohortStartup) => {
+    if (startup.is_manual_entry) return 'External company';
+    return startup.company?.description || 'No description available';
+  };
+
   const filteredStartups = startups.filter(startup => {
+    const name = getStartupName(startup);
+    const industry = getStartupIndustry(startup);
     const matchesSearch = !searchQuery || 
-      startup.company?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      startup.company?.industry?.toLowerCase().includes(searchQuery.toLowerCase());
+      name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      industry.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCohort = selectedCohort === 'all' || startup.cohort_id === selectedCohort;
     const matchesStage = selectedStage === 'all' || startup.current_stage === selectedStage;
     return matchesSearch && matchesCohort && matchesStage;
@@ -231,17 +260,22 @@ export const AcceleratorPortfolio = ({
               <CardContent className="p-5">
                 <div className="flex items-start gap-4">
                   <Avatar className="w-14 h-14">
-                    <AvatarImage src={startup.company?.logo_url || undefined} />
+                    <AvatarImage src={getStartupLogo(startup) || undefined} />
                     <AvatarFallback className="bg-emerald-500/20 text-emerald-400 text-lg">
-                      {startup.company?.name?.charAt(0) || 'S'}
+                      {getStartupName(startup)?.charAt(0) || 'S'}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-lg group-hover:text-emerald-400 transition-colors">
-                      {startup.company?.name}
-                    </h3>
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-lg group-hover:text-emerald-400 transition-colors">
+                        {getStartupName(startup)}
+                      </h3>
+                      {startup.is_manual_entry && (
+                        <Badge variant="outline" className="text-xs">External</Badge>
+                      )}
+                    </div>
                     <p className="text-sm text-muted-foreground truncate">
-                      {startup.company?.industry || 'Technology'}
+                      {getStartupIndustry(startup)}
                     </p>
                     <div className="flex items-center gap-2 mt-2">
                       <Badge className={getStageColor(startup.current_stage)}>
@@ -255,7 +289,7 @@ export const AcceleratorPortfolio = ({
                 </div>
 
                 <p className="text-sm text-muted-foreground mt-4 line-clamp-2">
-                  {startup.company?.description || 'No description available'}
+                  {getStartupDescription(startup)}
                 </p>
 
                 {/* Progress */}
@@ -295,15 +329,18 @@ export const AcceleratorPortfolio = ({
                   onClick={() => onViewStartup(startup)}
                 >
                   <Avatar className="w-12 h-12">
-                    <AvatarImage src={startup.company?.logo_url || undefined} />
+                    <AvatarImage src={getStartupLogo(startup) || undefined} />
                     <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
-                      {startup.company?.name?.charAt(0) || 'S'}
+                      {getStartupName(startup)?.charAt(0) || 'S'}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-medium">{startup.company?.name}</h4>
+                    <div className="flex items-center gap-2">
+                      <h4 className="font-medium">{getStartupName(startup)}</h4>
+                      {startup.is_manual_entry && <Badge variant="outline" className="text-xs">External</Badge>}
+                    </div>
                     <p className="text-sm text-muted-foreground">
-                      {startup.company?.industry || 'Technology'}
+                      {getStartupIndustry(startup)}
                     </p>
                   </div>
                   <Badge className={getStageColor(startup.current_stage)}>

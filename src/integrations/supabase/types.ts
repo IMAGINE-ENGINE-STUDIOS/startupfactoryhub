@@ -864,9 +864,15 @@ export type Database = {
           current_stage: string | null
           demo_day_slot: string | null
           equity_given: number | null
+          external_company_industry: string | null
+          external_company_logo: string | null
+          external_company_name: string | null
+          external_company_website: string | null
           funding_received: number | null
           graduation_date: string | null
+          graduation_year: number | null
           id: string
+          is_manual_entry: boolean | null
           joined_at: string | null
           notes: string | null
           progress_percentage: number | null
@@ -879,9 +885,15 @@ export type Database = {
           current_stage?: string | null
           demo_day_slot?: string | null
           equity_given?: number | null
+          external_company_industry?: string | null
+          external_company_logo?: string | null
+          external_company_name?: string | null
+          external_company_website?: string | null
           funding_received?: number | null
           graduation_date?: string | null
+          graduation_year?: number | null
           id?: string
+          is_manual_entry?: boolean | null
           joined_at?: string | null
           notes?: string | null
           progress_percentage?: number | null
@@ -894,9 +906,15 @@ export type Database = {
           current_stage?: string | null
           demo_day_slot?: string | null
           equity_given?: number | null
+          external_company_industry?: string | null
+          external_company_logo?: string | null
+          external_company_name?: string | null
+          external_company_website?: string | null
           funding_received?: number | null
           graduation_date?: string | null
+          graduation_year?: number | null
           id?: string
+          is_manual_entry?: boolean | null
           joined_at?: string | null
           notes?: string | null
           progress_percentage?: number | null

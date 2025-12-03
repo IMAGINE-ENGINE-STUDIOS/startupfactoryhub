@@ -77,6 +77,12 @@ interface CohortStartup {
   demo_day_slot: string | null;
   graduation_date: string | null;
   notes: string | null;
+  is_manual_entry?: boolean;
+  external_company_name?: string | null;
+  external_company_industry?: string | null;
+  external_company_website?: string | null;
+  external_company_logo?: string | null;
+  graduation_year?: number | null;
   company?: {
     id: string;
     name: string;

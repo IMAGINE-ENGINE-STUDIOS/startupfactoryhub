@@ -14,21 +14,32 @@ import {
   Edit, 
   Save,
   DollarSign,
-  TrendingUp,
-  Building,
-  Target,
   X,
   Users,
-  Calendar,
   Rocket,
   Percent,
+  GraduationCap,
+  Locate,
+  Building2,
+  ExternalLink,
+  Plus,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import AvatarUpload from './AvatarUpload';
+import AddStartupToPortfolioDialog from './accelerator/AddStartupToPortfolioDialog';
 
 const INDUSTRIES = ['Technology', 'Healthcare', 'Fintech', 'E-commerce', 'AI/ML', 'SaaS', 'Biotech', 'Clean Energy', 'Education', 'Real Estate'];
 const PROGRAM_DURATIONS = ['8 weeks', '10 weeks', '12 weeks', '16 weeks', '6 months', '12 months'];
+
+interface Alumni {
+  id: string;
+  name: string;
+  industry: string | null;
+  logo_url: string | null;
+  graduation_year: number | null;
+  website: string | null;
+}
 
 export default function AcceleratorProfileView() {
   const { profile, loading: profileLoading } = useProfileWithRole();
@@ -51,6 +62,17 @@ export default function AcceleratorProfileView() {
   const [editedEquityPercentage, setEditedEquityPercentage] = useState('');
   const [editedFundingOffered, setEditedFundingOffered] = useState('');
   const [editedIndustriesFocus, setEditedIndustriesFocus] = useState<string[]>([]);
+  
+  // Address fields
+  const [editedAddress, setEditedAddress] = useState('');
+  const [editedCity, setEditedCity] = useState('');
+  const [editedCountry, setEditedCountry] = useState('');
+
+  // Alumni data
+  const [alumni, setAlumni] = useState<Alumni[]>([]);
+  const [alumniLoading, setAlumniLoading] = useState(false);
+  const [cohorts, setCohorts] = useState<{ id: string; name: string }[]>([]);
+  const [addAlumniDialogOpen, setAddAlumniDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchAcceleratorData = async () => {
@@ -63,10 +85,72 @@ export default function AcceleratorProfileView() {
         .maybeSingle();
       
       setAcceleratorProfile(accProfile);
+
+      // Fetch cohorts for the alumni dialog
+      if (accProfile) {
+        const { data: cohortsData } = await supabase
+          .from('accelerator_cohorts')
+          .select('id, name')
+          .eq('accelerator_id', accProfile.id);
+        setCohorts(cohortsData || []);
+      }
     };
 
     fetchAcceleratorData();
   }, [profile?.user_id]);
+
+  // Fetch alumni when accelerator profile is loaded
+  useEffect(() => {
+    const fetchAlumni = async () => {
+      if (!acceleratorProfile?.id) return;
+      setAlumniLoading(true);
+
+      try {
+        // Get cohort IDs for this accelerator
+        const { data: cohortIds } = await supabase
+          .from('accelerator_cohorts')
+          .select('id')
+          .eq('accelerator_id', acceleratorProfile.id);
+
+        if (cohortIds && cohortIds.length > 0) {
+          const ids = cohortIds.map(c => c.id);
+          
+          // Fetch graduated startups
+          const { data: graduatedStartups } = await supabase
+            .from('cohort_startups')
+            .select(`
+              id,
+              graduation_year,
+              external_company_name,
+              external_company_industry,
+              external_company_logo,
+              external_company_website,
+              is_manual_entry,
+              company:companies(id, name, industry, logo_url, website)
+            `)
+            .in('cohort_id', ids)
+            .eq('current_stage', 'graduated');
+
+          if (graduatedStartups) {
+            const alumniList: Alumni[] = graduatedStartups.map(s => ({
+              id: s.id,
+              name: s.is_manual_entry ? s.external_company_name : s.company?.name,
+              industry: s.is_manual_entry ? s.external_company_industry : s.company?.industry,
+              logo_url: s.is_manual_entry ? s.external_company_logo : s.company?.logo_url,
+              graduation_year: s.graduation_year,
+              website: s.is_manual_entry ? s.external_company_website : s.company?.website,
+            })).filter(a => a.name) as Alumni[];
+            setAlumni(alumniList);
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching alumni:', err);
+      }
+      setAlumniLoading(false);
+    };
+
+    fetchAlumni();
+  }, [acceleratorProfile?.id]);
 
   const startEditing = () => {
     if (profile) {
@@ -82,12 +166,49 @@ export default function AcceleratorProfileView() {
       setEditedEquityPercentage(acceleratorProfile.equity_percentage?.toString() || '');
       setEditedFundingOffered(acceleratorProfile.funding_offered?.toString() || '');
       setEditedIndustriesFocus(acceleratorProfile.industries_focus || []);
+      setEditedAddress(acceleratorProfile.address || '');
+      setEditedCity(acceleratorProfile.city || '');
+      setEditedCountry(acceleratorProfile.country || '');
     }
     setIsEditing(true);
   };
 
   const cancelEditing = () => {
     setIsEditing(false);
+  };
+
+  const handleUseMyLocation = () => {
+    if (!navigator.geolocation) {
+      toast({ title: 'Geolocation not supported', variant: 'destructive' });
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        // Use reverse geocoding with Mapbox
+        try {
+          const response = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${position.coords.longitude},${position.coords.latitude}.json?access_token=pk.eyJ1IjoibG92YWJsZSIsImEiOiJjbHc2NGNvbnkwMXhxMm1wdGh4cm16YjhjIn0.O0-Lw80KVFLAVpQQpzVmzg`
+          );
+          const data = await response.json();
+          if (data.features && data.features.length > 0) {
+            const place = data.features[0];
+            const context = place.context || [];
+            const city = context.find((c: any) => c.id.startsWith('place'))?.text || '';
+            const country = context.find((c: any) => c.id.startsWith('country'))?.text || '';
+            setEditedAddress(place.place_name || '');
+            setEditedCity(city);
+            setEditedCountry(country);
+            toast({ title: 'Location detected successfully' });
+          }
+        } catch (err) {
+          toast({ title: 'Failed to get address', variant: 'destructive' });
+        }
+      },
+      () => {
+        toast({ title: 'Failed to get location', variant: 'destructive' });
+      }
+    );
   };
 
   const handleSaveProfile = async () => {
@@ -108,18 +229,46 @@ export default function AcceleratorProfileView() {
 
       if (profileError) throw profileError;
 
+      // Geocode the address if provided
+      let latitude = null;
+      let longitude = null;
+      const fullAddress = [editedAddress, editedCity, editedCountry].filter(Boolean).join(', ');
+      
+      if (fullAddress) {
+        try {
+          const response = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(fullAddress)}.json?access_token=pk.eyJ1IjoibG92YWJsZSIsImEiOiJjbHc2NGNvbnkwMXhxMm1wdGh4cm16YjhjIn0.O0-Lw80KVFLAVpQQpzVmzg&limit=1`
+          );
+          const data = await response.json();
+          if (data.features && data.features.length > 0) {
+            const [lng, lat] = data.features[0].center;
+            latitude = lat;
+            longitude = lng;
+          }
+        } catch (err) {
+          console.error('Geocoding error:', err);
+        }
+      }
+
       // Update or create accelerator profile
       const acceleratorData = {
         user_id: profile.user_id,
         organization_name: editedOrgName,
         description: editedDescription,
-        location: editedLocation,
+        location: editedLocation || fullAddress,
         website: editedWebsite,
         program_duration: editedProgramDuration,
         equity_percentage: editedEquityPercentage ? parseFloat(editedEquityPercentage) : null,
         funding_offered: editedFundingOffered ? parseInt(editedFundingOffered) : null,
         industries_focus: editedIndustriesFocus,
+        address: editedAddress,
+        city: editedCity,
+        country: editedCountry,
+        latitude,
+        longitude,
       };
+
+      let accProfileId = acceleratorProfile?.id;
 
       if (acceleratorProfile) {
         const { error: accError } = await supabase
@@ -128,10 +277,51 @@ export default function AcceleratorProfileView() {
           .eq('user_id', profile.user_id);
         if (accError) throw accError;
       } else {
-        const { error: accError } = await supabase
+        const { data: newProfile, error: accError } = await supabase
           .from('accelerator_profiles')
-          .insert(acceleratorData);
+          .insert(acceleratorData)
+          .select()
+          .single();
         if (accError) throw accError;
+        accProfileId = newProfile?.id;
+      }
+
+      // Auto-create or update resource entry for the map (all accelerators are official partners)
+      if (accProfileId && fullAddress && latitude && longitude) {
+        const resourceData = {
+          title: editedOrgName,
+          description: editedDescription,
+          resource_type: 'accelerator_incubator',
+          address: fullAddress,
+          city: editedCity,
+          country: editedCountry,
+          latitude,
+          longitude,
+          website: editedWebsite,
+          logo_url: acceleratorProfile?.logo_url,
+          is_official_partner: true,
+          is_verified: true,
+          linked_accelerator_id: accProfileId,
+          created_by: profile.user_id,
+        };
+
+        // Check if resource already exists
+        const { data: existingResource } = await supabase
+          .from('resources')
+          .select('id')
+          .eq('linked_accelerator_id', accProfileId)
+          .maybeSingle();
+
+        if (existingResource) {
+          await supabase
+            .from('resources')
+            .update(resourceData)
+            .eq('id', existingResource.id);
+        } else {
+          await supabase
+            .from('resources')
+            .insert(resourceData);
+        }
       }
 
       // Refresh accelerator profile data
@@ -145,6 +335,7 @@ export default function AcceleratorProfileView() {
       toast({ title: 'Profile updated successfully' });
       setIsEditing(false);
     } catch (error) {
+      console.error('Error saving profile:', error);
       toast({ title: 'Error updating profile', variant: 'destructive' });
     } finally {
       setSaving(false);
@@ -362,9 +553,10 @@ export default function AcceleratorProfileView() {
 
       {/* Details */}
       <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
+        <TabsList className="grid w-full grid-cols-3 max-w-lg">
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="program">Program Details</TabsTrigger>
+          <TabsTrigger value="alumni">Alumni</TabsTrigger>
         </TabsList>
 
         <TabsContent value="about" className="space-y-4">
@@ -385,6 +577,69 @@ export default function AcceleratorProfileView() {
                 <p className="text-muted-foreground">
                   {acceleratorProfile?.description || 'No description provided yet.'}
                 </p>
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="tech-card border-0">
+            <CardHeader>
+              <CardTitle>Address (for Resource Map)</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isEditing ? (
+                <div className="space-y-4">
+                  <div className="flex gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={handleUseMyLocation}>
+                      <Locate className="h-4 w-4 mr-2" />
+                      Use My Location
+                    </Button>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm text-muted-foreground">Street Address</label>
+                    <Input
+                      value={editedAddress}
+                      onChange={(e) => setEditedAddress(e.target.value)}
+                      placeholder="e.g., 123 Innovation Drive"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="text-sm text-muted-foreground">City</label>
+                      <Input
+                        value={editedCity}
+                        onChange={(e) => setEditedCity(e.target.value)}
+                        placeholder="e.g., San Francisco"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm text-muted-foreground">Country</label>
+                      <Input
+                        value={editedCountry}
+                        onChange={(e) => setEditedCountry(e.target.value)}
+                        placeholder="e.g., United States"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Your accelerator will appear on the Resources map when you save a valid address.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {acceleratorProfile?.address || acceleratorProfile?.city || acceleratorProfile?.country ? (
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 mt-1 text-muted-foreground" />
+                      <div>
+                        {acceleratorProfile?.address && <p>{acceleratorProfile.address}</p>}
+                        <p className="text-muted-foreground">
+                          {[acceleratorProfile?.city, acceleratorProfile?.country].filter(Boolean).join(', ')}
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">No address specified. Add an address to appear on the Resources map.</p>
+                  )}
+                </div>
               )}
             </CardContent>
           </Card>
@@ -535,7 +790,84 @@ export default function AcceleratorProfileView() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        <TabsContent value="alumni" className="space-y-4">
+          <Card className="tech-card border-0">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2">
+                  <GraduationCap className="h-5 w-5" />
+                  Alumni ({alumni.length})
+                </CardTitle>
+              </div>
+              <Button onClick={() => setAddAlumniDialogOpen(true)} size="sm" className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Alumni
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {alumniLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                </div>
+              ) : alumni.length === 0 ? (
+                <div className="text-center py-8">
+                  <GraduationCap className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <p className="text-muted-foreground">No alumni yet</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Add graduated startups to showcase your program's success
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {alumni.map((alum) => (
+                    <Card key={alum.id} className="glass-morphism border-border/50">
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-12 w-12">
+                            <AvatarImage src={alum.logo_url || ''} />
+                            <AvatarFallback className="bg-purple-500/20 text-purple-400">
+                              {alum.name?.charAt(0) || 'A'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium truncate">{alum.name}</h4>
+                            <p className="text-sm text-muted-foreground truncate">
+                              {alum.industry || 'Technology'}
+                            </p>
+                            {alum.graduation_year && (
+                              <Badge variant="outline" className="text-xs mt-1">
+                                Class of {alum.graduation_year}
+                              </Badge>
+                            )}
+                          </div>
+                          {alum.website && (
+                            <a href={alum.website} target="_blank" rel="noopener noreferrer">
+                              <ExternalLink className="h-4 w-4 text-muted-foreground hover:text-primary" />
+                            </a>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
+
+      {/* Add Alumni Dialog */}
+      <AddStartupToPortfolioDialog
+        open={addAlumniDialogOpen}
+        onOpenChange={setAddAlumniDialogOpen}
+        cohorts={cohorts}
+        onStartupAdded={() => {
+          // Refresh alumni list
+          window.location.reload();
+        }}
+        isAlumniMode={true}
+      />
     </div>
   );
 }

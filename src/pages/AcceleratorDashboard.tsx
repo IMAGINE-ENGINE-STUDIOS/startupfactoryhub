@@ -20,6 +20,7 @@ import { AcceleratorPortfolio } from '@/components/accelerator/AcceleratorPortfo
 import { MentorAdvisorAssignment } from '@/components/accelerator/MentorAdvisorAssignment';
 import { StartupDetailDialog } from '@/components/accelerator/StartupDetailDialog';
 import { CohortDetailsDialog } from '@/components/accelerator/CohortDetailsDialog';
+import AddStartupToPortfolioDialog from '@/components/accelerator/AddStartupToPortfolioDialog';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
@@ -75,6 +76,7 @@ const AcceleratorDashboard = () => {
   const [showCohortDetails, setShowCohortDetails] = useState(false);
   const [selectedStartup, setSelectedStartup] = useState<any>(null);
   const [showStartupDetails, setShowStartupDetails] = useState(false);
+  const [addStartupDialogOpen, setAddStartupDialogOpen] = useState(false);
 
   const handleSelectCohort = (cohort: any) => {
     setSelectedCohort(cohort);
@@ -186,17 +188,7 @@ const AcceleratorDashboard = () => {
 
           {/* Social Tab */}
           <TabsContent value="social" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-8">
-                <AcceleratorRoadmapWidget activeCohorts={activeCohorts} pendingApplications={pendingApplications} activeStartups={activeStartups} totalSupported={profile?.total_startups_supported || 0} />
-                <UnifiedCommunityFeed showCreatePost={true} limit={10} />
-              </div>
-              
-              {/* Right Sidebar */}
-              <div className="space-y-6">
-                <ConnectionsWidget />
-              </div>
-            </div>
+            <UnifiedCommunityFeed showCreatePost={true} />
           </TabsContent>
 
 
@@ -218,6 +210,12 @@ const AcceleratorDashboard = () => {
 
           {/* Portfolio Tab */}
           <TabsContent value="portfolio" className="space-y-6">
+            <div className="flex justify-end mb-4">
+              <Button onClick={() => setAddStartupDialogOpen(true)} className="gap-2">
+                <Plus className="h-4 w-4" />
+                Add Startup
+              </Button>
+            </div>
             <AcceleratorPortfolio startups={portfolioStartups} cohorts={cohorts} totalFundingRaised={profile?.total_funding_raised || 0} onViewStartup={handleViewStartup} />
             <StartupJourneyTracker startups={portfolioStartups} onAddMilestone={addMilestone} onUpdateMilestone={updateMilestone} />
             <MentorAdvisorAssignment startups={portfolioStartups} onAssignMentor={assignMentor} onAssignAdvisor={assignAdvisor} />
@@ -321,6 +319,17 @@ const AcceleratorDashboard = () => {
         onAddMilestone={addMilestone}
         onUpdateMilestone={updateMilestone}
         cohortName={cohorts.find(c => c.id === selectedStartup?.cohort_id)?.name}
+      />
+
+      {/* Add Startup to Portfolio Dialog */}
+      <AddStartupToPortfolioDialog
+        open={addStartupDialogOpen}
+        onOpenChange={setAddStartupDialogOpen}
+        cohorts={cohorts}
+        onStartupAdded={() => {
+          // Trigger refetch of portfolio
+          window.location.reload();
+        }}
       />
     </div>;
 };
