@@ -17,6 +17,7 @@ import ShortsCreator from '@/components/ShortsCreator';
 import GuestPrompt from '@/components/GuestPrompt';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
 import UserProfileDialog from '@/components/UserProfileDialog';
+import { CohortPostCard } from '@/components/CohortPostCard';
 interface FeedPost {
   id: string;
   content: string;
@@ -24,6 +25,7 @@ interface FeedPost {
   user_id: string;
   post_type: string;
   internship_data?: any;
+  cohort_data?: any;
   media_urls?: string[] | null;
   shared_post_id?: string | null;
   profiles?: {

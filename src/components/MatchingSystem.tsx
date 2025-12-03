@@ -137,8 +137,8 @@ export default function MatchingSystem() {
       }
     }
 
-    // Fetch startup matches (for investors, mentors, advisors)
-    if (userRole === 'investor' || userRole === 'mentor' || userRole === 'advisor') {
+    // Fetch startup matches (for investors, mentors, advisors, accelerators)
+    if (userRole === 'investor' || userRole === 'mentor' || userRole === 'advisor' || userRole === 'accelerator') {
       const { data: companies, error: companyError } = await supabase
         .from('companies')
         .select('*')
@@ -382,13 +382,20 @@ export default function MatchingSystem() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue={userRole === 'mentor' || userRole === 'advisor' || userRole === 'investor' ? 'startups' : 'mentors'} className="space-y-6">
-        <TabsList className={`grid w-full ${(!userRole || userRole === 'startup' || userRole === 'student') ? 'grid-cols-3' : 'grid-cols-1'} max-w-md`}>
+      <Tabs defaultValue={userRole === 'mentor' || userRole === 'advisor' || userRole === 'investor' || userRole === 'accelerator' ? 'startups' : 'mentors'} className="space-y-6">
+        <TabsList className={`grid w-full ${(!userRole || userRole === 'startup' || userRole === 'student') ? 'grid-cols-3' : userRole === 'accelerator' ? 'grid-cols-3' : 'grid-cols-1'} max-w-md`}>
           {(!userRole || userRole === 'startup' || userRole === 'student') && (
             <>
               <TabsTrigger value="mentors">Mentors</TabsTrigger>
               <TabsTrigger value="investors">Investors</TabsTrigger>
               <TabsTrigger value="startups">Startups</TabsTrigger>
+            </>
+          )}
+          {userRole === 'accelerator' && (
+            <>
+              <TabsTrigger value="startups">Startups</TabsTrigger>
+              <TabsTrigger value="investors">Investors</TabsTrigger>
+              <TabsTrigger value="mentors">Mentors</TabsTrigger>
             </>
           )}
           {(userRole === 'investor' || userRole === 'mentor' || userRole === 'advisor') && (
@@ -434,7 +441,7 @@ export default function MatchingSystem() {
         </TabsContent>
         )}
 
-        {(!userRole || userRole === 'startup' || userRole === 'student') && (
+        {(!userRole || userRole === 'startup' || userRole === 'student' || userRole === 'accelerator') && (
           <TabsContent value="investors" className="space-y-4">
           <Card className="tech-card border-0">
             <CardHeader>
@@ -465,6 +472,45 @@ export default function MatchingSystem() {
                   <TrendingUp className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No investor matches yet</h3>
                   <p className="text-muted-foreground">Complete your startup profile to attract investors</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        )}
+
+        {/* Mentors tab for accelerators */}
+        {userRole === 'accelerator' && (
+          <TabsContent value="mentors" className="space-y-4">
+          <Card className="tech-card border-0">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <UserCheck className="h-5 w-5 text-primary" />
+                <span>Mentors & Advisors</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {mentorMatches.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {mentorMatches.map((mentor) => (
+                    <MatchCard
+                      key={mentor.id}
+                      match={mentor}
+                      onConnect={() => sendConnectionRequest(mentor.id, mentor.name, () => {
+                        setMentorMatches(mentorMatches.filter(m => m.id !== mentor.id));
+                      })}
+                      onPass={() => {
+                        setMentorMatches(mentorMatches.filter(m => m.id !== mentor.id));
+                        toast({ title: "Mentor passed", description: "We'll find better matches for you." });
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No mentor matches yet</h3>
+                  <p className="text-muted-foreground">Complete your profile to get better matches</p>
                 </div>
               )}
             </CardContent>

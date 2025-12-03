@@ -220,6 +220,28 @@ export const useAcceleratorProfile = () => {
         .single();
 
       if (createError) throw createError;
+
+      // Auto-create a social post announcing the cohort
+      if (data && user) {
+        await supabase.from('feed_posts').insert({
+          user_id: user.id,
+          post_type: 'cohort',
+          content: `🚀 ${profile.organization_name} is launching ${data.name}! Apply now to join our accelerator program.`,
+          cohort_data: {
+            cohort_id: data.id,
+            name: data.name,
+            description: data.description,
+            deadline: data.application_deadline,
+            funding: data.funding_per_startup,
+            equity: data.equity_percentage,
+            industries: data.focus_industries,
+            accelerator_name: profile.organization_name,
+            accelerator_logo: profile.logo_url,
+            accelerator_id: profile.id
+          }
+        });
+      }
+
       await fetchCohorts();
       return data;
     } catch (err) {

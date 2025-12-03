@@ -78,6 +78,9 @@ export type Database = {
       }
       accelerator_profiles: {
         Row: {
+          address: string | null
+          city: string | null
+          country: string | null
           created_at: string | null
           description: string | null
           equity_percentage: number | null
@@ -86,8 +89,10 @@ export type Database = {
           id: string
           industries_focus: string[] | null
           is_accepting_applications: boolean | null
+          latitude: number | null
           location: string | null
           logo_url: string | null
+          longitude: number | null
           organization_name: string
           program_duration: string | null
           total_cohorts: number | null
@@ -98,6 +103,9 @@ export type Database = {
           website: string | null
         }
         Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           description?: string | null
           equity_percentage?: number | null
@@ -106,8 +114,10 @@ export type Database = {
           id?: string
           industries_focus?: string[] | null
           is_accepting_applications?: boolean | null
+          latitude?: number | null
           location?: string | null
           logo_url?: string | null
+          longitude?: number | null
           organization_name: string
           program_duration?: string | null
           total_cohorts?: number | null
@@ -118,6 +128,9 @@ export type Database = {
           website?: string | null
         }
         Update: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           description?: string | null
           equity_percentage?: number | null
@@ -126,8 +139,10 @@ export type Database = {
           id?: string
           industries_focus?: string[] | null
           is_accepting_applications?: boolean | null
+          latitude?: number | null
           location?: string | null
           logo_url?: string | null
+          longitude?: number | null
           organization_name?: string
           program_duration?: string | null
           total_cohorts?: number | null
@@ -1741,6 +1756,7 @@ export type Database = {
         Row: {
           ai_summary_id: string | null
           bookmarks_count: number | null
+          cohort_data: Json | null
           comments_count: number | null
           content: string
           created_at: string
@@ -1759,6 +1775,7 @@ export type Database = {
         Insert: {
           ai_summary_id?: string | null
           bookmarks_count?: number | null
+          cohort_data?: Json | null
           comments_count?: number | null
           content: string
           created_at?: string
@@ -1777,6 +1794,7 @@ export type Database = {
         Update: {
           ai_summary_id?: string | null
           bookmarks_count?: number | null
+          cohort_data?: Json | null
           comments_count?: number | null
           content?: string
           created_at?: string
@@ -3325,6 +3343,7 @@ export type Database = {
           is_official_partner: boolean | null
           is_verified: boolean | null
           latitude: number | null
+          linked_accelerator_id: string | null
           location_type: string
           logo_url: string | null
           longitude: number | null
@@ -3350,6 +3369,7 @@ export type Database = {
           is_official_partner?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
+          linked_accelerator_id?: string | null
           location_type?: string
           logo_url?: string | null
           longitude?: number | null
@@ -3375,6 +3395,7 @@ export type Database = {
           is_official_partner?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
+          linked_accelerator_id?: string | null
           location_type?: string
           logo_url?: string | null
           longitude?: number | null
@@ -3384,7 +3405,15 @@ export type Database = {
           updated_at?: string
           website_url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "resources_linked_accelerator_id_fkey"
+            columns: ["linked_accelerator_id"]
+            isOneToOne: false
+            referencedRelation: "accelerator_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       roadmap_progress: {
         Row: {
@@ -4044,6 +4073,7 @@ export type Database = {
         | "short"
         | "event"
         | "journey_completion"
+        | "cohort"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -4197,6 +4227,7 @@ export const Constants = {
         "short",
         "event",
         "journey_completion",
+        "cohort",
       ],
     },
   },
