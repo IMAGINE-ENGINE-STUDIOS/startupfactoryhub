@@ -600,13 +600,23 @@ export const GlobalResourcesMap = () => {
                       <CardContent className="p-3">
                         <div className="flex items-start gap-3">
                           <div
-                            className="w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 backdrop-blur-xl"
+                            className="relative w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 backdrop-blur-xl"
                             style={{ backgroundColor: config.color + '20' }}
                           >
                             <Icon className="w-5 h-5" />
+                            {resource.is_official_partner && (
+                              <span className="absolute -top-1 -right-1 text-xs drop-shadow-md">⭐</span>
+                            )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-sm truncate">{resource.title}</h4>
+                            <div className="flex items-center gap-1.5">
+                              <h4 className="font-medium text-sm truncate">{resource.title}</h4>
+                              {resource.is_official_partner && (
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-amber-500/20 border-amber-500/50 text-amber-400 shrink-0">
+                                  Partner
+                                </Badge>
+                              )}
+                            </div>
                             <p className="text-xs text-muted-foreground truncate">
                               {resource.city}, {resource.country}
                             </p>
@@ -647,15 +657,22 @@ export const GlobalResourcesMap = () => {
               <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex-1">
-                    <Badge 
-                      className="mb-2 backdrop-blur-xl rounded-xl" 
-                      style={{ 
-                        backgroundColor: RESOURCE_CONFIG[selectedResource.resource_type].color,
-                        color: 'white'
-                      }}
-                    >
-                      {RESOURCE_CONFIG[selectedResource.resource_type].label}
-                    </Badge>
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <Badge 
+                        className="backdrop-blur-xl rounded-xl" 
+                        style={{ 
+                          backgroundColor: RESOURCE_CONFIG[selectedResource.resource_type].color,
+                          color: 'white'
+                        }}
+                      >
+                        {RESOURCE_CONFIG[selectedResource.resource_type].label}
+                      </Badge>
+                      {selectedResource.is_official_partner && (
+                        <Badge className="bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-semibold rounded-xl flex items-center gap-1">
+                          <span>⭐</span> Official Partner
+                        </Badge>
+                      )}
+                    </div>
                     <h3 className="text-lg font-semibold">{selectedResource.title}</h3>
                   </div>
                   <Button
