@@ -5,6 +5,7 @@ import { Plus, Play, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import ShortsViewer from "./ShortsViewer";
 import useEmblaCarousel from "embla-carousel-react";
 import { Button } from "@/components/ui/button";
+
 interface Short {
   id: string;
   video_url: string;
@@ -18,14 +19,13 @@ interface Short {
   comments_count: number;
   created_at: string;
 }
+
 interface ShortsCarouselProps {
   onCreateShort: () => void;
   newShort?: Short | null;
 }
-const ShortsCarousel = ({
-  onCreateShort,
-  newShort
-}: ShortsCarouselProps) => {
+
+const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
   const [shorts, setShorts] = useState<Short[]>([]);
   const [viewerOpen, setViewerOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -34,20 +34,25 @@ const ShortsCarousel = ({
   const [hasMore, setHasMore] = useState(true);
   const [offset, setOffset] = useState(0);
   const observerTarget = useRef<HTMLDivElement>(null);
+  
   const [emblaRef, emblaApi] = useEmblaCarousel({
     align: 'start',
     containScroll: 'trimSnaps',
-    dragFree: true
+    dragFree: true,
   });
+  
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
+  
   const scrollPrev = useCallback(() => emblaApi?.scrollPrev(), [emblaApi]);
   const scrollNext = useCallback(() => emblaApi?.scrollNext(), [emblaApi]);
+  
   const onSelect = useCallback(() => {
     if (!emblaApi) return;
     setCanScrollPrev(emblaApi.canScrollPrev());
     setCanScrollNext(emblaApi.canScrollNext());
   }, [emblaApi]);
+  
   useEffect(() => {
     if (!emblaApi) return;
     onSelect();
@@ -58,20 +63,28 @@ const ShortsCarousel = ({
       emblaApi.off('reInit', onSelect);
     };
   }, [emblaApi, onSelect]);
+
   useEffect(() => {
     fetchShorts();
-
+    
     // Set up real-time subscription for shorts only
-    const channel = supabase.channel('shorts-updates').on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'feed_posts',
-      filter: 'post_type=eq.short'
-    }, () => {
-      console.log('Shorts updated, refreshing');
-      setOffset(0);
-      fetchShorts(false);
-    }).subscribe();
+    const channel = supabase
+      .channel('shorts-updates')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'feed_posts',
+          filter: 'post_type=eq.short'
+        },
+        () => {
+          console.log('Shorts updated, refreshing');
+          setOffset(0);
+          fetchShorts(false);
+        }
+      )
+      .subscribe();
+
     return () => {
       supabase.removeChannel(channel);
     };
@@ -79,16 +92,19 @@ const ShortsCarousel = ({
 
   // Intersection Observer for infinite scroll
   useEffect(() => {
-    const observer = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting && hasMore && !loadingMore) {
-        loadMoreShorts();
-      }
-    }, {
-      threshold: 0.1
-    });
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          loadMoreShorts();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
     if (observerTarget.current) {
       observer.observe(observerTarget.current);
     }
+
     return () => {
       if (observerTarget.current) {
         observer.unobserve(observerTarget.current);
@@ -108,6 +124,7 @@ const ShortsCarousel = ({
       });
     }
   }, [newShort]);
+
   const fetchShorts = async (isLoadingMore = false) => {
     try {
       if (!isLoadingMore) {
@@ -115,51 +132,63 @@ const ShortsCarousel = ({
       }
       const currentOffset = isLoadingMore ? offset : 0;
       console.log(`[Shorts] Fetching shorts... offset: ${currentOffset}, isLoadingMore: ${isLoadingMore}`);
-
+      
       // Fetch posts without profiles join
-      const {
-        data: postsData,
-        error
-      } = await supabase.from('feed_posts').select('id, content, user_id, media_urls, likes_count, comments_count, created_at').eq('post_type', 'short').order('created_at', {
-        ascending: false
-      }).range(currentOffset, currentOffset + 19);
+      const { data: postsData, error } = await supabase
+        .from('feed_posts')
+        .select('id, content, user_id, media_urls, likes_count, comments_count, created_at')
+        .eq('post_type', 'short')
+        .order('created_at', { ascending: false })
+        .range(currentOffset, currentOffset + 19);
+
       if (error) {
         console.error('[Shorts] Error fetching shorts:', error);
         return;
       }
+
       console.log('[Shorts] Shorts fetched:', postsData?.length || 0);
+
       if (postsData && postsData.length > 0) {
         // Get unique user IDs
         const userIds = [...new Set(postsData.map(post => post.user_id))];
-
+        
         // Fetch profiles separately
-        const {
-          data: profilesData
-        } = await supabase.from('profiles').select('user_id, full_name, avatar_url').in('user_id', userIds);
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('user_id, full_name, avatar_url')
+          .in('user_id', userIds);
 
         // Create a map of user_id to profile
-        const profilesMap = new Map(profilesData?.map(profile => [profile.user_id, profile]) || []);
-        const videoShorts = postsData.filter(post => {
-          const hasUrl = post.media_urls && Array.isArray(post.media_urls) && post.media_urls.length > 0;
-          if (!hasUrl) {
-            console.log('[Shorts] Filtered out - no media URL:', post.id);
-          }
-          return hasUrl;
-        }).map(post => {
-          // Use first media_urls entry
-          const videoUrl = Array.isArray(post.media_urls) && post.media_urls.length > 0 ? post.media_urls[0] : '';
-          return {
-            id: post.id,
-            video_url: videoUrl,
-            content: post.content,
-            user_id: post.user_id,
-            profiles: profilesMap.get(post.user_id),
-            likes_count: post.likes_count || 0,
-            comments_count: post.comments_count || 0,
-            created_at: post.created_at
-          };
-        });
+        const profilesMap = new Map(
+          profilesData?.map(profile => [profile.user_id, profile]) || []
+        );
+
+        const videoShorts = postsData
+          .filter(post => {
+            const hasUrl = post.media_urls && Array.isArray(post.media_urls) && post.media_urls.length > 0;
+            if (!hasUrl) {
+              console.log('[Shorts] Filtered out - no media URL:', post.id);
+            }
+            return hasUrl;
+          })
+          .map(post => {
+            // Use first media_urls entry
+            const videoUrl = Array.isArray(post.media_urls) && post.media_urls.length > 0 ? post.media_urls[0] : '';
+
+            return {
+              id: post.id,
+              video_url: videoUrl,
+              content: post.content,
+              user_id: post.user_id,
+              profiles: profilesMap.get(post.user_id),
+              likes_count: post.likes_count || 0,
+              comments_count: post.comments_count || 0,
+              created_at: post.created_at
+            };
+          });
+
         console.log('[Shorts] Processed shorts count:', videoShorts.length);
+        
         if (isLoadingMore) {
           setShorts(prev => [...prev, ...videoShorts]);
         } else {
@@ -186,6 +215,7 @@ const ShortsCarousel = ({
       setLoadingMore(false);
     }
   };
+
   const loadMoreShorts = () => {
     if (!loadingMore && hasMore) {
       console.log('[Shorts] Loading more shorts...');
@@ -193,6 +223,7 @@ const ShortsCarousel = ({
       fetchShorts(true);
     }
   };
+
   const openViewer = (index: number) => {
     setSelectedIndex(index);
     setViewerOpen(true);
@@ -200,7 +231,8 @@ const ShortsCarousel = ({
 
   // Don't render if no shorts and user hasn't created any yet
   if (shorts.length === 0 && !isLoading) {
-    return <div className="mb-8">
+    return (
+      <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-foreground">Shorts</h2>
         </div>
@@ -208,7 +240,10 @@ const ShortsCarousel = ({
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex gap-3 touch-pan-y">
             {/* Create Short Card - Always show */}
-            <Card className="flex-shrink-0 w-[120px] h-[180px] cursor-pointer hover:shadow-lg transition-all hover:scale-105 border-2 border-dashed border-primary/30 tech-card" onClick={onCreateShort}>
+            <Card
+              className="flex-shrink-0 w-[120px] h-[180px] cursor-pointer hover:shadow-lg transition-all hover:scale-105 border-2 border-dashed border-primary/30 tech-card"
+              onClick={onCreateShort}
+            >
               <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
                   <Plus className="h-7 w-7 text-primary" />
@@ -226,12 +261,14 @@ const ShortsCarousel = ({
             </div>
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
 
   // Show loading skeleton
   if (isLoading) {
-    return <div className="mb-8">
+    return (
+      <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-foreground">Shorts</h2>
         </div>
@@ -248,21 +285,56 @@ const ShortsCarousel = ({
                 </div>
               </CardContent>
             </Card>
-            {[1, 2, 3].map(i => <Card key={i} className="flex-shrink-0 w-[120px] h-[180px] animate-pulse tech-card border-0">
+            {[1, 2, 3].map((i) => (
+              <Card key={i} className="flex-shrink-0 w-[120px] h-[180px] animate-pulse tech-card border-0">
                 <CardContent className="h-full p-0 bg-muted rounded-lg" />
-              </Card>)}
+              </Card>
+            ))}
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <>
+
+  return (
+    <>
       <div className="mb-8 mt-3">
-        
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold text-foreground">Shorts</h2>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-muted-foreground">
+              {shorts.length}{hasMore ? '+' : ''} shorts
+            </span>
+            <div className="hidden sm:flex gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full bg-muted/50 hover:bg-muted"
+                onClick={scrollPrev}
+                disabled={!canScrollPrev}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-full bg-muted/50 hover:bg-muted"
+                onClick={scrollNext}
+                disabled={!canScrollNext}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
 
         <div className="overflow-hidden" ref={emblaRef}>
           <div className="flex gap-3 touch-pan-y">
             {/* Create Short Card */}
-            <Card className="flex-shrink-0 w-[120px] h-[180px] cursor-pointer hover:shadow-lg transition-all hover:scale-105 border-2 border-dashed border-primary/30 tech-card" onClick={onCreateShort}>
+            <Card
+              className="flex-shrink-0 w-[120px] h-[180px] cursor-pointer hover:shadow-lg transition-all hover:scale-105 border-2 border-dashed border-primary/30 tech-card"
+              onClick={onCreateShort}
+            >
               <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center">
                   <Plus className="h-7 w-7 text-primary" />
@@ -275,9 +347,19 @@ const ShortsCarousel = ({
             </Card>
             
             {/* Existing Shorts */}
-            {shorts.map((short, index) => <Card key={short.id} className="flex-shrink-0 w-[120px] h-[180px] overflow-hidden cursor-pointer hover:shadow-xl transition-all hover:scale-105 group tech-card border-0" onClick={() => openViewer(index)}>
+            {shorts.map((short, index) => (
+              <Card 
+                key={short.id} 
+                className="flex-shrink-0 w-[120px] h-[180px] overflow-hidden cursor-pointer hover:shadow-xl transition-all hover:scale-105 group tech-card border-0"
+                onClick={() => openViewer(index)}
+              >
                 <CardContent className="p-0 h-full relative">
-                  <video src={short.video_url} className="w-full h-full object-cover" muted playsInline />
+                  <video
+                    src={short.video_url}
+                    className="w-full h-full object-cover"
+                    muted
+                    playsInline
+                  />
                   
                   {/* Gradient Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-background/30" />
@@ -306,22 +388,36 @@ const ShortsCarousel = ({
                     </div>
                   </div>
                 </CardContent>
-              </Card>)}
+              </Card>
+            ))}
 
             {/* Infinite scroll trigger */}
-            {hasMore && <div ref={observerTarget} className="flex-shrink-0 w-[120px] h-[180px] flex items-center justify-center">
-                {loadingMore && <Card className="flex-shrink-0 w-[120px] h-[180px] tech-card border-0">
+            {hasMore && (
+              <div ref={observerTarget} className="flex-shrink-0 w-[120px] h-[180px] flex items-center justify-center">
+                {loadingMore && (
+                  <Card className="flex-shrink-0 w-[120px] h-[180px] tech-card border-0">
                     <CardContent className="h-full flex flex-col items-center justify-center p-3 gap-2">
                       <Loader2 className="w-6 h-6 animate-spin text-primary" />
                       <span className="text-xs text-muted-foreground">Loading...</span>
                     </CardContent>
-                  </Card>}
-              </div>}
+                  </Card>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
 
-      <ShortsViewer shorts={shorts} initialIndex={selectedIndex} open={viewerOpen} onOpenChange={setViewerOpen} onLoadMore={loadMoreShorts} hasMore={hasMore} />
-    </>;
+      <ShortsViewer
+        shorts={shorts}
+        initialIndex={selectedIndex}
+        open={viewerOpen}
+        onOpenChange={setViewerOpen}
+        onLoadMore={loadMoreShorts}
+        hasMore={hasMore}
+      />
+    </>
+  );
 };
+
 export default ShortsCarousel;
