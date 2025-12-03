@@ -57,6 +57,7 @@ import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import ConnectionsWidget from '@/components/ConnectionsWidget';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
+import AcceleratorRoadmapWidget from '@/components/accelerator/AcceleratorRoadmapWidget';
 
 const AcceleratorDashboard = () => {
   const { user } = useAuth();
@@ -222,54 +223,12 @@ const AcceleratorDashboard = () => {
           <TabsContent value="social" className="space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-8">
-                {/* Quick Stats */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <Card className="tech-card border-0">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Active Cohorts</p>
-                          <p className="text-2xl font-bold text-emerald-400">{activeCohorts}</p>
-                        </div>
-                        <Users className="h-6 w-6 text-emerald-500" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card className="tech-card border-0">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Pending Apps</p>
-                          <p className="text-2xl font-bold text-blue-400">{pendingApplications}</p>
-                        </div>
-                        <FileText className="h-6 w-6 text-blue-500" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card className="tech-card border-0">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Active Startups</p>
-                          <p className="text-2xl font-bold text-purple-400">{activeStartups}</p>
-                        </div>
-                        <Rocket className="h-6 w-6 text-purple-500" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card className="tech-card border-0">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <p className="text-xs text-muted-foreground">Total Supported</p>
-                          <p className="text-2xl font-bold text-amber-400">{profile?.total_startups_supported || 0}</p>
-                        </div>
-                        <TrendingUp className="h-6 w-6 text-amber-500" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </div>
-
+                <AcceleratorRoadmapWidget 
+                  activeCohorts={activeCohorts}
+                  pendingApplications={pendingApplications}
+                  activeStartups={activeStartups}
+                  totalSupported={profile?.total_startups_supported || 0}
+                />
                 <UnifiedCommunityFeed showCreatePost={false} limit={5} />
               </div>
               
