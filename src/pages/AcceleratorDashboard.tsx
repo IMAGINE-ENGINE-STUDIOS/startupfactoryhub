@@ -1,26 +1,40 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { 
   Rocket, 
   Users, 
   FileText, 
   Briefcase, 
-  Calendar,
+  Calendar as CalendarIcon,
   BarChart3,
-  Settings,
   Globe,
   MessageSquare,
-  Sparkles,
   Building2,
   Target,
-  TrendingUp
+  TrendingUp,
+  Plus,
+  Bell,
+  Clock,
+  MapPin,
+  MessageCircle,
+  Network,
+  BarChart,
+  Brain,
+  Wrench,
+  User
 } from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useUserRole } from '@/hooks/useUserRole';
+import { useEvents } from '@/hooks/useEvents';
+import { format, parseISO } from 'date-fns';
 import { CohortManagement } from '@/components/accelerator/CohortManagement';
 import { CohortApplicationsManager } from '@/components/accelerator/CohortApplicationsManager';
 import { StartupJourneyTracker } from '@/components/accelerator/StartupJourneyTracker';
@@ -29,13 +43,34 @@ import { MentorAdvisorAssignment } from '@/components/accelerator/MentorAdvisorA
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
-import DashboardNavigation from '@/components/DashboardNavigation';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
+import FloatingChat from '@/components/FloatingChat';
+import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+import AcceleratorProfileView from '@/components/AcceleratorProfileView';
+import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
+import NetworkBrowser from '@/components/NetworkBrowser';
+import MatchingSystem from '@/components/MatchingSystem';
+import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
+import AnalyticsDashboard from '@/components/AnalyticsDashboard';
+import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import ConnectionsWidget from '@/components/ConnectionsWidget';
+import { CreateEventDialog } from '@/components/CreateEventDialog';
+import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 
 const AcceleratorDashboard = () => {
-  const [activeTab, setActiveTab] = useState('overview');
-  const { profile: userProfile } = useProfileWithRole();
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { role, loading: roleLoading } = useUserRole();
+  const { profile: profileWithRole } = useProfileWithRole();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const urlTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(urlTab || 'social');
+  const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
+  const [showEventDetails, setShowEventDetails] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const { upcomingEvents } = useEvents();
+
   const {
     profile,
     cohorts,
@@ -54,6 +89,21 @@ const AcceleratorDashboard = () => {
 
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
 
+  // Sync URL tab param to activeTab
+  useEffect(() => {
+    if (urlTab && urlTab !== activeTab) {
+      setActiveTab(urlTab);
+      setSearchParams({});
+    }
+  }, [urlTab, activeTab, setSearchParams]);
+
+  // Redirect if wrong role
+  useEffect(() => {
+    if (!roleLoading && role && role !== 'accelerator') {
+      navigate('/dashboard');
+    }
+  }, [role, roleLoading, navigate]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -71,315 +121,353 @@ const AcceleratorDashboard = () => {
   const activeCohorts = cohorts.filter(c => c.status === 'in_progress' || c.status === 'applications_open').length;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-6 relative">
       <DashboardHeader />
       
-      <div className="flex">
-        <DashboardNavigation />
-        
-        <main className="flex-1 p-6 ml-16 md:ml-64">
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <div className="flex items-center justify-between">
+      <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4 sm:pb-8">
+        {/* Welcome Header */}
+        <div className="mb-6 sm:mb-8">
+          {/* Mobile: Only Avatar */}
+          <div className="md:hidden flex justify-start mb-4">
+            <RoleBasedAvatar 
+              avatarUrl={profile?.logo_url || profileWithRole?.avatar_url} 
+              role="accelerator"
+              fallbackText={profile?.organization_name || 'A'}
+              className="h-16 w-16"
+            />
+          </div>
+          
+          {/* Desktop: Full Welcome Section */}
+          <div className="hidden md:flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-center space-x-4">
+              <RoleBasedAvatar 
+                avatarUrl={profile?.logo_url || profileWithRole?.avatar_url} 
+                role="accelerator"
+                fallbackText={profile?.organization_name || 'A'}
+                className="h-16 w-16"
+              />
               <div>
-                <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-teal-500 flex items-center justify-center">
-                    <Rocket className="w-5 h-5 text-white" />
-                  </div>
-                  {profile?.organization_name || 'Accelerator Dashboard'}
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  Manage your cohorts, applications, and portfolio companies
-                </p>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground">Welcome back, {profile?.organization_name || 'Accelerator'}! 👋</h1>
+                <p className="text-sm text-muted-foreground mt-1">Manage your cohorts, applications, and portfolio companies</p>
               </div>
-
-              <TabsList className="glass-morphism">
-                <TabsTrigger value="overview" className="flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4" />
-                  Overview
-                </TabsTrigger>
-                <TabsTrigger value="cohorts" className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  Cohorts
-                </TabsTrigger>
-                <TabsTrigger value="applications" className="flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
-                  Applications
-                  {pendingApplications > 0 && (
-                    <Badge className="ml-1 bg-emerald-500">{pendingApplications}</Badge>
-                  )}
-                </TabsTrigger>
-                <TabsTrigger value="portfolio" className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4" />
-                  Portfolio
-                </TabsTrigger>
-                <TabsTrigger value="journey" className="flex items-center gap-2">
-                  <Target className="w-4 h-4" />
-                  Journey
-                </TabsTrigger>
-                <TabsTrigger value="mentors" className="flex items-center gap-2">
-                  <Briefcase className="w-4 h-4" />
-                  Mentors
-                </TabsTrigger>
-              </TabsList>
             </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
+                <Bell className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Notifications</span>
+              </Button>
+              <Button variant="hero" size="sm" className="flex-1 sm:flex-none" onClick={() => setCreateEventDialogOpen(true)}>
+                <Plus className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Create Event</span>
+              </Button>
+            </div>
+          </div>
+        </div>
 
-            {/* Overview Tab */}
-            <TabsContent value="overview" className="space-y-6">
-              {/* Stats Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <Card className="glass-morphism border-border/50 hover:border-emerald-500/30 transition-all">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Active Cohorts</p>
-                        <p className="text-3xl font-bold text-emerald-400">{activeCohorts}</p>
-                      </div>
-                      <div className="w-12 h-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                        <Users className="w-6 h-6 text-emerald-500" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+        {/* Tabbed Dashboard Content */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-11 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+              <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Social</span>
+              </TabsTrigger>
+              <TabsTrigger value="profile" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <User className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Profile</span>
+              </TabsTrigger>
+              <TabsTrigger value="network" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Network className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Network</span>
+              </TabsTrigger>
+              <TabsTrigger value="cohorts" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Users className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Cohorts</span>
+              </TabsTrigger>
+              <TabsTrigger value="applications" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <FileText className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Apps</span>
+                {pendingApplications > 0 && (
+                  <Badge className="ml-1 bg-emerald-500 text-xs">{pendingApplications}</Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="portfolio" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Building2 className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Portfolio</span>
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <CalendarIcon className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Calendar</span>
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <BarChart className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Analytics</span>
+              </TabsTrigger>
+              <TabsTrigger value="intelligence" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Brain className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Intelligence</span>
+              </TabsTrigger>
+              <TabsTrigger value="tools" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Wrench className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Tools</span>
+              </TabsTrigger>
+              <TabsTrigger value="resources" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Resources</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-                <Card className="glass-morphism border-border/50 hover:border-blue-500/30 transition-all">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Pending Applications</p>
-                        <p className="text-3xl font-bold text-blue-400">{pendingApplications}</p>
+          {/* Social Tab */}
+          <TabsContent value="social" className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-8">
+                {/* Quick Stats */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <Card className="tech-card border-0">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Active Cohorts</p>
+                          <p className="text-2xl font-bold text-emerald-400">{activeCohorts}</p>
+                        </div>
+                        <Users className="h-6 w-6 text-emerald-500" />
                       </div>
-                      <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                        <FileText className="w-6 h-6 text-blue-500" />
+                    </CardContent>
+                  </Card>
+                  <Card className="tech-card border-0">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Pending Apps</p>
+                          <p className="text-2xl font-bold text-blue-400">{pendingApplications}</p>
+                        </div>
+                        <FileText className="h-6 w-6 text-blue-500" />
                       </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                    </CardContent>
+                  </Card>
+                  <Card className="tech-card border-0">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Active Startups</p>
+                          <p className="text-2xl font-bold text-purple-400">{activeStartups}</p>
+                        </div>
+                        <Rocket className="h-6 w-6 text-purple-500" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="tech-card border-0">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-muted-foreground">Total Supported</p>
+                          <p className="text-2xl font-bold text-amber-400">{profile?.total_startups_supported || 0}</p>
+                        </div>
+                        <TrendingUp className="h-6 w-6 text-amber-500" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
 
-                <Card className="glass-morphism border-border/50 hover:border-purple-500/30 transition-all">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Active Startups</p>
-                        <p className="text-3xl font-bold text-purple-400">{activeStartups}</p>
-                      </div>
-                      <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center">
-                        <Rocket className="w-6 h-6 text-purple-500" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card className="glass-morphism border-border/50 hover:border-amber-500/30 transition-all">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-muted-foreground">Total Supported</p>
-                        <p className="text-3xl font-bold text-amber-400">
-                          {profile?.total_startups_supported || 0}
-                        </p>
-                      </div>
-                      <div className="w-12 h-12 rounded-full bg-amber-500/10 flex items-center justify-center">
-                        <TrendingUp className="w-6 h-6 text-amber-500" />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
+                <UnifiedCommunityFeed showCreatePost={false} limit={5} />
               </div>
-
-              {/* Quick Actions & Recent Activity */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Recent Applications */}
-                <Card className="glass-morphism border-border/50">
+              
+              <div className="space-y-6">
+                <Card className="tech-card border-0">
                   <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="w-5 h-5 text-emerald-500" />
-                      Recent Applications
-                    </CardTitle>
+                    <CardTitle className="text-lg">Quick Actions</CardTitle>
                   </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {applications.slice(0, 5).map((app) => (
-                        <div 
-                          key={app.id}
-                          className="flex items-center gap-3 p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors"
-                        >
-                          <Avatar className="w-10 h-10">
-                            <AvatarImage src={app.startup?.logo_url || undefined} />
-                            <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
-                              {app.startup?.name?.charAt(0) || 'S'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium truncate">{app.startup?.name || 'Unknown'}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {app.startup?.industry || 'Technology'}
-                            </p>
-                          </div>
-                          <Badge className={
-                            app.status === 'pending' ? 'bg-slate-500/20 text-slate-400' :
-                            app.status === 'accepted' ? 'bg-emerald-500/20 text-emerald-400' :
-                            'bg-blue-500/20 text-blue-400'
-                          }>
-                            {app.status}
-                          </Badge>
-                        </div>
-                      ))}
-                      {applications.length === 0 && (
-                        <p className="text-center text-muted-foreground py-8">
-                          No applications yet
-                        </p>
-                      )}
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      className="w-full mt-4"
-                      onClick={() => setActiveTab('applications')}
-                    >
-                      View All Applications
-                    </Button>
-                  </CardContent>
-                </Card>
-
-                {/* Active Cohorts */}
-                <Card className="glass-morphism border-border/50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Users className="w-5 h-5 text-emerald-500" />
-                      Your Cohorts
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {cohorts.slice(0, 5).map((cohort) => (
-                        <div 
-                          key={cohort.id}
-                          className="flex items-center justify-between p-3 rounded-lg bg-background/50 hover:bg-background/80 transition-colors cursor-pointer"
-                          onClick={() => {
-                            setSelectedCohort(cohort);
-                            setActiveTab('cohorts');
-                          }}
-                        >
-                          <div>
-                            <p className="font-medium">{cohort.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {cohort.current_startups} / {cohort.max_startups} startups
-                            </p>
-                          </div>
-                          <Badge className={
-                            cohort.status === 'applications_open' ? 'bg-emerald-500/20 text-emerald-400' :
-                            cohort.status === 'in_progress' ? 'bg-amber-500/20 text-amber-400' :
-                            'bg-blue-500/20 text-blue-400'
-                          }>
-                            {cohort.status.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                      ))}
-                      {cohorts.length === 0 && (
-                        <p className="text-center text-muted-foreground py-8">
-                          No cohorts created yet
-                        </p>
-                      )}
-                    </div>
-                    <Button 
-                      variant="outline" 
-                      className="w-full mt-4"
-                      onClick={() => setActiveTab('cohorts')}
-                    >
+                  <CardContent className="space-y-3">
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setActiveTab('cohorts')}>
+                      <Users className="w-4 h-4 mr-2" />
                       Manage Cohorts
                     </Button>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setActiveTab('applications')}>
+                      <FileText className="w-4 h-4 mr-2" />
+                      Review Applications
+                    </Button>
+                    <Button variant="outline" className="w-full justify-start" onClick={() => setActiveTab('portfolio')}>
+                      <Building2 className="w-4 h-4 mr-2" />
+                      View Portfolio
+                    </Button>
                   </CardContent>
                 </Card>
+                <ConnectionsWidget />
               </div>
+            </div>
+          </TabsContent>
 
-              {/* Community Feed */}
-              <Card className="glass-morphism border-border/50">
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="space-y-6">
+            <AcceleratorProfileView />
+            
+            <Card className="tech-card border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="h-5 w-5" />
+                  Your Posts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Network Tab */}
+          <TabsContent value="network" className="space-y-4">
+            <MatchingSystem />
+            <NetworkBrowser />
+          </TabsContent>
+
+          {/* Cohorts Tab */}
+          <TabsContent value="cohorts">
+            <CohortManagement
+              cohorts={cohorts}
+              onCreateCohort={createCohort}
+              onUpdateCohort={updateCohort}
+              onSelectCohort={setSelectedCohort}
+            />
+          </TabsContent>
+
+          {/* Applications Tab */}
+          <TabsContent value="applications">
+            <CohortApplicationsManager
+              applications={applications}
+              cohorts={cohorts}
+              onUpdateStatus={updateApplicationStatus}
+              onAcceptStartup={acceptStartupToCohort}
+            />
+          </TabsContent>
+
+          {/* Portfolio Tab */}
+          <TabsContent value="portfolio" className="space-y-6">
+            <AcceleratorPortfolio
+              startups={portfolioStartups}
+              cohorts={cohorts}
+              totalFundingRaised={profile?.total_funding_raised || 0}
+              onViewStartup={(startup) => {}}
+            />
+            <StartupJourneyTracker
+              startups={portfolioStartups}
+              onAddMilestone={addMilestone}
+              onUpdateMilestone={updateMilestone}
+            />
+            <MentorAdvisorAssignment
+              startups={portfolioStartups}
+              onAssignMentor={assignMentor}
+              onAssignAdvisor={assignAdvisor}
+            />
+          </TabsContent>
+
+          {/* Calendar Tab */}
+          <TabsContent value="calendar" className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
+              <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2 w-full sm:w-auto">
+                <Plus className="h-4 w-4" />
+                <span className="sm:inline">Create Event</span>
+              </Button>
+            </div>
+
+            {/* Upcoming Events with Banners */}
+            {upcomingEvents.length > 0 && (
+              <Card className="tech-card border-0">
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageSquare className="w-5 h-5 text-emerald-500" />
-                    Community Feed
-                  </CardTitle>
+                  <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <UnifiedCommunityFeed />
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-4 pb-4">
+                      {upcomingEvents.slice(0, 6).map((event) => (
+                        <div
+                          key={event.id}
+                          className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]"
+                          onClick={() => {
+                            setSelectedEvent(event);
+                            setShowEventDetails(true);
+                          }}
+                        >
+                          <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
+                            {event.banner_url ? (
+                              <img
+                                src={event.banner_url}
+                                alt={event.title}
+                                className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
+                              />
+                            ) : (
+                              <div className="w-full h-48 bg-gradient-to-br from-emerald-500/20 to-teal-500/5 flex items-center justify-center">
+                                <CalendarIcon className="h-16 w-16 text-emerald-500/30" />
+                              </div>
+                            )}
+                            <div className="p-4 min-h-[120px] flex flex-col">
+                              <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
+                              <div className="space-y-1 text-sm text-muted-foreground flex-1">
+                                <div className="flex items-center gap-2">
+                                  <Clock className="h-3 w-3" />
+                                  {format(parseISO(event.start_date), 'MMM d, h:mm a')}
+                                </div>
+                                {event.location && (
+                                  <div className="flex items-center gap-2">
+                                    <MapPin className="h-3 w-3" />
+                                    <span className="line-clamp-1">{event.location}</span>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
                 </CardContent>
               </Card>
-            </TabsContent>
-
-            {/* Cohorts Tab */}
-            <TabsContent value="cohorts">
-              <CohortManagement
-                cohorts={cohorts}
-                onCreateCohort={createCohort}
-                onUpdateCohort={updateCohort}
-                onSelectCohort={setSelectedCohort}
-              />
-            </TabsContent>
-
-            {/* Applications Tab */}
-            <TabsContent value="applications">
-              <CohortApplicationsManager
-                applications={applications}
-                cohorts={cohorts}
-                onUpdateStatus={updateApplicationStatus}
-                onAcceptStartup={acceptStartupToCohort}
-              />
-            </TabsContent>
-
-            {/* Portfolio Tab */}
-            <TabsContent value="portfolio">
-              <AcceleratorPortfolio
-                startups={portfolioStartups}
-                cohorts={cohorts}
-                totalFundingRaised={profile?.total_funding_raised || 0}
-                onViewStartup={(startup) => {
-                  setActiveTab('journey');
-                }}
-              />
-            </TabsContent>
-
-            {/* Journey Tab */}
-            <TabsContent value="journey">
-              <StartupJourneyTracker
-                startups={portfolioStartups}
-                onAddMilestone={addMilestone}
-                onUpdateMilestone={updateMilestone}
-              />
-            </TabsContent>
-
-            {/* Mentors Tab */}
-            <TabsContent value="mentors">
-              <MentorAdvisorAssignment
-                startups={portfolioStartups}
-                onAssignMentor={assignMentor}
-                onAssignAdvisor={assignAdvisor}
-              />
-            </TabsContent>
-
-            {/* Resources Tab */}
-            {activeTab === "resources" && (
-              <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{ height: 'calc(100vh - 12rem)', minHeight: '500px' }}>
-                <div className="absolute inset-0">
-                  <GlobalResourcesMap />
-                </div>
-              </TabsContent>
             )}
 
-            {/* Calendar Tab */}
-            {activeTab === "calendar" && (
-              <TabsContent value="calendar">
-                <UnifiedCalendar userRole="accelerator" />
-              </TabsContent>
-            )}
+            <UnifiedCalendar userRole="accelerator" />
+          </TabsContent>
 
-            {/* AI Tools Tab */}
-            {activeTab === "ai-tools" && (
-              <TabsContent value="ai-tools">
-                <AIFeaturesHub />
-              </TabsContent>
-            )}
-          </Tabs>
-        </main>
+          {/* Analytics Tab */}
+          <TabsContent value="analytics" className="space-y-4">
+            <AnalyticsDashboard />
+          </TabsContent>
+
+          {/* Intelligence Tab */}
+          <TabsContent value="intelligence" className="space-y-4">
+            <MarketIntelligenceWidget />
+          </TabsContent>
+
+          {/* Tools Tab */}
+          <TabsContent value="tools" className="space-y-4">
+            <AIFeaturesHub />
+          </TabsContent>
+
+          {/* Resources Tab */}
+          <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{ height: 'calc(100vh - 12rem)', minHeight: '500px' }}>
+            <div className="absolute inset-0">
+              <GlobalResourcesMap />
+            </div>
+          </TabsContent>
+        </Tabs>
       </div>
+
+      <FloatingChat />
+      
+      <CreateEventDialog 
+        open={createEventDialogOpen} 
+        onOpenChange={setCreateEventDialogOpen}
+        onEventCreated={() => {}}
+      />
+      
+      {selectedEvent && (
+        <EventDetailsDialog
+          event={selectedEvent}
+          open={showEventDetails}
+          onOpenChange={setShowEventDetails}
+          onEventUpdated={() => {}}
+        />
+      )}
     </div>
   );
 };
