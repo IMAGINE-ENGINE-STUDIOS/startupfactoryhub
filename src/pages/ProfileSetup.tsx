@@ -16,7 +16,7 @@ import AvatarUpload from "@/components/AvatarUpload";
 import CompanyLogoUpload from "@/components/CompanyLogoUpload";
 import { PasswordChangeDialog } from "@/components/PasswordChangeDialog";
 
-type UserRole = 'startup' | 'advisor' | 'investor' | 'student' | 'mentor';
+type UserRole = 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator';
 
 const ProfileSetup = () => {
   const [step, setStep] = useState(1);
@@ -219,7 +219,7 @@ const ProfileSetup = () => {
                     currentAvatarUrl={formData.avatar_url}
                     onUploadComplete={(url) => updateFormData('avatar_url', url)}
                     size="lg"
-                    userRole={selectedRole}
+                    userRole={selectedRole === 'accelerator' ? 'startup' : selectedRole}
                   />
                 </div>
 
@@ -232,6 +232,7 @@ const ProfileSetup = () => {
                       { value: 'investor', label: 'Investor', icon: DollarSign, desc: 'Invest in startups' },
                       { value: 'student', label: 'Student', icon: Target, desc: 'Learn and grow' },
                       { value: 'mentor', label: 'Mentor', icon: Users, desc: 'Guide others' },
+                      { value: 'accelerator', label: 'Accelerator', icon: Target, desc: 'Run startup programs' },
                     ].map(({ value, label, icon: Icon, desc }) => (
                       <button
                         key={value}
