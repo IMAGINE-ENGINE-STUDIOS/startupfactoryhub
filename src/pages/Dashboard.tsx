@@ -882,12 +882,15 @@ const Dashboard = () => {
             </TabsContent>
           )}
 
-          {/* Resources Tab */}
-          {activeTab === "resources" && (
-            <TabsContent value="resources" className="mt-0 relative h-[calc(100vh-12rem)] overflow-hidden">
-              <GlobalResourcesMap />
-            </TabsContent>
-          )}
+          {/* Resources Tab - Always mounted but hidden for better performance */}
+          <TabsContent 
+            value="resources" 
+            className="mt-0 relative h-[calc(100vh-12rem)] overflow-hidden"
+            forceMount
+            style={{ display: activeTab === "resources" ? "block" : "none" }}
+          >
+            <GlobalResourcesMap />
+          </TabsContent>
         </Tabs>
       </div>
 
