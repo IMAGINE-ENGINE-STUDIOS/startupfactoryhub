@@ -1,0 +1,31 @@
+INSERT INTO public.resources (
+  title,
+  description,
+  resource_type,
+  location_type,
+  address,
+  city,
+  country,
+  latitude,
+  longitude,
+  website_url,
+  contact_email,
+  logo_url,
+  is_verified,
+  is_official_partner
+) VALUES (
+  'Lehigh University - Innovation Internship',
+  'Innovation Programs internship opportunity. Contact: Sarah Lederberg, EdD, Assistant Director, Innovation Programs. Phone: (610) 758-3000',
+  'human_capital',
+  'physical',
+  '27 Memorial Drive West',
+  'Bethlehem, PA 18015',
+  'USA',
+  40.6069,
+  -75.3781,
+  'https://www.lehigh.edu',
+  'info@lehigh.edu',
+  '/lehigh-university-logo.png',
+  true,
+  true
+);
