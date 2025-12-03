@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useResources, Resource, ResourceType } from '@/hooks/useResources';
+import { useMapTracking } from '@/hooks/useMapTracking';
+import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,9 +36,13 @@ import {
   Play,
   Locate,
   Loader2,
-  Mail
+  Mail,
+  Radio,
+  MapPinned
 } from 'lucide-react';
 import { AddResourceDialog } from './AddResourceDialog';
+import { TrackingSessionDialog } from './TrackingSessionDialog';
+import { UserTrackingMarkers } from './UserTrackingMarkers';
 import { toast } from '@/hooks/use-toast';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
@@ -64,6 +70,7 @@ export const GlobalResourcesMap = () => {
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
   const userMarker = useRef<mapboxgl.Marker | null>(null);
+  const addressMarker = useRef<mapboxgl.Marker | null>(null);
   const [selectedType, setSelectedType] = useState<ResourceType | null>(null);
   const [search, setSearch] = useState('');
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
@@ -73,6 +80,28 @@ export const GlobalResourcesMap = () => {
   const [isLocating, setIsLocating] = useState(false);
   const [isRotating, setIsRotating] = useState(true);
   const isRotatingRef = useRef(true);
+
+  // Address search state
+  const [isSearchingAddress, setIsSearchingAddress] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Tracking session state
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [trackingSessionId, setTrackingSessionId] = useState<string | null>(
+    searchParams.get('tracking')
+  );
+  const [showTrackingDialog, setShowTrackingDialog] = useState(false);
+
+  const {
+    trackedUsers,
+    currentUser,
+    userColor,
+    isTracking,
+    startTracking,
+    stopTracking,
+    generateSessionId,
+  } = useMapTracking(trackingSessionId);
 
   // Add pulsing glow animation for flagship hubs
   useEffect(() => {
@@ -97,6 +126,143 @@ export const GlobalResourcesMap = () => {
     type: selectedType || undefined,
     search: search || undefined
   });
+
+  // Geocode address using Mapbox
+  const geocodeAddress = useCallback(async (query: string) => {
+    if (!query || query.length < 3) {
+      setAddressSuggestions([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${mapboxgl.accessToken}&types=address,place,poi&limit=5`
+      );
+      const data = await response.json();
+      
+      if (data.features) {
+        setAddressSuggestions(data.features);
+        setShowSuggestions(true);
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+    }
+  }, []);
+
+  // Handle address selection from suggestions
+  const handleAddressSelect = useCallback((feature: any) => {
+    const [lng, lat] = feature.center;
+    
+    // Remove existing address marker
+    if (addressMarker.current) {
+      addressMarker.current.remove();
+    }
+
+    // Create a temporary address marker
+    const el = document.createElement('div');
+    el.innerHTML = `
+      <div style="position: relative;">
+        <div style="
+          width: 40px;
+          height: 40px;
+          background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+          border: 3px solid white;
+          border-radius: 50% 50% 50% 0;
+          transform: rotate(-45deg);
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
+        ">
+          <div style="
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(45deg);
+            color: white;
+            font-size: 16px;
+          ">📍</div>
+        </div>
+      </div>
+    `;
+
+    addressMarker.current = new mapboxgl.Marker({
+      element: el,
+      anchor: 'bottom',
+    })
+      .setLngLat([lng, lat])
+      .setPopup(new mapboxgl.Popup().setHTML(`
+        <div style="padding: 8px;">
+          <strong>${feature.text}</strong>
+          <p style="color: #666; font-size: 12px; margin-top: 4px;">${feature.place_name}</p>
+        </div>
+      `))
+      .addTo(map.current!);
+
+    // Open the popup
+    addressMarker.current.togglePopup();
+
+    // Fly to the address
+    map.current?.flyTo({
+      center: [lng, lat],
+      zoom: 15,
+      duration: 2000,
+    });
+
+    setSearch(feature.place_name);
+    setShowSuggestions(false);
+    setAddressSuggestions([]);
+
+    toast({
+      title: "Address found",
+      description: feature.place_name,
+    });
+  }, []);
+
+  // Debounced search for addresses
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Check if it looks like an address (has numbers or common address keywords)
+      const isAddressLike = /\d/.test(search) || 
+        /\b(st|street|ave|avenue|blvd|road|rd|drive|dr|way|lane|ln|court|ct|place|pl)\b/i.test(search);
+      
+      if (isAddressLike && search.length >= 5) {
+        geocodeAddress(search);
+      } else {
+        setAddressSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [search, geocodeAddress]);
+
+  // Tracking session handlers
+  const handleCreateSession = useCallback(() => {
+    const newSessionId = generateSessionId();
+    setTrackingSessionId(newSessionId);
+    setSearchParams({ tracking: newSessionId });
+    toast({
+      title: "Tracking session created",
+      description: "Share the link with others to track locations together",
+    });
+  }, [generateSessionId, setSearchParams]);
+
+  const handleJoinSession = useCallback((sessionId: string) => {
+    setTrackingSessionId(sessionId);
+    setSearchParams({ tracking: sessionId });
+    toast({
+      title: "Joined tracking session",
+      description: "You've joined the location tracking session",
+    });
+  }, [setSearchParams]);
+
+  const handleLeaveSession = useCallback(() => {
+    stopTracking();
+    setTrackingSessionId(null);
+    setSearchParams({});
+    toast({
+      title: "Left tracking session",
+      description: "You've left the location tracking session",
+    });
+  }, [stopTracking, setSearchParams]);
 
   const requestUserLocation = () => {
     setIsLocating(true);
@@ -476,7 +642,32 @@ export const GlobalResourcesMap = () => {
         >
           {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Locate className="w-4 h-4" />}
         </Button>
+
+        {/* Tracking Session Button */}
+        <Button
+          size="icon"
+          onClick={() => setShowTrackingDialog(true)}
+          className={cn(
+            "backdrop-blur-2xl border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all",
+            trackingSessionId 
+              ? "bg-green-500/20 border-green-500/50 text-green-400" 
+              : "bg-white/10 dark:bg-black/20"
+          )}
+          title={trackingSessionId ? "Tracking session active" : "Start tracking session"}
+        >
+          <Radio className={cn("w-4 h-4", trackingSessionId && "animate-pulse")} />
+        </Button>
+        
+        {/* Active trackers badge */}
+        {trackingSessionId && trackedUsers.length > 0 && (
+          <Badge className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+            {trackedUsers.length + 1}
+          </Badge>
+        )}
       </div>
+      
+      {/* User Tracking Markers */}
+      <UserTrackingMarkers map={map.current} trackedUsers={trackedUsers} />
       
       {/* Single Toggle Button - works for both open and closed states */}
       <Button
@@ -512,12 +703,37 @@ export const GlobalResourcesMap = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search resources..."
+                placeholder="Search resources or addresses..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                onFocus={() => addressSuggestions.length > 0 && setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 className="pl-10 bg-white/10 dark:bg-black/20 backdrop-blur-xl border-white/30 dark:border-white/20 focus:bg-white/20 dark:focus:bg-black/30 rounded-2xl"
               />
+              
+              {/* Address Suggestions Dropdown */}
+              {showSuggestions && addressSuggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 mt-2 backdrop-blur-2xl bg-white/20 dark:bg-black/40 border border-white/30 dark:border-white/20 rounded-xl shadow-lg overflow-hidden z-50">
+                  <div className="p-2 text-xs text-muted-foreground uppercase tracking-wide border-b border-white/20">
+                    <MapPinned className="w-3 h-3 inline mr-1" />
+                    Address Results
+                  </div>
+                  {addressSuggestions.map((feature: any) => (
+                    <button
+                      key={feature.id}
+                      onClick={() => handleAddressSelect(feature)}
+                      className="w-full px-3 py-2 text-left hover:bg-white/20 dark:hover:bg-white/10 transition-colors border-b border-white/10 last:border-0"
+                    >
+                      <div className="font-medium text-sm">{feature.text}</div>
+                      <div className="text-xs text-muted-foreground truncate">{feature.place_name}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+            <p className="text-xs text-muted-foreground mt-2">
+              Tip: Search addresses like "505 Howard St, San Francisco"
+            </p>
           </div>
 
           {/* Categories */}
@@ -815,6 +1031,20 @@ export const GlobalResourcesMap = () => {
       )}
 
       <AddResourceDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
+      
+      <TrackingSessionDialog
+        open={showTrackingDialog}
+        onOpenChange={setShowTrackingDialog}
+        sessionId={trackingSessionId}
+        onCreateSession={handleCreateSession}
+        onJoinSession={handleJoinSession}
+        onLeaveSession={handleLeaveSession}
+        trackedUsers={trackedUsers}
+        isTracking={isTracking}
+        onStartTracking={startTracking}
+        onStopTracking={stopTracking}
+        userColor={userColor}
+      />
     </div>
   );
 };
