@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Rocket, GraduationCap, DollarSign, Lightbulb } from "lucide-react";
+import { Rocket, GraduationCap, DollarSign, Lightbulb, Building2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import WebGLBackground from "./WebGLBackground";
 
@@ -32,6 +32,13 @@ const userTypes = [
     description: "Learn, gain experience, find internships.",
     features: ["Resources", "Internships", "Career growth"],
     color: "primary"
+  },
+  {
+    icon: Building2,
+    title: "Accelerators",
+    description: "Run cohorts and scale startup programs.",
+    features: ["Cohort management", "Portfolio tracking", "Mentor matching"],
+    color: "ocean-primary"
   }
 ];
 
@@ -62,7 +69,7 @@ const CommunitySection = () => {
           </p>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6 max-w-7xl mx-auto">
           {userTypes.map((type, index) => (
             <div 
               key={index}
