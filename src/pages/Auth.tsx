@@ -426,6 +426,7 @@ export default function Auth() {
                           <SelectItem value="advisor">Advisor</SelectItem>
                           <SelectItem value="investor">Investor</SelectItem>
                           <SelectItem value="student">Student</SelectItem>
+                          <SelectItem value="accelerator">Accelerator/Incubator</SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
