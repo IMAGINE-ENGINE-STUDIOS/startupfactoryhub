@@ -8,7 +8,7 @@ import { OnlineStatusIndicator } from './OnlineStatusIndicator';
 
 interface RoleBasedAvatarProps {
   avatarUrl?: string | null;
-  role?: 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | null;
+  role?: 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator' | null;
   fallbackText?: string;
   className?: string;
   userId?: string;
