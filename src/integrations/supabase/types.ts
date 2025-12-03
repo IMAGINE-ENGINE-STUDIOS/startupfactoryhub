@@ -14,6 +14,131 @@ export type Database = {
   }
   public: {
     Tables: {
+      accelerator_cohorts: {
+        Row: {
+          accelerator_id: string
+          application_deadline: string | null
+          created_at: string | null
+          current_startups: number | null
+          description: string | null
+          end_date: string | null
+          equity_percentage: number | null
+          focus_industries: string[] | null
+          funding_per_startup: number | null
+          id: string
+          max_startups: number | null
+          name: string
+          start_date: string | null
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          accelerator_id: string
+          application_deadline?: string | null
+          created_at?: string | null
+          current_startups?: number | null
+          description?: string | null
+          end_date?: string | null
+          equity_percentage?: number | null
+          focus_industries?: string[] | null
+          funding_per_startup?: number | null
+          id?: string
+          max_startups?: number | null
+          name: string
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          accelerator_id?: string
+          application_deadline?: string | null
+          created_at?: string | null
+          current_startups?: number | null
+          description?: string | null
+          end_date?: string | null
+          equity_percentage?: number | null
+          focus_industries?: string[] | null
+          funding_per_startup?: number | null
+          id?: string
+          max_startups?: number | null
+          name?: string
+          start_date?: string | null
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "accelerator_cohorts_accelerator_id_fkey"
+            columns: ["accelerator_id"]
+            isOneToOne: false
+            referencedRelation: "accelerator_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      accelerator_profiles: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          equity_percentage: number | null
+          founded_year: number | null
+          funding_offered: number | null
+          id: string
+          industries_focus: string[] | null
+          is_accepting_applications: boolean | null
+          location: string | null
+          logo_url: string | null
+          organization_name: string
+          program_duration: string | null
+          total_cohorts: number | null
+          total_funding_raised: number | null
+          total_startups_supported: number | null
+          updated_at: string | null
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          equity_percentage?: number | null
+          founded_year?: number | null
+          funding_offered?: number | null
+          id?: string
+          industries_focus?: string[] | null
+          is_accepting_applications?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          organization_name: string
+          program_duration?: string | null
+          total_cohorts?: number | null
+          total_funding_raised?: number | null
+          total_startups_supported?: number | null
+          updated_at?: string | null
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          equity_percentage?: number | null
+          founded_year?: number | null
+          funding_offered?: number | null
+          id?: string
+          industries_focus?: string[] | null
+          is_accepting_applications?: boolean | null
+          location?: string | null
+          logo_url?: string | null
+          organization_name?: string
+          program_duration?: string | null
+          total_cohorts?: number | null
+          total_funding_raised?: number | null
+          total_startups_supported?: number | null
+          updated_at?: string | null
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       achievements: {
         Row: {
           achievement_type: string
@@ -643,6 +768,138 @@ export type Database = {
             columns: ["course_id"]
             isOneToOne: false
             referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cohort_applications: {
+        Row: {
+          applicant_user_id: string
+          application_answers: Json | null
+          applied_at: string | null
+          cohort_id: string
+          created_at: string | null
+          id: string
+          interview_date: string | null
+          pitch_deck_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          reviewer_notes: string | null
+          startup_id: string
+          status: string | null
+          updated_at: string | null
+          video_pitch_url: string | null
+        }
+        Insert: {
+          applicant_user_id: string
+          application_answers?: Json | null
+          applied_at?: string | null
+          cohort_id: string
+          created_at?: string | null
+          id?: string
+          interview_date?: string | null
+          pitch_deck_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          startup_id: string
+          status?: string | null
+          updated_at?: string | null
+          video_pitch_url?: string | null
+        }
+        Update: {
+          applicant_user_id?: string
+          application_answers?: Json | null
+          applied_at?: string | null
+          cohort_id?: string
+          created_at?: string | null
+          id?: string
+          interview_date?: string | null
+          pitch_deck_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          reviewer_notes?: string | null
+          startup_id?: string
+          status?: string | null
+          updated_at?: string | null
+          video_pitch_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cohort_applications_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "accelerator_cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cohort_applications_startup_id_fkey"
+            columns: ["startup_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cohort_startups: {
+        Row: {
+          cohort_id: string
+          company_id: string
+          created_at: string | null
+          current_stage: string | null
+          demo_day_slot: string | null
+          equity_given: number | null
+          funding_received: number | null
+          graduation_date: string | null
+          id: string
+          joined_at: string | null
+          notes: string | null
+          progress_percentage: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          cohort_id: string
+          company_id: string
+          created_at?: string | null
+          current_stage?: string | null
+          demo_day_slot?: string | null
+          equity_given?: number | null
+          funding_received?: number | null
+          graduation_date?: string | null
+          id?: string
+          joined_at?: string | null
+          notes?: string | null
+          progress_percentage?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          cohort_id?: string
+          company_id?: string
+          created_at?: string | null
+          current_stage?: string | null
+          demo_day_slot?: string | null
+          equity_given?: number | null
+          funding_received?: number | null
+          graduation_date?: string | null
+          id?: string
+          joined_at?: string | null
+          notes?: string | null
+          progress_percentage?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cohort_startups_cohort_id_fkey"
+            columns: ["cohort_id"]
+            isOneToOne: false
+            referencedRelation: "accelerator_cohorts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cohort_startups_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -3239,6 +3496,147 @@ export type Database = {
           },
         ]
       }
+      startup_advisor_assignments: {
+        Row: {
+          advisor_id: string
+          assigned_at: string | null
+          assigned_by: string
+          cohort_startup_id: string
+          ended_at: string | null
+          expertise_area: string | null
+          id: string
+          notes: string | null
+          status: string | null
+        }
+        Insert: {
+          advisor_id: string
+          assigned_at?: string | null
+          assigned_by: string
+          cohort_startup_id: string
+          ended_at?: string | null
+          expertise_area?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+        }
+        Update: {
+          advisor_id?: string
+          assigned_at?: string | null
+          assigned_by?: string
+          cohort_startup_id?: string
+          ended_at?: string | null
+          expertise_area?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "startup_advisor_assignments_cohort_startup_id_fkey"
+            columns: ["cohort_startup_id"]
+            isOneToOne: false
+            referencedRelation: "cohort_startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      startup_journey_milestones: {
+        Row: {
+          cohort_startup_id: string
+          completed_date: string | null
+          created_at: string | null
+          description: string | null
+          evidence_url: string | null
+          id: string
+          milestone_name: string
+          order_index: number | null
+          status: string | null
+          target_date: string | null
+          updated_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          cohort_startup_id: string
+          completed_date?: string | null
+          created_at?: string | null
+          description?: string | null
+          evidence_url?: string | null
+          id?: string
+          milestone_name: string
+          order_index?: number | null
+          status?: string | null
+          target_date?: string | null
+          updated_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          cohort_startup_id?: string
+          completed_date?: string | null
+          created_at?: string | null
+          description?: string | null
+          evidence_url?: string | null
+          id?: string
+          milestone_name?: string
+          order_index?: number | null
+          status?: string | null
+          target_date?: string | null
+          updated_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "startup_journey_milestones_cohort_startup_id_fkey"
+            columns: ["cohort_startup_id"]
+            isOneToOne: false
+            referencedRelation: "cohort_startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      startup_mentor_assignments: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string
+          cohort_startup_id: string
+          ended_at: string | null
+          focus_area: string | null
+          id: string
+          mentor_id: string
+          notes: string | null
+          status: string | null
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by: string
+          cohort_startup_id: string
+          ended_at?: string | null
+          focus_area?: string | null
+          id?: string
+          mentor_id: string
+          notes?: string | null
+          status?: string | null
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string
+          cohort_startup_id?: string
+          ended_at?: string | null
+          focus_area?: string | null
+          id?: string
+          mentor_id?: string
+          notes?: string | null
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "startup_mentor_assignments_cohort_startup_id_fkey"
+            columns: ["cohort_startup_id"]
+            isOneToOne: false
+            referencedRelation: "cohort_startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_internship_tasks: {
         Row: {
           application_id: string
@@ -3622,7 +4020,13 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "startup" | "investor" | "mentor" | "advisor" | "student"
+      app_role:
+        | "startup"
+        | "investor"
+        | "mentor"
+        | "advisor"
+        | "student"
+        | "accelerator"
       company_stage: "idea" | "prototype" | "mvp" | "growth" | "scale"
       job_category: "full-time" | "part-time" | "contract" | "internship"
       lightpaper_project_type:
@@ -3767,7 +4171,14 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["startup", "investor", "mentor", "advisor", "student"],
+      app_role: [
+        "startup",
+        "investor",
+        "mentor",
+        "advisor",
+        "student",
+        "accelerator",
+      ],
       company_stage: ["idea", "prototype", "mvp", "growth", "scale"],
       job_category: ["full-time", "part-time", "contract", "internship"],
       lightpaper_project_type: [
