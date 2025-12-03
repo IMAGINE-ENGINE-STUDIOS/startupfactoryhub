@@ -55,8 +55,12 @@ interface CohortStartup {
     stage: string | null;
     logo_url: string | null;
     user_id: string;
-    website?: string;
-    pitch_deck_url?: string;
+    website: string | null;
+    pitch_deck_url: string | null;
+    funding_amount: number | null;
+    team_size: number | null;
+    founded_year: number | null;
+    location: string | null;
   };
   mentor_assignments?: any[];
   advisor_assignments?: any[];

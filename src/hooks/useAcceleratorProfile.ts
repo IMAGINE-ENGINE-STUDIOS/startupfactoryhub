@@ -85,6 +85,12 @@ interface CohortStartup {
     stage: string | null;
     logo_url: string | null;
     user_id: string;
+    website: string | null;
+    pitch_deck_url: string | null;
+    funding_amount: number | null;
+    team_size: number | null;
+    founded_year: number | null;
+    location: string | null;
   };
   mentor_assignments?: any[];
   advisor_assignments?: any[];
@@ -165,7 +171,7 @@ export const useAcceleratorProfile = () => {
         .from('cohort_startups')
         .select(`
           *,
-          company:companies(id, name, description, industry, stage, logo_url, user_id),
+          company:companies(id, name, description, industry, stage, logo_url, user_id, website, pitch_deck_url, funding_amount, team_size, founded_year, location),
           mentor_assignments:startup_mentor_assignments(*),
           advisor_assignments:startup_advisor_assignments(*),
           milestones:startup_journey_milestones(*)

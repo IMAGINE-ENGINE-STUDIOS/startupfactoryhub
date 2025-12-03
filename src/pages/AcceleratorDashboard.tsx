@@ -189,42 +189,6 @@ const AcceleratorDashboard = () => {
               
               {/* Right Sidebar */}
               <div className="space-y-6">
-                {/* Quick Actions */}
-                <Card className="tech-card border-0">
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-lg">Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-2">
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab('cohorts')}
-                    >
-                      <Users className="w-4 h-4 mr-2" />
-                      View Cohorts
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab('applications')}
-                    >
-                      <FileText className="w-4 h-4 mr-2" />
-                      Review Applications
-                      {pendingApplications > 0 && (
-                        <Badge className="ml-auto bg-emerald-500">{pendingApplications}</Badge>
-                      )}
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full justify-start"
-                      onClick={() => setActiveTab('portfolio')}
-                    >
-                      <Building2 className="w-4 h-4 mr-2" />
-                      Portfolio
-                    </Button>
-                  </CardContent>
-                </Card>
-                
                 <ConnectionsWidget />
               </div>
             </div>
