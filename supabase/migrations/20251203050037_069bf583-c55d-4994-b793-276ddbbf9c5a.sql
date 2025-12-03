@@ -1,0 +1,1 @@
+UPDATE public.resources SET contact_email = 'sel523@lehigh.edu' WHERE title = 'Lehigh University - Innovation Internship';
