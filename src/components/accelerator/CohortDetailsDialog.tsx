@@ -21,7 +21,9 @@ import {
   Share2,
   ExternalLink,
   Percent,
-  Target
+  Target,
+  Copy,
+  Link
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -67,6 +69,8 @@ export const CohortDetailsDialog = ({
   const [editedEquity, setEditedEquity] = useState('');
 
   if (!cohort) return null;
+
+  const applicationUrl = `${window.location.origin}/cohorts/${cohort.id}/apply`;
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -128,13 +132,18 @@ export const CohortDetailsDialog = ({
     toast({ title: 'Link copied to clipboard' });
   };
 
+  const copyApplicationLink = () => {
+    navigator.clipboard.writeText(applicationUrl);
+    toast({ title: 'Application link copied!' });
+  };
+
   const daysUntilDeadline = cohort.application_deadline 
     ? differenceInDays(new Date(cohort.application_deadline), new Date())
     : null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl glass-morphism">
+      <DialogContent className="max-w-2xl tech-card">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -177,6 +186,36 @@ export const CohortDetailsDialog = ({
         </DialogHeader>
 
         <div className="space-y-6 mt-4">
+          {/* Application Link */}
+          <Card className="tech-card border-emerald-500/30 bg-emerald-500/5">
+            <CardContent className="p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Link className="w-4 h-4 text-emerald-500" />
+                <span className="font-medium">Application Link</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Input 
+                  value={applicationUrl} 
+                  readOnly 
+                  className="flex-1 text-sm bg-background/50"
+                />
+                <Button variant="outline" size="sm" onClick={copyApplicationLink}>
+                  <Copy className="w-4 h-4 mr-1" /> Copy
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => window.open(applicationUrl, '_blank')}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Share this link with startups to accept applications from outside the platform.
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Description */}
           <div>
             <h4 className="text-sm font-medium text-muted-foreground mb-2">Description</h4>

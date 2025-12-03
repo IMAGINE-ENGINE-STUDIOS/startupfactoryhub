@@ -12,10 +12,13 @@ import {
   Play,
   Pause,
   CheckCircle,
-  Clock
+  Clock,
+  Copy,
+  ExternalLink
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { CreateCohortDialog } from './CreateCohortDialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface Cohort {
   id: string;
@@ -46,6 +49,7 @@ export const CohortManagement = ({
   onSelectCohort 
 }: CohortManagementProps) => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const { toast } = useToast();
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -73,6 +77,13 @@ export const CohortManagement = ({
     ).join(' ');
   };
 
+  const copyApplicationLink = (cohortId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/cohorts/${cohortId}/apply`;
+    navigator.clipboard.writeText(url);
+    toast({ title: 'Application link copied!' });
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -92,7 +103,7 @@ export const CohortManagement = ({
 
       {/* Cohort Grid */}
       {cohorts.length === 0 ? (
-        <Card className="glass-morphism border-border/50">
+        <Card className="tech-card border-0">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4">
               <Users className="w-8 h-8 text-emerald-500" />
@@ -112,30 +123,28 @@ export const CohortManagement = ({
           {cohorts.map((cohort) => (
             <Card 
               key={cohort.id}
-              className="glass-morphism border-border/50 hover:border-emerald-500/30 transition-all duration-300 cursor-pointer group"
+              className="tech-card border-0 hover:border-emerald-500/30 transition-all duration-300 cursor-pointer group flex flex-col min-h-[340px]"
               onClick={() => onSelectCohort(cohort)}
             >
               <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg group-hover:text-emerald-400 transition-colors">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-lg group-hover:text-emerald-400 transition-colors truncate">
                       {cohort.name}
                     </CardTitle>
-                    {cohort.description && (
-                      <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-                        {cohort.description}
-                      </p>
-                    )}
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2 min-h-[40px]">
+                      {cohort.description || 'No description provided'}
+                    </p>
                   </div>
-                  <Badge className={`${getStatusColor(cohort.status)} flex items-center gap-1`}>
+                  <Badge className={`${getStatusColor(cohort.status)} flex items-center gap-1 shrink-0`}>
                     {getStatusIcon(cohort.status)}
                     {formatStatus(cohort.status)}
                   </Badge>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent className="flex-1 flex flex-col">
                 {/* Progress */}
-                <div>
+                <div className="mb-4">
                   <div className="flex items-center justify-between text-sm mb-2">
                     <span className="text-muted-foreground">Startups</span>
                     <span className="font-medium">{cohort.current_startups} / {cohort.max_startups}</span>
@@ -147,43 +156,53 @@ export const CohortManagement = ({
                 </div>
 
                 {/* Details Grid */}
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  {cohort.start_date && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Calendar className="w-4 h-4 text-muted-foreground" />
-                      <span>{format(new Date(cohort.start_date), 'MMM d, yyyy')}</span>
-                    </div>
-                  )}
-                  {cohort.funding_per_startup && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <DollarSign className="w-4 h-4 text-emerald-500" />
-                      <span>${(cohort.funding_per_startup / 1000).toFixed(0)}K</span>
-                    </div>
-                  )}
+                <div className="grid grid-cols-2 gap-3 mb-4">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Calendar className="w-4 h-4 text-muted-foreground shrink-0" />
+                    <span className="truncate">
+                      {cohort.start_date 
+                        ? format(new Date(cohort.start_date), 'MMM d, yyyy')
+                        : 'No date set'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <DollarSign className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <span>
+                      {cohort.funding_per_startup 
+                        ? `$${(cohort.funding_per_startup / 1000).toFixed(0)}K`
+                        : 'N/A'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Industries */}
-                {cohort.focus_industries && cohort.focus_industries.length > 0 && (
-                  <div className="flex flex-wrap gap-1 pt-2">
-                    {cohort.focus_industries.slice(0, 3).map((industry) => (
-                      <Badge 
-                        key={industry} 
-                        variant="outline" 
-                        className="text-xs bg-background/50"
-                      >
-                        {industry}
-                      </Badge>
-                    ))}
-                    {cohort.focus_industries.length > 3 && (
-                      <Badge variant="outline" className="text-xs bg-background/50">
-                        +{cohort.focus_industries.length - 3}
-                      </Badge>
-                    )}
-                  </div>
-                )}
+                <div className="flex flex-wrap gap-1 mb-4 min-h-[28px]">
+                  {cohort.focus_industries && cohort.focus_industries.length > 0 ? (
+                    <>
+                      {cohort.focus_industries.slice(0, 2).map((industry) => (
+                        <Badge 
+                          key={industry} 
+                          variant="outline" 
+                          className="text-xs bg-background/50"
+                        >
+                          {industry}
+                        </Badge>
+                      ))}
+                      {cohort.focus_industries.length > 2 && (
+                        <Badge variant="outline" className="text-xs bg-background/50">
+                          +{cohort.focus_industries.length - 2}
+                        </Badge>
+                      )}
+                    </>
+                  ) : (
+                    <Badge variant="outline" className="text-xs bg-background/50 opacity-50">
+                      No industries
+                    </Badge>
+                  )}
+                </div>
 
-                {/* Actions */}
-                <div className="flex items-center gap-2 pt-2">
+                {/* Actions - pushed to bottom */}
+                <div className="flex items-center gap-2 mt-auto pt-4 border-t border-border/50">
                   <Button 
                     variant="outline" 
                     size="sm" 
@@ -198,12 +217,21 @@ export const CohortManagement = ({
                   <Button 
                     variant="ghost" 
                     size="icon"
+                    onClick={(e) => copyApplicationLink(cohort.id, e)}
+                    title="Copy application link"
+                  >
+                    <Copy className="w-4 h-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Open settings
+                      window.open(`/cohorts/${cohort.id}/apply`, '_blank');
                     }}
+                    title="Open application page"
                   >
-                    <Settings className="w-4 h-4" />
+                    <ExternalLink className="w-4 h-4" />
                   </Button>
                 </div>
               </CardContent>

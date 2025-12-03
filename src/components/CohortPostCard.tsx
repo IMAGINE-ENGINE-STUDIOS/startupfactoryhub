@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format, differenceInDays } from 'date-fns';
-import { Rocket, Calendar, DollarSign, Percent, Clock, Users, Heart, MessageCircle, Share, Bookmark } from 'lucide-react';
+import { Rocket, Calendar, DollarSign, Percent, Clock, Users, Heart, MessageCircle, Share, Bookmark, Copy, ExternalLink } from 'lucide-react';
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
+import { useToast } from '@/hooks/use-toast';
 
 interface CohortData {
   cohort_id: string;
@@ -18,6 +19,7 @@ interface CohortData {
   accelerator_name?: string;
   accelerator_logo?: string;
   accelerator_id?: string;
+  application_url?: string;
 }
 
 interface CohortPostCardProps {
@@ -56,6 +58,7 @@ export const CohortPostCard = ({
   onUserClick
 }: CohortPostCardProps) => {
   const [showApplicationDialog, setShowApplicationDialog] = useState(false);
+  const { toast } = useToast();
   const cohortData = post.cohort_data;
 
   if (!cohortData) return null;
@@ -63,6 +66,17 @@ export const CohortPostCard = ({
   const daysUntilDeadline = cohortData.deadline 
     ? differenceInDays(new Date(cohortData.deadline), new Date())
     : null;
+
+  const applicationUrl = cohortData.application_url || `${window.location.origin}/cohorts/${cohortData.cohort_id}/apply`;
+
+  const copyApplicationLink = () => {
+    navigator.clipboard.writeText(applicationUrl);
+    toast({ title: 'Application link copied!' });
+  };
+
+  const openApplicationPage = () => {
+    window.open(applicationUrl, '_blank');
+  };
 
   return (
     <>
@@ -144,14 +158,34 @@ export const CohortPostCard = ({
               </div>
             )}
 
-            {/* Apply Button */}
-            <Button 
-              className="w-full mt-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
-              onClick={() => setShowApplicationDialog(true)}
-            >
-              <Rocket className="w-4 h-4 mr-2" />
-              Apply Now
-            </Button>
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2 mt-4">
+              <Button 
+                className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600"
+                onClick={() => setShowApplicationDialog(true)}
+              >
+                <Rocket className="w-4 h-4 mr-2" />
+                Apply Now
+              </Button>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={copyApplicationLink}
+                  title="Copy application link"
+                >
+                  <Copy className="w-4 h-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="icon"
+                  onClick={openApplicationPage}
+                  title="Open application page"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           </div>
 
           {/* Actions */}
