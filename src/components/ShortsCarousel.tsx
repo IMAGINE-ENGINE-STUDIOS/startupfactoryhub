@@ -298,7 +298,7 @@ const ShortsCarousel = ({ onCreateShort, newShort }: ShortsCarouselProps) => {
 
   return (
     <>
-      <div className="mb-8">
+      <div className="mb-8 mt-3">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-foreground">Shorts</h2>
           <div className="flex items-center gap-2">
