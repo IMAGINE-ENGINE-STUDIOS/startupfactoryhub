@@ -27,7 +27,7 @@ import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import FloatingChat from '@/components/FloatingChat';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
-import NetworkBrowser from '@/components/NetworkBrowser';
+
 import MatchingSystem from '@/components/MatchingSystem';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
@@ -146,7 +146,7 @@ const AcceleratorDashboard = () => {
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Social</span>
@@ -154,10 +154,6 @@ const AcceleratorDashboard = () => {
               <TabsTrigger value="network" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Network className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Network</span>
-              </TabsTrigger>
-              <TabsTrigger value="mynetwork" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Users className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">My Network</span>
               </TabsTrigger>
               <TabsTrigger value="cohorts" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Users className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -200,11 +196,6 @@ const AcceleratorDashboard = () => {
           {/* Network Tab */}
           <TabsContent value="network" className="space-y-6">
             <MatchingSystem />
-          </TabsContent>
-
-          {/* My Network Tab */}
-          <TabsContent value="mynetwork" className="space-y-6">
-            <NetworkBrowser />
           </TabsContent>
 
           {/* Cohorts Tab */}
