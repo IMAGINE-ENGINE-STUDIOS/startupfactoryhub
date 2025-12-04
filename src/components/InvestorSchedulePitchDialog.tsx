@@ -336,13 +336,15 @@ export default function InvestorSchedulePitchDialog({
                     <CalendarIcon className="h-4 w-4 text-primary" />
                     Select Date
                   </Label>
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    disabled={(date) => date < new Date()}
-                    className="rounded-md border"
-                  />
+                  <div className="rounded-lg border border-border/50 bg-background/50 overflow-hidden">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      disabled={(date) => date < new Date()}
+                      className="rounded-lg"
+                    />
+                  </div>
                 </div>
 
                 {/* Right Column - Time & Duration */}

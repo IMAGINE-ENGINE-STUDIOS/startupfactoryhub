@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Rocket, Users, FileText, Briefcase, Calendar as CalendarIcon, BarChart3, Globe, MessageSquare, Building2, Target, TrendingUp, Plus, Bell, Clock, MapPin, MessageCircle, Network, BarChart } from 'lucide-react';
+import { Rocket, Users, FileText, Briefcase, Calendar as CalendarIcon, BarChart3, Globe, MessageSquare, Building2, Target, TrendingUp, Plus, Bell, Clock, MapPin, MessageCircle, Network, BarChart, Video } from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useAuth } from '@/contexts/AuthContext';
@@ -21,6 +21,7 @@ import { MentorAdvisorAssignment } from '@/components/accelerator/MentorAdvisorA
 import { StartupDetailDialog } from '@/components/accelerator/StartupDetailDialog';
 import { CohortDetailsDialog } from '@/components/accelerator/CohortDetailsDialog';
 import AddStartupToPortfolioDialog from '@/components/accelerator/AddStartupToPortfolioDialog';
+import AcceleratorSchedulePitchDialog from '@/components/accelerator/AcceleratorSchedulePitchDialog';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
@@ -77,6 +78,7 @@ const AcceleratorDashboard = () => {
   const [showCohortDetails, setShowCohortDetails] = useState(false);
   const [selectedStartup, setSelectedStartup] = useState<any>(null);
   const [showStartupDetails, setShowStartupDetails] = useState(false);
+  const [schedulePitchDialogOpen, setSchedulePitchDialogOpen] = useState(false);
   const [addStartupDialogOpen, setAddStartupDialogOpen] = useState(false);
 
   const handleSelectCohort = (cohort: any) => {
@@ -220,6 +222,15 @@ const AcceleratorDashboard = () => {
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
+              <Button 
+                variant="outline" 
+                onClick={() => setSchedulePitchDialogOpen(true)} 
+                className="gap-2 w-full sm:w-auto"
+                disabled={portfolioStartups.length === 0}
+              >
+                <Video className="h-4 w-4" />
+                <span className="sm:inline">Schedule Pitch</span>
+              </Button>
               <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2 w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
                 <span className="sm:inline">Create Event</span>
@@ -322,6 +333,15 @@ const AcceleratorDashboard = () => {
           // Trigger refetch of portfolio
           window.location.reload();
         }}
+      />
+
+      {/* Schedule Pitch Meeting Dialog */}
+      <AcceleratorSchedulePitchDialog
+        open={schedulePitchDialogOpen}
+        onOpenChange={setSchedulePitchDialogOpen}
+        portfolioStartups={portfolioStartups}
+        cohorts={cohorts}
+        onPitchScheduled={() => {}}
       />
     </div>;
 };

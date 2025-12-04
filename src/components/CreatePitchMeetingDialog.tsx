@@ -348,13 +348,15 @@ export default function CreatePitchMeetingDialog({
               <>
                 <div>
                   <Label>Select Date</Label>
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={setSelectedDate}
-                    disabled={(date) => date < new Date()}
-                    className="rounded-md border"
-                  />
+                  <div className="rounded-lg border border-border/50 bg-background/50 overflow-hidden mt-2">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={setSelectedDate}
+                      disabled={(date) => date < new Date()}
+                      className="rounded-lg"
+                    />
+                  </div>
                 </div>
 
                 {selectedDate && (
