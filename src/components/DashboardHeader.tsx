@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Home, Brain, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -9,13 +9,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Dialog,
-  DialogContent,
-} from "@/components/ui/dialog";
 import RecommendationPopup from "@/components/RecommendationPopup";
-import { useUserRole } from "@/hooks/useUserRole";
-import AcceleratorProfileView from "@/components/AcceleratorProfileView";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
@@ -23,8 +17,6 @@ export function DashboardHeader() {
   const [, setSearchParams] = useSearchParams();
   const [recommendationCount, setRecommendationCount] = useState(0);
   const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
-  const [showAcceleratorProfile, setShowAcceleratorProfile] = useState(false);
-  const { role } = useUserRole();
 
   const handleRecommendationsLoad = (count: number) => {
     setRecommendationCount(count);
@@ -35,9 +27,9 @@ export function DashboardHeader() {
   };
 
   const handleProfileClick = () => {
-    // Check if we're on accelerator dashboard or if user is accelerator role
-    if (location.pathname === '/accelerator-dashboard' || role === 'accelerator') {
-      setShowAcceleratorProfile(true);
+    // Navigate to profile tab on current dashboard
+    if (location.pathname === '/accelerator-dashboard') {
+      setSearchParams({ tab: 'profile' });
     } else {
       setSearchParams({ tab: 'profile' });
     }
@@ -102,13 +94,6 @@ export function DashboardHeader() {
           <ThemeToggle />
         </div>
       </div>
-
-      {/* Accelerator Profile Dialog */}
-      <Dialog open={showAcceleratorProfile} onOpenChange={setShowAcceleratorProfile}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <AcceleratorProfileView />
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

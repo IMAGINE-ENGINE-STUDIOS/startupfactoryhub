@@ -1,19 +1,24 @@
 import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Rocket, Users, FileText, Briefcase, Calendar as CalendarIcon, BarChart3, Globe, MessageSquare, Building2, Target, TrendingUp, Plus, Bell, Clock, MapPin, MessageCircle, Network, BarChart, Video, Presentation, Check, X, ExternalLink } from 'lucide-react';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { 
+  Users, FileText, Briefcase, Calendar as CalendarIcon, Globe, MessageCircle, 
+  Building2, Plus, Clock, MapPin, Network, BarChart, Presentation, 
+  ChevronDown, ChevronUp, Check, X, User
+} from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useEvents } from '@/hooks/useEvents';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isBefore } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import { CohortManagement } from '@/components/accelerator/CohortManagement';
 import { CohortApplicationsManager } from '@/components/accelerator/CohortApplicationsManager';
 import { StartupJourneyTracker } from '@/components/accelerator/StartupJourneyTracker';
@@ -26,41 +31,30 @@ import AcceleratorSchedulePitchDialog from '@/components/accelerator/Accelerator
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
+import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import FloatingChat from '@/components/FloatingChat';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
 import PitchMeetingCard from '@/components/PitchMeetingCard';
-
 import MatchingSystem from '@/components/MatchingSystem';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
-import AcceleratorRoadmapWidget from '@/components/accelerator/AcceleratorRoadmapWidget';
-import ConnectionsWidget from '@/components/ConnectionsWidget';
 import AcceleratorProfileView from '@/components/AcceleratorProfileView';
 
-
 const AcceleratorDashboard = () => {
-  const {
-    user
-  } = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const {
-    role,
-    loading: roleLoading
-  } = useUserRole();
-  const {
-    profile: profileWithRole
-  } = useProfileWithRole();
+  const { toast } = useToast();
+  const { role, loading: roleLoading } = useUserRole();
+  const { profile: profileWithRole } = useProfileWithRole();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(urlTab || 'social');
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
-  const {
-    upcomingEvents
-  } = useEvents();
+  const { upcomingEvents } = useEvents();
   const {
     profile,
     cohorts,
@@ -82,15 +76,30 @@ const AcceleratorDashboard = () => {
   const [showStartupDetails, setShowStartupDetails] = useState(false);
   const [schedulePitchDialogOpen, setSchedulePitchDialogOpen] = useState(false);
   const [addStartupDialogOpen, setAddStartupDialogOpen] = useState(false);
-  const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
-  const [activeVideoUrl, setActiveVideoUrl] = useState<string | undefined>();
+  
+  // Meeting states
+  const [startupMeetings, setStartupMeetings] = useState<any[]>([]);
+  const [investorMeetings, setInvestorMeetings] = useState<any[]>([]);
+  const [startupSectionsOpen, setStartupSectionsOpen] = useState({
+    incoming: true,
+    sent: true,
+    upcoming: true,
+    past: false
+  });
+  const [investorSectionsOpen, setInvestorSectionsOpen] = useState({
+    incoming: true,
+    sent: true,
+    upcoming: true,
+    past: false
+  });
 
   // Fetch pitch meetings for accelerator
   useEffect(() => {
     if (!user) return;
     
-    const fetchPitchMeetings = async () => {
-      const { data, error } = await supabase
+    const fetchMeetings = async () => {
+      // Fetch startup meetings (where accelerator is investor_id)
+      const { data: startupData, error: startupError } = await supabase
         .from('pitch_meetings')
         .select(`
           *,
@@ -100,12 +109,27 @@ const AcceleratorDashboard = () => {
         .eq('investor_id', user.id)
         .order('scheduled_date', { ascending: true });
 
-      if (!error && data) {
-        setPitchMeetings(data);
+      if (!startupError && startupData) {
+        setStartupMeetings(startupData);
+      }
+
+      // Fetch investor meetings (where accelerator is startup_id)
+      const { data: investorData, error: investorError } = await supabase
+        .from('pitch_meetings')
+        .select(`
+          *,
+          company:companies(id, name, logo_url, industry),
+          investor_profile:profiles!pitch_meetings_investor_id_fkey(id, full_name, avatar_url)
+        `)
+        .eq('startup_id', user.id)
+        .order('scheduled_date', { ascending: true });
+
+      if (!investorError && investorData) {
+        setInvestorMeetings(investorData);
       }
     };
 
-    fetchPitchMeetings();
+    fetchMeetings();
   }, [user]);
 
   const handleSelectCohort = (cohort: any) => {
@@ -132,20 +156,74 @@ const AcceleratorDashboard = () => {
       navigate('/dashboard');
     }
   }, [role, roleLoading, navigate]);
+
+  const handleAcceptMeeting = async (meetingId: string) => {
+    try {
+      const { error } = await supabase
+        .from('pitch_meetings')
+        .update({ status: 'scheduled' })
+        .eq('id', meetingId);
+
+      if (error) throw error;
+      
+      toast({ title: 'Meeting accepted', description: 'The meeting has been scheduled.' });
+      
+      // Refresh meetings
+      window.location.reload();
+    } catch (error) {
+      console.error('Error accepting meeting:', error);
+      toast({ title: 'Error', description: 'Failed to accept meeting', variant: 'destructive' });
+    }
+  };
+
+  const handleRejectMeeting = async (meetingId: string) => {
+    try {
+      const { error } = await supabase
+        .from('pitch_meetings')
+        .update({ status: 'cancelled' })
+        .eq('id', meetingId);
+
+      if (error) throw error;
+      
+      toast({ title: 'Meeting declined', description: 'The meeting has been declined.' });
+      
+      // Refresh meetings
+      window.location.reload();
+    } catch (error) {
+      console.error('Error rejecting meeting:', error);
+      toast({ title: 'Error', description: 'Failed to decline meeting', variant: 'destructive' });
+    }
+  };
+
+  // Categorize startup meetings
+  const now = new Date();
+  const startupIncoming = startupMeetings.filter(m => m.status === 'pending' && m.host_id !== user?.id);
+  const startupSent = startupMeetings.filter(m => m.status === 'pending' && m.host_id === user?.id);
+  const startupUpcoming = startupMeetings.filter(m => m.status === 'scheduled' && !isBefore(new Date(m.scheduled_date), now));
+  const startupPast = startupMeetings.filter(m => m.status === 'completed' || (m.status === 'scheduled' && isBefore(new Date(m.scheduled_date), now)));
+
+  // Categorize investor meetings
+  const investorIncoming = investorMeetings.filter(m => m.status === 'pending' && m.host_id !== user?.id);
+  const investorSent = investorMeetings.filter(m => m.status === 'pending' && m.host_id === user?.id);
+  const investorUpcoming = investorMeetings.filter(m => m.status === 'scheduled' && !isBefore(new Date(m.scheduled_date), now));
+  const investorPast = investorMeetings.filter(m => m.status === 'completed' || (m.status === 'scheduled' && isBefore(new Date(m.scheduled_date), now)));
+
   if (loading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center">
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500 mx-auto mb-4"></div>
           <p className="text-muted-foreground">Loading accelerator dashboard...</p>
         </div>
-      </div>;
+      </div>
+    );
   }
 
   // Stats
   const pendingApplications = applications.filter(a => a.status === 'pending').length;
-  const activeStartups = portfolioStartups.filter(s => s.current_stage === 'active').length;
-  const activeCohorts = cohorts.filter(c => c.status === 'in_progress' || c.status === 'applications_open').length;
-  return <div className="min-h-screen bg-background pb-6 relative">
+
+  return (
+    <div className="min-h-screen bg-background pb-6 relative">
       <DashboardHeader />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4 sm:pb-8">
@@ -165,17 +243,13 @@ const AcceleratorDashboard = () => {
                 <p className="text-sm text-muted-foreground mt-1">Manage your cohorts, applications, and portfolio companies</p>
               </div>
             </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              
-              
-            </div>
           </div>
         </div>
 
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-11 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Social</span>
@@ -201,6 +275,10 @@ const AcceleratorDashboard = () => {
                 <Presentation className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Meetings</span>
               </TabsTrigger>
+              <TabsTrigger value="jobs" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Briefcase className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Jobs</span>
+              </TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <CalendarIcon className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Calendar</span>
@@ -213,6 +291,10 @@ const AcceleratorDashboard = () => {
                 <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Resources</span>
               </TabsTrigger>
+              <TabsTrigger value="profile" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <User className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Profile</span>
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -220,7 +302,6 @@ const AcceleratorDashboard = () => {
           <TabsContent value="social" className="space-y-6">
             <UnifiedCommunityFeed showCreatePost={true} />
           </TabsContent>
-
 
           {/* Network Tab */}
           <TabsContent value="network" className="space-y-6">
@@ -256,57 +337,280 @@ const AcceleratorDashboard = () => {
             <MentorAdvisorAssignment startups={portfolioStartups} onAssignMentor={assignMentor} onAssignAdvisor={assignAdvisor} />
           </TabsContent>
 
-          {/* Meetings Tab */}
+          {/* Meetings Tab - Two Column Layout */}
           <TabsContent value="meetings" className="space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div>
-                <h2 className="text-2xl font-bold">Pitch Meetings</h2>
-                <p className="text-muted-foreground">Schedule and manage meetings with portfolio startups</p>
+                <h2 className="text-2xl font-bold">Meetings</h2>
+                <p className="text-muted-foreground">Manage meetings with startups and investors</p>
               </div>
               <Button 
                 onClick={() => setSchedulePitchDialogOpen(true)} 
                 className="gap-2"
-                disabled={portfolioStartups.length === 0}
               >
                 <Plus className="h-4 w-4" />
                 Schedule Meeting
               </Button>
             </div>
 
-            {/* Pitch Meetings Grid */}
-            {pitchMeetings.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {pitchMeetings.map((meeting) => {
-                  const isPast = new Date(meeting.scheduled_date) < new Date();
-                  return (
-                    <PitchMeetingCard 
-                      key={meeting.id}
-                      meeting={meeting}
-                      variant={isPast ? 'past' : 'upcoming'}
-                      viewerType="investor"
-                      onJoin={(url) => setActiveVideoUrl(url)}
-                    />
-                  );
-                })}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Left Column - Startup Pitches */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Building2 className="h-5 w-5 text-emerald-500" />
+                  Startup Pitches
+                </h3>
+
+                {/* Incoming Requests */}
+                <Collapsible open={startupSectionsOpen.incoming} onOpenChange={(open) => setStartupSectionsOpen(prev => ({ ...prev, incoming: open }))}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
+                      <span className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-amber-500" />
+                        Incoming Requests
+                        {startupIncoming.length > 0 && <Badge variant="secondary">{startupIncoming.length}</Badge>}
+                      </span>
+                      {startupSectionsOpen.incoming ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-2 mt-2">
+                    {startupIncoming.length > 0 ? startupIncoming.map((meeting) => (
+                      <Card key={meeting.id} className="tech-card border-0">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">{meeting.company?.name || 'Unknown Startup'}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {format(new Date(meeting.scheduled_date), 'MMM d, yyyy h:mm a')}
+                              </p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline" onClick={() => handleAcceptMeeting(meeting.id)}>
+                                <Check className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => handleRejectMeeting(meeting.id)}>
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )) : (
+                      <p className="text-sm text-muted-foreground p-3">No incoming requests</p>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Sent Requests */}
+                <Collapsible open={startupSectionsOpen.sent} onOpenChange={(open) => setStartupSectionsOpen(prev => ({ ...prev, sent: open }))}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
+                      <span className="flex items-center gap-2">
+                        <Presentation className="h-4 w-4 text-blue-500" />
+                        Sent Requests
+                        {startupSent.length > 0 && <Badge variant="secondary">{startupSent.length}</Badge>}
+                      </span>
+                      {startupSectionsOpen.sent ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-2 mt-2">
+                    {startupSent.length > 0 ? startupSent.map((meeting) => (
+                      <PitchMeetingCard 
+                        key={meeting.id}
+                        meeting={meeting}
+                        variant="upcoming"
+                        viewerType="investor"
+                      />
+                    )) : (
+                      <p className="text-sm text-muted-foreground p-3">No sent requests</p>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Upcoming Pitches */}
+                <Collapsible open={startupSectionsOpen.upcoming} onOpenChange={(open) => setStartupSectionsOpen(prev => ({ ...prev, upcoming: open }))}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
+                      <span className="flex items-center gap-2">
+                        <CalendarIcon className="h-4 w-4 text-emerald-500" />
+                        Upcoming Pitches
+                        {startupUpcoming.length > 0 && <Badge variant="secondary">{startupUpcoming.length}</Badge>}
+                      </span>
+                      {startupSectionsOpen.upcoming ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-2 mt-2">
+                    {startupUpcoming.length > 0 ? startupUpcoming.map((meeting) => (
+                      <PitchMeetingCard 
+                        key={meeting.id}
+                        meeting={meeting}
+                        variant="upcoming"
+                        viewerType="investor"
+                      />
+                    )) : (
+                      <p className="text-sm text-muted-foreground p-3">No upcoming pitches</p>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Past Pitches */}
+                <Collapsible open={startupSectionsOpen.past} onOpenChange={(open) => setStartupSectionsOpen(prev => ({ ...prev, past: open }))}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
+                      <span className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        Past Pitches
+                        {startupPast.length > 0 && <Badge variant="secondary">{startupPast.length}</Badge>}
+                      </span>
+                      {startupSectionsOpen.past ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-2 mt-2">
+                    {startupPast.length > 0 ? startupPast.map((meeting) => (
+                      <PitchMeetingCard 
+                        key={meeting.id}
+                        meeting={meeting}
+                        variant="past"
+                        viewerType="investor"
+                      />
+                    )) : (
+                      <p className="text-sm text-muted-foreground p-3">No past pitches</p>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
               </div>
-            ) : (
-              <Card className="tech-card border-0">
-                <CardContent className="flex flex-col items-center justify-center py-16">
-                  <Presentation className="h-16 w-16 text-muted-foreground/30 mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Meetings Scheduled</h3>
-                  <p className="text-muted-foreground text-center mb-4">
-                    Schedule pitch meetings with your portfolio startups to track their progress
-                  </p>
-                  <Button 
-                    onClick={() => setSchedulePitchDialogOpen(true)}
-                    disabled={portfolioStartups.length === 0}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Schedule First Meeting
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
+
+              {/* Right Column - Investor Meetings */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <Users className="h-5 w-5 text-blue-500" />
+                  Investor Meetings
+                </h3>
+
+                {/* Incoming Requests */}
+                <Collapsible open={investorSectionsOpen.incoming} onOpenChange={(open) => setInvestorSectionsOpen(prev => ({ ...prev, incoming: open }))}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
+                      <span className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-amber-500" />
+                        Incoming Requests
+                        {investorIncoming.length > 0 && <Badge variant="secondary">{investorIncoming.length}</Badge>}
+                      </span>
+                      {investorSectionsOpen.incoming ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-2 mt-2">
+                    {investorIncoming.length > 0 ? investorIncoming.map((meeting) => (
+                      <Card key={meeting.id} className="tech-card border-0">
+                        <CardContent className="p-4">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-medium">{meeting.investor_profile?.full_name || 'Unknown Investor'}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {format(new Date(meeting.scheduled_date), 'MMM d, yyyy h:mm a')}
+                              </p>
+                            </div>
+                            <div className="flex gap-2">
+                              <Button size="sm" variant="outline" onClick={() => handleAcceptMeeting(meeting.id)}>
+                                <Check className="h-4 w-4" />
+                              </Button>
+                              <Button size="sm" variant="destructive" onClick={() => handleRejectMeeting(meeting.id)}>
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )) : (
+                      <p className="text-sm text-muted-foreground p-3">No incoming requests</p>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Sent Requests */}
+                <Collapsible open={investorSectionsOpen.sent} onOpenChange={(open) => setInvestorSectionsOpen(prev => ({ ...prev, sent: open }))}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
+                      <span className="flex items-center gap-2">
+                        <Presentation className="h-4 w-4 text-blue-500" />
+                        Sent Requests
+                        {investorSent.length > 0 && <Badge variant="secondary">{investorSent.length}</Badge>}
+                      </span>
+                      {investorSectionsOpen.sent ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-2 mt-2">
+                    {investorSent.length > 0 ? investorSent.map((meeting) => (
+                      <PitchMeetingCard 
+                        key={meeting.id}
+                        meeting={meeting}
+                        variant="upcoming"
+                        viewerType="startup"
+                      />
+                    )) : (
+                      <p className="text-sm text-muted-foreground p-3">No sent requests</p>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Upcoming Meetings */}
+                <Collapsible open={investorSectionsOpen.upcoming} onOpenChange={(open) => setInvestorSectionsOpen(prev => ({ ...prev, upcoming: open }))}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
+                      <span className="flex items-center gap-2">
+                        <CalendarIcon className="h-4 w-4 text-emerald-500" />
+                        Upcoming Meetings
+                        {investorUpcoming.length > 0 && <Badge variant="secondary">{investorUpcoming.length}</Badge>}
+                      </span>
+                      {investorSectionsOpen.upcoming ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-2 mt-2">
+                    {investorUpcoming.length > 0 ? investorUpcoming.map((meeting) => (
+                      <PitchMeetingCard 
+                        key={meeting.id}
+                        meeting={meeting}
+                        variant="upcoming"
+                        viewerType="startup"
+                      />
+                    )) : (
+                      <p className="text-sm text-muted-foreground p-3">No upcoming meetings</p>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+
+                {/* Past Meetings */}
+                <Collapsible open={investorSectionsOpen.past} onOpenChange={(open) => setInvestorSectionsOpen(prev => ({ ...prev, past: open }))}>
+                  <CollapsibleTrigger asChild>
+                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
+                      <span className="flex items-center gap-2">
+                        <Clock className="h-4 w-4 text-muted-foreground" />
+                        Past Meetings
+                        {investorPast.length > 0 && <Badge variant="secondary">{investorPast.length}</Badge>}
+                      </span>
+                      {investorSectionsOpen.past ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                    </Button>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="space-y-2 mt-2">
+                    {investorPast.length > 0 ? investorPast.map((meeting) => (
+                      <PitchMeetingCard 
+                        key={meeting.id}
+                        meeting={meeting}
+                        variant="past"
+                        viewerType="startup"
+                      />
+                    )) : (
+                      <p className="text-sm text-muted-foreground p-3">No past meetings</p>
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Jobs Tab */}
+          <TabsContent value="jobs" className="space-y-6">
+            <UnifiedJobsBoard />
           </TabsContent>
 
           {/* Calendar Tab */}
@@ -319,21 +623,31 @@ const AcceleratorDashboard = () => {
             </div>
 
             {/* Upcoming Events with Banners */}
-            {upcomingEvents.length > 0 && <Card className="tech-card border-0">
+            {upcomingEvents.length > 0 && (
+              <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="w-full">
                     <div className="flex gap-4 pb-4">
-                      {upcomingEvents.slice(0, 6).map(event => <div key={event.id} className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]" onClick={() => {
-                    setSelectedEvent(event);
-                    setShowEventDetails(true);
-                  }}>
+                      {upcomingEvents.slice(0, 6).map(event => (
+                        <div 
+                          key={event.id} 
+                          className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]" 
+                          onClick={() => {
+                            setSelectedEvent(event);
+                            setShowEventDetails(true);
+                          }}
+                        >
                           <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
-                            {event.banner_url ? <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" /> : <div className="w-full h-48 bg-gradient-to-br from-emerald-500/20 to-teal-500/5 flex items-center justify-center">
+                            {event.banner_url ? (
+                              <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" />
+                            ) : (
+                              <div className="w-full h-48 bg-gradient-to-br from-emerald-500/20 to-teal-500/5 flex items-center justify-center">
                                 <CalendarIcon className="h-16 w-16 text-emerald-500/30" />
-                              </div>}
+                              </div>
+                            )}
                             <div className="p-4 min-h-[120px] flex flex-col">
                               <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
                               <div className="space-y-1 text-sm text-muted-foreground flex-1">
@@ -341,19 +655,23 @@ const AcceleratorDashboard = () => {
                                   <Clock className="h-3 w-3" />
                                   {format(parseISO(event.start_date), 'MMM d, h:mm a')}
                                 </div>
-                                {event.location && <div className="flex items-center gap-2">
+                                {event.location && (
+                                  <div className="flex items-center gap-2">
                                     <MapPin className="h-3 w-3" />
                                     <span className="line-clamp-1">{event.location}</span>
-                                  </div>}
+                                  </div>
+                                )}
                               </div>
                             </div>
                           </div>
-                        </div>)}
+                        </div>
+                      ))}
                     </div>
                     <ScrollBar orientation="horizontal" />
                   </ScrollArea>
                 </CardContent>
-              </Card>}
+              </Card>
+            )}
 
             <UnifiedCalendar userRole="accelerator" />
           </TabsContent>
@@ -363,17 +681,20 @@ const AcceleratorDashboard = () => {
             <AnalyticsDashboard />
           </TabsContent>
 
-
           {/* Resources Tab */}
           <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{
-          height: 'calc(100vh - 12rem)',
-          minHeight: '500px'
-        }}>
+            height: 'calc(100vh - 12rem)',
+            minHeight: '500px'
+          }}>
             <div className="absolute inset-0">
               <GlobalResourcesMap />
             </div>
           </TabsContent>
 
+          {/* Profile Tab */}
+          <TabsContent value="profile" className="space-y-6">
+            <AcceleratorProfileView />
+          </TabsContent>
         </Tabs>
       </div>
 
@@ -411,7 +732,6 @@ const AcceleratorDashboard = () => {
         onOpenChange={setAddStartupDialogOpen}
         cohorts={cohorts}
         onStartupAdded={() => {
-          // Trigger refetch of portfolio
           window.location.reload();
         }}
       />
@@ -421,9 +741,14 @@ const AcceleratorDashboard = () => {
         open={schedulePitchDialogOpen}
         onOpenChange={setSchedulePitchDialogOpen}
         portfolioStartups={portfolioStartups}
+        applications={applications}
         cohorts={cohorts}
-        onPitchScheduled={() => {}}
+        onPitchScheduled={() => {
+          window.location.reload();
+        }}
       />
-    </div>;
+    </div>
+  );
 };
+
 export default AcceleratorDashboard;
