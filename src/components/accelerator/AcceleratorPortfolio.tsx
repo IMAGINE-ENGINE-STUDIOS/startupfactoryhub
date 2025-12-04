@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,7 +13,6 @@ import {
   TrendingUp, 
   Users, 
   DollarSign,
-  ExternalLink,
   ChevronRight,
   GraduationCap,
   Building2
@@ -78,7 +77,6 @@ export const AcceleratorPortfolio = ({
   const [selectedStage, setSelectedStage] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
-  // Helper to get startup name (platform or manual entry)
   const getStartupName = (startup: CohortStartup) => {
     if (startup.is_manual_entry) return startup.external_company_name || 'Unknown';
     return startup.company?.name || 'Unknown';
@@ -116,15 +114,14 @@ export const AcceleratorPortfolio = ({
 
   const getStageColor = (stage: string) => {
     switch (stage) {
-      case 'onboarding': return 'bg-blue-500/20 text-blue-400';
-      case 'active': return 'bg-emerald-500/20 text-emerald-400';
-      case 'graduated': return 'bg-purple-500/20 text-purple-400';
-      case 'dropped': return 'bg-red-500/20 text-red-400';
+      case 'onboarding': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+      case 'active': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
+      case 'graduated': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+      case 'dropped': return 'bg-red-500/20 text-red-400 border-red-500/30';
       default: return 'bg-muted text-muted-foreground';
     }
   };
 
-  // Stats
   const activeStartups = startups.filter(s => s.current_stage === 'active').length;
   const graduatedStartups = startups.filter(s => s.current_stage === 'graduated').length;
   const totalMentors = new Set(startups.flatMap(s => s.mentor_assignments?.map(m => m.mentor_id) || [])).size;
@@ -133,7 +130,7 @@ export const AcceleratorPortfolio = ({
     <div className="space-y-6">
       {/* Header Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="glass-morphism border-border/50">
+        <Card className="tech-card border-0">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-emerald-500/10 flex items-center justify-center">
@@ -147,7 +144,7 @@ export const AcceleratorPortfolio = ({
           </CardContent>
         </Card>
 
-        <Card className="glass-morphism border-border/50">
+        <Card className="tech-card border-0">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-blue-500/10 flex items-center justify-center">
@@ -161,7 +158,7 @@ export const AcceleratorPortfolio = ({
           </CardContent>
         </Card>
 
-        <Card className="glass-morphism border-border/50">
+        <Card className="tech-card border-0">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
@@ -175,7 +172,7 @@ export const AcceleratorPortfolio = ({
           </CardContent>
         </Card>
 
-        <Card className="glass-morphism border-border/50">
+        <Card className="tech-card border-0">
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center">
@@ -254,7 +251,7 @@ export const AcceleratorPortfolio = ({
           {filteredStartups.map((startup) => (
             <Card 
               key={startup.id}
-              className="glass-morphism border-border/50 hover:border-emerald-500/30 transition-all duration-300 cursor-pointer group"
+              className="tech-card border-0 hover:border-emerald-500/30 transition-colors cursor-pointer group"
               onClick={() => onViewStartup(startup)}
             >
               <CardContent className="p-5">
@@ -319,13 +316,13 @@ export const AcceleratorPortfolio = ({
           ))}
         </div>
       ) : (
-        <Card className="glass-morphism border-border/50">
+        <Card className="tech-card border-0">
           <CardContent className="p-0">
             <div className="divide-y divide-border/50">
               {filteredStartups.map((startup) => (
                 <div 
                   key={startup.id}
-                  className="flex items-center gap-4 p-4 hover:bg-background/50 cursor-pointer transition-colors"
+                  className="flex items-center gap-4 p-4 hover:bg-muted/30 cursor-pointer transition-colors"
                   onClick={() => onViewStartup(startup)}
                 >
                   <Avatar className="w-12 h-12">
@@ -360,7 +357,7 @@ export const AcceleratorPortfolio = ({
 
       {/* Empty State */}
       {filteredStartups.length === 0 && (
-        <Card className="glass-morphism border-border/50">
+        <Card className="tech-card border-0">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4">
               <Building2 className="w-8 h-8 text-emerald-500" />

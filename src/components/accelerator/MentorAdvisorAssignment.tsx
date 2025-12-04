@@ -168,7 +168,7 @@ export const MentorAdvisorAssignment = ({
 
       {/* Stats Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="glass-morphism border-border/50">
+        <Card className="tech-card border-0">
           <CardContent className="p-4 flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center">
               <Users className="w-6 h-6 text-blue-500" />
@@ -180,7 +180,7 @@ export const MentorAdvisorAssignment = ({
           </CardContent>
         </Card>
 
-        <Card className="glass-morphism border-border/50">
+        <Card className="tech-card border-0">
           <CardContent className="p-4 flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-purple-500/10 flex items-center justify-center">
               <Briefcase className="w-6 h-6 text-purple-500" />
@@ -198,7 +198,7 @@ export const MentorAdvisorAssignment = ({
         {filteredStartups.map((startup) => (
           <Card 
             key={startup.id}
-            className="glass-morphism border-border/50"
+            className="tech-card border-0"
           >
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
@@ -330,7 +330,7 @@ export const MentorAdvisorAssignment = ({
 
       {/* Empty State */}
       {filteredStartups.length === 0 && (
-        <Card className="glass-morphism border-border/50">
+        <Card className="tech-card border-0">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4">
               <Users className="w-8 h-8 text-emerald-500" />
@@ -345,7 +345,7 @@ export const MentorAdvisorAssignment = ({
 
       {/* Assignment Dialog */}
       <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
-        <DialogContent className="glass-morphism border-border/50">
+        <DialogContent className="tech-card border-0">
           <DialogHeader>
             <DialogTitle>
               Assign {assignType === 'mentor' ? 'Mentor' : 'Advisor'} to {selectedStartup?.company?.name}

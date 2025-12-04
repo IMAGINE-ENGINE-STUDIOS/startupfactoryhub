@@ -123,8 +123,7 @@ export const CohortManagement = ({
           {cohorts.map((cohort) => (
             <Card 
               key={cohort.id}
-              className="tech-card border-0 hover:border-emerald-500/30 transition-all duration-300 cursor-pointer group flex flex-col min-h-[340px]"
-              onClick={() => onSelectCohort(cohort)}
+              className="tech-card border-0 hover:border-emerald-500/30 transition-colors group flex flex-col min-h-[340px]"
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between gap-2">
