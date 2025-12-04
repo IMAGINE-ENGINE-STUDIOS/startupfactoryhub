@@ -1,23 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
   Search, 
-  Filter, 
   FileText, 
   Video, 
   Calendar,
   CheckCircle,
   XCircle,
   Clock,
-  MessageSquare,
   ExternalLink,
-  Globe
+  Globe,
+  LayoutList,
+  LayoutGrid,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -75,12 +78,12 @@ interface CohortApplicationsManagerProps {
 }
 
 const STATUSES = [
-  { value: 'pending', label: 'Pending', color: 'bg-slate-500/20 text-slate-400' },
-  { value: 'under_review', label: 'Under Review', color: 'bg-blue-500/20 text-blue-400' },
-  { value: 'interview_scheduled', label: 'Interview', color: 'bg-amber-500/20 text-amber-400' },
-  { value: 'accepted', label: 'Accepted', color: 'bg-emerald-500/20 text-emerald-400' },
-  { value: 'rejected', label: 'Rejected', color: 'bg-red-500/20 text-red-400' },
-  { value: 'waitlist', label: 'Waitlist', color: 'bg-purple-500/20 text-purple-400' },
+  { value: 'pending', label: 'Pending', color: 'bg-slate-500/20 text-slate-400 border-slate-500/30' },
+  { value: 'under_review', label: 'Under Review', color: 'bg-blue-500/20 text-blue-400 border-blue-500/30' },
+  { value: 'interview_scheduled', label: 'Interview', color: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
+  { value: 'accepted', label: 'Accepted', color: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
+  { value: 'rejected', label: 'Rejected', color: 'bg-red-500/20 text-red-400 border-red-500/30' },
+  { value: 'waitlist', label: 'Waitlist', color: 'bg-purple-500/20 text-purple-400 border-purple-500/30' },
 ];
 
 export const CohortApplicationsManager = ({
@@ -93,8 +96,10 @@ export const CohortApplicationsManager = ({
   const [selectedCohort, setSelectedCohort] = useState<string>('all');
   const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [activeTab, setActiveTab] = useState('platform');
+  const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [publicApplications, setPublicApplications] = useState<PublicApplication[]>([]);
   const [loadingPublic, setLoadingPublic] = useState(false);
+  const [expandedRow, setExpandedRow] = useState<string | null>(null);
 
   useEffect(() => {
     if (cohorts.length > 0) {
@@ -165,65 +170,396 @@ export const CohortApplicationsManager = ({
     return cohorts.find(c => c.id === cohortId)?.name || 'Unknown';
   };
 
-  // Group applications by status for Kanban view
-  const applicationsByStatus = STATUSES.reduce((acc, status) => {
-    acc[status.value] = filteredApplications.filter(app => app.status === status.value);
-    return acc;
-  }, {} as Record<string, Application[]>);
+  // Stats
+  const pendingCount = [...filteredApplications, ...filteredPublicApplications].filter(a => a.status === 'pending').length;
+  const reviewCount = [...filteredApplications, ...filteredPublicApplications].filter(a => a.status === 'under_review').length;
+  const acceptedCount = [...filteredApplications, ...filteredPublicApplications].filter(a => a.status === 'accepted').length;
 
-  const publicAppsByStatus = STATUSES.reduce((acc, status) => {
-    acc[status.value] = filteredPublicApplications.filter(app => app.status === status.value);
-    return acc;
-  }, {} as Record<string, PublicApplication[]>);
+  const renderPlatformListView = () => (
+    <Card className="tech-card border-0 overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="border-border/50 hover:bg-transparent">
+            <TableHead className="w-[300px]">Startup</TableHead>
+            <TableHead>Cohort</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Applied</TableHead>
+            <TableHead>Links</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredApplications.map((app) => {
+            const statusConfig = getStatusBadge(app.status);
+            const isExpanded = expandedRow === app.id;
+            
+            return (
+              <>
+                <TableRow 
+                  key={app.id} 
+                  className="border-border/50 cursor-pointer hover:bg-muted/30"
+                  onClick={() => setExpandedRow(isExpanded ? null : app.id)}
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage src={app.startup?.logo_url || undefined} />
+                        <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
+                          {app.startup?.name?.charAt(0) || 'S'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <p className="font-medium">{app.startup?.name || 'Unknown'}</p>
+                        <p className="text-xs text-muted-foreground">{app.startup?.industry || 'No industry'}</p>
+                      </div>
+                      {isExpanded ? <ChevronUp className="w-4 h-4 ml-2 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 ml-2 text-muted-foreground" />}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-xs">{getCohortName(app.cohort_id)}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={statusConfig.color}>{statusConfig.label}</Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {format(new Date(app.applied_at), 'MMM d, yyyy')}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      {app.pitch_deck_url && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => { e.stopPropagation(); window.open(app.pitch_deck_url!, '_blank'); }}
+                        >
+                          <FileText className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {app.video_pitch_url && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => { e.stopPropagation(); window.open(app.video_pitch_url!, '_blank'); }}
+                        >
+                          <Video className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                      {app.status === 'pending' && (
+                        <Button size="sm" variant="outline" onClick={() => onUpdateStatus(app.id, 'under_review')}>
+                          Review
+                        </Button>
+                      )}
+                      {app.status === 'under_review' && (
+                        <Button size="sm" variant="outline" onClick={() => onUpdateStatus(app.id, 'interview_scheduled')}>
+                          <Calendar className="w-3 h-3 mr-1" />
+                          Interview
+                        </Button>
+                      )}
+                      {app.status === 'interview_scheduled' && (
+                        <>
+                          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => onAcceptStartup(app)}>
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Accept
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => onUpdateStatus(app.id, 'rejected')}>
+                            <XCircle className="w-3 h-3" />
+                          </Button>
+                        </>
+                      )}
+                      {(app.status === 'accepted' || app.status === 'rejected' || app.status === 'waitlist') && (
+                        <Button size="sm" variant="outline" onClick={() => onUpdateStatus(app.id, 'under_review')}>
+                          Reconsider
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+                {isExpanded && (
+                  <TableRow className="border-border/50 bg-muted/20">
+                    <TableCell colSpan={6} className="p-4">
+                      <div className="space-y-3">
+                        <p className="text-sm text-muted-foreground">{app.startup?.description || 'No description available'}</p>
+                        {app.startup?.stage && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">Stage:</span>
+                            <Badge variant="outline" className="text-xs">{app.startup.stage}</Badge>
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
+            );
+          })}
+          {filteredApplications.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
+                No applications found
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </Card>
+  );
+
+  const renderExternalListView = () => (
+    <Card className="tech-card border-0 overflow-hidden">
+      <Table>
+        <TableHeader>
+          <TableRow className="border-border/50 hover:bg-transparent">
+            <TableHead className="w-[300px]">Startup</TableHead>
+            <TableHead>Founder</TableHead>
+            <TableHead>Cohort</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead>Applied</TableHead>
+            <TableHead>Links</TableHead>
+            <TableHead className="text-right">Actions</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {filteredPublicApplications.map((app) => {
+            const statusConfig = getStatusBadge(app.status);
+            const isExpanded = expandedRow === app.id;
+            
+            return (
+              <>
+                <TableRow 
+                  key={app.id} 
+                  className="border-border/50 cursor-pointer hover:bg-muted/30"
+                  onClick={() => setExpandedRow(isExpanded ? null : app.id)}
+                >
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-10 h-10">
+                        <AvatarFallback className="bg-amber-500/20 text-amber-400">
+                          {app.startup_name?.charAt(0) || 'S'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{app.startup_name}</p>
+                          <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-500 border-amber-500/30">
+                            External
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-muted-foreground">{app.industry || 'No industry'}</p>
+                      </div>
+                      {isExpanded ? <ChevronUp className="w-4 h-4 ml-2 text-muted-foreground" /> : <ChevronDown className="w-4 h-4 ml-2 text-muted-foreground" />}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-sm">{app.founder_name}</TableCell>
+                  <TableCell>
+                    <Badge variant="outline" className="text-xs">{getCohortName(app.cohort_id)}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge className={statusConfig.color}>{statusConfig.label}</Badge>
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {format(new Date(app.applied_at), 'MMM d, yyyy')}
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex items-center gap-1">
+                      {app.website && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => { e.stopPropagation(); window.open(app.website!, '_blank'); }}
+                        >
+                          <Globe className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {app.pitch_deck_url && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => { e.stopPropagation(); window.open(app.pitch_deck_url!, '_blank'); }}
+                        >
+                          <FileText className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {app.video_pitch_url && (
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => { e.stopPropagation(); window.open(app.video_pitch_url!, '_blank'); }}
+                        >
+                          <Video className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                      {app.status === 'pending' && (
+                        <Button size="sm" variant="outline" onClick={() => updatePublicApplicationStatus(app.id, 'under_review')}>
+                          Review
+                        </Button>
+                      )}
+                      {app.status === 'under_review' && (
+                        <Button size="sm" variant="outline" onClick={() => updatePublicApplicationStatus(app.id, 'interview_scheduled')}>
+                          <Calendar className="w-3 h-3 mr-1" />
+                          Interview
+                        </Button>
+                      )}
+                      {app.status === 'interview_scheduled' && (
+                        <>
+                          <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => updatePublicApplicationStatus(app.id, 'accepted')}>
+                            <CheckCircle className="w-3 h-3 mr-1" />
+                            Accept
+                          </Button>
+                          <Button size="sm" variant="destructive" onClick={() => updatePublicApplicationStatus(app.id, 'rejected')}>
+                            <XCircle className="w-3 h-3" />
+                          </Button>
+                        </>
+                      )}
+                      {(app.status === 'accepted' || app.status === 'rejected' || app.status === 'waitlist') && (
+                        <Button size="sm" variant="outline" onClick={() => updatePublicApplicationStatus(app.id, 'under_review')}>
+                          Reconsider
+                        </Button>
+                      )}
+                    </div>
+                  </TableCell>
+                </TableRow>
+                {isExpanded && (
+                  <TableRow className="border-border/50 bg-muted/20">
+                    <TableCell colSpan={7} className="p-4">
+                      <div className="space-y-3">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <span className="text-xs text-muted-foreground">Email:</span>
+                            <p className="text-sm">{app.email}</p>
+                          </div>
+                          {app.phone && (
+                            <div>
+                              <span className="text-xs text-muted-foreground">Phone:</span>
+                              <p className="text-sm">{app.phone}</p>
+                            </div>
+                          )}
+                        </div>
+                        {app.why_applying && (
+                          <div>
+                            <span className="text-xs text-muted-foreground">Why Applying:</span>
+                            <p className="text-sm mt-1">{app.why_applying}</p>
+                          </div>
+                        )}
+                        {app.stage && (
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-muted-foreground">Stage:</span>
+                            <Badge variant="outline" className="text-xs">{app.stage}</Badge>
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
+            );
+          })}
+          {filteredPublicApplications.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
+                No external applications found
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
+    </Card>
+  );
 
   return (
     <div className="space-y-6">
-      {/* Header */}
+      {/* Header with Stats */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Applications</h2>
           <p className="text-muted-foreground">
-            {filteredApplications.length + filteredPublicApplications.length} total applications across {cohorts.length} cohorts
+            {filteredApplications.length + filteredPublicApplications.length} total applications
           </p>
         </div>
 
-        {/* Filters */}
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="Search startups..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-[200px]"
-            />
+        {/* Stats Pills */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-500/10 border border-slate-500/20">
+            <Clock className="w-4 h-4 text-slate-400" />
+            <span className="text-sm font-medium">{pendingCount} Pending</span>
           </div>
-          <Select value={selectedCohort} onValueChange={setSelectedCohort}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="All Cohorts" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Cohorts</SelectItem>
-              {cohorts.map((cohort) => (
-                <SelectItem key={cohort.id} value={cohort.id}>
-                  {cohort.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-            <SelectTrigger className="w-[150px]">
-              <SelectValue placeholder="All Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              {STATUSES.map((status) => (
-                <SelectItem key={status.value} value={status.value}>
-                  {status.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20">
+            <Search className="w-4 h-4 text-blue-400" />
+            <span className="text-sm font-medium">{reviewCount} In Review</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+            <CheckCircle className="w-4 h-4 text-emerald-400" />
+            <span className="text-sm font-medium">{acceptedCount} Accepted</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="relative flex-1 max-w-[300px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search startups..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={selectedCohort} onValueChange={setSelectedCohort}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="All Cohorts" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Cohorts</SelectItem>
+            {cohorts.map((cohort) => (
+              <SelectItem key={cohort.id} value={cohort.id}>
+                {cohort.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+          <SelectTrigger className="w-[150px]">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            {STATUSES.map((status) => (
+              <SelectItem key={status.value} value={status.value}>
+                {status.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        
+        {/* View Toggle */}
+        <div className="flex items-center gap-1 ml-auto">
+          <Button 
+            variant={viewMode === 'list' ? 'default' : 'outline'} 
+            size="icon"
+            onClick={() => setViewMode('list')}
+          >
+            <LayoutList className="w-4 h-4" />
+          </Button>
+          <Button 
+            variant={viewMode === 'kanban' ? 'default' : 'outline'} 
+            size="icon"
+            onClick={() => setViewMode('kanban')}
+          >
+            <LayoutGrid className="w-4 h-4" />
+          </Button>
         </div>
       </div>
 
@@ -240,324 +576,11 @@ export const CohortApplicationsManager = ({
         </TabsList>
 
         <TabsContent value="platform" className="mt-6">
-          {/* Platform Applications Kanban Board */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 overflow-x-auto pb-4">
-            {STATUSES.map((status) => (
-              <div key={status.value} className="min-w-[280px]">
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge className={status.color}>
-                    {status.label}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    ({applicationsByStatus[status.value]?.length || 0})
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  {applicationsByStatus[status.value]?.map((app) => (
-                    <Card 
-                      key={app.id}
-                      className="tech-card border-0 hover:border-emerald-500/30 transition-all duration-300"
-                    >
-                      <CardContent className="p-4 space-y-3">
-                        {/* Startup Info */}
-                        <div className="flex items-start gap-3">
-                          <Avatar className="w-10 h-10">
-                            <AvatarImage src={app.startup?.logo_url || undefined} />
-                            <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
-                              {app.startup?.name?.charAt(0) || 'S'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold truncate">{app.startup?.name || 'Unknown'}</h4>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {app.startup?.industry || 'No industry'}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Cohort */}
-                        <Badge variant="outline" className="text-xs">
-                          {getCohortName(app.cohort_id)}
-                        </Badge>
-
-                        {/* Description */}
-                        {app.startup?.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {app.startup.description}
-                          </p>
-                        )}
-
-                        {/* Links */}
-                        <div className="flex items-center gap-2">
-                          {app.pitch_deck_url && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 px-2"
-                              onClick={() => window.open(app.pitch_deck_url!, '_blank')}
-                            >
-                              <FileText className="w-3 h-3 mr-1" />
-                              Deck
-                            </Button>
-                          )}
-                          {app.video_pitch_url && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 px-2"
-                              onClick={() => window.open(app.video_pitch_url!, '_blank')}
-                            >
-                              <Video className="w-3 h-3 mr-1" />
-                              Video
-                            </Button>
-                          )}
-                        </div>
-
-                        {/* Applied Date */}
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="w-3 h-3" />
-                          Applied {format(new Date(app.applied_at), 'MMM d, yyyy')}
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-                          {app.status === 'pending' && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="flex-1 h-8"
-                              onClick={() => onUpdateStatus(app.id, 'under_review')}
-                            >
-                              Review
-                            </Button>
-                          )}
-                          {app.status === 'under_review' && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="flex-1 h-8"
-                              onClick={() => onUpdateStatus(app.id, 'interview_scheduled')}
-                            >
-                              <Calendar className="w-3 h-3 mr-1" />
-                              Interview
-                            </Button>
-                          )}
-                          {app.status === 'interview_scheduled' && (
-                            <>
-                              <Button 
-                                size="sm" 
-                                className="flex-1 h-8 bg-emerald-500 hover:bg-emerald-600"
-                                onClick={() => onAcceptStartup(app)}
-                              >
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Accept
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="destructive"
-                                className="h-8"
-                                onClick={() => onUpdateStatus(app.id, 'rejected')}
-                              >
-                                <XCircle className="w-3 h-3" />
-                              </Button>
-                            </>
-                          )}
-                          {(app.status === 'accepted' || app.status === 'rejected' || app.status === 'waitlist') && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="flex-1 h-8"
-                              onClick={() => onUpdateStatus(app.id, 'under_review')}
-                            >
-                              Reconsider
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-
-                  {(!applicationsByStatus[status.value] || applicationsByStatus[status.value].length === 0) && (
-                    <div className="text-center py-8 text-muted-foreground text-sm">
-                      No applications
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          {renderPlatformListView()}
         </TabsContent>
 
         <TabsContent value="external" className="mt-6">
-          {/* External Applications Kanban Board */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 overflow-x-auto pb-4">
-            {STATUSES.map((status) => (
-              <div key={status.value} className="min-w-[280px]">
-                <div className="flex items-center gap-2 mb-3">
-                  <Badge className={status.color}>
-                    {status.label}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    ({publicAppsByStatus[status.value]?.length || 0})
-                  </span>
-                </div>
-
-                <div className="space-y-3">
-                  {publicAppsByStatus[status.value]?.map((app) => (
-                    <Card 
-                      key={app.id}
-                      className="tech-card border-0 hover:border-amber-500/30 transition-all duration-300"
-                    >
-                      <CardContent className="p-4 space-y-3">
-                        {/* External Badge */}
-                        <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-500 border-amber-500/30">
-                          <Globe className="w-3 h-3 mr-1" />
-                          External
-                        </Badge>
-
-                        {/* Startup Info */}
-                        <div className="flex items-start gap-3">
-                          <Avatar className="w-10 h-10">
-                            <AvatarFallback className="bg-amber-500/20 text-amber-400">
-                              {app.startup_name?.charAt(0) || 'S'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-semibold truncate">{app.startup_name}</h4>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {app.founder_name} • {app.industry || 'No industry'}
-                            </p>
-                          </div>
-                        </div>
-
-                        {/* Cohort */}
-                        <Badge variant="outline" className="text-xs">
-                          {getCohortName(app.cohort_id)}
-                        </Badge>
-
-                        {/* Contact */}
-                        <p className="text-xs text-muted-foreground truncate">
-                          {app.email}
-                        </p>
-
-                        {/* Why Applying */}
-                        {app.why_applying && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">
-                            {app.why_applying}
-                          </p>
-                        )}
-
-                        {/* Links */}
-                        <div className="flex items-center gap-2">
-                          {app.website && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 px-2"
-                              onClick={() => window.open(app.website!, '_blank')}
-                            >
-                              <Globe className="w-3 h-3 mr-1" />
-                              Site
-                            </Button>
-                          )}
-                          {app.pitch_deck_url && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 px-2"
-                              onClick={() => window.open(app.pitch_deck_url!, '_blank')}
-                            >
-                              <FileText className="w-3 h-3 mr-1" />
-                              Deck
-                            </Button>
-                          )}
-                          {app.video_pitch_url && (
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 px-2"
-                              onClick={() => window.open(app.video_pitch_url!, '_blank')}
-                            >
-                              <Video className="w-3 h-3 mr-1" />
-                              Video
-                            </Button>
-                          )}
-                        </div>
-
-                        {/* Applied Date */}
-                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                          <Clock className="w-3 h-3" />
-                          Applied {format(new Date(app.applied_at), 'MMM d, yyyy')}
-                        </div>
-
-                        {/* Actions */}
-                        <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-                          {app.status === 'pending' && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="flex-1 h-8"
-                              onClick={() => updatePublicApplicationStatus(app.id, 'under_review')}
-                            >
-                              Review
-                            </Button>
-                          )}
-                          {app.status === 'under_review' && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="flex-1 h-8"
-                              onClick={() => updatePublicApplicationStatus(app.id, 'interview_scheduled')}
-                            >
-                              <Calendar className="w-3 h-3 mr-1" />
-                              Interview
-                            </Button>
-                          )}
-                          {app.status === 'interview_scheduled' && (
-                            <>
-                              <Button 
-                                size="sm" 
-                                className="flex-1 h-8 bg-emerald-500 hover:bg-emerald-600"
-                                onClick={() => updatePublicApplicationStatus(app.id, 'accepted')}
-                              >
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                Accept
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="destructive"
-                                className="h-8"
-                                onClick={() => updatePublicApplicationStatus(app.id, 'rejected')}
-                              >
-                                <XCircle className="w-3 h-3" />
-                              </Button>
-                            </>
-                          )}
-                          {(app.status === 'accepted' || app.status === 'rejected' || app.status === 'waitlist') && (
-                            <Button 
-                              size="sm" 
-                              variant="outline"
-                              className="flex-1 h-8"
-                              onClick={() => updatePublicApplicationStatus(app.id, 'under_review')}
-                            >
-                              Reconsider
-                            </Button>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-
-                  {(!publicAppsByStatus[status.value] || publicAppsByStatus[status.value].length === 0) && (
-                    <div className="text-center py-8 text-muted-foreground text-sm">
-                      No applications
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+          {renderExternalListView()}
         </TabsContent>
       </Tabs>
     </div>
