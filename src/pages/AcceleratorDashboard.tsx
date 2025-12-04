@@ -206,6 +206,24 @@ const AcceleratorDashboard = () => {
   const investorUpcoming = investorMeetings.filter(m => m.status === 'scheduled' && !isBefore(new Date(m.scheduled_date), now));
   const investorPast = investorMeetings.filter(m => m.status === 'completed' || (m.status === 'scheduled' && isBefore(new Date(m.scheduled_date), now)));
 
+  // Delete portfolio startup handler
+  const deletePortfolioStartup = async (startupId: string) => {
+    try {
+      const { error } = await supabase
+        .from('cohort_startups')
+        .delete()
+        .eq('id', startupId);
+
+      if (error) throw error;
+      
+      toast({ title: 'Startup removed', description: 'The startup has been removed from your portfolio.' });
+      window.location.reload();
+    } catch (error) {
+      console.error('Error deleting portfolio startup:', error);
+      toast({ title: 'Error', description: 'Failed to remove startup from portfolio', variant: 'destructive' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -329,7 +347,7 @@ const AcceleratorDashboard = () => {
                 Add Startup
               </Button>
             </div>
-            <AcceleratorPortfolio startups={portfolioStartups} cohorts={cohorts} totalFundingRaised={profile?.total_funding_raised || 0} onViewStartup={handleViewStartup} />
+            <AcceleratorPortfolio startups={portfolioStartups} cohorts={cohorts} totalFundingRaised={profile?.total_funding_raised || 0} onViewStartup={handleViewStartup} onDeleteStartup={deletePortfolioStartup} />
             <StartupJourneyTracker startups={portfolioStartups} onAddMilestone={addMilestone} onUpdateMilestone={updateMilestone} />
             <MentorAdvisorAssignment startups={portfolioStartups} onAssignMentor={assignMentor} onAssignAdvisor={assignAdvisor} />
           </TabsContent>

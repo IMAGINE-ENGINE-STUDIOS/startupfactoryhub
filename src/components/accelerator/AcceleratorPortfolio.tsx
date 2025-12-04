@@ -6,6 +6,17 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { 
   Search, 
   Grid3X3, 
@@ -15,7 +26,9 @@ import {
   DollarSign,
   ChevronRight,
   GraduationCap,
-  Building2
+  Building2,
+  MoreVertical,
+  Trash2
 } from 'lucide-react';
 
 interface CohortStartup {
@@ -64,18 +77,36 @@ interface AcceleratorPortfolioProps {
   cohorts: Cohort[];
   totalFundingRaised?: number;
   onViewStartup: (startup: CohortStartup) => void;
+  onDeleteStartup?: (startupId: string) => Promise<void>;
 }
 
 export const AcceleratorPortfolio = ({
   startups,
   cohorts,
   totalFundingRaised = 0,
-  onViewStartup
+  onViewStartup,
+  onDeleteStartup
 }: AcceleratorPortfolioProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCohort, setSelectedCohort] = useState<string>('all');
   const [selectedStage, setSelectedStage] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [startupToDelete, setStartupToDelete] = useState<string | null>(null);
+
+  const handleDeleteClick = (e: React.MouseEvent, startupId: string) => {
+    e.stopPropagation();
+    setStartupToDelete(startupId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (startupToDelete && onDeleteStartup) {
+      await onDeleteStartup(startupToDelete);
+    }
+    setDeleteDialogOpen(false);
+    setStartupToDelete(null);
+  };
 
   const getStartupName = (startup: CohortStartup) => {
     if (startup.is_manual_entry) return startup.external_company_name || 'Unknown';
@@ -251,9 +282,31 @@ export const AcceleratorPortfolio = ({
           {filteredStartups.map((startup) => (
             <Card 
               key={startup.id}
-              className="tech-card border-0 hover:border-emerald-500/30 transition-colors cursor-pointer group"
+              className="tech-card border-0 hover:border-emerald-500/30 transition-colors cursor-pointer group relative"
               onClick={() => onViewStartup(startup)}
             >
+              {onDeleteStartup && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="absolute top-2 right-2 h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <MoreVertical className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem 
+                      onClick={(e) => handleDeleteClick(e, startup.id)} 
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" /> Remove from Portfolio
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
               <CardContent className="p-5">
                 <div className="flex items-start gap-4">
                   <Avatar className="w-14 h-14">
@@ -322,7 +375,7 @@ export const AcceleratorPortfolio = ({
               {filteredStartups.map((startup) => (
                 <div 
                   key={startup.id}
-                  className="flex items-center gap-4 p-4 hover:bg-muted/30 cursor-pointer transition-colors"
+                  className="flex items-center gap-4 p-4 hover:bg-muted/30 cursor-pointer transition-colors group"
                   onClick={() => onViewStartup(startup)}
                 >
                   <Avatar className="w-12 h-12">
@@ -344,9 +397,31 @@ export const AcceleratorPortfolio = ({
                     {startup.current_stage}
                   </Badge>
                   <Badge variant="outline">{getCohortName(startup.cohort_id)}</Badge>
-                  <div className="w-32">
+                  <div className="w-32 hidden sm:block">
                     <Progress value={startup.progress_percentage} className="h-2" />
                   </div>
+                  {onDeleteStartup && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="ghost" 
+                          size="icon"
+                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem 
+                          onClick={(e) => handleDeleteClick(e, startup.id)} 
+                          className="text-destructive focus:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" /> Remove
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
                   <ChevronRight className="w-5 h-5 text-muted-foreground" />
                 </div>
               ))}
@@ -354,6 +429,24 @@ export const AcceleratorPortfolio = ({
           </CardContent>
         </Card>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent className="tech-card border-0">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove from Portfolio?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the startup from your portfolio. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete} className="bg-destructive hover:bg-destructive/90">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Empty State */}
       {filteredStartups.length === 0 && (

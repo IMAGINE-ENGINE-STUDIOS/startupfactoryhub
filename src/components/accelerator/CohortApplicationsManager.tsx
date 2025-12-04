@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { 
   Search, 
   FileText, 
@@ -328,11 +329,12 @@ export const CohortApplicationsManager = ({
   );
 
   const renderPlatformKanbanView = () => (
-    <div className="flex gap-4 overflow-x-auto pb-4">
-      {STATUSES.map((status) => {
-        const statusApps = filteredApplications.filter(app => app.status === status.value);
-        return (
-          <div key={status.value} className="flex-shrink-0 w-[280px]">
+    <ScrollArea className="w-full">
+      <div className="flex gap-3 pb-4 min-w-max">
+        {STATUSES.map((status) => {
+          const statusApps = filteredApplications.filter(app => app.status === status.value);
+          return (
+            <div key={status.value} className="flex-shrink-0 w-[220px] sm:w-[240px]">
             <div className="mb-3 flex items-center gap-2">
               <Badge className={status.color}>{status.label}</Badge>
               <span className="text-sm text-muted-foreground">({statusApps.length})</span>
@@ -404,16 +406,19 @@ export const CohortApplicationsManager = ({
             </div>
           </div>
         );
-      })}
-    </div>
+        })}
+      </div>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   );
 
   const renderExternalKanbanView = () => (
-    <div className="flex gap-4 overflow-x-auto pb-4">
-      {STATUSES.map((status) => {
-        const statusApps = filteredPublicApplications.filter(app => app.status === status.value);
-        return (
-          <div key={status.value} className="flex-shrink-0 w-[280px]">
+    <ScrollArea className="w-full">
+      <div className="flex gap-3 pb-4 min-w-max">
+        {STATUSES.map((status) => {
+          const statusApps = filteredPublicApplications.filter(app => app.status === status.value);
+          return (
+            <div key={status.value} className="flex-shrink-0 w-[220px] sm:w-[240px]">
             <div className="mb-3 flex items-center gap-2">
               <Badge className={status.color}>{status.label}</Badge>
               <span className="text-sm text-muted-foreground">({statusApps.length})</span>
@@ -477,8 +482,10 @@ export const CohortApplicationsManager = ({
             </div>
           </div>
         );
-      })}
-    </div>
+        })}
+      </div>
+      <ScrollBar orientation="horizontal" />
+    </ScrollArea>
   );
 
   const renderExternalListView = () => (
@@ -678,45 +685,9 @@ export const CohortApplicationsManager = ({
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative flex-1 max-w-[300px]">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Search startups..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-        <Select value={selectedCohort} onValueChange={setSelectedCohort}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="All Cohorts" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Cohorts</SelectItem>
-            {cohorts.map((cohort) => (
-              <SelectItem key={cohort.id} value={cohort.id}>
-                {cohort.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue placeholder="All Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            {STATUSES.map((status) => (
-              <SelectItem key={status.value} value={status.value}>
-                {status.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        
-        {/* View Toggle */}
-        <div className="flex items-center gap-1 ml-auto">
+      <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3">
+        {/* View Toggle - First on mobile */}
+        <div className="flex items-center gap-1 order-first sm:order-last sm:ml-auto">
           <Button 
             variant={viewMode === 'list' ? 'default' : 'outline'} 
             size="icon"
@@ -732,6 +703,42 @@ export const CohortApplicationsManager = ({
             <LayoutGrid className="w-4 h-4" />
           </Button>
         </div>
+        
+        <div className="relative flex-1 min-w-[200px] max-w-full sm:max-w-[300px]">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="Search startups..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+        <Select value={selectedCohort} onValueChange={setSelectedCohort}>
+          <SelectTrigger className="w-full sm:w-[150px]">
+            <SelectValue placeholder="All Cohorts" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Cohorts</SelectItem>
+            {cohorts.map((cohort) => (
+              <SelectItem key={cohort.id} value={cohort.id}>
+                {cohort.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+          <SelectTrigger className="w-full sm:w-[150px]">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            {STATUSES.map((status) => (
+              <SelectItem key={status.value} value={status.value}>
+                {status.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Tabs for Platform vs External Applications */}
