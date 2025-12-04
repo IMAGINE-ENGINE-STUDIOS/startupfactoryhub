@@ -2513,6 +2513,36 @@ export type Database = {
           },
         ]
       }
+      market_themes: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          ems_score: number | null
+          id: string
+          last_updated: string | null
+          name: string
+          trend_direction: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          ems_score?: number | null
+          id?: string
+          last_updated?: string | null
+          name: string
+          trend_direction?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          ems_score?: number | null
+          id?: string
+          last_updated?: string | null
+          name?: string
+          trend_direction?: string | null
+        }
+        Relationships: []
+      }
       mentor_availability: {
         Row: {
           created_at: string | null
@@ -3748,6 +3778,126 @@ export type Database = {
             columns: ["cohort_startup_id"]
             isOneToOne: false
             referencedRelation: "cohort_startups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      startup_scores: {
+        Row: {
+          cc_capital_efficiency: number | null
+          cc_exit_environment: number | null
+          cc_founder_team_quality: number | null
+          cc_intellectual_property: number | null
+          cc_product_market_fit: number | null
+          cc_recurring_revenue_ratio: number | null
+          cc_regulatory_momentum: number | null
+          cc_strategic_partnerships: number | null
+          cc_supply_chain_stability: number | null
+          cc_tech_replacement_risk: number | null
+          cohort_startup_id: string | null
+          company_coefficient: number | null
+          company_id: string
+          core_score: number | null
+          created_at: string | null
+          id: string
+          market_ems_score: number | null
+          notes: string | null
+          primary_market: string | null
+          scored_at: string | null
+          scored_by: string | null
+          startup_score: number | null
+          traction_score: number | null
+          ts_retention_rate: number | null
+          ts_revenue_growth: number | null
+          ts_sales_cycle_days: number | null
+          ts_stage: string | null
+          ts_user_pilot_count: number | null
+          updated_at: string | null
+          weight_alpha: number | null
+          weight_beta: number | null
+          weight_gamma: number | null
+        }
+        Insert: {
+          cc_capital_efficiency?: number | null
+          cc_exit_environment?: number | null
+          cc_founder_team_quality?: number | null
+          cc_intellectual_property?: number | null
+          cc_product_market_fit?: number | null
+          cc_recurring_revenue_ratio?: number | null
+          cc_regulatory_momentum?: number | null
+          cc_strategic_partnerships?: number | null
+          cc_supply_chain_stability?: number | null
+          cc_tech_replacement_risk?: number | null
+          cohort_startup_id?: string | null
+          company_coefficient?: number | null
+          company_id: string
+          core_score?: number | null
+          created_at?: string | null
+          id?: string
+          market_ems_score?: number | null
+          notes?: string | null
+          primary_market?: string | null
+          scored_at?: string | null
+          scored_by?: string | null
+          startup_score?: number | null
+          traction_score?: number | null
+          ts_retention_rate?: number | null
+          ts_revenue_growth?: number | null
+          ts_sales_cycle_days?: number | null
+          ts_stage?: string | null
+          ts_user_pilot_count?: number | null
+          updated_at?: string | null
+          weight_alpha?: number | null
+          weight_beta?: number | null
+          weight_gamma?: number | null
+        }
+        Update: {
+          cc_capital_efficiency?: number | null
+          cc_exit_environment?: number | null
+          cc_founder_team_quality?: number | null
+          cc_intellectual_property?: number | null
+          cc_product_market_fit?: number | null
+          cc_recurring_revenue_ratio?: number | null
+          cc_regulatory_momentum?: number | null
+          cc_strategic_partnerships?: number | null
+          cc_supply_chain_stability?: number | null
+          cc_tech_replacement_risk?: number | null
+          cohort_startup_id?: string | null
+          company_coefficient?: number | null
+          company_id?: string
+          core_score?: number | null
+          created_at?: string | null
+          id?: string
+          market_ems_score?: number | null
+          notes?: string | null
+          primary_market?: string | null
+          scored_at?: string | null
+          scored_by?: string | null
+          startup_score?: number | null
+          traction_score?: number | null
+          ts_retention_rate?: number | null
+          ts_revenue_growth?: number | null
+          ts_sales_cycle_days?: number | null
+          ts_stage?: string | null
+          ts_user_pilot_count?: number | null
+          updated_at?: string | null
+          weight_alpha?: number | null
+          weight_beta?: number | null
+          weight_gamma?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "startup_scores_cohort_startup_id_fkey"
+            columns: ["cohort_startup_id"]
+            isOneToOne: false
+            referencedRelation: "cohort_startups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "startup_scores_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
