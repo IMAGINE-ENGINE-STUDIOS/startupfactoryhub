@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, X, Users, MessageSquare, Star, TrendingUp, Building, UserCheck } from 'lucide-react';
+import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -22,6 +22,27 @@ interface Match {
   expertise?: string[];
   compatibility_score: number;
   avatar?: string;
+  match_reasons: string[];
+}
+
+interface InvestorProfile {
+  user_id: string;
+  preferred_industries: string[] | null;
+  preferred_stages: string[] | null;
+  investment_range_min: number | null;
+  investment_range_max: number | null;
+  focus_industries: string[] | null;
+}
+
+interface Company {
+  id: string;
+  user_id: string;
+  name: string;
+  description: string | null;
+  industry: string | null;
+  stage: string | null;
+  looking_for: string[] | null;
+  funding_amount: number | null;
 }
 
 export default function MatchingSystem() {
@@ -31,6 +52,7 @@ export default function MatchingSystem() {
   const [connections, setConnections] = useState<any[]>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [userCompany, setUserCompany] = useState<Company | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const { notifyConnection } = useNotifications();
@@ -39,10 +61,16 @@ export default function MatchingSystem() {
     if (user) {
       fetchUserRole();
       fetchUserProfile();
-      fetchMatches();
+      fetchUserCompany();
       fetchConnections();
     }
   }, [user]);
+
+  useEffect(() => {
+    if (user && userRole !== null) {
+      fetchMatches();
+    }
+  }, [user, userRole, userCompany]);
 
   const fetchUserRole = async () => {
     if (!user) return;
@@ -75,114 +103,407 @@ export default function MatchingSystem() {
     setUserProfile(data);
   };
 
+  const fetchUserCompany = async () => {
+    if (!user) return;
+
+    const { data, error } = await supabase
+      .from('companies')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (!error && data) {
+      setUserCompany(data);
+    }
+  };
+
+  // Calculate investor-startup compatibility score
+  const calculateInvestorStartupScore = (
+    company: Company,
+    investorProfile: InvestorProfile
+  ): { score: number; reasons: string[] } => {
+    let score = 40; // Base score
+    const reasons: string[] = [];
+
+    // Industry match (+25 points)
+    const preferredIndustries = investorProfile.preferred_industries || investorProfile.focus_industries || [];
+    if (company.industry && preferredIndustries.some(ind => 
+      ind?.toLowerCase() === company.industry?.toLowerCase() ||
+      company.industry?.toLowerCase().includes(ind?.toLowerCase()) ||
+      ind?.toLowerCase().includes(company.industry?.toLowerCase())
+    )) {
+      score += 25;
+      reasons.push(`Industry match: ${company.industry}`);
+    }
+
+    // Stage match (+25 points)
+    const preferredStages = investorProfile.preferred_stages || [];
+    if (company.stage && preferredStages.some(stage => 
+      stage?.toLowerCase() === company.stage?.toLowerCase()
+    )) {
+      score += 25;
+      reasons.push(`Stage match: ${company.stage}`);
+    }
+
+    // Looking for investor (+15 points)
+    const lookingFor = company.looking_for || [];
+    if (lookingFor.some(l => 
+      l?.toLowerCase().includes('investor') || 
+      l?.toLowerCase().includes('funding') ||
+      l?.toLowerCase().includes('investment')
+    )) {
+      score += 15;
+      reasons.push('Actively seeking investors');
+    }
+
+    // Funding range match (+15 points)
+    const fundingAmount = company.funding_amount || 0;
+    const minRange = investorProfile.investment_range_min || 0;
+    const maxRange = investorProfile.investment_range_max || Infinity;
+    if (fundingAmount >= minRange && fundingAmount <= maxRange) {
+      score += 15;
+      reasons.push('Within investment range');
+    }
+
+    return { score: Math.min(score, 100), reasons };
+  };
+
+  // Calculate startup-investor compatibility score
+  const calculateStartupInvestorScore = (
+    investorProfile: InvestorProfile & { full_name?: string; bio?: string; avatar_url?: string },
+    company: Company
+  ): { score: number; reasons: string[] } => {
+    let score = 40; // Base score
+    const reasons: string[] = [];
+
+    // Investor's preferred industry matches startup's industry (+30 points)
+    const preferredIndustries = investorProfile.preferred_industries || investorProfile.focus_industries || [];
+    if (company.industry && preferredIndustries.some(ind => 
+      ind?.toLowerCase() === company.industry?.toLowerCase() ||
+      company.industry?.toLowerCase().includes(ind?.toLowerCase()) ||
+      ind?.toLowerCase().includes(company.industry?.toLowerCase())
+    )) {
+      score += 30;
+      reasons.push(`Invests in ${company.industry}`);
+    }
+
+    // Investor's preferred stage matches startup's stage (+30 points)
+    const preferredStages = investorProfile.preferred_stages || [];
+    if (company.stage && preferredStages.some(stage => 
+      stage?.toLowerCase() === company.stage?.toLowerCase()
+    )) {
+      score += 30;
+      reasons.push(`Invests in ${company.stage} stage`);
+    }
+
+    // Funding range compatibility (+20 points)
+    const fundingAmount = company.funding_amount || 0;
+    const minRange = investorProfile.investment_range_min || 0;
+    const maxRange = investorProfile.investment_range_max || Infinity;
+    if (fundingAmount >= minRange && fundingAmount <= maxRange) {
+      score += 20;
+      reasons.push('Investment range compatible');
+    }
+
+    return { score: Math.min(score, 100), reasons };
+  };
+
+  // Calculate mentor/advisor-startup compatibility score
+  const calculateMentorStartupScore = (
+    company: Company,
+    mentorSkills: string[]
+  ): { score: number; reasons: string[] } => {
+    let score = 45; // Base score
+    const reasons: string[] = [];
+
+    // Looking for mentor/advisor (+30 points)
+    const lookingFor = company.looking_for || [];
+    if (lookingFor.some(l => 
+      l?.toLowerCase().includes('mentor') || 
+      l?.toLowerCase().includes('advisor') ||
+      l?.toLowerCase().includes('guidance')
+    )) {
+      score += 30;
+      reasons.push('Seeking mentorship');
+    }
+
+    // Industry/skill match (+25 points)
+    if (company.industry && mentorSkills.some(skill => 
+      skill?.toLowerCase().includes(company.industry?.toLowerCase()) ||
+      company.industry?.toLowerCase().includes(skill?.toLowerCase())
+    )) {
+      score += 25;
+      reasons.push(`Expertise in ${company.industry}`);
+    }
+
+    // Early stage preference (+15 points)
+    const earlyStages = ['idea', 'pre-seed', 'seed', 'mvp'];
+    if (company.stage && earlyStages.some(s => company.stage?.toLowerCase().includes(s))) {
+      score += 15;
+      reasons.push('Early-stage startup (ideal for mentoring)');
+    }
+
+    return { score: Math.min(score, 100), reasons };
+  };
+
+  // Calculate startup-mentor compatibility score
+  const calculateStartupMentorScore = (
+    mentorSkills: string[],
+    company: Company
+  ): { score: number; reasons: string[] } => {
+    let score = 45; // Base score
+    const reasons: string[] = [];
+
+    // Startup is looking for mentor/advisor (+30 points)
+    const lookingFor = company.looking_for || [];
+    if (lookingFor.some(l => 
+      l?.toLowerCase().includes('mentor') || 
+      l?.toLowerCase().includes('advisor')
+    )) {
+      score += 30;
+      reasons.push('You are seeking mentorship');
+    }
+
+    // Mentor has relevant industry skills (+30 points)
+    if (company.industry && mentorSkills.some(skill => 
+      skill?.toLowerCase().includes(company.industry?.toLowerCase()) ||
+      company.industry?.toLowerCase().includes(skill?.toLowerCase())
+    )) {
+      score += 30;
+      reasons.push(`Has ${company.industry} expertise`);
+    }
+
+    return { score: Math.min(score, 100), reasons };
+  };
+
   const fetchMatches = async () => {
-    // Fetch mentor/advisor matches (for startups)
+    if (!user) return;
+
+    // For startups/students: fetch mentor and investor matches
     if (!userRole || userRole === 'startup' || userRole === 'student') {
-      // Fetch advisor/mentor role IDs
-      const { data: advisorRoles } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'advisor')
-        .limit(10);
-
-      const advisorIds = advisorRoles?.map(r => r.user_id) || [];
-
-      // Fetch mentor matches
-      const { data: mentors, error: mentorError } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('user_id', advisorIds)
-        .limit(5);
-
-      if (!mentorError && mentors) {
-        const mentorMatches = mentors.map(mentor => ({
-          id: mentor.user_id,
-          name: mentor.full_name || 'Anonymous Mentor',
-          role: 'Mentor',
-          description: mentor.bio || 'Experienced mentor ready to guide your startup journey',
-          industry: mentor.bio?.split(' ')[0] || 'General',
-          expertise: mentor.bio ? [mentor.bio] : [],
-          compatibility_score: Math.floor(Math.random() * 40) + 60,
-          avatar: mentor.avatar_url,
-        }));
-        setMentorMatches(mentorMatches);
-      }
-
-      // Fetch investor role IDs
-      const { data: investorRoles } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'investor')
-        .limit(10);
-
-      const investorIds = investorRoles?.map(r => r.user_id) || [];
-
-      // Fetch investor matches
-      const { data: investors, error: investorError } = await supabase
-        .from('profiles')
-        .select('*')
-        .in('user_id', investorIds)
-        .limit(5);
-
-      if (!investorError && investors) {
-        const investorMatches = investors.map(investor => ({
-          id: investor.user_id,
-          name: investor.full_name || 'Anonymous Investor',
-          role: 'Investor',
-          description: investor.bio || 'Looking for promising startups to invest in',
-          industry: investor.bio?.split(' ')[0] || 'General',
-          expertise: investor.bio ? [investor.bio] : [],
-          compatibility_score: Math.floor(Math.random() * 30) + 70,
-          avatar: investor.avatar_url,
-        }));
-        setInvestorMatches(investorMatches);
-      }
+      await fetchMentorMatchesForStartup();
+      await fetchInvestorMatchesForStartup();
     }
 
-    // Fetch startup matches (for investors, mentors, advisors, accelerators)
-    if (userRole === 'investor' || userRole === 'mentor' || userRole === 'advisor' || userRole === 'accelerator') {
-      const { data: companies, error: companyError } = await supabase
-        .from('companies')
-        .select('*')
-        .limit(10);
-
-      if (!companyError && companies) {
-        // For advisors/mentors: prioritize startups looking for mentorship
-        let filteredCompanies = companies;
-        
-        if (userRole === 'mentor' || userRole === 'advisor') {
-          // Prioritize companies with 'looking_for' including 'advisor' or 'mentor'
-          filteredCompanies = companies.sort((a, b) => {
-            const aLookingFor = a.looking_for || [];
-            const bLookingFor = b.looking_for || [];
-            const aScore = (aLookingFor.includes('advisor') || aLookingFor.includes('mentor')) ? 1 : 0;
-            const bScore = (bLookingFor.includes('advisor') || bLookingFor.includes('mentor')) ? 1 : 0;
-            return bScore - aScore;
-          });
-        }
-
-        // Get profile info for each startup
-        const startupIds = filteredCompanies.map(c => c.user_id);
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('user_id, avatar_url')
-          .in('user_id', startupIds);
-
-        const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
-
-        const startupMatches = filteredCompanies.map(company => ({
-          id: company.user_id,
-          name: company.name,
-          role: 'Startup',
-          description: company.description,
-          industry: company.industry,
-          stage: company.stage,
-          avatar: profileMap.get(company.user_id)?.avatar_url,
-          compatibility_score: Math.floor(Math.random() * 40) + 60,
-        }));
-        setStartupMatches(startupMatches);
-      }
+    // For investors: fetch startup matches
+    if (userRole === 'investor') {
+      await fetchStartupMatchesForInvestor();
     }
+
+    // For mentors/advisors: fetch startup matches
+    if (userRole === 'mentor' || userRole === 'advisor') {
+      await fetchStartupMatchesForMentor();
+    }
+
+    // For accelerators: fetch all types
+    if (userRole === 'accelerator') {
+      await fetchMentorMatchesForStartup();
+      await fetchInvestorMatchesForStartup();
+      await fetchStartupMatchesForInvestor();
+    }
+  };
+
+  const fetchMentorMatchesForStartup = async () => {
+    // Fetch advisor role IDs
+    const { data: advisorRoles } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .in('role', ['advisor', 'mentor'])
+      .limit(20);
+
+    const advisorIds = advisorRoles?.map(r => r.user_id) || [];
+    if (advisorIds.length === 0) return;
+
+    // Fetch mentor profiles and their skills
+    const [profilesResult, skillsResult] = await Promise.all([
+      supabase.from('profiles').select('*').in('user_id', advisorIds),
+      supabase.from('advisor_skills').select('user_id, skill_name').in('user_id', advisorIds)
+    ]);
+
+    const profiles = profilesResult.data || [];
+    const skills = skillsResult.data || [];
+
+    // Group skills by user
+    const skillsByUser = new Map<string, string[]>();
+    skills.forEach(s => {
+      const existing = skillsByUser.get(s.user_id) || [];
+      existing.push(s.skill_name);
+      skillsByUser.set(s.user_id, existing);
+    });
+
+    // Calculate scores and create matches
+    const matches: Match[] = profiles.map(mentor => {
+      const mentorSkills = skillsByUser.get(mentor.user_id) || [];
+      const { score, reasons } = userCompany 
+        ? calculateStartupMentorScore(mentorSkills, userCompany)
+        : { score: 50, reasons: ['Complete your startup profile for better matches'] };
+
+      return {
+        id: mentor.user_id,
+        name: mentor.full_name || 'Anonymous Mentor',
+        role: 'Mentor/Advisor',
+        description: mentor.bio || 'Experienced mentor ready to guide your startup journey',
+        industry: mentorSkills[0] || 'General',
+        expertise: mentorSkills.slice(0, 5),
+        compatibility_score: score,
+        avatar: mentor.avatar_url,
+        match_reasons: reasons.length > 0 ? reasons : ['Available for mentorship'],
+      };
+    });
+
+    // Sort by score descending
+    matches.sort((a, b) => b.compatibility_score - a.compatibility_score);
+    setMentorMatches(matches.slice(0, 10));
+  };
+
+  const fetchInvestorMatchesForStartup = async () => {
+    // Fetch investor role IDs
+    const { data: investorRoles } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', 'investor')
+      .limit(20);
+
+    const investorIds = investorRoles?.map(r => r.user_id) || [];
+    if (investorIds.length === 0) return;
+
+    // Fetch investor profiles and user profiles
+    const [investorProfilesResult, profilesResult] = await Promise.all([
+      supabase.from('investor_profiles').select('*').in('user_id', investorIds),
+      supabase.from('profiles').select('*').in('user_id', investorIds)
+    ]);
+
+    const investorProfiles = investorProfilesResult.data || [];
+    const profiles = profilesResult.data || [];
+
+    // Map profiles by user_id
+    const profileMap = new Map(profiles.map(p => [p.user_id, p]));
+
+    // Calculate scores and create matches
+    const matches: Match[] = investorProfiles.map(investor => {
+      const profile = profileMap.get(investor.user_id);
+      const { score, reasons } = userCompany 
+        ? calculateStartupInvestorScore(investor, userCompany)
+        : { score: 50, reasons: ['Complete your startup profile for better matches'] };
+
+      return {
+        id: investor.user_id,
+        name: profile?.full_name || 'Anonymous Investor',
+        role: 'Investor',
+        description: profile?.bio || 'Looking for promising startups to invest in',
+        industry: investor.preferred_industries?.[0] || investor.focus_industries?.[0] || 'General',
+        expertise: investor.preferred_industries || investor.focus_industries || [],
+        stage: investor.preferred_stages?.[0],
+        compatibility_score: score,
+        avatar: profile?.avatar_url,
+        match_reasons: reasons.length > 0 ? reasons : ['Active investor'],
+      };
+    });
+
+    // Sort by score descending
+    matches.sort((a, b) => b.compatibility_score - a.compatibility_score);
+    setInvestorMatches(matches.slice(0, 10));
+  };
+
+  const fetchStartupMatchesForInvestor = async () => {
+    if (!user) return;
+
+    // Fetch investor's profile for matching criteria
+    const { data: investorProfile } = await supabase
+      .from('investor_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    // Fetch all companies
+    const { data: companies } = await supabase
+      .from('companies')
+      .select('*')
+      .limit(30);
+
+    if (!companies || companies.length === 0) return;
+
+    // Get profile info for each startup
+    const startupIds = companies.map(c => c.user_id);
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, avatar_url')
+      .in('user_id', startupIds);
+
+    const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+
+    // Calculate scores and create matches
+    const matches: Match[] = companies.map(company => {
+      const { score, reasons } = investorProfile
+        ? calculateInvestorStartupScore(company, investorProfile)
+        : { score: 50, reasons: ['Complete your investor profile for better matches'] };
+
+      return {
+        id: company.user_id,
+        name: company.name,
+        role: 'Startup',
+        description: company.description || 'Innovative startup seeking growth',
+        industry: company.industry || 'General',
+        stage: company.stage,
+        avatar: profileMap.get(company.user_id)?.avatar_url,
+        compatibility_score: score,
+        match_reasons: reasons.length > 0 ? reasons : ['Available for investment'],
+      };
+    });
+
+    // Sort by score descending
+    matches.sort((a, b) => b.compatibility_score - a.compatibility_score);
+    setStartupMatches(matches.slice(0, 15));
+  };
+
+  const fetchStartupMatchesForMentor = async () => {
+    if (!user) return;
+
+    // Fetch mentor's skills
+    const { data: mentorSkills } = await supabase
+      .from('advisor_skills')
+      .select('skill_name')
+      .eq('user_id', user.id);
+
+    const skills = mentorSkills?.map(s => s.skill_name) || [];
+
+    // Fetch all companies
+    const { data: companies } = await supabase
+      .from('companies')
+      .select('*')
+      .limit(30);
+
+    if (!companies || companies.length === 0) return;
+
+    // Get profile info for each startup
+    const startupIds = companies.map(c => c.user_id);
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, avatar_url')
+      .in('user_id', startupIds);
+
+    const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
+
+    // Calculate scores and create matches
+    const matches: Match[] = companies.map(company => {
+      const { score, reasons } = calculateMentorStartupScore(company, skills);
+
+      return {
+        id: company.user_id,
+        name: company.name,
+        role: 'Startup',
+        description: company.description || 'Innovative startup seeking guidance',
+        industry: company.industry || 'General',
+        stage: company.stage,
+        avatar: profileMap.get(company.user_id)?.avatar_url,
+        compatibility_score: score,
+        match_reasons: reasons.length > 0 ? reasons : ['Open to mentorship'],
+      };
+    });
+
+    // Sort by score descending
+    matches.sort((a, b) => b.compatibility_score - a.compatibility_score);
+    setStartupMatches(matches.slice(0, 15));
   };
 
   const fetchConnections = async () => {
@@ -330,15 +651,33 @@ export default function MatchingSystem() {
                 {match.compatibility_score}% • {getCompatibilityLabel(match.compatibility_score)} Match
               </span>
             </div>
-            <div className="flex space-x-1 mb-3">
+            <div className="flex flex-wrap gap-1 mb-3">
               <Badge variant="secondary" className="text-xs">{match.industry}</Badge>
               {match.stage && <Badge variant="outline" className="text-xs">{match.stage}</Badge>}
             </div>
           </div>
         </div>
         
-        <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{match.description}</p>
+        <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{match.description}</p>
         
+        {/* Match Reasons */}
+        {match.match_reasons && match.match_reasons.length > 0 && (
+          <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/10">
+            <p className="text-xs font-medium text-foreground mb-2 flex items-center gap-1">
+              <CheckCircle2 className="h-3 w-3 text-primary" />
+              Why this match:
+            </p>
+            <ul className="space-y-1">
+              {match.match_reasons.slice(0, 3).map((reason, idx) => (
+                <li key={idx} className="text-xs text-muted-foreground flex items-center gap-1">
+                  <span className="w-1 h-1 rounded-full bg-primary/50" />
+                  {reason}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         {match.expertise && match.expertise.length > 0 && (
           <div className="mb-4">
             <p className="text-xs font-medium text-foreground mb-2">Expertise:</p>
@@ -379,7 +718,7 @@ export default function MatchingSystem() {
         <CardContent>
           <p className="text-muted-foreground">
             Our AI-powered matching system connects you with the right people based on your profile, 
-            industry, stage, and goals. Discover mentors, investors, and collaborators.
+            industry, stage, and goals. Scores reflect actual compatibility based on your criteria.
           </p>
         </CardContent>
       </Card>
