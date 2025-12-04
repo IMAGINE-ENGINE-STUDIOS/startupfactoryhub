@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw, ChevronDown, Trophy, Trash2 } from 'lucide-react';
+import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw, ChevronDown, Trophy, Trash2, Building2, GraduationCap, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -16,6 +16,7 @@ import { Label } from '@/components/ui/label';
 import TRLTracker from '@/components/TRLTracker';
 import RoadmapChecklist, { ChecklistItem } from '@/components/RoadmapChecklist';
 import JourneyCompletionDialog from '@/components/JourneyCompletionDialog';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface RoadmapStep {
   id: string;
@@ -139,6 +140,34 @@ const roadmapSteps: RoadmapStep[] = [
   }
 ];
 
+interface AcceleratorProgram {
+  id: string;
+  cohort_name: string;
+  accelerator_name: string;
+  accelerator_logo: string | null;
+  progress_percentage: number;
+  current_stage: string;
+  joined_at: string;
+  mentor_assignments: {
+    mentor_id: string;
+    mentor_name: string;
+    mentor_avatar: string | null;
+    focus_area: string | null;
+  }[];
+  advisor_assignments: {
+    advisor_id: string;
+    advisor_name: string;
+    advisor_avatar: string | null;
+    expertise_area: string | null;
+  }[];
+  milestones: {
+    id: string;
+    milestone_name: string;
+    status: string;
+    target_date: string | null;
+  }[];
+}
+
 export default function StartupRoadmap() {
   const [steps, setSteps] = useState<RoadmapStep[]>(roadmapSteps);
   const [currentStage, setCurrentStage] = useState<string>('idea');
@@ -148,6 +177,9 @@ export default function StartupRoadmap() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [expandedSteps, setExpandedSteps] = useState<Set<string>>(new Set(['1']));
   const [showCompletionDialog, setShowCompletionDialog] = useState(false);
+  const [acceleratorPrograms, setAcceleratorPrograms] = useState<AcceleratorProgram[]>([]);
+  const [loadingAccelerators, setLoadingAccelerators] = useState(false);
+  const [acceleratorExpanded, setAcceleratorExpanded] = useState(true);
   const roadmapProgress = useRoadmapProgress(refreshTrigger);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -155,6 +187,7 @@ export default function StartupRoadmap() {
   useEffect(() => {
     if (user) {
       loadUserProgress();
+      fetchAcceleratorPrograms();
     }
   }, [user]);
 
@@ -240,6 +273,147 @@ export default function StartupRoadmap() {
     });
     
     setSteps([...updatedSteps, ...customSteps]);
+  };
+
+  const fetchAcceleratorPrograms = async () => {
+    if (!user) return;
+
+    setLoadingAccelerators(true);
+    try {
+      // Get user's company
+      const { data: company } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!company) {
+        setLoadingAccelerators(false);
+        return;
+      }
+
+      // Get cohort startups for this company
+      const { data: cohortStartups, error } = await supabase
+        .from('cohort_startups')
+        .select(`
+          id,
+          current_stage,
+          progress_percentage,
+          joined_at,
+          cohort_id
+        `)
+        .eq('company_id', company.id);
+
+      if (error) throw error;
+
+      if (!cohortStartups || cohortStartups.length === 0) {
+        setAcceleratorPrograms([]);
+        setLoadingAccelerators(false);
+        return;
+      }
+
+      const programs: AcceleratorProgram[] = [];
+
+      for (const cs of cohortStartups) {
+        // Get cohort and accelerator info
+        const { data: cohort } = await supabase
+          .from('accelerator_cohorts')
+          .select(`
+            name,
+            accelerator_id
+          `)
+          .eq('id', cs.cohort_id)
+          .single();
+
+        if (!cohort) continue;
+
+        const { data: accelerator } = await supabase
+          .from('accelerator_profiles')
+          .select('organization_name, logo_url')
+          .eq('id', cohort.accelerator_id)
+          .single();
+
+        // Get mentor assignments
+        const { data: mentorAssignments } = await supabase
+          .from('startup_mentor_assignments')
+          .select('mentor_id, focus_area')
+          .eq('cohort_startup_id', cs.id)
+          .eq('status', 'active');
+
+        // Get advisor assignments
+        const { data: advisorAssignments } = await supabase
+          .from('startup_advisor_assignments')
+          .select('advisor_id, expertise_area')
+          .eq('cohort_startup_id', cs.id)
+          .eq('status', 'active');
+
+        // Fetch mentor profiles
+        const mentorProfiles = [];
+        if (mentorAssignments && mentorAssignments.length > 0) {
+          const mentorIds = mentorAssignments.map(m => m.mentor_id);
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('user_id, full_name, avatar_url')
+            .in('user_id', mentorIds);
+
+          for (const ma of mentorAssignments) {
+            const profile = profiles?.find(p => p.user_id === ma.mentor_id);
+            mentorProfiles.push({
+              mentor_id: ma.mentor_id,
+              mentor_name: profile?.full_name || 'Unknown',
+              mentor_avatar: profile?.avatar_url,
+              focus_area: ma.focus_area
+            });
+          }
+        }
+
+        // Fetch advisor profiles
+        const advisorProfiles = [];
+        if (advisorAssignments && advisorAssignments.length > 0) {
+          const advisorIds = advisorAssignments.map(a => a.advisor_id);
+          const { data: profiles } = await supabase
+            .from('profiles')
+            .select('user_id, full_name, avatar_url')
+            .in('user_id', advisorIds);
+
+          for (const aa of advisorAssignments) {
+            const profile = profiles?.find(p => p.user_id === aa.advisor_id);
+            advisorProfiles.push({
+              advisor_id: aa.advisor_id,
+              advisor_name: profile?.full_name || 'Unknown',
+              advisor_avatar: profile?.avatar_url,
+              expertise_area: aa.expertise_area
+            });
+          }
+        }
+
+        // Get milestones
+        const { data: milestones } = await supabase
+          .from('startup_journey_milestones')
+          .select('id, milestone_name, status, target_date')
+          .eq('cohort_startup_id', cs.id)
+          .order('target_date', { ascending: true });
+
+        programs.push({
+          id: cs.id,
+          cohort_name: cohort.name,
+          accelerator_name: accelerator?.organization_name || 'Unknown',
+          accelerator_logo: accelerator?.logo_url,
+          progress_percentage: cs.progress_percentage || 0,
+          current_stage: cs.current_stage || 'onboarding',
+          joined_at: cs.joined_at || '',
+          mentor_assignments: mentorProfiles,
+          advisor_assignments: advisorProfiles,
+          milestones: milestones || []
+        });
+      }
+
+      setAcceleratorPrograms(programs);
+    } catch (error) {
+      console.error('Error fetching accelerator programs:', error);
+    } finally {
+      setLoadingAccelerators(false);
+    }
   };
 
   const completeStep = async (stepId: string) => {
@@ -938,6 +1112,166 @@ export default function StartupRoadmap() {
             </Collapsible>
           );
         })}
+
+        {/* Accelerator Program Journeys Section */}
+        {acceleratorPrograms.length > 0 && (
+          <Collapsible open={acceleratorExpanded} onOpenChange={setAcceleratorExpanded}>
+            <Card className="tech-card border-0 border-emerald-500/20">
+              <CardContent className="p-4 sm:p-6">
+                <CollapsibleTrigger asChild>
+                  <div className="flex items-center justify-between cursor-pointer">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                        <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-500" />
+                      </div>
+                      <div>
+                        <h3 className="text-base sm:text-lg font-semibold text-foreground">
+                          Accelerator Program Journeys
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {acceleratorPrograms.length} active program{acceleratorPrograms.length > 1 ? 's' : ''}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronDown className={`w-5 h-5 text-muted-foreground transition-transform ${acceleratorExpanded ? 'rotate-180' : ''}`} />
+                  </div>
+                </CollapsibleTrigger>
+
+                <CollapsibleContent className="mt-6 space-y-6">
+                  {acceleratorPrograms.map((program) => (
+                    <div key={program.id} className="p-4 rounded-lg bg-background/50 border border-border/50 space-y-4">
+                      {/* Program Header */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-10 h-10">
+                            <AvatarImage src={program.accelerator_logo || undefined} />
+                            <AvatarFallback className="bg-emerald-500/20 text-emerald-400">
+                              {program.accelerator_name.charAt(0)}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h4 className="font-semibold">{program.cohort_name}</h4>
+                            <p className="text-sm text-muted-foreground">{program.accelerator_name}</p>
+                          </div>
+                        </div>
+                        <Badge className={`
+                          ${program.current_stage === 'active' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : ''}
+                          ${program.current_stage === 'onboarding' ? 'bg-blue-500/20 text-blue-400 border-blue-500/30' : ''}
+                          ${program.current_stage === 'graduated' ? 'bg-purple-500/20 text-purple-400 border-purple-500/30' : ''}
+                        `}>
+                          {program.current_stage}
+                        </Badge>
+                      </div>
+
+                      {/* Progress */}
+                      <div>
+                        <div className="flex items-center justify-between text-sm mb-2">
+                          <span className="text-muted-foreground">Program Progress</span>
+                          <span className="font-medium">{program.progress_percentage}%</span>
+                        </div>
+                        <Progress value={program.progress_percentage} className="h-2" />
+                      </div>
+
+                      {/* Assigned Mentors & Advisors */}
+                      {(program.mentor_assignments.length > 0 || program.advisor_assignments.length > 0) && (
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* Mentors */}
+                          {program.mentor_assignments.length > 0 && (
+                            <div className="space-y-2">
+                              <h5 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                                <Users className="w-3 h-3" /> Assigned Mentors
+                              </h5>
+                              <div className="flex flex-wrap gap-2">
+                                {program.mentor_assignments.map((mentor) => (
+                                  <div key={mentor.mentor_id} className="flex items-center gap-2 px-2 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
+                                    <Avatar className="w-5 h-5">
+                                      <AvatarImage src={mentor.mentor_avatar || undefined} />
+                                      <AvatarFallback className="text-xs bg-blue-500/20 text-blue-400">
+                                        {mentor.mentor_name.charAt(0)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-xs font-medium">{mentor.mentor_name}</span>
+                                    {mentor.focus_area && (
+                                      <Badge variant="outline" className="text-xs h-4 px-1">{mentor.focus_area}</Badge>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Advisors */}
+                          {program.advisor_assignments.length > 0 && (
+                            <div className="space-y-2">
+                              <h5 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                                <GraduationCap className="w-3 h-3" /> Assigned Advisors
+                              </h5>
+                              <div className="flex flex-wrap gap-2">
+                                {program.advisor_assignments.map((advisor) => (
+                                  <div key={advisor.advisor_id} className="flex items-center gap-2 px-2 py-1 rounded-full bg-purple-500/10 border border-purple-500/20">
+                                    <Avatar className="w-5 h-5">
+                                      <AvatarImage src={advisor.advisor_avatar || undefined} />
+                                      <AvatarFallback className="text-xs bg-purple-500/20 text-purple-400">
+                                        {advisor.advisor_name.charAt(0)}
+                                      </AvatarFallback>
+                                    </Avatar>
+                                    <span className="text-xs font-medium">{advisor.advisor_name}</span>
+                                    {advisor.expertise_area && (
+                                      <Badge variant="outline" className="text-xs h-4 px-1">{advisor.expertise_area}</Badge>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Milestones */}
+                      {program.milestones.length > 0 && (
+                        <div className="space-y-2">
+                          <h5 className="text-xs font-medium text-muted-foreground flex items-center gap-1">
+                            <Calendar className="w-3 h-3" /> Program Milestones
+                          </h5>
+                          <div className="space-y-2">
+                            {program.milestones.slice(0, 5).map((milestone) => (
+                              <div key={milestone.id} className="flex items-center gap-3 p-2 rounded-lg bg-muted/30">
+                                <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                                  milestone.status === 'completed' ? 'bg-emerald-500/20' :
+                                  milestone.status === 'in_progress' ? 'bg-blue-500/20' :
+                                  'bg-muted'
+                                }`}>
+                                  {milestone.status === 'completed' ? (
+                                    <CheckCircle className="w-4 h-4 text-emerald-500" />
+                                  ) : (
+                                    <Circle className={`w-4 h-4 ${milestone.status === 'in_progress' ? 'text-blue-500' : 'text-muted-foreground'}`} />
+                                  )}
+                                </div>
+                                <span className={`text-sm flex-1 ${milestone.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+                                  {milestone.milestone_name}
+                                </span>
+                                {milestone.target_date && (
+                                  <span className="text-xs text-muted-foreground">
+                                    {new Date(milestone.target_date).toLocaleDateString()}
+                                  </span>
+                                )}
+                              </div>
+                            ))}
+                            {program.milestones.length > 5 && (
+                              <p className="text-xs text-muted-foreground text-center">
+                                +{program.milestones.length - 5} more milestones
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </CollapsibleContent>
+              </CardContent>
+            </Card>
+          </Collapsible>
+        )}
         
         {/* Add Custom Step Card */}
         <Card className="tech-card border-0 border-dashed border-2 border-primary/20 hover:border-primary/40 transition-colors">
