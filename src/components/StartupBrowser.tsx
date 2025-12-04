@@ -27,6 +27,7 @@ interface Company {
   logo_url?: string;
   pitch_deck_url?: string;
   website?: string;
+  founded_year?: number;
 }
 
 export default function StartupBrowser() {

@@ -14,8 +14,10 @@ import {
   FileText, 
   ExternalLink,
   Heart,
-  Calendar
+  Calendar,
+  MessageSquare
 } from 'lucide-react';
+import ProfilePostsMosaic from './ProfilePostsMosaic';
 
 interface Company {
   id: string;
@@ -30,6 +32,8 @@ interface Company {
   logo_url?: string;
   pitch_deck_url?: string;
   looking_for?: string[];
+  user_id?: string;
+  founded_year?: number;
 }
 
 interface StartupProfileDialogProps {
@@ -170,9 +174,10 @@ export default function StartupProfileDialog({
 
         {/* Tabs */}
         <Tabs defaultValue="about" className="mt-4">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="about">About</TabsTrigger>
             <TabsTrigger value="details">Details</TabsTrigger>
+            <TabsTrigger value="posts">Posts</TabsTrigger>
             <TabsTrigger value="deck">Pitch Deck</TabsTrigger>
           </TabsList>
 
@@ -208,6 +213,10 @@ export default function StartupProfileDialog({
                 <span className="text-sm font-medium">{company.stage || 'Not specified'}</span>
               </div>
               <div className="flex justify-between py-2 border-b border-border/50">
+                <span className="text-sm text-muted-foreground">Founded</span>
+                <span className="text-sm font-medium">{company.founded_year || 'Not specified'}</span>
+              </div>
+              <div className="flex justify-between py-2 border-b border-border/50">
                 <span className="text-sm text-muted-foreground">Location</span>
                 <span className="text-sm font-medium">{company.location || 'Not specified'}</span>
               </div>
@@ -220,6 +229,22 @@ export default function StartupProfileDialog({
                 <span className="text-sm font-medium">{formatCurrency(company.funding_amount || 0)}</span>
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="posts" className="mt-4">
+            {company.user_id ? (
+              <div className="max-h-[400px] overflow-y-auto">
+                <ProfilePostsMosaic userId={company.user_id} />
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <MessageSquare className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-30" />
+                <p className="text-muted-foreground">No posts available</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  This startup hasn't shared any posts yet
+                </p>
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="deck" className="mt-4">
