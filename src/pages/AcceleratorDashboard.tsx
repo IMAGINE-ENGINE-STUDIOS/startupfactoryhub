@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { 
   Users, FileText, Briefcase, Calendar as CalendarIcon, Globe, MessageCircle, 
   Building2, Plus, Clock, MapPin, Network, BarChart, Presentation, 
-  ChevronDown, ChevronUp, Check, X, User
+  ChevronDown, Check, X, Bell
 } from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
@@ -80,18 +80,6 @@ const AcceleratorDashboard = () => {
   // Meeting states
   const [startupMeetings, setStartupMeetings] = useState<any[]>([]);
   const [investorMeetings, setInvestorMeetings] = useState<any[]>([]);
-  const [startupSectionsOpen, setStartupSectionsOpen] = useState({
-    incoming: true,
-    sent: true,
-    upcoming: true,
-    past: false
-  });
-  const [investorSectionsOpen, setInvestorSectionsOpen] = useState({
-    incoming: true,
-    sent: true,
-    upcoming: true,
-    past: false
-  });
 
   // Fetch pitch meetings for accelerator
   useEffect(() => {
@@ -249,7 +237,7 @@ const AcceleratorDashboard = () => {
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-11 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Social</span>
@@ -290,10 +278,6 @@ const AcceleratorDashboard = () => {
               <TabsTrigger value="resources" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Resources</span>
-              </TabsTrigger>
-              <TabsTrigger value="profile" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <User className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Profile</span>
               </TabsTrigger>
             </TabsList>
           </div>
@@ -337,12 +321,17 @@ const AcceleratorDashboard = () => {
             <MentorAdvisorAssignment startups={portfolioStartups} onAssignMentor={assignMentor} onAssignAdvisor={assignAdvisor} />
           </TabsContent>
 
-          {/* Meetings Tab - Two Column Layout */}
+          {/* Meetings Tab - Two Column Layout (Startup Dashboard Style) */}
           <TabsContent value="meetings" className="space-y-6">
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-              <div>
-                <h2 className="text-2xl font-bold">Meetings</h2>
-                <p className="text-muted-foreground">Manage meetings with startups and investors</p>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                  <Presentation className="h-5 w-5 text-emerald-500" />
+                </div>
+                <div>
+                  <h2 className="text-lg font-semibold text-foreground">Meetings</h2>
+                  <p className="text-xs text-muted-foreground">Manage meetings with startups and investors</p>
+                </div>
               </div>
               <Button 
                 onClick={() => setSchedulePitchDialogOpen(true)} 
@@ -356,125 +345,174 @@ const AcceleratorDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Left Column - Startup Pitches */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Building2 className="h-5 w-5 text-emerald-500" />
-                  Startup Pitches
-                </h3>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
+                    <Building2 className="h-5 w-5 text-emerald-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Startup Pitches</h3>
+                    <p className="text-xs text-muted-foreground">Meetings with startups</p>
+                  </div>
+                </div>
 
                 {/* Incoming Requests */}
-                <Collapsible open={startupSectionsOpen.incoming} onOpenChange={(open) => setStartupSectionsOpen(prev => ({ ...prev, incoming: open }))}>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
-                      <span className="flex items-center gap-2">
+                <Collapsible defaultOpen className="tech-card rounded-xl border-0">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                         <Clock className="h-4 w-4 text-amber-500" />
-                        Incoming Requests
-                        {startupIncoming.length > 0 && <Badge variant="secondary">{startupIncoming.length}</Badge>}
-                      </span>
-                      {startupSectionsOpen.incoming ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </Button>
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-sm font-medium">Incoming Requests</h4>
+                        <p className="text-xs text-muted-foreground">From startups</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {startupIncoming.length > 0 && <Badge variant="secondary">{startupIncoming.length}</Badge>}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                    </div>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2 mt-2">
-                    {startupIncoming.length > 0 ? startupIncoming.map((meeting) => (
-                      <Card key={meeting.id} className="tech-card border-0">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">{meeting.company?.name || 'Unknown Startup'}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {format(new Date(meeting.scheduled_date), 'MMM d, yyyy h:mm a')}
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline" onClick={() => handleAcceptMeeting(meeting.id)}>
-                                <Check className="h-4 w-4" />
-                              </Button>
-                              <Button size="sm" variant="destructive" onClick={() => handleRejectMeeting(meeting.id)}>
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )) : (
-                      <p className="text-sm text-muted-foreground p-3">No incoming requests</p>
+                  <CollapsibleContent className="px-4 pb-4">
+                    {startupIncoming.length > 0 ? (
+                      <div className="space-y-2">
+                        {startupIncoming.map((meeting) => (
+                          <Card key={meeting.id} className="tech-card border-0">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium">{meeting.company?.name || 'Unknown Startup'}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {format(new Date(meeting.scheduled_date), 'MMM d, yyyy h:mm a')}
+                                  </p>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button size="sm" variant="outline" onClick={() => handleAcceptMeeting(meeting.id)}>
+                                    <Check className="h-4 w-4" />
+                                  </Button>
+                                  <Button size="sm" variant="destructive" onClick={() => handleRejectMeeting(meeting.id)}>
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">No incoming requests</p>
+                      </div>
                     )}
                   </CollapsibleContent>
                 </Collapsible>
 
                 {/* Sent Requests */}
-                <Collapsible open={startupSectionsOpen.sent} onOpenChange={(open) => setStartupSectionsOpen(prev => ({ ...prev, sent: open }))}>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
-                      <span className="flex items-center gap-2">
+                <Collapsible defaultOpen className="tech-card rounded-xl border-0">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
                         <Presentation className="h-4 w-4 text-blue-500" />
-                        Sent Requests
-                        {startupSent.length > 0 && <Badge variant="secondary">{startupSent.length}</Badge>}
-                      </span>
-                      {startupSectionsOpen.sent ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </Button>
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-sm font-medium">Sent Requests</h4>
+                        <p className="text-xs text-muted-foreground">Awaiting response</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {startupSent.length > 0 && <Badge variant="secondary">{startupSent.length}</Badge>}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                    </div>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2 mt-2">
-                    {startupSent.length > 0 ? startupSent.map((meeting) => (
-                      <PitchMeetingCard 
-                        key={meeting.id}
-                        meeting={meeting}
-                        variant="upcoming"
-                        viewerType="investor"
-                      />
-                    )) : (
-                      <p className="text-sm text-muted-foreground p-3">No sent requests</p>
+                  <CollapsibleContent className="px-4 pb-4">
+                    {startupSent.length > 0 ? (
+                      <div className="space-y-2">
+                        {startupSent.map((meeting) => (
+                          <PitchMeetingCard 
+                            key={meeting.id}
+                            meeting={meeting}
+                            variant="upcoming"
+                            viewerType="investor"
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">No sent requests</p>
+                      </div>
                     )}
                   </CollapsibleContent>
                 </Collapsible>
 
                 {/* Upcoming Pitches */}
-                <Collapsible open={startupSectionsOpen.upcoming} onOpenChange={(open) => setStartupSectionsOpen(prev => ({ ...prev, upcoming: open }))}>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
-                      <span className="flex items-center gap-2">
+                <Collapsible defaultOpen className="tech-card rounded-xl border-0">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                         <CalendarIcon className="h-4 w-4 text-emerald-500" />
-                        Upcoming Pitches
-                        {startupUpcoming.length > 0 && <Badge variant="secondary">{startupUpcoming.length}</Badge>}
-                      </span>
-                      {startupSectionsOpen.upcoming ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </Button>
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-sm font-medium">Upcoming Pitches</h4>
+                        <p className="text-xs text-muted-foreground">Scheduled meetings</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {startupUpcoming.length > 0 && <Badge variant="secondary">{startupUpcoming.length}</Badge>}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                    </div>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2 mt-2">
-                    {startupUpcoming.length > 0 ? startupUpcoming.map((meeting) => (
-                      <PitchMeetingCard 
-                        key={meeting.id}
-                        meeting={meeting}
-                        variant="upcoming"
-                        viewerType="investor"
-                      />
-                    )) : (
-                      <p className="text-sm text-muted-foreground p-3">No upcoming pitches</p>
+                  <CollapsibleContent className="px-4 pb-4">
+                    {startupUpcoming.length > 0 ? (
+                      <div className="space-y-2">
+                        {startupUpcoming.map((meeting) => (
+                          <PitchMeetingCard 
+                            key={meeting.id}
+                            meeting={meeting}
+                            variant="upcoming"
+                            viewerType="investor"
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">No upcoming pitches</p>
+                      </div>
                     )}
                   </CollapsibleContent>
                 </Collapsible>
 
                 {/* Past Pitches */}
-                <Collapsible open={startupSectionsOpen.past} onOpenChange={(open) => setStartupSectionsOpen(prev => ({ ...prev, past: open }))}>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
-                      <span className="flex items-center gap-2">
+                <Collapsible className="tech-card rounded-xl border-0">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
                         <Clock className="h-4 w-4 text-muted-foreground" />
-                        Past Pitches
-                        {startupPast.length > 0 && <Badge variant="secondary">{startupPast.length}</Badge>}
-                      </span>
-                      {startupSectionsOpen.past ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </Button>
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-sm font-medium">Past Pitches</h4>
+                        <p className="text-xs text-muted-foreground">Completed meetings</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {startupPast.length > 0 && <Badge variant="secondary">{startupPast.length}</Badge>}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                    </div>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2 mt-2">
-                    {startupPast.length > 0 ? startupPast.map((meeting) => (
-                      <PitchMeetingCard 
-                        key={meeting.id}
-                        meeting={meeting}
-                        variant="past"
-                        viewerType="investor"
-                      />
-                    )) : (
-                      <p className="text-sm text-muted-foreground p-3">No past pitches</p>
+                  <CollapsibleContent className="px-4 pb-4">
+                    {startupPast.length > 0 ? (
+                      <div className="space-y-2">
+                        {startupPast.map((meeting) => (
+                          <PitchMeetingCard 
+                            key={meeting.id}
+                            meeting={meeting}
+                            variant="past"
+                            viewerType="investor"
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">No past pitches</p>
+                      </div>
                     )}
                   </CollapsibleContent>
                 </Collapsible>
@@ -482,125 +520,174 @@ const AcceleratorDashboard = () => {
 
               {/* Right Column - Investor Meetings */}
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Users className="h-5 w-5 text-blue-500" />
-                  Investor Meetings
-                </h3>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                    <Users className="h-5 w-5 text-blue-500" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Investor Meetings</h3>
+                    <p className="text-xs text-muted-foreground">Meetings with investors</p>
+                  </div>
+                </div>
 
                 {/* Incoming Requests */}
-                <Collapsible open={investorSectionsOpen.incoming} onOpenChange={(open) => setInvestorSectionsOpen(prev => ({ ...prev, incoming: open }))}>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
-                      <span className="flex items-center gap-2">
+                <Collapsible defaultOpen className="tech-card rounded-xl border-0">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
                         <Clock className="h-4 w-4 text-amber-500" />
-                        Incoming Requests
-                        {investorIncoming.length > 0 && <Badge variant="secondary">{investorIncoming.length}</Badge>}
-                      </span>
-                      {investorSectionsOpen.incoming ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </Button>
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-sm font-medium">Incoming Requests</h4>
+                        <p className="text-xs text-muted-foreground">From investors</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {investorIncoming.length > 0 && <Badge variant="secondary">{investorIncoming.length}</Badge>}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                    </div>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2 mt-2">
-                    {investorIncoming.length > 0 ? investorIncoming.map((meeting) => (
-                      <Card key={meeting.id} className="tech-card border-0">
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <p className="font-medium">{meeting.investor_profile?.full_name || 'Unknown Investor'}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {format(new Date(meeting.scheduled_date), 'MMM d, yyyy h:mm a')}
-                              </p>
-                            </div>
-                            <div className="flex gap-2">
-                              <Button size="sm" variant="outline" onClick={() => handleAcceptMeeting(meeting.id)}>
-                                <Check className="h-4 w-4" />
-                              </Button>
-                              <Button size="sm" variant="destructive" onClick={() => handleRejectMeeting(meeting.id)}>
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    )) : (
-                      <p className="text-sm text-muted-foreground p-3">No incoming requests</p>
+                  <CollapsibleContent className="px-4 pb-4">
+                    {investorIncoming.length > 0 ? (
+                      <div className="space-y-2">
+                        {investorIncoming.map((meeting) => (
+                          <Card key={meeting.id} className="tech-card border-0">
+                            <CardContent className="p-4">
+                              <div className="flex items-center justify-between">
+                                <div>
+                                  <p className="font-medium">{meeting.investor_profile?.full_name || 'Unknown Investor'}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {format(new Date(meeting.scheduled_date), 'MMM d, yyyy h:mm a')}
+                                  </p>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button size="sm" variant="outline" onClick={() => handleAcceptMeeting(meeting.id)}>
+                                    <Check className="h-4 w-4" />
+                                  </Button>
+                                  <Button size="sm" variant="destructive" onClick={() => handleRejectMeeting(meeting.id)}>
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">No incoming requests</p>
+                      </div>
                     )}
                   </CollapsibleContent>
                 </Collapsible>
 
                 {/* Sent Requests */}
-                <Collapsible open={investorSectionsOpen.sent} onOpenChange={(open) => setInvestorSectionsOpen(prev => ({ ...prev, sent: open }))}>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
-                      <span className="flex items-center gap-2">
+                <Collapsible defaultOpen className="tech-card rounded-xl border-0">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
                         <Presentation className="h-4 w-4 text-blue-500" />
-                        Sent Requests
-                        {investorSent.length > 0 && <Badge variant="secondary">{investorSent.length}</Badge>}
-                      </span>
-                      {investorSectionsOpen.sent ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </Button>
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-sm font-medium">Sent Requests</h4>
+                        <p className="text-xs text-muted-foreground">Awaiting response</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {investorSent.length > 0 && <Badge variant="secondary">{investorSent.length}</Badge>}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                    </div>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2 mt-2">
-                    {investorSent.length > 0 ? investorSent.map((meeting) => (
-                      <PitchMeetingCard 
-                        key={meeting.id}
-                        meeting={meeting}
-                        variant="upcoming"
-                        viewerType="startup"
-                      />
-                    )) : (
-                      <p className="text-sm text-muted-foreground p-3">No sent requests</p>
+                  <CollapsibleContent className="px-4 pb-4">
+                    {investorSent.length > 0 ? (
+                      <div className="space-y-2">
+                        {investorSent.map((meeting) => (
+                          <PitchMeetingCard 
+                            key={meeting.id}
+                            meeting={meeting}
+                            variant="upcoming"
+                            viewerType="startup"
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">No sent requests</p>
+                      </div>
                     )}
                   </CollapsibleContent>
                 </Collapsible>
 
                 {/* Upcoming Meetings */}
-                <Collapsible open={investorSectionsOpen.upcoming} onOpenChange={(open) => setInvestorSectionsOpen(prev => ({ ...prev, upcoming: open }))}>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
-                      <span className="flex items-center gap-2">
+                <Collapsible defaultOpen className="tech-card rounded-xl border-0">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                         <CalendarIcon className="h-4 w-4 text-emerald-500" />
-                        Upcoming Meetings
-                        {investorUpcoming.length > 0 && <Badge variant="secondary">{investorUpcoming.length}</Badge>}
-                      </span>
-                      {investorSectionsOpen.upcoming ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </Button>
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-sm font-medium">Upcoming Meetings</h4>
+                        <p className="text-xs text-muted-foreground">Scheduled meetings</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {investorUpcoming.length > 0 && <Badge variant="secondary">{investorUpcoming.length}</Badge>}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                    </div>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2 mt-2">
-                    {investorUpcoming.length > 0 ? investorUpcoming.map((meeting) => (
-                      <PitchMeetingCard 
-                        key={meeting.id}
-                        meeting={meeting}
-                        variant="upcoming"
-                        viewerType="startup"
-                      />
-                    )) : (
-                      <p className="text-sm text-muted-foreground p-3">No upcoming meetings</p>
+                  <CollapsibleContent className="px-4 pb-4">
+                    {investorUpcoming.length > 0 ? (
+                      <div className="space-y-2">
+                        {investorUpcoming.map((meeting) => (
+                          <PitchMeetingCard 
+                            key={meeting.id}
+                            meeting={meeting}
+                            variant="upcoming"
+                            viewerType="startup"
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">No upcoming meetings</p>
+                      </div>
                     )}
                   </CollapsibleContent>
                 </Collapsible>
 
                 {/* Past Meetings */}
-                <Collapsible open={investorSectionsOpen.past} onOpenChange={(open) => setInvestorSectionsOpen(prev => ({ ...prev, past: open }))}>
-                  <CollapsibleTrigger asChild>
-                    <Button variant="ghost" className="w-full justify-between p-3 h-auto tech-card border-0">
-                      <span className="flex items-center gap-2">
+                <Collapsible className="tech-card rounded-xl border-0">
+                  <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
                         <Clock className="h-4 w-4 text-muted-foreground" />
-                        Past Meetings
-                        {investorPast.length > 0 && <Badge variant="secondary">{investorPast.length}</Badge>}
-                      </span>
-                      {investorSectionsOpen.past ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-                    </Button>
+                      </div>
+                      <div className="text-left">
+                        <h4 className="text-sm font-medium">Past Meetings</h4>
+                        <p className="text-xs text-muted-foreground">Completed meetings</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {investorPast.length > 0 && <Badge variant="secondary">{investorPast.length}</Badge>}
+                      <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform group-data-[state=open]:rotate-180" />
+                    </div>
                   </CollapsibleTrigger>
-                  <CollapsibleContent className="space-y-2 mt-2">
-                    {investorPast.length > 0 ? investorPast.map((meeting) => (
-                      <PitchMeetingCard 
-                        key={meeting.id}
-                        meeting={meeting}
-                        variant="past"
-                        viewerType="startup"
-                      />
-                    )) : (
-                      <p className="text-sm text-muted-foreground p-3">No past meetings</p>
+                  <CollapsibleContent className="px-4 pb-4">
+                    {investorPast.length > 0 ? (
+                      <div className="space-y-2">
+                        {investorPast.map((meeting) => (
+                          <PitchMeetingCard 
+                            key={meeting.id}
+                            meeting={meeting}
+                            variant="past"
+                            viewerType="startup"
+                          />
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                        <p className="text-sm text-muted-foreground">No past meetings</p>
+                      </div>
                     )}
                   </CollapsibleContent>
                 </Collapsible>
@@ -689,11 +776,6 @@ const AcceleratorDashboard = () => {
             <div className="absolute inset-0">
               <GlobalResourcesMap />
             </div>
-          </TabsContent>
-
-          {/* Profile Tab */}
-          <TabsContent value="profile" className="space-y-6">
-            <AcceleratorProfileView />
           </TabsContent>
         </Tabs>
       </div>
