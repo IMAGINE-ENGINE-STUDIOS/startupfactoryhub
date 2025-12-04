@@ -282,7 +282,7 @@ export const AcceleratorPortfolio = ({
           {filteredStartups.map((startup) => (
             <Card 
               key={startup.id}
-              className="tech-card border-0 hover:border-emerald-500/30 transition-colors cursor-pointer group relative"
+              className="tech-card border-0 cursor-pointer group relative"
               onClick={() => onViewStartup(startup)}
             >
               {onDeleteStartup && (
@@ -375,7 +375,7 @@ export const AcceleratorPortfolio = ({
               {filteredStartups.map((startup) => (
                 <div 
                   key={startup.id}
-                  className="flex items-center gap-4 p-4 hover:bg-muted/30 cursor-pointer transition-colors group"
+                  className="flex items-center gap-4 p-4 hover:bg-muted/30 cursor-pointer group"
                   onClick={() => onViewStartup(startup)}
                 >
                   <Avatar className="w-12 h-12">
