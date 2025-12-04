@@ -43,6 +43,7 @@ interface AcceleratorSchedulePitchDialogProps {
   applications?: any[];
   cohorts: { id: string; name: string }[];
   onPitchScheduled?: () => void;
+  preSelectedApplication?: any;
 }
 
 export default function AcceleratorSchedulePitchDialog({
@@ -51,7 +52,8 @@ export default function AcceleratorSchedulePitchDialog({
   portfolioStartups,
   applications = [],
   cohorts,
-  onPitchScheduled
+  onPitchScheduled,
+  preSelectedApplication
 }: AcceleratorSchedulePitchDialogProps) {
   const { user } = useAuth();
   const { toast } = useToast();
@@ -68,6 +70,19 @@ export default function AcceleratorSchedulePitchDialog({
       buildStartupList();
     }
   }, [open, portfolioStartups, applications]);
+
+  // Pre-select startup from application if provided
+  useEffect(() => {
+    if (preSelectedApplication && startups.length > 0) {
+      const matchingStartup = startups.find(
+        s => s.company_id === preSelectedApplication.startup_id || 
+             s.id === `application-${preSelectedApplication.id}`
+      );
+      if (matchingStartup) {
+        setSelectedStartupId(matchingStartup.id);
+      }
+    }
+  }, [preSelectedApplication, startups]);
 
   const buildStartupList = async () => {
     setLoading(true);

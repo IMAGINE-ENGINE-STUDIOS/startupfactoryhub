@@ -131,7 +131,7 @@ export const StartupJourneyTracker = ({
           return (
             <Card 
               key={startup.id}
-              className="glass-morphism border-border/50 hover:border-emerald-500/30 transition-all duration-300"
+              className="tech-card border-0 hover:border-emerald-500/30 transition-all duration-300"
             >
               <CardHeader className="pb-3">
                 <div className="flex items-start justify-between">
@@ -235,7 +235,7 @@ export const StartupJourneyTracker = ({
 
       {/* Empty State */}
       {startups.length === 0 && (
-        <Card className="glass-morphism border-border/50">
+        <Card className="tech-card border-0">
           <CardContent className="flex flex-col items-center justify-center py-16">
             <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mb-4">
               <Target className="w-8 h-8 text-emerald-500" />
@@ -250,7 +250,7 @@ export const StartupJourneyTracker = ({
 
       {/* Detailed Startup View Dialog */}
       <Dialog open={!!selectedStartup && !addMilestoneOpen} onOpenChange={() => setSelectedStartup(null)}>
-        <DialogContent className="glass-morphism border-border/50 max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="tech-card border-0 max-w-2xl max-h-[80vh] overflow-y-auto !transition-none">
           {selectedStartup && (
             <>
               <DialogHeader>
@@ -369,7 +369,7 @@ export const StartupJourneyTracker = ({
 
       {/* Add Milestone Dialog */}
       <Dialog open={addMilestoneOpen} onOpenChange={setAddMilestoneOpen}>
-        <DialogContent className="glass-morphism border-border/50">
+        <DialogContent className="tech-card border-0 !transition-none">
           <DialogHeader>
             <DialogTitle>Add Milestone</DialogTitle>
           </DialogHeader>
