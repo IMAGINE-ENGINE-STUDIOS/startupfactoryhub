@@ -143,8 +143,8 @@ export const CohortDetailsDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl tech-card">
-        <DialogHeader>
+      <DialogContent className="max-w-2xl glass-morphism !transition-none">
+        <DialogHeader className="!transition-none">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {isEditing ? (
