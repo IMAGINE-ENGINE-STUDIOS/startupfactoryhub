@@ -252,8 +252,8 @@ export default function StartupBrowser() {
           ) : filteredCompanies.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredCompanies.map((company) => (
-                <Card key={company.id} className="tech-card border-0 hover:scale-[1.01] transition-all">
-                  <CardContent className="p-4 space-y-4">
+                <Card key={company.id} className="tech-card border-0 hover:shadow-lg transition-shadow h-full">
+                  <CardContent className="p-4 flex flex-col h-full">
                     <div className="flex items-start gap-3">
                       <Avatar className="h-12 w-12">
                         <AvatarFallback className="bg-gradient-primary text-primary-foreground">
@@ -276,11 +276,11 @@ export default function StartupBrowser() {
                       )}
                     </div>
 
-                    <p className="text-sm text-muted-foreground line-clamp-3">
+                    <p className="text-sm text-muted-foreground line-clamp-3 mt-4">
                       {company.description || 'No description available'}
                     </p>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 mt-4 flex-1">
                       <div className="flex items-center gap-2">
                         <Badge variant="secondary" className="text-xs">
                           {company.stage || 'Unspecified'}
@@ -290,37 +290,43 @@ export default function StartupBrowser() {
                         </Badge>
                       </div>
 
-                      {company.team_size && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Users className="h-3 w-3" />
-                          <span>{company.team_size} team members</span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground min-h-[20px]">
+                        {company.team_size ? (
+                          <>
+                            <Users className="h-3 w-3" />
+                            <span>{company.team_size} team members</span>
+                          </>
+                        ) : null}
+                      </div>
 
-                      {company.funding_amount && (
-                        <div className="flex items-center gap-2 text-xs font-medium text-primary">
-                          <DollarSign className="h-3 w-3" />
-                          <span>Seeking: {formatCurrency(company.funding_amount)}</span>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-2 text-xs font-medium text-primary min-h-[20px]">
+                        {company.funding_amount ? (
+                          <>
+                            <DollarSign className="h-3 w-3" />
+                            <span>Seeking: {formatCurrency(company.funding_amount)}</span>
+                          </>
+                        ) : null}
+                      </div>
 
-                      {company.looking_for && company.looking_for.length > 0 && (
-                        <div className="flex flex-wrap gap-1">
-                          {company.looking_for.slice(0, 2).map((item, idx) => (
-                            <Badge key={idx} variant="outline" className="text-xs">
-                              {item}
-                            </Badge>
-                          ))}
-                          {company.looking_for.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{company.looking_for.length - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      )}
+                      <div className="flex flex-wrap gap-1 min-h-[24px]">
+                        {company.looking_for && company.looking_for.length > 0 ? (
+                          <>
+                            {company.looking_for.slice(0, 2).map((item, idx) => (
+                              <Badge key={idx} variant="outline" className="text-xs">
+                                {item}
+                              </Badge>
+                            ))}
+                            {company.looking_for.length > 2 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{company.looking_for.length - 2}
+                              </Badge>
+                            )}
+                          </>
+                        ) : null}
+                      </div>
                     </div>
 
-                    <div className="flex gap-2 pt-2">
+                    <div className="flex gap-2 pt-4 mt-auto">
                       <Button
                         variant="outline"
                         size="sm"
