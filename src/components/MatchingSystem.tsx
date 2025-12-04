@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2 } from 'lucide-react';
+import { Heart, X, Users, Star, TrendingUp, Building, UserCheck, CheckCircle2, Rocket, DollarSign, Clock } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -23,6 +23,10 @@ interface Match {
   compatibility_score: number;
   avatar?: string;
   match_reasons: string[];
+  funding_offered?: number;
+  equity_percentage?: number;
+  program_duration?: string;
+  location?: string;
 }
 
 interface InvestorProfile {
@@ -45,17 +49,32 @@ interface Company {
   funding_amount: number | null;
 }
 
+interface AcceleratorProfile {
+  id: string;
+  user_id: string;
+  organization_name: string;
+  description: string | null;
+  industries_focus: string[] | null;
+  funding_offered: number | null;
+  equity_percentage: number | null;
+  program_duration: string | null;
+  is_accepting_applications: boolean | null;
+  location: string | null;
+  logo_url: string | null;
+}
+
 export default function MatchingSystem() {
   const [mentorMatches, setMentorMatches] = useState<Match[]>([]);
   const [investorMatches, setInvestorMatches] = useState<Match[]>([]);
   const [startupMatches, setStartupMatches] = useState<Match[]>([]);
+  const [acceleratorMatches, setAcceleratorMatches] = useState<Match[]>([]);
   const [connections, setConnections] = useState<any[]>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userCompany, setUserCompany] = useState<Company | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
-  const { notifyConnection } = useNotifications();
+  const { notifyConnection, createNotification } = useNotifications();
 
   useEffect(() => {
     if (user) {
@@ -276,13 +295,73 @@ export default function MatchingSystem() {
     return { score: Math.min(score, 100), reasons };
   };
 
+  // Calculate startup-accelerator compatibility score
+  const calculateStartupAcceleratorScore = (
+    accelerator: AcceleratorProfile,
+    company: Company,
+    hasActiveCohorts: boolean
+  ): { score: number; reasons: string[] } => {
+    let score = 35; // Base score
+    const reasons: string[] = [];
+
+    // Industry match (+25 points)
+    const acceleratorIndustries = accelerator.industries_focus || [];
+    if (company.industry && acceleratorIndustries.some(ind => 
+      ind?.toLowerCase() === company.industry?.toLowerCase() ||
+      company.industry?.toLowerCase().includes(ind?.toLowerCase()) ||
+      ind?.toLowerCase().includes(company.industry?.toLowerCase())
+    )) {
+      score += 25;
+      reasons.push(`Focuses on ${company.industry}`);
+    }
+
+    // Looking for accelerator/program (+20 points)
+    const lookingFor = company.looking_for || [];
+    if (lookingFor.some(l => 
+      l?.toLowerCase().includes('accelerator') || 
+      l?.toLowerCase().includes('program') ||
+      l?.toLowerCase().includes('incubator')
+    )) {
+      score += 20;
+      reasons.push('Seeking accelerator programs');
+    }
+
+    // Accepting applications (+15 points)
+    if (accelerator.is_accepting_applications) {
+      score += 15;
+      reasons.push('Currently accepting applications');
+    }
+
+    // Has active cohorts (+10 points)
+    if (hasActiveCohorts) {
+      score += 10;
+      reasons.push('Has active cohorts');
+    }
+
+    // Early stage preference (+15 points)
+    const earlyStages = ['idea', 'pre-seed', 'seed', 'mvp'];
+    if (company.stage && earlyStages.some(s => company.stage?.toLowerCase().includes(s))) {
+      score += 15;
+      reasons.push('Ideal stage for accelerator');
+    }
+
+    // Has funding (+5 points)
+    if (accelerator.funding_offered && accelerator.funding_offered > 0) {
+      score += 5;
+      reasons.push(`Offers $${(accelerator.funding_offered / 1000).toFixed(0)}K funding`);
+    }
+
+    return { score: Math.min(score, 100), reasons };
+  };
+
   const fetchMatches = async () => {
     if (!user) return;
 
-    // For startups/students: fetch mentor and investor matches
+    // For startups/students: fetch mentor, investor, and accelerator matches
     if (!userRole || userRole === 'startup' || userRole === 'student') {
       await fetchMentorMatchesForStartup();
       await fetchInvestorMatchesForStartup();
+      await fetchAcceleratorMatchesForStartup();
     }
 
     // For investors: fetch startup matches
@@ -405,6 +484,58 @@ export default function MatchingSystem() {
     setInvestorMatches(matches.slice(0, 10));
   };
 
+  const fetchAcceleratorMatchesForStartup = async () => {
+    // Fetch all accelerator profiles
+    const { data: acceleratorProfiles } = await supabase
+      .from('accelerator_profiles')
+      .select('*')
+      .limit(20);
+
+    if (!acceleratorProfiles || acceleratorProfiles.length === 0) return;
+
+    // Fetch active cohorts for each accelerator
+    const acceleratorIds = acceleratorProfiles.map(a => a.id);
+    const { data: cohorts } = await supabase
+      .from('accelerator_cohorts')
+      .select('accelerator_id, status')
+      .in('accelerator_id', acceleratorIds)
+      .in('status', ['applications_open', 'in_progress']);
+
+    // Group cohorts by accelerator
+    const cohortsByAccelerator = new Map<string, boolean>();
+    cohorts?.forEach(c => {
+      cohortsByAccelerator.set(c.accelerator_id, true);
+    });
+
+    // Calculate scores and create matches
+    const matches: Match[] = acceleratorProfiles.map(accelerator => {
+      const hasActiveCohorts = cohortsByAccelerator.get(accelerator.id) || false;
+      const { score, reasons } = userCompany 
+        ? calculateStartupAcceleratorScore(accelerator, userCompany, hasActiveCohorts)
+        : { score: 50, reasons: ['Complete your startup profile for better matches'] };
+
+      return {
+        id: accelerator.user_id,
+        name: accelerator.organization_name,
+        role: 'Accelerator',
+        description: accelerator.description || 'Accelerator program helping startups grow',
+        industry: accelerator.industries_focus?.[0] || 'General',
+        expertise: accelerator.industries_focus || [],
+        compatibility_score: score,
+        avatar: accelerator.logo_url,
+        match_reasons: reasons.length > 0 ? reasons : ['Open to applications'],
+        funding_offered: accelerator.funding_offered,
+        equity_percentage: accelerator.equity_percentage,
+        program_duration: accelerator.program_duration,
+        location: accelerator.location,
+      };
+    });
+
+    // Sort by score descending
+    matches.sort((a, b) => b.compatibility_score - a.compatibility_score);
+    setAcceleratorMatches(matches.slice(0, 10));
+  };
+
   const fetchStartupMatchesForInvestor = async () => {
     if (!user) return;
 
@@ -520,7 +651,7 @@ export default function MatchingSystem() {
     }
   };
 
-  const sendConnectionRequest = async (targetId: string, targetName: string, onSuccess: () => void) => {
+  const sendConnectionRequest = async (targetId: string, targetName: string, onSuccess: () => void, targetRole?: string) => {
     if (!user) return;
 
     // Remove card immediately - no matter what
@@ -608,9 +739,27 @@ export default function MatchingSystem() {
         // Send notification to recipient
         await notifyConnection(targetId, senderName);
 
+        // If connecting with an accelerator, send special notification
+        if (targetRole === 'Accelerator') {
+          // Find the startup owner to notify them when accelerator connects
+          // This handles the reverse case - when startup connects to accelerator
+        }
+
         toast({
           title: "Connection Request Sent!",
           description: `Your request has been sent to ${targetName}.`,
+        });
+      }
+
+      // If the current user is an accelerator connecting with a startup, notify the startup
+      if (userRole === 'accelerator') {
+        const acceleratorName = userProfile?.full_name || 'An accelerator';
+        await createNotification({
+          userId: targetId,
+          title: 'Accelerator Interest',
+          message: `${acceleratorName} is interested in your startup for their program`,
+          type: 'connection',
+          data: { accelerator_id: user.id }
         });
       }
     } catch (error) {
@@ -660,6 +809,36 @@ export default function MatchingSystem() {
         
         <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{match.description}</p>
         
+        {/* Accelerator-specific info */}
+        {match.role === 'Accelerator' && (
+          <div className="mb-4 grid grid-cols-2 gap-2 text-xs">
+            {match.funding_offered && (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <DollarSign className="h-3 w-3 text-green-500" />
+                ${(match.funding_offered / 1000).toFixed(0)}K funding
+              </div>
+            )}
+            {match.equity_percentage && (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <TrendingUp className="h-3 w-3 text-primary" />
+                {match.equity_percentage}% equity
+              </div>
+            )}
+            {match.program_duration && (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Clock className="h-3 w-3 text-blue-500" />
+                {match.program_duration}
+              </div>
+            )}
+            {match.location && (
+              <div className="flex items-center gap-1 text-muted-foreground">
+                <Building className="h-3 w-3 text-orange-500" />
+                {match.location}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Match Reasons */}
         {match.match_reasons && match.match_reasons.length > 0 && (
           <div className="mb-4 p-3 rounded-lg bg-primary/5 border border-primary/10">
@@ -678,7 +857,7 @@ export default function MatchingSystem() {
           </div>
         )}
 
-        {match.expertise && match.expertise.length > 0 && (
+        {match.expertise && match.expertise.length > 0 && match.role !== 'Accelerator' && (
           <div className="mb-4">
             <p className="text-xs font-medium text-foreground mb-2">Expertise:</p>
             <div className="flex flex-wrap gap-1">
@@ -724,13 +903,14 @@ export default function MatchingSystem() {
       </Card>
 
       <Tabs defaultValue={userRole === 'mentor' || userRole === 'advisor' || userRole === 'investor' || userRole === 'accelerator' ? 'startups' : 'mentors'} className="space-y-6">
-        <TabsList className={`grid w-full ${(!userRole || userRole === 'startup' || userRole === 'student') ? 'grid-cols-4' : userRole === 'accelerator' ? 'grid-cols-4' : 'grid-cols-2'} max-w-lg`}>
+        <TabsList className={`grid w-full ${(!userRole || userRole === 'startup' || userRole === 'student') ? 'grid-cols-5' : userRole === 'accelerator' ? 'grid-cols-4' : 'grid-cols-2'} max-w-xl`}>
           {(!userRole || userRole === 'startup' || userRole === 'student') && (
             <>
               <TabsTrigger value="mentors">Mentors</TabsTrigger>
               <TabsTrigger value="investors">Investors</TabsTrigger>
+              <TabsTrigger value="accelerators">Accelerators</TabsTrigger>
               <TabsTrigger value="startups">Startups</TabsTrigger>
-              <TabsTrigger value="mynetwork">My Network</TabsTrigger>
+              <TabsTrigger value="mynetwork">Network</TabsTrigger>
             </>
           )}
           {userRole === 'accelerator' && (
@@ -823,6 +1003,45 @@ export default function MatchingSystem() {
             </CardContent>
           </Card>
         </TabsContent>
+        )}
+
+        {/* Accelerators Tab for Startups/Students */}
+        {(!userRole || userRole === 'startup' || userRole === 'student') && (
+          <TabsContent value="accelerators" className="space-y-4">
+            <Card className="tech-card border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Rocket className="h-5 w-5 text-primary" />
+                  <span>Recommended Accelerators</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {acceleratorMatches.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {acceleratorMatches.map((accelerator) => (
+                      <MatchCard
+                        key={accelerator.id}
+                        match={accelerator}
+                        onConnect={() => sendConnectionRequest(accelerator.id, accelerator.name, () => {
+                          setAcceleratorMatches(acceleratorMatches.filter(a => a.id !== accelerator.id));
+                        }, 'Accelerator')}
+                        onPass={() => {
+                          setAcceleratorMatches(acceleratorMatches.filter(a => a.id !== accelerator.id));
+                          toast({ title: "Accelerator passed", description: "We'll find better program matches for you." });
+                        }}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-12">
+                    <Rocket className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold mb-2">No accelerator matches yet</h3>
+                    <p className="text-muted-foreground">Complete your startup profile to find the best programs</p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
         )}
 
         {/* Mentors tab for accelerators */}
