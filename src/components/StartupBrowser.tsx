@@ -251,7 +251,7 @@ export default function StartupBrowser() {
           ) : filteredCompanies.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredCompanies.map((company) => (
-                <Card key={company.id} className="border border-border hover:border-primary transition-colors">
+                <Card key={company.id} className="tech-card border-0 hover:scale-[1.01] transition-all">
                   <CardContent className="p-4 space-y-4">
                     <div className="flex items-start gap-3">
                       <Avatar className="h-12 w-12">
