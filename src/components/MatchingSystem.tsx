@@ -9,6 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '@/hooks/useNotifications';
+import StartupBrowser from './StartupBrowser';
 
 interface Match {
   id: string;
@@ -518,7 +519,7 @@ export default function MatchingSystem() {
         </TabsContent>
         )}
 
-        <TabsContent value="startups" className="space-y-4">
+        <TabsContent value="startups" className="space-y-6">
           <Card className="tech-card border-0">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -552,6 +553,9 @@ export default function MatchingSystem() {
               )}
             </CardContent>
           </Card>
+          
+          {/* Browse All Startups */}
+          <StartupBrowser />
         </TabsContent>
       </Tabs>
     </div>
