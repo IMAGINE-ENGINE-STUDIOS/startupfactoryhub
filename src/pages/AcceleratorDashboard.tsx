@@ -36,8 +36,6 @@ import AcceleratorRoadmapWidget from '@/components/accelerator/AcceleratorRoadma
 import ConnectionsWidget from '@/components/ConnectionsWidget';
 import AcceleratorProfileView from '@/components/AcceleratorProfileView';
 import StartupBrowser from '@/components/StartupBrowser';
-import StartupRecommendationsWidget from '@/components/StartupRecommendationsWidget';
-import RoleFilteredNetworkBrowser from '@/components/RoleFilteredNetworkBrowser';
 
 const AcceleratorDashboard = () => {
   const {
@@ -197,32 +195,17 @@ const AcceleratorDashboard = () => {
 
           {/* Network Tab */}
           <TabsContent value="network" className="space-y-4">
-            <Tabs defaultValue="startups" className="w-full">
+            <Tabs defaultValue="people" className="w-full">
               <TabsList className="tech-card border-0 mb-4">
+                <TabsTrigger value="people">People</TabsTrigger>
                 <TabsTrigger value="startups">Startups</TabsTrigger>
-                <TabsTrigger value="mentors">Mentors</TabsTrigger>
-                <TabsTrigger value="investors">Investors</TabsTrigger>
-                <TabsTrigger value="my-network">My Network</TabsTrigger>
               </TabsList>
-              <TabsContent value="startups" className="space-y-6">
-                <StartupRecommendationsWidget />
-                <StartupBrowser />
-              </TabsContent>
-              <TabsContent value="mentors">
-                <RoleFilteredNetworkBrowser 
-                  roleFilter="mentor" 
-                  emptyMessage="No mentors found in the network yet"
-                />
-              </TabsContent>
-              <TabsContent value="investors">
-                <RoleFilteredNetworkBrowser 
-                  roleFilter="investor" 
-                  emptyMessage="No investors found in the network yet"
-                />
-              </TabsContent>
-              <TabsContent value="my-network" className="space-y-4">
+              <TabsContent value="people" className="space-y-4">
                 <MatchingSystem />
                 <NetworkBrowser />
+              </TabsContent>
+              <TabsContent value="startups">
+                <StartupBrowser />
               </TabsContent>
             </Tabs>
           </TabsContent>
