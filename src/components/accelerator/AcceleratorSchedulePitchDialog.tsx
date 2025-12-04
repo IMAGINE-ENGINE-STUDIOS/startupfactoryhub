@@ -20,12 +20,27 @@ interface PortfolioStartup {
   user_id: string;
   cohort_name?: string;
   current_stage: string;
+  source: 'portfolio' | 'application';
+}
+
+interface Application {
+  id: string;
+  cohort_id: string;
+  startup_id: string;
+  applicant_user_id: string;
+  status: string;
+  startup?: {
+    id: string;
+    name: string;
+    logo_url: string | null;
+  };
 }
 
 interface AcceleratorSchedulePitchDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   portfolioStartups: any[];
+  applications?: any[];
   cohorts: { id: string; name: string }[];
   onPitchScheduled?: () => void;
 }
@@ -34,6 +49,7 @@ export default function AcceleratorSchedulePitchDialog({
   open,
   onOpenChange,
   portfolioStartups,
+  applications = [],
   cohorts,
   onPitchScheduled
 }: AcceleratorSchedulePitchDialogProps) {
@@ -51,29 +67,68 @@ export default function AcceleratorSchedulePitchDialog({
     if (open) {
       buildStartupList();
     }
-  }, [open, portfolioStartups]);
+  }, [open, portfolioStartups, applications]);
 
   const buildStartupList = async () => {
     setLoading(true);
     try {
-      const startupList: PortfolioStartup[] = portfolioStartups.map(startup => {
+      const startupList: PortfolioStartup[] = [];
+
+      // Add portfolio startups
+      portfolioStartups.forEach(startup => {
         const cohort = cohorts.find(c => c.id === startup.cohort_id);
-        return {
-          id: startup.id,
-          company_id: startup.company_id,
-          company_name: startup.is_manual_entry 
-            ? startup.external_company_name || 'Unknown'
-            : startup.company?.name || 'Unknown',
-          company_logo: startup.is_manual_entry 
-            ? startup.external_company_logo 
-            : startup.company?.logo_url,
-          user_id: startup.company?.user_id || '',
-          cohort_name: cohort?.name,
-          current_stage: startup.current_stage
-        };
+        if (startup.company?.user_id || startup.is_manual_entry) {
+          startupList.push({
+            id: `portfolio-${startup.id}`,
+            company_id: startup.company_id,
+            company_name: startup.is_manual_entry 
+              ? startup.external_company_name || 'Unknown'
+              : startup.company?.name || 'Unknown',
+            company_logo: startup.is_manual_entry 
+              ? startup.external_company_logo 
+              : startup.company?.logo_url,
+            user_id: startup.company?.user_id || '',
+            cohort_name: cohort?.name,
+            current_stage: startup.current_stage || 'active',
+            source: 'portfolio'
+          });
+        }
       });
 
-      setStartups(startupList.filter(s => s.user_id)); // Only include startups with user_id
+      // Add applicants with status 'under_review' or 'interview_scheduled'
+      const eligibleApplications = applications.filter(
+        app => app.status === 'under_review' || app.status === 'interview_scheduled'
+      );
+
+      for (const app of eligibleApplications) {
+        // Check if this startup is already in portfolio
+        const alreadyInList = startupList.some(s => s.company_id === app.startup_id);
+        if (!alreadyInList && app.startup) {
+          const cohort = cohorts.find(c => c.id === app.cohort_id);
+          
+          // Fetch startup's user_id from companies table
+          const { data: companyData } = await supabase
+            .from('companies')
+            .select('user_id')
+            .eq('id', app.startup_id)
+            .single();
+
+          if (companyData?.user_id) {
+            startupList.push({
+              id: `application-${app.id}`,
+              company_id: app.startup_id,
+              company_name: app.startup.name || 'Unknown',
+              company_logo: app.startup.logo_url || undefined,
+              user_id: companyData.user_id,
+              cohort_name: cohort?.name,
+              current_stage: app.status === 'interview_scheduled' ? 'interview' : 'review',
+              source: 'application'
+            });
+          }
+        }
+      }
+
+      setStartups(startupList.filter(s => s.user_id));
     } catch (error) {
       console.error('Error building startup list:', error);
     } finally {
@@ -98,8 +153,17 @@ export default function AcceleratorSchedulePitchDialog({
       case 'onboarding': return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
       case 'active': return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
       case 'graduated': return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+      case 'review': return 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+      case 'interview': return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
       default: return 'bg-muted text-muted-foreground';
     }
+  };
+
+  const getSourceBadge = (source: 'portfolio' | 'application') => {
+    if (source === 'portfolio') {
+      return <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-500 border-emerald-500/30">Portfolio</Badge>;
+    }
+    return <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-500 border-amber-500/30">Applicant</Badge>;
   };
 
   const handleSubmit = async () => {
@@ -210,7 +274,7 @@ export default function AcceleratorSchedulePitchDialog({
         <DialogHeader>
           <DialogTitle>Schedule Program Review</DialogTitle>
           <DialogDescription>
-            Schedule a pitch or review meeting with a portfolio startup. They will receive a notification and can accept or suggest an alternative time.
+            Schedule a pitch or review meeting with a portfolio startup or applicant. They will receive a notification and can accept or suggest an alternative time.
           </DialogDescription>
         </DialogHeader>
 
@@ -221,7 +285,7 @@ export default function AcceleratorSchedulePitchDialog({
         ) : startups.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-muted-foreground">
-              No portfolio startups available. Accept applications to add startups to your portfolio.
+              No startups available. Accept applications or add startups to your portfolio first.
             </p>
           </div>
         ) : (
@@ -231,7 +295,7 @@ export default function AcceleratorSchedulePitchDialog({
               <Label>Select Startup</Label>
               <Select value={selectedStartupId} onValueChange={setSelectedStartupId}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Choose a startup from your portfolio" />
+                  <SelectValue placeholder="Choose a startup from your portfolio or applicants" />
                 </SelectTrigger>
                 <SelectContent className="max-h-[300px]">
                   {startups.map((startup) => (
@@ -244,6 +308,7 @@ export default function AcceleratorSchedulePitchDialog({
                           </AvatarFallback>
                         </Avatar>
                         <span>{startup.company_name}</span>
+                        {getSourceBadge(startup.source)}
                         {startup.cohort_name && (
                           <Badge variant="outline" className="text-xs">
                             {startup.cohort_name}

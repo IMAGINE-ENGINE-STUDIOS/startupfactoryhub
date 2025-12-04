@@ -244,6 +244,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
   const fetchUserCompany = async () => {
     if (!user) return;
     
+    // First check if user has a company
     const { data, error } = await supabase
       .from('companies')
       .select('id')
@@ -252,6 +253,37 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
 
     if (!error && data) {
       setUserCompanyId(data.id);
+      return;
+    }
+
+    // If user is accelerator, check if they have an accelerator profile and create company if needed
+    if (role === 'accelerator') {
+      const { data: acceleratorProfile } = await supabase
+        .from('accelerator_profiles')
+        .select('id, organization_name, description, logo_url, location')
+        .eq('user_id', user.id)
+        .single();
+
+      if (acceleratorProfile) {
+        // Create a company for the accelerator to post jobs
+        const { data: newCompany, error: createError } = await supabase
+          .from('companies')
+          .insert({
+            user_id: user.id,
+            name: acceleratorProfile.organization_name,
+            description: acceleratorProfile.description,
+            logo_url: acceleratorProfile.logo_url,
+            location: acceleratorProfile.location,
+            industry: 'Accelerator/Incubator',
+            stage: 'growth'
+          })
+          .select('id')
+          .single();
+
+        if (!createError && newCompany) {
+          setUserCompanyId(newCompany.id);
+        }
+      }
     }
   };
 
@@ -800,7 +832,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
     return <div className="text-center py-8">Loading jobs...</div>;
   }
 
-  const isCompanyUser = role === 'startup' && userCompanyId;
+  const isCompanyUser = (role === 'startup' || role === 'accelerator') && userCompanyId;
   const canApply = role === 'student' || role === 'advisor' || role === 'mentor';
 
   return (
