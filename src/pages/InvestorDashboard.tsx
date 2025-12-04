@@ -544,7 +544,7 @@ export default function InvestorDashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-10 max-w-7xl whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-9 max-w-7xl whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Social</span>
@@ -552,10 +552,6 @@ export default function InvestorDashboard() {
               <TabsTrigger value="network" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Network className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Network</span>
-              </TabsTrigger>
-              <TabsTrigger value="startups" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <TrendingUp className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Startups</span>
               </TabsTrigger>
               <TabsTrigger value="portfolio" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Building className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -715,13 +711,19 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
-            <MatchingSystem />
-            <NetworkBrowser />
-          </TabsContent>
-
-          {/* Startups Tab */}
-          <TabsContent value="startups" className="space-y-4">
-            <StartupBrowser />
+            <Tabs defaultValue="people" className="w-full">
+              <TabsList className="tech-card border-0 mb-4">
+                <TabsTrigger value="people">People</TabsTrigger>
+                <TabsTrigger value="startups">Startups</TabsTrigger>
+              </TabsList>
+              <TabsContent value="people" className="space-y-4">
+                <MatchingSystem />
+                <NetworkBrowser />
+              </TabsContent>
+              <TabsContent value="startups">
+                <StartupBrowser />
+              </TabsContent>
+            </Tabs>
           </TabsContent>
 
           {/* Pitches Tab - Reorganized into 4 sections */}
