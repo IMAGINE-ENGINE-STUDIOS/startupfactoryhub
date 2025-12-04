@@ -1,21 +1,30 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Home, Brain, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import NotificationCenter from "@/components/NotificationCenter";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import RecommendationPopup from "@/components/RecommendationPopup";
+import { useUserRole } from "@/hooks/useUserRole";
+import AcceleratorProfileView from "@/components/AcceleratorProfileView";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [, setSearchParams] = useSearchParams();
   const [recommendationCount, setRecommendationCount] = useState(0);
   const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
+  const [showAcceleratorProfile, setShowAcceleratorProfile] = useState(false);
+  const { role } = useUserRole();
 
   const handleRecommendationsLoad = (count: number) => {
     setRecommendationCount(count);
@@ -25,63 +34,81 @@ export function DashboardHeader() {
     }
   };
 
-  return (
-    <div className="absolute sm:fixed top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-1.5 sm:gap-2 z-40">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => navigate("/")}
-        className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
-        title="Home"
-      >
-        <Home className="h-4 w-4 sm:h-5 sm:w-5" />
-      </Button>
+  const handleProfileClick = () => {
+    // Check if we're on accelerator dashboard or if user is accelerator role
+    if (location.pathname === '/accelerator-dashboard' || role === 'accelerator') {
+      setShowAcceleratorProfile(true);
+    } else {
+      setSearchParams({ tab: 'profile' });
+    }
+  };
 
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setSearchParams({ tab: 'profile' })}
-        className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
-        title="Profile"
-      >
-        <User className="h-4 w-4 sm:h-5 sm:w-5" />
-      </Button>
-      
-      <NotificationCenter className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10" />
-      
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="neon-glow hover:scale-110 transition-transform duration-300 relative h-9 w-9 sm:h-10 sm:w-10"
-            title="AI Recommendations"
-          >
-            <Brain className={`h-4 w-4 sm:h-5 sm:w-5 ${hasNewRecommendations ? 'animate-pulse' : ''}`} />
-            {recommendationCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[9px] sm:text-[10px] flex items-center justify-center text-primary-foreground">
-                {recommendationCount}
-              </span>
-            )}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-[calc(100vw-2rem)] sm:w-96 p-0" align="center">
-          <div className="p-3 sm:p-4 border-b">
-            <div className="flex items-center gap-2">
-              <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-              <h3 className="font-semibold text-sm sm:text-base">AI Recommendations</h3>
+  return (
+    <>
+      <div className="absolute sm:fixed top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-1.5 sm:gap-2 z-40">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate("/")}
+          className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
+          title="Home"
+        >
+          <Home className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Button>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleProfileClick}
+          className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
+          title="Profile"
+        >
+          <User className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Button>
+        
+        <NotificationCenter className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10" />
+        
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="neon-glow hover:scale-110 transition-transform duration-300 relative h-9 w-9 sm:h-10 sm:w-10"
+              title="AI Recommendations"
+            >
+              <Brain className={`h-4 w-4 sm:h-5 sm:w-5 ${hasNewRecommendations ? 'animate-pulse' : ''}`} />
+              {recommendationCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[9px] sm:text-[10px] flex items-center justify-center text-primary-foreground">
+                  {recommendationCount}
+                </span>
+              )}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[calc(100vw-2rem)] sm:w-96 p-0" align="center">
+            <div className="p-3 sm:p-4 border-b">
+              <div className="flex items-center gap-2">
+                <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                <h3 className="font-semibold text-sm sm:text-base">AI Recommendations</h3>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Personalized suggestions based on your activity
+              </p>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Personalized suggestions based on your activity
-            </p>
-          </div>
-          <RecommendationPopup onRecommendationsLoad={handleRecommendationsLoad} />
-        </PopoverContent>
-      </Popover>
-      
-      <div className="h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center">
-        <ThemeToggle />
+            <RecommendationPopup onRecommendationsLoad={handleRecommendationsLoad} />
+          </PopoverContent>
+        </Popover>
+        
+        <div className="h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center">
+          <ThemeToggle />
+        </div>
       </div>
-    </div>
+
+      {/* Accelerator Profile Dialog */}
+      <Dialog open={showAcceleratorProfile} onOpenChange={setShowAcceleratorProfile}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <AcceleratorProfileView />
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }

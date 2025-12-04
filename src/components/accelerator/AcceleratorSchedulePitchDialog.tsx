@@ -267,13 +267,13 @@ export default function AcceleratorSchedulePitchDialog({
                     <CalendarIcon className="h-4 w-4 text-emerald-500" />
                     Select Date
                   </Label>
-                  <div className="rounded-lg border border-border/50 bg-background/50 overflow-hidden">
+                  <div className="rounded-xl border border-border/50 bg-card/50 p-4">
                     <Calendar
                       mode="single"
                       selected={date}
                       onSelect={setDate}
                       disabled={(date) => date < new Date()}
-                      className="rounded-lg"
+                      className="w-full"
                     />
                   </div>
                 </div>

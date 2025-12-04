@@ -38,12 +38,16 @@ import {
   Loader2,
   Mail,
   Radio,
-  MapPinned
+  MapPinned,
+  Home
 } from 'lucide-react';
 import { AddResourceDialog } from './AddResourceDialog';
 import { TrackingSessionDialog } from './TrackingSessionDialog';
 import { UserTrackingMarkers } from './UserTrackingMarkers';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
@@ -66,11 +70,14 @@ const RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: s
 };
 
 export const GlobalResourcesMap = () => {
+  const { user } = useAuth();
+  const { role } = useUserRole();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
   const userMarker = useRef<mapboxgl.Marker | null>(null);
   const addressMarker = useRef<mapboxgl.Marker | null>(null);
+  const acceleratorMarker = useRef<mapboxgl.Marker | null>(null);
   const [selectedType, setSelectedType] = useState<ResourceType | null>(null);
   const [search, setSearch] = useState('');
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
@@ -78,6 +85,7 @@ export const GlobalResourcesMap = () => {
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
   const [isLocating, setIsLocating] = useState(false);
+  const [acceleratorLocation, setAcceleratorLocation] = useState<{lat: number; lng: number; name: string; logo?: string} | null>(null);
   const [isRotating, setIsRotating] = useState(true);
   const isRotatingRef = useRef(true);
 
@@ -121,6 +129,30 @@ export const GlobalResourcesMap = () => {
       document.head.removeChild(style);
     };
   }, []);
+
+  // Fetch accelerator profile location if user is accelerator
+  useEffect(() => {
+    if (!user || role !== 'accelerator') return;
+    
+    const fetchAcceleratorLocation = async () => {
+      const { data, error } = await supabase
+        .from('accelerator_profiles')
+        .select('latitude, longitude, organization_name, logo_url')
+        .eq('user_id', user.id)
+        .single();
+      
+      if (!error && data && data.latitude && data.longitude) {
+        setAcceleratorLocation({
+          lat: data.latitude,
+          lng: data.longitude,
+          name: data.organization_name,
+          logo: data.logo_url || undefined
+        });
+      }
+    };
+
+    fetchAcceleratorLocation();
+  }, [user, role]);
 
   const { data: resources, isLoading } = useResources({ 
     type: selectedType || undefined,
@@ -657,6 +689,74 @@ export const GlobalResourcesMap = () => {
         >
           <Radio className={cn("w-4 h-4", trackingSessionId && "animate-pulse")} />
         </Button>
+
+        {/* Accelerator Location Button - Only show for accelerators with location */}
+        {acceleratorLocation && (
+          <Button
+            size="icon"
+            onClick={() => {
+              if (map.current && acceleratorLocation) {
+                // Remove existing accelerator marker
+                if (acceleratorMarker.current) {
+                  acceleratorMarker.current.remove();
+                }
+                
+                // Create a special marker for accelerator HQ
+                const el = document.createElement('div');
+                el.innerHTML = `
+                  <div style="position: relative;">
+                    <div style="
+                      width: 44px;
+                      height: 44px;
+                      background: ${acceleratorLocation.logo ? `url(${acceleratorLocation.logo}) center/cover,` : ''} linear-gradient(135deg, #10b981, #059669);
+                      border: 3px solid #FFD700;
+                      border-radius: 50%;
+                      box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3);
+                      animation: pulse-glow 2s ease-in-out infinite;
+                    "></div>
+                    <div style="
+                      position: absolute;
+                      top: -6px;
+                      right: -6px;
+                      font-size: 16px;
+                      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+                    ">🏢</div>
+                  </div>
+                `;
+                
+                acceleratorMarker.current = new mapboxgl.Marker({
+                  element: el,
+                  anchor: 'center',
+                })
+                  .setLngLat([acceleratorLocation.lng, acceleratorLocation.lat])
+                  .setPopup(new mapboxgl.Popup().setHTML(`
+                    <div style="padding: 8px;">
+                      <strong>${acceleratorLocation.name}</strong>
+                      <p style="color: #666; font-size: 12px; margin-top: 4px;">Your Accelerator HQ</p>
+                    </div>
+                  `))
+                  .addTo(map.current);
+                
+                acceleratorMarker.current.togglePopup();
+                
+                map.current.flyTo({
+                  center: [acceleratorLocation.lng, acceleratorLocation.lat],
+                  zoom: 14,
+                  duration: 2000,
+                });
+                
+                toast({
+                  title: "Accelerator Location",
+                  description: `Flying to ${acceleratorLocation.name}`,
+                });
+              }
+            }}
+            className="backdrop-blur-2xl bg-emerald-500/20 border border-emerald-500/50 text-emerald-400 rounded-2xl hover:bg-emerald-500/30 transition-all"
+            title={`Go to ${acceleratorLocation.name}`}
+          >
+            <Home className="w-4 h-4" />
+          </Button>
+        )}
         
         {/* Active trackers badge */}
         {trackingSessionId && trackedUsers.length > 0 && (

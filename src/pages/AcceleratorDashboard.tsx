@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
-import { Rocket, Users, FileText, Briefcase, Calendar as CalendarIcon, BarChart3, Globe, MessageSquare, Building2, Target, TrendingUp, Plus, Bell, Clock, MapPin, MessageCircle, Network, BarChart, Video } from 'lucide-react';
+import { Rocket, Users, FileText, Briefcase, Calendar as CalendarIcon, BarChart3, Globe, MessageSquare, Building2, Target, TrendingUp, Plus, Bell, Clock, MapPin, MessageCircle, Network, BarChart, Video, Presentation, Check, X, ExternalLink } from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +13,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
 import { CohortManagement } from '@/components/accelerator/CohortManagement';
 import { CohortApplicationsManager } from '@/components/accelerator/CohortApplicationsManager';
 import { StartupJourneyTracker } from '@/components/accelerator/StartupJourneyTracker';
@@ -28,6 +29,7 @@ import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import FloatingChat from '@/components/FloatingChat';
 import RoleBasedAvatar from '@/components/RoleBasedAvatar';
+import PitchMeetingCard from '@/components/PitchMeetingCard';
 
 import MatchingSystem from '@/components/MatchingSystem';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
@@ -80,6 +82,31 @@ const AcceleratorDashboard = () => {
   const [showStartupDetails, setShowStartupDetails] = useState(false);
   const [schedulePitchDialogOpen, setSchedulePitchDialogOpen] = useState(false);
   const [addStartupDialogOpen, setAddStartupDialogOpen] = useState(false);
+  const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
+  const [activeVideoUrl, setActiveVideoUrl] = useState<string | undefined>();
+
+  // Fetch pitch meetings for accelerator
+  useEffect(() => {
+    if (!user) return;
+    
+    const fetchPitchMeetings = async () => {
+      const { data, error } = await supabase
+        .from('pitch_meetings')
+        .select(`
+          *,
+          company:companies(id, name, logo_url, industry),
+          startup_profile:profiles!pitch_meetings_startup_id_fkey(id, full_name, avatar_url)
+        `)
+        .eq('investor_id', user.id)
+        .order('scheduled_date', { ascending: true });
+
+      if (!error && data) {
+        setPitchMeetings(data);
+      }
+    };
+
+    fetchPitchMeetings();
+  }, [user]);
 
   const handleSelectCohort = (cohort: any) => {
     setSelectedCohort(cohort);
@@ -148,7 +175,7 @@ const AcceleratorDashboard = () => {
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-8 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-9 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Social</span>
@@ -169,6 +196,10 @@ const AcceleratorDashboard = () => {
               <TabsTrigger value="portfolio" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Building2 className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Portfolio</span>
+              </TabsTrigger>
+              <TabsTrigger value="meetings" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Presentation className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Meetings</span>
               </TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <CalendarIcon className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -203,7 +234,13 @@ const AcceleratorDashboard = () => {
 
           {/* Applications Tab */}
           <TabsContent value="applications">
-            <CohortApplicationsManager applications={applications} cohorts={cohorts} onUpdateStatus={updateApplicationStatus} onAcceptStartup={acceptStartupToCohort} />
+            <CohortApplicationsManager 
+              applications={applications} 
+              cohorts={cohorts} 
+              onUpdateStatus={updateApplicationStatus} 
+              onAcceptStartup={acceptStartupToCohort}
+              onSchedulePitch={() => setSchedulePitchDialogOpen(true)}
+            />
           </TabsContent>
 
           {/* Portfolio Tab */}
@@ -219,18 +256,62 @@ const AcceleratorDashboard = () => {
             <MentorAdvisorAssignment startups={portfolioStartups} onAssignMentor={assignMentor} onAssignAdvisor={assignAdvisor} />
           </TabsContent>
 
+          {/* Meetings Tab */}
+          <TabsContent value="meetings" className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 className="text-2xl font-bold">Pitch Meetings</h2>
+                <p className="text-muted-foreground">Schedule and manage meetings with portfolio startups</p>
+              </div>
+              <Button 
+                onClick={() => setSchedulePitchDialogOpen(true)} 
+                className="gap-2"
+                disabled={portfolioStartups.length === 0}
+              >
+                <Plus className="h-4 w-4" />
+                Schedule Meeting
+              </Button>
+            </div>
+
+            {/* Pitch Meetings Grid */}
+            {pitchMeetings.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {pitchMeetings.map((meeting) => {
+                  const isPast = new Date(meeting.scheduled_date) < new Date();
+                  return (
+                    <PitchMeetingCard 
+                      key={meeting.id}
+                      meeting={meeting}
+                      variant={isPast ? 'past' : 'upcoming'}
+                      viewerType="investor"
+                      onJoin={(url) => setActiveVideoUrl(url)}
+                    />
+                  );
+                })}
+              </div>
+            ) : (
+              <Card className="tech-card border-0">
+                <CardContent className="flex flex-col items-center justify-center py-16">
+                  <Presentation className="h-16 w-16 text-muted-foreground/30 mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No Meetings Scheduled</h3>
+                  <p className="text-muted-foreground text-center mb-4">
+                    Schedule pitch meetings with your portfolio startups to track their progress
+                  </p>
+                  <Button 
+                    onClick={() => setSchedulePitchDialogOpen(true)}
+                    disabled={portfolioStartups.length === 0}
+                  >
+                    <Plus className="h-4 w-4 mr-2" />
+                    Schedule First Meeting
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
+
           {/* Calendar Tab */}
           <TabsContent value="calendar" className="space-y-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
-              <Button 
-                variant="outline" 
-                onClick={() => setSchedulePitchDialogOpen(true)} 
-                className="gap-2 w-full sm:w-auto"
-                disabled={portfolioStartups.length === 0}
-              >
-                <Video className="h-4 w-4" />
-                <span className="sm:inline">Schedule Pitch</span>
-              </Button>
               <Button onClick={() => setCreateEventDialogOpen(true)} className="gap-2 w-full sm:w-auto">
                 <Plus className="h-4 w-4" />
                 <span className="sm:inline">Create Event</span>
