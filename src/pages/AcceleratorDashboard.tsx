@@ -19,6 +19,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO, isBefore } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useRealtime } from '@/hooks/useRealtime';
 import { CohortManagement } from '@/components/accelerator/CohortManagement';
 import { CohortApplicationsManager } from '@/components/accelerator/CohortApplicationsManager';
 import { StartupJourneyTracker } from '@/components/accelerator/StartupJourneyTracker';
@@ -80,45 +81,54 @@ const AcceleratorDashboard = () => {
   // Meeting states
   const [startupMeetings, setStartupMeetings] = useState<any[]>([]);
   const [investorMeetings, setInvestorMeetings] = useState<any[]>([]);
+  const [selectedApplicationForPitch, setSelectedApplicationForPitch] = useState<any>(null);
+
+  const fetchMeetings = async () => {
+    if (!user) return;
+    
+    // Fetch startup meetings (where accelerator is investor_id)
+    const { data: startupData, error: startupError } = await supabase
+      .from('pitch_meetings')
+      .select(`
+        *,
+        company:companies(id, name, logo_url, industry),
+        startup_profile:profiles!pitch_meetings_startup_id_fkey(id, full_name, avatar_url)
+      `)
+      .eq('investor_id', user.id)
+      .order('scheduled_date', { ascending: true });
+
+    if (!startupError && startupData) {
+      setStartupMeetings(startupData);
+    }
+
+    // Fetch investor meetings (where accelerator is startup_id)
+    const { data: investorData, error: investorError } = await supabase
+      .from('pitch_meetings')
+      .select(`
+        *,
+        company:companies(id, name, logo_url, industry),
+        investor_profile:profiles!pitch_meetings_investor_id_fkey(id, full_name, avatar_url)
+      `)
+      .eq('startup_id', user.id)
+      .order('scheduled_date', { ascending: true });
+
+    if (!investorError && investorData) {
+      setInvestorMeetings(investorData);
+    }
+  };
 
   // Fetch pitch meetings for accelerator
   useEffect(() => {
-    if (!user) return;
-    
-    const fetchMeetings = async () => {
-      // Fetch startup meetings (where accelerator is investor_id)
-      const { data: startupData, error: startupError } = await supabase
-        .from('pitch_meetings')
-        .select(`
-          *,
-          company:companies(id, name, logo_url, industry),
-          startup_profile:profiles!pitch_meetings_startup_id_fkey(id, full_name, avatar_url)
-        `)
-        .eq('investor_id', user.id)
-        .order('scheduled_date', { ascending: true });
-
-      if (!startupError && startupData) {
-        setStartupMeetings(startupData);
-      }
-
-      // Fetch investor meetings (where accelerator is startup_id)
-      const { data: investorData, error: investorError } = await supabase
-        .from('pitch_meetings')
-        .select(`
-          *,
-          company:companies(id, name, logo_url, industry),
-          investor_profile:profiles!pitch_meetings_investor_id_fkey(id, full_name, avatar_url)
-        `)
-        .eq('startup_id', user.id)
-        .order('scheduled_date', { ascending: true });
-
-      if (!investorError && investorData) {
-        setInvestorMeetings(investorData);
-      }
-    };
-
     fetchMeetings();
   }, [user]);
+
+  // Real-time meeting updates
+  useRealtime({
+    table: 'pitch_meetings',
+    onInsert: () => fetchMeetings(),
+    onUpdate: () => fetchMeetings(),
+    onDelete: () => fetchMeetings()
+  });
 
   const handleSelectCohort = (cohort: any) => {
     setSelectedCohort(cohort);
@@ -304,7 +314,10 @@ const AcceleratorDashboard = () => {
               cohorts={cohorts} 
               onUpdateStatus={updateApplicationStatus} 
               onAcceptStartup={acceptStartupToCohort}
-              onSchedulePitch={() => setSchedulePitchDialogOpen(true)}
+              onSchedulePitch={(app) => {
+                setSelectedApplicationForPitch(app);
+                setSchedulePitchDialogOpen(true);
+              }}
             />
           </TabsContent>
 
@@ -821,13 +834,17 @@ const AcceleratorDashboard = () => {
       {/* Schedule Pitch Meeting Dialog */}
       <AcceleratorSchedulePitchDialog
         open={schedulePitchDialogOpen}
-        onOpenChange={setSchedulePitchDialogOpen}
+        onOpenChange={(open) => {
+          setSchedulePitchDialogOpen(open);
+          if (!open) setSelectedApplicationForPitch(null);
+        }}
         portfolioStartups={portfolioStartups}
         applications={applications}
         cohorts={cohorts}
         onPitchScheduled={() => {
-          window.location.reload();
+          fetchMeetings();
         }}
+        preSelectedApplication={selectedApplicationForPitch}
       />
     </div>
   );
