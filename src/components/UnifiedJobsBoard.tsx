@@ -128,12 +128,12 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
   const hasMoreJobs = displayCount < filteredJobs.length;
 
   useEffect(() => {
-    if (user) {
+    if (user && role !== undefined) {
       fetchUserCompany();
       fetchJobs();
       fetchAppliedJobs();
     }
-  }, [user, categoryFilter]);
+  }, [user, categoryFilter, role]);
 
   useEffect(() => {
     if (userCompanyId) {

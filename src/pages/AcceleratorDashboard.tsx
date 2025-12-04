@@ -224,6 +224,42 @@ const AcceleratorDashboard = () => {
     }
   };
 
+  // Remove mentor assignment handler
+  const removeMentorAssignment = async (assignmentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('startup_mentor_assignments')
+        .update({ status: 'ended', ended_at: new Date().toISOString() })
+        .eq('id', assignmentId);
+
+      if (error) throw error;
+      
+      toast({ title: 'Mentor removed', description: 'The mentor has been removed from the startup.' });
+      window.location.reload();
+    } catch (error) {
+      console.error('Error removing mentor:', error);
+      toast({ title: 'Error', description: 'Failed to remove mentor', variant: 'destructive' });
+    }
+  };
+
+  // Remove advisor assignment handler
+  const removeAdvisorAssignment = async (assignmentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('startup_advisor_assignments')
+        .update({ status: 'ended', ended_at: new Date().toISOString() })
+        .eq('id', assignmentId);
+
+      if (error) throw error;
+      
+      toast({ title: 'Advisor removed', description: 'The advisor has been removed from the startup.' });
+      window.location.reload();
+    } catch (error) {
+      console.error('Error removing advisor:', error);
+      toast({ title: 'Error', description: 'Failed to remove advisor', variant: 'destructive' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -349,7 +385,7 @@ const AcceleratorDashboard = () => {
             </div>
             <AcceleratorPortfolio startups={portfolioStartups} cohorts={cohorts} totalFundingRaised={profile?.total_funding_raised || 0} onViewStartup={handleViewStartup} onDeleteStartup={deletePortfolioStartup} />
             <StartupJourneyTracker startups={portfolioStartups} onAddMilestone={addMilestone} onUpdateMilestone={updateMilestone} />
-            <MentorAdvisorAssignment startups={portfolioStartups} onAssignMentor={assignMentor} onAssignAdvisor={assignAdvisor} />
+            <MentorAdvisorAssignment startups={portfolioStartups} onAssignMentor={assignMentor} onAssignAdvisor={assignAdvisor} onRemoveMentor={removeMentorAssignment} onRemoveAdvisor={removeAdvisorAssignment} />
           </TabsContent>
 
           {/* Meetings Tab - Two Column Layout (Startup Dashboard Style) */}

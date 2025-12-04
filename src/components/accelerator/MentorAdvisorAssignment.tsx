@@ -7,6 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { 
   Search, 
   Plus, 
@@ -50,12 +60,16 @@ interface MentorAdvisorAssignmentProps {
   startups: CohortStartup[];
   onAssignMentor: (cohortStartupId: string, mentorId: string, focusArea?: string) => Promise<void>;
   onAssignAdvisor: (cohortStartupId: string, advisorId: string, expertiseArea?: string) => Promise<void>;
+  onRemoveMentor?: (assignmentId: string) => Promise<void>;
+  onRemoveAdvisor?: (assignmentId: string) => Promise<void>;
 }
 
 export const MentorAdvisorAssignment = ({
   startups,
   onAssignMentor,
-  onAssignAdvisor
+  onAssignAdvisor,
+  onRemoveMentor,
+  onRemoveAdvisor
 }: MentorAdvisorAssignmentProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [mentors, setMentors] = useState<Profile[]>([]);
@@ -66,6 +80,31 @@ export const MentorAdvisorAssignment = ({
   const [selectedUserId, setSelectedUserId] = useState('');
   const [focusArea, setFocusArea] = useState('');
   const [loading, setLoading] = useState(false);
+  const [removeDialogOpen, setRemoveDialogOpen] = useState(false);
+  const [assignmentToRemove, setAssignmentToRemove] = useState<{ id: string; type: 'mentor' | 'advisor' } | null>(null);
+
+  const handleRemoveClick = (e: React.MouseEvent, assignmentId: string, type: 'mentor' | 'advisor') => {
+    e.stopPropagation();
+    setAssignmentToRemove({ id: assignmentId, type });
+    setRemoveDialogOpen(true);
+  };
+
+  const confirmRemove = async () => {
+    if (!assignmentToRemove) return;
+    
+    try {
+      if (assignmentToRemove.type === 'mentor' && onRemoveMentor) {
+        await onRemoveMentor(assignmentToRemove.id);
+      } else if (assignmentToRemove.type === 'advisor' && onRemoveAdvisor) {
+        await onRemoveAdvisor(assignmentToRemove.id);
+      }
+    } catch (error) {
+      console.error('Error removing assignment:', error);
+    } finally {
+      setRemoveDialogOpen(false);
+      setAssignmentToRemove(null);
+    }
+  };
 
   useEffect(() => {
     fetchMentorsAndAdvisors();
@@ -242,7 +281,7 @@ export const MentorAdvisorAssignment = ({
                       return (
                         <div 
                           key={assignment.id}
-                          className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/50"
+                          className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/50 group/item"
                         >
                           <Avatar className="w-8 h-8">
                             <AvatarImage src={profile?.avatar_url || undefined} />
@@ -260,6 +299,16 @@ export const MentorAdvisorAssignment = ({
                               </Badge>
                             )}
                           </div>
+                          {onRemoveMentor && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 opacity-0 group-hover/item:opacity-100"
+                              onClick={(e) => handleRemoveClick(e, assignment.id, 'mentor')}
+                            >
+                              <X className="h-3 w-3 text-destructive" />
+                            </Button>
+                          )}
                         </div>
                       );
                     })}
@@ -294,7 +343,7 @@ export const MentorAdvisorAssignment = ({
                       return (
                         <div 
                           key={assignment.id}
-                          className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/50"
+                          className="flex items-center gap-3 p-3 rounded-lg bg-background/50 border border-border/50 group/item"
                         >
                           <Avatar className="w-8 h-8">
                             <AvatarImage src={profile?.avatar_url || undefined} />
@@ -312,6 +361,16 @@ export const MentorAdvisorAssignment = ({
                               </Badge>
                             )}
                           </div>
+                          {onRemoveAdvisor && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 opacity-0 group-hover/item:opacity-100"
+                              onClick={(e) => handleRemoveClick(e, assignment.id, 'advisor')}
+                            >
+                              <X className="h-3 w-3 text-destructive" />
+                            </Button>
+                          )}
                         </div>
                       );
                     })}
@@ -345,7 +404,7 @@ export const MentorAdvisorAssignment = ({
 
       {/* Assignment Dialog */}
       <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
-        <DialogContent className="tech-card border-0">
+        <DialogContent className="tech-card border-0 !transition-none">
           <DialogHeader>
             <DialogTitle>
               Assign {assignType === 'mentor' ? 'Mentor' : 'Advisor'} to {selectedStartup?.company?.name}
@@ -402,6 +461,24 @@ export const MentorAdvisorAssignment = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Remove Confirmation Dialog */}
+      <AlertDialog open={removeDialogOpen} onOpenChange={setRemoveDialogOpen}>
+        <AlertDialogContent className="tech-card border-0 !transition-none">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Assignment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove the {assignmentToRemove?.type} from this startup. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmRemove} className="bg-destructive hover:bg-destructive/90">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
