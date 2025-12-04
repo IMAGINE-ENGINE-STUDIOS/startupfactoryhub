@@ -47,9 +47,9 @@ const CommunitySection = () => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   
   return (
-    <section id="community" className="py-20 sm:py-32 md:py-40 relative overflow-hidden min-h-[700px] sm:min-h-[850px] md:min-h-[900px]" style={{ perspective: '2000px' }}>
-      {/* WebGL Globe Background - More visible */}
-      <div className="absolute inset-0 opacity-70">
+    <section id="community" className="relative overflow-hidden min-h-[700px] sm:min-h-[850px] md:min-h-[900px] flex items-center justify-center" style={{ perspective: '2000px' }}>
+      {/* WebGL Globe Background - Centered */}
+      <div className="absolute inset-0 opacity-70 flex items-center justify-center">
         <WebGLBackground />
       </div>
       
