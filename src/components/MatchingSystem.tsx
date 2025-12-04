@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '@/hooks/useNotifications';
 import StartupBrowser from './StartupBrowser';
+import NetworkBrowser from './NetworkBrowser';
 
 interface Match {
   id: string;
@@ -384,12 +385,13 @@ export default function MatchingSystem() {
       </Card>
 
       <Tabs defaultValue={userRole === 'mentor' || userRole === 'advisor' || userRole === 'investor' || userRole === 'accelerator' ? 'startups' : 'mentors'} className="space-y-6">
-        <TabsList className={`grid w-full ${(!userRole || userRole === 'startup' || userRole === 'student') ? 'grid-cols-3' : userRole === 'accelerator' ? 'grid-cols-3' : 'grid-cols-1'} max-w-md`}>
+        <TabsList className={`grid w-full ${(!userRole || userRole === 'startup' || userRole === 'student') ? 'grid-cols-4' : userRole === 'accelerator' ? 'grid-cols-4' : 'grid-cols-2'} max-w-lg`}>
           {(!userRole || userRole === 'startup' || userRole === 'student') && (
             <>
               <TabsTrigger value="mentors">Mentors</TabsTrigger>
               <TabsTrigger value="investors">Investors</TabsTrigger>
               <TabsTrigger value="startups">Startups</TabsTrigger>
+              <TabsTrigger value="mynetwork">My Network</TabsTrigger>
             </>
           )}
           {userRole === 'accelerator' && (
@@ -397,10 +399,14 @@ export default function MatchingSystem() {
               <TabsTrigger value="startups">Startups</TabsTrigger>
               <TabsTrigger value="investors">Investors</TabsTrigger>
               <TabsTrigger value="mentors">Mentors</TabsTrigger>
+              <TabsTrigger value="mynetwork">My Network</TabsTrigger>
             </>
           )}
           {(userRole === 'investor' || userRole === 'mentor' || userRole === 'advisor') && (
-            <TabsTrigger value="startups">Startups</TabsTrigger>
+            <>
+              <TabsTrigger value="startups">Startups</TabsTrigger>
+              <TabsTrigger value="mynetwork">My Network</TabsTrigger>
+            </>
           )}
         </TabsList>
 
@@ -556,6 +562,11 @@ export default function MatchingSystem() {
           
           {/* Browse All Startups */}
           <StartupBrowser />
+        </TabsContent>
+
+        {/* My Network Tab */}
+        <TabsContent value="mynetwork" className="space-y-6">
+          <NetworkBrowser />
         </TabsContent>
       </Tabs>
     </div>
