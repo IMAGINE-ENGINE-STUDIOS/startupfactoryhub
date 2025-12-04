@@ -710,20 +710,10 @@ export default function InvestorDashboard() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="network" className="space-y-4">
-            <Tabs defaultValue="people" className="w-full">
-              <TabsList className="tech-card border-0 mb-4">
-                <TabsTrigger value="people">People</TabsTrigger>
-                <TabsTrigger value="startups">Startups</TabsTrigger>
-              </TabsList>
-              <TabsContent value="people" className="space-y-4">
-                <MatchingSystem />
-                <NetworkBrowser />
-              </TabsContent>
-              <TabsContent value="startups">
-                <StartupBrowser />
-              </TabsContent>
-            </Tabs>
+          <TabsContent value="network" className="space-y-6">
+            <MatchingSystem />
+            <NetworkBrowser />
+            <StartupBrowser />
           </TabsContent>
 
           {/* Pitches Tab - Reorganized into 4 sections */}
