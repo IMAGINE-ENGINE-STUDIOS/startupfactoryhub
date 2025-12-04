@@ -20,7 +20,8 @@ import {
   LayoutList,
   LayoutGrid,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Presentation
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
@@ -75,6 +76,7 @@ interface CohortApplicationsManagerProps {
   cohorts: Cohort[];
   onUpdateStatus: (applicationId: string, status: string, notes?: string) => Promise<void>;
   onAcceptStartup: (application: Application) => Promise<void>;
+  onSchedulePitch?: (application: Application) => void;
 }
 
 const STATUSES = [
@@ -90,7 +92,8 @@ export const CohortApplicationsManager = ({
   applications,
   cohorts,
   onUpdateStatus,
-  onAcceptStartup
+  onAcceptStartup,
+  onSchedulePitch
 }: CohortApplicationsManagerProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCohort, setSelectedCohort] = useState<string>('all');
@@ -256,13 +259,27 @@ export const CohortApplicationsManager = ({
                         </Button>
                       )}
                       {app.status === 'under_review' && (
-                        <Button size="sm" variant="outline" onClick={() => onUpdateStatus(app.id, 'interview_scheduled')}>
-                          <Calendar className="w-3 h-3 mr-1" />
-                          Interview
-                        </Button>
+                        <>
+                          <Button size="sm" variant="outline" onClick={() => onUpdateStatus(app.id, 'interview_scheduled')}>
+                            <Calendar className="w-3 h-3 mr-1" />
+                            Interview
+                          </Button>
+                          {onSchedulePitch && (
+                            <Button size="sm" variant="outline" onClick={() => onSchedulePitch(app)}>
+                              <Presentation className="w-3 h-3 mr-1" />
+                              Pitch
+                            </Button>
+                          )}
+                        </>
                       )}
                       {app.status === 'interview_scheduled' && (
                         <>
+                          {onSchedulePitch && (
+                            <Button size="sm" variant="outline" onClick={() => onSchedulePitch(app)}>
+                              <Presentation className="w-3 h-3 mr-1" />
+                              Pitch
+                            </Button>
+                          )}
                           <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600" onClick={() => onAcceptStartup(app)}>
                             <CheckCircle className="w-3 h-3 mr-1" />
                             Accept
