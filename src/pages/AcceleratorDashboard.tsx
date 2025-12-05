@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { 
   Users, FileText, Briefcase, Calendar as CalendarIcon, Globe, MessageCircle, 
   Building2, Plus, Clock, MapPin, Network, BarChart, Presentation, 
-  ChevronDown, Check, X, Bell
+  ChevronDown, Check, X, Bell, Gift
 } from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
@@ -42,6 +42,7 @@ import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import AcceleratorProfileView from '@/components/AcceleratorProfileView';
+import { AcceleratorPrivateResources } from '@/components/accelerator/AcceleratorPrivateResources';
 
 const AcceleratorDashboard = () => {
   const { user } = useAuth();
@@ -301,7 +302,7 @@ const AcceleratorDashboard = () => {
         {/* Tabbed Dashboard Content */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-10 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+            <TabsList className="inline-flex w-auto min-w-full lg:grid lg:w-full lg:grid-cols-11 max-w-7xl tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Social</span>
@@ -322,6 +323,10 @@ const AcceleratorDashboard = () => {
               <TabsTrigger value="portfolio" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Building2 className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Portfolio</span>
+              </TabsTrigger>
+              <TabsTrigger value="perks" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Gift className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Perks</span>
               </TabsTrigger>
               <TabsTrigger value="meetings" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Presentation className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -760,6 +765,11 @@ const AcceleratorDashboard = () => {
                 </Collapsible>
               </div>
             </div>
+          </TabsContent>
+
+          {/* Perks Tab - Private Resources */}
+          <TabsContent value="perks" className="space-y-6">
+            <AcceleratorPrivateResources />
           </TabsContent>
 
           {/* Jobs Tab */}
