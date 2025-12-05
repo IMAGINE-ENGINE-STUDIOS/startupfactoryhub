@@ -144,7 +144,7 @@ export const StartupDetailDialog = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] glass-morphism !transition-none">
+      <DialogContent className="max-w-3xl max-h-[90vh] glass-morphism">
         <DialogHeader>
           <div className="flex items-center gap-4">
             <Avatar className="w-16 h-16">

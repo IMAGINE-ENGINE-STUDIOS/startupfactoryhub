@@ -853,7 +853,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
                     Post Job
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto !transition-none">
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Post a New Job</DialogTitle>
                     <DialogDescription>Fill in the details for your job posting</DialogDescription>
@@ -1336,7 +1336,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
 
       {/* Applications Dialog */}
       <Dialog open={showApplicationsDialog} onOpenChange={handleCloseApplicationsDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col !transition-none">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Job Applications</DialogTitle>
             <DialogDescription>
@@ -1467,7 +1467,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
 
       {/* Job Details Dialog */}
       <Dialog open={!!selectedJobForDetails} onOpenChange={(open) => !open && setSelectedJobForDetails(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col !transition-none">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
           {selectedJobForDetails && (
             <>
               <DialogHeader className="flex-shrink-0">
@@ -1683,7 +1683,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
 
       {/* Apply Dialog */}
       <Dialog open={showApplyDialog} onOpenChange={setShowApplyDialog}>
-        <DialogContent className="max-w-lg !transition-none">
+        <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Apply to {applyingToJob?.title}</DialogTitle>
             <DialogDescription>
