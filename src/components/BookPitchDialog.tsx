@@ -223,7 +223,7 @@ export default function BookPitchDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl !transition-none">
         <DialogHeader>
           <DialogTitle>Book Pitch Meeting with {investorName}</DialogTitle>
         </DialogHeader>

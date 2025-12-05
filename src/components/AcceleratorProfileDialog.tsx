@@ -100,7 +100,7 @@ export const AcceleratorProfileDialog = ({
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-2xl max-h-[90vh] glass-morphism">
+        <DialogContent className="max-w-2xl max-h-[90vh] glass-morphism !transition-none">
           {loading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500" />

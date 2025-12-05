@@ -265,7 +265,7 @@ export default function UserProfileDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl h-[90vh] overflow-hidden p-0 flex flex-col" aria-describedby={undefined}>
+      <DialogContent className="max-w-2xl h-[90vh] overflow-hidden p-0 flex flex-col !transition-none" aria-describedby={undefined}>
         <VisuallyHidden>
           <DialogTitle>{profile?.full_name || 'User Profile'}</DialogTitle>
         </VisuallyHidden>

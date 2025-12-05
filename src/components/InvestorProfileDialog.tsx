@@ -76,7 +76,7 @@ export default function InvestorProfileDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto !transition-none">
         <DialogHeader>
           <DialogTitle className="sr-only">{investor.full_name} Profile</DialogTitle>
         </DialogHeader>
