@@ -154,62 +154,6 @@ export type Database = {
         }
         Relationships: []
       }
-      accelerator_resources: {
-        Row: {
-          accelerator_id: string
-          contact_email: string | null
-          created_at: string | null
-          description: string | null
-          discount_details: string | null
-          id: string
-          is_active: boolean | null
-          logo_url: string | null
-          promo_code: string | null
-          resource_type: string
-          title: string
-          updated_at: string | null
-          website_url: string | null
-        }
-        Insert: {
-          accelerator_id: string
-          contact_email?: string | null
-          created_at?: string | null
-          description?: string | null
-          discount_details?: string | null
-          id?: string
-          is_active?: boolean | null
-          logo_url?: string | null
-          promo_code?: string | null
-          resource_type?: string
-          title: string
-          updated_at?: string | null
-          website_url?: string | null
-        }
-        Update: {
-          accelerator_id?: string
-          contact_email?: string | null
-          created_at?: string | null
-          description?: string | null
-          discount_details?: string | null
-          id?: string
-          is_active?: boolean | null
-          logo_url?: string | null
-          promo_code?: string | null
-          resource_type?: string
-          title?: string
-          updated_at?: string | null
-          website_url?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "accelerator_resources_accelerator_id_fkey"
-            columns: ["accelerator_id"]
-            isOneToOne: false
-            referencedRelation: "accelerator_profiles"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       achievements: {
         Row: {
           achievement_type: string
@@ -908,45 +852,6 @@ export type Database = {
             columns: ["startup_id"]
             isOneToOne: false
             referencedRelation: "companies"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      cohort_resource_access: {
-        Row: {
-          cohort_id: string
-          granted_at: string | null
-          granted_by: string | null
-          id: string
-          resource_id: string
-        }
-        Insert: {
-          cohort_id: string
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          resource_id: string
-        }
-        Update: {
-          cohort_id?: string
-          granted_at?: string | null
-          granted_by?: string | null
-          id?: string
-          resource_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cohort_resource_access_cohort_id_fkey"
-            columns: ["cohort_id"]
-            isOneToOne: false
-            referencedRelation: "accelerator_cohorts"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cohort_resource_access_resource_id_fkey"
-            columns: ["resource_id"]
-            isOneToOne: false
-            referencedRelation: "accelerator_resources"
             referencedColumns: ["id"]
           },
         ]

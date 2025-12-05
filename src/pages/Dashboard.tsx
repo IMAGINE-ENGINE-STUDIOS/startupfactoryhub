@@ -31,7 +31,6 @@ import StartupMentorshipOffers from '@/components/StartupMentorshipOffers';
 import StartupActiveMentors from '@/components/StartupActiveMentors';
 import StartupMentoringSessions from '@/components/StartupMentoringSessions';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
-import { ProgramResourcesWidget } from '@/components/ProgramResourcesWidget';
 import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, ChevronRight, Presentation, Video, Bell, Check, X, ExternalLink, Sparkles, History, Star, Globe } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -885,15 +884,9 @@ const Dashboard = () => {
 
           {/* Resources Tab */}
           {activeTab === "resources" && (
-            <TabsContent value="resources" className="space-y-6">
-              {/* Program Perks Widget - only shows if enrolled in accelerator */}
-              <ProgramResourcesWidget />
-              
-              {/* Global Resources Map */}
-              <div className="relative overflow-hidden rounded-lg" style={{ height: 'calc(100vh - 16rem)', minHeight: '400px' }}>
-                <div className="absolute inset-0">
-                  <GlobalResourcesMap />
-                </div>
+            <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{ height: 'calc(100vh - 12rem)', minHeight: '500px' }}>
+              <div className="absolute inset-0">
+                <GlobalResourcesMap />
               </div>
             </TabsContent>
           )}

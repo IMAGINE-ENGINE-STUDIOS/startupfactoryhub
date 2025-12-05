@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+// Dashboard Router - Routes users to their role-specific dashboard
 import { useUserRole } from "@/hooks/useUserRole";
 import Dashboard from "@/pages/Dashboard";
 import MentorDashboard from "@/pages/MentorDashboard";
@@ -15,6 +16,7 @@ const DashboardRouter = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // If logged in user has no role, redirect to profile setup
     if (!authLoading && user && !roleLoading && (!role || error)) {
       navigate("/profile-setup");
     }
@@ -31,11 +33,13 @@ const DashboardRouter = () => {
     );
   }
 
+  // Guest mode - redirect to auth
   if (!user) {
     navigate("/auth");
     return null;
   }
 
+  // Route to appropriate dashboard based on user role (secured via user_roles table)
   switch (role) {
     case 'advisor':
       return <AdvisorDashboard />;
