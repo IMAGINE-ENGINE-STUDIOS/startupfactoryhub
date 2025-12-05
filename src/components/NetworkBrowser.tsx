@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Users, MessageSquare, UserPlus, Eye, UserCheck, UserX, Bell } from 'lucide-react';
+import { Search, Users, MessageSquare, UserPlus, Eye, UserCheck, UserX, Bell } from 'lucide-react';
 import UserProfileDialog from '@/components/UserProfileDialog';
 import { useNotifications } from '@/hooks/useNotifications';
 
@@ -25,8 +26,11 @@ interface PendingRequest extends Connection {
 }
 
 export default function NetworkBrowser() {
+  const [currentConnections, setCurrentConnections] = useState<Connection[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
+  const [searchResults, setSearchResults] = useState<Connection[]>([]);
   const [suggestedUsers, setSuggestedUsers] = useState<Connection[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState<Connection | null>(null);
   const [profileDialogOpen, setProfileDialogOpen] = useState(false);
@@ -36,6 +40,7 @@ export default function NetworkBrowser() {
 
   useEffect(() => {
     if (user) {
+      fetchCurrentConnections();
       fetchPendingRequests();
       fetchSuggestedUsers();
     }
@@ -55,6 +60,7 @@ export default function NetworkBrowser() {
           filter: `requester_id=eq.${user.id}` 
         },
         () => {
+          fetchCurrentConnections();
           fetchPendingRequests();
           fetchSuggestedUsers();
         }
@@ -67,6 +73,7 @@ export default function NetworkBrowser() {
           filter: `addressee_id=eq.${user.id}` 
         },
         () => {
+          fetchCurrentConnections();
           fetchPendingRequests();
           fetchSuggestedUsers();
         }
@@ -75,6 +82,68 @@ export default function NetworkBrowser() {
     
     return () => { supabase.removeChannel(channel); };
   }, [user]);
+
+  useEffect(() => {
+    if (searchQuery.length > 0) {
+      searchUsers();
+    } else {
+      setSearchResults([]);
+    }
+  }, [searchQuery]);
+
+  const fetchCurrentConnections = async () => {
+    if (!user) return;
+
+    setLoading(true);
+    try {
+      // Get accepted connections
+      const { data: connections } = await supabase
+        .from('connections')
+        .select('requester_id, addressee_id, status')
+        .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+        .eq('status', 'accepted');
+
+      if (!connections || connections.length === 0) {
+        setCurrentConnections([]);
+        setLoading(false);
+        return;
+      }
+
+      // Get user IDs of connections
+      const connectedUserIds = connections.map(c => 
+        c.requester_id === user.id ? c.addressee_id : c.requester_id
+      );
+
+      // Fetch profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url, bio, location')
+        .in('user_id', connectedUserIds);
+
+      if (profiles) {
+        // Get roles
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('user_id, role')
+          .in('user_id', connectedUserIds);
+
+        const profilesWithRoles = profiles.map(profile => {
+          const userRole = userRoles?.find(ur => ur.user_id === profile.user_id);
+          return {
+            ...profile,
+            role: userRole?.role || null,
+            status: 'accepted' as const
+          };
+        });
+
+        setCurrentConnections(profilesWithRoles);
+      }
+    } catch (error) {
+      console.error('Error fetching connections:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchPendingRequests = async () => {
     if (!user) return;
@@ -125,6 +194,59 @@ export default function NetworkBrowser() {
     }
   };
 
+  const searchUsers = async () => {
+    if (!user || searchQuery.length < 2) return;
+
+    setLoading(true);
+    try {
+      // Search profiles
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url, bio, location')
+        .neq('user_id', user.id)
+        .ilike('full_name', `%${searchQuery}%`)
+        .limit(10);
+
+      if (profiles && profiles.length > 0) {
+        // Get roles
+        const userIds = profiles.map(p => p.user_id);
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('user_id, role')
+          .in('user_id', userIds);
+
+        // Get connection status
+        const { data: connections } = await supabase
+          .from('connections')
+          .select('requester_id, addressee_id, status')
+          .or(`requester_id.eq.${user.id},addressee_id.eq.${user.id}`)
+          .in('addressee_id', userIds);
+
+        const profilesWithInfo = profiles.map(profile => {
+          const userRole = userRoles?.find(ur => ur.user_id === profile.user_id);
+          const connection = connections?.find(c => 
+            c.requester_id === profile.user_id || c.addressee_id === profile.user_id
+          );
+          
+          return {
+            ...profile,
+            role: userRole?.role || null,
+            status: connection?.status as 'accepted' | 'pending' | undefined
+          };
+        });
+
+        setSearchResults(profilesWithInfo);
+      } else {
+        setSearchResults([]);
+      }
+    } catch (error) {
+      console.error('Error searching users:', error);
+      setSearchResults([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleConnect = async (connectionUserId: string, connectionName: string) => {
     if (!user) return;
 
@@ -158,7 +280,7 @@ export default function NetworkBrowser() {
       description: `Your request to connect with ${connectionName} has been sent.`,
     });
 
-    fetchSuggestedUsers(); // Refresh suggested users
+    searchUsers(); // Refresh search results
   };
 
   const handleAcceptRequest = async (connectionId: string, requesterName: string, requesterId: string) => {
@@ -199,7 +321,7 @@ export default function NetworkBrowser() {
     });
 
     fetchPendingRequests();
-    fetchSuggestedUsers();
+    fetchCurrentConnections();
   };
 
   const handleDeclineRequest = async (connectionId: string, requesterName: string) => {
@@ -458,6 +580,78 @@ export default function NetworkBrowser() {
         </Card>
       )}
 
+      {/* Search Section */}
+      <Card className="tech-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-5 w-5 text-primary" />
+            Find People on Network
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="relative mb-4">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search by name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {searchQuery.length > 0 && (
+            <>
+              {loading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+                  <p className="text-sm text-muted-foreground">Searching...</p>
+                </div>
+              ) : searchResults.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {searchResults.map((connection) => renderUserCard(connection, false))}
+                </div>
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <Users className="h-12 w-12 mx-auto mb-2 opacity-20" />
+                  <p className="text-sm">No users found</p>
+                  <p className="text-xs mt-1">Try a different search term</p>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Current Connections */}
+      <Card className="tech-card">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            Your Connections
+            <Badge variant="secondary" className="ml-auto">
+              {currentConnections.length}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+              <p className="text-sm text-muted-foreground">Loading connections...</p>
+            </div>
+          ) : currentConnections.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {currentConnections.map((connection) => renderUserCard(connection, true))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">
+              <Users className="h-16 w-16 mx-auto mb-4 opacity-20" />
+              <h3 className="text-lg font-semibold mb-2">No connections yet</h3>
+              <p className="text-sm">Use the search above to find and connect with people</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Suggested Connections */}
       {suggestedUsers.length > 0 && (
