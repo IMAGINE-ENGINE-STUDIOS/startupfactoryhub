@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 import ErrorBoundary from "./components/ErrorBoundary";
 import FloatingChat from "./components/FloatingChat";
 import Index from "./pages/Index";
@@ -50,42 +51,44 @@ const App = () => (
   <ErrorBoundary>
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="dark" enableSystem>
-        <AuthProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter
-              future={{
-                v7_startTransition: true,
-                v7_relativeSplatPath: true,
-              }}
-            >
-              <Suspense fallback={<PageLoader />}>
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/profile-setup" element={<ProfileSetup />} />
-                  <Route path="/dashboard" element={<DashboardRouter />} />
-                  <Route path="/tools" element={<Tools />} />
-                  <Route path="/lightpaper" element={<NotFound />} />
-                  <Route path="/guidelines" element={<Guidelines />} />
-                  <Route path="/jobs/:jobId/apply" element={<PublicJobApplicationPage />} />
-                  <Route path="/internships/:internshipId/apply" element={<PublicInternshipApplication />} />
-                  <Route path="/accept-invitation" element={<AcceptInvitation />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-                  <Route path="/terms-of-service" element={<TermsOfService />} />
-                  <Route path="/cookie-policy" element={<CookiePolicy />} />
-                  <Route path="/about" element={<About />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/sponsorship" element={<Sponsorship />} />
-                  <Route path="/cohorts/:cohortId/apply" element={<PublicCohortApplication />} />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </Suspense>
-              <FloatingChat />
-            </BrowserRouter>
-          </TooltipProvider>
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter
+                future={{
+                  v7_startTransition: true,
+                  v7_relativeSplatPath: true,
+                }}
+              >
+                <Suspense fallback={<PageLoader />}>
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/profile-setup" element={<ProfileSetup />} />
+                    <Route path="/dashboard" element={<DashboardRouter />} />
+                    <Route path="/tools" element={<Tools />} />
+                    <Route path="/lightpaper" element={<NotFound />} />
+                    <Route path="/guidelines" element={<Guidelines />} />
+                    <Route path="/jobs/:jobId/apply" element={<PublicJobApplicationPage />} />
+                    <Route path="/internships/:internshipId/apply" element={<PublicInternshipApplication />} />
+                    <Route path="/accept-invitation" element={<AcceptInvitation />} />
+                    <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+                    <Route path="/terms-of-service" element={<TermsOfService />} />
+                    <Route path="/cookie-policy" element={<CookiePolicy />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/sponsorship" element={<Sponsorship />} />
+                    <Route path="/cohorts/:cohortId/apply" element={<PublicCohortApplication />} />
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </Suspense>
+                <FloatingChat />
+              </BrowserRouter>
+            </TooltipProvider>
+          </AuthProvider>
+        </LanguageProvider>
       </ThemeProvider>
     </QueryClientProvider>
   </ErrorBoundary>
