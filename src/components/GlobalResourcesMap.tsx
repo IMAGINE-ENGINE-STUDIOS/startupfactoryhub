@@ -855,7 +855,7 @@ export const GlobalResourcesMap = () => {
   };
 
   return (
-    <div className="relative w-full overflow-y-auto bg-background rounded-2xl">
+    <div className="relative w-full min-h-screen bg-background rounded-2xl">
       {/* Map Container */}
       <div className="relative h-screen">
         {/* Full Viewport Map */}
