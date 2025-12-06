@@ -72,6 +72,7 @@ export default function MatchingSystem() {
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [userCompany, setUserCompany] = useState<Company | null>(null);
+  const [userAcceleratorProfile, setUserAcceleratorProfile] = useState<AcceleratorProfile | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
   const { notifyConnection, createNotification } = useNotifications();
@@ -84,6 +85,27 @@ export default function MatchingSystem() {
       fetchConnections();
     }
   }, [user]);
+
+  // Fetch accelerator profile when role is accelerator
+  useEffect(() => {
+    if (user && userRole === 'accelerator') {
+      fetchUserAcceleratorProfile();
+    }
+  }, [user, userRole]);
+
+  const fetchUserAcceleratorProfile = async () => {
+    if (!user) return;
+    
+    const { data, error } = await supabase
+      .from('accelerator_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+      
+    if (!error && data) {
+      setUserAcceleratorProfile(data);
+    }
+  };
 
   useEffect(() => {
     if (user && userRole !== null) {
@@ -354,6 +376,88 @@ export default function MatchingSystem() {
     return { score: Math.min(score, 100), reasons };
   };
 
+  // Calculate accelerator-mentor/advisor compatibility score based on industry and experience
+  const calculateAcceleratorMentorScore = (
+    acceleratorProfile: AcceleratorProfile,
+    mentorSkills: { skill_name: string; category: string | null; endorsement_count: number | null }[],
+    mentorExperiences: { title: string; company: string; start_date: string; end_date: string | null; is_current: boolean | null; description: string | null }[]
+  ): { score: number; reasons: string[] } => {
+    let score = 30; // Base score
+    const reasons: string[] = [];
+
+    const focusIndustries = acceleratorProfile.industries_focus || [];
+    
+    // Industry/skill match (+35 points) - mentor skills match accelerator's focus industries
+    const matchingSkills = mentorSkills.filter(skill => 
+      focusIndustries.some(ind => {
+        const skillLower = skill.skill_name.toLowerCase();
+        const indLower = ind.toLowerCase();
+        return skillLower.includes(indLower) || indLower.includes(skillLower) ||
+          // Also check category
+          (skill.category && (skill.category.toLowerCase().includes(indLower) || indLower.includes(skill.category.toLowerCase())));
+      })
+    );
+    
+    if (matchingSkills.length > 0) {
+      score += 35;
+      reasons.push(`Expertise in ${matchingSkills[0].skill_name}`);
+    }
+
+    // Experience relevance (+25 points) - worked in startups/VC/accelerators
+    const startupKeywords = ['startup', 'venture', 'accelerator', 'incubator', 'founder', 'ceo', 'cto', 'entrepreneur', 'vc', 'capital'];
+    const relevantExperience = mentorExperiences.find(exp => {
+      const titleLower = exp.title?.toLowerCase() || '';
+      const companyLower = exp.company?.toLowerCase() || '';
+      const descLower = exp.description?.toLowerCase() || '';
+      return startupKeywords.some(keyword => 
+        titleLower.includes(keyword) || companyLower.includes(keyword) || descLower.includes(keyword)
+      );
+    });
+    
+    if (relevantExperience) {
+      score += 25;
+      reasons.push(`Startup ecosystem experience at ${relevantExperience.company}`);
+    }
+
+    // Years of experience (+15 points)
+    const totalYears = mentorExperiences.reduce((years, exp) => {
+      const start = new Date(exp.start_date);
+      const end = exp.end_date ? new Date(exp.end_date) : new Date();
+      return years + ((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365));
+    }, 0);
+    
+    if (totalYears >= 10) {
+      score += 15;
+      reasons.push(`${Math.floor(totalYears)}+ years experience`);
+    } else if (totalYears >= 5) {
+      score += 10;
+      reasons.push(`${Math.floor(totalYears)} years experience`);
+    }
+
+    // High endorsements (+10 points)
+    const totalEndorsements = mentorSkills.reduce((sum, s) => sum + (s.endorsement_count || 0), 0);
+    if (totalEndorsements >= 10) {
+      score += 10;
+      reasons.push('Highly endorsed by peers');
+    } else if (totalEndorsements >= 5) {
+      score += 5;
+      reasons.push('Endorsed by peers');
+    }
+
+    // Current role bonus (+5 points) - currently in leadership/advisory role
+    const currentLeadership = mentorExperiences.find(exp => 
+      exp.is_current && 
+      ['advisor', 'mentor', 'director', 'partner', 'head', 'lead', 'chief', 'vp', 'president']
+        .some(keyword => exp.title?.toLowerCase().includes(keyword))
+    );
+    if (currentLeadership) {
+      score += 5;
+      reasons.push(`Currently ${currentLeadership.title}`);
+    }
+
+    return { score: Math.min(score, 100), reasons };
+  };
+
   const fetchMatches = async () => {
     if (!user) return;
 
@@ -374,9 +478,9 @@ export default function MatchingSystem() {
       await fetchStartupMatchesForMentor();
     }
 
-    // For accelerators: fetch all types
+    // For accelerators: fetch proper matches with industry/experience scoring
     if (userRole === 'accelerator') {
-      await fetchMentorMatchesForStartup();
+      await fetchMentorMatchesForAccelerator();
       await fetchInvestorMatchesForStartup();
       await fetchStartupMatchesForInvestor();
     }
@@ -433,6 +537,90 @@ export default function MatchingSystem() {
     // Sort by score descending
     matches.sort((a, b) => b.compatibility_score - a.compatibility_score);
     setMentorMatches(matches.slice(0, 10));
+  };
+
+  // Fetch mentor/advisor matches for accelerators with industry and experience scoring
+  const fetchMentorMatchesForAccelerator = async () => {
+    if (!userAcceleratorProfile) {
+      // If accelerator profile not loaded yet, use default scoring
+      await fetchMentorMatchesForStartup();
+      return;
+    }
+
+    // Fetch advisor/mentor role IDs
+    const { data: advisorRoles } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .in('role', ['advisor', 'mentor'])
+      .limit(30);
+
+    const advisorIds = advisorRoles?.map(r => r.user_id) || [];
+    if (advisorIds.length === 0) return;
+
+    // Fetch mentor profiles, skills, and experiences in parallel
+    const [profilesResult, skillsResult, experiencesResult] = await Promise.all([
+      supabase.from('profiles').select('*').in('user_id', advisorIds),
+      supabase.from('advisor_skills').select('user_id, skill_name, category, endorsement_count').in('user_id', advisorIds),
+      supabase.from('advisor_experiences').select('user_id, title, company, start_date, end_date, is_current, description').in('user_id', advisorIds)
+    ]);
+
+    const profiles = profilesResult.data || [];
+    const skills = skillsResult.data || [];
+    const experiences = experiencesResult.data || [];
+
+    // Group skills by user
+    const skillsByUser = new Map<string, { skill_name: string; category: string | null; endorsement_count: number | null }[]>();
+    skills.forEach(s => {
+      const existing = skillsByUser.get(s.user_id) || [];
+      existing.push({ skill_name: s.skill_name, category: s.category, endorsement_count: s.endorsement_count });
+      skillsByUser.set(s.user_id, existing);
+    });
+
+    // Group experiences by user
+    const experiencesByUser = new Map<string, { title: string; company: string; start_date: string; end_date: string | null; is_current: boolean | null; description: string | null }[]>();
+    experiences.forEach(e => {
+      const existing = experiencesByUser.get(e.user_id) || [];
+      existing.push({
+        title: e.title,
+        company: e.company,
+        start_date: e.start_date,
+        end_date: e.end_date,
+        is_current: e.is_current,
+        description: e.description
+      });
+      experiencesByUser.set(e.user_id, existing);
+    });
+
+    // Calculate scores using accelerator-mentor scoring function
+    const matches: Match[] = profiles.map(mentor => {
+      const mentorSkills = skillsByUser.get(mentor.user_id) || [];
+      const mentorExperiences = experiencesByUser.get(mentor.user_id) || [];
+      
+      const { score, reasons } = calculateAcceleratorMentorScore(
+        userAcceleratorProfile,
+        mentorSkills,
+        mentorExperiences
+      );
+
+      // Get skill names for display
+      const skillNames = mentorSkills.map(s => s.skill_name);
+
+      return {
+        id: mentor.user_id,
+        name: mentor.full_name || 'Anonymous Mentor',
+        role: 'Mentor/Advisor',
+        description: mentor.bio || 'Experienced mentor ready to guide your startup journey',
+        industry: skillNames[0] || 'General',
+        expertise: skillNames.slice(0, 5),
+        compatibility_score: score,
+        avatar: mentor.avatar_url,
+        match_reasons: reasons.length > 0 ? reasons : ['Available for mentorship'],
+      };
+    });
+
+    // Sort by score descending
+    matches.sort((a, b) => b.compatibility_score - a.compatibility_score);
+    setMentorMatches(matches.slice(0, 15));
   };
 
   const fetchInvestorMatchesForStartup = async () => {
