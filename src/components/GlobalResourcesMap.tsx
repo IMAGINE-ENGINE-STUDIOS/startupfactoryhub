@@ -855,9 +855,9 @@ export const GlobalResourcesMap = () => {
   };
 
   return (
-    <div className="relative w-full h-full flex flex-col bg-background overflow-hidden rounded-2xl">
-      {/* Map Container - takes most of the viewport */}
-      <div className="relative flex-1 min-h-0">
+    <div className="relative w-full overflow-y-auto bg-background rounded-2xl">
+      {/* Map Container */}
+      <div className="relative h-screen">
         {/* Full Viewport Map */}
         <div ref={mapContainer} className="absolute inset-0 w-full h-full rounded-t-2xl" />
       
@@ -1459,7 +1459,7 @@ export const GlobalResourcesMap = () => {
       </div>
 
       {/* Network Perks Section - Below the map */}
-      <div className="flex-shrink-0 tech-card border-0 border-t border-white/20 rounded-none rounded-b-2xl p-4">
+      <div className="tech-card border-0 border-t border-white/20 rounded-none rounded-b-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold flex items-center gap-2">
             <Gift className="w-4 h-4 text-green-400" />
