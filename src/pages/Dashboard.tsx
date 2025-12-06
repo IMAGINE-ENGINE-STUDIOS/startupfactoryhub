@@ -11,7 +11,6 @@ import AIFeaturesHub from '@/components/AIFeaturesHub';
 import CRMBoard from '@/components/CRMBoard';
 import FloatingChat from '@/components/FloatingChat';
 import MatchingSystem from '@/components/MatchingSystem';
-import NetworkBrowser from '@/components/NetworkBrowser';
 import EducationalResources from '@/components/EducationalResources';
 import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
 import MentorAdvisorNetwork from '@/components/MentorAdvisorNetwork';
@@ -539,7 +538,6 @@ const Dashboard = () => {
           {activeTab === "network" && (
             <TabsContent value="network" className="space-y-4">
               <MatchingSystem />
-              <NetworkBrowser />
             </TabsContent>
           )}
 

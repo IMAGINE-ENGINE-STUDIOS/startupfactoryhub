@@ -26,7 +26,6 @@ import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 import ProfilePostsMosaic from "@/components/ProfilePostsMosaic";
 import { useProfileWithRole } from "@/hooks/useProfileWithRole";
 import StartupBrowser from "@/components/StartupBrowser";
-import NetworkBrowser from "@/components/NetworkBrowser";
 import MatchingSystem from "@/components/MatchingSystem";
 import MentorOffersBoard from "@/components/MentorOffersBoard";
 import MenteeSessions from "@/components/MenteeSessions";
@@ -236,7 +235,6 @@ const MentorDashboard = () => {
 
           <TabsContent value="network" className="space-y-4">
             <MatchingSystem />
-            <NetworkBrowser />
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-4">

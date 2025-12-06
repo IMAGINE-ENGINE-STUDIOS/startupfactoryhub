@@ -23,7 +23,6 @@ import AdvisorJobTaskViewer from '@/components/AdvisorJobTaskViewer';
 import AvailabilityManager from '@/components/AvailabilityManager';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import StartupProfileDialog from '@/components/StartupProfileDialog';
-import NetworkBrowser from '@/components/NetworkBrowser';
 import MatchingSystem from '@/components/MatchingSystem';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { DashboardHeader } from '@/components/DashboardHeader';
@@ -436,7 +435,6 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="network" className="space-y-4">
             <MatchingSystem />
-            <NetworkBrowser />
           </TabsContent>
 
           <TabsContent value="jobs" className="space-y-4">
