@@ -212,13 +212,11 @@ All colors MUST be HSL.
     background: var(--gradient-tech);
     box-shadow: var(--shadow-tech);
     border: 1px solid hsl(var(--accent) / 0.3);
-    transition: var(--transition-spring);
   }
   
   .tech-card:hover {
     box-shadow: var(--pulse-glow), var(--shadow-tech);
     border-color: hsl(var(--accent));
-    transform: translateY(-4px);
   }
   
   .scan-effect {
