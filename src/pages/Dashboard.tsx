@@ -565,12 +565,10 @@ const Dashboard = () => {
             <TabsContent value="jobs" className="space-y-4">
               <Tabs defaultValue="opportunities" className="w-full">
                 <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
-                  <TabsTrigger value="opportunities" className="flex items-center gap-2">
-                    <Briefcase className="h-4 w-4" />
+                  <TabsTrigger value="opportunities">
                     Job Opportunities
                   </TabsTrigger>
-                  <TabsTrigger value="manage-tasks" className="flex items-center gap-2">
-                    <Target className="h-4 w-4" />
+                  <TabsTrigger value="manage-tasks">
                     Manage Tasks
                   </TabsTrigger>
                 </TabsList>
