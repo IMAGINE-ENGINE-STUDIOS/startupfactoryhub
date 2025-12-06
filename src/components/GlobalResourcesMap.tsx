@@ -96,6 +96,8 @@ export const GlobalResourcesMap = () => {
   const [isRotating, setIsRotating] = useState(true);
   const isRotatingRef = useRef(true);
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
+  const [userEventStatus, setUserEventStatus] = useState<string | null>(null);
+  const [isUpdatingRsvp, setIsUpdatingRsvp] = useState(false);
 
   // Address search state
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
@@ -178,7 +180,7 @@ export const GlobalResourcesMap = () => {
   });
 
   // Fetch events for map
-  const { data: mapEvents, isLoading: isLoadingEvents } = useEventsForMap();
+  const { data: mapEvents, isLoading: isLoadingEvents, refetch: refetchEvents } = useEventsForMap();
 
   // Geocode address using Mapbox
   const geocodeAddress = useCallback(async (query: string) => {
@@ -338,6 +340,76 @@ export const GlobalResourcesMap = () => {
       }
     );
   };
+
+  // Fetch user's RSVP status when event is selected
+  useEffect(() => {
+    const fetchUserEventStatus = async () => {
+      if (!user || !selectedEvent) {
+        setUserEventStatus(null);
+        return;
+      }
+
+      const { data } = await supabase
+        .from('event_attendees')
+        .select('status')
+        .eq('event_id', selectedEvent.id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      setUserEventStatus(data?.status || null);
+    };
+
+    fetchUserEventStatus();
+  }, [user, selectedEvent?.id]);
+
+  // Handle RSVP attendance
+  const handleEventAttendance = async (status: 'going' | 'maybe' | 'declined') => {
+    if (!user || !selectedEvent) return;
+
+    setIsUpdatingRsvp(true);
+    try {
+      const { error } = await supabase
+        .from('event_attendees')
+        .upsert({
+          event_id: selectedEvent.id,
+          user_id: user.id,
+          status
+        }, { onConflict: 'event_id,user_id' });
+
+      if (error) throw error;
+
+      setUserEventStatus(status);
+      refetchEvents();
+      toast({
+        title: status === 'going' ? "You're going!" : status === 'maybe' ? "Marked as maybe" : "RSVP declined",
+        description: status === 'going' ? `You'll attend ${selectedEvent.title}` : undefined,
+      });
+    } catch (error) {
+      console.error('RSVP error:', error);
+      toast({
+        title: "Failed to update RSVP",
+        description: "Please try again",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdatingRsvp(false);
+    }
+  };
+
+  // Real-time subscription for event attendees
+  useEffect(() => {
+    const channel = supabase
+      .channel('map-event-attendees')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'event_attendees' },
+        () => refetchEvents()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetchEvents]);
 
   // Helper: Create marker icon for native markers
   const createMarkerIcon = (color: string, type: ResourceType) => {
@@ -1356,7 +1428,7 @@ export const GlobalResourcesMap = () => {
                     </div>
                   )}
 
-                  <div className="flex flex-col gap-2 pt-2">
+                  <div className="flex flex-col gap-3 pt-2">
                     <Button 
                       size="sm" 
                       variant="outline" 
@@ -1366,13 +1438,57 @@ export const GlobalResourcesMap = () => {
                       <Navigation className="w-4 h-4" />
                       Get Directions
                     </Button>
-                    <Button 
-                      size="sm" 
-                      className="gap-2 bg-rose-500 hover:bg-rose-600 text-white w-full justify-center rounded-xl"
-                    >
-                      <CalendarDays className="w-4 h-4" />
-                      View Event Details
-                    </Button>
+
+                    {/* RSVP Buttons */}
+                    {user ? (
+                      <div className="space-y-2">
+                        <p className="text-xs text-muted-foreground">RSVP to this event</p>
+                        <div className="grid grid-cols-3 gap-2">
+                          <Button
+                            size="sm"
+                            variant={userEventStatus === 'going' ? 'default' : 'outline'}
+                            className={cn(
+                              "gap-1 rounded-xl text-xs",
+                              userEventStatus === 'going' && "bg-green-500 hover:bg-green-600 text-white"
+                            )}
+                            onClick={() => handleEventAttendance('going')}
+                            disabled={isUpdatingRsvp || (selectedEvent.max_attendees && (selectedEvent.attendee_count || 0) >= selectedEvent.max_attendees && userEventStatus !== 'going')}
+                          >
+                            <Users2 className="w-3 h-3" />
+                            Going
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={userEventStatus === 'maybe' ? 'default' : 'outline'}
+                            className={cn(
+                              "gap-1 rounded-xl text-xs",
+                              userEventStatus === 'maybe' && "bg-amber-500 hover:bg-amber-600 text-white"
+                            )}
+                            onClick={() => handleEventAttendance('maybe')}
+                            disabled={isUpdatingRsvp}
+                          >
+                            Maybe
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant={userEventStatus === 'declined' ? 'default' : 'outline'}
+                            className={cn(
+                              "gap-1 rounded-xl text-xs",
+                              userEventStatus === 'declined' && "bg-red-500 hover:bg-red-600 text-white"
+                            )}
+                            onClick={() => handleEventAttendance('declined')}
+                            disabled={isUpdatingRsvp}
+                          >
+                            <X className="w-3 h-3" />
+                            Can't
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground text-center p-3 rounded-xl backdrop-blur-xl bg-white/5 border border-white/10">
+                        Sign in to RSVP for this event
+                      </p>
+                    )}
                   </div>
                 </div>
               </ScrollArea>
