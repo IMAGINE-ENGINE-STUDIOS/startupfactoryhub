@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { 
   Building2, 
@@ -855,11 +855,9 @@ export const GlobalResourcesMap = () => {
   };
 
   return (
-    <div className="relative w-full min-h-screen bg-background rounded-2xl">
-      {/* Map Container */}
-      <div className="relative h-screen">
-        {/* Full Viewport Map */}
-        <div ref={mapContainer} className="absolute inset-0 w-full h-full rounded-t-2xl" />
+    <div className="relative w-full h-full bg-background overflow-hidden rounded-2xl">
+      {/* Full Viewport Map */}
+      <div ref={mapContainer} className="absolute inset-0 w-full h-full rounded-2xl" />
       
       {/* Control Buttons - Top Center */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
@@ -1085,6 +1083,71 @@ export const GlobalResourcesMap = () => {
                       <Icon className="w-4 h-4" />
                       {config.label}
                     </Button>
+                  );
+                })}
+              </div>
+            </ScrollArea>
+          </div>
+
+          {/* Resource List */}
+          <div className="flex-1 overflow-hidden flex flex-col backdrop-blur">
+            <div className="p-4 border-b border-white/30 dark:border-white/20">
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                Resources ({resources?.length || 0})
+              </h3>
+            </div>
+            <ScrollArea className="flex-1 px-4">
+              <div className="space-y-2 py-2">
+                {resources?.map((resource) => {
+                  const config = RESOURCE_CONFIG[resource.resource_type];
+                  const Icon = config.icon;
+                  const isSelected = selectedResource?.id === resource.id;
+                  return (
+                    <Card
+                      key={resource.id}
+                      className={cn(
+                        "cursor-pointer transition-all backdrop-blur-2xl bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/30 border-white/30 dark:border-white/20 rounded-2xl",
+                        isSelected && "ring-2 ring-primary shadow-lg shadow-primary/20 bg-white/20 dark:bg-black/30"
+                      )}
+                      onClick={() => {
+                        setSelectedResource(resource);
+                        if (map.current && resource.latitude && resource.longitude) {
+                          map.current.flyTo({
+                            center: [resource.longitude, resource.latitude],
+                            zoom: 12,
+                            duration: 2000,
+                          });
+                        }
+                      }}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-start gap-3">
+                          <div
+                            className="relative w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 backdrop-blur-xl"
+                            style={{ backgroundColor: config.color + '20' }}
+                          >
+                            <Icon className="w-5 h-5" />
+                            {resource.is_official_partner && (
+                              <span className="absolute -top-1 -right-1 text-xs drop-shadow-md">⭐</span>
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-1.5">
+                              <h4 className="font-medium text-sm truncate">{resource.title}</h4>
+                              {resource.is_official_partner && (
+                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-amber-500/20 border-amber-500/50 text-amber-400 shrink-0">
+                                  Partner
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {resource.city}, {resource.country}
+                            </p>
+                          </div>
+                          <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                        </div>
+                      </CardContent>
+                    </Card>
                   );
                 })}
               </div>
@@ -1434,91 +1497,28 @@ export const GlobalResourcesMap = () => {
         </div>
       </div>
 
-        {/* Loading Overlay */}
-        {(isLoading || isLoadingEvents) && (
-          <div className="absolute inset-0 bg-background/30 backdrop-blur-sm flex items-center justify-center z-30 pointer-events-none">
-            <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
-          </div>
-        )}
-
-        <AddResourceDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
-        
-        <TrackingSessionDialog
-          open={showTrackingDialog}
-          onOpenChange={setShowTrackingDialog}
-          sessionId={trackingSessionId}
-          onCreateSession={handleCreateSession}
-          onJoinSession={handleJoinSession}
-          onLeaveSession={handleLeaveSession}
-          trackedUsers={trackedUsers}
-          isTracking={isTracking}
-          onStartTracking={startTracking}
-          onStopTracking={stopTracking}
-          userColor={userColor}
-        />
-      </div>
-
-      {/* Network Perks Section - Below the map, outside h-screen */}
-      <div className="relative z-10 tech-card border-0 border-t border-white/20 rounded-none rounded-b-2xl p-4 bg-background">
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-sm font-semibold flex items-center gap-2">
-            <Gift className="w-4 h-4 text-green-400" />
-            Network Perks
-          </h3>
-          <Badge variant="outline" className="text-xs bg-green-500/10 border-green-500/30 text-green-400">
-            {resources?.filter(r => r.resource_type === 'perk').length || 0} Available
-          </Badge>
+      {/* Loading Overlay */}
+      {(isLoading || isLoadingEvents) && (
+        <div className="absolute inset-0 bg-background/30 backdrop-blur-sm flex items-center justify-center z-30 pointer-events-none">
+          <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
         </div>
-        <ScrollArea className="w-full">
-          <div className="flex gap-3 pb-2">
-            {resources?.filter(r => r.resource_type === 'perk').map((perk) => (
-              <Card
-                key={perk.id}
-                className="tech-card border-0 min-w-[220px] cursor-pointer hover:bg-white/10 dark:hover:bg-black/30"
-                onClick={() => {
-                  setSelectedResource(perk);
-                  if (map.current && perk.latitude && perk.longitude) {
-                    map.current.flyTo({
-                      center: [perk.longitude, perk.latitude],
-                      zoom: 12,
-                      duration: 2000,
-                    });
-                  }
-                }}
-              >
-                <CardContent className="p-3">
-                  <div className="flex items-center gap-3">
-                    {perk.logo_url ? (
-                      <img src={perk.logo_url} className="w-10 h-10 rounded-xl object-cover" alt={perk.title} />
-                    ) : (
-                      <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
-                        <Gift className="w-5 h-5 text-green-400" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-1.5">
-                        <h4 className="font-medium text-sm truncate">{perk.title}</h4>
-                        {perk.is_official_partner && (
-                          <span className="text-xs">⭐</span>
-                        )}
-                      </div>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {perk.description?.slice(0, 40)}...
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-            {(!resources || resources.filter(r => r.resource_type === 'perk').length === 0) && (
-              <div className="flex items-center justify-center w-full py-4 text-muted-foreground text-sm">
-                No perks available yet
-              </div>
-            )}
-          </div>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
+      )}
+
+      <AddResourceDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
+      
+      <TrackingSessionDialog
+        open={showTrackingDialog}
+        onOpenChange={setShowTrackingDialog}
+        sessionId={trackingSessionId}
+        onCreateSession={handleCreateSession}
+        onJoinSession={handleJoinSession}
+        onLeaveSession={handleLeaveSession}
+        trackedUsers={trackedUsers}
+        isTracking={isTracking}
+        onStartTracking={startTracking}
+        onStopTracking={stopTracking}
+        userColor={userColor}
+      />
     </div>
   );
 };
