@@ -1109,7 +1109,7 @@ export const GlobalResourcesMap = () => {
         // Collapsed state - pill on the right
         if (!isPerksExpanded) {
           return (
-            <div className="absolute bottom-4 right-4 z-10 pointer-events-auto">
+            <div className="absolute bottom-20 right-4 z-10 pointer-events-auto">
               <Button
                 onClick={() => setIsPerksExpanded(true)}
                 className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl px-3 py-6 flex flex-col items-center gap-2 hover:ring-1 hover:ring-green-500/50"
@@ -1216,7 +1216,12 @@ export const GlobalResourcesMap = () => {
       })()}
 
       {/* Right Side Panel - Resource Details (Slide In) */}
-        <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl">
+      <div 
+        className={cn(
+          "absolute right-2 top-2 bottom-2 w-96 z-20 transition-all duration-300",
+          selectedResource ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
+        )}
+      >
         <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl">
           {selectedResource && (
             <>
