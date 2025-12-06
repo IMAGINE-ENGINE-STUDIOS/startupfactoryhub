@@ -1044,10 +1044,10 @@ export const GlobalResourcesMap = () => {
           </div>
 
           {/* Categories */}
-          <div className="p-4 backdrop-blur">
-            <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Categories</h3>
-            <ScrollArea className="max-h-[calc(100vh-320px)]">
-              <div className="space-y-1">
+          <div className="flex-1 flex flex-col overflow-hidden p-4 backdrop-blur">
+            <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex-shrink-0">Categories</h3>
+            <ScrollArea className="flex-1 overflow-hidden">
+              <div className="space-y-1 pr-2">
                 <Button
                   variant={selectedType === null ? 'default' : 'ghost'}
                   size="sm"
@@ -1091,7 +1091,7 @@ export const GlobalResourcesMap = () => {
             {/* Add Resource Button - directly after categories */}
             <Button 
               onClick={() => setShowAddDialog(true)} 
-              className="w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20 rounded-2xl mt-4"
+              className="w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20 rounded-2xl mt-4 flex-shrink-0"
             >
               <Plus className="w-4 h-4" />
               Add Resource
@@ -1100,7 +1100,7 @@ export const GlobalResourcesMap = () => {
         </div>
       </div>
 
-      {/* Bottom Perks Section - Overlay with Infinite Scroll */}
+      {/* Bottom Perks Section - Manual Infinite Scroll */}
       {resources && resources.filter(r => r.resource_type === 'perk').length > 0 && (() => {
         const perks = resources.filter(r => r.resource_type === 'perk');
         return (
@@ -1117,46 +1117,38 @@ export const GlobalResourcesMap = () => {
                 </Badge>
               </div>
               
-              {/* Infinite Scroll Container */}
-              <div className="overflow-hidden">
-                <div className="flex gap-3 pb-2 animate-scroll-x hover:[animation-play-state:paused]" style={{ width: 'max-content' }}>
-                  {/* First set of perks */}
-                  {perks.map((perk) => (
+              {/* Manual Infinite Scroll Container */}
+              <div 
+                className="overflow-x-auto scrollbar-thin pb-2"
+                onScroll={(e) => {
+                  const container = e.currentTarget;
+                  const scrollWidth = container.scrollWidth;
+                  const clientWidth = container.clientWidth;
+                  const scrollLeft = container.scrollLeft;
+                  const sectionWidth = scrollWidth / 3;
+                  
+                  // If scrolled to near the end, jump back to middle section
+                  if (scrollLeft >= sectionWidth * 2 - 10) {
+                    container.scrollLeft = sectionWidth;
+                  }
+                  // If scrolled to near the beginning, jump to middle section
+                  else if (scrollLeft <= 10) {
+                    container.scrollLeft = sectionWidth;
+                  }
+                }}
+                ref={(el) => {
+                  // Initialize scroll position to middle section on mount
+                  if (el && el.scrollLeft === 0) {
+                    const sectionWidth = el.scrollWidth / 3;
+                    el.scrollLeft = sectionWidth;
+                  }
+                }}
+              >
+                <div className="flex gap-3" style={{ width: 'max-content' }}>
+                  {/* Triple the perks for seamless circular scroll */}
+                  {[...perks, ...perks, ...perks].map((perk, index) => (
                     <Card
-                      key={`perk-1-${perk.id}`}
-                      className="tech-card border-0 min-w-[220px] max-w-[220px] cursor-pointer hover:ring-1 hover:ring-green-500/50 flex-shrink-0"
-                      onClick={() => {
-                        setSelectedResource(perk);
-                        if (map.current && perk.latitude && perk.longitude) {
-                          map.current.flyTo({
-                            center: [perk.longitude, perk.latitude],
-                            zoom: 12,
-                            duration: 2000,
-                          });
-                        }
-                      }}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-center gap-2">
-                          {perk.logo_url ? (
-                            <img src={perk.logo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
-                          ) : (
-                            <Gift className="w-6 h-6 text-green-400" />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-sm truncate">{perk.title}</h4>
-                            {perk.is_official_partner && (
-                              <span className="text-xs text-amber-400">⭐ Partner</span>
-                            )}
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                  {/* Duplicate set for seamless infinite loop */}
-                  {perks.map((perk) => (
-                    <Card
-                      key={`perk-2-${perk.id}`}
+                      key={`perk-${index}-${perk.id}`}
                       className="tech-card border-0 min-w-[220px] max-w-[220px] cursor-pointer hover:ring-1 hover:ring-green-500/50 flex-shrink-0"
                       onClick={() => {
                         setSelectedResource(perk);
