@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,15 +7,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Loader2, ExternalLink } from 'lucide-react';
+import { Upload, Loader2, ExternalLink, MapPin } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface CreateEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEventCreated: () => void;
 }
+
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 export function CreateEventDialog({ open, onOpenChange, onEventCreated }: CreateEventDialogProps) {
   const [loading, setLoading] = useState(false);
@@ -33,8 +36,85 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
     banner_url: '',
     post_to_feed: true
   });
+  
+  // Geocoding state
+  const [addressSuggestions, setAddressSuggestions] = useState<any[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedCoords, setSelectedCoords] = useState<{
+    latitude: number;
+    longitude: number;
+    city: string;
+    country: string;
+  } | null>(null);
+  
   const { user } = useAuth();
   const { toast } = useToast();
+
+  // Geocode address using Mapbox
+  const geocodeAddress = useCallback(async (query: string) => {
+    if (!query || query.length < 3 || isOnlineEvent) {
+      setAddressSuggestions([]);
+      return;
+    }
+
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${MAPBOX_TOKEN}&types=address,place,poi&limit=5`
+      );
+      const data = await response.json();
+      
+      if (data.features) {
+        setAddressSuggestions(data.features);
+        setShowSuggestions(true);
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+    }
+  }, [isOnlineEvent]);
+
+  // Handle address selection from suggestions
+  const handleAddressSelect = useCallback((feature: any) => {
+    const [lng, lat] = feature.center;
+    
+    // Extract city and country from context
+    let city = '';
+    let country = '';
+    
+    if (feature.context) {
+      for (const ctx of feature.context) {
+        if (ctx.id.startsWith('place')) city = ctx.text;
+        if (ctx.id.startsWith('region') && !city) city = ctx.text;
+        if (ctx.id.startsWith('country')) country = ctx.text;
+      }
+    }
+    
+    setSelectedCoords({
+      latitude: lat,
+      longitude: lng,
+      city: city || feature.text,
+      country: country || '',
+    });
+    
+    setFormData(prev => ({ ...prev, location: feature.place_name }));
+    setShowSuggestions(false);
+    setAddressSuggestions([]);
+  }, []);
+
+  // Debounced search for addresses
+  useEffect(() => {
+    if (isOnlineEvent) return;
+    
+    const timer = setTimeout(() => {
+      if (formData.location.length >= 3) {
+        geocodeAddress(formData.location);
+      } else {
+        setAddressSuggestions([]);
+        setShowSuggestions(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timer);
+  }, [formData.location, geocodeAddress, isOnlineEvent]);
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -111,8 +191,13 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
         banner_url: formData.banner_url || null,
         organizer_id: user.id,
-        host_id: user.id
-      }).select().single();
+        host_id: user.id,
+        is_virtual: isOnlineEvent,
+        latitude: !isOnlineEvent && selectedCoords ? selectedCoords.latitude : null,
+        longitude: !isOnlineEvent && selectedCoords ? selectedCoords.longitude : null,
+        city: !isOnlineEvent && selectedCoords ? selectedCoords.city : null,
+        country: !isOnlineEvent && selectedCoords ? selectedCoords.country : null,
+      } as any).select().single();
 
       if (error) throw error;
 
@@ -159,6 +244,8 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         post_to_feed: true
       });
       setIsOnlineEvent(false);
+      setSelectedCoords(null);
+      setAddressSuggestions([]);
     } catch (error) {
       console.error('Error creating event:', error);
       toast({ title: 'Failed to create event', variant: 'destructive' });
@@ -255,16 +342,51 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
 
           <div className="space-y-2">
             <Label htmlFor="location">
-              {isOnlineEvent ? 'Meeting Link (Generated on submit)' : 'Location'}
+              {isOnlineEvent ? 'Meeting Link (Generated on submit)' : 'Location *'}
             </Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={e => !isOnlineEvent && setFormData(prev => ({ ...prev, location: e.target.value }))}
-              placeholder={isOnlineEvent ? 'Video meeting link will be created when you submit' : 'Event location or virtual link'}
-              readOnly={isOnlineEvent}
-              className={isOnlineEvent ? 'bg-muted' : ''}
-            />
+            <div className="relative">
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                id="location"
+                value={formData.location}
+                onChange={e => {
+                  if (!isOnlineEvent) {
+                    setFormData(prev => ({ ...prev, location: e.target.value }));
+                    setSelectedCoords(null); // Reset coords when typing
+                  }
+                }}
+                onFocus={() => addressSuggestions.length > 0 && setShowSuggestions(true)}
+                placeholder={isOnlineEvent ? 'Video meeting link will be created when you submit' : 'Start typing an address...'}
+                readOnly={isOnlineEvent}
+                className={`pl-10 ${isOnlineEvent ? 'bg-muted' : ''}`}
+              />
+              
+              {/* Address Suggestions Dropdown */}
+              {showSuggestions && addressSuggestions.length > 0 && !isOnlineEvent && (
+                <ScrollArea className="absolute top-full left-0 right-0 mt-1 max-h-48 bg-popover border rounded-md shadow-lg z-50">
+                  {addressSuggestions.map((feature: any) => (
+                    <button
+                      key={feature.id}
+                      type="button"
+                      onClick={() => handleAddressSelect(feature)}
+                      className="w-full px-3 py-2 text-left hover:bg-accent transition-colors border-b last:border-0"
+                    >
+                      <div className="font-medium text-sm">{feature.text}</div>
+                      <div className="text-xs text-muted-foreground truncate">{feature.place_name}</div>
+                    </button>
+                  ))}
+                </ScrollArea>
+              )}
+            </div>
+            
+            {/* Show selected location confirmation */}
+            {selectedCoords && !isOnlineEvent && (
+              <div className="flex items-center gap-2 text-sm text-emerald-500">
+                <MapPin className="h-3 w-3" />
+                Location confirmed: {selectedCoords.city}, {selectedCoords.country}
+              </div>
+            )}
+            
             {formData.location && formData.location.startsWith('http') && (
               <a 
                 href={formData.location} 

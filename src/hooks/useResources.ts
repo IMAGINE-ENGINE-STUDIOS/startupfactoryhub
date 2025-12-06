@@ -17,6 +17,7 @@ export type ResourceType =
   | 'coworking' 
   | 'investor_network'
   | 'human_capital'
+  | 'event'
   | 'other';
 
 export type LocationType = 'physical' | 'online' | 'hybrid';
