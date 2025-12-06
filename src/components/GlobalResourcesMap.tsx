@@ -39,7 +39,10 @@ import {
   Mail,
   Radio,
   MapPinned,
-  Home
+  Home,
+  CalendarDays,
+  Clock,
+  Users2
 } from 'lucide-react';
 import { AddResourceDialog } from './AddResourceDialog';
 import { TrackingSessionDialog } from './TrackingSessionDialog';
@@ -48,6 +51,8 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useEventsForMap, MapEvent } from '@/hooks/useEventsForMap';
+import { format } from 'date-fns';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
@@ -66,6 +71,7 @@ const RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: s
   coworking: { icon: Briefcase, color: '#14b8a6', label: 'Coworking' },
   investor_network: { icon: TrendingUp, color: '#facc15', label: 'Investor Net' },
   human_capital: { icon: Users, color: '#0ea5e9', label: 'Human Capital' },
+  event: { icon: CalendarDays, color: '#f43f5e', label: 'Events' },
   other: { icon: MapPin, color: '#64748b', label: 'Other' },
 };
 
@@ -81,6 +87,7 @@ export const GlobalResourcesMap = () => {
   const [selectedType, setSelectedType] = useState<ResourceType | null>(null);
   const [search, setSearch] = useState('');
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(false);
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
@@ -88,6 +95,7 @@ export const GlobalResourcesMap = () => {
   const [acceleratorLocation, setAcceleratorLocation] = useState<{lat: number; lng: number; name: string; logo?: string} | null>(null);
   const [isRotating, setIsRotating] = useState(true);
   const isRotatingRef = useRef(true);
+  const eventMarkers = useRef<mapboxgl.Marker[]>([]);
 
   // Address search state
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
@@ -111,7 +119,7 @@ export const GlobalResourcesMap = () => {
     generateSessionId,
   } = useMapTracking(trackingSessionId);
 
-  // Add pulsing glow animation for flagship hubs
+  // Add pulsing glow animation for flagship hubs and events
   useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -121,6 +129,16 @@ export const GlobalResourcesMap = () => {
         }
         50% {
           box-shadow: 0 6px 24px rgba(16, 185, 129, 0.7), 0 0 30px rgba(16, 185, 129, 0.5), 0 4px 12px rgba(0,0,0,0.4);
+        }
+      }
+      @keyframes pulse-event {
+        0%, 100% {
+          box-shadow: 0 4px 12px rgba(244, 63, 94, 0.5), 0 0 20px rgba(244, 63, 94, 0.3);
+          transform: scale(1);
+        }
+        50% {
+          box-shadow: 0 6px 20px rgba(244, 63, 94, 0.7), 0 0 30px rgba(244, 63, 94, 0.5);
+          transform: scale(1.05);
         }
       }
     `;
@@ -155,9 +173,12 @@ export const GlobalResourcesMap = () => {
   }, [user, role]);
 
   const { data: resources, isLoading } = useResources({ 
-    type: selectedType || undefined,
+    type: selectedType === 'event' ? undefined : selectedType || undefined,
     search: search || undefined
   });
+
+  // Fetch events for map
+  const { data: mapEvents, isLoading: isLoadingEvents } = useEventsForMap();
 
   // Geocode address using Mapbox
   const geocodeAddress = useCallback(async (query: string) => {
@@ -641,10 +662,123 @@ export const GlobalResourcesMap = () => {
     });
   }, [resources]);
 
+  // Add event markers to map
+  useEffect(() => {
+    if (!map.current || selectedType !== 'event') {
+      // Clear event markers if not showing events
+      eventMarkers.current.forEach(marker => marker.remove());
+      eventMarkers.current = [];
+      return;
+    }
+
+    // Clear existing event markers
+    eventMarkers.current.forEach(marker => marker.remove());
+    eventMarkers.current = [];
+
+    if (!mapEvents) return;
+
+    // Add event markers
+    mapEvents.forEach(event => {
+      const now = new Date();
+      const startDate = new Date(event.start_date);
+      const endDate = new Date(event.end_date);
+      const isLive = now >= startDate && now <= endDate;
+      const isUpcoming = now < startDate;
+      
+      const markerSize = 36;
+      const eventColor = '#f43f5e'; // Rose color for events
+      
+      const el = document.createElement('div');
+      el.className = 'event-marker';
+      el.style.cssText = `
+        width: ${markerSize}px;
+        height: ${markerSize}px;
+        cursor: pointer;
+        position: relative;
+      `;
+      
+      // Main marker element
+      const markerEl = document.createElement('div');
+      markerEl.style.cssText = `
+        width: 100%;
+        height: 100%;
+        background: ${event.banner_url ? `url(${event.banner_url}) center/cover,` : ''} linear-gradient(135deg, ${eventColor}, #e11d48);
+        border: 3px solid white;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(244, 63, 94, 0.5), 0 0 20px rgba(244, 63, 94, 0.3);
+        transition: all 0.2s;
+        ${isLive ? 'animation: pulse-event 2s ease-in-out infinite;' : ''}
+      `;
+      el.appendChild(markerEl);
+      
+      // Live badge for active events
+      if (isLive) {
+        const liveEl = document.createElement('div');
+        liveEl.innerHTML = '🔴';
+        liveEl.style.cssText = `
+          position: absolute;
+          top: -6px;
+          right: -6px;
+          font-size: 12px;
+          filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+          animation: pulse 1s ease-in-out infinite;
+        `;
+        el.appendChild(liveEl);
+      } else if (isUpcoming) {
+        const upcomingEl = document.createElement('div');
+        upcomingEl.innerHTML = '📅';
+        upcomingEl.style.cssText = `
+          position: absolute;
+          top: -6px;
+          right: -6px;
+          font-size: 12px;
+          filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+        `;
+        el.appendChild(upcomingEl);
+      }
+
+      // Hover effect
+      el.addEventListener('mouseenter', () => {
+        markerEl.style.transform = 'scale(1.15)';
+        markerEl.style.boxShadow = '0 6px 20px rgba(244, 63, 94, 0.7), 0 0 30px rgba(244, 63, 94, 0.5)';
+      });
+      el.addEventListener('mouseleave', () => {
+        markerEl.style.transform = 'scale(1)';
+        markerEl.style.boxShadow = '0 4px 12px rgba(244, 63, 94, 0.5), 0 0 20px rgba(244, 63, 94, 0.3)';
+      });
+
+      // Click handler
+      el.addEventListener('click', () => {
+        setSelectedEvent(event);
+        setSelectedResource(null); // Clear resource selection
+        if (map.current) {
+          map.current.flyTo({
+            center: [event.longitude, event.latitude],
+            zoom: 14,
+            duration: 2000,
+          });
+        }
+      });
+
+      const marker = new mapboxgl.Marker({ 
+        element: el, 
+        anchor: 'center',
+      })
+        .setLngLat([event.longitude, event.latitude])
+        .addTo(map.current!);
+
+      eventMarkers.current.push(marker);
+    });
+  }, [mapEvents, selectedType]);
+
   const getDirections = (resource: Resource) => {
     if (resource.latitude && resource.longitude) {
       window.open(`https://www.google.com/maps/dir/?api=1&destination=${resource.latitude},${resource.longitude}`, '_blank');
     }
+  };
+
+  const getEventDirections = (event: MapEvent) => {
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${event.latitude},${event.longitude}`, '_blank');
   };
 
   return (
@@ -1123,8 +1257,131 @@ export const GlobalResourcesMap = () => {
         </div>
       </div>
 
+      {/* Right Side Panel - Event Details (Slide In) */}
+      <div 
+        className={cn(
+          "absolute right-2 top-2 bottom-2 w-96 z-10 transition-all duration-300",
+          selectedEvent && !selectedResource ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
+        )}
+      >
+        <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl">
+          {selectedEvent && (
+            <>
+              <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      {(() => {
+                        const now = new Date();
+                        const startDate = new Date(selectedEvent.start_date);
+                        const isLive = now >= startDate && now <= new Date(selectedEvent.end_date);
+                        return isLive ? (
+                          <Badge className="bg-rose-500 text-white rounded-xl flex items-center gap-1">
+                            <span className="animate-pulse">🔴</span> LIVE EVENT
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-rose-500/20 text-rose-400 border-rose-500/30 rounded-xl">
+                            📅 Upcoming Event
+                          </Badge>
+                        );
+                      })()}
+                    </div>
+                    <h3 className="text-lg font-semibold">{selectedEvent.title}</h3>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedEvent(null)}
+                    className="shrink-0 backdrop-blur-xl bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/30 rounded-xl"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+                {selectedEvent.banner_url && (
+                  <img 
+                    src={selectedEvent.banner_url} 
+                    alt="" 
+                    className="w-full h-32 rounded-2xl object-cover mb-3" 
+                  />
+                )}
+              </div>
+
+              <ScrollArea className="flex-1">
+                <div className="p-4 space-y-4">
+                  {selectedEvent.description && (
+                    <p className="text-sm text-muted-foreground">
+                      {selectedEvent.description}
+                    </p>
+                  )}
+
+                  {/* Date & Time */}
+                  <div className="flex items-start gap-2 text-sm">
+                    <Clock className="w-4 h-4 text-rose-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="font-medium">{format(new Date(selectedEvent.start_date), 'PPP')}</p>
+                      <p className="text-muted-foreground">
+                        {format(new Date(selectedEvent.start_date), 'p')} - {format(new Date(selectedEvent.end_date), 'p')}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Location */}
+                  <div className="flex items-start gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-rose-400 mt-0.5 shrink-0" />
+                    <div>
+                      <p>{selectedEvent.location}</p>
+                      {selectedEvent.city && selectedEvent.country && (
+                        <p className="text-muted-foreground">
+                          {selectedEvent.city}, {selectedEvent.country}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Attendees */}
+                  <div className="flex items-center gap-2 text-sm">
+                    <Users2 className="w-4 h-4 text-rose-400 shrink-0" />
+                    <span>
+                      {selectedEvent.attendee_count || 0}
+                      {selectedEvent.max_attendees && ` / ${selectedEvent.max_attendees}`} Attendees
+                    </span>
+                  </div>
+
+                  {/* Organizer */}
+                  {selectedEvent.organizer && (
+                    <div className="p-3 rounded-xl backdrop-blur-xl bg-white/5 border border-white/10">
+                      <p className="text-xs text-muted-foreground mb-1">Organized by</p>
+                      <p className="font-medium">{selectedEvent.organizer.full_name}</p>
+                    </div>
+                  )}
+
+                  <div className="flex flex-col gap-2 pt-2">
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      className="gap-2 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border-white/30 dark:border-white/20 hover:bg-white/20 dark:hover:bg-black/30 w-full justify-start rounded-xl" 
+                      onClick={() => getEventDirections(selectedEvent)}
+                    >
+                      <Navigation className="w-4 h-4" />
+                      Get Directions
+                    </Button>
+                    <Button 
+                      size="sm" 
+                      className="gap-2 bg-rose-500 hover:bg-rose-600 text-white w-full justify-center rounded-xl"
+                    >
+                      <CalendarDays className="w-4 h-4" />
+                      View Event Details
+                    </Button>
+                  </div>
+                </div>
+              </ScrollArea>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* Loading Overlay */}
-      {isLoading && (
+      {(isLoading || isLoadingEvents) && (
         <div className="absolute inset-0 bg-background/30 backdrop-blur-sm flex items-center justify-center z-30 pointer-events-none">
           <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
         </div>

@@ -1820,13 +1820,18 @@ export type Database = {
       events: {
         Row: {
           banner_url: string | null
+          city: string | null
+          country: string | null
           created_at: string | null
           description: string | null
           end_date: string
           host_id: string | null
           id: string
           is_public: boolean | null
+          is_virtual: boolean | null
+          latitude: number | null
           location: string | null
+          longitude: number | null
           max_attendees: number | null
           organizer_id: string
           start_date: string
@@ -1835,13 +1840,18 @@ export type Database = {
         }
         Insert: {
           banner_url?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           description?: string | null
           end_date: string
           host_id?: string | null
           id?: string
           is_public?: boolean | null
+          is_virtual?: boolean | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           max_attendees?: number | null
           organizer_id: string
           start_date: string
@@ -1850,13 +1860,18 @@ export type Database = {
         }
         Update: {
           banner_url?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string | null
           description?: string | null
           end_date?: string
           host_id?: string | null
           id?: string
           is_public?: boolean | null
+          is_virtual?: boolean | null
+          latitude?: number | null
           location?: string | null
+          longitude?: number | null
           max_attendees?: number | null
           organizer_id?: string
           start_date?: string
