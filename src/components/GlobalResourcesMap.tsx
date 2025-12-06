@@ -664,7 +664,8 @@ export const GlobalResourcesMap = () => {
 
   // Add event markers to map
   useEffect(() => {
-    if (!map.current || selectedType !== 'event') {
+    // Show events when "All Resources" (null) or "Events" is selected
+    if (!map.current || (selectedType !== null && selectedType !== 'event')) {
       // Clear event markers if not showing events
       eventMarkers.current.forEach(marker => marker.remove());
       eventMarkers.current = [];

@@ -30,9 +30,9 @@ export const useEventsForMap = () => {
       const now = new Date().toISOString();
       
       // Fetch physical events that are currently active (started but not ended)
-      // OR upcoming events (haven't started yet but will within the next 7 days)
-      const sevenDaysFromNow = new Date();
-      sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7);
+      // OR upcoming events (haven't started yet but will within the next 30 days)
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
       
       const { data: events, error } = await supabase
         .from('events')
@@ -56,7 +56,7 @@ export const useEventsForMap = () => {
         .not('longitude', 'is', null)
         .eq('is_virtual', false)
         .gte('end_date', now) // Event hasn't ended yet
-        .lte('start_date', sevenDaysFromNow.toISOString()) // Event starts within 7 days
+        .lte('start_date', thirtyDaysFromNow.toISOString()) // Event starts within 30 days
         .order('start_date', { ascending: true });
 
       if (error) throw error;
