@@ -216,7 +216,7 @@ export default function StudentJobTasks() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="tech-card border-0">
         <CardHeader>
           <CardTitle className="text-2xl">My Job Tasks</CardTitle>
           <CardDescription>Track and complete tasks for your active positions</CardDescription>
@@ -224,7 +224,7 @@ export default function StudentJobTasks() {
       </Card>
 
       {totalTasks === 0 ? (
-        <Card>
+        <Card className="tech-card border-0">
           <CardContent className="py-8">
             <p className="text-center text-muted-foreground">
               No tasks yet. Tasks will appear here once you're accepted to a task-based position.
@@ -233,8 +233,7 @@ export default function StudentJobTasks() {
         </Card>
       ) : (
         <>
-          {/* Overall Progress */}
-          <Card>
+          <Card className="tech-card border-0">
             <CardHeader>
               <CardTitle className="text-lg">Overall Progress</CardTitle>
             </CardHeader>
@@ -254,7 +253,7 @@ export default function StudentJobTasks() {
             );
 
             return (
-              <Card key={jobId}>
+              <Card key={jobId} className="tech-card border-0">
                 <CardHeader>
                   <div className="flex items-start gap-4">
                     {job.companies.logo_url && (
@@ -289,7 +288,7 @@ export default function StudentJobTasks() {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {jobTasks.map((task) => (
-                    <Card key={task.id} className={task.completed ? 'bg-muted/50' : ''}>
+                    <Card key={task.id} className={`tech-card border-0 ${task.completed ? 'opacity-75' : ''}`}>
                       <CardHeader>
                         <div className="flex items-start gap-3">
                           <Checkbox

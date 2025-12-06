@@ -260,7 +260,7 @@ export default function JobTaskManager() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="tech-card border-0">
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
@@ -274,7 +274,7 @@ export default function JobTaskManager() {
                   Create Task
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="tech-card border-0 !transition-none">
                 <DialogHeader>
                   <DialogTitle>Create New Task</DialogTitle>
                   <DialogDescription>
@@ -322,7 +322,7 @@ export default function JobTaskManager() {
       </Card>
 
       {jobs.length === 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardContent className="py-8">
             <p className="text-center text-muted-foreground">
               No task-based positions available. Create a job with task management enabled first.
@@ -332,7 +332,7 @@ export default function JobTaskManager() {
       )}
 
       {tasks.length === 0 && jobs.length > 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardContent className="py-8">
             <p className="text-center text-muted-foreground">
               No tasks yet. Click "Create Task" to get started.
@@ -348,7 +348,7 @@ export default function JobTaskManager() {
           const completedCount = task.student_job_tasks.filter(st => st.completed).length;
 
           return (
-            <Card key={task.id}>
+            <Card key={task.id} className="tech-card border-0">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -413,7 +413,7 @@ export default function JobTaskManager() {
 
       {/* Delete Task Confirmation Dialog */}
       <AlertDialog open={deleteTaskId !== null} onOpenChange={(open) => !open && setDeleteTaskId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="tech-card border-0 !transition-none">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Task</AlertDialogTitle>
             <AlertDialogDescription>

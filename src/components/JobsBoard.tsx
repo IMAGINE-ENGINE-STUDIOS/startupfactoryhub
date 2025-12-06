@@ -172,7 +172,7 @@ export function JobsBoard() {
             <DialogTrigger asChild>
               <Button>Post a Job</Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Post a New Job</DialogTitle>
               </DialogHeader>
@@ -263,14 +263,14 @@ export function JobsBoard() {
           <TabsContent value="browse" className="space-y-4">
             <div className="grid gap-4">
               {jobs.length === 0 ? (
-                <Card>
+                <Card className="tech-card border-0">
                   <CardContent className="p-8 text-center text-muted-foreground">
                     No jobs posted yet
                   </CardContent>
                 </Card>
               ) : (
                 jobs.map((job) => (
-                  <Card key={job.id} className="hover:shadow-lg transition-shadow">
+                  <Card key={job.id} className="tech-card border-0 hover:scale-[1.01] transition-transform">
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div className="flex gap-4">
@@ -336,14 +336,14 @@ export function JobsBoard() {
       ) : (
         <div className="grid gap-4">
           {jobs.length === 0 ? (
-          <Card>
+          <Card className="tech-card border-0">
             <CardContent className="p-8 text-center text-muted-foreground">
               No jobs posted yet
             </CardContent>
           </Card>
         ) : (
           jobs.map((job) => (
-            <Card key={job.id} className="hover:shadow-lg transition-shadow">
+            <Card key={job.id} className="tech-card border-0 hover:scale-[1.01] transition-transform">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex gap-4">
