@@ -291,18 +291,24 @@ All colors MUST be HSL.
   50% { box-shadow: 0 0 40px hsl(var(--primary) / 0.6); }
 }
 
-/* Infinite horizontal scroll animation for perks carousel */
-@keyframes scroll-x {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
+/* Custom scrollbar for horizontal scroll areas */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
 }
 
-.animate-scroll-x {
-  animation: scroll-x 30s linear infinite;
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: hsl(var(--muted) / 0.2);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.4);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.6);
 }
 
 /* Global Print Styles - Hide all UI elements when printing */
