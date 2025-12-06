@@ -1458,8 +1458,8 @@ export const GlobalResourcesMap = () => {
         />
       </div>
 
-      {/* Network Perks Section - Below the map */}
-      <div className="tech-card border-0 border-t border-white/20 rounded-none rounded-b-2xl p-4">
+      {/* Network Perks Section - Below the map, outside h-screen */}
+      <div className="relative z-10 tech-card border-0 border-t border-white/20 rounded-none rounded-b-2xl p-4 bg-background">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-sm font-semibold flex items-center gap-2">
             <Gift className="w-4 h-4 text-green-400" />
