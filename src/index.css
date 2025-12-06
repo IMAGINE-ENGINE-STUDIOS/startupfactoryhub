@@ -291,6 +291,20 @@ All colors MUST be HSL.
   50% { box-shadow: 0 0 40px hsl(var(--primary) / 0.6); }
 }
 
+/* Infinite horizontal scroll animation for perks carousel */
+@keyframes scroll-x {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-x {
+  animation: scroll-x 30s linear infinite;
+}
+
 /* Global Print Styles - Hide all UI elements when printing */
 @media print {
   /* Hide navigation and headers */

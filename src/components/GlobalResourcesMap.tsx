@@ -1100,56 +1100,98 @@ export const GlobalResourcesMap = () => {
         </div>
       </div>
 
-      {/* Bottom Perks Section - Overlay */}
-      {resources && resources.filter(r => r.resource_type === 'perk').length > 0 && (
-        <div className="absolute bottom-4 left-4 right-4 z-10 pointer-events-auto">
-          <div className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Gift className="w-4 h-4 text-green-400" />
-              <h3 className="text-sm font-semibold">Network Perks</h3>
-              <Badge variant="outline" className="text-xs bg-green-500/20 border-green-500/50 text-green-400">
-                {resources.filter(r => r.resource_type === 'perk').length} available
-              </Badge>
-            </div>
-            <ScrollArea className="w-full">
-              <div className="flex gap-3 pb-2">
-                {resources.filter(r => r.resource_type === 'perk').map((perk) => (
-                  <Card
-                    key={perk.id}
-                    className="tech-card border-0 min-w-[220px] max-w-[220px] cursor-pointer hover:ring-1 hover:ring-green-500/50"
-                    onClick={() => {
-                      setSelectedResource(perk);
-                      if (map.current && perk.latitude && perk.longitude) {
-                        map.current.flyTo({
-                          center: [perk.longitude, perk.latitude],
-                          zoom: 12,
-                          duration: 2000,
-                        });
-                      }
-                    }}
-                  >
-                    <CardContent className="p-3">
-                      <div className="flex items-center gap-2">
-                        {perk.logo_url ? (
-                          <img src={perk.logo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
-                        ) : (
-                          <Gift className="w-6 h-6 text-green-400" />
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-sm truncate">{perk.title}</h4>
-                          {perk.is_official_partner && (
-                            <span className="text-xs text-amber-400">⭐ Partner</span>
-                          )}
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+      {/* Bottom Perks Section - Overlay with Infinite Scroll */}
+      {resources && resources.filter(r => r.resource_type === 'perk').length > 0 && (() => {
+        const perks = resources.filter(r => r.resource_type === 'perk');
+        return (
+          <div className={cn(
+            "absolute bottom-4 right-4 z-10 pointer-events-auto transition-all duration-300",
+            isLeftPanelOpen ? "left-[348px]" : "left-4"
+          )}>
+            <div className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl p-4 overflow-hidden">
+              <div className="flex items-center gap-2 mb-3">
+                <Gift className="w-4 h-4 text-green-400" />
+                <h3 className="text-sm font-semibold">Network Perks</h3>
+                <Badge variant="outline" className="text-xs bg-green-500/20 border-green-500/50 text-green-400">
+                  {perks.length} available
+                </Badge>
               </div>
-            </ScrollArea>
+              
+              {/* Infinite Scroll Container */}
+              <div className="overflow-hidden">
+                <div className="flex gap-3 pb-2 animate-scroll-x hover:[animation-play-state:paused]" style={{ width: 'max-content' }}>
+                  {/* First set of perks */}
+                  {perks.map((perk) => (
+                    <Card
+                      key={`perk-1-${perk.id}`}
+                      className="tech-card border-0 min-w-[220px] max-w-[220px] cursor-pointer hover:ring-1 hover:ring-green-500/50 flex-shrink-0"
+                      onClick={() => {
+                        setSelectedResource(perk);
+                        if (map.current && perk.latitude && perk.longitude) {
+                          map.current.flyTo({
+                            center: [perk.longitude, perk.latitude],
+                            zoom: 12,
+                            duration: 2000,
+                          });
+                        }
+                      }}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-center gap-2">
+                          {perk.logo_url ? (
+                            <img src={perk.logo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                          ) : (
+                            <Gift className="w-6 h-6 text-green-400" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm truncate">{perk.title}</h4>
+                            {perk.is_official_partner && (
+                              <span className="text-xs text-amber-400">⭐ Partner</span>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                  {/* Duplicate set for seamless infinite loop */}
+                  {perks.map((perk) => (
+                    <Card
+                      key={`perk-2-${perk.id}`}
+                      className="tech-card border-0 min-w-[220px] max-w-[220px] cursor-pointer hover:ring-1 hover:ring-green-500/50 flex-shrink-0"
+                      onClick={() => {
+                        setSelectedResource(perk);
+                        if (map.current && perk.latitude && perk.longitude) {
+                          map.current.flyTo({
+                            center: [perk.longitude, perk.latitude],
+                            zoom: 12,
+                            duration: 2000,
+                          });
+                        }
+                      }}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-center gap-2">
+                          {perk.logo_url ? (
+                            <img src={perk.logo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                          ) : (
+                            <Gift className="w-6 h-6 text-green-400" />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-sm truncate">{perk.title}</h4>
+                            {perk.is_official_partner && (
+                              <span className="text-xs text-amber-400">⭐ Partner</span>
+                            )}
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Right Side Panel - Resource Details (Slide In) */}
         <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl">
