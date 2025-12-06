@@ -270,7 +270,7 @@ export function JobsBoard() {
                 </Card>
               ) : (
                 jobs.map((job) => (
-                  <Card key={job.id} className="tech-card border-0 hover:scale-[1.01] transition-transform">
+                  <Card key={job.id} className="tech-card border-0">
                     <CardHeader>
                       <div className="flex justify-between items-start">
                         <div className="flex gap-4">
@@ -343,7 +343,7 @@ export function JobsBoard() {
           </Card>
         ) : (
           jobs.map((job) => (
-            <Card key={job.id} className="tech-card border-0 hover:scale-[1.01] transition-transform">
+            <Card key={job.id} className="tech-card border-0">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div className="flex gap-4">

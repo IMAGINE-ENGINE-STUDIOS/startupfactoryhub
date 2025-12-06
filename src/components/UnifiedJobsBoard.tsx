@@ -1095,7 +1095,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
           </Card>
         ) : (
           displayedJobs.map((job) => (
-            <Card key={job.id} className="tech-card border-0 hover:scale-[1.02] transition-transform flex flex-col h-[300px]">
+            <Card key={job.id} className="tech-card border-0 flex flex-col h-[300px]">
               <CardHeader className="pb-2">
                 <div className="flex items-start gap-3 sm:gap-4">
                   {job.companies?.logo_url && (
