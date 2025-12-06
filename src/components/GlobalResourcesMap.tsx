@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { 
   Building2, 
   Beaker, 
@@ -79,6 +80,7 @@ const RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: s
 export const GlobalResourcesMap = () => {
   const { user } = useAuth();
   const { role } = useUserRole();
+  const isMobile = useIsMobile();
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
@@ -861,8 +863,13 @@ export const GlobalResourcesMap = () => {
       {/* Full Viewport Map */}
       <div ref={mapContainer} className="absolute inset-0 w-full h-full rounded-2xl" />
       
-      {/* Control Buttons - Top Center */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+      {/* Control Buttons - Top Center on Desktop, Bottom Right on Mobile */}
+      <div className={cn(
+        "absolute z-20 flex gap-2",
+        isMobile 
+          ? "bottom-36 right-4 flex-col" 
+          : "top-4 left-1/2 -translate-x-1/2"
+      )}>
         {/* Rotation Toggle Button */}
         <Button
           size="icon"
@@ -984,27 +991,42 @@ export const GlobalResourcesMap = () => {
         onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
         className={cn(
           "absolute top-4 z-20 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-white/20 dark:hover:bg-black/30 rounded-2xl",
-          isLeftPanelOpen ? "left-[348px]" : "left-4"
+          // On mobile: always stay at left-4, don't move with panel
+          isMobile ? "left-4" : (isLeftPanelOpen ? "left-[348px]" : "left-4")
         )}
         variant="ghost"
       >
-        {isLeftPanelOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        {isLeftPanelOpen && !isMobile ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
       </Button>
 
       {/* Left Side Sliding Panel */}
       <div 
         className={cn(
-          "absolute top-2 bottom-2 w-80 z-10 transition-all duration-300",
-          isLeftPanelOpen ? "left-2" : "-left-[330px]"
+          "absolute top-2 bottom-2 z-10 transition-all duration-300",
+          isMobile ? "w-[calc(100%-16px)] left-2 right-2" : "w-80",
+          isMobile 
+            ? (isLeftPanelOpen ? "translate-x-0 opacity-100" : "-translate-x-full opacity-0 pointer-events-none")
+            : (isLeftPanelOpen ? "left-2" : "-left-[330px]")
         )}
       >
         <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col rounded-3xl">
           {/* Header */}
-          <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
+          <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur flex items-center justify-between">
             <h2 className="text-lg font-semibold flex items-center gap-2">
               <MapPin className="w-5 h-5" />
               Resources Map
             </h2>
+            {/* Close button - inside menu on mobile */}
+            {isMobile && (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => setIsLeftPanelOpen(false)}
+                className="h-8 w-8 rounded-lg hover:bg-white/20"
+              >
+                <X className="w-5 h-5" />
+              </Button>
+            )}
           </div>
 
           {/* Search */}
