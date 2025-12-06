@@ -795,6 +795,33 @@ export default function UnifiedCommunityFeed({
       <div className="space-y-4">
         {posts.map(post => {
         const isJourneyCompletion = post.post_type === 'journey_completion';
+        const isCohortPost = post.post_type === 'cohort' && post.cohort_data;
+        
+        // Render cohort posts with special CohortPostCard
+        if (isCohortPost) {
+          return (
+            <CohortPostCard
+              key={post.id}
+              post={{
+                id: post.id,
+                content: post.content,
+                created_at: post.created_at,
+                user_id: post.user_id,
+                cohort_data: post.cohort_data,
+                profiles: post.profiles
+              }}
+              isLiked={likedPosts.has(post.id)}
+              isBookmarked={bookmarkedPosts.has(post.id)}
+              likesCount={post._count?.post_likes || 0}
+              commentsCount={post._count?.post_comments || 0}
+              onLike={() => toggleLike(post.id)}
+              onBookmark={() => toggleBookmark(post.id)}
+              onComment={() => toggleComments(post.id)}
+              onShare={() => sharePost(post.id, false)}
+              onUserClick={handleUserClick}
+            />
+          );
+        }
         return isJourneyCompletion ? <motion.div key={post.id} initial={{
           scale: 0.95,
           opacity: 0
