@@ -32,6 +32,7 @@ import {
   X,
   Menu,
   ChevronRight,
+  ChevronLeft,
   Pause,
   Play,
   Locate,
@@ -95,6 +96,7 @@ export const GlobalResourcesMap = () => {
   const [acceleratorLocation, setAcceleratorLocation] = useState<{lat: number; lng: number; name: string; logo?: string} | null>(null);
   const [isRotating, setIsRotating] = useState(true);
   const isRotatingRef = useRef(true);
+  const [isPerksExpanded, setIsPerksExpanded] = useState(true);
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
   const [userEventStatus, setUserEventStatus] = useState<string | null>(null);
   const [isUpdatingRsvp, setIsUpdatingRsvp] = useState(false);
@@ -1100,21 +1102,50 @@ export const GlobalResourcesMap = () => {
         </div>
       </div>
 
-      {/* Bottom Perks Section - Manual Infinite Scroll */}
+      {/* Bottom Perks Section - Collapsible */}
       {resources && resources.filter(r => r.resource_type === 'perk').length > 0 && (() => {
         const perks = resources.filter(r => r.resource_type === 'perk');
+        
+        // Collapsed state - pill on the right
+        if (!isPerksExpanded) {
+          return (
+            <div className="absolute bottom-4 right-4 z-10 pointer-events-auto">
+              <Button
+                onClick={() => setIsPerksExpanded(true)}
+                className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl px-3 py-6 flex flex-col items-center gap-2 hover:ring-1 hover:ring-green-500/50"
+                variant="ghost"
+              >
+                <ChevronLeft className="w-4 h-4 text-green-400" />
+                <Gift className="w-5 h-5 text-green-400" />
+                <span className="text-xs font-semibold text-green-400 [writing-mode:vertical-rl]">{perks.length}</span>
+              </Button>
+            </div>
+          );
+        }
+        
+        // Expanded state
         return (
           <div className={cn(
             "absolute bottom-4 right-4 z-10 pointer-events-auto transition-all duration-300",
             isLeftPanelOpen ? "left-[348px]" : "left-4"
           )}>
             <div className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl p-4 overflow-hidden">
-              <div className="flex items-center gap-2 mb-3">
-                <Gift className="w-4 h-4 text-green-400" />
-                <h3 className="text-sm font-semibold">Network Perks</h3>
-                <Badge variant="outline" className="text-xs bg-green-500/20 border-green-500/50 text-green-400">
-                  {perks.length} available
-                </Badge>
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <Gift className="w-4 h-4 text-green-400" />
+                  <h3 className="text-sm font-semibold">Network Perks</h3>
+                  <Badge variant="outline" className="text-xs bg-green-500/20 border-green-500/50 text-green-400">
+                    {perks.length} available
+                  </Badge>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsPerksExpanded(false)}
+                  className="h-6 w-6 rounded-lg backdrop-blur-xl bg-white/10 dark:bg-black/20 hover:bg-white/20"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
               </div>
               
               {/* Manual Infinite Scroll Container */}
@@ -1123,7 +1154,6 @@ export const GlobalResourcesMap = () => {
                 onScroll={(e) => {
                   const container = e.currentTarget;
                   const scrollWidth = container.scrollWidth;
-                  const clientWidth = container.clientWidth;
                   const scrollLeft = container.scrollLeft;
                   const sectionWidth = scrollWidth / 3;
                   
