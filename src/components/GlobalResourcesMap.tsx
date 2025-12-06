@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { 
   Building2, 
@@ -855,9 +855,11 @@ export const GlobalResourcesMap = () => {
   };
 
   return (
-    <div className="relative w-full h-full bg-background overflow-hidden rounded-2xl">
-      {/* Full Viewport Map */}
-      <div ref={mapContainer} className="absolute inset-0 w-full h-full rounded-2xl" />
+    <div className="relative w-full h-full flex flex-col bg-background overflow-hidden rounded-2xl">
+      {/* Map Container - takes most of the viewport */}
+      <div className="relative flex-1 min-h-0">
+        {/* Full Viewport Map */}
+        <div ref={mapContainer} className="absolute inset-0 w-full h-full rounded-t-2xl" />
       
       {/* Control Buttons - Top Center */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 flex gap-2">
@@ -1432,91 +1434,91 @@ export const GlobalResourcesMap = () => {
         </div>
       </div>
 
-      {/* Bottom Perks Section */}
-      <div className="absolute bottom-4 left-4 right-4 z-10">
-        <div className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-semibold flex items-center gap-2">
-              <Gift className="w-4 h-4 text-green-400" />
-              Network Perks
-            </h3>
-            <Badge variant="outline" className="text-xs bg-green-500/10 border-green-500/30 text-green-400">
-              {resources?.filter(r => r.resource_type === 'perk').length || 0} Available
-            </Badge>
+        {/* Loading Overlay */}
+        {(isLoading || isLoadingEvents) && (
+          <div className="absolute inset-0 bg-background/30 backdrop-blur-sm flex items-center justify-center z-30 pointer-events-none">
+            <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
           </div>
-          <ScrollArea className="w-full">
-            <div className="flex gap-3 pb-2">
-              {resources?.filter(r => r.resource_type === 'perk').map((perk) => (
-                <Card
-                  key={perk.id}
-                  className="tech-card border-0 min-w-[220px] cursor-pointer hover:bg-white/10 dark:hover:bg-black/30"
-                  onClick={() => {
-                    setSelectedResource(perk);
-                    if (map.current && perk.latitude && perk.longitude) {
-                      map.current.flyTo({
-                        center: [perk.longitude, perk.latitude],
-                        zoom: 12,
-                        duration: 2000,
-                      });
-                    }
-                  }}
-                >
-                  <CardContent className="p-3">
-                    <div className="flex items-center gap-3">
-                      {perk.logo_url ? (
-                        <img src={perk.logo_url} className="w-10 h-10 rounded-xl object-cover" alt={perk.title} />
-                      ) : (
-                        <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
-                          <Gift className="w-5 h-5 text-green-400" />
-                        </div>
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <h4 className="font-medium text-sm truncate">{perk.title}</h4>
-                          {perk.is_official_partner && (
-                            <span className="text-xs">⭐</span>
-                          )}
-                        </div>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {perk.description?.slice(0, 40)}...
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-              {(!resources || resources.filter(r => r.resource_type === 'perk').length === 0) && (
-                <div className="flex items-center justify-center w-full py-4 text-muted-foreground text-sm">
-                  No perks available yet
-                </div>
-              )}
-            </div>
-          </ScrollArea>
-        </div>
+        )}
+
+        <AddResourceDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
+        
+        <TrackingSessionDialog
+          open={showTrackingDialog}
+          onOpenChange={setShowTrackingDialog}
+          sessionId={trackingSessionId}
+          onCreateSession={handleCreateSession}
+          onJoinSession={handleJoinSession}
+          onLeaveSession={handleLeaveSession}
+          trackedUsers={trackedUsers}
+          isTracking={isTracking}
+          onStartTracking={startTracking}
+          onStopTracking={stopTracking}
+          userColor={userColor}
+        />
       </div>
 
-      {/* Loading Overlay */}
-      {(isLoading || isLoadingEvents) && (
-        <div className="absolute inset-0 bg-background/30 backdrop-blur-sm flex items-center justify-center z-30 pointer-events-none">
-          <div className="animate-spin w-12 h-12 border-4 border-primary border-t-transparent rounded-full" />
+      {/* Network Perks Section - Below the map */}
+      <div className="flex-shrink-0 tech-card border-0 border-t border-white/20 rounded-none rounded-b-2xl p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold flex items-center gap-2">
+            <Gift className="w-4 h-4 text-green-400" />
+            Network Perks
+          </h3>
+          <Badge variant="outline" className="text-xs bg-green-500/10 border-green-500/30 text-green-400">
+            {resources?.filter(r => r.resource_type === 'perk').length || 0} Available
+          </Badge>
         </div>
-      )}
-
-      <AddResourceDialog open={showAddDialog} onOpenChange={setShowAddDialog} />
-      
-      <TrackingSessionDialog
-        open={showTrackingDialog}
-        onOpenChange={setShowTrackingDialog}
-        sessionId={trackingSessionId}
-        onCreateSession={handleCreateSession}
-        onJoinSession={handleJoinSession}
-        onLeaveSession={handleLeaveSession}
-        trackedUsers={trackedUsers}
-        isTracking={isTracking}
-        onStartTracking={startTracking}
-        onStopTracking={stopTracking}
-        userColor={userColor}
-      />
+        <ScrollArea className="w-full">
+          <div className="flex gap-3 pb-2">
+            {resources?.filter(r => r.resource_type === 'perk').map((perk) => (
+              <Card
+                key={perk.id}
+                className="tech-card border-0 min-w-[220px] cursor-pointer hover:bg-white/10 dark:hover:bg-black/30"
+                onClick={() => {
+                  setSelectedResource(perk);
+                  if (map.current && perk.latitude && perk.longitude) {
+                    map.current.flyTo({
+                      center: [perk.longitude, perk.latitude],
+                      zoom: 12,
+                      duration: 2000,
+                    });
+                  }
+                }}
+              >
+                <CardContent className="p-3">
+                  <div className="flex items-center gap-3">
+                    {perk.logo_url ? (
+                      <img src={perk.logo_url} className="w-10 h-10 rounded-xl object-cover" alt={perk.title} />
+                    ) : (
+                      <div className="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+                        <Gift className="w-5 h-5 text-green-400" />
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <h4 className="font-medium text-sm truncate">{perk.title}</h4>
+                        {perk.is_official_partner && (
+                          <span className="text-xs">⭐</span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground truncate">
+                        {perk.description?.slice(0, 40)}...
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {(!resources || resources.filter(r => r.resource_type === 'perk').length === 0) && (
+              <div className="flex items-center justify-center w-full py-4 text-muted-foreground text-sm">
+                No perks available yet
+              </div>
+            )}
+          </div>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
+      </div>
     </div>
   );
 };
