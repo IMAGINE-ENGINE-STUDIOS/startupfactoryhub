@@ -563,8 +563,26 @@ const Dashboard = () => {
           {/* Jobs Tab */}
           {activeTab === "jobs" && (
             <TabsContent value="jobs" className="space-y-4">
-              <UnifiedJobsBoard />
-              <JobTaskManager />
+              <Tabs defaultValue="opportunities" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+                  <TabsTrigger value="opportunities" className="flex items-center gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    Job Opportunities
+                  </TabsTrigger>
+                  <TabsTrigger value="manage-tasks" className="flex items-center gap-2">
+                    <Target className="h-4 w-4" />
+                    Manage Tasks
+                  </TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="opportunities">
+                  <UnifiedJobsBoard />
+                </TabsContent>
+                
+                <TabsContent value="manage-tasks">
+                  <JobTaskManager />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
           )}
 
