@@ -17,7 +17,7 @@ import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { 
   UserPlus, UserMinus, MapPin, Globe, Briefcase, UserCheck, Clock,
   Building, TrendingUp, Users, DollarSign, FileText, ExternalLink,
-  Star, Award, Calendar, Loader2, MessageCircle
+  Star, Award, Calendar, Loader2, MessageCircle, Rocket, GraduationCap
 } from 'lucide-react';
 
 interface UserProfile {
@@ -36,6 +36,9 @@ interface RoleSpecificData {
   company?: any;
   investorProfile?: any;
   mentorProfile?: any;
+  acceleratorProfile?: any;
+  cohorts?: any[];
+  alumni?: any[];
   portfolio?: any[];
 }
 
@@ -182,6 +185,40 @@ export default function UserProfileDialog({
           setRoleData({ mentorProfile });
           break;
         }
+
+        case 'accelerator': {
+          const { data: acceleratorProfile } = await supabase
+            .from('accelerator_profiles')
+            .select('*')
+            .eq('user_id', uid)
+            .maybeSingle();
+          
+          if (acceleratorProfile) {
+            // Fetch active cohorts
+            const { data: cohorts } = await supabase
+              .from('accelerator_cohorts')
+              .select('*')
+              .eq('accelerator_id', acceleratorProfile.id)
+              .in('status', ['active', 'upcoming'])
+              .order('start_date', { ascending: false })
+              .limit(5);
+            
+            // Fetch alumni (graduated startups)
+            const { data: alumni } = await supabase
+              .from('cohort_startups')
+              .select(`
+                *,
+                company:companies(id, name, logo_url, industry, stage),
+                cohort:accelerator_cohorts(name)
+              `)
+              .in('cohort_id', cohorts?.map(c => c.id) || [])
+              .not('graduation_date', 'is', null)
+              .limit(10);
+            
+            setRoleData({ acceleratorProfile, cohorts: cohorts || [], alumni: alumni || [] });
+          }
+          break;
+        }
       }
     } catch (error) {
       console.error('Error fetching role-specific data:', error);
@@ -252,6 +289,7 @@ export default function UserProfileDialog({
       case 'mentor': return 'outline';
       case 'advisor': return 'outline';
       case 'student': return 'secondary';
+      case 'accelerator': return 'default';
       default: return 'outline';
     }
   };
@@ -615,6 +653,110 @@ export default function UserProfileDialog({
                               <Badge key={index} variant="secondary">{area}</Badge>
                             ))}
                           </div>
+                        </div>
+                      </>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Accelerator Profile */}
+              {profile.role === 'accelerator' && roleData?.acceleratorProfile && (
+                <Card className="tech-card border-0">
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg flex items-center gap-2">
+                      <Rocket className="h-5 w-5 text-emerald-500" />
+                      {roleData.acceleratorProfile.organization_name || 'Accelerator Program'}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Stats Row */}
+                    <div className="grid grid-cols-3 gap-4 text-center">
+                      <div>
+                        <p className="text-2xl font-bold">{roleData.acceleratorProfile.total_cohorts || 0}</p>
+                        <p className="text-xs text-muted-foreground">Cohorts</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{roleData.acceleratorProfile.total_startups_supported || 0}</p>
+                        <p className="text-xs text-muted-foreground">Startups</p>
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold">{roleData.acceleratorProfile.program_duration || '-'}</p>
+                        <p className="text-xs text-muted-foreground">Duration</p>
+                      </div>
+                    </div>
+                    
+                    {/* Program Details */}
+                    {roleData.acceleratorProfile.funding_offered && (
+                      <div className="flex items-center justify-between p-3 bg-emerald-500/10 rounded-lg">
+                        <span className="text-sm">Funding Offered</span>
+                        <span className="font-bold text-emerald-500">
+                          ${(roleData.acceleratorProfile.funding_offered / 1000).toFixed(0)}K
+                        </span>
+                      </div>
+                    )}
+
+                    {roleData.acceleratorProfile.equity_percentage && (
+                      <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                        <span className="text-sm">Equity Take</span>
+                        <span className="font-bold">{roleData.acceleratorProfile.equity_percentage}%</span>
+                      </div>
+                    )}
+                    
+                    {/* Active Cohorts Section */}
+                    {roleData.cohorts && roleData.cohorts.length > 0 && (
+                      <>
+                        <Separator />
+                        <div>
+                          <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                            <Calendar className="h-4 w-4" />
+                            Active Cohorts
+                          </h4>
+                          <div className="space-y-2">
+                            {roleData.cohorts.map((cohort: any) => (
+                              <div key={cohort.id} className="p-3 border border-border/30 rounded-lg bg-background/50">
+                                <div className="flex justify-between items-center">
+                                  <p className="font-medium text-sm">{cohort.name}</p>
+                                  <Badge variant="outline" className="text-xs bg-emerald-500/10 text-emerald-500">
+                                    {cohort.current_startups || 0} startups
+                                  </Badge>
+                                </div>
+                                {cohort.application_deadline && (
+                                  <p className="text-xs text-muted-foreground mt-1">
+                                    Deadline: {new Date(cohort.application_deadline).toLocaleDateString()}
+                                  </p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    
+                    {/* Alumni Section */}
+                    {roleData.alumni && roleData.alumni.length > 0 && (
+                      <>
+                        <Separator />
+                        <div>
+                          <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                            <GraduationCap className="h-4 w-4" />
+                            Alumni ({roleData.alumni.length})
+                          </h4>
+                          <div className="grid grid-cols-2 gap-2">
+                            {roleData.alumni.slice(0, 4).map((alum: any) => (
+                              <div key={alum.id} className="p-2 border border-border/30 rounded-lg bg-background/50">
+                                <p className="font-medium text-sm truncate">
+                                  {alum.company?.name || alum.external_company_name || 'Startup'}
+                                </p>
+                                <p className="text-xs text-muted-foreground">{alum.cohort?.name}</p>
+                              </div>
+                            ))}
+                          </div>
+                          {roleData.alumni.length > 4 && (
+                            <p className="text-xs text-muted-foreground mt-2">
+                              +{roleData.alumni.length - 4} more alumni
+                            </p>
+                          )}
                         </div>
                       </>
                     )}

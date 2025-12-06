@@ -118,7 +118,21 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
 
       // Post to feed if option is selected
       if (formData.post_to_feed && eventData) {
-        const feedContent = `📅 ${formData.title}\n\n${formData.description || ''}\n\n📍 ${formData.location || 'TBD'}\n⏰ ${format(startDateTime, 'PPP p')}`;
+        // Determine location display text
+        let locationDisplay = '';
+        if (meetingLocation) {
+          if (meetingLocation.startsWith('http')) {
+            locationDisplay = '🎥 Virtual Event - Join link in event details';
+          } else {
+            locationDisplay = meetingLocation;
+          }
+        } else if (formData.location) {
+          locationDisplay = formData.location;
+        } else {
+          locationDisplay = 'Location to be announced';
+        }
+
+        const feedContent = `📅 ${formData.title}\n\n${formData.description || ''}\n\n📍 ${locationDisplay}\n⏰ ${format(startDateTime, 'PPP p')}`;
         
         await supabase.from('feed_posts').insert({
           user_id: user.id,
