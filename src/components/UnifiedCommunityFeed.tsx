@@ -692,6 +692,8 @@ export default function UnifiedCommunityFeed({
         return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
       case 'student':
         return 'bg-pink-500/10 text-pink-500 border-pink-500/20';
+      case 'accelerator':
+        return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
       default:
         return 'bg-muted text-muted-foreground';
     }
