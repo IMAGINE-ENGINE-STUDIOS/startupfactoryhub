@@ -1044,9 +1044,9 @@ export const GlobalResourcesMap = () => {
           </div>
 
           {/* Categories */}
-          <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
+          <div className="p-4 backdrop-blur">
             <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Categories</h3>
-            <ScrollArea className="h-64">
+            <ScrollArea className="max-h-[calc(100vh-320px)]">
               <div className="space-y-1">
                 <Button
                   variant={selectedType === null ? 'default' : 'ghost'}
@@ -1060,7 +1060,7 @@ export const GlobalResourcesMap = () => {
                   <div className="w-2 h-2 rounded-full bg-current" />
                   All Resources
                 </Button>
-                {(Object.keys(RESOURCE_CONFIG) as ResourceType[]).map((type) => {
+                {(Object.keys(RESOURCE_CONFIG) as ResourceType[]).filter(type => type !== 'perk').map((type) => {
                   const config = RESOURCE_CONFIG[type];
                   const Icon = config.icon;
                   const isSelected = selectedType === type;
@@ -1087,78 +1087,11 @@ export const GlobalResourcesMap = () => {
                 })}
               </div>
             </ScrollArea>
-          </div>
-
-          {/* Resource List */}
-          <div className="flex-1 overflow-hidden flex flex-col backdrop-blur">
-            <div className="p-4 border-b border-white/30 dark:border-white/20">
-              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                Resources ({resources?.length || 0})
-              </h3>
-            </div>
-            <ScrollArea className="flex-1 px-4">
-              <div className="space-y-2 py-2">
-                {resources?.map((resource) => {
-                  const config = RESOURCE_CONFIG[resource.resource_type];
-                  const Icon = config.icon;
-                  const isSelected = selectedResource?.id === resource.id;
-                  return (
-                    <Card
-                      key={resource.id}
-                      className={cn(
-                        "cursor-pointer transition-all backdrop-blur-2xl bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/30 border-white/30 dark:border-white/20 rounded-2xl",
-                        isSelected && "ring-2 ring-primary shadow-lg shadow-primary/20 bg-white/20 dark:bg-black/30"
-                      )}
-                      onClick={() => {
-                        setSelectedResource(resource);
-                        if (map.current && resource.latitude && resource.longitude) {
-                          map.current.flyTo({
-                            center: [resource.longitude, resource.latitude],
-                            zoom: 12,
-                            duration: 2000,
-                          });
-                        }
-                      }}
-                    >
-                      <CardContent className="p-3">
-                        <div className="flex items-start gap-3">
-                          <div
-                            className="relative w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 backdrop-blur-xl"
-                            style={{ backgroundColor: config.color + '20' }}
-                          >
-                            <Icon className="w-5 h-5" />
-                            {resource.is_official_partner && (
-                              <span className="absolute -top-1 -right-1 text-xs drop-shadow-md">⭐</span>
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-1.5">
-                              <h4 className="font-medium text-sm truncate">{resource.title}</h4>
-                              {resource.is_official_partner && (
-                                <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 bg-amber-500/20 border-amber-500/50 text-amber-400 shrink-0">
-                                  Partner
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-xs text-muted-foreground truncate">
-                              {resource.city}, {resource.country}
-                            </p>
-                          </div>
-                          <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
-                        </div>
-                      </CardContent>
-                    </Card>
-                  );
-                })}
-              </div>
-            </ScrollArea>
-          </div>
-
-          {/* Add Resource Button */}
-          <div className="p-4 border-t border-white/30 dark:border-white/20 backdrop-blur">
+            
+            {/* Add Resource Button - directly after categories */}
             <Button 
               onClick={() => setShowAddDialog(true)} 
-              className="w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20 rounded-2xl"
+              className="w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20 rounded-2xl mt-4"
             >
               <Plus className="w-4 h-4" />
               Add Resource
@@ -1167,13 +1100,59 @@ export const GlobalResourcesMap = () => {
         </div>
       </div>
 
+      {/* Bottom Perks Section - Overlay */}
+      {resources && resources.filter(r => r.resource_type === 'perk').length > 0 && (
+        <div className="absolute bottom-4 left-4 right-4 z-10 pointer-events-auto">
+          <div className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl p-4">
+            <div className="flex items-center gap-2 mb-3">
+              <Gift className="w-4 h-4 text-green-400" />
+              <h3 className="text-sm font-semibold">Network Perks</h3>
+              <Badge variant="outline" className="text-xs bg-green-500/20 border-green-500/50 text-green-400">
+                {resources.filter(r => r.resource_type === 'perk').length} available
+              </Badge>
+            </div>
+            <ScrollArea className="w-full">
+              <div className="flex gap-3 pb-2">
+                {resources.filter(r => r.resource_type === 'perk').map((perk) => (
+                  <Card
+                    key={perk.id}
+                    className="tech-card border-0 min-w-[220px] max-w-[220px] cursor-pointer hover:ring-1 hover:ring-green-500/50"
+                    onClick={() => {
+                      setSelectedResource(perk);
+                      if (map.current && perk.latitude && perk.longitude) {
+                        map.current.flyTo({
+                          center: [perk.longitude, perk.latitude],
+                          zoom: 12,
+                          duration: 2000,
+                        });
+                      }
+                    }}
+                  >
+                    <CardContent className="p-3">
+                      <div className="flex items-center gap-2">
+                        {perk.logo_url ? (
+                          <img src={perk.logo_url} alt="" className="w-8 h-8 rounded-lg object-cover" />
+                        ) : (
+                          <Gift className="w-6 h-6 text-green-400" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-sm truncate">{perk.title}</h4>
+                          {perk.is_official_partner && (
+                            <span className="text-xs text-amber-400">⭐ Partner</span>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
+        </div>
+      )}
+
       {/* Right Side Panel - Resource Details (Slide In) */}
-      <div 
-        className={cn(
-          "absolute right-2 top-2 bottom-2 w-96 z-10 transition-all duration-300",
-          selectedResource ? "translate-x-0 opacity-100" : "translate-x-full opacity-0 pointer-events-none"
-        )}
-      >
+        <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl">
         <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl">
           {selectedResource && (
             <>
