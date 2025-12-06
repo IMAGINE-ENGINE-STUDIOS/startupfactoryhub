@@ -853,7 +853,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
                     Post Job
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Post a New Job</DialogTitle>
                     <DialogDescription>Fill in the details for your job posting</DialogDescription>
@@ -1259,7 +1259,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
 
       {/* Closed Jobs Section (Company Owners Only) */}
       {isCompanyUser && closedJobs.length > 0 && (
-        <Card>
+        <Card className="tech-card border-0">
           <CardHeader>
             <div className="flex items-center gap-2">
               <XCircle className="h-5 w-5 text-muted-foreground" />
@@ -1270,7 +1270,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
           <CardContent>
             <div className="grid gap-4 md:grid-cols-2">
               {closedJobs.map((job) => (
-                <Card key={job.id} className="opacity-60 hover:opacity-100 transition-opacity">
+                <Card key={job.id} className="tech-card border-0 opacity-60 hover:opacity-100 transition-opacity">
                   <CardHeader>
                     <div className="flex items-start gap-3 sm:gap-4">
                       {job.companies?.logo_url && (
@@ -1336,7 +1336,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
 
       {/* Applications Dialog */}
       <Dialog open={showApplicationsDialog} onOpenChange={handleCloseApplicationsDialog}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="tech-card border-0 !transition-none max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
           <DialogHeader>
             <DialogTitle>Job Applications</DialogTitle>
             <DialogDescription>
@@ -1356,7 +1356,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
               <div className="h-[60vh] overflow-y-auto pr-4">
                 <div className="space-y-4 pb-4">
                 {applications.map((app) => (
-                  <Card key={app.id}>
+                  <Card key={app.id} className="tech-card border-0">
                     <CardContent className="pt-6">
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-1 space-y-3">
@@ -1446,7 +1446,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
 
       {/* Close Job Confirmation Dialog */}
       <AlertDialog open={closeJobId !== null} onOpenChange={(open) => !open && setCloseJobId(null)}>
-        <AlertDialogContent>
+        <AlertDialogContent className="tech-card border-0 !transition-none">
           <AlertDialogHeader>
             <AlertDialogTitle>Close Job Posting</AlertDialogTitle>
             <AlertDialogDescription>
@@ -1467,7 +1467,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
 
       {/* Job Details Dialog */}
       <Dialog open={!!selectedJobForDetails} onOpenChange={(open) => !open && setSelectedJobForDetails(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
           {selectedJobForDetails && (
             <>
               <DialogHeader className="flex-shrink-0">
@@ -1683,7 +1683,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
 
       {/* Apply Dialog */}
       <Dialog open={showApplyDialog} onOpenChange={setShowApplyDialog}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="tech-card border-0 !transition-none max-w-lg">
           <DialogHeader>
             <DialogTitle>Apply to {applyingToJob?.title}</DialogTitle>
             <DialogDescription>

@@ -144,7 +144,7 @@ export default function InternshipTasksManager() {
 
   if (internships.length === 0) {
     return (
-      <Card>
+      <Card className="tech-card border-0">
         <CardContent className="p-8 text-center text-muted-foreground">
           <p>Create an internship first to add tasks</p>
         </CardContent>
@@ -166,7 +166,7 @@ export default function InternshipTasksManager() {
               Create Task
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="tech-card border-0 !transition-none">
             <DialogHeader>
               <DialogTitle>Create New Task</DialogTitle>
             </DialogHeader>
@@ -211,14 +211,14 @@ export default function InternshipTasksManager() {
 
       <div className="grid gap-4">
         {tasks.length === 0 ? (
-          <Card>
+          <Card className="tech-card border-0">
             <CardContent className="p-8 text-center text-muted-foreground">
               No tasks created yet. Create your first task to get started.
             </CardContent>
           </Card>
         ) : (
           tasks.map((task) => (
-            <Card key={task.id}>
+            <Card key={task.id} className="tech-card border-0">
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">

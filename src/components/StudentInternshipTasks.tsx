@@ -128,7 +128,7 @@ export default function StudentInternshipTasks() {
 
   if (tasks.length === 0) {
     return (
-      <Card>
+      <Card className="tech-card border-0">
         <CardContent className="p-8 text-center text-muted-foreground">
           <FileText className="h-16 w-16 mx-auto mb-4 opacity-50" />
           <h3 className="text-lg font-semibold mb-2">No Tasks Yet</h3>
@@ -140,7 +140,7 @@ export default function StudentInternshipTasks() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="tech-card border-0">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>My Internship Tasks</span>
@@ -156,7 +156,7 @@ export default function StudentInternshipTasks() {
 
       <div className="grid gap-4">
         {tasks.map((task) => (
-          <Card key={task.id} className={task.completed ? 'opacity-75' : ''}>
+          <Card key={task.id} className={`tech-card border-0 ${task.completed ? 'opacity-75' : ''}`}>
             <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1">

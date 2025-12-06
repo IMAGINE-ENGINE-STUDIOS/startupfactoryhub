@@ -187,7 +187,7 @@ export default function AdvisorJobTaskViewer() {
 
   if (tasks.length === 0) {
     return (
-      <Card>
+      <Card className="tech-card border-0">
         <CardContent className="py-8">
           <div className="text-center text-muted-foreground">
             <ListTodo className="h-12 w-12 mx-auto mb-4 opacity-20" />
@@ -201,7 +201,7 @@ export default function AdvisorJobTaskViewer() {
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card className="tech-card border-0">
         <CardHeader>
           <CardTitle className="text-2xl flex items-center gap-2">
             <ListTodo className="h-6 w-6" />
@@ -219,7 +219,7 @@ export default function AdvisorJobTaskViewer() {
           const completedAt = task.advisor_job_tasks?.[0]?.completed_at;
 
           return (
-            <Card key={task.id} className={isCompleted ? 'border-green-500/50' : ''}>
+            <Card key={task.id} className={`tech-card border-0 ${isCompleted ? 'ring-1 ring-green-500/50' : ''}`}>
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-3 flex-1">

@@ -242,7 +242,7 @@ export default function InternshipBoard() {
                     Post Internship
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-2xl">
+                <DialogContent className="tech-card border-0 !transition-none max-w-2xl">
                   <DialogHeader>
                     <DialogTitle>Post Internship Opportunity</DialogTitle>
                   </DialogHeader>
