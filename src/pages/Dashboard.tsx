@@ -15,7 +15,7 @@ import EducationalResources from '@/components/EducationalResources';
 import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
 import MentorAdvisorNetwork from '@/components/MentorAdvisorNetwork';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
-import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import CompanyProfileManager from '@/components/CompanyProfileManager';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
@@ -601,7 +601,7 @@ const Dashboard = () => {
           {/* Intelligence Tab */}
           {activeTab === "intelligence" && (
             <TabsContent value="intelligence" className="space-y-4">
-              <MarketIntelligenceWidget />
+              <IntelligenceHub />
             </TabsContent>
           )}
 
