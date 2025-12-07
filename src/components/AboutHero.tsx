@@ -17,11 +17,15 @@ const AboutHero = () => {
                 <span className="text-xs font-medium text-primary">Deep Tech Accelerator</span>
               </div>
 
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3">
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-2">
                 <span className="bg-gradient-to-r from-primary via-cyan-400 to-purple-400 bg-clip-text text-transparent">
                   About Startup Factory Hub
                 </span>
               </h2>
+
+              <p className="text-xs sm:text-sm text-primary/80 font-medium mb-3">
+                Technology designed to advance technology startups.
+              </p>
 
               <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">
                 An accelerator platform for <span className="text-foreground font-medium">deep tech startups</span>, 
