@@ -49,7 +49,7 @@ const HeroSection = () => {
               </span>
             </h1>
             
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">The ultimate social accelerator platform where startups, mentors, acceletrators, investors, and students connect in real-time with AI-powered tools.</p>
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-4">The ultimate social accelerator platform where startups, mentors, accelerators, investors, and students connect in real-time with AI-powered strategies.</p>
           </div>
 
           {/* CTA Buttons */}
