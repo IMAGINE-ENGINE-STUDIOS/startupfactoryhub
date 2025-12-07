@@ -456,7 +456,7 @@ export default function TrendingCompanies() {
                           {story.stage.replace('_', ' ')}
                         </Badge>
                       )}
-                      {story.funding_amount && story.funding_amount > 0 && (
+                      {story.funding_amount !== null && story.funding_amount > 0 && (
                         <Badge variant="outline" className="text-xs">
                           💰 {formatFunding(story.funding_amount)} Raised
                         </Badge>
