@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import AISummaryCard from "./AISummaryCard";
 import AITranslator from "./AITranslator";
 import TaskAutomation from "./TaskAutomation";
@@ -12,9 +13,9 @@ import DocumentAnalyzer from "./DocumentAnalyzer";
 import { LightPaperDocument } from "./lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "./lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "./lightpaper/LightPaperPresentation";
-
 import { LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CRMBoard from "./CRMBoard";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   FileText, 
   TrendingUp, 
@@ -23,10 +24,23 @@ import {
   Workflow,
   Sparkles,
   Table,
-  Presentation
+  Presentation,
+  ChevronDown,
+  ChevronUp,
+  Kanban,
+  Bot
 } from "lucide-react";
 
 export default function AIFeaturesHub() {
+  const isMobile = useIsMobile();
+  
+  // CRM collapsible state - persisted in localStorage
+  const [isCRMOpen, setIsCRMOpen] = useState(() => {
+    const saved = localStorage.getItem('tools-crm-open');
+    if (saved !== null) return JSON.parse(saved);
+    return !isMobile; // Default: collapsed on mobile, open on desktop
+  });
+
   const [openDialogs, setOpenDialogs] = useState<Record<string, boolean>>({
     summary: false,
     sentiment: false,
@@ -37,6 +51,11 @@ export default function AIFeaturesHub() {
   const [lightPaperTab, setLightPaperTab] = useState("document");
   const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
 
+  // Persist CRM state
+  useEffect(() => {
+    localStorage.setItem('tools-crm-open', JSON.stringify(isCRMOpen));
+  }, [isCRMOpen]);
+
   const openDialog = (featureId: string) => {
     setOpenDialogs({ ...openDialogs, [featureId]: true });
   };
@@ -45,58 +64,145 @@ export default function AIFeaturesHub() {
     setOpenDialogs({ ...openDialogs, [featureId]: false });
   };
 
-  const features = [
+  const aiTools = [
     {
       id: 'summary',
-      title: 'Smart Summaries',
-      description: 'Automatically condense long content into key takeaways',
+      title: 'Smart Summary',
+      description: 'Condense long content into key takeaways',
       icon: FileText,
-      color: 'text-purple-500'
+      gradient: 'from-purple-500 to-violet-600'
     },
     {
       id: 'sentiment',
       title: 'Sentiment Analysis',
-      description: 'Understand feedback and communications at scale',
+      description: 'Understand feedback at scale',
       icon: TrendingUp,
-      color: 'text-green-500'
+      gradient: 'from-emerald-500 to-teal-600'
     },
     {
       id: 'translate',
       title: 'AI Translator',
-      description: 'Communicate globally with instant translations',
+      description: 'Communicate globally with translations',
       icon: Languages,
-      color: 'text-orange-500'
+      gradient: 'from-orange-500 to-amber-600'
     },
     {
       id: 'document',
       title: 'Document Analysis',
-      description: 'Extract insights from images and documents',
+      description: 'Extract insights from documents',
       icon: Image,
-      color: 'text-pink-500'
+      gradient: 'from-pink-500 to-rose-600'
     },
     {
       id: 'automation',
       title: 'Task Automation',
-      description: 'Automate workflows and repetitive tasks',
+      description: 'Automate repetitive workflows',
       icon: Workflow,
-      color: 'text-cyan-500'
+      gradient: 'from-cyan-500 to-blue-600'
     }
   ];
 
   return (
-    <>
+    <div className="space-y-6">
+      {/* Collapsible CRM Board Section */}
+      <Collapsible open={isCRMOpen} onOpenChange={setIsCRMOpen}>
+        <Card className="tech-card border-0">
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/20 rounded-t-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    <Kanban className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg sm:text-xl">CRM Board</CardTitle>
+                    <CardDescription className="text-sm">
+                      Manage your client pipeline and deals
+                    </CardDescription>
+                  </div>
+                </div>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  {isCRMOpen ? (
+                    <>
+                      <span className="hidden sm:inline text-sm text-muted-foreground">Collapse</span>
+                      <ChevronUp className="h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      <span className="hidden sm:inline text-sm text-muted-foreground">Expand</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0">
+              <CRMBoard />
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
+
+      {/* AI Tools Grid */}
+      <div>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+            <Bot className="h-5 w-5 text-primary" />
+          </div>
+          <h2 className="text-xl sm:text-2xl font-bold">AI Tools</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {aiTools.map((tool) => (
+            <Card
+              key={tool.id}
+              className="tech-card border-0 cursor-pointer group"
+              onClick={() => openDialog(tool.id)}
+            >
+              <CardContent className="p-6">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center shadow-lg`}>
+                    <tool.icon className="h-8 w-8 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-lg mb-1">{tool.title}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {tool.description}
+                    </p>
+                  </div>
+                  <Button 
+                    size="lg" 
+                    className="w-full mt-2"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openDialog(tool.id);
+                    }}
+                  >
+                    Open Tool
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+
       {/* LightPaper Professional Workspace */}
       <Card className="tech-card border-0">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
                 <FileText className="h-5 w-5 text-primary" />
-                LightPaper Professional Workspace
-              </CardTitle>
-              <CardDescription>
-                Enterprise-grade document creation, spreadsheet management, and presentations
-              </CardDescription>
+              </div>
+              <div>
+                <CardTitle className="text-lg sm:text-xl">LightPaper Workspace</CardTitle>
+                <CardDescription>
+                  Documents, spreadsheets, and presentations
+                </CardDescription>
+              </div>
             </div>
             <div className="flex border rounded-lg p-1 bg-muted/30">
               <Button 
@@ -134,48 +240,15 @@ export default function AIFeaturesHub() {
             <TabsContent value="document" className="mt-0">
               <LightPaperDocument selectedProject={selectedProject} />
             </TabsContent>
-
             <TabsContent value="spreadsheet" className="mt-0">
               <LightPaperSpreadsheet />
             </TabsContent>
-
             <TabsContent value="presentation" className="mt-0">
               <LightPaperPresentation />
             </TabsContent>
           </Tabs>
         </CardContent>
       </Card>
-
-      {/* AI-Powered Tools */}
-      <Card className="mt-6 tech-card border-0">
-        <CardHeader className="pb-4">
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Sparkles className="h-5 w-5 text-primary" />
-            AI-Powered Tools
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2">
-            {features.map((feature) => (
-              <Button
-                key={feature.id}
-                variant="outline"
-                size="sm"
-                className="gap-2"
-                onClick={() => openDialog(feature.id)}
-              >
-                <feature.icon className={`h-4 w-4 ${feature.color}`} />
-                {feature.title}
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* CRM Board */}
-      <div className="mt-6">
-        <CRMBoard />
-      </div>
       
       {/* Individual dialogs for each feature */}
       <SummaryDialog 
@@ -198,7 +271,7 @@ export default function AIFeaturesHub() {
         open={openDialogs.automation} 
         onOpenChange={(open) => !open && closeDialog('automation')} 
       />
-    </>
+    </div>
   );
 }
 
@@ -208,7 +281,7 @@ function SummaryDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="tech-card border-0 !transition-none max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <FileText className="h-5 w-5 text-purple-500" />
@@ -246,7 +319,7 @@ function SummaryDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (o
 function SentimentDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="tech-card border-0 !transition-none max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <TrendingUp className="h-5 w-5 text-green-500" />
@@ -267,7 +340,7 @@ function TranslateDialog({ open, onOpenChange }: { open: boolean; onOpenChange: 
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="tech-card border-0 !transition-none max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Languages className="h-5 w-5 text-orange-500" />
@@ -300,7 +373,7 @@ function TranslateDialog({ open, onOpenChange }: { open: boolean; onOpenChange: 
 function DocumentDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="tech-card border-0 !transition-none max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Image className="h-5 w-5 text-pink-500" />
@@ -319,7 +392,7 @@ function DocumentDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (
 function AutomationDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="tech-card border-0 !transition-none max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Workflow className="h-5 w-5 text-cyan-500" />
