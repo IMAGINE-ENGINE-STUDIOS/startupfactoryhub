@@ -41,6 +41,13 @@ export default function AIFeaturesHub() {
     return !isMobile; // Default: collapsed on mobile, open on desktop
   });
 
+  // AI Tools collapsible state - persisted in localStorage
+  const [isAIToolsOpen, setIsAIToolsOpen] = useState(() => {
+    const saved = localStorage.getItem('tools-ai-open');
+    if (saved !== null) return JSON.parse(saved);
+    return !isMobile; // Default: collapsed on mobile, open on desktop
+  });
+
   const [openDialogs, setOpenDialogs] = useState<Record<string, boolean>>({
     summary: false,
     sentiment: false,
@@ -55,6 +62,11 @@ export default function AIFeaturesHub() {
   useEffect(() => {
     localStorage.setItem('tools-crm-open', JSON.stringify(isCRMOpen));
   }, [isCRMOpen]);
+
+  // Persist AI Tools state
+  useEffect(() => {
+    localStorage.setItem('tools-ai-open', JSON.stringify(isAIToolsOpen));
+  }, [isAIToolsOpen]);
 
   const openDialog = (featureId: string) => {
     setOpenDialogs({ ...openDialogs, [featureId]: true });
@@ -145,49 +157,78 @@ export default function AIFeaturesHub() {
         </Card>
       </Collapsible>
 
-      {/* AI Tools Grid */}
-      <div>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-            <Bot className="h-5 w-5 text-primary" />
-          </div>
-          <h2 className="text-xl sm:text-2xl font-bold">AI Tools</h2>
-        </div>
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {aiTools.map((tool) => (
-            <Card
-              key={tool.id}
-              className="tech-card border-0 cursor-pointer group"
-              onClick={() => openDialog(tool.id)}
-            >
-              <CardContent className="p-6">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center shadow-lg`}>
-                    <tool.icon className="h-8 w-8 text-white" />
+      {/* Collapsible AI Tools Section */}
+      <Collapsible open={isAIToolsOpen} onOpenChange={setIsAIToolsOpen}>
+        <Card className="tech-card border-0">
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/20 rounded-t-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    <Bot className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-lg mb-1">{tool.title}</h3>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {tool.description}
-                    </p>
+                    <CardTitle className="text-lg sm:text-xl">AI Tools</CardTitle>
+                    <CardDescription className="text-sm">
+                      Smart summaries, translation, and automation
+                    </CardDescription>
                   </div>
-                  <Button 
-                    size="lg" 
-                    className="w-full mt-2"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      openDialog(tool.id);
-                    }}
-                  >
-                    Open Tool
-                  </Button>
                 </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
+                <Button variant="ghost" size="sm" className="gap-2">
+                  {isAIToolsOpen ? (
+                    <>
+                      <span className="hidden sm:inline text-sm text-muted-foreground">Collapse</span>
+                      <ChevronUp className="h-4 w-4" />
+                    </>
+                  ) : (
+                    <>
+                      <span className="hidden sm:inline text-sm text-muted-foreground">Expand</span>
+                      <ChevronDown className="h-4 w-4" />
+                    </>
+                  )}
+                </Button>
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {aiTools.map((tool) => (
+                  <Card
+                    key={tool.id}
+                    className="tech-card border-0 cursor-pointer group"
+                    onClick={() => openDialog(tool.id)}
+                  >
+                    <CardContent className="p-6">
+                      <div className="flex flex-col items-center text-center space-y-4">
+                        <div className={`h-16 w-16 rounded-2xl bg-gradient-to-br ${tool.gradient} flex items-center justify-center shadow-lg`}>
+                          <tool.icon className="h-8 w-8 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-lg mb-1">{tool.title}</h3>
+                          <p className="text-sm text-muted-foreground line-clamp-2">
+                            {tool.description}
+                          </p>
+                        </div>
+                        <Button 
+                          size="lg" 
+                          className="w-full mt-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDialog(tool.id);
+                          }}
+                        >
+                          Open Tool
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
 
       {/* LightPaper Professional Workspace */}
       <Card className="tech-card border-0">
