@@ -867,7 +867,7 @@ export const GlobalResourcesMap = () => {
       <div className={cn(
         "absolute z-20 flex gap-2",
         isMobile 
-          ? "bottom-36 right-4 flex-col" 
+          ? "bottom-52 right-4 flex-col" 
           : "top-4 left-1/2 -translate-x-1/2"
       )}>
         {/* Rotation Toggle Button */}
