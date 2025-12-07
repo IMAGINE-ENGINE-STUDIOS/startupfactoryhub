@@ -1,7 +1,7 @@
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { TrendingUp, Sparkles, Target, Rocket } from 'lucide-react';
+import { TrendingUp, Sparkles, Target, Rocket, Trophy, GraduationCap, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -36,16 +36,118 @@ interface PredictionData {
   color: string;
 }
 
+interface SuccessStoryData {
+  id: string;
+  name: string;
+  description: string | null;
+  industry: string | null;
+  logo_url: string | null;
+  stage: string | null;
+  website: string | null;
+  funding_amount: number | null;
+  type: 'graduated' | 'journey_complete';
+  graduation_date?: string | null;
+}
+
 export default function TrendingCompanies() {
   const [trendingData, setTrendingData] = useState<CompanyData[]>([]);
   const [insightsData, setInsightsData] = useState<InsightData[]>([]);
   const [predictionsData, setPredictionsData] = useState<PredictionData[]>([]);
+  const [successStories, setSuccessStories] = useState<SuccessStoryData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
   useEffect(() => {
     fetchMarketData();
+    fetchSuccessStories();
   }, []);
+
+  const fetchSuccessStories = async () => {
+    try {
+      // Fetch companies with completed roadmaps (all 6 steps)
+      const { data: roadmapProgress, error: roadmapError } = await supabase
+        .from('roadmap_progress')
+        .select('user_id, completed')
+        .eq('completed', true);
+
+      if (roadmapError) throw roadmapError;
+
+      // Group by user_id and count completed steps
+      const userCompletionCount: Record<string, number> = {};
+      roadmapProgress?.forEach(item => {
+        userCompletionCount[item.user_id] = (userCompletionCount[item.user_id] || 0) + 1;
+      });
+
+      // Get users who completed all 6 steps
+      const fullyCompletedUserIds = Object.entries(userCompletionCount)
+        .filter(([_, count]) => count >= 6)
+        .map(([userId]) => userId);
+
+      // Fetch their companies
+      let journeyCompleteCompanies: SuccessStoryData[] = [];
+      if (fullyCompletedUserIds.length > 0) {
+        const { data: companies, error: companiesError } = await supabase
+          .from('companies')
+          .select('id, name, description, industry, logo_url, stage, website, funding_amount')
+          .in('user_id', fullyCompletedUserIds);
+
+        if (!companiesError && companies) {
+          journeyCompleteCompanies = companies.map(c => ({
+            ...c,
+            type: 'journey_complete' as const
+          }));
+        }
+      }
+
+      // Fetch graduated cohort startups
+      const { data: graduates, error: graduatesError } = await supabase
+        .from('cohort_startups')
+        .select(`
+          company_id,
+          graduation_date,
+          current_stage,
+          companies (
+            id, name, description, industry, logo_url, stage, website, funding_amount
+          )
+        `)
+        .or('graduation_date.not.is.null,current_stage.eq.graduated');
+
+      if (graduatesError) throw graduatesError;
+
+      const graduatedCompanies: SuccessStoryData[] = (graduates || [])
+        .filter(g => g.companies)
+        .map(g => ({
+          id: (g.companies as any).id,
+          name: (g.companies as any).name,
+          description: (g.companies as any).description,
+          industry: (g.companies as any).industry,
+          logo_url: (g.companies as any).logo_url,
+          stage: (g.companies as any).stage,
+          website: (g.companies as any).website,
+          funding_amount: (g.companies as any).funding_amount,
+          type: 'graduated' as const,
+          graduation_date: g.graduation_date
+        }));
+
+      // Merge and deduplicate
+      const allStories = [...journeyCompleteCompanies, ...graduatedCompanies];
+      const uniqueStories = allStories.reduce((acc, story) => {
+        const existing = acc.find(s => s.id === story.id);
+        if (!existing) {
+          acc.push(story);
+        } else if (story.type === 'graduated' && existing.type !== 'graduated') {
+          // Prefer graduated status
+          const index = acc.indexOf(existing);
+          acc[index] = { ...story, type: 'graduated' };
+        }
+        return acc;
+      }, [] as SuccessStoryData[]);
+
+      setSuccessStories(uniqueStories);
+    } catch (error) {
+      console.error('Error fetching success stories:', error);
+    }
+  };
 
   const fetchMarketData = async () => {
     setIsLoading(true);
@@ -105,6 +207,24 @@ export default function TrendingCompanies() {
     return `https://logo.clearbit.com/${domain}`;
   };
 
+  const formatFunding = (amount: number | null) => {
+    if (!amount) return null;
+    if (amount >= 1000000) return `$${(amount / 1000000).toFixed(1)}M`;
+    if (amount >= 1000) return `$${(amount / 1000).toFixed(0)}K`;
+    return `$${amount}`;
+  };
+
+  const getStageColor = (stage: string | null) => {
+    switch (stage) {
+      case 'idea': return 'bg-purple-500/20 text-purple-700 dark:text-purple-400';
+      case 'mvp': return 'bg-blue-500/20 text-blue-700 dark:text-blue-400';
+      case 'seed': return 'bg-green-500/20 text-green-700 dark:text-green-400';
+      case 'series_a': return 'bg-amber-500/20 text-amber-700 dark:text-amber-400';
+      case 'growth': return 'bg-rose-500/20 text-rose-700 dark:text-rose-400';
+      default: return 'bg-muted text-muted-foreground';
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -128,7 +248,7 @@ export default function TrendingCompanies() {
     <div className="space-y-6">
       {/* Tabs for different views */}
       <Tabs defaultValue="trending" className="space-y-6">
-        <TabsList className="w-full justify-start">
+        <TabsList className="w-full justify-start flex-wrap">
           <TabsTrigger value="trending">
             <TrendingUp className="h-4 w-4 mr-2" />
             Trending
@@ -140,6 +260,10 @@ export default function TrendingCompanies() {
           <TabsTrigger value="predictions">
             <Target className="h-4 w-4 mr-2" />
             Predictions
+          </TabsTrigger>
+          <TabsTrigger value="success">
+            <Trophy className="h-4 w-4 mr-2" />
+            Success Stories
           </TabsTrigger>
         </TabsList>
 
@@ -261,6 +385,107 @@ export default function TrendingCompanies() {
               </Card>
             ))}
           </div>
+        </TabsContent>
+
+        {/* Success Stories Tab */}
+        <TabsContent value="success" className="space-y-4">
+          {successStories.length === 0 ? (
+            <Card className="tech-card border-0 p-8 text-center">
+              <Trophy className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-lg font-semibold mb-2">No Success Stories Yet</h3>
+              <p className="text-sm text-muted-foreground">
+                Companies that complete their journey or graduate from accelerator programs will appear here.
+              </p>
+            </Card>
+          ) : (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {successStories.map((story) => (
+                <Card 
+                  key={story.id}
+                  className="tech-card border-0 p-5 hover:shadow-lg transition-shadow cursor-pointer"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-3">
+                      {story.logo_url ? (
+                        <img 
+                          src={story.logo_url} 
+                          alt={`${story.name} logo`}
+                          className="w-12 h-12 object-contain rounded bg-background p-1"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://via.placeholder.com/48?text=' + story.name.charAt(0);
+                          }}
+                        />
+                      ) : (
+                        <div className="w-12 h-12 rounded bg-primary/10 flex items-center justify-center text-primary font-bold text-lg">
+                          {story.name.charAt(0)}
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="font-semibold text-lg">{story.name}</h3>
+                        {story.industry && (
+                          <Badge variant="secondary" className="text-xs">
+                            {story.industry}
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <Badge 
+                      className={story.type === 'graduated' 
+                        ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-400' 
+                        : 'bg-amber-500/20 text-amber-700 dark:text-amber-400'
+                      }
+                    >
+                      {story.type === 'graduated' ? (
+                        <><GraduationCap className="h-3 w-3 mr-1" /> Graduated</>
+                      ) : (
+                        <><CheckCircle className="h-3 w-3 mr-1" /> Journey Complete</>
+                      )}
+                    </Badge>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    {story.description && (
+                      <p className="text-sm text-muted-foreground line-clamp-2">
+                        {story.description}
+                      </p>
+                    )}
+                    
+                    <div className="flex flex-wrap gap-2">
+                      {story.stage && (
+                        <Badge className={`text-xs ${getStageColor(story.stage)}`}>
+                          {story.stage.replace('_', ' ')}
+                        </Badge>
+                      )}
+                      {story.funding_amount && story.funding_amount > 0 && (
+                        <Badge variant="outline" className="text-xs">
+                          💰 {formatFunding(story.funding_amount)} Raised
+                        </Badge>
+                      )}
+                    </div>
+                    
+                    {story.graduation_date && (
+                      <div className="text-xs text-muted-foreground flex items-center gap-1">
+                        <GraduationCap className="h-3 w-3" />
+                        Graduated: {new Date(story.graduation_date).toLocaleDateString()}
+                      </div>
+                    )}
+                    
+                    {story.website && (
+                      <a 
+                        href={story.website.startsWith('http') ? story.website : `https://${story.website}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:underline inline-flex items-center gap-1"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        Visit Website →
+                      </a>
+                    )}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
         </TabsContent>
       </Tabs>
     </div>
