@@ -864,12 +864,14 @@ export const GlobalResourcesMap = () => {
       <div ref={mapContainer} className="absolute inset-0 w-full h-full rounded-2xl" />
       
       {/* Control Buttons - Top Center on Desktop, Bottom Right on Mobile */}
-      <div className={cn(
-        "absolute z-20 flex gap-2",
-        isMobile 
-          ? "bottom-52 right-4 flex-col" 
-          : "top-4 left-1/2 -translate-x-1/2"
-      )}>
+      {/* Hide on mobile when menu is open to prevent overlap */}
+      {!(isMobile && isLeftPanelOpen) && (
+        <div className={cn(
+          "absolute z-20 flex gap-2",
+          isMobile 
+            ? "bottom-52 right-4 flex-col" 
+            : "top-4 left-1/2 -translate-x-1/2"
+        )}>
         {/* Rotation Toggle Button */}
         <Button
           size="icon"
@@ -981,23 +983,27 @@ export const GlobalResourcesMap = () => {
           </Badge>
         )}
       </div>
+      )}
       
       {/* User Tracking Markers */}
       <UserTrackingMarkers map={map.current} trackedUsers={trackedUsers} />
       
       {/* Single Toggle Button - works for both open and closed states */}
-      <Button
-        size="icon"
-        onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
-        className={cn(
-          "absolute top-4 z-20 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-white/20 dark:hover:bg-black/30 rounded-2xl",
-          // On mobile: always stay at left-4, don't move with panel
-          isMobile ? "left-4" : (isLeftPanelOpen ? "left-[348px]" : "left-4")
-        )}
-        variant="ghost"
-      >
-        {isLeftPanelOpen && !isMobile ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-      </Button>
+      {/* On mobile, hide when menu is open (use close button inside menu instead) */}
+      {!(isMobile && isLeftPanelOpen) && (
+        <Button
+          size="icon"
+          onClick={() => setIsLeftPanelOpen(!isLeftPanelOpen)}
+          className={cn(
+            "absolute top-4 z-20 backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] hover:bg-white/20 dark:hover:bg-black/30 rounded-2xl",
+            // On mobile: always stay at left-4, don't move with panel
+            isMobile ? "left-4" : (isLeftPanelOpen ? "left-[348px]" : "left-4")
+          )}
+          variant="ghost"
+        >
+          {isLeftPanelOpen && !isMobile ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+        </Button>
+      )}
 
       {/* Left Side Sliding Panel */}
       <div 
