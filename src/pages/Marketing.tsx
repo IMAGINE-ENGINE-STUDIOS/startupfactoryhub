@@ -67,199 +67,94 @@ const Marketing = () => {
 
     ctx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
 
-    // Cinematic overlay
-    const overlayGradient = ctx.createLinearGradient(0, 0, width, 0);
-    overlayGradient.addColorStop(0, 'rgba(0, 8, 12, 0.1)');
-    overlayGradient.addColorStop(0.35, 'rgba(0, 12, 18, 0.3)');
-    overlayGradient.addColorStop(0.6, 'rgba(0, 15, 22, 0.6)');
-    overlayGradient.addColorStop(1, 'rgba(0, 18, 28, 0.88)');
+    // Dark cinematic overlay
+    const overlayGradient = ctx.createLinearGradient(0, 0, width, height);
+    overlayGradient.addColorStop(0, 'rgba(0, 15, 25, 0.85)');
+    overlayGradient.addColorStop(0.5, 'rgba(0, 18, 30, 0.80)');
+    overlayGradient.addColorStop(1, 'rgba(0, 12, 22, 0.88)');
     ctx.fillStyle = overlayGradient;
     ctx.fillRect(0, 0, width, height);
 
-    // Decorative elements - geometric shapes
-    drawGeometricAccents(ctx, width, height);
+    // Draw tech grid pattern
+    drawTechGrid(ctx, width, height);
 
-    // Large Logo with intense glow
-    const logoSize = 220;
-    const logoX = width - 320;
-    const logoY = 60;
-    
-    // Multiple glow layers
-    ctx.shadowColor = 'rgba(20, 184, 166, 0.6)';
-    ctx.shadowBlur = 60;
-    ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
-    ctx.shadowBlur = 0;
+    // Draw floating hexagons in background
+    drawFloatingHexagons(ctx, width, height);
 
-    // Orbit ring around logo
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.3)';
-    ctx.lineWidth = 2;
-    ctx.setLineDash([8, 8]);
-    ctx.beginPath();
-    ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/2 + 30, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    // Draw energy lines and arcs
+    drawEnergyLines(ctx, width, height);
 
-    // Orbit dots
-    const orbitDots = [0, 90, 180, 270];
-    orbitDots.forEach(angle => {
-      const rad = angle * Math.PI / 180;
-      const dotX = logoX + logoSize/2 + (logoSize/2 + 30) * Math.cos(rad);
-      const dotY = logoY + logoSize/2 + (logoSize/2 + 30) * Math.sin(rad);
-      ctx.fillStyle = '#14b8a6';
-      ctx.shadowColor = 'rgba(20, 184, 166, 0.8)';
-      ctx.shadowBlur = 10;
-      ctx.beginPath();
-      ctx.arc(dotX, dotY, 5, 0, Math.PI * 2);
-      ctx.fill();
-    });
-    ctx.shadowBlur = 0;
+    // Draw enhanced logo with orbits - centered at top
+    drawEnhancedLogo(ctx, width / 2, 180, logoImage);
 
-    // Brand Name - HUGE and bold
-    ctx.textAlign = 'right';
-    const brandX = width - 80;
-    
-    ctx.font = '900 72px "Segoe UI", system-ui, sans-serif';
-    ctx.shadowColor = 'rgba(20, 184, 166, 0.4)';
-    ctx.shadowBlur = 25;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('STARTUP FACTORY', brandX, 380);
-    
-    // "HUB" massive with gradient
-    ctx.font = '900 100px "Segoe UI", system-ui, sans-serif';
-    const hubGradient = ctx.createLinearGradient(width - 400, 0, brandX, 0);
-    hubGradient.addColorStop(0, '#0d9488');
-    hubGradient.addColorStop(0.5, '#14b8a6');
-    hubGradient.addColorStop(1, '#2dd4bf');
-    ctx.fillStyle = hubGradient;
-    ctx.fillText('HUB', brandX, 480);
-    ctx.shadowBlur = 0;
+    // Draw brand name - centered
+    drawBrandName(ctx, width, 380);
 
-    // Accent line under brand
-    const lineGradient = ctx.createLinearGradient(width - 700, 0, brandX, 0);
-    lineGradient.addColorStop(0, 'transparent');
-    lineGradient.addColorStop(0.2, 'rgba(20, 184, 166, 0.3)');
-    lineGradient.addColorStop(1, 'rgba(20, 184, 166, 1)');
-    ctx.strokeStyle = lineGradient;
-    ctx.lineWidth = 3;
-    ctx.beginPath();
-    ctx.moveTo(width - 700, 510);
-    ctx.lineTo(brandX, 510);
-    ctx.stroke();
+    // Draw tagline - centered
+    drawTagline(ctx, width, 470);
 
-    // Tagline - large and readable
-    ctx.font = '400 38px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillText('The technology designed to help', brandX, 580);
-    
-    ctx.font = '700 44px "Segoe UI", system-ui, sans-serif';
-    const tagGradient = ctx.createLinearGradient(width - 600, 0, brandX, 0);
-    tagGradient.addColorStop(0, '#14b8a6');
-    tagGradient.addColorStop(1, '#06b6d4');
-    ctx.fillStyle = tagGradient;
-    ctx.fillText('deep tech startups succeed.', brandX, 640);
+    // Draw "Built for Everyone" section divider
+    drawSectionDivider(ctx, width, 555);
 
-    // "Built for Everyone" header
-    ctx.font = '700 22px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.fillText('BUILT FOR EVERYONE', brandX, 720);
+    // Draw user type badges - centered row
+    drawUserTypeBadges(ctx, width, height);
 
-    // User type badges - larger 3x2 grid
-    const userTypes = [
-      { name: 'Startups', icon: '🚀', color: '#10b981' },
-      { name: 'Investors', icon: '💎', color: '#8b5cf6' },
-      { name: 'Mentors', icon: '🎯', color: '#f59e0b' },
-      { name: 'Advisors', icon: '⚡', color: '#3b82f6' },
-      { name: 'Students', icon: '🎓', color: '#ec4899' },
-      { name: 'Accelerators', icon: '🏛️', color: '#14b8a6' },
-    ];
+    // Draw CTA button - centered
+    drawCTAButton(ctx, width, 920);
 
-    const badgeWidth = 180;
-    const badgeHeight = 60;
-    const badgeGap = 14;
-    const gridStartX = brandX - (badgeWidth * 3 + badgeGap * 2);
-    const badgeStartY = 760;
-
-    userTypes.forEach((user, index) => {
-      const col = index % 3;
-      const row = Math.floor(index / 3);
-      const badgeX = gridStartX + col * (badgeWidth + badgeGap);
-      const badgeY = badgeStartY + row * (badgeHeight + badgeGap);
-
-      // Badge background
-      ctx.fillStyle = `${user.color}25`;
-      ctx.beginPath();
-      ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 12);
-      ctx.fill();
-
-      // Badge border
-      ctx.strokeStyle = `${user.color}70`;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.roundRect(badgeX, badgeY, badgeWidth, badgeHeight, 12);
-      ctx.stroke();
-
-      // Top glow line
-      ctx.strokeStyle = `${user.color}90`;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(badgeX + 20, badgeY);
-      ctx.lineTo(badgeX + badgeWidth - 20, badgeY);
-      ctx.stroke();
-
-      // Icon
-      ctx.textAlign = 'left';
-      ctx.font = '28px Arial';
-      ctx.fillText(user.icon, badgeX + 16, badgeY + 42);
-
-      // Name
-      ctx.font = 'bold 20px "Segoe UI", system-ui, sans-serif';
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(user.name, badgeX + 56, badgeY + 40);
-    });
-
-    // CTA Button - prominent
-    const ctaY = 920;
-    const ctaWidth = 380;
-    const ctaHeight = 70;
-    const ctaX = brandX - ctaWidth;
-
-    ctx.shadowColor = 'rgba(20, 184, 166, 0.7)';
-    ctx.shadowBlur = 40;
-
-    const ctaGradient = ctx.createLinearGradient(ctaX, ctaY, ctaX + ctaWidth, ctaY);
-    ctaGradient.addColorStop(0, '#0d9488');
-    ctaGradient.addColorStop(0.5, '#14b8a6');
-    ctaGradient.addColorStop(1, '#0d9488');
-    ctx.fillStyle = ctaGradient;
-    ctx.beginPath();
-    ctx.roundRect(ctaX, ctaY, ctaWidth, ctaHeight, 35);
-    ctx.fill();
-    ctx.shadowBlur = 0;
-
-    // CTA text
-    ctx.textAlign = 'center';
+    // Draw website URL
     ctx.font = 'bold 26px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('START YOUR JOURNEY →', ctaX + ctaWidth / 2, ctaY + 45);
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.textAlign = 'center';
+    ctx.fillText('www.startupfactoryhub.com', width / 2, 1010);
 
-    // Website URL
-    ctx.textAlign = 'right';
-    ctx.font = '600 22px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.fillText('startupfactoryhub.com', brandX, 1040);
-
-    // Corner accents
+    // Draw corner accents
     drawCornerAccents(ctx, width, height);
   };
 
-  const drawGeometricAccents = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    // Floating hexagons on left side
+  const drawTechGrid = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.04)';
+    ctx.lineWidth = 1;
+
+    // Horizontal lines
+    for (let y = 0; y < height; y += 50) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+
+    // Vertical lines
+    for (let x = 0; x < width; x += 50) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+
+    // Grid intersection dots
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.08)';
+    for (let x = 0; x < width; x += 100) {
+      for (let y = 0; y < height; y += 100) {
+        ctx.beginPath();
+        ctx.arc(x, y, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  };
+
+  const drawFloatingHexagons = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
     const hexagons = [
-      { x: 150, y: 200, size: 40, opacity: 0.15 },
-      { x: 80, y: 500, size: 60, opacity: 0.1 },
-      { x: 200, y: 750, size: 35, opacity: 0.12 },
-      { x: 350, y: 350, size: 25, opacity: 0.08 },
-      { x: 120, y: 900, size: 45, opacity: 0.1 },
+      { x: 120, y: 150, size: 50, opacity: 0.12 },
+      { x: 1800, y: 180, size: 55, opacity: 0.1 },
+      { x: 80, y: 850, size: 40, opacity: 0.08 },
+      { x: 1840, y: 900, size: 45, opacity: 0.1 },
+      { x: 200, y: 500, size: 30, opacity: 0.06 },
+      { x: 1720, y: 550, size: 35, opacity: 0.08 },
+      { x: 60, y: 400, size: 60, opacity: 0.1 },
+      { x: 1860, y: 450, size: 50, opacity: 0.08 },
+      { x: 300, y: 900, size: 35, opacity: 0.07 },
+      { x: 1620, y: 850, size: 40, opacity: 0.09 },
     ];
 
     hexagons.forEach(hex => {
@@ -267,103 +162,558 @@ const Marketing = () => {
       ctx.lineWidth = 2;
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
-        const angle = (i * 60 - 30) * Math.PI / 180;
-        const x = hex.x + hex.size * Math.cos(angle);
-        const y = hex.y + hex.size * Math.sin(angle);
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        const angle = (Math.PI / 3) * i - Math.PI / 2;
+        const px = hex.x + hex.size * Math.cos(angle);
+        const py = hex.y + hex.size * Math.sin(angle);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
       }
       ctx.closePath();
       ctx.stroke();
     });
+  };
 
-    // Glowing particles
+  const drawEnergyLines = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    // Left sweeping arcs
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.12)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(-100, height / 2, 450, -Math.PI / 3, Math.PI / 3);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(-100, height / 2, 550, -Math.PI / 4, Math.PI / 4);
+    ctx.stroke();
+
+    // Right sweeping arcs
+    ctx.beginPath();
+    ctx.arc(width + 100, height / 2, 450, Math.PI * 0.67, Math.PI * 1.33);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(width + 100, height / 2, 550, Math.PI * 0.75, Math.PI * 1.25);
+    ctx.stroke();
+
+    // Glowing particles with connections
     const particles = [
-      { x: 100, y: 150, size: 4 },
-      { x: 300, y: 400, size: 3 },
-      { x: 180, y: 650, size: 5 },
-      { x: 400, y: 250, size: 3 },
-      { x: 250, y: 850, size: 4 },
-      { x: 500, y: 500, size: 3 },
-      { x: 60, y: 700, size: 4 },
+      { x: 150, y: 250 },
+      { x: 280, y: 180 },
+      { x: 1640, y: 200 },
+      { x: 1770, y: 300 },
+      { x: 130, y: 750 },
+      { x: 260, y: 850 },
+      { x: 1660, y: 800 },
+      { x: 1790, y: 700 },
     ];
 
-    particles.forEach(p => {
-      ctx.fillStyle = 'rgba(20, 184, 166, 0.5)';
-      ctx.shadowColor = 'rgba(20, 184, 166, 0.8)';
-      ctx.shadowBlur = 15;
+    particles.forEach((p, i) => {
+      // Outer glow
+      const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 20);
+      glow.addColorStop(0, 'rgba(20, 184, 166, 0.6)');
+      glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+      ctx.fillStyle = glow;
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, 20, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Core
+      ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Connect adjacent particles
+      if (i % 2 === 0 && i < particles.length - 1) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(20, 184, 166, 0.08)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 8]);
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(particles[i + 1].x, particles[i + 1].y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    });
+  };
+
+  const drawEnhancedLogo = (ctx: CanvasRenderingContext2D, x: number, y: number, logoImage: HTMLImageElement) => {
+    const logoSize = 200;
+
+    // Multiple glow layers
+    for (let i = 5; i >= 0; i--) {
+      const radius = logoSize / 2 + 50 + i * 25;
+      const glow = ctx.createRadialGradient(x, y, radius - 40, x, y, radius + 40);
+      glow.addColorStop(0, `rgba(20, 184, 166, ${0.04 - i * 0.006})`);
+      glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(x, y, radius + 40, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Triple orbit rings
+    const orbits = [
+      { radius: 140, dashArray: [10, 10], opacity: 0.4, width: 2 },
+      { radius: 175, dashArray: [18, 12], opacity: 0.3, width: 2 },
+      { radius: 210, dashArray: [6, 18], opacity: 0.2, width: 1.5 },
+    ];
+
+    orbits.forEach(orbit => {
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(20, 184, 166, ${orbit.opacity})`;
+      ctx.lineWidth = orbit.width;
+      ctx.setLineDash(orbit.dashArray);
+      ctx.arc(x, y, orbit.radius, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+    ctx.setLineDash([]);
+
+    // Orbit dots on each ring
+    const orbitDots = [
+      { angle: 0, radius: 140 },
+      { angle: Math.PI * 0.5, radius: 140 },
+      { angle: Math.PI, radius: 140 },
+      { angle: Math.PI * 1.5, radius: 140 },
+      { angle: Math.PI * 0.25, radius: 175 },
+      { angle: Math.PI * 0.75, radius: 175 },
+      { angle: Math.PI * 1.25, radius: 175 },
+      { angle: Math.PI * 1.75, radius: 175 },
+      { angle: Math.PI * 0.125, radius: 210 },
+      { angle: Math.PI * 0.625, radius: 210 },
+      { angle: Math.PI * 1.125, radius: 210 },
+      { angle: Math.PI * 1.625, radius: 210 },
+    ];
+
+    orbitDots.forEach(dot => {
+      const dx = x + Math.cos(dot.angle) * dot.radius;
+      const dy = y + Math.sin(dot.angle) * dot.radius;
+
+      // Glow
+      const glow = ctx.createRadialGradient(dx, dy, 0, dx, dy, 15);
+      glow.addColorStop(0, 'rgba(20, 184, 166, 0.8)');
+      glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(dx, dy, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Core
+      ctx.fillStyle = '#14b8a6';
+      ctx.beginPath();
+      ctx.arc(dx, dy, 6, 0, Math.PI * 2);
       ctx.fill();
     });
+
+    // Logo background glow
+    const logoGlow = ctx.createRadialGradient(x, y, 0, x, y, logoSize / 2 + 40);
+    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.4)');
+    logoGlow.addColorStop(0.6, 'rgba(20, 184, 166, 0.15)');
+    logoGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.fillStyle = logoGlow;
+    ctx.beginPath();
+    ctx.arc(x, y, logoSize / 2 + 40, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Logo ring
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.6)';
+    ctx.lineWidth = 4;
+    ctx.arc(x, y, logoSize / 2 + 12, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Draw logo image
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(x, y, logoSize / 2, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(logoImage, x - logoSize / 2, y - logoSize / 2, logoSize, logoSize);
+    ctx.restore();
+  };
+
+  const drawBrandName = (ctx: CanvasRenderingContext2D, width: number, y: number) => {
+    ctx.textAlign = 'center';
+
+    // "STARTUP FACTORY" text with glow
+    ctx.font = '900 80px "Segoe UI", system-ui, sans-serif';
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.5)';
+    ctx.shadowBlur = 35;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('STARTUP FACTORY', width / 2, y);
+
+    // "HUB" with gradient - massive
+    ctx.font = '900 110px "Segoe UI", system-ui, sans-serif';
+    const hubGradient = ctx.createLinearGradient(width / 2 - 150, y + 90, width / 2 + 150, y + 90);
+    hubGradient.addColorStop(0, '#0d9488');
+    hubGradient.addColorStop(0.3, '#14b8a6');
+    hubGradient.addColorStop(0.7, '#22d3ee');
+    hubGradient.addColorStop(1, '#14b8a6');
+    ctx.fillStyle = hubGradient;
+    ctx.fillText('HUB', width / 2, y + 95);
+
     ctx.shadowBlur = 0;
+  };
 
-    // Connecting lines between some particles
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.1)';
-    ctx.lineWidth = 1;
+  const drawTagline = (ctx: CanvasRenderingContext2D, width: number, y: number) => {
+    ctx.textAlign = 'center';
+    
+    ctx.font = '400 40px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.fillText('The technology designed to help', width / 2, y);
+    
+    ctx.font = '700 46px "Segoe UI", system-ui, sans-serif';
+    const tagGradient = ctx.createLinearGradient(width / 2 - 300, y + 55, width / 2 + 300, y + 55);
+    tagGradient.addColorStop(0, '#14b8a6');
+    tagGradient.addColorStop(0.5, '#22d3ee');
+    tagGradient.addColorStop(1, '#14b8a6');
+    ctx.fillStyle = tagGradient;
+    ctx.fillText('deep tech startups succeed.', width / 2, y + 55);
+  };
+
+  const drawSectionDivider = (ctx: CanvasRenderingContext2D, width: number, y: number) => {
+    const centerX = width / 2;
+    const lineLength = 280;
+
+    // Left decorative line
+    const leftGrad = ctx.createLinearGradient(centerX - lineLength - 160, y, centerX - 160, y);
+    leftGrad.addColorStop(0, 'rgba(20, 184, 166, 0)');
+    leftGrad.addColorStop(1, 'rgba(20, 184, 166, 0.7)');
+    ctx.strokeStyle = leftGrad;
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(100, 150);
-    ctx.lineTo(300, 400);
-    ctx.lineTo(180, 650);
+    ctx.moveTo(centerX - lineLength - 160, y);
+    ctx.lineTo(centerX - 160, y);
     ctx.stroke();
 
-    ctx.beginPath();
-    ctx.moveTo(400, 250);
-    ctx.lineTo(500, 500);
-    ctx.stroke();
+    // Left diamond
+    ctx.fillStyle = '#14b8a6';
+    ctx.save();
+    ctx.translate(centerX - 150, y);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-6, -6, 12, 12);
+    ctx.restore();
 
-    // Large decorative arc
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.08)';
-    ctx.lineWidth = 3;
+    // Text
+    ctx.font = 'bold 36px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText('Built for Everyone', centerX, y + 12);
+
+    // Right diamond
+    ctx.save();
+    ctx.translate(centerX + 150, y);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-6, -6, 12, 12);
+    ctx.restore();
+
+    // Right decorative line
+    const rightGrad = ctx.createLinearGradient(centerX + 160, y, centerX + lineLength + 160, y);
+    rightGrad.addColorStop(0, 'rgba(20, 184, 166, 0.7)');
+    rightGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.strokeStyle = rightGrad;
     ctx.beginPath();
-    ctx.arc(-200, height / 2, 500, -Math.PI / 4, Math.PI / 4);
+    ctx.moveTo(centerX + 160, y);
+    ctx.lineTo(centerX + lineLength + 160, y);
     ctx.stroke();
   };
 
-  const drawCornerAccents = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    const corners = [
-      { x: 50, y: 50, angle: 0 },
-      { x: width - 50, y: 50, angle: Math.PI / 2 },
-      { x: width - 50, y: height - 50, angle: Math.PI },
-      { x: 50, y: height - 50, angle: -Math.PI / 2 },
+  const drawUserTypeBadges = (ctx: CanvasRenderingContext2D, width: number, _height: number) => {
+    const userTypes = [
+      { 
+        icon: '🚀', 
+        title: 'Startups', 
+        features: ['AI-Powered Roadmap', 'Investor Matching', 'Pitch Tools'],
+        color: '#10b981',
+        glowColor: 'rgba(16, 185, 129, 0.25)'
+      },
+      { 
+        icon: '💡', 
+        title: 'Mentors', 
+        features: ['Session Management', 'Endorsements', 'Calendar Sync'],
+        color: '#06b6d4',
+        glowColor: 'rgba(6, 182, 212, 0.25)'
+      },
+      { 
+        icon: '💎', 
+        title: 'Investors', 
+        features: ['Deal Pipeline', 'Portfolio Tracking', 'Due Diligence'],
+        color: '#8b5cf6',
+        glowColor: 'rgba(139, 92, 246, 0.25)'
+      },
+      { 
+        icon: '🎓', 
+        title: 'Students', 
+        features: ['Internship Board', 'Learning Paths', 'Mentorship'],
+        color: '#ec4899',
+        glowColor: 'rgba(236, 72, 153, 0.25)'
+      },
+      { 
+        icon: '🏛️', 
+        title: 'Accelerators', 
+        features: ['Cohort Management', 'Portfolio Analytics', 'Demo Days'],
+        color: '#14b8a6',
+        glowColor: 'rgba(20, 184, 166, 0.25)'
+      },
     ];
 
-    corners.forEach(corner => {
-      ctx.save();
-      ctx.translate(corner.x, corner.y);
-      ctx.rotate(corner.angle);
-      
-      const lineGradient = ctx.createLinearGradient(0, 0, 80, 0);
-      lineGradient.addColorStop(0, 'rgba(20, 184, 166, 0.9)');
-      lineGradient.addColorStop(1, 'transparent');
-      
-      ctx.strokeStyle = lineGradient;
+    const cardWidth = 320;
+    const cardHeight = 280;
+    const gap = 30;
+    const totalWidth = userTypes.length * cardWidth + (userTypes.length - 1) * gap;
+    const startX = (width - totalWidth) / 2;
+    const startY = 600;
+
+    userTypes.forEach((type, index) => {
+      const x = startX + index * (cardWidth + gap);
+      const y = startY;
+      const centerX = x + cardWidth / 2;
+
+      // Card background glow
+      const bgGlow = ctx.createRadialGradient(centerX, y + cardHeight / 2, 0, centerX, y + cardHeight / 2, cardWidth);
+      bgGlow.addColorStop(0, type.glowColor);
+      bgGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = bgGlow;
+      ctx.beginPath();
+      ctx.arc(centerX, y + cardHeight / 2, cardWidth / 1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Card background
+      ctx.fillStyle = 'rgba(0, 20, 40, 0.75)';
+      ctx.beginPath();
+      ctx.roundRect(x, y, cardWidth, cardHeight, 20);
+      ctx.fill();
+
+      // Card border gradient
+      const borderGrad = ctx.createLinearGradient(x, y, x + cardWidth, y + cardHeight);
+      borderGrad.addColorStop(0, type.color);
+      borderGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
+      borderGrad.addColorStop(1, type.color);
+      ctx.strokeStyle = borderGrad;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(x, y, cardWidth, cardHeight, 20);
+      ctx.stroke();
+
+      // Top glow line
+      ctx.strokeStyle = `${type.color}aa`;
       ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(80, 0);
+      ctx.moveTo(x + 40, y);
+      ctx.lineTo(x + cardWidth - 40, y);
       ctx.stroke();
 
-      const lineGradient2 = ctx.createLinearGradient(0, 0, 0, 80);
-      lineGradient2.addColorStop(0, 'rgba(20, 184, 166, 0.9)');
-      lineGradient2.addColorStop(1, 'transparent');
-      
-      ctx.strokeStyle = lineGradient2;
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.lineTo(0, 80);
-      ctx.stroke();
+      // Hexagon icon container
+      const hexY = y + 60;
+      const hexSize = 42;
 
-      ctx.shadowColor = 'rgba(20, 184, 166, 0.9)';
-      ctx.shadowBlur = 12;
-      ctx.fillStyle = '#14b8a6';
+      // Hexagon glow
+      const hexGlow = ctx.createRadialGradient(centerX, hexY, 0, centerX, hexY, hexSize + 25);
+      hexGlow.addColorStop(0, type.glowColor);
+      hexGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = hexGlow;
       ctx.beginPath();
-      ctx.arc(0, 0, 6, 0, Math.PI * 2);
+      ctx.arc(centerX, hexY, hexSize + 25, 0, Math.PI * 2);
       ctx.fill();
-      ctx.shadowBlur = 0;
 
-      ctx.restore();
+      // Hexagon background
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i - Math.PI / 2;
+        const px = centerX + hexSize * Math.cos(angle);
+        const py = hexY + hexSize * Math.sin(angle);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      const hexFill = ctx.createLinearGradient(centerX - hexSize, hexY - hexSize, centerX + hexSize, hexY + hexSize);
+      hexFill.addColorStop(0, type.color);
+      hexFill.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
+      ctx.fillStyle = hexFill;
+      ctx.fill();
+      ctx.strokeStyle = type.color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Orbit ring around hexagon
+      ctx.beginPath();
+      ctx.strokeStyle = `${type.color}50`;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([5, 5]);
+      ctx.arc(centerX, hexY, hexSize + 15, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Orbit dots
+      [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach(angle => {
+        const dotX = centerX + Math.cos(angle) * (hexSize + 15);
+        const dotY = hexY + Math.sin(angle) * (hexSize + 15);
+        ctx.fillStyle = type.color;
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Icon emoji
+      ctx.font = '38px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(type.icon, centerX, hexY);
+
+      // Title
+      ctx.font = 'bold 28px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillText(type.title, centerX, y + 135);
+
+      // Features
+      ctx.font = '17px "Segoe UI", system-ui, sans-serif';
+      type.features.forEach((feature, fIndex) => {
+        const featureY = y + 170 + fIndex * 30;
+        
+        // Feature dot with glow
+        ctx.fillStyle = type.color;
+        ctx.shadowColor = type.color;
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.arc(centerX - 90, featureY - 5, 5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        
+        // Feature text
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.textAlign = 'left';
+        ctx.fillText(feature, centerX - 75, featureY);
+      });
+
+      ctx.textAlign = 'center';
+
+      // Corner accents on card
+      ctx.strokeStyle = type.color;
+      ctx.lineWidth = 2;
+      // Top left
+      ctx.beginPath();
+      ctx.moveTo(x + 20, y);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x, y + 20);
+      ctx.stroke();
+      // Top right
+      ctx.beginPath();
+      ctx.moveTo(x + cardWidth - 20, y);
+      ctx.lineTo(x + cardWidth, y);
+      ctx.lineTo(x + cardWidth, y + 20);
+      ctx.stroke();
+      // Bottom left
+      ctx.beginPath();
+      ctx.moveTo(x, y + cardHeight - 20);
+      ctx.lineTo(x, y + cardHeight);
+      ctx.lineTo(x + 20, y + cardHeight);
+      ctx.stroke();
+      // Bottom right
+      ctx.beginPath();
+      ctx.moveTo(x + cardWidth, y + cardHeight - 20);
+      ctx.lineTo(x + cardWidth, y + cardHeight);
+      ctx.lineTo(x + cardWidth - 20, y + cardHeight);
+      ctx.stroke();
     });
+  };
+
+  const drawCTAButton = (ctx: CanvasRenderingContext2D, width: number, y: number) => {
+    const btnWidth = 420;
+    const btnHeight = 70;
+    const x = (width - btnWidth) / 2;
+
+    // Button glow
+    const glow = ctx.createRadialGradient(width / 2, y + btnHeight / 2, 0, width / 2, y + btnHeight / 2, btnWidth);
+    glow.addColorStop(0, 'rgba(20, 184, 166, 0.35)');
+    glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(width / 2, y + btnHeight / 2, btnWidth / 1.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Button background
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.6)';
+    ctx.shadowBlur = 40;
+    const btnGrad = ctx.createLinearGradient(x, y, x + btnWidth, y + btnHeight);
+    btnGrad.addColorStop(0, '#0d9488');
+    btnGrad.addColorStop(0.5, '#14b8a6');
+    btnGrad.addColorStop(1, '#0d9488');
+    ctx.fillStyle = btnGrad;
+    ctx.beginPath();
+    ctx.roundRect(x, y, btnWidth, btnHeight, 35);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Button text
+    ctx.font = 'bold 28px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText('START YOUR JOURNEY →', width / 2, y + 46);
+  };
+
+  const drawCornerAccents = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    const size = 100;
+    const offset = 40;
+
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.5)';
+    ctx.lineWidth = 4;
+
+    // Top left
+    ctx.beginPath();
+    ctx.moveTo(offset, offset + size);
+    ctx.lineTo(offset, offset);
+    ctx.lineTo(offset + size, offset);
+    ctx.stroke();
+    
+    // Dot with glow
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.9)';
+    ctx.shadowBlur = 15;
+    ctx.fillStyle = '#14b8a6';
+    ctx.beginPath();
+    ctx.arc(offset, offset, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Top right
+    ctx.beginPath();
+    ctx.moveTo(width - offset - size, offset);
+    ctx.lineTo(width - offset, offset);
+    ctx.lineTo(width - offset, offset + size);
+    ctx.stroke();
+    
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.9)';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(width - offset, offset, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Bottom left
+    ctx.beginPath();
+    ctx.moveTo(offset, height - offset - size);
+    ctx.lineTo(offset, height - offset);
+    ctx.lineTo(offset + size, height - offset);
+    ctx.stroke();
+    
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.9)';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(offset, height - offset, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Bottom right
+    ctx.beginPath();
+    ctx.moveTo(width - offset - size, height - offset);
+    ctx.lineTo(width - offset, height - offset);
+    ctx.lineTo(width - offset, height - offset - size);
+    ctx.stroke();
+    
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.9)';
+    ctx.shadowBlur = 15;
+    ctx.beginPath();
+    ctx.arc(width - offset, height - offset, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
   };
 
   const downloadImage = (format: 'png' | 'jpg') => {
