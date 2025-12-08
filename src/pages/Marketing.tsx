@@ -84,23 +84,23 @@ const Marketing = () => {
     // Draw energy lines and arcs
     drawEnergyLines(ctx, width, height);
 
-    // Draw enhanced logo with orbits - centered at top
-    drawEnhancedLogo(ctx, width / 2, 140, logoImage);
+    // Draw enhanced logo with orbits - moved down so orbits stay inside canvas
+    drawEnhancedLogo(ctx, width / 2, 180, logoImage);
 
-    // Draw brand name - centered, below orbit rings (outermost orbit extends to ~350)
-    drawBrandName(ctx, width, 400);
+    // Draw brand name - centered, below orbit rings
+    drawBrandName(ctx, width, 430);
 
-    // Draw tagline - centered
-    drawTagline(ctx, width, 550);
+    // Draw tagline - single horizontal line
+    drawTagline(ctx, width, 530);
 
     // Draw "Built for Everyone" section divider
-    drawSectionDivider(ctx, width, 640);
+    drawSectionDivider(ctx, width, 600);
 
     // Draw user type badges - centered row
     drawUserTypeBadges(ctx, width, height);
 
     // Draw CTA button with website - centered
-    drawCTAButton(ctx, width, 960);
+    drawCTAButton(ctx, width, 970);
 
     // Draw corner accents
     drawCornerAccents(ctx, width, height);
@@ -350,17 +350,34 @@ const Marketing = () => {
   const drawTagline = (ctx: CanvasRenderingContext2D, width: number, y: number) => {
     ctx.textAlign = 'center';
     
-    ctx.font = '400 40px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-    ctx.fillText('The technology designed to help', width / 2, y);
+    // Single horizontal line with mixed styling
+    const text1 = 'The technology designed to help ';
+    const text2 = 'deep tech startups succeed.';
     
-    ctx.font = '700 46px "Segoe UI", system-ui, sans-serif';
-    const tagGradient = ctx.createLinearGradient(width / 2 - 300, y + 55, width / 2 + 300, y + 55);
+    ctx.font = '400 34px "Segoe UI", system-ui, sans-serif';
+    const text1Width = ctx.measureText(text1).width;
+    ctx.font = '700 34px "Segoe UI", system-ui, sans-serif';
+    const text2Width = ctx.measureText(text2).width;
+    
+    const totalWidth = text1Width + text2Width;
+    const startX = (width - totalWidth) / 2;
+    
+    // First part - white
+    ctx.font = '400 34px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.textAlign = 'left';
+    ctx.fillText(text1, startX, y);
+    
+    // Second part - gradient teal
+    ctx.font = '700 34px "Segoe UI", system-ui, sans-serif';
+    const tagGradient = ctx.createLinearGradient(startX + text1Width, y, startX + text1Width + text2Width, y);
     tagGradient.addColorStop(0, '#14b8a6');
     tagGradient.addColorStop(0.5, '#22d3ee');
     tagGradient.addColorStop(1, '#14b8a6');
     ctx.fillStyle = tagGradient;
-    ctx.fillText('deep tech startups succeed.', width / 2, y + 55);
+    ctx.fillText(text2, startX + text1Width, y);
+    
+    ctx.textAlign = 'center';
   };
 
   const drawSectionDivider = (ctx: CanvasRenderingContext2D, width: number, y: number) => {
@@ -576,7 +593,7 @@ const Marketing = () => {
     const gap = 30;
     const totalWidth = userTypes.length * cardWidth + (userTypes.length - 1) * gap;
     const startX = (width - totalWidth) / 2;
-    const startY = 690;
+    const startY = 650;
 
     userTypes.forEach((type, index) => {
       const x = startX + index * (cardWidth + gap);
