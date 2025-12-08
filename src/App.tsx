@@ -30,6 +30,7 @@ const About = lazy(() => import("./pages/About"));
 const Blog = lazy(() => import("./pages/Blog"));
 const Sponsorship = lazy(() => import("./pages/Sponsorship"));
 const PublicCohortApplication = lazy(() => import("./pages/PublicCohortApplication"));
+const Marketing = lazy(() => import("./pages/Marketing"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -81,6 +82,7 @@ const App = () => (
                     <Route path="/blog" element={<Blog />} />
                     <Route path="/sponsorship" element={<Sponsorship />} />
                     <Route path="/cohorts/:cohortId/apply" element={<PublicCohortApplication />} />
+                    <Route path="/marketing" element={<Marketing />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
