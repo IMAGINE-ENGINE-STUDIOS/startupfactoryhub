@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { Users } from 'lucide-react';
+import { Users, Building2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import CreateSessionDialog from './CreateSessionDialog';
 import MentorshipSessionCard from './MentorshipSessionCard';
+import { Badge } from './ui/badge';
 
 interface ActiveMentor {
   id: string;
@@ -16,6 +17,9 @@ interface ActiveMentor {
     bio: string;
   };
   role: string;
+  source: 'direct' | 'accelerator';
+  acceleratorName?: string;
+  focusArea?: string;
   nextSession?: {
     id: string;
     scheduled_at: string;
@@ -70,6 +74,28 @@ export default function StartupActiveMentors({ onSessionScheduled, onJoin }: Sta
           fetchActiveMentors();
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'startup_mentor_assignments',
+        },
+        () => {
+          fetchActiveMentors();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'startup_advisor_assignments',
+        },
+        () => {
+          fetchActiveMentors();
+        }
+      )
       .subscribe();
 
     return () => {
@@ -80,6 +106,7 @@ export default function StartupActiveMentors({ onSessionScheduled, onJoin }: Sta
   const fetchActiveMentors = async () => {
     if (!user) return;
 
+    // 1. Fetch direct mentorship relationships
     const { data: relationships, error } = await supabase
       .from('mentorship_relationships')
       .select('id, mentor_id, status, start_date')
@@ -89,34 +116,93 @@ export default function StartupActiveMentors({ onSessionScheduled, onJoin }: Sta
 
     if (error) {
       console.error('Error fetching active mentors:', error);
-      return;
     }
 
-    if (!relationships || relationships.length === 0) {
+    // 2. Get user's company to find accelerator assignments
+    const { data: company } = await supabase
+      .from('companies')
+      .select('id')
+      .eq('user_id', user.id)
+      .single();
+
+    let acceleratorMentorAssignments: any[] = [];
+    let acceleratorAdvisorAssignments: any[] = [];
+
+    if (company) {
+      // 3. Get cohort startups for this company
+      const { data: cohortStartups } = await supabase
+        .from('cohort_startups')
+        .select(`
+          id,
+          cohort:accelerator_cohorts(
+            id,
+            name,
+            accelerator:accelerator_profiles(id, organization_name)
+          )
+        `)
+        .eq('company_id', company.id);
+
+      if (cohortStartups && cohortStartups.length > 0) {
+        const cohortStartupIds = cohortStartups.map(cs => cs.id);
+
+        // 4. Fetch mentor assignments from accelerator programs
+        const { data: mentorAssigns } = await supabase
+          .from('startup_mentor_assignments')
+          .select('id, mentor_id, focus_area, assigned_at, status, cohort_startup_id')
+          .in('cohort_startup_id', cohortStartupIds)
+          .eq('status', 'active');
+
+        // 5. Fetch advisor assignments from accelerator programs
+        const { data: advisorAssigns } = await supabase
+          .from('startup_advisor_assignments')
+          .select('id, advisor_id, expertise_area, assigned_at, status, cohort_startup_id')
+          .in('cohort_startup_id', cohortStartupIds)
+          .eq('status', 'active');
+
+        // Map assignments with accelerator info
+        const cohortMap = new Map(cohortStartups.map(cs => [cs.id, cs.cohort]));
+        
+        acceleratorMentorAssignments = (mentorAssigns || []).map(a => ({
+          ...a,
+          acceleratorName: (cohortMap.get(a.cohort_startup_id) as any)?.accelerator?.organization_name || 'Accelerator Program'
+        }));
+        
+        acceleratorAdvisorAssignments = (advisorAssigns || []).map(a => ({
+          ...a,
+          acceleratorName: (cohortMap.get(a.cohort_startup_id) as any)?.accelerator?.organization_name || 'Accelerator Program'
+        }));
+      }
+    }
+
+    // Collect all unique mentor/advisor IDs
+    const directMentorIds = (relationships || []).map(r => r.mentor_id);
+    const accelMentorIds = acceleratorMentorAssignments.map(a => a.mentor_id);
+    const accelAdvisorIds = acceleratorAdvisorAssignments.map(a => a.advisor_id);
+    const allMentorIds = [...new Set([...directMentorIds, ...accelMentorIds, ...accelAdvisorIds])];
+
+    if (allMentorIds.length === 0) {
       setMentors([]);
       return;
     }
 
-    const mentorIds = relationships.map(r => r.mentor_id);
-
-    // Fetch profiles
+    // Fetch profiles for all mentors/advisors
     const { data: profiles } = await supabase
       .from('profiles')
       .select('user_id, full_name, avatar_url, bio')
-      .in('user_id', mentorIds);
+      .in('user_id', allMentorIds);
 
     // Fetch roles from user_roles table
     const { data: roles } = await supabase
       .from('user_roles')
       .select('user_id, role')
-      .in('user_id', mentorIds);
+      .in('user_id', allMentorIds);
 
     // Fetch upcoming sessions
     const { data: sessions } = await supabase
       .from('mentoring_sessions')
       .select('*')
       .eq('mentee_id', user.id)
-      .in('mentor_id', mentorIds)
+      .in('mentor_id', allMentorIds)
       .gte('scheduled_at', new Date().toISOString())
       .eq('status', 'scheduled')
       .order('scheduled_at', { ascending: true });
@@ -130,28 +216,78 @@ export default function StartupActiveMentors({ onSessionScheduled, onJoin }: Sta
       roleMap.set(r.user_id, [...existingRoles, r.role]);
     });
 
-    const mentorsWithSessions = relationships
-      .map((rel) => {
-        const profile = profileMap.get(rel.mentor_id);
-        // Skip if no valid profile exists
-        if (!profile || !profile.full_name) return null;
-        
-        const nextSession = sessions?.find(s => s.mentor_id === rel.mentor_id);
-        const userRoles = roleMap.get(rel.mentor_id) || [];
-        // Prefer 'advisor' role over 'mentor'
-        const displayRole = userRoles.includes('advisor') ? 'advisor' : 
-                           userRoles.includes('mentor') ? 'mentor' : 
-                           userRoles[0] || 'mentor';
-        return {
-          ...rel,
-          mentor: profile,
-          role: displayRole,
-          nextSession: nextSession || null
-        };
-      })
-      .filter(Boolean); // Remove null entries
+    // Build combined mentor list
+    const allMentors: ActiveMentor[] = [];
 
-    setMentors(mentorsWithSessions as ActiveMentor[]);
+    // Add direct mentorship relationships
+    (relationships || []).forEach((rel) => {
+      const profile = profileMap.get(rel.mentor_id);
+      if (!profile || !profile.full_name) return;
+      
+      const nextSession = sessions?.find(s => s.mentor_id === rel.mentor_id);
+      const userRoles = roleMap.get(rel.mentor_id) || [];
+      const displayRole = userRoles.includes('advisor') ? 'advisor' : 
+                         userRoles.includes('mentor') ? 'mentor' : 
+                         userRoles[0] || 'mentor';
+      allMentors.push({
+        id: rel.id,
+        mentor_id: rel.mentor_id,
+        status: rel.status,
+        start_date: rel.start_date,
+        mentor: profile,
+        role: displayRole,
+        source: 'direct',
+        nextSession: nextSession || undefined
+      });
+    });
+
+    // Add accelerator-assigned mentors
+    acceleratorMentorAssignments.forEach((assignment) => {
+      // Skip if already added from direct relationships
+      if (allMentors.some(m => m.mentor_id === assignment.mentor_id)) return;
+      
+      const profile = profileMap.get(assignment.mentor_id);
+      if (!profile || !profile.full_name) return;
+      
+      const nextSession = sessions?.find(s => s.mentor_id === assignment.mentor_id);
+      allMentors.push({
+        id: assignment.id,
+        mentor_id: assignment.mentor_id,
+        status: assignment.status,
+        start_date: assignment.assigned_at,
+        mentor: profile,
+        role: 'mentor',
+        source: 'accelerator',
+        acceleratorName: assignment.acceleratorName,
+        focusArea: assignment.focus_area,
+        nextSession: nextSession || undefined
+      });
+    });
+
+    // Add accelerator-assigned advisors
+    acceleratorAdvisorAssignments.forEach((assignment) => {
+      // Skip if already added
+      if (allMentors.some(m => m.mentor_id === assignment.advisor_id)) return;
+      
+      const profile = profileMap.get(assignment.advisor_id);
+      if (!profile || !profile.full_name) return;
+      
+      const nextSession = sessions?.find(s => s.mentor_id === assignment.advisor_id);
+      allMentors.push({
+        id: assignment.id,
+        mentor_id: assignment.advisor_id,
+        status: assignment.status,
+        start_date: assignment.assigned_at,
+        mentor: profile,
+        role: 'advisor',
+        source: 'accelerator',
+        acceleratorName: assignment.acceleratorName,
+        focusArea: assignment.expertise_area,
+        nextSession: nextSession || undefined
+      });
+    });
+
+    setMentors(allMentors);
   };
 
   const handleSessionCreated = () => {
@@ -182,6 +318,9 @@ export default function StartupActiveMentors({ onSessionScheduled, onJoin }: Sta
             start_date: mentor.start_date,
             mentor: mentor.mentor,
             role: mentor.role,
+            source: mentor.source,
+            acceleratorName: mentor.acceleratorName,
+            focusArea: mentor.focusArea,
             nextSession: mentor.nextSession,
           }}
           variant="active"

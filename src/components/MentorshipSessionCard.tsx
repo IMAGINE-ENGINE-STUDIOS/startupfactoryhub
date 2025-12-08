@@ -2,7 +2,7 @@ import { format, formatDistanceToNow, isToday, isTomorrow } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, Video, Check, X, ArrowRight, Star, CheckCircle2 } from 'lucide-react';
+import { Calendar, Clock, Video, Check, X, ArrowRight, Star, CheckCircle2, Building2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface MentorshipSessionCardProps {
@@ -16,6 +16,9 @@ interface MentorshipSessionCardProps {
     meeting_link?: string;
     start_date?: string;
     hasRated?: boolean;
+    source?: 'direct' | 'accelerator';
+    acceleratorName?: string;
+    focusArea?: string;
     mentor: {
       full_name: string;
       avatar_url?: string;
@@ -170,10 +173,16 @@ export const MentorshipSessionCard = ({
                 <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0 h-4 font-medium uppercase tracking-wide', getRoleBadgeStyle(session.role))}>
                   {session.role || 'mentor'}
                 </Badge>
+                {session.source === 'accelerator' && session.acceleratorName && (
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4 font-medium bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400">
+                    <Building2 className="h-2.5 w-2.5 mr-1" />
+                    {session.acceleratorName}
+                  </Badge>
+                )}
               </div>
               <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 line-clamp-1">
                 {variant === 'offer' && (session.mentor?.bio || 'Wants to mentor you')}
-                {variant === 'active' && (session.mentor?.bio || 'Your active mentor')}
+                {variant === 'active' && (session.focusArea || session.mentor?.bio || 'Your active mentor')}
                 {variant === 'upcoming' && (session.topic || 'Mentoring session scheduled')}
                 {variant === 'past' && (session.topic || 'Session completed')}
               </p>
@@ -182,7 +191,7 @@ export const MentorshipSessionCard = ({
             {/* Status Badge */}
             <Badge variant="outline" className={cn('shrink-0 text-[10px] sm:text-xs font-medium w-fit', styles.badge)}>
               {variant === 'offer' && 'Action Required'}
-              {variant === 'active' && 'Active'}
+              {variant === 'active' && (session.source === 'accelerator' ? 'Program Assigned' : 'Active')}
               {variant === 'upcoming' && 'Confirmed'}
               {variant === 'past' && 'Completed'}
             </Badge>
