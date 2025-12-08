@@ -588,12 +588,12 @@ const Marketing = () => {
       },
     ];
 
-    const cardWidth = 320;
-    const cardHeight = 240;
-    const gap = 30;
+    const cardWidth = 280;
+    const cardHeight = 160;
+    const gap = 25;
     const totalWidth = userTypes.length * cardWidth + (userTypes.length - 1) * gap;
     const startX = (width - totalWidth) / 2;
-    const startY = 700;
+    const startY = 720;
 
     userTypes.forEach((type, index) => {
       const x = startX + index * (cardWidth + gap);
@@ -634,17 +634,17 @@ const Marketing = () => {
       ctx.lineTo(x + cardWidth - 40, y);
       ctx.stroke();
 
-      // Hexagon icon container
-      const hexY = y + 60;
-      const hexSize = 42;
+      // Hexagon icon container - centered in card
+      const hexY = y + cardHeight / 2 - 15;
+      const hexSize = 38;
 
       // Hexagon glow
-      const hexGlow = ctx.createRadialGradient(centerX, hexY, 0, centerX, hexY, hexSize + 25);
+      const hexGlow = ctx.createRadialGradient(centerX, hexY, 0, centerX, hexY, hexSize + 20);
       hexGlow.addColorStop(0, type.glowColor);
       hexGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = hexGlow;
       ctx.beginPath();
-      ctx.arc(centerX, hexY, hexSize + 25, 0, Math.PI * 2);
+      ctx.arc(centerX, hexY, hexSize + 20, 0, Math.PI * 2);
       ctx.fill();
 
       // Hexagon background
@@ -671,50 +671,29 @@ const Marketing = () => {
       ctx.strokeStyle = `${type.color}50`;
       ctx.lineWidth = 1.5;
       ctx.setLineDash([5, 5]);
-      ctx.arc(centerX, hexY, hexSize + 15, 0, Math.PI * 2);
+      ctx.arc(centerX, hexY, hexSize + 12, 0, Math.PI * 2);
       ctx.stroke();
       ctx.setLineDash([]);
 
       // Orbit dots
       [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach(angle => {
-        const dotX = centerX + Math.cos(angle) * (hexSize + 15);
-        const dotY = hexY + Math.sin(angle) * (hexSize + 15);
+        const dotX = centerX + Math.cos(angle) * (hexSize + 12);
+        const dotY = hexY + Math.sin(angle) * (hexSize + 12);
         ctx.fillStyle = type.color;
         ctx.beginPath();
-        ctx.arc(dotX, dotY, 4, 0, Math.PI * 2);
+        ctx.arc(dotX, dotY, 3, 0, Math.PI * 2);
         ctx.fill();
       });
 
       // Draw styled icon instead of emoji
-      drawStyledIcon(ctx, type.iconType, centerX, hexY, 18, type.color);
+      drawStyledIcon(ctx, type.iconType, centerX, hexY, 16, type.color);
 
-      // Title
-      ctx.font = 'bold 28px "Segoe UI", system-ui, sans-serif';
+      // Title only - no features
+      ctx.font = 'bold 24px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = '#ffffff';
       ctx.textBaseline = 'alphabetic';
-      ctx.fillText(type.title, centerX, y + 135);
-
-      // Features
-      ctx.font = '17px "Segoe UI", system-ui, sans-serif';
-      type.features.forEach((feature, fIndex) => {
-        const featureY = y + 150 + fIndex * 26;
-        
-        // Feature dot with glow
-        ctx.fillStyle = type.color;
-        ctx.shadowColor = type.color;
-        ctx.shadowBlur = 8;
-        ctx.beginPath();
-        ctx.arc(centerX - 90, featureY - 5, 5, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.shadowBlur = 0;
-        
-        // Feature text
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-        ctx.textAlign = 'left';
-        ctx.fillText(feature, centerX - 75, featureY);
-      });
-
       ctx.textAlign = 'center';
+      ctx.fillText(type.title, centerX, y + cardHeight - 20);
 
       // Corner accents on card
       ctx.strokeStyle = type.color;
@@ -768,18 +747,7 @@ const Marketing = () => {
     ctx.textBaseline = 'middle';
     ctx.fillText(websiteText, startX, y + btnHeight / 2);
 
-    // Button glow
-    const glow = ctx.createRadialGradient(btnX + btnWidth / 2, y + btnHeight / 2, 0, btnX + btnWidth / 2, y + btnHeight / 2, btnWidth);
-    glow.addColorStop(0, 'rgba(20, 184, 166, 0.35)');
-    glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
-    ctx.fillStyle = glow;
-    ctx.beginPath();
-    ctx.arc(btnX + btnWidth / 2, y + btnHeight / 2, btnWidth / 1.5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Button background
-    ctx.shadowColor = 'rgba(20, 184, 166, 0.6)';
-    ctx.shadowBlur = 40;
+    // Button background - no glow effect
     const btnGrad = ctx.createLinearGradient(btnX, y, btnX + btnWidth, y + btnHeight);
     btnGrad.addColorStop(0, '#0d9488');
     btnGrad.addColorStop(0.5, '#14b8a6');
@@ -788,7 +756,6 @@ const Marketing = () => {
     ctx.beginPath();
     ctx.roundRect(btnX, y, btnWidth, btnHeight, 32);
     ctx.fill();
-    ctx.shadowBlur = 0;
 
     // Button text
     ctx.font = 'bold 26px "Segoe UI", system-ui, sans-serif';
