@@ -383,22 +383,23 @@ const Marketing = () => {
   const drawSectionDivider = (ctx: CanvasRenderingContext2D, width: number, y: number) => {
     const centerX = width / 2;
     const lineLength = 280;
+    const diamondOffset = 180; // Move diamonds further from text
 
     // Left decorative line
-    const leftGrad = ctx.createLinearGradient(centerX - lineLength - 160, y, centerX - 160, y);
+    const leftGrad = ctx.createLinearGradient(centerX - lineLength - diamondOffset, y, centerX - diamondOffset, y);
     leftGrad.addColorStop(0, 'rgba(20, 184, 166, 0)');
     leftGrad.addColorStop(1, 'rgba(20, 184, 166, 0.7)');
     ctx.strokeStyle = leftGrad;
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(centerX - lineLength - 160, y);
-    ctx.lineTo(centerX - 160, y);
+    ctx.moveTo(centerX - lineLength - diamondOffset, y);
+    ctx.lineTo(centerX - diamondOffset, y);
     ctx.stroke();
 
     // Left diamond
     ctx.fillStyle = '#14b8a6';
     ctx.save();
-    ctx.translate(centerX - 150, y);
+    ctx.translate(centerX - diamondOffset + 10, y);
     ctx.rotate(Math.PI / 4);
     ctx.fillRect(-6, -6, 12, 12);
     ctx.restore();
@@ -411,19 +412,19 @@ const Marketing = () => {
 
     // Right diamond
     ctx.save();
-    ctx.translate(centerX + 150, y);
+    ctx.translate(centerX + diamondOffset - 10, y);
     ctx.rotate(Math.PI / 4);
     ctx.fillRect(-6, -6, 12, 12);
     ctx.restore();
 
     // Right decorative line
-    const rightGrad = ctx.createLinearGradient(centerX + 160, y, centerX + lineLength + 160, y);
+    const rightGrad = ctx.createLinearGradient(centerX + diamondOffset, y, centerX + lineLength + diamondOffset, y);
     rightGrad.addColorStop(0, 'rgba(20, 184, 166, 0.7)');
     rightGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
     ctx.strokeStyle = rightGrad;
     ctx.beginPath();
-    ctx.moveTo(centerX + 160, y);
-    ctx.lineTo(centerX + lineLength + 160, y);
+    ctx.moveTo(centerX + diamondOffset, y);
+    ctx.lineTo(centerX + lineLength + diamondOffset, y);
     ctx.stroke();
   };
 
