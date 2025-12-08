@@ -88,13 +88,13 @@ const Marketing = () => {
     drawEnhancedLogo(ctx, width / 2, 180, logoImage);
 
     // Draw brand name - centered, below orbit rings
-    drawBrandName(ctx, width, 430);
+    drawBrandName(ctx, width, 420);
 
-    // Draw tagline - single horizontal line
-    drawTagline(ctx, width, 530);
+    // Draw tagline - single horizontal line (after HUB at 420+95=515, so tagline at 580)
+    drawTagline(ctx, width, 580);
 
     // Draw "Built for Everyone" section divider
-    drawSectionDivider(ctx, width, 600);
+    drawSectionDivider(ctx, width, 640);
 
     // Draw user type badges - centered row
     drawUserTypeBadges(ctx, width, height);
@@ -593,7 +593,7 @@ const Marketing = () => {
     const gap = 30;
     const totalWidth = userTypes.length * cardWidth + (userTypes.length - 1) * gap;
     const startX = (width - totalWidth) / 2;
-    const startY = 650;
+    const startY = 700;
 
     userTypes.forEach((type, index) => {
       const x = startX + index * (cardWidth + gap);
