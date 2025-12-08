@@ -85,28 +85,28 @@ const Marketing = () => {
     drawEnergyLines(ctx, width, height);
 
     // Draw enhanced logo with orbits - centered at top
-    drawEnhancedLogo(ctx, width / 2, 180, logoImage);
+    drawEnhancedLogo(ctx, width / 2, 160, logoImage);
 
     // Draw brand name - centered
-    drawBrandName(ctx, width, 380);
+    drawBrandName(ctx, width, 350);
 
-    // Draw tagline - centered
-    drawTagline(ctx, width, 470);
+    // Draw tagline - centered (with proper spacing after HUB)
+    drawTagline(ctx, width, 510);
 
     // Draw "Built for Everyone" section divider
-    drawSectionDivider(ctx, width, 555);
+    drawSectionDivider(ctx, width, 610);
 
     // Draw user type badges - centered row
     drawUserTypeBadges(ctx, width, height);
 
     // Draw CTA button - centered
-    drawCTAButton(ctx, width, 920);
+    drawCTAButton(ctx, width, 950);
 
     // Draw website URL
     ctx.font = 'bold 26px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
     ctx.textAlign = 'center';
-    ctx.fillText('www.startupfactoryhub.com', width / 2, 1010);
+    ctx.fillText('www.startupfactoryhub.com', width / 2, 1040);
 
     // Draw corner accents
     drawCornerAccents(ctx, width, height);
@@ -456,11 +456,11 @@ const Marketing = () => {
     ];
 
     const cardWidth = 320;
-    const cardHeight = 280;
+    const cardHeight = 240;
     const gap = 30;
     const totalWidth = userTypes.length * cardWidth + (userTypes.length - 1) * gap;
     const startX = (width - totalWidth) / 2;
-    const startY = 600;
+    const startY = 660;
 
     userTypes.forEach((type, index) => {
       const x = startX + index * (cardWidth + gap);
@@ -567,7 +567,7 @@ const Marketing = () => {
       // Features
       ctx.font = '17px "Segoe UI", system-ui, sans-serif';
       type.features.forEach((feature, fIndex) => {
-        const featureY = y + 170 + fIndex * 30;
+        const featureY = y + 150 + fIndex * 26;
         
         // Feature dot with glow
         ctx.fillStyle = type.color;
