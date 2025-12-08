@@ -85,28 +85,22 @@ const Marketing = () => {
     drawEnergyLines(ctx, width, height);
 
     // Draw enhanced logo with orbits - centered at top
-    drawEnhancedLogo(ctx, width / 2, 160, logoImage);
+    drawEnhancedLogo(ctx, width / 2, 140, logoImage);
 
-    // Draw brand name - centered
-    drawBrandName(ctx, width, 350);
+    // Draw brand name - centered, below orbit rings (outermost orbit extends to ~350)
+    drawBrandName(ctx, width, 400);
 
-    // Draw tagline - centered (with proper spacing after HUB)
-    drawTagline(ctx, width, 510);
+    // Draw tagline - centered
+    drawTagline(ctx, width, 550);
 
     // Draw "Built for Everyone" section divider
-    drawSectionDivider(ctx, width, 610);
+    drawSectionDivider(ctx, width, 640);
 
     // Draw user type badges - centered row
     drawUserTypeBadges(ctx, width, height);
 
-    // Draw CTA button - centered
-    drawCTAButton(ctx, width, 950);
-
-    // Draw website URL
-    ctx.font = 'bold 26px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.textAlign = 'center';
-    ctx.fillText('www.startupfactoryhub.com', width / 2, 1040);
+    // Draw CTA button with website - centered
+    drawCTAButton(ctx, width, 960);
 
     // Draw corner accents
     drawCornerAccents(ctx, width, height);
@@ -416,38 +410,160 @@ const Marketing = () => {
     ctx.stroke();
   };
 
+  const drawStyledIcon = (ctx: CanvasRenderingContext2D, iconType: string, x: number, y: number, size: number, color: string) => {
+    ctx.save();
+    ctx.strokeStyle = '#ffffff';
+    ctx.fillStyle = '#ffffff';
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    switch (iconType) {
+      case 'rocket':
+        // Rocket body
+        ctx.beginPath();
+        ctx.moveTo(x, y - size);
+        ctx.lineTo(x + size * 0.5, y + size * 0.3);
+        ctx.lineTo(x, y + size * 0.1);
+        ctx.lineTo(x - size * 0.5, y + size * 0.3);
+        ctx.closePath();
+        ctx.stroke();
+        // Fins
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.5, y + size * 0.3);
+        ctx.lineTo(x - size * 0.7, y + size * 0.7);
+        ctx.lineTo(x - size * 0.2, y + size * 0.3);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x + size * 0.5, y + size * 0.3);
+        ctx.lineTo(x + size * 0.7, y + size * 0.7);
+        ctx.lineTo(x + size * 0.2, y + size * 0.3);
+        ctx.stroke();
+        // Window
+        ctx.beginPath();
+        ctx.arc(x, y - size * 0.3, size * 0.2, 0, Math.PI * 2);
+        ctx.stroke();
+        break;
+
+      case 'lightbulb':
+        // Bulb
+        ctx.beginPath();
+        ctx.arc(x, y - size * 0.2, size * 0.5, Math.PI * 0.8, Math.PI * 2.2);
+        ctx.stroke();
+        // Base
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.3, y + size * 0.3);
+        ctx.lineTo(x - size * 0.3, y + size * 0.6);
+        ctx.lineTo(x + size * 0.3, y + size * 0.6);
+        ctx.lineTo(x + size * 0.3, y + size * 0.3);
+        ctx.stroke();
+        // Lines on base
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.25, y + size * 0.4);
+        ctx.lineTo(x + size * 0.25, y + size * 0.4);
+        ctx.moveTo(x - size * 0.25, y + size * 0.5);
+        ctx.lineTo(x + size * 0.25, y + size * 0.5);
+        ctx.stroke();
+        break;
+
+      case 'diamond':
+        // Diamond shape
+        ctx.beginPath();
+        ctx.moveTo(x, y - size * 0.7);
+        ctx.lineTo(x + size * 0.6, y);
+        ctx.lineTo(x, y + size * 0.7);
+        ctx.lineTo(x - size * 0.6, y);
+        ctx.closePath();
+        ctx.stroke();
+        // Inner lines
+        ctx.beginPath();
+        ctx.moveTo(x, y - size * 0.7);
+        ctx.lineTo(x, y + size * 0.7);
+        ctx.moveTo(x - size * 0.6, y);
+        ctx.lineTo(x + size * 0.6, y);
+        ctx.stroke();
+        break;
+
+      case 'gradcap':
+        // Cap top
+        ctx.beginPath();
+        ctx.moveTo(x, y - size * 0.5);
+        ctx.lineTo(x + size * 0.8, y);
+        ctx.lineTo(x, y + size * 0.3);
+        ctx.lineTo(x - size * 0.8, y);
+        ctx.closePath();
+        ctx.stroke();
+        // Tassel
+        ctx.beginPath();
+        ctx.moveTo(x + size * 0.5, y - size * 0.1);
+        ctx.lineTo(x + size * 0.5, y + size * 0.6);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(x + size * 0.5, y + size * 0.7, size * 0.12, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+
+      case 'building':
+        // Building outline
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.5, y + size * 0.7);
+        ctx.lineTo(x - size * 0.5, y - size * 0.5);
+        ctx.lineTo(x, y - size * 0.8);
+        ctx.lineTo(x + size * 0.5, y - size * 0.5);
+        ctx.lineTo(x + size * 0.5, y + size * 0.7);
+        ctx.stroke();
+        // Columns
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.25, y + size * 0.7);
+        ctx.lineTo(x - size * 0.25, y - size * 0.3);
+        ctx.moveTo(x, y + size * 0.7);
+        ctx.lineTo(x, y - size * 0.3);
+        ctx.moveTo(x + size * 0.25, y + size * 0.7);
+        ctx.lineTo(x + size * 0.25, y - size * 0.3);
+        ctx.stroke();
+        // Base line
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.6, y + size * 0.7);
+        ctx.lineTo(x + size * 0.6, y + size * 0.7);
+        ctx.stroke();
+        break;
+    }
+
+    ctx.restore();
+  };
+
   const drawUserTypeBadges = (ctx: CanvasRenderingContext2D, width: number, _height: number) => {
     const userTypes = [
       { 
-        icon: '🚀', 
+        iconType: 'rocket', 
         title: 'Startups', 
         features: ['AI-Powered Roadmap', 'Investor Matching', 'Pitch Tools'],
         color: '#10b981',
         glowColor: 'rgba(16, 185, 129, 0.25)'
       },
       { 
-        icon: '💡', 
+        iconType: 'lightbulb', 
         title: 'Mentors', 
         features: ['Session Management', 'Endorsements', 'Calendar Sync'],
         color: '#06b6d4',
         glowColor: 'rgba(6, 182, 212, 0.25)'
       },
       { 
-        icon: '💎', 
+        iconType: 'diamond', 
         title: 'Investors', 
         features: ['Deal Pipeline', 'Portfolio Tracking', 'Due Diligence'],
         color: '#8b5cf6',
         glowColor: 'rgba(139, 92, 246, 0.25)'
       },
       { 
-        icon: '🎓', 
+        iconType: 'gradcap', 
         title: 'Students', 
         features: ['Internship Board', 'Learning Paths', 'Mentorship'],
         color: '#ec4899',
         glowColor: 'rgba(236, 72, 153, 0.25)'
       },
       { 
-        icon: '🏛️', 
+        iconType: 'building', 
         title: 'Accelerators', 
         features: ['Cohort Management', 'Portfolio Analytics', 'Demo Days'],
         color: '#14b8a6',
@@ -460,7 +576,7 @@ const Marketing = () => {
     const gap = 30;
     const totalWidth = userTypes.length * cardWidth + (userTypes.length - 1) * gap;
     const startX = (width - totalWidth) / 2;
-    const startY = 660;
+    const startY = 690;
 
     userTypes.forEach((type, index) => {
       const x = startX + index * (cardWidth + gap);
@@ -552,11 +668,8 @@ const Marketing = () => {
         ctx.fill();
       });
 
-      // Icon emoji
-      ctx.font = '38px Arial';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillText(type.icon, centerX, hexY);
+      // Draw styled icon instead of emoji
+      drawStyledIcon(ctx, type.iconType, centerX, hexY, 18, type.color);
 
       // Title
       ctx.font = 'bold 28px "Segoe UI", system-ui, sans-serif';
@@ -617,37 +730,55 @@ const Marketing = () => {
   };
 
   const drawCTAButton = (ctx: CanvasRenderingContext2D, width: number, y: number) => {
-    const btnWidth = 420;
-    const btnHeight = 70;
-    const x = (width - btnWidth) / 2;
+    const btnWidth = 380;
+    const btnHeight = 65;
+    const spacing = 40;
+    
+    // Measure website text width
+    ctx.font = 'bold 24px "Segoe UI", system-ui, sans-serif';
+    const websiteText = 'www.startupfactoryhub.com';
+    const websiteWidth = ctx.measureText(websiteText).width;
+    
+    // Calculate total width and center position
+    const totalWidth = websiteWidth + spacing + btnWidth;
+    const startX = (width - totalWidth) / 2;
+    const btnX = startX + websiteWidth + spacing;
+
+    // Draw website URL on the left
+    ctx.font = 'bold 24px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(websiteText, startX, y + btnHeight / 2);
 
     // Button glow
-    const glow = ctx.createRadialGradient(width / 2, y + btnHeight / 2, 0, width / 2, y + btnHeight / 2, btnWidth);
+    const glow = ctx.createRadialGradient(btnX + btnWidth / 2, y + btnHeight / 2, 0, btnX + btnWidth / 2, y + btnHeight / 2, btnWidth);
     glow.addColorStop(0, 'rgba(20, 184, 166, 0.35)');
     glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
     ctx.fillStyle = glow;
     ctx.beginPath();
-    ctx.arc(width / 2, y + btnHeight / 2, btnWidth / 1.5, 0, Math.PI * 2);
+    ctx.arc(btnX + btnWidth / 2, y + btnHeight / 2, btnWidth / 1.5, 0, Math.PI * 2);
     ctx.fill();
 
     // Button background
     ctx.shadowColor = 'rgba(20, 184, 166, 0.6)';
     ctx.shadowBlur = 40;
-    const btnGrad = ctx.createLinearGradient(x, y, x + btnWidth, y + btnHeight);
+    const btnGrad = ctx.createLinearGradient(btnX, y, btnX + btnWidth, y + btnHeight);
     btnGrad.addColorStop(0, '#0d9488');
     btnGrad.addColorStop(0.5, '#14b8a6');
     btnGrad.addColorStop(1, '#0d9488');
     ctx.fillStyle = btnGrad;
     ctx.beginPath();
-    ctx.roundRect(x, y, btnWidth, btnHeight, 35);
+    ctx.roundRect(btnX, y, btnWidth, btnHeight, 32);
     ctx.fill();
     ctx.shadowBlur = 0;
 
     // Button text
-    ctx.font = 'bold 28px "Segoe UI", system-ui, sans-serif';
+    ctx.font = 'bold 26px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
-    ctx.fillText('START YOUR JOURNEY →', width / 2, y + 46);
+    ctx.textBaseline = 'middle';
+    ctx.fillText('START YOUR JOURNEY →', btnX + btnWidth / 2, y + btnHeight / 2);
   };
 
   const drawCornerAccents = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
