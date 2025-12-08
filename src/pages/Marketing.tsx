@@ -1,15 +1,19 @@
 import { useRef, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Download, Printer, Image, ArrowLeft } from 'lucide-react';
+import { Download, Printer, Image, ArrowLeft, Film } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import marketingBg from '@/assets/marketing-bg.jpg';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
+import GIF from 'gif.js';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
   const [isRendering, setIsRendering] = useState(true);
+  const [isGeneratingGif, setIsGeneratingGif] = useState(false);
+  const [bgImageRef, setBgImageRef] = useState<HTMLImageElement | null>(null);
+  const [logoImageRef, setLogoImageRef] = useState<HTMLImageElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -29,6 +33,8 @@ const Marketing = () => {
     const tryDraw = () => {
       loadedCount++;
       if (loadedCount === 2) {
+        setBgImageRef(bgImage);
+        setLogoImageRef(logoImage);
         drawMarketingGraphic(ctx, canvas.width, canvas.height, bgImage, logoImage);
         setIsRendering(false);
       }
@@ -877,6 +883,253 @@ const Marketing = () => {
     printWindow.document.close();
   };
 
+  const generateGif = async () => {
+    if (!bgImageRef || !logoImageRef) {
+      toast.error('Images not loaded yet');
+      return;
+    }
+
+    setIsGeneratingGif(true);
+    toast.info('Generating GIF... This may take a moment.');
+
+    try {
+      const gif = new GIF({
+        workers: 2,
+        quality: 10,
+        width: 960,
+        height: 540,
+        workerScript: '/gif.worker.js'
+      });
+
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = 960;
+      tempCanvas.height = 540;
+      const tempCtx = tempCanvas.getContext('2d')!;
+
+      const totalFrames = 30;
+      const frameDelay = 80;
+
+      for (let frame = 0; frame < totalFrames; frame++) {
+        const progress = frame / totalFrames;
+        drawAnimatedFrame(tempCtx, 960, 540, bgImageRef, logoImageRef, progress);
+        gif.addFrame(tempCtx, { copy: true, delay: frameDelay });
+      }
+
+      gif.on('finished', (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = 'startup-factory-hub-animated.gif';
+        link.href = url;
+        link.click();
+        URL.revokeObjectURL(url);
+        setIsGeneratingGif(false);
+        toast.success('GIF downloaded successfully!');
+      });
+
+      gif.render();
+    } catch (error) {
+      console.error('GIF generation error:', error);
+      setIsGeneratingGif(false);
+      toast.error('Failed to generate GIF');
+    }
+  };
+
+  const drawAnimatedFrame = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    bgImage: HTMLImageElement,
+    logoImage: HTMLImageElement,
+    progress: number
+  ) => {
+    // Scale factor for smaller GIF
+    const scale = width / 1920;
+
+    // Draw background
+    const bgRatio = bgImage.width / bgImage.height;
+    const canvasRatio = width / height;
+    
+    let drawWidth = width;
+    let drawHeight = height;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (bgRatio > canvasRatio) {
+      drawWidth = height * bgRatio;
+      offsetX = -(drawWidth - width) / 2;
+    } else {
+      drawHeight = width / bgRatio;
+      offsetY = -(drawHeight - height) / 2;
+    }
+
+    ctx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
+
+    // Dark overlay
+    const overlayGradient = ctx.createLinearGradient(0, 0, width, height);
+    overlayGradient.addColorStop(0, 'rgba(0, 15, 25, 0.85)');
+    overlayGradient.addColorStop(0.5, 'rgba(0, 18, 30, 0.80)');
+    overlayGradient.addColorStop(1, 'rgba(0, 12, 22, 0.88)');
+    ctx.fillStyle = overlayGradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Animated logo with pulsing glow
+    const logoX = width / 2;
+    const logoY = 180 * scale;
+    const logoSize = 200 * scale;
+    const pulseAmount = Math.sin(progress * Math.PI * 2) * 0.15 + 1;
+
+    // Pulsing glow
+    for (let i = 3; i >= 0; i--) {
+      const radius = (logoSize / 2 + 30 + i * 15) * pulseAmount;
+      const glow = ctx.createRadialGradient(logoX, logoY, radius - 20, logoX, logoY, radius + 20);
+      glow.addColorStop(0, `rgba(20, 184, 166, ${(0.15 - i * 0.03) * pulseAmount})`);
+      glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(logoX, logoY, radius + 20, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    // Animated orbit rings
+    const orbits = [
+      { radius: 140 * scale, speed: 1 },
+      { radius: 175 * scale, speed: -0.7 },
+      { radius: 210 * scale, speed: 0.5 },
+    ];
+
+    orbits.forEach((orbit, idx) => {
+      ctx.beginPath();
+      ctx.strokeStyle = `rgba(20, 184, 166, ${0.4 - idx * 0.1})`;
+      ctx.lineWidth = 2 * scale;
+      ctx.setLineDash([10 * scale, 10 * scale]);
+      ctx.arc(logoX, logoY, orbit.radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Animated orbit dots
+      const dotCount = 4;
+      for (let d = 0; d < dotCount; d++) {
+        const angle = (progress * Math.PI * 2 * orbit.speed) + (d * Math.PI * 2 / dotCount);
+        const dotX = logoX + Math.cos(angle) * orbit.radius;
+        const dotY = logoY + Math.sin(angle) * orbit.radius;
+
+        // Dot glow
+        const dotGlow = ctx.createRadialGradient(dotX, dotY, 0, dotX, dotY, 10 * scale);
+        dotGlow.addColorStop(0, 'rgba(20, 184, 166, 0.8)');
+        dotGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+        ctx.fillStyle = dotGlow;
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, 10 * scale, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = '#14b8a6';
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, 4 * scale, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    });
+
+    // Logo ring
+    ctx.beginPath();
+    ctx.strokeStyle = `rgba(20, 184, 166, ${0.5 + Math.sin(progress * Math.PI * 2) * 0.2})`;
+    ctx.lineWidth = 3 * scale;
+    ctx.arc(logoX, logoY, logoSize / 2 + 8 * scale, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Logo image
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(logoX, logoY, logoSize / 2, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(logoImage, logoX - logoSize / 2, logoY - logoSize / 2, logoSize, logoSize);
+    ctx.restore();
+
+    // Brand name
+    ctx.textAlign = 'center';
+    ctx.font = `900 ${40 * scale}px "Segoe UI", system-ui, sans-serif`;
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.5)';
+    ctx.shadowBlur = 20 * scale;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('STARTUP FACTORY', width / 2, 420 * scale);
+
+    ctx.font = `900 ${55 * scale}px "Segoe UI", system-ui, sans-serif`;
+    const hubGradient = ctx.createLinearGradient(width / 2 - 75 * scale, 0, width / 2 + 75 * scale, 0);
+    hubGradient.addColorStop(0, '#0d9488');
+    hubGradient.addColorStop(0.5, '#22d3ee');
+    hubGradient.addColorStop(1, '#14b8a6');
+    ctx.fillStyle = hubGradient;
+    ctx.fillText('HUB', width / 2, 515 * scale);
+    ctx.shadowBlur = 0;
+
+    // Tagline
+    ctx.font = `400 ${17 * scale}px "Segoe UI", system-ui, sans-serif`;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+    ctx.fillText('The technology designed to help deep tech startups succeed.', width / 2, 580 * scale);
+
+    // Built for Everyone
+    ctx.font = `bold ${18 * scale}px "Segoe UI", system-ui, sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('Built for Everyone', width / 2, 652 * scale);
+
+    // Simple profile type indicators
+    const types = ['Startups', 'Mentors', 'Investors', 'Students', 'Accelerators'];
+    const colors = ['#10b981', '#06b6d4', '#8b5cf6', '#ec4899', '#14b8a6'];
+    const cardWidth = 140 * scale;
+    const gap = 12 * scale;
+    const totalWidth = types.length * cardWidth + (types.length - 1) * gap;
+    const startX = (width - totalWidth) / 2;
+    const cardY = 720 * scale;
+
+    types.forEach((type, i) => {
+      const x = startX + i * (cardWidth + gap);
+      const centerX = x + cardWidth / 2;
+
+      // Card background
+      ctx.fillStyle = 'rgba(0, 20, 40, 0.75)';
+      ctx.beginPath();
+      ctx.roundRect(x, cardY, cardWidth, 80 * scale, 10 * scale);
+      ctx.fill();
+
+      // Animated border
+      const borderOpacity = 0.5 + Math.sin((progress * Math.PI * 2) + i * 0.5) * 0.3;
+      ctx.strokeStyle = colors[i] + Math.floor(borderOpacity * 255).toString(16).padStart(2, '0');
+      ctx.lineWidth = 2 * scale;
+      ctx.beginPath();
+      ctx.roundRect(x, cardY, cardWidth, 80 * scale, 10 * scale);
+      ctx.stroke();
+
+      // Type name
+      ctx.font = `bold ${12 * scale}px "Segoe UI", system-ui, sans-serif`;
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(type, centerX, cardY + 50 * scale);
+    });
+
+    // CTA section
+    ctx.font = `bold ${12 * scale}px "Segoe UI", system-ui, sans-serif`;
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.fillText('www.startupfactoryhub.com', width / 2 - 100 * scale, 970 * scale + 32 * scale);
+
+    // Button with subtle pulse
+    const btnPulse = 1 + Math.sin(progress * Math.PI * 2) * 0.02;
+    const btnWidth = 190 * scale * btnPulse;
+    const btnHeight = 32 * scale * btnPulse;
+    const btnX = width / 2 + 20 * scale - btnWidth / 2 + 50 * scale;
+    const btnY = 970 * scale;
+
+    const btnGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnWidth, btnY + btnHeight);
+    btnGrad.addColorStop(0, '#0d9488');
+    btnGrad.addColorStop(0.5, '#14b8a6');
+    btnGrad.addColorStop(1, '#0d9488');
+    ctx.fillStyle = btnGrad;
+    ctx.beginPath();
+    ctx.roundRect(btnX, btnY, btnWidth, btnHeight, 16 * scale);
+    ctx.fill();
+
+    ctx.font = `bold ${13 * scale}px "Segoe UI", system-ui, sans-serif`;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('START YOUR JOURNEY →', btnX + btnWidth / 2, btnY + btnHeight / 2 + 4 * scale);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border/50">
@@ -896,6 +1149,10 @@ const Marketing = () => {
             <Button variant="outline" size="sm" onClick={() => downloadImage('jpg')} disabled={isRendering} className="gap-2">
               <Image className="h-4 w-4" />
               JPG
+            </Button>
+            <Button variant="outline" size="sm" onClick={generateGif} disabled={isRendering || isGeneratingGif} className="gap-2">
+              <Film className="h-4 w-4" />
+              {isGeneratingGif ? 'Generating...' : 'GIF'}
             </Button>
             <Button variant="default" size="sm" onClick={handlePrint} disabled={isRendering} className="gap-2">
               <Printer className="h-4 w-4" />
