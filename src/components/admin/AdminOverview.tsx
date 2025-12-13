@@ -190,28 +190,69 @@ const AdminOverview = () => {
         .sort((a, b) => b.count - a.count)
         .slice(0, 8);
 
-      // Process industry data
+      // Process industry data - normalize to handle typos like 'ecomerce' vs 'ecommerce'
       const industryCounts: Record<string, number> = {};
       companiesData?.forEach((c: any) => {
-        const ind = c.industry?.trim() || 'Other';
+        let ind = c.industry?.trim()?.toLowerCase() || 'other';
+        // Normalize common typos
+        if (ind === 'ecomerce') ind = 'ecommerce';
+        if (ind === 'e-commerce') ind = 'ecommerce';
         industryCounts[ind] = (industryCounts[ind] || 0) + 1;
       });
       const industryData = Object.entries(industryCounts)
-        .map(([industry, count]) => ({ industry, count }))
+        .map(([industry, count]) => ({ 
+          industry: industry.charAt(0).toUpperCase() + industry.slice(1), 
+          count 
+        }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 8);
 
-      // Generate mock growth data for chart (could be replaced with real date-based queries)
-      const growth = [];
+      // Fetch real growth data based on actual signup and post dates
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      
+      const { data: recentUsersData } = await supabase
+        .from('profiles')
+        .select('created_at')
+        .gte('created_at', sevenDaysAgo.toISOString());
+      
+      const { data: recentPostsData } = await supabase
+        .from('feed_posts')
+        .select('created_at')
+        .gte('created_at', sevenDaysAgo.toISOString());
+      
+      // Group by date for the growth chart
+      const usersByDate: Record<string, number> = {};
+      const postsByDate: Record<string, number> = {};
+      
       for (let i = 6; i >= 0; i--) {
         const date = new Date();
         date.setDate(date.getDate() - i);
-        growth.push({
-          date: format(date, 'MMM dd'),
-          users: Math.floor(Math.random() * 50) + (usersCount || 0) - 200 + i * 30,
-          posts: Math.floor(Math.random() * 20) + (postsCount || 0) - 50 + i * 10
-        });
+        const dateKey = format(date, 'MMM dd');
+        usersByDate[dateKey] = 0;
+        postsByDate[dateKey] = 0;
       }
+      
+      recentUsersData?.forEach((u: any) => {
+        const dateKey = format(new Date(u.created_at), 'MMM dd');
+        if (usersByDate[dateKey] !== undefined) {
+          usersByDate[dateKey]++;
+        }
+      });
+      
+      recentPostsData?.forEach((p: any) => {
+        const dateKey = format(new Date(p.created_at), 'MMM dd');
+        if (postsByDate[dateKey] !== undefined) {
+          postsByDate[dateKey]++;
+        }
+      });
+      
+      const growth = Object.keys(usersByDate).map(dateKey => ({
+        date: dateKey,
+        users: usersByDate[dateKey],
+        posts: postsByDate[dateKey]
+      }));
+      
       setGrowthData(growth);
 
       setStats({
