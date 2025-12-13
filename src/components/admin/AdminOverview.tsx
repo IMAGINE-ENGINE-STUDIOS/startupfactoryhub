@@ -5,8 +5,19 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { format } from 'date-fns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { format, subDays, subMonths, subYears, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval } from 'date-fns';
 import { toast } from 'sonner';
+
+type TimeRange = '7d' | '30d' | '90d' | '1y' | 'all';
+
+const TIME_RANGE_LABELS: Record<TimeRange, string> = {
+  '7d': 'Last 7 Days',
+  '30d': 'Last 30 Days',
+  '90d': 'Last 90 Days',
+  '1y': 'Last Year',
+  'all': 'All Time'
+};
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Users, 
@@ -84,6 +95,11 @@ const AdminOverview = () => {
   });
   const [loading, setLoading] = useState(true);
   const [growthData, setGrowthData] = useState<any[]>([]);
+  const [timeRange, setTimeRange] = useState<TimeRange>('7d');
+
+  useEffect(() => {
+    fetchGrowthData();
+  }, [timeRange]);
 
   useEffect(() => {
     let isMounted = true;
@@ -207,53 +223,7 @@ const AdminOverview = () => {
         .sort((a, b) => b.count - a.count)
         .slice(0, 8);
 
-      // Fetch real growth data based on actual signup and post dates
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      
-      const { data: recentUsersData } = await supabase
-        .from('profiles')
-        .select('created_at')
-        .gte('created_at', sevenDaysAgo.toISOString());
-      
-      const { data: recentPostsData } = await supabase
-        .from('feed_posts')
-        .select('created_at')
-        .gte('created_at', sevenDaysAgo.toISOString());
-      
-      // Group by date for the growth chart
-      const usersByDate: Record<string, number> = {};
-      const postsByDate: Record<string, number> = {};
-      
-      for (let i = 6; i >= 0; i--) {
-        const date = new Date();
-        date.setDate(date.getDate() - i);
-        const dateKey = format(date, 'MMM dd');
-        usersByDate[dateKey] = 0;
-        postsByDate[dateKey] = 0;
-      }
-      
-      recentUsersData?.forEach((u: any) => {
-        const dateKey = format(new Date(u.created_at), 'MMM dd');
-        if (usersByDate[dateKey] !== undefined) {
-          usersByDate[dateKey]++;
-        }
-      });
-      
-      recentPostsData?.forEach((p: any) => {
-        const dateKey = format(new Date(p.created_at), 'MMM dd');
-        if (postsByDate[dateKey] !== undefined) {
-          postsByDate[dateKey]++;
-        }
-      });
-      
-      const growth = Object.keys(usersByDate).map(dateKey => ({
-        date: dateKey,
-        users: usersByDate[dateKey],
-        posts: postsByDate[dateKey]
-      }));
-      
-      setGrowthData(growth);
+      // Growth data fetched separately via fetchGrowthData
 
       setStats({
         totalUsers: usersCount || 0,
@@ -277,6 +247,70 @@ const AdminOverview = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchGrowthData = async () => {
+    const now = new Date();
+    let startDate: Date;
+    let dateFormat: string;
+    let intervals: Date[];
+
+    switch (timeRange) {
+      case '7d':
+        startDate = subDays(now, 7);
+        intervals = eachDayOfInterval({ start: startDate, end: now });
+        dateFormat = 'MMM dd';
+        break;
+      case '30d':
+        startDate = subDays(now, 30);
+        intervals = eachDayOfInterval({ start: startDate, end: now });
+        dateFormat = 'MMM dd';
+        break;
+      case '90d':
+        startDate = subDays(now, 90);
+        intervals = eachWeekOfInterval({ start: startDate, end: now });
+        dateFormat = 'MMM dd';
+        break;
+      case '1y':
+        startDate = subYears(now, 1);
+        intervals = eachMonthOfInterval({ start: startDate, end: now });
+        dateFormat = 'MMM yy';
+        break;
+      case 'all':
+        startDate = new Date('2020-01-01');
+        intervals = eachMonthOfInterval({ start: startDate, end: now });
+        dateFormat = 'MMM yy';
+        break;
+      default:
+        startDate = subDays(now, 7);
+        intervals = eachDayOfInterval({ start: startDate, end: now });
+        dateFormat = 'MMM dd';
+    }
+
+    const { data: usersData } = await supabase
+      .from('profiles')
+      .select('created_at')
+      .gte('created_at', startDate.toISOString());
+
+    const { data: postsData } = await supabase
+      .from('feed_posts')
+      .select('created_at')
+      .gte('created_at', startDate.toISOString());
+
+    const growth = intervals.map(date => {
+      const dateKey = format(date, dateFormat);
+      const usersCount = usersData?.filter(u => {
+        const d = new Date(u.created_at);
+        return format(d, dateFormat) === dateKey;
+      }).length || 0;
+      const postsCount = postsData?.filter(p => {
+        const d = new Date(p.created_at);
+        return format(d, dateFormat) === dateKey;
+      }).length || 0;
+      return { date: dateKey, users: usersCount, posts: postsCount };
+    });
+
+    setGrowthData(growth);
   };
 
   const getRoleIcon = (role: string) => {
@@ -418,10 +452,24 @@ const AdminOverview = () => {
         {/* Growth Chart */}
         <Card className="tech-card border-0">
           <CardHeader>
-            <CardTitle className="text-lg flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-primary" />
-              Platform Growth (7 days)
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Platform Growth
+              </CardTitle>
+              <Select value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
+                <SelectTrigger className="w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="7d">Last 7 Days</SelectItem>
+                  <SelectItem value="30d">Last 30 Days</SelectItem>
+                  <SelectItem value="90d">Last 90 Days</SelectItem>
+                  <SelectItem value="1y">Last Year</SelectItem>
+                  <SelectItem value="all">All Time</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </CardHeader>
           <CardContent>
             <ResponsiveContainer width="100%" height={200}>
