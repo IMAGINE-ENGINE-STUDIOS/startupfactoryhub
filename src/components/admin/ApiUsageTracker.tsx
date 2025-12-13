@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
-import { format, subDays, startOfMonth, endOfMonth } from 'date-fns';
+import { format, startOfMonth, endOfMonth, subMonths } from 'date-fns';
 import { 
   Video,
   Newspaper,
@@ -17,18 +17,17 @@ import {
   RefreshCw,
   AlertTriangle,
   TrendingUp,
-  Settings
+  Settings,
+  Database
 } from 'lucide-react';
 import { 
-  AreaChart, 
-  Area, 
+  BarChart, 
+  Bar,
   XAxis, 
   YAxis, 
   CartesianGrid, 
   Tooltip, 
-  ResponsiveContainer,
-  BarChart,
-  Bar
+  ResponsiveContainer
 } from 'recharts';
 
 interface ApiUsageLog {
@@ -39,6 +38,7 @@ interface ApiUsageLog {
   tokens_used: number | null;
   estimated_cost: number | null;
   created_at: string;
+  metadata: any;
 }
 
 interface ServiceStats {
@@ -50,6 +50,14 @@ interface ServiceStats {
   limit?: number;
   remaining?: number;
 }
+
+// Cost estimates per service
+const SERVICE_COSTS = {
+  whereby: 0.10,  // per room
+  webzio: 0.01,   // per request
+  gemini: 0.0001, // per token
+  resend: 0.001   // per email
+};
 
 const ApiUsageTracker = () => {
   const { toast } = useToast();
@@ -67,12 +75,125 @@ const ApiUsageTracker = () => {
 
   useEffect(() => {
     fetchUsageData();
+    
+    // Set up real-time subscription
+    const channel = supabase
+      .channel('api-usage-changes')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'api_usage_logs' },
+        (payload) => {
+          console.log('New API usage log:', payload);
+          setUsageLogs(prev => [payload.new as ApiUsageLog, ...prev]);
+          toast({
+            title: "New API Call",
+            description: `${(payload.new as ApiUsageLog).service_name} - ${(payload.new as ApiUsageLog).endpoint || 'API Call'}`,
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
+
+  // Recalculate stats when logs change
+  useEffect(() => {
+    if (usageLogs.length > 0) {
+      calculateStats(usageLogs);
+    }
+  }, [usageLogs]);
+
+  const calculateStats = (logs: ApiUsageLog[]) => {
+    // Calculate service stats
+    const stats: Record<string, { requests: number; cost: number; tokens: number; remaining?: number }> = {
+      whereby: { requests: 0, cost: 0, tokens: 0 },
+      webzio: { requests: 0, cost: 0, tokens: 0 },
+      gemini: { requests: 0, cost: 0, tokens: 0 },
+      resend: { requests: 0, cost: 0, tokens: 0 }
+    };
+
+    logs.forEach(log => {
+      const service = log.service_name.toLowerCase();
+      if (stats[service]) {
+        stats[service].requests += log.request_count || 1;
+        stats[service].cost += log.estimated_cost || 0;
+        stats[service].tokens += log.tokens_used || 0;
+        
+        // Check for remaining credits in metadata (Webz.io returns this)
+        if (log.metadata?.requestsLeft !== undefined) {
+          stats[service].remaining = log.metadata.requestsLeft;
+        }
+      }
+    });
+
+    // Calculate costs based on actual data or estimate from usage
+    const calculatedStats: ServiceStats[] = [
+      { 
+        name: 'Whereby', 
+        icon: Video, 
+        requests: stats.whereby.requests, 
+        cost: stats.whereby.cost > 0 ? stats.whereby.cost : stats.whereby.requests * SERVICE_COSTS.whereby,
+        color: '#3B82F6',
+        limit: 1000
+      },
+      { 
+        name: 'Webz.io', 
+        icon: Newspaper, 
+        requests: stats.webzio.requests, 
+        cost: stats.webzio.cost > 0 ? stats.webzio.cost : stats.webzio.requests * SERVICE_COSTS.webzio,
+        color: '#10B981',
+        limit: 10000,
+        remaining: stats.webzio.remaining
+      },
+      { 
+        name: 'Gemini AI', 
+        icon: Brain, 
+        requests: stats.gemini.requests, 
+        cost: stats.gemini.cost > 0 ? stats.gemini.cost : stats.gemini.tokens * SERVICE_COSTS.gemini,
+        color: '#8B5CF6',
+        limit: 100000
+      },
+      { 
+        name: 'Resend', 
+        icon: Mail, 
+        requests: stats.resend.requests, 
+        cost: stats.resend.cost > 0 ? stats.resend.cost : stats.resend.requests * SERVICE_COSTS.resend,
+        color: '#F59E0B',
+        limit: 3000
+      }
+    ];
+
+    setServiceStats(calculatedStats);
+
+    // Calculate monthly spending trends - only from real data
+    const monthly = [];
+    for (let i = 5; i >= 0; i--) {
+      const monthDate = subMonths(new Date(), i);
+      const monthStart = startOfMonth(monthDate);
+      const monthEnd = endOfMonth(monthDate);
+      
+      const monthLogs = logs.filter(log => {
+        const date = new Date(log.created_at);
+        return date >= monthStart && date <= monthEnd;
+      });
+
+      const monthCost = monthLogs.reduce((sum, log) => sum + (log.estimated_cost || 0), 0);
+      const monthRequests = monthLogs.reduce((sum, log) => sum + (log.request_count || 1), 0);
+      
+      monthly.push({
+        month: format(monthDate, 'MMM'),
+        cost: monthCost,
+        requests: monthRequests
+      });
+    }
+    setMonthlySpending(monthly);
+  };
 
   const fetchUsageData = async () => {
     setLoading(true);
     try {
-      // Fetch API usage logs
       const { data: logs, error } = await supabase
         .from('api_usage_logs')
         .select('*')
@@ -81,80 +202,19 @@ const ApiUsageTracker = () => {
 
       if (error) throw error;
       setUsageLogs(logs || []);
-
-      // Calculate service stats
-      const stats: Record<string, { requests: number; cost: number; tokens: number }> = {
-        whereby: { requests: 0, cost: 0, tokens: 0 },
-        webzio: { requests: 0, cost: 0, tokens: 0 },
-        gemini: { requests: 0, cost: 0, tokens: 0 },
-        resend: { requests: 0, cost: 0, tokens: 0 }
-      };
-
-      logs?.forEach(log => {
-        const service = log.service_name.toLowerCase();
-        if (stats[service]) {
-          stats[service].requests += log.request_count || 1;
-          stats[service].cost += log.estimated_cost || 0;
-          stats[service].tokens += log.tokens_used || 0;
-        }
-      });
-
-      setServiceStats([
-        { 
-          name: 'Whereby', 
-          icon: Video, 
-          requests: stats.whereby.requests, 
-          cost: stats.whereby.cost || stats.whereby.requests * 0.10,
-          color: '#3B82F6',
-          limit: 1000
-        },
-        { 
-          name: 'Webz.io', 
-          icon: Newspaper, 
-          requests: stats.webzio.requests, 
-          cost: stats.webzio.cost || stats.webzio.requests * 0.01,
-          color: '#10B981',
-          limit: 10000,
-          remaining: 10000 - stats.webzio.requests
-        },
-        { 
-          name: 'Gemini AI', 
-          icon: Brain, 
-          requests: stats.gemini.requests, 
-          cost: stats.gemini.cost || stats.gemini.tokens * 0.0001,
-          color: '#8B5CF6',
-          limit: 100000
-        },
-        { 
-          name: 'Resend', 
-          icon: Mail, 
-          requests: stats.resend.requests, 
-          cost: stats.resend.cost || stats.resend.requests * 0.001,
-          color: '#F59E0B',
-          limit: 3000
-        }
-      ]);
-
-      // Calculate monthly spending trends
-      const monthly = [];
-      for (let i = 5; i >= 0; i--) {
-        const monthStart = startOfMonth(subDays(new Date(), i * 30));
-        const monthEnd = endOfMonth(subDays(new Date(), i * 30));
-        
-        const monthLogs = logs?.filter(log => {
-          const date = new Date(log.created_at);
-          return date >= monthStart && date <= monthEnd;
-        }) || [];
-
-        const monthCost = monthLogs.reduce((sum, log) => sum + (log.estimated_cost || 0), 0);
-        
-        monthly.push({
-          month: format(monthStart, 'MMM'),
-          cost: monthCost || Math.random() * 100 + 20,
-          requests: monthLogs.length || Math.floor(Math.random() * 500 + 100)
-        });
+      
+      if (logs && logs.length > 0) {
+        calculateStats(logs);
+      } else {
+        // No data - set empty stats
+        setServiceStats([
+          { name: 'Whereby', icon: Video, requests: 0, cost: 0, color: '#3B82F6', limit: 1000 },
+          { name: 'Webz.io', icon: Newspaper, requests: 0, cost: 0, color: '#10B981', limit: 10000 },
+          { name: 'Gemini AI', icon: Brain, requests: 0, cost: 0, color: '#8B5CF6', limit: 100000 },
+          { name: 'Resend', icon: Mail, requests: 0, cost: 0, color: '#F59E0B', limit: 3000 }
+        ]);
+        setMonthlySpending([]);
       }
-      setMonthlySpending(monthly);
 
     } catch (error) {
       console.error('Error fetching usage data:', error);
@@ -170,6 +230,7 @@ const ApiUsageTracker = () => {
 
   const totalMonthlyCost = serviceStats.reduce((sum, s) => sum + s.cost, 0);
   const totalRequests = serviceStats.reduce((sum, s) => sum + s.requests, 0);
+  const hasData = usageLogs.length > 0;
 
   if (loading) {
     return (
@@ -200,18 +261,32 @@ const ApiUsageTracker = () => {
         <Card className="tech-card border-0">
           <CardContent className="p-4">
             <Brain className="h-5 w-5 text-purple-400 mb-2" />
-            <p className="text-2xl font-bold">4</p>
+            <p className="text-2xl font-bold">{serviceStats.filter(s => s.requests > 0).length}</p>
             <p className="text-xs text-muted-foreground">Active Services</p>
           </CardContent>
         </Card>
         <Card className="tech-card border-0">
           <CardContent className="p-4">
             <AlertTriangle className="h-5 w-5 text-amber-400 mb-2" />
-            <p className="text-2xl font-bold">0</p>
+            <p className="text-2xl font-bold">
+              {serviceStats.filter(s => s.limit && (s.requests / s.limit) > 0.8).length}
+            </p>
             <p className="text-xs text-muted-foreground">Budget Alerts</p>
           </CardContent>
         </Card>
       </div>
+
+      {!hasData && (
+        <Card className="tech-card border-0">
+          <CardContent className="p-8 text-center">
+            <Database className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">No API Usage Data Yet</h3>
+            <p className="text-muted-foreground">
+              API usage will appear here as edge functions log their activity.
+            </p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Service Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -230,9 +305,9 @@ const ApiUsageTracker = () => {
                   </CardTitle>
                   <Badge 
                     variant="outline" 
-                    className={isNearLimit ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : ''}
+                    className={isNearLimit ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : service.requests > 0 ? 'bg-green-500/20 text-green-400' : ''}
                   >
-                    {isNearLimit ? 'Near Limit' : 'Normal'}
+                    {isNearLimit ? 'Near Limit' : service.requests > 0 ? 'Active' : 'No Activity'}
                   </Badge>
                 </div>
               </CardHeader>
@@ -261,7 +336,7 @@ const ApiUsageTracker = () => {
 
                   {service.remaining !== undefined && (
                     <p className="text-sm text-muted-foreground">
-                      Remaining: <span className="text-foreground font-medium">{service.remaining.toLocaleString()}</span>
+                      Remaining Credits: <span className="text-foreground font-medium">{service.remaining.toLocaleString()}</span>
                     </p>
                   )}
                 </div>
@@ -272,43 +347,48 @@ const ApiUsageTracker = () => {
       </div>
 
       {/* Monthly Spending Chart */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-primary" />
-              Monthly Spending Trends
-            </CardTitle>
-            <Button 
-              variant="outline" 
-              size="sm"
-              onClick={() => setShowSettings(!showSettings)}
-              className="tech-card border-0"
-            >
-              <Settings className="h-4 w-4 mr-2" />
-              Budget Alerts
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={monthlySpending}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
-              <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
-              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))', 
-                  border: '1px solid hsl(var(--border))',
-                  borderRadius: '8px'
-                }}
-                formatter={(value: any) => [`$${value.toFixed(2)}`, 'Cost']}
-              />
-              <Bar dataKey="cost" fill="#10B981" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
+      {monthlySpending.some(m => m.cost > 0 || m.requests > 0) && (
+        <Card className="tech-card border-0">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-primary" />
+                Monthly Spending Trends
+              </CardTitle>
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowSettings(!showSettings)}
+                className="tech-card border-0"
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Budget Alerts
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={monthlySpending}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                <XAxis dataKey="month" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px'
+                  }}
+                  formatter={(value: any, name: string) => [
+                    name === 'cost' ? `$${value.toFixed(2)}` : value.toLocaleString(),
+                    name === 'cost' ? 'Cost' : 'Requests'
+                  ]}
+                />
+                <Bar dataKey="cost" fill="#10B981" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Budget Alerts Configuration */}
       {showSettings && (
@@ -350,7 +430,13 @@ const ApiUsageTracker = () => {
       {/* Recent API Calls */}
       <Card className="tech-card border-0">
         <CardHeader>
-          <CardTitle>Recent API Calls</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Recent API Calls</CardTitle>
+            <Button variant="outline" size="sm" onClick={fetchUsageData} className="tech-card border-0">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-2 max-h-[300px] overflow-y-auto">
@@ -364,6 +450,11 @@ const ApiUsageTracker = () => {
                   <span className="text-muted-foreground">
                     {log.request_count || 1} req
                   </span>
+                  {log.tokens_used && (
+                    <span className="text-muted-foreground">
+                      {log.tokens_used} tokens
+                    </span>
+                  )}
                   <span className="font-medium">
                     ${(log.estimated_cost || 0).toFixed(4)}
                   </span>

@@ -12,15 +12,14 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Settings,
   AlertTriangle,
-  Shield,
   Mail,
   Key,
   ToggleLeft,
-  Wrench,
   RefreshCw,
   Eye,
   EyeOff,
-  Save
+  Save,
+  Loader2
 } from 'lucide-react';
 
 interface PlatformSettings {
@@ -41,9 +40,17 @@ interface FeatureFlags {
   cohortManagement: boolean;
 }
 
+interface EmailTemplates {
+  welcomeSubject: string;
+  welcomeBody: string;
+  notificationSubject: string;
+  notificationBody: string;
+}
+
 const AdminSettings = () => {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [showApiKeys, setShowApiKeys] = useState(false);
   
   const [platformSettings, setPlatformSettings] = useState<PlatformSettings>({
@@ -64,7 +71,7 @@ const AdminSettings = () => {
     cohortManagement: true
   });
 
-  const [emailTemplates, setEmailTemplates] = useState({
+  const [emailTemplates, setEmailTemplates] = useState<EmailTemplates>({
     welcomeSubject: '🚀 Welcome to Startup Factory Hub!',
     welcomeBody: 'Thank you for joining our platform. Get started by completing your profile.',
     notificationSubject: '[Startup Factory Hub] {title}',
@@ -79,41 +86,85 @@ const AdminSettings = () => {
     { name: 'RESEND_API_KEY', value: 're_...', masked: true }
   ];
 
-  const handleSavePlatformSettings = async () => {
+  useEffect(() => {
+    loadSettings();
+  }, []);
+
+  const loadSettings = async () => {
     setLoading(true);
     try {
-      // In a real app, save to admin_settings table
-      toast({
-        title: "Settings Saved",
-        description: "Platform settings have been updated successfully."
+      const { data: settings, error } = await supabase
+        .from('admin_settings')
+        .select('*');
+
+      if (error) throw error;
+
+      // Parse settings from database
+      settings?.forEach((setting: any) => {
+        const value = setting.setting_value;
+        
+        switch (setting.setting_key) {
+          case 'platform_settings':
+            setPlatformSettings(prev => ({ ...prev, ...value }));
+            break;
+          case 'feature_flags':
+            setFeatureFlags(prev => ({ ...prev, ...value }));
+            break;
+          case 'email_templates':
+            setEmailTemplates(prev => ({ ...prev, ...value }));
+            break;
+        }
       });
     } catch (error) {
+      console.error('Error loading settings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const saveSetting = async (key: string, value: any, description: string) => {
+    setSaving(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const { error } = await supabase
+        .from('admin_settings')
+        .upsert({
+          setting_key: key,
+          setting_value: value,
+          description,
+          updated_by: user?.id,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'setting_key' });
+
+      if (error) throw error;
+
+      toast({
+        title: "Settings Saved",
+        description: `${description} updated successfully.`
+      });
+    } catch (error) {
+      console.error('Error saving settings:', error);
       toast({
         title: "Error",
         description: "Failed to save settings",
         variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  const handleSaveFeatureFlags = async () => {
-    setLoading(true);
-    try {
-      toast({
-        title: "Feature Flags Saved",
-        description: "Feature flags have been updated successfully."
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save feature flags",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleSavePlatformSettings = () => {
+    saveSetting('platform_settings', platformSettings, 'Platform settings');
+  };
+
+  const handleSaveFeatureFlags = () => {
+    saveSetting('feature_flags', featureFlags, 'Feature flags');
+  };
+
+  const handleSaveEmailTemplates = () => {
+    saveSetting('email_templates', emailTemplates, 'Email templates');
   };
 
   const handleClearCache = () => {
@@ -124,6 +175,14 @@ const AdminSettings = () => {
       description: "All local cache has been cleared."
     });
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -185,8 +244,8 @@ const AdminSettings = () => {
                 );
               })}
               
-              <Button onClick={handleSavePlatformSettings} disabled={loading}>
-                <Save className="h-4 w-4 mr-2" />
+              <Button onClick={handleSavePlatformSettings} disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                 Save Settings
               </Button>
             </CardContent>
@@ -213,12 +272,14 @@ const AdminSettings = () => {
                 <Button 
                   variant="outline" 
                   className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                  disabled
                 >
                   Reset Platform Stats
                 </Button>
                 <Button 
                   variant="outline" 
                   className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                  disabled
                 >
                   Purge Inactive Users
                 </Button>
@@ -270,8 +331,8 @@ const AdminSettings = () => {
                 );
               })}
               
-              <Button onClick={handleSaveFeatureFlags} disabled={loading}>
-                <Save className="h-4 w-4 mr-2" />
+              <Button onClick={handleSaveFeatureFlags} disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                 Save Feature Flags
               </Button>
             </CardContent>
@@ -328,8 +389,8 @@ const AdminSettings = () => {
                 </div>
               </div>
               
-              <Button disabled={loading}>
-                <Save className="h-4 w-4 mr-2" />
+              <Button onClick={handleSaveEmailTemplates} disabled={saving}>
+                {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
                 Save Templates
               </Button>
             </CardContent>

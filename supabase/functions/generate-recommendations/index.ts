@@ -6,6 +6,22 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to log API usage
+async function logApiUsage(supabaseClient: any, serviceName: string, endpoint: string, tokensUsed?: number, estimatedCost?: number) {
+  try {
+    await supabaseClient.from('api_usage_logs').insert({
+      service_name: serviceName,
+      endpoint: endpoint,
+      request_count: 1,
+      tokens_used: tokensUsed || null,
+      estimated_cost: estimatedCost || 0.001,
+      metadata: { timestamp: new Date().toISOString() }
+    });
+  } catch (err) {
+    console.error('Failed to log API usage:', err);
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -200,6 +216,11 @@ Focus on recommendations that match the user's role, industry, and goals.`;
 
     const aiData = await aiResponse.json();
     console.log('AI response:', JSON.stringify(aiData));
+
+    // Estimate tokens and log usage
+    const tokensUsed = aiData.usage?.total_tokens || 800;
+    const estimatedCost = tokensUsed * 0.0001;
+    await logApiUsage(supabaseClient, 'gemini', 'generate-recommendations', tokensUsed, estimatedCost);
 
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) {
