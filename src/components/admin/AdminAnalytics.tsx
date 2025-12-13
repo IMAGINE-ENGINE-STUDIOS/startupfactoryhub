@@ -47,17 +47,34 @@ const AdminAnalytics = () => {
   const [hasData, setHasData] = useState(false);
 
   useEffect(() => {
-    fetchAnalyticsData();
+    let isMounted = true;
     
-    // Set up real-time subscription for updates
+    const loadData = async () => {
+      if (!isMounted) return;
+      await fetchAnalyticsData();
+    };
+    
+    loadData();
+    
+    // Set up real-time subscription for updates - debounced
+    let debounceTimer: NodeJS.Timeout;
+    const debouncedFetch = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        if (isMounted) fetchAnalyticsData();
+      }, 1000);
+    };
+    
     const channel = supabase
       .channel('analytics-updates')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, fetchAnalyticsData)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'feed_posts' }, fetchAnalyticsData)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'connections' }, fetchAnalyticsData)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'profiles' }, debouncedFetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'feed_posts' }, debouncedFetch)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'connections' }, debouncedFetch)
       .subscribe();
 
     return () => {
+      isMounted = false;
+      clearTimeout(debounceTimer);
       supabase.removeChannel(channel);
     };
   }, []);

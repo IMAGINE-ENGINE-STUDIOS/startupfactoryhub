@@ -95,18 +95,30 @@ const ResourcesManagement = () => {
   });
 
   useEffect(() => {
-    fetchResources();
+    let isMounted = true;
+    let debounceTimer: NodeJS.Timeout;
+    
+    const loadData = async () => {
+      if (!isMounted) return;
+      await fetchResources();
+    };
+    
+    loadData();
+
+    // Debounced fetch for realtime updates
+    const debouncedFetch = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        if (isMounted) fetchResources();
+      }, 1000);
+    };
 
     // Real-time subscription for resource submissions
     const channel = supabase
       .channel('admin-resources-realtime')
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'resources'
-        },
+        { event: '*', schema: 'public', table: 'resources' },
         (payload) => {
           if (payload.eventType === 'INSERT' && !(payload.new as any).is_verified) {
             toast({
@@ -114,12 +126,14 @@ const ResourcesManagement = () => {
               description: `"${(payload.new as any).title}" is pending approval`
             });
           }
-          fetchResources();
+          debouncedFetch();
         }
       )
       .subscribe();
 
     return () => {
+      isMounted = false;
+      clearTimeout(debounceTimer);
       supabase.removeChannel(channel);
     };
   }, []);
