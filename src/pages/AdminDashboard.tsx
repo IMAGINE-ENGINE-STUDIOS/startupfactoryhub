@@ -31,6 +31,7 @@ import FeedModeration from '@/components/admin/FeedModeration';
 import AdminAnalytics from '@/components/admin/AdminAnalytics';
 import ApiUsageTracker from '@/components/admin/ApiUsageTracker';
 import AdminSettings from '@/components/admin/AdminSettings';
+import { InvestorsManagement } from '@/components/admin/InvestorsManagement';
 
 const AdminDashboard = () => {
   const { role, loading: roleLoading } = useUserRole();
@@ -88,7 +89,7 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="tech-card border-0 p-1 grid grid-cols-6 lg:grid-cols-11 h-auto gap-1 overflow-x-auto">
+          <TabsList className="tech-card border-0 p-1 grid grid-cols-6 lg:grid-cols-12 h-auto gap-1 overflow-x-auto">
             <TabsTrigger value="overview" className="flex items-center gap-1 py-2 px-2 text-xs">
               <BarChart3 className="h-4 w-4" />
               <span className="hidden lg:inline">Overview</span>
@@ -96,6 +97,10 @@ const AdminDashboard = () => {
             <TabsTrigger value="users" className="flex items-center gap-1 py-2 px-2 text-xs">
               <Users className="h-4 w-4" />
               <span className="hidden lg:inline">Users</span>
+            </TabsTrigger>
+            <TabsTrigger value="investors" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <DollarSign className="h-4 w-4" />
+              <span className="hidden lg:inline">Investors</span>
             </TabsTrigger>
             <TabsTrigger value="startups" className="flex items-center gap-1 py-2 px-2 text-xs">
               <Building2 className="h-4 w-4" />
@@ -137,6 +142,7 @@ const AdminDashboard = () => {
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
           <TabsContent value="users"><UsersManagement /></TabsContent>
+          <TabsContent value="investors"><InvestorsManagement /></TabsContent>
           <TabsContent value="startups"><StartupsManagement /></TabsContent>
           <TabsContent value="accelerators"><AcceleratorsManagement /></TabsContent>
           <TabsContent value="resources"><ResourcesManagement /></TabsContent>
