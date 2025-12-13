@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Building, Users, TrendingUp, DollarSign, Edit, Plus, Globe, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import PitchDeckUpload from './PitchDeckUpload';
 import AvatarUpload from './AvatarUpload';
 import { useUserRole } from '@/hooks/useUserRole';
+import { INDUSTRIES, getIndustryLabel, normalizeIndustry } from '@/lib/constants';
 
 export default function CompanyProfileManager() {
   const [company, setCompany] = useState<any>(null);
@@ -74,7 +76,7 @@ export default function CompanyProfileManager() {
       setFormData({
         name: data.name || '',
         description: data.description || '',
-        industry: data.industry || '',
+        industry: normalizeIndustry(data.industry),
         stage: data.stage || '',
         website: data.website || '',
         location: data.location || '',
@@ -193,12 +195,21 @@ export default function CompanyProfileManager() {
             </div>
             <div>
               <label className="text-sm font-medium text-foreground">Industry *</label>
-              <Input
-                value={formData.industry}
-                onChange={(e) => setFormData({ ...formData, industry: e.target.value })}
-                placeholder="e.g., Fintech, Healthtech, AI"
-                className="mt-1"
-              />
+              <Select 
+                value={formData.industry} 
+                onValueChange={(value) => setFormData({ ...formData, industry: value })}
+              >
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Select industry" />
+                </SelectTrigger>
+                <SelectContent>
+                  {INDUSTRIES.map((ind) => (
+                    <SelectItem key={ind.value} value={ind.value}>
+                      {ind.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
