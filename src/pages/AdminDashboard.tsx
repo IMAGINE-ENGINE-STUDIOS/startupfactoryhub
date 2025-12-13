@@ -100,24 +100,13 @@ const AdminDashboard = () => {
     }
   }, [urlTab, activeTab, setSearchParams]);
 
-  // Redirect if not admin
-  useEffect(() => {
-    if (!roleLoading && role && role !== 'admin') {
-      navigate('/dashboard');
-      toast({
-        title: "Access Denied",
-        description: "You don't have permission to access the admin dashboard.",
-        variant: "destructive"
-      });
-    }
-  }, [role, roleLoading, navigate, toast]);
+  // Allow access without requiring admin role (public view mode)
+  const isAdmin = role === 'admin';
 
-  // Fetch data
+  // Fetch data - allow viewing for everyone
   useEffect(() => {
-    if (user && role === 'admin') {
-      fetchAllData();
-    }
-  }, [user, role]);
+    fetchAllData();
+  }, []);
 
   const fetchAllData = async () => {
     setLoading(true);
@@ -277,7 +266,7 @@ const AdminDashboard = () => {
     return matchesSearch && matchesRole;
   });
 
-  if (loading || roleLoading) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
