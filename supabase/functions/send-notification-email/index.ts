@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -13,6 +14,30 @@ interface NotificationEmailRequest {
   title: string;
   message: string;
   type: string;
+}
+
+// Helper function to log API usage
+async function logApiUsage(serviceName: string, endpoint: string, success: boolean) {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (supabaseUrl && supabaseServiceKey) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      await supabase.from('api_usage_logs').insert({
+        service_name: serviceName,
+        endpoint: endpoint,
+        request_count: 1,
+        estimated_cost: 0.001, // Resend ~$0.001 per email
+        metadata: { 
+          timestamp: new Date().toISOString(),
+          success: success
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error logging API usage:', error);
+  }
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -330,12 +355,19 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log("Email sent successfully:", emailResponse);
 
+    // Log successful email send
+    await logApiUsage('resend', '/emails', true);
+
     return new Response(JSON.stringify({ success: true, emailResponse }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   } catch (error: any) {
     console.error("Error sending notification email:", error);
+    
+    // Log failed email attempt
+    await logApiUsage('resend', '/emails', false);
+    
     return new Response(
       JSON.stringify({ error: error.message }),
       {

@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -18,6 +19,27 @@ function sanitizeRoomNamePrefix(name: string): string {
     .replace(/-+/g, '-')           // Replace multiple dashes with single dash
     .replace(/^-|-$/g, '')         // Remove leading/trailing dashes
     .substring(0, 30);             // Limit to 30 chars
+}
+
+// Helper function to log API usage
+async function logApiUsage(serviceName: string, endpoint: string, estimatedCost: number) {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (supabaseUrl && supabaseServiceKey) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      await supabase.from('api_usage_logs').insert({
+        service_name: serviceName,
+        endpoint: endpoint,
+        request_count: 1,
+        estimated_cost: estimatedCost,
+        metadata: { timestamp: new Date().toISOString() }
+      });
+    }
+  } catch (error) {
+    console.error('Error logging API usage:', error);
+  }
 }
 
 serve(async (req) => {
@@ -58,6 +80,9 @@ serve(async (req) => {
     }
 
     const data = await response.json();
+
+    // Log API usage - Whereby costs ~$0.10 per room created
+    await logApiUsage('whereby', '/v1/meetings', 0.10);
 
     return new Response(
       JSON.stringify({
