@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, AreaChart, Area } from "recharts";
-import { Search, TrendingUp, Users, DollarSign, Briefcase, Building2, Target } from "lucide-react";
+import { Search, TrendingUp, Users, DollarSign, Briefcase, Building2, Target, ExternalLink } from "lucide-react";
 import { INDUSTRIES, getIndustryLabel } from "@/lib/constants";
 
 interface InvestorProfile {
@@ -31,24 +31,39 @@ interface InvestorProfile {
 interface Investment {
   id: string;
   investor_id: string;
-  company_id: string;
+  company_id: string | null;
   amount: number | null;
   investment_date: string | null;
   round_name: string | null;
+  notes: string | null;
+  external_company_name: string | null;
+  external_company_industry: string | null;
   company?: {
+    id: string;
     name: string;
     industry: string | null;
     stage: string | null;
+    logo_url: string | null;
+    description: string | null;
   } | null;
 }
 
 const STAGE_COLORS: Record<string, string> = {
-  'pre_seed': 'hsl(var(--chart-1))',
-  'seed': 'hsl(var(--chart-2))',
-  'series_a': 'hsl(var(--chart-3))',
-  'series_b': 'hsl(var(--chart-4))',
-  'series_c': 'hsl(var(--chart-5))',
-  'growth': 'hsl(var(--primary))',
+  'pre_seed': 'hsl(280, 70%, 50%)',
+  'seed': 'hsl(200, 70%, 50%)',
+  'series_a': 'hsl(150, 70%, 45%)',
+  'series_b': 'hsl(45, 80%, 50%)',
+  'series_c': 'hsl(15, 80%, 55%)',
+  'growth': 'hsl(330, 70%, 50%)',
+};
+
+const STAGE_LABELS: Record<string, string> = {
+  'pre_seed': 'Pre-Seed',
+  'seed': 'Seed',
+  'series_a': 'Series A',
+  'series_b': 'Series B',
+  'series_c': 'Series C+',
+  'growth': 'Growth',
 };
 
 export function InvestorsManagement() {
@@ -60,20 +75,46 @@ export function InvestorsManagement() {
   const [industryFilter, setIndustryFilter] = useState<string>("all");
   const [selectedInvestor, setSelectedInvestor] = useState<InvestorProfile | null>(null);
   const [investorInvestments, setInvestorInvestments] = useState<Investment[]>([]);
+  const isMounted = useRef(true);
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    isMounted.current = true;
     fetchData();
+
+    // Real-time subscriptions
+    const investorChannel = supabase
+      .channel('admin-investors-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'investor_profiles' }, () => {
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => {
+          if (isMounted.current) fetchData();
+        }, 500);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'investments' }, () => {
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => {
+          if (isMounted.current) fetchData();
+        }, 500);
+      })
+      .subscribe();
+
+    return () => {
+      isMounted.current = false;
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      supabase.removeChannel(investorChannel);
+    };
   }, []);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch investor profiles with user profile data
+      // Fetch investor profiles
       const { data: investorData } = await supabase
         .from('investor_profiles')
         .select('*');
 
-      // Fetch profile data separately to avoid join issues
+      // Fetch profile data separately
       const userIds = investorData?.map(i => i.user_id) || [];
       const { data: profilesData } = await supabase
         .from('profiles')
@@ -87,18 +128,20 @@ export function InvestorsManagement() {
         profile: profilesMap.get(inv.user_id) || null
       })) || [];
 
-      // Fetch all investments with company data
+      // Fetch all investments with company data including logo
       const { data: investmentData } = await supabase
         .from('investments')
-        .select('id, investor_id, company_id, amount, investment_date, round_name, company:companies(name, industry, stage)')
+        .select('id, investor_id, company_id, amount, investment_date, round_name, notes, external_company_name, external_company_industry, company:companies(id, name, industry, stage, logo_url, description)')
         .order('investment_date', { ascending: false });
 
-      setInvestors(investorsWithProfiles);
-      setInvestments((investmentData as any) || []);
+      if (isMounted.current) {
+        setInvestors(investorsWithProfiles);
+        setInvestments((investmentData as any) || []);
+      }
     } catch (error) {
       console.error('Error fetching investor data:', error);
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
 
@@ -120,30 +163,40 @@ export function InvestorsManagement() {
   const avgInvestment = investments.length > 0 ? totalInvested / investments.length : 0;
   const totalDeals = investments.length;
 
-  // Prepare chart data
-  const stageData = investments.reduce((acc, inv) => {
-    const stage = inv.round_name || 'unknown';
-    const existing = acc.find(d => d.name === stage);
-    if (existing) {
-      existing.value += 1;
-      existing.amount += inv.amount || 0;
-    } else {
-      acc.push({ name: stage, value: 1, amount: inv.amount || 0 });
-    }
-    return acc;
-  }, [] as { name: string; value: number; amount: number }[]);
+  // Count INVESTORS by their preferred stages (not investments)
+  const investorsByStageData = (() => {
+    const stageCounts: Record<string, number> = {};
+    investors.forEach(investor => {
+      investor.preferred_stages?.forEach(stage => {
+        stageCounts[stage] = (stageCounts[stage] || 0) + 1;
+      });
+    });
+    return Object.entries(stageCounts)
+      .map(([name, value]) => ({ 
+        name: STAGE_LABELS[name] || name.replace('_', ' '), 
+        value,
+        key: name 
+      }))
+      .sort((a, b) => b.value - a.value);
+  })();
 
-  const industryData = investments.reduce((acc, inv) => {
-    const industry = inv.company?.industry || 'other';
-    const existing = acc.find(d => d.name === industry);
-    if (existing) {
-      existing.value += 1;
-      existing.amount += inv.amount || 0;
-    } else {
-      acc.push({ name: industry, value: 1, amount: inv.amount || 0 });
-    }
-    return acc;
-  }, [] as { name: string; value: number; amount: number }[]);
+  // Count INVESTORS by their preferred industries (not investments)
+  const investorsByIndustryData = (() => {
+    const industryCounts: Record<string, number> = {};
+    investors.forEach(investor => {
+      investor.preferred_industries?.forEach(industry => {
+        industryCounts[industry] = (industryCounts[industry] || 0) + 1;
+      });
+    });
+    return Object.entries(industryCounts)
+      .map(([name, value]) => ({ 
+        name: getIndustryLabel(name), 
+        value,
+        key: name 
+      }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8);
+  })();
 
   // Investment activity over time (last 12 months)
   const activityData = (() => {
@@ -187,14 +240,30 @@ export function InvestorsManagement() {
   const handleViewInvestor = async (investor: InvestorProfile) => {
     setSelectedInvestor(investor);
     
-    // Fetch this investor's investments
+    // Fetch this investor's investments with full company data
     const { data } = await supabase
       .from('investments')
-      .select('id, investor_id, company_id, amount, investment_date, round_name, company:companies(name, industry, stage)')
+      .select('id, investor_id, company_id, amount, investment_date, round_name, notes, external_company_name, external_company_industry, company:companies(id, name, industry, stage, logo_url, description)')
       .eq('investor_id', investor.user_id)
       .order('investment_date', { ascending: false });
     
     setInvestorInvestments((data as any) || []);
+  };
+
+  const getCompanyName = (investment: Investment) => {
+    if (investment.company?.name) return investment.company.name;
+    if (investment.external_company_name) return investment.external_company_name;
+    return 'Unknown Company';
+  };
+
+  const getCompanyIndustry = (investment: Investment) => {
+    if (investment.company?.industry) return getIndustryLabel(investment.company.industry);
+    if (investment.external_company_industry) return getIndustryLabel(investment.external_company_industry);
+    return null;
+  };
+
+  const isExternalCompany = (investment: Investment) => {
+    return !investment.company_id && investment.external_company_name;
   };
 
   if (loading) {
@@ -268,28 +337,30 @@ export function InvestorsManagement() {
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Investments by Stage */}
+        {/* Investors by Stage */}
         <Card className="tech-card border-0">
           <CardHeader>
-            <CardTitle className="text-base">Investments by Stage</CardTitle>
+            <CardTitle className="text-base">Investors by Stage</CardTitle>
+            <p className="text-xs text-muted-foreground">Count of investors preferring each stage</p>
           </CardHeader>
           <CardContent>
-            {stageData.length > 0 ? (
+            {investorsByStageData.length > 0 ? (
               <ChartContainer config={{}} className="h-[200px]">
                 <PieChart>
                   <Pie
-                    data={stageData}
+                    data={investorsByStageData}
                     dataKey="value"
                     nameKey="name"
                     cx="50%"
                     cy="50%"
                     outerRadius={70}
                     label={({ name, value }) => `${name}: ${value}`}
+                    labelLine={false}
                   >
-                    {stageData.map((entry, index) => (
+                    {investorsByStageData.map((entry) => (
                       <Cell 
-                        key={entry.name} 
-                        fill={STAGE_COLORS[entry.name] || `hsl(${index * 60}, 70%, 50%)`} 
+                        key={entry.key} 
+                        fill={STAGE_COLORS[entry.key] || 'hsl(var(--muted))'} 
                       />
                     ))}
                   </Pie>
@@ -298,30 +369,31 @@ export function InvestorsManagement() {
               </ChartContainer>
             ) : (
               <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-                No investment data
+                No investor stage preferences
               </div>
             )}
           </CardContent>
         </Card>
 
-        {/* Investments by Industry */}
+        {/* Investors by Industry */}
         <Card className="tech-card border-0">
           <CardHeader>
-            <CardTitle className="text-base">Investments by Industry</CardTitle>
+            <CardTitle className="text-base">Investors by Industry</CardTitle>
+            <p className="text-xs text-muted-foreground">Count of investors preferring each industry</p>
           </CardHeader>
           <CardContent>
-            {industryData.length > 0 ? (
+            {investorsByIndustryData.length > 0 ? (
               <ChartContainer config={{}} className="h-[200px]">
-                <BarChart data={industryData.slice(0, 6)}>
-                  <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} />
-                  <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <BarChart data={investorsByIndustryData} layout="vertical">
+                  <XAxis type="number" tick={{ fontSize: 10 }} />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 9 }} width={80} />
+                  <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
                   <ChartTooltip content={<ChartTooltipContent />} />
                 </BarChart>
               </ChartContainer>
             ) : (
               <div className="h-[200px] flex items-center justify-center text-muted-foreground">
-                No investment data
+                No investor industry preferences
               </div>
             )}
           </CardContent>
@@ -331,6 +403,7 @@ export function InvestorsManagement() {
         <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="text-base">Investment Activity (12 Months)</CardTitle>
+            <p className="text-xs text-muted-foreground">Number of deals per month</p>
           </CardHeader>
           <CardContent>
             <ChartContainer config={{}} className="h-[200px]">
@@ -403,7 +476,7 @@ export function InvestorsManagement() {
                 filteredInvestors.map((investor) => (
                   <div
                     key={investor.id}
-                    className="flex items-center justify-between p-4 rounded-lg bg-card/50 hover:bg-card/80 cursor-pointer transition-colors"
+                    className="flex items-center justify-between p-4 rounded-lg bg-card/50 hover:bg-card/80 cursor-pointer"
                     onClick={() => handleViewInvestor(investor)}
                   >
                     <div className="flex items-center gap-4">
@@ -430,21 +503,25 @@ export function InvestorsManagement() {
                       <div className="text-right hidden md:block">
                         <p className="text-muted-foreground">Preferred Stages</p>
                         <div className="flex gap-1 flex-wrap justify-end">
-                          {investor.preferred_stages?.slice(0, 2).map(stage => (
-                            <Badge key={stage} variant="secondary" className="text-xs">
-                              {stage.replace('_', ' ')}
-                            </Badge>
-                          )) || <span className="text-muted-foreground">—</span>}
+                          {investor.preferred_stages?.length ? (
+                            investor.preferred_stages.slice(0, 2).map(stage => (
+                              <Badge key={stage} variant="secondary" className="text-xs">
+                                {STAGE_LABELS[stage] || stage.replace('_', ' ')}
+                              </Badge>
+                            ))
+                          ) : <span className="text-muted-foreground">—</span>}
                         </div>
                       </div>
                       <div className="text-right hidden lg:block">
                         <p className="text-muted-foreground">Industries</p>
                         <div className="flex gap-1 flex-wrap justify-end">
-                          {investor.preferred_industries?.slice(0, 2).map(ind => (
-                            <Badge key={ind} variant="outline" className="text-xs">
-                              {getIndustryLabel(ind)}
-                            </Badge>
-                          )) || <span className="text-muted-foreground">—</span>}
+                          {investor.preferred_industries?.length ? (
+                            investor.preferred_industries.slice(0, 2).map(ind => (
+                              <Badge key={ind} variant="outline" className="text-xs">
+                                {getIndustryLabel(ind)}
+                              </Badge>
+                            ))
+                          ) : <span className="text-muted-foreground">—</span>}
                         </div>
                       </div>
                       <div className="text-right hidden xl:block">
@@ -479,26 +556,40 @@ export function InvestorsManagement() {
                     className="flex items-center justify-between p-3 rounded-lg bg-card/50"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-full bg-primary/10">
-                        <Building2 className="h-4 w-4 text-primary" />
-                      </div>
+                      {investment.company?.logo_url ? (
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={investment.company.logo_url} />
+                          <AvatarFallback>
+                            <Building2 className="h-4 w-4" />
+                          </AvatarFallback>
+                        </Avatar>
+                      ) : (
+                        <div className="p-2 rounded-full bg-primary/10">
+                          <Building2 className="h-4 w-4 text-primary" />
+                        </div>
+                      )}
                       <div>
-                        <p className="font-medium">{investment.company?.name || 'Unknown Company'}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">{getCompanyName(investment)}</p>
+                          {isExternalCompany(investment) && (
+                            <Badge variant="outline" className="text-xs">External</Badge>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground">
-                          {investment.company?.industry ? getIndustryLabel(investment.company.industry) : 'N/A'}
+                          {getCompanyIndustry(investment) || 'Industry not set'}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4 text-sm">
                       <div className="text-right">
                         <p className="font-medium text-emerald-500">{formatCurrency(investment.amount)}</p>
-                        <p className="text-xs text-muted-foreground">{investment.round_name || 'Unknown round'}</p>
+                        <p className="text-xs text-muted-foreground">{investment.round_name || 'Round not set'}</p>
                       </div>
                       <div className="text-right hidden sm:block">
                         <p className="text-muted-foreground">
                           {investment.investment_date 
                             ? new Date(investment.investment_date).toLocaleDateString()
-                            : 'Date unknown'
+                            : 'Date not set'
                           }
                         </p>
                       </div>
@@ -513,17 +604,17 @@ export function InvestorsManagement() {
 
       {/* Investor Detail Dialog */}
       <Dialog open={!!selectedInvestor} onOpenChange={() => setSelectedInvestor(null)}>
-        <DialogContent className="tech-card border-0 !transition-none max-w-2xl">
+        <DialogContent className="tech-card border-0 !transition-none max-w-3xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3">
-              <Avatar className="h-12 w-12">
+              <Avatar className="h-14 w-14">
                 <AvatarImage src={selectedInvestor?.profile?.avatar_url || undefined} />
-                <AvatarFallback>
+                <AvatarFallback className="text-lg">
                   {selectedInvestor?.profile?.full_name?.charAt(0) || 'I'}
                 </AvatarFallback>
               </Avatar>
               <div>
-                <p>{selectedInvestor?.profile?.full_name || 'Investor Profile'}</p>
+                <p className="text-xl">{selectedInvestor?.profile?.full_name || 'Investor Profile'}</p>
                 <p className="text-sm font-normal text-muted-foreground">
                   {selectedInvestor?.profile?.location || 'Location not set'}
                 </p>
@@ -531,75 +622,138 @@ export function InvestorsManagement() {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-6 mt-4">
-            {/* Investment Preferences */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 rounded-lg bg-card/50">
-                <p className="text-sm text-muted-foreground mb-1">Investment Range</p>
-                <p className="font-medium">
-                  {formatRange(selectedInvestor?.investment_range_min || null, selectedInvestor?.investment_range_max || null)}
-                </p>
+          <ScrollArea className="max-h-[calc(90vh-120px)]">
+            <div className="space-y-6 mt-4 pr-4">
+              {/* Investment Stats */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="p-3 rounded-lg bg-card/50 text-center">
+                  <p className="text-2xl font-bold text-primary">{investorInvestments.length}</p>
+                  <p className="text-xs text-muted-foreground">Investments</p>
+                </div>
+                <div className="p-3 rounded-lg bg-card/50 text-center">
+                  <p className="text-2xl font-bold text-emerald-500">
+                    {formatCurrency(investorInvestments.reduce((sum, inv) => sum + (inv.amount || 0), 0))}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Total Invested</p>
+                </div>
+                <div className="p-3 rounded-lg bg-card/50 text-center">
+                  <p className="text-2xl font-bold">{selectedInvestor?.portfolio_size || 0}</p>
+                  <p className="text-xs text-muted-foreground">Portfolio Size</p>
+                </div>
+                <div className="p-3 rounded-lg bg-card/50 text-center">
+                  <p className="text-lg font-bold">
+                    {formatRange(selectedInvestor?.investment_range_min || null, selectedInvestor?.investment_range_max || null)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Investment Range</p>
+                </div>
               </div>
-              <div className="p-4 rounded-lg bg-card/50">
-                <p className="text-sm text-muted-foreground mb-1">Portfolio Size</p>
-                <p className="font-medium">{selectedInvestor?.portfolio_size || 0} companies</p>
-              </div>
-            </div>
 
-            {/* Preferred Stages */}
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Preferred Stages</p>
-              <div className="flex flex-wrap gap-2">
-                {selectedInvestor?.preferred_stages?.map(stage => (
-                  <Badge key={stage} variant="secondary">
-                    <Target className="h-3 w-3 mr-1" />
-                    {stage.replace('_', ' ')}
-                  </Badge>
-                )) || <span className="text-muted-foreground">Not specified</span>}
+              {/* Preferred Stages */}
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Preferred Stages</p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedInvestor?.preferred_stages?.length ? (
+                    selectedInvestor.preferred_stages.map(stage => (
+                      <Badge key={stage} variant="secondary">
+                        <Target className="h-3 w-3 mr-1" />
+                        {STAGE_LABELS[stage] || stage.replace('_', ' ')}
+                      </Badge>
+                    ))
+                  ) : <span className="text-muted-foreground">No stages specified</span>}
+                </div>
               </div>
-            </div>
 
-            {/* Preferred Industries */}
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Preferred Industries</p>
-              <div className="flex flex-wrap gap-2">
-                {selectedInvestor?.preferred_industries?.map(ind => (
-                  <Badge key={ind} variant="outline">
-                    {getIndustryLabel(ind)}
-                  </Badge>
-                )) || <span className="text-muted-foreground">Not specified</span>}
+              {/* Preferred Industries */}
+              <div>
+                <p className="text-sm text-muted-foreground mb-2">Preferred Industries</p>
+                <div className="flex flex-wrap gap-2">
+                  {selectedInvestor?.preferred_industries?.length ? (
+                    selectedInvestor.preferred_industries.map(ind => (
+                      <Badge key={ind} variant="outline">
+                        {getIndustryLabel(ind)}
+                      </Badge>
+                    ))
+                  ) : <span className="text-muted-foreground">No industries specified</span>}
+                </div>
               </div>
-            </div>
 
-            {/* Investments History */}
-            <div>
-              <p className="text-sm text-muted-foreground mb-2">Investment History ({investorInvestments.length})</p>
-              <ScrollArea className="h-[200px]">
-                <div className="space-y-2">
-                  {investorInvestments.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-4">No recorded investments</p>
-                  ) : (
-                    investorInvestments.map(inv => (
-                      <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg bg-card/30">
-                        <div>
-                          <p className="font-medium">{inv.company?.name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {inv.round_name} • {inv.company?.industry ? getIndustryLabel(inv.company.industry) : 'N/A'}
-                          </p>
+              {/* Portfolio Companies */}
+              <div>
+                <p className="text-sm text-muted-foreground mb-3">Portfolio Companies ({investorInvestments.length})</p>
+                {investorInvestments.length === 0 ? (
+                  <p className="text-muted-foreground text-center py-6">No recorded investments</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {investorInvestments.map(inv => (
+                      <div key={inv.id} className="p-4 rounded-lg bg-card/50 space-y-3">
+                        <div className="flex items-start gap-3">
+                          {inv.company?.logo_url ? (
+                            <Avatar className="h-12 w-12 rounded-lg">
+                              <AvatarImage src={inv.company.logo_url} className="object-cover" />
+                              <AvatarFallback className="rounded-lg">
+                                <Building2 className="h-5 w-5" />
+                              </AvatarFallback>
+                            </Avatar>
+                          ) : (
+                            <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                              <Building2 className="h-5 w-5 text-primary" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium truncate">{getCompanyName(inv)}</p>
+                              {isExternalCompany(inv) && (
+                                <Badge variant="outline" className="text-xs shrink-0">
+                                  <ExternalLink className="h-2.5 w-2.5 mr-1" />
+                                  External
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {getCompanyIndustry(inv) && (
+                                <Badge variant="secondary" className="text-xs">
+                                  {getCompanyIndustry(inv)}
+                                </Badge>
+                              )}
+                              {inv.company?.stage && (
+                                <Badge variant="outline" className="text-xs">
+                                  {STAGE_LABELS[inv.company.stage] || inv.company.stage}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="font-medium text-emerald-500">{formatCurrency(inv.amount)}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {inv.investment_date ? new Date(inv.investment_date).toLocaleDateString() : 'Unknown'}
+                        
+                        {inv.company?.description && (
+                          <p className="text-xs text-muted-foreground line-clamp-2">
+                            {inv.company.description}
                           </p>
+                        )}
+                        
+                        <div className="flex items-center justify-between pt-2 border-t border-border/50">
+                          <div>
+                            <p className="text-lg font-bold text-emerald-500">{formatCurrency(inv.amount)}</p>
+                            <p className="text-xs text-muted-foreground">{inv.round_name || 'Round not set'}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm">
+                              {inv.investment_date 
+                                ? new Date(inv.investment_date).toLocaleDateString('en-US', { 
+                                    month: 'short', 
+                                    year: 'numeric' 
+                                  })
+                                : 'Date not set'
+                              }
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    ))
-                  )}
-                </div>
-              </ScrollArea>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          </ScrollArea>
         </DialogContent>
       </Dialog>
     </div>
