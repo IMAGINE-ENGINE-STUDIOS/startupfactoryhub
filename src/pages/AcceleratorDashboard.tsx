@@ -69,8 +69,38 @@ const AcceleratorDashboard = () => {
     assignMentor,
     assignAdvisor,
     addMilestone,
-    updateMilestone
+    updateMilestone,
+    refetch
   } = useAcceleratorProfile();
+
+  // Real-time sync for portfolio and applications
+  useRealtime({
+    table: 'cohort_startups',
+    onInsert: () => refetch(),
+    onUpdate: () => refetch(),
+    onDelete: () => refetch()
+  });
+
+  useRealtime({
+    table: 'cohort_applications',
+    onInsert: () => refetch(),
+    onUpdate: () => refetch(),
+    onDelete: () => refetch()
+  });
+
+  useRealtime({
+    table: 'startup_mentor_assignments',
+    onInsert: () => refetch(),
+    onUpdate: () => refetch(),
+    onDelete: () => refetch()
+  });
+
+  useRealtime({
+    table: 'startup_advisor_assignments',
+    onInsert: () => refetch(),
+    onUpdate: () => refetch(),
+    onDelete: () => refetch()
+  });
   const [selectedCohort, setSelectedCohort] = useState<any>(null);
   const [showCohortDetails, setShowCohortDetails] = useState(false);
   const [selectedStartup, setSelectedStartup] = useState<any>(null);
@@ -166,8 +196,8 @@ const AcceleratorDashboard = () => {
       
       toast({ title: 'Meeting accepted', description: 'The meeting has been scheduled.' });
       
-      // Refresh meetings
-      window.location.reload();
+      // Real-time sync will handle refresh via useRealtime hook
+      fetchMeetings();
     } catch (error) {
       console.error('Error accepting meeting:', error);
       toast({ title: 'Error', description: 'Failed to accept meeting', variant: 'destructive' });
@@ -185,8 +215,8 @@ const AcceleratorDashboard = () => {
       
       toast({ title: 'Meeting declined', description: 'The meeting has been declined.' });
       
-      // Refresh meetings
-      window.location.reload();
+      // Real-time sync will handle refresh via useRealtime hook
+      fetchMeetings();
     } catch (error) {
       console.error('Error rejecting meeting:', error);
       toast({ title: 'Error', description: 'Failed to decline meeting', variant: 'destructive' });
@@ -217,7 +247,7 @@ const AcceleratorDashboard = () => {
       if (error) throw error;
       
       toast({ title: 'Startup removed', description: 'The startup has been removed from your portfolio.' });
-      window.location.reload();
+      refetch();
     } catch (error) {
       console.error('Error deleting portfolio startup:', error);
       toast({ title: 'Error', description: 'Failed to remove startup from portfolio', variant: 'destructive' });
@@ -235,7 +265,7 @@ const AcceleratorDashboard = () => {
       if (error) throw error;
       
       toast({ title: 'Mentor removed', description: 'The mentor has been removed from the startup.' });
-      window.location.reload();
+      refetch();
     } catch (error) {
       console.error('Error removing mentor:', error);
       toast({ title: 'Error', description: 'Failed to remove mentor', variant: 'destructive' });
@@ -253,7 +283,7 @@ const AcceleratorDashboard = () => {
       if (error) throw error;
       
       toast({ title: 'Advisor removed', description: 'The advisor has been removed from the startup.' });
-      window.location.reload();
+      refetch();
     } catch (error) {
       console.error('Error removing advisor:', error);
       toast({ title: 'Error', description: 'Failed to remove advisor', variant: 'destructive' });
