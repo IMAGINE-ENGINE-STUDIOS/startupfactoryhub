@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,6 +16,30 @@ interface NewsArticle {
   language: string;
   category: string;
   image?: string;
+}
+
+// Helper function to log API usage
+async function logApiUsage(serviceName: string, endpoint: string, requestsRemaining: number) {
+  try {
+    const supabaseUrl = Deno.env.get("SUPABASE_URL");
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+    
+    if (supabaseUrl && supabaseServiceKey) {
+      const supabase = createClient(supabaseUrl, supabaseServiceKey);
+      await supabase.from('api_usage_logs').insert({
+        service_name: serviceName,
+        endpoint: endpoint,
+        request_count: 1,
+        estimated_cost: 0.01, // Webz.io ~$0.01 per request
+        metadata: { 
+          timestamp: new Date().toISOString(),
+          requests_remaining: requestsRemaining 
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error logging API usage:', error);
+  }
 }
 
 serve(async (req) => {
@@ -62,6 +87,9 @@ serve(async (req) => {
 
     const data = await response.json();
     console.log(`Received ${data.posts?.length || 0} articles`);
+
+    // Log API usage with requests remaining from Webz.io response
+    await logApiUsage('webzio', '/filterWebContent', data.requestsLeft || 0);
 
     // Transform and return articles
     const articles: NewsArticle[] = data.posts?.map((post: any) => ({
