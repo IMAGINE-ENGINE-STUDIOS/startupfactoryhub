@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-type AppRole = 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator';
+type AppRole = 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator' | 'admin';
 
 interface ProfileWithRole {
   user_id: string;
