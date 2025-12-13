@@ -6,6 +6,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
+import { toast } from 'sonner';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Users, 
   Building2, 
@@ -19,10 +21,13 @@ import {
   Globe,
   Rocket,
   GraduationCap,
-  TrendingDown,
-  RefreshCw
+  RefreshCw,
+  MapPin,
+  Factory,
+  Package,
+  AlertCircle
 } from 'lucide-react';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
 
 interface PlatformStats {
   totalUsers: number;
@@ -31,9 +36,15 @@ interface PlatformStats {
   totalEvents: number;
   totalJobs: number;
   activeUsers: number;
+  totalConnections: number;
+  pendingConnections: number;
+  pendingResources: number;
   usersByRole: { role: string; count: number }[];
+  locationData: { location: string; count: number }[];
+  industryData: { industry: string; count: number }[];
   recentSignups: any[];
   recentActivity: any[];
+  recentConnections: any[];
 }
 
 const ROLE_COLORS: Record<string, string> = {
@@ -46,7 +57,14 @@ const ROLE_COLORS: Record<string, string> = {
   admin: '#EF4444'
 };
 
+const INDUSTRY_COLORS = [
+  '#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', 
+  '#06B6D4', '#EC4899', '#84CC16', '#F97316', '#6366F1'
+];
+
 const AdminOverview = () => {
+  const navigate = useNavigate();
+  const [, setSearchParams] = useSearchParams();
   const [stats, setStats] = useState<PlatformStats>({
     totalUsers: 0,
     totalCompanies: 0,
@@ -54,15 +72,44 @@ const AdminOverview = () => {
     totalEvents: 0,
     totalJobs: 0,
     activeUsers: 0,
+    totalConnections: 0,
+    pendingConnections: 0,
+    pendingResources: 0,
     usersByRole: [],
+    locationData: [],
+    industryData: [],
     recentSignups: [],
-    recentActivity: []
+    recentActivity: [],
+    recentConnections: []
   });
   const [loading, setLoading] = useState(true);
   const [growthData, setGrowthData] = useState<any[]>([]);
 
   useEffect(() => {
     fetchStats();
+
+    // Subscribe to new resource submissions
+    const channel = supabase
+      .channel('admin-resources-watch')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'resources'
+        },
+        (payload) => {
+          if (payload.new && !(payload.new as any).is_verified) {
+            toast.info('New resource submission pending approval!');
+            fetchStats();
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchStats = async () => {
@@ -76,9 +123,14 @@ const AdminOverview = () => {
         { count: eventsCount },
         { count: jobsCount },
         { count: activeUsersCount },
+        { count: totalConnectionsCount },
+        { count: pendingConnectionsCount },
+        { count: pendingResourcesCount },
         { data: recentProfiles },
         { data: recentPosts },
-        { data: userRoles }
+        { data: userRoles },
+        { data: companiesData },
+        { data: recentConnectionsData }
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('companies').select('*', { count: 'exact', head: true }),
@@ -86,9 +138,14 @@ const AdminOverview = () => {
         supabase.from('events').select('*', { count: 'exact', head: true }),
         supabase.from('jobs').select('*', { count: 'exact', head: true }),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('is_online', true),
+        supabase.from('connections').select('*', { count: 'exact', head: true }).eq('status', 'accepted'),
+        supabase.from('connections').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('resources').select('*', { count: 'exact', head: true }).eq('is_verified', false),
         supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(10),
         supabase.from('feed_posts').select('*, profiles:user_id(full_name, avatar_url)').order('created_at', { ascending: false }).limit(10),
-        supabase.from('user_roles').select('role')
+        supabase.from('user_roles').select('role'),
+        supabase.from('companies').select('location, industry'),
+        supabase.from('connections').select('*, requester:requester_id(full_name, avatar_url), addressee:addressee_id(full_name, avatar_url)').eq('status', 'accepted').order('created_at', { ascending: false }).limit(5)
       ]);
 
       // Count roles
@@ -96,10 +153,31 @@ const AdminOverview = () => {
       userRoles?.forEach((r: any) => {
         roleCounts[r.role] = (roleCounts[r.role] || 0) + 1;
       });
-
       const usersByRole = Object.entries(roleCounts).map(([role, count]) => ({ role, count }));
 
-      // Generate mock growth data for chart
+      // Process location data
+      const locationCounts: Record<string, number> = {};
+      companiesData?.forEach((c: any) => {
+        const loc = c.location?.trim() || 'Unknown';
+        locationCounts[loc] = (locationCounts[loc] || 0) + 1;
+      });
+      const locationData = Object.entries(locationCounts)
+        .map(([location, count]) => ({ location, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8);
+
+      // Process industry data
+      const industryCounts: Record<string, number> = {};
+      companiesData?.forEach((c: any) => {
+        const ind = c.industry?.trim() || 'Other';
+        industryCounts[ind] = (industryCounts[ind] || 0) + 1;
+      });
+      const industryData = Object.entries(industryCounts)
+        .map(([industry, count]) => ({ industry, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 8);
+
+      // Generate mock growth data for chart (could be replaced with real date-based queries)
       const growth = [];
       for (let i = 6; i >= 0; i--) {
         const date = new Date();
@@ -119,9 +197,15 @@ const AdminOverview = () => {
         totalEvents: eventsCount || 0,
         totalJobs: jobsCount || 0,
         activeUsers: activeUsersCount || 0,
+        totalConnections: totalConnectionsCount || 0,
+        pendingConnections: pendingConnectionsCount || 0,
+        pendingResources: pendingResourcesCount || 0,
         usersByRole,
+        locationData,
+        industryData,
         recentSignups: recentProfiles || [],
-        recentActivity: recentPosts || []
+        recentActivity: recentPosts || [],
+        recentConnections: recentConnectionsData || []
       });
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -144,6 +228,10 @@ const AdminOverview = () => {
     return <Icon className="h-4 w-4" />;
   };
 
+  const navigateToResources = () => {
+    setSearchParams({ tab: 'resources' });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -155,15 +243,11 @@ const AdminOverview = () => {
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
         <Card className="tech-card border-0">
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <Users className="h-5 w-5 text-blue-400" />
-              <Badge variant="outline" className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
-                <TrendingUp className="h-3 w-3 mr-1" />
-                +12%
-              </Badge>
             </div>
             <div className="mt-2">
               <p className="text-2xl font-bold">{stats.totalUsers}</p>
@@ -192,6 +276,18 @@ const AdminOverview = () => {
             <div className="mt-2">
               <p className="text-2xl font-bold">{stats.totalCompanies}</p>
               <p className="text-xs text-muted-foreground">Companies</p>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="tech-card border-0">
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <Link2 className="h-5 w-5 text-teal-400" />
+            </div>
+            <div className="mt-2">
+              <p className="text-2xl font-bold">{stats.totalConnections}</p>
+              <p className="text-xs text-muted-foreground">Connections</p>
             </div>
           </CardContent>
         </Card>
@@ -231,9 +327,28 @@ const AdminOverview = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Pending Resources - Clickable */}
+        <Card 
+          className={`tech-card border-0 cursor-pointer hover:bg-muted/50 transition-colors ${stats.pendingResources > 0 ? 'ring-2 ring-amber-500/50' : ''}`}
+          onClick={navigateToResources}
+        >
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <Package className="h-5 w-5 text-amber-400" />
+              {stats.pendingResources > 0 && (
+                <AlertCircle className="h-4 w-4 text-amber-400 animate-pulse" />
+              )}
+            </div>
+            <div className="mt-2">
+              <p className="text-2xl font-bold">{stats.pendingResources}</p>
+              <p className="text-xs text-muted-foreground">Pending Resources</p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Charts Row */}
+      {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Growth Chart */}
         <Card className="tech-card border-0">
@@ -304,6 +419,180 @@ const AdminOverview = () => {
                 ))}
               </div>
             </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Charts Row 2 - Location & Industry Analytics */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Startup Locations */}
+        <Card className="tech-card border-0">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <MapPin className="h-5 w-5 text-primary" />
+              Startup Locations
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {stats.locationData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={stats.locationData} layout="vertical" margin={{ left: 80 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                  <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                  <YAxis 
+                    type="category" 
+                    dataKey="location" 
+                    stroke="hsl(var(--muted-foreground))" 
+                    fontSize={11}
+                    width={75}
+                    tickFormatter={(value) => value.length > 12 ? value.slice(0, 12) + '...' : value}
+                  />
+                  <Tooltip 
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px'
+                    }} 
+                  />
+                  <Bar dataKey="count" fill="#10B981" radius={[0, 4, 4, 0]} name="Startups" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[220px] flex items-center justify-center text-muted-foreground">
+                No location data available
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Startup Industries */}
+        <Card className="tech-card border-0">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Factory className="h-5 w-5 text-primary" />
+              Startup Industries
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {stats.industryData.length > 0 ? (
+              <div className="flex items-center gap-4">
+                <ResponsiveContainer width="50%" height={220}>
+                  <PieChart>
+                    <Pie
+                      data={stats.industryData}
+                      dataKey="count"
+                      nameKey="industry"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={80}
+                      label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                    >
+                      {stats.industryData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={INDUSTRY_COLORS[index % INDUSTRY_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+                <ScrollArea className="h-[200px] flex-1">
+                  <div className="space-y-2 pr-4">
+                    {stats.industryData.map((ind, index) => (
+                      <div key={ind.industry} className="flex items-center gap-2">
+                        <div 
+                          className="w-3 h-3 rounded-full flex-shrink-0" 
+                          style={{ backgroundColor: INDUSTRY_COLORS[index % INDUSTRY_COLORS.length] }} 
+                        />
+                        <span className="text-sm truncate">{ind.industry}</span>
+                        <span className="text-sm text-muted-foreground ml-auto">({ind.count})</span>
+                      </div>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            ) : (
+              <div className="h-[220px] flex items-center justify-center text-muted-foreground">
+                No industry data available
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Connections Analytics Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Connections Stats */}
+        <Card className="tech-card border-0">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Link2 className="h-5 w-5 text-primary" />
+              Connection Stats
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <span className="text-sm">Accepted Connections</span>
+                <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                  {stats.totalConnections}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <span className="text-sm">Pending Requests</span>
+                <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30">
+                  {stats.pendingConnections}
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <span className="text-sm">Acceptance Rate</span>
+                <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                  {stats.totalConnections + stats.pendingConnections > 0 
+                    ? ((stats.totalConnections / (stats.totalConnections + stats.pendingConnections)) * 100).toFixed(1)
+                    : 0}%
+                </Badge>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Recent Connections */}
+        <Card className="tech-card border-0 lg:col-span-2">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <UserPlus className="h-5 w-5 text-primary" />
+              Recent Connections Made
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ScrollArea className="h-[180px]">
+              <div className="space-y-3">
+                {stats.recentConnections.length > 0 ? (
+                  stats.recentConnections.map((conn: any) => (
+                    <div key={conn.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={conn.requester?.avatar_url || ''} />
+                        <AvatarFallback>{conn.requester?.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium">{conn.requester?.full_name || 'Unknown'}</span>
+                        <Link2 className="h-3 w-3 text-muted-foreground" />
+                        <span className="text-sm font-medium">{conn.addressee?.full_name || 'Unknown'}</span>
+                      </div>
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={conn.addressee?.avatar_url || ''} />
+                        <AvatarFallback>{conn.addressee?.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs text-muted-foreground ml-auto">
+                        {format(new Date(conn.created_at), 'MMM dd')}
+                      </span>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center h-[150px] text-muted-foreground">
+                    No recent connections
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
           </CardContent>
         </Card>
       </div>
