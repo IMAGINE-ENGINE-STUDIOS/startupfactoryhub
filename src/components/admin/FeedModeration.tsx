@@ -70,6 +70,37 @@ const FeedModeration = () => {
 
   useEffect(() => {
     fetchData();
+
+    // Real-time subscription for feed posts
+    const channel = supabase
+      .channel('admin-feed-watch')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'feed_posts'
+        },
+        () => {
+          fetchData();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'content_flags'
+        },
+        () => {
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchData = async () => {
@@ -87,7 +118,19 @@ const FeedModeration = () => {
 
       if (postsResult.error) throw postsResult.error;
 
-      setPosts((postsResult.data || []) as Post[]);
+      // Fetch profiles separately for each post
+      const postsWithProfiles = await Promise.all(
+        (postsResult.data || []).map(async (post) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, avatar_url, email')
+            .eq('user_id', post.user_id)
+            .single();
+          return { ...post, profiles: profile } as Post;
+        })
+      );
+
+      setPosts(postsWithProfiles);
       setFlags((flagsResult.data || []) as ContentFlag[]);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -285,7 +328,7 @@ const FeedModeration = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <p className="text-sm line-clamp-2 max-w-[300px]">{post.content}</p>
+                        <p className="text-sm max-w-[400px] whitespace-pre-wrap">{post.content}</p>
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={getPostTypeBadge(post.post_type)}>
