@@ -243,6 +243,66 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_audit_logs: {
+        Row: {
+          action_type: string
+          admin_id: string | null
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: string | null
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action_type: string
+          admin_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action_type?: string
+          admin_id?: string | null
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
+      admin_settings: {
+        Row: {
+          description: string | null
+          id: string
+          setting_key: string
+          setting_value: Json
+          updated_at: string | null
+          updated_by: string | null
+        }
+        Insert: {
+          description?: string | null
+          id?: string
+          setting_key: string
+          setting_value: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Update: {
+          description?: string | null
+          id?: string
+          setting_key?: string
+          setting_value?: Json
+          updated_at?: string | null
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       advisor_achievements: {
         Row: {
           created_at: string | null
@@ -652,6 +712,42 @@ export type Database = {
           source_language?: string
           target_language?: string
           translated_text?: string
+        }
+        Relationships: []
+      }
+      api_usage_logs: {
+        Row: {
+          created_at: string | null
+          endpoint: string | null
+          estimated_cost: number | null
+          id: string
+          metadata: Json | null
+          request_count: number | null
+          service_name: string
+          tokens_used: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint?: string | null
+          estimated_cost?: number | null
+          id?: string
+          metadata?: Json | null
+          request_count?: number | null
+          service_name: string
+          tokens_used?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string | null
+          estimated_cost?: number | null
+          id?: string
+          metadata?: Json | null
+          request_count?: number | null
+          service_name?: string
+          tokens_used?: number | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -1206,6 +1302,45 @@ export type Database = {
           requester_id?: string
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      content_flags: {
+        Row: {
+          content_id: string
+          content_type: string
+          created_at: string | null
+          details: string | null
+          id: string
+          reason: string
+          reporter_id: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+        }
+        Insert: {
+          content_id: string
+          content_type: string
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+        }
+        Update: {
+          content_id?: string
+          content_type?: string
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_id?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
         }
         Relationships: []
       }
