@@ -8,6 +8,7 @@ import AdvisorDashboard from "@/pages/AdvisorDashboard";
 import InvestorDashboard from "@/pages/InvestorDashboard";
 import StudentDashboard from "@/pages/StudentDashboard";
 import AcceleratorDashboard from "@/pages/AcceleratorDashboard";
+import AdminDashboard from "@/pages/AdminDashboard";
 import { useNavigate } from "react-router-dom";
 
 const DashboardRouter = () => {
@@ -41,6 +42,8 @@ const DashboardRouter = () => {
 
   // Route to appropriate dashboard based on user role (secured via user_roles table)
   switch (role) {
+    case 'admin':
+      return <AdminDashboard />;
     case 'advisor':
       return <AdvisorDashboard />;
     case 'investor':
