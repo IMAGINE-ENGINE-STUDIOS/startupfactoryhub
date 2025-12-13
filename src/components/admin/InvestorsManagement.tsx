@@ -8,7 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, AreaChart, Area } from "recharts";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, AreaChart, Area, Legend, ResponsiveContainer } from "recharts";
 import { Search, TrendingUp, Users, DollarSign, Briefcase, Building2, Target, ExternalLink } from "lucide-react";
 import { INDUSTRIES, getIndustryLabel } from "@/lib/constants";
 
@@ -345,30 +345,52 @@ export function InvestorsManagement() {
           </CardHeader>
           <CardContent>
             {investorsByStageData.length > 0 ? (
-              <ChartContainer config={{}} className="h-[200px]">
-                <PieChart>
-                  <Pie
-                    data={investorsByStageData}
-                    dataKey="value"
-                    nameKey="name"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={70}
-                    label={({ name, value }) => `${name}: ${value}`}
-                    labelLine={false}
-                  >
-                    {investorsByStageData.map((entry) => (
-                      <Cell 
-                        key={entry.key} 
-                        fill={STAGE_COLORS[entry.key] || 'hsl(var(--muted))'} 
-                      />
-                    ))}
-                  </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </PieChart>
-              </ChartContainer>
+              <div className="h-[250px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={investorsByStageData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="45%"
+                      outerRadius={60}
+                      innerRadius={30}
+                    >
+                      {investorsByStageData.map((entry) => (
+                        <Cell 
+                          key={entry.key} 
+                          fill={STAGE_COLORS[entry.key] || 'hsl(220, 70%, 50%)'} 
+                        />
+                      ))}
+                    </Pie>
+                    <Legend 
+                      layout="horizontal" 
+                      verticalAlign="bottom" 
+                      align="center"
+                      formatter={(value, entry: any) => {
+                        const item = investorsByStageData.find(d => d.name === value);
+                        return <span className="text-xs">{value} ({item?.value || 0})</span>;
+                      }}
+                    />
+                    <ChartTooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                              <p className="text-sm font-medium">{payload[0].name}</p>
+                              <p className="text-sm text-muted-foreground">{payload[0].value} investors</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
                 No investor stage preferences
               </div>
             )}
