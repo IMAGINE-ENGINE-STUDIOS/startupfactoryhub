@@ -40,6 +40,10 @@ interface Job {
   applications_count: number | null;
   created_at: string;
   company_id: string;
+  companies?: {
+    name: string;
+    logo_url: string | null;
+  };
 }
 
 interface Internship {
@@ -75,8 +79,8 @@ const JobsManagement = () => {
     setLoading(true);
     try {
       const [jobsResult, internshipsResult] = await Promise.all([
-        supabase.from('jobs').select('*').order('created_at', { ascending: false }),
-        supabase.from('internships').select('*').order('created_at', { ascending: false })
+        supabase.from('jobs').select('*, companies(name, logo_url)').order('created_at', { ascending: false }),
+        supabase.from('internships').select('*, companies(name, logo_url)').order('created_at', { ascending: false })
       ]);
 
       if (jobsResult.error) throw jobsResult.error;
