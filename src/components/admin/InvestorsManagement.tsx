@@ -7,9 +7,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, AreaChart, Area, Legend, ResponsiveContainer } from "recharts";
-import { Search, TrendingUp, Users, DollarSign, Briefcase, Building2, Target, ExternalLink } from "lucide-react";
+import { Search, TrendingUp, Users, DollarSign, Briefcase, Building2, Target, ExternalLink, Calendar, Wallet } from "lucide-react";
 import { INDUSTRIES, getIndustryLabel } from "@/lib/constants";
 
 interface InvestorProfile {
@@ -34,7 +35,7 @@ interface Investment {
   company_id: string | null;
   amount: number | null;
   investment_date: string | null;
-  round_name: string | null;
+  investment_round: string | null;
   notes: string | null;
   external_company_name: string | null;
   external_company_industry: string | null;
@@ -47,6 +48,24 @@ interface Investment {
     description: string | null;
   } | null;
 }
+
+// Normalize stage values to consistent keys
+const normalizeStage = (stage: string): string => {
+  const normalized = stage.toLowerCase().replace(/[\s-]+/g, '_').replace(/\+/g, '');
+  const mappings: Record<string, string> = {
+    'preseed': 'pre_seed',
+    'pre_seed': 'pre_seed',
+    'seed': 'seed',
+    'seriesa': 'series_a',
+    'series_a': 'series_a',
+    'seriesb': 'series_b',
+    'series_b': 'series_b',
+    'seriesc': 'series_c',
+    'series_c': 'series_c',
+    'growth': 'growth',
+  };
+  return mappings[normalized] || normalized;
+};
 
 const STAGE_COLORS: Record<string, string> = {
   'pre_seed': 'hsl(280, 70%, 50%)',
@@ -131,7 +150,7 @@ export function InvestorsManagement() {
       // Fetch all investments with company data including logo
       const { data: investmentData } = await supabase
         .from('investments')
-        .select('id, investor_id, company_id, amount, investment_date, round_name, notes, external_company_name, external_company_industry, company:companies(id, name, industry, stage, logo_url, description)')
+        .select('id, investor_id, company_id, amount, investment_date, investment_round, notes, external_company_name, external_company_industry, company:companies(id, name, industry, stage, logo_url, description)')
         .order('investment_date', { ascending: false });
 
       if (isMounted.current) {
@@ -163,19 +182,20 @@ export function InvestorsManagement() {
   const avgInvestment = investments.length > 0 ? totalInvested / investments.length : 0;
   const totalDeals = investments.length;
 
-  // Count INVESTORS by their preferred stages (not investments)
+  // Count INVESTORS by their preferred stages (not investments) - normalize stage values
   const investorsByStageData = (() => {
     const stageCounts: Record<string, number> = {};
     investors.forEach(investor => {
       investor.preferred_stages?.forEach(stage => {
-        stageCounts[stage] = (stageCounts[stage] || 0) + 1;
+        const normalizedKey = normalizeStage(stage);
+        stageCounts[normalizedKey] = (stageCounts[normalizedKey] || 0) + 1;
       });
     });
     return Object.entries(stageCounts)
-      .map(([name, value]) => ({ 
-        name: STAGE_LABELS[name] || name.replace('_', ' '), 
+      .map(([key, value]) => ({ 
+        name: STAGE_LABELS[key] || key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()), 
         value,
-        key: name 
+        key 
       }))
       .sort((a, b) => b.value - a.value);
   })();
@@ -243,7 +263,7 @@ export function InvestorsManagement() {
     // Fetch this investor's investments with full company data
     const { data } = await supabase
       .from('investments')
-      .select('id, investor_id, company_id, amount, investment_date, round_name, notes, external_company_name, external_company_industry, company:companies(id, name, industry, stage, logo_url, description)')
+      .select('id, investor_id, company_id, amount, investment_date, investment_round, notes, external_company_name, external_company_industry, company:companies(id, name, industry, stage, logo_url, description)')
       .eq('investor_id', investor.user_id)
       .order('investment_date', { ascending: false });
     
@@ -526,11 +546,14 @@ export function InvestorsManagement() {
                         <p className="text-muted-foreground">Preferred Stages</p>
                         <div className="flex gap-1 flex-wrap justify-end">
                           {investor.preferred_stages?.length ? (
-                            investor.preferred_stages.slice(0, 2).map(stage => (
-                              <Badge key={stage} variant="secondary" className="text-xs">
-                                {STAGE_LABELS[stage] || stage.replace('_', ' ')}
-                              </Badge>
-                            ))
+                            investor.preferred_stages.slice(0, 2).map(stage => {
+                              const key = normalizeStage(stage);
+                              return (
+                                <Badge key={stage} variant="secondary" className="text-xs">
+                                  {STAGE_LABELS[key] || stage.replace(/_/g, ' ')}
+                                </Badge>
+                              );
+                            })
                           ) : <span className="text-muted-foreground">—</span>}
                         </div>
                       </div>
@@ -602,10 +625,10 @@ export function InvestorsManagement() {
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 text-sm">
+                      <div className="flex items-center gap-4 text-sm">
                       <div className="text-right">
                         <p className="font-medium text-emerald-500">{formatCurrency(investment.amount)}</p>
-                        <p className="text-xs text-muted-foreground">{investment.round_name || 'Round not set'}</p>
+                        <p className="text-xs text-muted-foreground">{investment.investment_round || 'Round not set'}</p>
                       </div>
                       <div className="text-right hidden sm:block">
                         <p className="text-muted-foreground">
@@ -624,7 +647,7 @@ export function InvestorsManagement() {
         </CardContent>
       </Card>
 
-      {/* Investor Detail Dialog */}
+      {/* Investor Detail Dialog with Tabs */}
       <Dialog open={!!selectedInvestor} onOpenChange={() => setSelectedInvestor(null)}>
         <DialogContent className="tech-card border-0 !transition-none max-w-3xl max-h-[90vh] overflow-hidden">
           <DialogHeader>
@@ -644,66 +667,89 @@ export function InvestorsManagement() {
             </DialogTitle>
           </DialogHeader>
 
-          <ScrollArea className="max-h-[calc(90vh-120px)]">
-            <div className="space-y-6 mt-4 pr-4">
-              {/* Investment Stats */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="p-3 rounded-lg bg-card/50 text-center">
-                  <p className="text-2xl font-bold text-primary">{investorInvestments.length}</p>
-                  <p className="text-xs text-muted-foreground">Investments</p>
-                </div>
-                <div className="p-3 rounded-lg bg-card/50 text-center">
-                  <p className="text-2xl font-bold text-emerald-500">
-                    {formatCurrency(investorInvestments.reduce((sum, inv) => sum + (inv.amount || 0), 0))}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Total Invested</p>
-                </div>
-                <div className="p-3 rounded-lg bg-card/50 text-center">
-                  <p className="text-2xl font-bold">{selectedInvestor?.portfolio_size || 0}</p>
-                  <p className="text-xs text-muted-foreground">Portfolio Size</p>
-                </div>
-                <div className="p-3 rounded-lg bg-card/50 text-center">
-                  <p className="text-lg font-bold">
-                    {formatRange(selectedInvestor?.investment_range_min || null, selectedInvestor?.investment_range_max || null)}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Investment Range</p>
-                </div>
-              </div>
+          <Tabs defaultValue="overview" className="mt-4">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="overview" className="flex items-center gap-2">
+                <Target className="h-4 w-4" />
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="portfolio" className="flex items-center gap-2">
+                <Wallet className="h-4 w-4" />
+                Portfolio ({investorInvestments.length})
+              </TabsTrigger>
+              <TabsTrigger value="history" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                History
+              </TabsTrigger>
+            </TabsList>
 
-              {/* Preferred Stages */}
-              <div>
-                <p className="text-sm text-muted-foreground mb-2">Preferred Stages</p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedInvestor?.preferred_stages?.length ? (
-                    selectedInvestor.preferred_stages.map(stage => (
-                      <Badge key={stage} variant="secondary">
-                        <Target className="h-3 w-3 mr-1" />
-                        {STAGE_LABELS[stage] || stage.replace('_', ' ')}
-                      </Badge>
-                    ))
-                  ) : <span className="text-muted-foreground">No stages specified</span>}
+            <ScrollArea className="max-h-[calc(90vh-200px)] mt-4">
+              {/* Overview Tab */}
+              <TabsContent value="overview" className="space-y-6 pr-4">
+                {/* Investment Stats */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="p-3 rounded-lg bg-card/50 text-center">
+                    <p className="text-2xl font-bold text-primary">{investorInvestments.length}</p>
+                    <p className="text-xs text-muted-foreground">Investments</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-card/50 text-center">
+                    <p className="text-2xl font-bold text-emerald-500">
+                      {formatCurrency(investorInvestments.reduce((sum, inv) => sum + (inv.amount || 0), 0))}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Total Invested</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-card/50 text-center">
+                    <p className="text-2xl font-bold">{selectedInvestor?.portfolio_size || 0}</p>
+                    <p className="text-xs text-muted-foreground">Portfolio Size</p>
+                  </div>
+                  <div className="p-3 rounded-lg bg-card/50 text-center">
+                    <p className="text-lg font-bold">
+                      {formatRange(selectedInvestor?.investment_range_min || null, selectedInvestor?.investment_range_max || null)}
+                    </p>
+                    <p className="text-xs text-muted-foreground">Investment Range</p>
+                  </div>
                 </div>
-              </div>
 
-              {/* Preferred Industries */}
-              <div>
-                <p className="text-sm text-muted-foreground mb-2">Preferred Industries</p>
-                <div className="flex flex-wrap gap-2">
-                  {selectedInvestor?.preferred_industries?.length ? (
-                    selectedInvestor.preferred_industries.map(ind => (
-                      <Badge key={ind} variant="outline">
-                        {getIndustryLabel(ind)}
-                      </Badge>
-                    ))
-                  ) : <span className="text-muted-foreground">No industries specified</span>}
+                {/* Preferred Stages */}
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Preferred Stages</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedInvestor?.preferred_stages?.length ? (
+                      selectedInvestor.preferred_stages.map(stage => {
+                        const key = normalizeStage(stage);
+                        return (
+                          <Badge key={stage} variant="secondary">
+                            <Target className="h-3 w-3 mr-1" />
+                            {STAGE_LABELS[key] || stage.replace(/_/g, ' ')}
+                          </Badge>
+                        );
+                      })
+                    ) : <span className="text-muted-foreground">No stages specified</span>}
+                  </div>
                 </div>
-              </div>
 
-              {/* Portfolio Companies */}
-              <div>
-                <p className="text-sm text-muted-foreground mb-3">Portfolio Companies ({investorInvestments.length})</p>
+                {/* Preferred Industries */}
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Preferred Industries</p>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedInvestor?.preferred_industries?.length ? (
+                      selectedInvestor.preferred_industries.map(ind => (
+                        <Badge key={ind} variant="outline">
+                          {getIndustryLabel(ind)}
+                        </Badge>
+                      ))
+                    ) : <span className="text-muted-foreground">No industries specified</span>}
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* Portfolio Tab */}
+              <TabsContent value="portfolio" className="space-y-4 pr-4">
                 {investorInvestments.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-6">No recorded investments</p>
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No portfolio companies recorded</p>
+                  </div>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {investorInvestments.map(inv => (
@@ -739,7 +785,7 @@ export function InvestorsManagement() {
                               )}
                               {inv.company?.stage && (
                                 <Badge variant="outline" className="text-xs">
-                                  {STAGE_LABELS[inv.company.stage] || inv.company.stage}
+                                  {STAGE_LABELS[normalizeStage(inv.company.stage)] || inv.company.stage}
                                 </Badge>
                               )}
                             </div>
@@ -755,7 +801,7 @@ export function InvestorsManagement() {
                         <div className="flex items-center justify-between pt-2 border-t border-border/50">
                           <div>
                             <p className="text-lg font-bold text-emerald-500">{formatCurrency(inv.amount)}</p>
-                            <p className="text-xs text-muted-foreground">{inv.round_name || 'Round not set'}</p>
+                            <p className="text-xs text-muted-foreground">{inv.investment_round || 'Round not set'}</p>
                           </div>
                           <div className="text-right">
                             <p className="text-sm">
@@ -773,9 +819,60 @@ export function InvestorsManagement() {
                     ))}
                   </div>
                 )}
-              </div>
-            </div>
-          </ScrollArea>
+              </TabsContent>
+
+              {/* History Tab */}
+              <TabsContent value="history" className="space-y-3 pr-4">
+                {investorInvestments.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No investment history recorded</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {investorInvestments.map(inv => (
+                      <div key={inv.id} className="flex items-center justify-between p-3 rounded-lg bg-card/50">
+                        <div className="flex items-center gap-3">
+                          {inv.company?.logo_url ? (
+                            <Avatar className="h-10 w-10">
+                              <AvatarImage src={inv.company.logo_url} />
+                              <AvatarFallback>
+                                <Building2 className="h-4 w-4" />
+                              </AvatarFallback>
+                            </Avatar>
+                          ) : (
+                            <div className="p-2 rounded-full bg-primary/10">
+                              <Building2 className="h-4 w-4 text-primary" />
+                            </div>
+                          )}
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <p className="font-medium">{getCompanyName(inv)}</p>
+                              {isExternalCompany(inv) && (
+                                <Badge variant="outline" className="text-xs">External</Badge>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {inv.investment_round || 'Round not set'} • {getCompanyIndustry(inv) || 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-emerald-500">{formatCurrency(inv.amount)}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {inv.investment_date 
+                              ? new Date(inv.investment_date).toLocaleDateString()
+                              : 'Date not set'
+                            }
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </TabsContent>
+            </ScrollArea>
+          </Tabs>
         </DialogContent>
       </Dialog>
     </div>
