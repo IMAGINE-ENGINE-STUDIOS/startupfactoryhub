@@ -1,10 +1,32 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+// Helper function to log API usage
+async function logApiUsage(serviceName: string, endpoint: string, tokensUsed?: number, estimatedCost?: number) {
+  try {
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    );
+    
+    await supabaseClient.from('api_usage_logs').insert({
+      service_name: serviceName,
+      endpoint: endpoint,
+      request_count: 1,
+      tokens_used: tokensUsed || null,
+      estimated_cost: estimatedCost || 0.001,
+      metadata: { timestamp: new Date().toISOString() }
+    });
+  } catch (err) {
+    console.error('Failed to log API usage:', err);
+  }
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -178,6 +200,11 @@ Provide detailed analysis in this JSON format:
     console.log('AI response received');
     
     let content = aiData.choices[0].message.content;
+    
+    // Estimate tokens and log usage
+    const tokensUsed = aiData.usage?.total_tokens || (userPrompt.length + content.length) / 4;
+    const estimatedCost = tokensUsed * 0.0001;
+    await logApiUsage('gemini', 'market-intelligence', tokensUsed, estimatedCost);
     
     // Clean up markdown code blocks if present
     content = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();

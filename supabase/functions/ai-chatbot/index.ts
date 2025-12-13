@@ -6,6 +6,22 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to log API usage
+async function logApiUsage(supabaseClient: any, serviceName: string, endpoint: string, tokensUsed?: number, estimatedCost?: number) {
+  try {
+    await supabaseClient.from('api_usage_logs').insert({
+      service_name: serviceName,
+      endpoint: endpoint,
+      request_count: 1,
+      tokens_used: tokensUsed || null,
+      estimated_cost: estimatedCost || 0.001, // Default small cost for Gemini
+      metadata: { timestamp: new Date().toISOString() }
+    });
+  } catch (err) {
+    console.error('Failed to log API usage:', err);
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -170,6 +186,13 @@ serve(async (req) => {
     const data = await response.json();
     const choice = data.choices[0];
     let assistantMessage = '';
+    
+    // Estimate tokens used from response
+    const tokensUsed = data.usage?.total_tokens || (message.length + (choice.message.content?.length || 0)) / 4;
+    const estimatedCost = tokensUsed * 0.0001;
+    
+    // Log Gemini API usage
+    await logApiUsage(supabaseClient, 'gemini', 'ai-chatbot', tokensUsed, estimatedCost);
     
     // Check if AI wants to use a tool
     if (choice.message.tool_calls && choice.message.tool_calls.length > 0) {
