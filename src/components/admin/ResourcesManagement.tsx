@@ -96,6 +96,32 @@ const ResourcesManagement = () => {
 
   useEffect(() => {
     fetchResources();
+
+    // Real-time subscription for resource submissions
+    const channel = supabase
+      .channel('admin-resources-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'resources'
+        },
+        (payload) => {
+          if (payload.eventType === 'INSERT' && !(payload.new as any).is_verified) {
+            toast({
+              title: "New Resource Submission",
+              description: `"${(payload.new as any).title}" is pending approval`
+            });
+          }
+          fetchResources();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const fetchResources = async () => {

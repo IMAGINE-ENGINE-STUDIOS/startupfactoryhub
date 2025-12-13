@@ -88,9 +88,9 @@ const AdminOverview = () => {
   useEffect(() => {
     fetchStats();
 
-    // Subscribe to new resource submissions
+    // Subscribe to new resource submissions and feed posts
     const channel = supabase
-      .channel('admin-resources-watch')
+      .channel('admin-overview-watch')
       .on(
         'postgres_changes',
         {
@@ -103,6 +103,28 @@ const AdminOverview = () => {
             toast.info('New resource submission pending approval!');
             fetchStats();
           }
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'feed_posts'
+        },
+        () => {
+          fetchStats();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+        },
+        () => {
+          fetchStats();
         }
       )
       .subscribe();
@@ -610,62 +632,74 @@ const AdminOverview = () => {
           <CardContent>
             <ScrollArea className="h-[300px]">
               <div className="space-y-3">
-                {stats.recentSignups.map((user: any) => (
-                  <div key={user.user_id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="flex items-center gap-3">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.avatar_url || ''} />
-                        <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <p className="font-medium text-sm">{user.full_name || 'Unknown'}</p>
-                        <p className="text-xs text-muted-foreground">{user.email}</p>
+                {stats.recentSignups.length > 0 ? (
+                  stats.recentSignups.map((user: any) => (
+                    <div key={user.user_id} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={user.avatar_url || ''} />
+                          <AvatarFallback>{user.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <p className="font-medium text-sm">{user.full_name || 'Unknown'}</p>
+                          <p className="text-xs text-muted-foreground">{user.email}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-muted-foreground">
+                          {format(new Date(user.created_at), 'MMM dd, HH:mm')}
+                        </span>
+                        {user.is_online && (
+                          <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                        )}
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs text-muted-foreground">
-                        {format(new Date(user.created_at), 'MMM dd, HH:mm')}
-                      </span>
-                      {user.is_online && (
-                        <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                      )}
-                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                    No recent signups
                   </div>
-                ))}
+                )}
               </div>
             </ScrollArea>
           </CardContent>
         </Card>
 
-        {/* Recent Activity */}
+        {/* Recent Activity - Full Post Content */}
         <Card className="tech-card border-0">
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Activity className="h-5 w-5 text-primary" />
-              Recent Activity
+              Recent Feed Posts
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ScrollArea className="h-[300px]">
               <div className="space-y-3">
-                {stats.recentActivity.map((post: any) => (
-                  <div key={post.id} className="flex items-start gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={post.profiles?.avatar_url || ''} />
-                      <AvatarFallback>{post.profiles?.full_name?.charAt(0) || 'U'}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm">{post.profiles?.full_name || 'Unknown'}</p>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{post.content}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="outline" className="text-xs">{post.post_type}</Badge>
+                {stats.recentActivity.length > 0 ? (
+                  stats.recentActivity.map((post: any) => (
+                    <div key={post.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+                      <Avatar className="h-8 w-8 flex-shrink-0">
+                        <AvatarImage src={post.profiles?.avatar_url || ''} />
+                        <AvatarFallback>{post.profiles?.full_name?.charAt(0) || 'U'}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium text-sm">{post.profiles?.full_name || 'Unknown'}</p>
+                          <Badge variant="outline" className="text-xs">{post.post_type}</Badge>
+                        </div>
+                        <p className="text-sm text-foreground whitespace-pre-wrap mb-2">{post.content}</p>
                         <span className="text-xs text-muted-foreground">
                           {format(new Date(post.created_at), 'MMM dd, HH:mm')}
                         </span>
                       </div>
                     </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-center h-[250px] text-muted-foreground">
+                    No recent posts
                   </div>
-                ))}
+                )}
               </div>
             </ScrollArea>
           </CardContent>
