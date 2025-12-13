@@ -86,50 +86,52 @@ const AdminOverview = () => {
   const [growthData, setGrowthData] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchStats();
+    let isMounted = true;
+    let debounceTimer: NodeJS.Timeout;
+    
+    const loadData = async () => {
+      if (!isMounted) return;
+      await fetchStats();
+    };
+    
+    loadData();
+
+    // Debounced fetch for realtime updates
+    const debouncedFetch = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        if (isMounted) fetchStats();
+      }, 1000);
+    };
 
     // Subscribe to new resource submissions and feed posts
     const channel = supabase
       .channel('admin-overview-watch')
       .on(
         'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'resources'
-        },
+        { event: 'INSERT', schema: 'public', table: 'resources' },
         (payload) => {
           if (payload.new && !(payload.new as any).is_verified) {
             toast.info('New resource submission pending approval!');
-            fetchStats();
           }
+          debouncedFetch();
         }
       )
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'feed_posts'
-        },
-        () => {
-          fetchStats();
-        }
+        { event: '*', schema: 'public', table: 'feed_posts' },
+        debouncedFetch
       )
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'profiles'
-        },
-        () => {
-          fetchStats();
-        }
+        { event: '*', schema: 'public', table: 'profiles' },
+        debouncedFetch
       )
       .subscribe();
 
     return () => {
+      isMounted = false;
+      clearTimeout(debounceTimer);
       supabase.removeChannel(channel);
     };
   }, []);

@@ -74,7 +74,14 @@ const ApiUsageTracker = () => {
   const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
-    fetchUsageData();
+    let isMounted = true;
+    
+    const loadData = async () => {
+      if (!isMounted) return;
+      await fetchUsageData();
+    };
+    
+    loadData();
     
     // Set up real-time subscription
     const channel = supabase
@@ -83,27 +90,24 @@ const ApiUsageTracker = () => {
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'api_usage_logs' },
         (payload) => {
-          console.log('New API usage log:', payload);
+          if (!isMounted) return;
           setUsageLogs(prev => [payload.new as ApiUsageLog, ...prev]);
-          toast({
-            title: "New API Call",
-            description: `${(payload.new as ApiUsageLog).service_name} - ${(payload.new as ApiUsageLog).endpoint || 'API Call'}`,
-          });
         }
       )
       .subscribe();
 
     return () => {
+      isMounted = false;
       supabase.removeChannel(channel);
     };
   }, []);
 
-  // Recalculate stats when logs change
+  // Recalculate stats when logs change - with guard
   useEffect(() => {
     if (usageLogs.length > 0) {
       calculateStats(usageLogs);
     }
-  }, [usageLogs]);
+  }, [usageLogs.length]);
 
   const calculateStats = (logs: ApiUsageLog[]) => {
     // Calculate service stats

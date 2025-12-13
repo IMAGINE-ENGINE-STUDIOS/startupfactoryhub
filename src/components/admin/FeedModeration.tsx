@@ -69,36 +69,42 @@ const FeedModeration = () => {
   const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    let isMounted = true;
+    let debounceTimer: NodeJS.Timeout;
+    
+    const loadData = async () => {
+      if (!isMounted) return;
+      await fetchData();
+    };
+    
+    loadData();
+
+    // Debounced fetch for realtime updates
+    const debouncedFetch = () => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        if (isMounted) fetchData();
+      }, 1000);
+    };
 
     // Real-time subscription for feed posts
     const channel = supabase
       .channel('admin-feed-watch')
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'feed_posts'
-        },
-        () => {
-          fetchData();
-        }
+        { event: '*', schema: 'public', table: 'feed_posts' },
+        debouncedFetch
       )
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'content_flags'
-        },
-        () => {
-          fetchData();
-        }
+        { event: '*', schema: 'public', table: 'content_flags' },
+        debouncedFetch
       )
       .subscribe();
 
     return () => {
+      isMounted = false;
+      clearTimeout(debounceTimer);
       supabase.removeChannel(channel);
     };
   }, []);
