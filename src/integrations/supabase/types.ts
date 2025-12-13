@@ -4402,6 +4402,7 @@ export type Database = {
         | "advisor"
         | "student"
         | "accelerator"
+        | "admin"
       company_stage: "idea" | "prototype" | "mvp" | "growth" | "scale"
       job_category: "full-time" | "part-time" | "contract" | "internship"
       lightpaper_project_type:
@@ -4554,6 +4555,7 @@ export const Constants = {
         "advisor",
         "student",
         "accelerator",
+        "admin",
       ],
       company_stage: ["idea", "prototype", "mvp", "growth", "scale"],
       job_category: ["full-time", "part-time", "contract", "internship"],
