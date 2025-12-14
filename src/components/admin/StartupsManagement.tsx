@@ -322,7 +322,7 @@ const StartupsManagement = () => {
   const journeyData = [
     { name: 'Completed', value: journeyCompleted, color: '#22c55e' },
     { name: 'In Progress', value: journeyInProgress, color: '#3b82f6' },
-    { name: 'Not Started', value: journeyNotStarted, color: '#ef4444' }
+    { name: 'Not Started', value: journeyNotStarted, color: '#f59e0b' }
   ].filter(d => d.value > 0);
 
   // Journey step breakdown
@@ -376,7 +376,9 @@ const StartupsManagement = () => {
           <CardContent className="p-4">
             <DollarSign className="h-5 w-5 text-green-400 mb-2" />
             <p className="text-2xl font-bold">
-              {formatFunding(companies.reduce((sum, c) => sum + (c.funding_amount || 0), 0))}
+              {companies.reduce((sum, c) => sum + (c.funding_amount || 0), 0) > 0 
+                ? formatFunding(companies.reduce((sum, c) => sum + (c.funding_amount || 0), 0))
+                : '0'}
             </p>
             <p className="text-xs text-muted-foreground">Total Funding</p>
           </CardContent>
