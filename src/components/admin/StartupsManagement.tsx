@@ -57,11 +57,10 @@ interface Company {
   user_id: string;
   pitch_deck_url: string | null;
   looking_for: string[] | null;
-  profiles?: {
-    full_name: string | null;
-    email: string | null;
-  };
-  journey_progress?: {
+  owner_name: string;
+  owner_email: string | null;
+  owner_avatar: string | null;
+  journey_progress: {
     completed_steps: number;
     total_steps: number;
     current_step: number;
@@ -145,15 +144,28 @@ const StartupsManagement = () => {
     if (!isMounted.current) return;
     setLoading(true);
     try {
-      // Fetch companies
+      // Step 1: Fetch companies WITHOUT join (no FK relationship exists)
       const { data: companiesData, error: companiesError } = await supabase
         .from('companies')
-        .select('*, profiles:user_id(full_name, email)')
+        .select('*')
         .order('created_at', { ascending: false });
 
       if (companiesError) throw companiesError;
 
-      // Fetch roadmap progress for all users
+      // Step 2: Get user IDs and fetch profiles separately
+      const userIds = companiesData?.map(c => c.user_id).filter(Boolean) || [];
+      
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, email, avatar_url')
+        .in('user_id', userIds.length > 0 ? userIds : ['none']);
+
+      // Step 3: Create profiles map for quick lookup
+      const profilesMap = new Map(
+        (profilesData || []).map(p => [p.user_id, p])
+      );
+
+      // Step 4: Fetch roadmap progress for all users
       const { data: progressData, error: progressError } = await supabase
         .from('roadmap_progress')
         .select('*');
@@ -168,7 +180,9 @@ const StartupsManagement = () => {
         progressMap.set(p.user_id, existing);
       });
 
+      // Step 5: Merge companies with profiles and progress
       const companiesWithProgress = (companiesData || []).map((company: any) => {
+        const profile = profilesMap.get(company.user_id);
         const progressRecords = progressMap.get(company.user_id) || [];
         const completedSteps = progressRecords.filter(p => p.completed).length;
         
@@ -185,6 +199,9 @@ const StartupsManagement = () => {
 
         return {
           ...company,
+          owner_name: profile?.full_name || 'Unknown Owner',
+          owner_email: profile?.email || null,
+          owner_avatar: profile?.avatar_url || null,
           journey_progress: {
             completed_steps: completedSteps,
             total_steps: 6,
@@ -766,7 +783,7 @@ const StartupsManagement = () => {
                     <div>
                       <p className="text-sm text-muted-foreground">Owner</p>
                       <p className="font-medium">
-                        {selectedCompany.profiles?.full_name || selectedCompany.profiles?.email || 'Unknown'}
+                        {selectedCompany.owner_name || 'Unknown'}
                       </p>
                     </div>
                     <div>
