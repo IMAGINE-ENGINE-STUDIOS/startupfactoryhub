@@ -38,12 +38,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 
 interface Company {
@@ -389,7 +384,15 @@ const StartupsManagement = () => {
                       <Cell key={`cell-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Tooltip 
+                    formatter={(value: number, name: string) => [`${value} startups`, name]}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      fontSize: '12px'
+                    }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -415,7 +418,15 @@ const StartupsManagement = () => {
                   <XAxis type="number" hide />
                   <YAxis dataKey="name" type="category" width={60} tick={{ fontSize: 10 }} />
                   <Bar dataKey="count" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Tooltip 
+                    formatter={(value: number) => [`${value} startups`]}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      fontSize: '12px'
+                    }}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -441,7 +452,15 @@ const StartupsManagement = () => {
                   <XAxis type="number" hide />
                   <YAxis dataKey="name" type="category" width={60} tick={{ fontSize: 10 }} />
                   <Bar dataKey="count" fill="hsl(var(--chart-2))" radius={[0, 4, 4, 0]} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
+                  <Tooltip 
+                    formatter={(value: number) => [`${value} startups`]}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      fontSize: '12px'
+                    }}
+                  />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -476,7 +495,15 @@ const StartupsManagement = () => {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <ChartTooltip content={<ChartTooltipContent />} />
+                <Tooltip 
+                  formatter={(value: number, name: string) => [`${value} startups`, name]}
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--card))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                    fontSize: '12px'
+                  }}
+                />
               </PieChart>
             </ResponsiveContainer>
           </CardContent>
