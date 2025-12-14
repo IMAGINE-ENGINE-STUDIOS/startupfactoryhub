@@ -86,12 +86,12 @@ const STAGE_COLORS: Record<string, string> = {
 };
 
 const JOURNEY_STEPS = [
-  'Company Profile',
-  'Pitch Deck',
-  'Team Building',
+  'Idea Validation',
   'Market Research',
-  'Product Development',
-  'Funding Ready'
+  'MVP Development',
+  'User Validation',
+  'Launch Preparation',
+  'Growth & Scaling'
 ];
 
 const StartupsManagement = () => {
@@ -111,10 +111,21 @@ const StartupsManagement = () => {
     isMounted.current = true;
     fetchCompanies();
 
-    // Real-time subscription
-    const channel = supabase
+    // Real-time subscription for companies
+    const companiesChannel = supabase
       .channel('companies-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'companies' }, () => {
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => {
+          if (isMounted.current) fetchCompanies();
+        }, 100);
+      })
+      .subscribe();
+
+    // Real-time subscription for roadmap progress
+    const progressChannel = supabase
+      .channel('roadmap-progress-admin')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'roadmap_progress' }, () => {
         if (debounceTimer.current) clearTimeout(debounceTimer.current);
         debounceTimer.current = setTimeout(() => {
           if (isMounted.current) fetchCompanies();
@@ -125,7 +136,8 @@ const StartupsManagement = () => {
     return () => {
       isMounted.current = false;
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
-      supabase.removeChannel(channel);
+      supabase.removeChannel(companiesChannel);
+      supabase.removeChannel(progressChannel);
     };
   }, []);
 
@@ -160,15 +172,15 @@ const StartupsManagement = () => {
         const progressRecords = progressMap.get(company.user_id) || [];
         const completedSteps = progressRecords.filter(p => p.completed).length;
         
-        // Find first incomplete step for current_step
+        // Find first incomplete step for current_step - database uses "1", "2", etc.
         let current_step = 1;
         for (let i = 1; i <= 6; i++) {
-          const stepRecord = progressRecords.find(p => p.step_id === `step_${i}`);
+          const stepRecord = progressRecords.find(p => p.step_id === String(i));
           if (!stepRecord || !stepRecord.completed) {
             current_step = i;
             break;
           }
-          if (i === 6) current_step = 6;
+          if (i === 6 && stepRecord?.completed) current_step = 7; // All completed
         }
 
         return {
@@ -176,7 +188,7 @@ const StartupsManagement = () => {
           journey_progress: {
             completed_steps: completedSteps,
             total_steps: 6,
-            current_step,
+            current_step: Math.min(current_step, 6),
             percentage: Math.round((completedSteps / 6) * 100)
           }
         };
