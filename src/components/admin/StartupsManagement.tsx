@@ -105,7 +105,9 @@ const StartupsManagement = () => {
   const [showDialog, setShowDialog] = useState(false);
   const [dialogTab, setDialogTab] = useState('overview');
   const isMounted = useRef(true);
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
+  const companiesDebounce = useRef<NodeJS.Timeout | null>(null);
+  const progressDebounce = useRef<NodeJS.Timeout | null>(null);
+  const isFetching = useRef(false);
 
   useEffect(() => {
     isMounted.current = true;
@@ -115,8 +117,8 @@ const StartupsManagement = () => {
     const companiesChannel = supabase
       .channel('companies-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'companies' }, () => {
-        if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        debounceTimer.current = setTimeout(() => {
+        if (companiesDebounce.current) clearTimeout(companiesDebounce.current);
+        companiesDebounce.current = setTimeout(() => {
           if (isMounted.current) fetchCompanies();
         }, 100);
       })
@@ -126,8 +128,8 @@ const StartupsManagement = () => {
     const progressChannel = supabase
       .channel('roadmap-progress-admin')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'roadmap_progress' }, () => {
-        if (debounceTimer.current) clearTimeout(debounceTimer.current);
-        debounceTimer.current = setTimeout(() => {
+        if (progressDebounce.current) clearTimeout(progressDebounce.current);
+        progressDebounce.current = setTimeout(() => {
           if (isMounted.current) fetchCompanies();
         }, 100);
       })
@@ -135,14 +137,16 @@ const StartupsManagement = () => {
 
     return () => {
       isMounted.current = false;
-      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      if (companiesDebounce.current) clearTimeout(companiesDebounce.current);
+      if (progressDebounce.current) clearTimeout(progressDebounce.current);
       supabase.removeChannel(companiesChannel);
       supabase.removeChannel(progressChannel);
     };
   }, []);
 
   const fetchCompanies = async () => {
-    if (!isMounted.current) return;
+    if (!isMounted.current || isFetching.current) return;
+    isFetching.current = true;
     setLoading(true);
     try {
       // Step 1: Fetch companies WITHOUT join (no FK relationship exists)
@@ -224,6 +228,7 @@ const StartupsManagement = () => {
       });
     } finally {
       if (isMounted.current) setLoading(false);
+      isFetching.current = false;
     }
   };
 

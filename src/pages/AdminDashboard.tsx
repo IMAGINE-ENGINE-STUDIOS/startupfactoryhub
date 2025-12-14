@@ -35,17 +35,9 @@ import { InvestorsManagement } from '@/components/admin/InvestorsManagement';
 
 const AdminDashboard = () => {
   const { role, loading: roleLoading } = useUserRole();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(urlTab || "overview");
+  const [searchParams] = useSearchParams();
+  const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || "overview");
   const [refreshing, setRefreshing] = useState(false);
-
-  useEffect(() => {
-    if (urlTab && urlTab !== activeTab) {
-      setActiveTab(urlTab);
-      setSearchParams({});
-    }
-  }, [urlTab, activeTab, setSearchParams]);
 
   const handleRefresh = () => {
     setRefreshing(true);
