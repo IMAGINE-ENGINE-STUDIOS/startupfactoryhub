@@ -38,8 +38,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
+import { getIndustryLabel } from '@/lib/constants';
 
 interface Company {
   id: string;
@@ -262,37 +263,56 @@ const StartupsManagement = () => {
     return `$${amount}`;
   };
 
+  // Helper to format stage labels
+  const formatStageLabel = (stage: string) => {
+    const labels: Record<string, string> = {
+      idea: 'Idea',
+      mvp: 'MVP',
+      seed: 'Seed',
+      series_a: 'Series A',
+      series_b: 'Series B',
+      series_c: 'Series C',
+      growth: 'Growth'
+    };
+    return labels[stage] || stage.charAt(0).toUpperCase() + stage.slice(1).replace(/_/g, ' ');
+  };
+
   // Analytics data
   const industries = [...new Set(companies.map(c => c.industry).filter(Boolean))];
   const stages = [...new Set(companies.map(c => c.stage).filter(Boolean))];
-  const locations = [...new Set(companies.map(c => c.location).filter(Boolean))];
 
-  // Stage distribution
+  // Stage distribution with formatted labels
   const stageData = stages.map(stage => ({
-    name: stage,
+    name: formatStageLabel(stage as string),
     value: companies.filter(c => c.stage === stage).length,
     color: STAGE_COLORS[stage || ''] || '#6b7280'
-  }));
+  })).filter(d => d.value > 0);
 
-  // Industry distribution (top 6)
+  // Industry distribution with proper labels (top 6)
   const industryData = industries
     .map(industry => ({
-      name: industry,
+      name: getIndustryLabel(industry as string),
       count: companies.filter(c => c.industry === industry).length
     }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 6);
 
-  // Location distribution (top 6)
-  const locationData = locations
-    .map(location => ({
-      name: location?.split(',')[0] || location,
-      count: companies.filter(c => c.location === location).length
-    }))
+  // Location distribution - deduplicate by trimming and aggregating
+  const locationCounts: Record<string, number> = {};
+  companies.forEach(c => {
+    if (c.location) {
+      const normalized = c.location.split(',')[0].trim();
+      if (normalized) {
+        locationCounts[normalized] = (locationCounts[normalized] || 0) + 1;
+      }
+    }
+  });
+  const locationData = Object.entries(locationCounts)
+    .map(([name, count]) => ({ name, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 6);
 
-  // Journey progress distribution
+  // Journey progress distribution with brighter colors
   const journeyCompleted = companies.filter(c => c.journey_progress?.completed_steps === 6).length;
   const journeyInProgress = companies.filter(c => 
     c.journey_progress && c.journey_progress.completed_steps > 0 && c.journey_progress.completed_steps < 6
@@ -300,10 +320,10 @@ const StartupsManagement = () => {
   const journeyNotStarted = companies.filter(c => !c.journey_progress || c.journey_progress.completed_steps === 0).length;
 
   const journeyData = [
-    { name: 'Completed', value: journeyCompleted, color: '#10b981' },
-    { name: 'In Progress', value: journeyInProgress, color: '#f59e0b' },
-    { name: 'Not Started', value: journeyNotStarted, color: '#6b7280' }
-  ];
+    { name: 'Completed', value: journeyCompleted, color: '#22c55e' },
+    { name: 'In Progress', value: journeyInProgress, color: '#3b82f6' },
+    { name: 'Not Started', value: journeyNotStarted, color: '#ef4444' }
+  ].filter(d => d.value > 0);
 
   // Journey step breakdown
   const stepBreakdown = JOURNEY_STEPS.map((step, i) => {
@@ -509,32 +529,44 @@ const StartupsManagement = () => {
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[180px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={journeyData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={30}
-                  outerRadius={60}
-                  paddingAngle={2}
-                  dataKey="value"
-                >
-                  {journeyData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  formatter={(value: number, name: string) => [`${value} startups`, name]}
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))', 
-                    border: '1px solid hsl(var(--border))',
-                    borderRadius: '8px',
-                    fontSize: '12px'
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+            {journeyData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={journeyData}
+                    cx="50%"
+                    cy="45%"
+                    innerRadius={25}
+                    outerRadius={50}
+                    paddingAngle={2}
+                    dataKey="value"
+                  >
+                    {journeyData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    formatter={(value: number, name: string) => [`${value} startups`, name]}
+                    contentStyle={{ 
+                      backgroundColor: 'hsl(var(--card))', 
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      fontSize: '12px'
+                    }}
+                  />
+                  <Legend 
+                    verticalAlign="bottom"
+                    height={28}
+                    iconSize={10}
+                    formatter={(value) => <span className="text-xs text-foreground">{value}</span>}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full flex items-center justify-center text-muted-foreground text-sm">
+                No journey data
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
