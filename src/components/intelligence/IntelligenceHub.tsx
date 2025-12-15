@@ -25,14 +25,6 @@ interface IntelligenceCard {
 
 const intelligenceCards: IntelligenceCard[] = [
   {
-    id: 'news',
-    title: 'Live News Feed',
-    description: 'Real-time news from tech, startups & finance',
-    icon: <Newspaper className="w-6 h-6" />,
-    color: 'from-blue-500 to-cyan-500',
-    badge: 'Webz.io',
-  },
-  {
     id: 'market',
     title: 'Market Analysis',
     description: 'AI-powered insights on startups & industries',
@@ -47,19 +39,39 @@ const intelligenceCards: IntelligenceCard[] = [
     icon: <BarChart3 className="w-6 h-6" />,
     color: 'from-purple-500 to-pink-500',
   },
+  {
+    id: 'news',
+    title: 'Live News Feed',
+    description: 'Real-time news from tech, startups & finance',
+    icon: <Newspaper className="w-6 h-6" />,
+    color: 'from-blue-500 to-cyan-500',
+    badge: 'Coming Soon',
+  },
 ];
 
 export const IntelligenceHub = () => {
-  const [activeSection, setActiveSection] = useState<string | null>('news');
+  const [activeSection, setActiveSection] = useState<string | null>('market');
 
   const renderSection = () => {
     switch (activeSection) {
-      case 'news':
-        return <NewsSection />;
       case 'market':
         return <MarketIntelligenceWidget />;
       case 'trending':
         return <TrendingCompanies />;
+      case 'news':
+        return (
+          <div className="tech-card border-0 p-8 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white">
+                <Newspaper className="w-10 h-10" />
+              </div>
+              <h3 className="text-xl font-semibold">Coming Soon</h3>
+              <p className="text-muted-foreground max-w-md">
+                Live News Feed is coming soon! Stay tuned for real-time tech, startup & finance news powered by advanced APIs.
+              </p>
+            </div>
+          </div>
+        );
       default:
         return null;
     }
