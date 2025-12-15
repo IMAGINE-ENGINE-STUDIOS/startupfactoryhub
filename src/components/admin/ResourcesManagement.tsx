@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import mapboxgl from 'mapbox-gl';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { 
   Search, 
   Eye, 
@@ -27,7 +29,9 @@ import {
   Plus,
   Crown,
   CheckCircle,
-  XCircle
+  XCircle,
+  Locate,
+  Loader2
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -35,6 +39,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+// Use the same Mapbox token as GlobalResourcesMap
+mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 interface Resource {
   id: string;
@@ -44,12 +51,14 @@ interface Resource {
   logo_url: string | null;
   website_url: string | null;
   contact_email: string | null;
+  address: string | null;
   latitude: number | null;
   longitude: number | null;
   city: string | null;
   country: string | null;
+  location_type: string | null;
   is_official_partner: boolean | null;
-  is_flagship?: boolean | null;
+  is_flagship: boolean | null;
   is_verified: boolean | null;
   author_id: string | null;
   created_at: string;
@@ -72,6 +81,8 @@ const RESOURCE_TYPES = [
   'event'
 ];
 
+const LOCATION_TYPES = ['physical', 'online', 'hybrid'];
+
 const ResourcesManagement = () => {
   const { toast } = useToast();
   const [resources, setResources] = useState<Resource[]>([]);
@@ -85,14 +96,28 @@ const ResourcesManagement = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editResource, setEditResource] = useState<Resource | null>(null);
+  const [isGeocoding, setIsGeocoding] = useState(false);
   const [newResource, setNewResource] = useState({
     title: '',
     description: '',
     resource_type: 'perk',
+    logo_url: '',
     website_url: '',
     contact_email: '',
-    is_official_partner: false
+    address: '',
+    city: '',
+    country: '',
+    latitude: null as number | null,
+    longitude: null as number | null,
+    location_type: 'physical',
+    is_official_partner: false,
+    is_flagship: false
   });
+
+  // Map state
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const map = useRef<mapboxgl.Map | null>(null);
+  const markers = useRef<mapboxgl.Marker[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -138,6 +163,112 @@ const ResourcesManagement = () => {
     };
   }, []);
 
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainer.current || map.current) return;
+
+    map.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/imagineengine/cmhfkp1ie001d01qi2hyg82lp',
+      projection: { name: 'globe' },
+      zoom: 2,
+      center: [-50, 30],
+      pitch: 30,
+      antialias: true,
+    });
+
+    map.current.addControl(
+      new mapboxgl.NavigationControl({ visualizePitch: true }),
+      'top-right'
+    );
+
+    map.current.on('style.load', () => {
+      if (!map.current) return;
+      map.current.setFog({
+        color: '#0f172a',
+        'high-color': '#1e293b',
+        'horizon-blend': 0.02,
+        'space-color': '#020617',
+        'star-intensity': 0.15
+      });
+    });
+
+    return () => {
+      map.current?.remove();
+      map.current = null;
+    };
+  }, []);
+
+  // Update map markers when resources change
+  useEffect(() => {
+    if (!map.current) return;
+
+    // Clear existing markers
+    markers.current.forEach(m => m.remove());
+    markers.current = [];
+
+    // Add markers for all resources with coordinates
+    const allResources = [...resources, ...pendingResources];
+    allResources.forEach(resource => {
+      if (!resource.latitude || !resource.longitude) return;
+
+      const el = document.createElement('div');
+      el.style.cssText = `
+        width: ${resource.is_flagship ? '44px' : resource.is_official_partner ? '28px' : '24px'};
+        height: ${resource.is_flagship ? '44px' : resource.is_official_partner ? '28px' : '24px'};
+        border-radius: 50%;
+        cursor: pointer;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        ${resource.is_flagship 
+          ? 'border: 3px solid gold; box-shadow: 0 4px 16px rgba(16, 185, 129, 0.5);' 
+          : resource.is_official_partner 
+            ? 'border: 2px solid #fbbf24; box-shadow: 0 2px 8px rgba(0,0,0,0.3);'
+            : 'border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.2);'
+        }
+        ${!resource.is_verified ? 'opacity: 0.6; border-color: #f97316;' : ''}
+      `;
+
+      if (resource.logo_url) {
+        el.style.background = `url(${resource.logo_url}) center/cover`;
+      } else {
+        el.style.background = resource.is_verified ? '#3b82f6' : '#f97316';
+      }
+
+      // Add badge
+      if (resource.is_flagship || resource.is_official_partner || !resource.is_verified) {
+        const badge = document.createElement('span');
+        badge.style.cssText = `
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          font-size: 10px;
+        `;
+        badge.textContent = resource.is_flagship ? '👑' : resource.is_official_partner ? '⭐' : '⏳';
+        el.appendChild(badge);
+      }
+
+      const marker = new mapboxgl.Marker({ element: el })
+        .setLngLat([resource.longitude, resource.latitude])
+        .addTo(map.current!);
+
+      // Click to edit
+      el.addEventListener('click', () => {
+        setEditResource(resource);
+        setShowEditDialog(true);
+        map.current?.flyTo({
+          center: [resource.longitude!, resource.latitude!],
+          zoom: 8,
+          duration: 1500
+        });
+      });
+
+      markers.current.push(marker);
+    });
+  }, [resources, pendingResources]);
+
   const fetchResources = async () => {
     setLoading(true);
     try {
@@ -172,6 +303,77 @@ const ResourcesManagement = () => {
       setLoading(false);
     }
   };
+
+  // Geocode address using Mapbox
+  const geocodeAddress = useCallback(async (address: string, isEdit: boolean = false) => {
+    if (!address || address.length < 5) return;
+
+    setIsGeocoding(true);
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(address)}.json?access_token=${mapboxgl.accessToken}&types=address,place,poi&limit=1`
+      );
+      const data = await response.json();
+      
+      if (data.features && data.features.length > 0) {
+        const feature = data.features[0];
+        const [lng, lat] = feature.center;
+        
+        // Extract city and country from context
+        let city = '';
+        let country = '';
+        feature.context?.forEach((ctx: any) => {
+          if (ctx.id.startsWith('place')) city = ctx.text;
+          if (ctx.id.startsWith('country')) country = ctx.text;
+        });
+
+        if (isEdit && editResource) {
+          setEditResource({
+            ...editResource,
+            latitude: lat,
+            longitude: lng,
+            city: city || editResource.city,
+            country: country || editResource.country
+          });
+        } else {
+          setNewResource(prev => ({
+            ...prev,
+            latitude: lat,
+            longitude: lng,
+            city: city || prev.city,
+            country: country || prev.country
+          }));
+        }
+
+        // Fly to location on map
+        map.current?.flyTo({
+          center: [lng, lat],
+          zoom: 10,
+          duration: 2000
+        });
+
+        toast({
+          title: "Address geocoded",
+          description: `Found: ${feature.place_name}`
+        });
+      } else {
+        toast({
+          title: "Address not found",
+          description: "Please try a more specific address",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Geocoding error:', error);
+      toast({
+        title: "Geocoding failed",
+        description: "Unable to geocode address",
+        variant: "destructive"
+      });
+    } finally {
+      setIsGeocoding(false);
+    }
+  }, [editResource, toast]);
 
   const handleTogglePartner = async (resource: Resource) => {
     try {
@@ -285,8 +487,15 @@ const ResourcesManagement = () => {
           title: editResource.title,
           description: editResource.description,
           resource_type: editResource.resource_type,
+          logo_url: editResource.logo_url,
           website_url: editResource.website_url,
           contact_email: editResource.contact_email,
+          address: editResource.address,
+          city: editResource.city,
+          country: editResource.country,
+          latitude: editResource.latitude,
+          longitude: editResource.longitude,
+          location_type: editResource.location_type,
           is_official_partner: editResource.is_official_partner,
           is_flagship: editResource.is_flagship
         })
@@ -295,6 +504,7 @@ const ResourcesManagement = () => {
       if (error) throw error;
 
       setResources(prev => prev.map(r => r.id === editResource.id ? editResource : r));
+      setPendingResources(prev => prev.map(r => r.id === editResource.id ? editResource : r));
       setShowEditDialog(false);
       setEditResource(null);
       toast({
@@ -315,7 +525,10 @@ const ResourcesManagement = () => {
     try {
       const { error } = await supabase
         .from('resources')
-        .insert([{ ...newResource, is_verified: true }]); // Admin-added resources are auto-verified
+        .insert([{ 
+          ...newResource, 
+          is_verified: true 
+        }]); // Admin-added resources are auto-verified
 
       if (error) throw error;
 
@@ -325,9 +538,17 @@ const ResourcesManagement = () => {
         title: '',
         description: '',
         resource_type: 'perk',
+        logo_url: '',
         website_url: '',
         contact_email: '',
-        is_official_partner: false
+        address: '',
+        city: '',
+        country: '',
+        latitude: null,
+        longitude: null,
+        location_type: 'physical',
+        is_official_partner: false,
+        is_flagship: false
       });
       toast({
         title: "Added",
@@ -407,6 +628,20 @@ const ResourcesManagement = () => {
         </Card>
       </div>
 
+      {/* Map Viewport */}
+      <Card className="tech-card border-0">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Globe className="h-5 w-5" />
+            Resource Map
+            <Badge variant="outline" className="ml-2">Click markers to edit</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div ref={mapContainer} className="h-[400px] rounded-b-lg" />
+        </CardContent>
+      </Card>
+
       {/* Filters */}
       <Card className="tech-card border-0">
         <CardContent className="p-4">
@@ -465,7 +700,7 @@ const ResourcesManagement = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <ScrollArea className="h-[500px]">
+          <ScrollArea className="h-[400px]">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -571,15 +806,15 @@ const ResourcesManagement = () => {
         </CardContent>
       </Card>
 
-      {/* Add Resource Dialog */}
+      {/* Add Resource Dialog - Full Fields */}
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
-        <DialogContent className="tech-card border-0 !transition-none">
+        <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add Resource</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label>Title</Label>
+              <Label>Title *</Label>
               <Input
                 value={newResource.title}
                 onChange={(e) => setNewResource({ ...newResource, title: e.target.value })}
@@ -587,15 +822,7 @@ const ResourcesManagement = () => {
               />
             </div>
             <div>
-              <Label>Description</Label>
-              <Textarea
-                value={newResource.description}
-                onChange={(e) => setNewResource({ ...newResource, description: e.target.value })}
-                className="tech-card border-0"
-              />
-            </div>
-            <div>
-              <Label>Type</Label>
+              <Label>Type *</Label>
               <Select value={newResource.resource_type} onValueChange={(v) => setNewResource({ ...newResource, resource_type: v })}>
                 <SelectTrigger className="tech-card border-0">
                   <SelectValue />
@@ -607,11 +834,29 @@ const ResourcesManagement = () => {
                 </SelectContent>
               </Select>
             </div>
+            <div className="md:col-span-2">
+              <Label>Description</Label>
+              <Textarea
+                value={newResource.description}
+                onChange={(e) => setNewResource({ ...newResource, description: e.target.value })}
+                className="tech-card border-0"
+              />
+            </div>
+            <div>
+              <Label>Logo URL</Label>
+              <Input
+                value={newResource.logo_url}
+                onChange={(e) => setNewResource({ ...newResource, logo_url: e.target.value })}
+                placeholder="https://..."
+                className="tech-card border-0"
+              />
+            </div>
             <div>
               <Label>Website URL</Label>
               <Input
                 value={newResource.website_url}
                 onChange={(e) => setNewResource({ ...newResource, website_url: e.target.value })}
+                placeholder="https://..."
                 className="tech-card border-0"
               />
             </div>
@@ -623,17 +868,92 @@ const ResourcesManagement = () => {
                 className="tech-card border-0"
               />
             </div>
+            <div>
+              <Label>Location Type</Label>
+              <Select value={newResource.location_type} onValueChange={(v) => setNewResource({ ...newResource, location_type: v })}>
+                <SelectTrigger className="tech-card border-0">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {LOCATION_TYPES.map(type => (
+                    <SelectItem key={type} value={type}>{type}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="md:col-span-2">
+              <Label>Address</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={newResource.address}
+                  onChange={(e) => setNewResource({ ...newResource, address: e.target.value })}
+                  placeholder="Full address for geocoding..."
+                  className="tech-card border-0 flex-1"
+                />
+                <Button 
+                  variant="outline" 
+                  onClick={() => geocodeAddress(newResource.address)}
+                  disabled={isGeocoding}
+                  className="tech-card border-0"
+                >
+                  {isGeocoding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Locate className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+            <div>
+              <Label>City</Label>
+              <Input
+                value={newResource.city}
+                onChange={(e) => setNewResource({ ...newResource, city: e.target.value })}
+                className="tech-card border-0"
+              />
+            </div>
+            <div>
+              <Label>Country</Label>
+              <Input
+                value={newResource.country}
+                onChange={(e) => setNewResource({ ...newResource, country: e.target.value })}
+                className="tech-card border-0"
+              />
+            </div>
+            <div>
+              <Label>Latitude</Label>
+              <Input
+                type="number"
+                step="any"
+                value={newResource.latitude || ''}
+                onChange={(e) => setNewResource({ ...newResource, latitude: e.target.value ? parseFloat(e.target.value) : null })}
+                className="tech-card border-0"
+              />
+            </div>
+            <div>
+              <Label>Longitude</Label>
+              <Input
+                type="number"
+                step="any"
+                value={newResource.longitude || ''}
+                onChange={(e) => setNewResource({ ...newResource, longitude: e.target.value ? parseFloat(e.target.value) : null })}
+                className="tech-card border-0"
+              />
+            </div>
             <div className="flex items-center gap-2">
               <Switch
                 checked={newResource.is_official_partner}
                 onCheckedChange={(v) => setNewResource({ ...newResource, is_official_partner: v })}
               />
-              <Label>Official Partner</Label>
+              <Label>Official Partner ⭐</Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch
+                checked={newResource.is_flagship}
+                onCheckedChange={(v) => setNewResource({ ...newResource, is_flagship: v })}
+              />
+              <Label>Flagship Location 👑</Label>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancel</Button>
-            <Button onClick={handleAddResource}>Add Resource</Button>
+            <Button onClick={handleAddResource} disabled={!newResource.title}>Add Resource</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -654,6 +974,8 @@ const ResourcesManagement = () => {
                 <div>
                   <h3 className="text-lg font-semibold">{selectedResource.title}</h3>
                   <Badge variant="outline">{selectedResource.resource_type?.replace(/_/g, ' ')}</Badge>
+                  {selectedResource.is_official_partner && <Badge className="ml-2 bg-amber-500/20 text-amber-400">⭐ Partner</Badge>}
+                  {selectedResource.is_flagship && <Badge className="ml-2 bg-yellow-500/20 text-yellow-400">👑 Flagship</Badge>}
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">{selectedResource.description}</p>
@@ -666,6 +988,14 @@ const ResourcesManagement = () => {
                   <p className="text-muted-foreground">Contact</p>
                   <p>{selectedResource.contact_email || 'N/A'}</p>
                 </div>
+                <div>
+                  <p className="text-muted-foreground">Coordinates</p>
+                  <p>{selectedResource.latitude?.toFixed(4)}, {selectedResource.longitude?.toFixed(4)}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Location Type</p>
+                  <p>{selectedResource.location_type || 'physical'}</p>
+                </div>
               </div>
             </div>
           )}
@@ -675,16 +1005,16 @@ const ResourcesManagement = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Resource Dialog */}
+      {/* Edit Resource Dialog - Full Fields */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
-        <DialogContent className="tech-card border-0 !transition-none">
+        <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Resource</DialogTitle>
           </DialogHeader>
           {editResource && (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label>Title</Label>
+                <Label>Title *</Label>
                 <Input
                   value={editResource.title}
                   onChange={(e) => setEditResource({ ...editResource, title: e.target.value })}
@@ -692,15 +1022,7 @@ const ResourcesManagement = () => {
                 />
               </div>
               <div>
-                <Label>Description</Label>
-                <Textarea
-                  value={editResource.description || ''}
-                  onChange={(e) => setEditResource({ ...editResource, description: e.target.value })}
-                  className="tech-card border-0"
-                />
-              </div>
-              <div>
-                <Label>Type</Label>
+                <Label>Type *</Label>
                 <Select value={editResource.resource_type} onValueChange={(v) => setEditResource({ ...editResource, resource_type: v })}>
                   <SelectTrigger className="tech-card border-0">
                     <SelectValue />
@@ -712,11 +1034,29 @@ const ResourcesManagement = () => {
                   </SelectContent>
                 </Select>
               </div>
+              <div className="md:col-span-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={editResource.description || ''}
+                  onChange={(e) => setEditResource({ ...editResource, description: e.target.value })}
+                  className="tech-card border-0"
+                />
+              </div>
+              <div>
+                <Label>Logo URL</Label>
+                <Input
+                  value={editResource.logo_url || ''}
+                  onChange={(e) => setEditResource({ ...editResource, logo_url: e.target.value })}
+                  placeholder="https://..."
+                  className="tech-card border-0"
+                />
+              </div>
               <div>
                 <Label>Website URL</Label>
                 <Input
                   value={editResource.website_url || ''}
                   onChange={(e) => setEditResource({ ...editResource, website_url: e.target.value })}
+                  placeholder="https://..."
                   className="tech-card border-0"
                 />
               </div>
@@ -728,21 +1068,87 @@ const ResourcesManagement = () => {
                   className="tech-card border-0"
                 />
               </div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={editResource.is_official_partner || false}
-                    onCheckedChange={(v) => setEditResource({ ...editResource, is_official_partner: v })}
+              <div>
+                <Label>Location Type</Label>
+                <Select value={editResource.location_type || 'physical'} onValueChange={(v) => setEditResource({ ...editResource, location_type: v })}>
+                  <SelectTrigger className="tech-card border-0">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LOCATION_TYPES.map(type => (
+                      <SelectItem key={type} value={type}>{type}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="md:col-span-2">
+                <Label>Address</Label>
+                <div className="flex gap-2">
+                  <Input
+                    value={editResource.address || ''}
+                    onChange={(e) => setEditResource({ ...editResource, address: e.target.value })}
+                    placeholder="Full address for geocoding..."
+                    className="tech-card border-0 flex-1"
                   />
-                  <Label>Official Partner</Label>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => geocodeAddress(editResource.address || '', true)}
+                    disabled={isGeocoding}
+                    className="tech-card border-0"
+                  >
+                    {isGeocoding ? <Loader2 className="h-4 w-4 animate-spin" /> : <Locate className="h-4 w-4" />}
+                  </Button>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Switch
-                    checked={editResource.is_flagship || false}
-                    onCheckedChange={(v) => setEditResource({ ...editResource, is_flagship: v })}
-                  />
-                  <Label>Flagship Location</Label>
-                </div>
+              </div>
+              <div>
+                <Label>City</Label>
+                <Input
+                  value={editResource.city || ''}
+                  onChange={(e) => setEditResource({ ...editResource, city: e.target.value })}
+                  className="tech-card border-0"
+                />
+              </div>
+              <div>
+                <Label>Country</Label>
+                <Input
+                  value={editResource.country || ''}
+                  onChange={(e) => setEditResource({ ...editResource, country: e.target.value })}
+                  className="tech-card border-0"
+                />
+              </div>
+              <div>
+                <Label>Latitude</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  value={editResource.latitude || ''}
+                  onChange={(e) => setEditResource({ ...editResource, latitude: e.target.value ? parseFloat(e.target.value) : null })}
+                  className="tech-card border-0"
+                />
+              </div>
+              <div>
+                <Label>Longitude</Label>
+                <Input
+                  type="number"
+                  step="any"
+                  value={editResource.longitude || ''}
+                  onChange={(e) => setEditResource({ ...editResource, longitude: e.target.value ? parseFloat(e.target.value) : null })}
+                  className="tech-card border-0"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={editResource.is_official_partner || false}
+                  onCheckedChange={(v) => setEditResource({ ...editResource, is_official_partner: v })}
+                />
+                <Label>Official Partner ⭐</Label>
+              </div>
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={editResource.is_flagship || false}
+                  onCheckedChange={(v) => setEditResource({ ...editResource, is_flagship: v })}
+                />
+                <Label>Flagship Location 👑</Label>
               </div>
             </div>
           )}
