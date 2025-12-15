@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import teamKhalia from "@/assets/team-khalia.jpg";
 import teamRicardo from "@/assets/team-ricardo.jpg";
 import teamSteven from "@/assets/team-steven.png";
 import teamPablo from "@/assets/team-pablo.jpg";
@@ -10,7 +11,7 @@ const teamMembers = [
     name: "Khalia Padilla",
     role: "Managing Partner & Founder",
     location: null,
-    image: null,
+    image: teamKhalia,
   },
   {
     name: "Ricardo Font",
