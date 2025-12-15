@@ -147,6 +147,14 @@ const ApiUsageTracker = () => {
         limit: 1000
       },
       { 
+        name: 'Gemini AI', 
+        icon: Brain, 
+        requests: stats.gemini.requests, 
+        cost: stats.gemini.cost > 0 ? stats.gemini.cost : stats.gemini.tokens * SERVICE_COSTS.gemini,
+        color: '#8B5CF6',
+        limit: 100000
+      },
+      { 
         name: 'Webz.io', 
         icon: Newspaper, 
         requests: stats.webzio.requests, 
@@ -154,14 +162,6 @@ const ApiUsageTracker = () => {
         color: '#10B981',
         limit: 10000,
         remaining: stats.webzio.remaining
-      },
-      { 
-        name: 'Gemini AI', 
-        icon: Brain, 
-        requests: stats.gemini.requests, 
-        cost: stats.gemini.cost > 0 ? stats.gemini.cost : stats.gemini.tokens * SERVICE_COSTS.gemini,
-        color: '#8B5CF6',
-        limit: 100000
       },
       { 
         name: 'Resend', 
@@ -225,8 +225,8 @@ const ApiUsageTracker = () => {
         // No data - set empty stats
         setServiceStats([
           { name: 'Whereby', icon: Video, requests: 0, cost: 0, color: '#3B82F6', limit: 1000 },
-          { name: 'Webz.io', icon: Newspaper, requests: 0, cost: 0, color: '#10B981', limit: 10000 },
           { name: 'Gemini AI', icon: Brain, requests: 0, cost: 0, color: '#8B5CF6', limit: 100000 },
+          { name: 'Webz.io', icon: Newspaper, requests: 0, cost: 0, color: '#10B981', limit: 10000 },
           { name: 'Resend', icon: Mail, requests: 0, cost: 0, color: '#F59E0B', limit: 3000 },
           { name: 'LinkedIn', icon: Linkedin, requests: 0, cost: 0, color: '#0A66C2', limit: 5000 }
         ]);
@@ -311,6 +311,7 @@ const ApiUsageTracker = () => {
           const Icon = service.icon;
           const usagePercent = service.limit ? (service.requests / service.limit) * 100 : 0;
           const isNearLimit = usagePercent > 80;
+          const isComingSoon = service.name === 'Webz.io';
           
           return (
             <Card key={service.name} className="tech-card border-0">
@@ -320,43 +321,58 @@ const ApiUsageTracker = () => {
                     <Icon className="h-5 w-5" style={{ color: service.color }} />
                     {service.name}
                   </CardTitle>
-                  <Badge 
-                    variant="outline" 
-                    className={isNearLimit ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : service.requests > 0 ? 'bg-green-500/20 text-green-400' : ''}
-                  >
-                    {isNearLimit ? 'Near Limit' : service.requests > 0 ? 'Active' : 'No Activity'}
-                  </Badge>
+                  {isComingSoon ? (
+                    <Badge variant="outline" className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                      Coming Soon
+                    </Badge>
+                  ) : (
+                    <Badge 
+                      variant="outline" 
+                      className={isNearLimit ? 'bg-amber-500/20 text-amber-400 border-amber-500/30' : service.requests > 0 ? 'bg-green-500/20 text-green-400' : ''}
+                    >
+                      {isNearLimit ? 'Near Limit' : service.requests > 0 ? 'Active' : 'No Activity'}
+                    </Badge>
+                  )}
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">Requests</p>
-                      <p className="text-xl font-bold">{service.requests.toLocaleString()}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-muted-foreground">Est. Cost</p>
-                      <p className="text-xl font-bold">${service.cost.toFixed(2)}</p>
-                    </div>
-                  </div>
-                  
-                  {service.limit && (
-                    <div className="space-y-1">
-                      <div className="flex justify-between text-xs text-muted-foreground">
-                        <span>Usage</span>
-                        <span>{service.requests} / {service.limit.toLocaleString()}</span>
-                      </div>
-                      <Progress value={usagePercent} className="h-2" />
-                    </div>
-                  )}
-
-                  {service.remaining !== undefined && (
+                {isComingSoon ? (
+                  <div className="text-center py-4">
+                    <Newspaper className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground">
-                      Remaining Credits: <span className="text-foreground font-medium">{service.remaining.toLocaleString()}</span>
+                      News Lite API integration coming soon
                     </p>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Requests</p>
+                        <p className="text-xl font-bold">{service.requests.toLocaleString()}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Est. Cost</p>
+                        <p className="text-xl font-bold">${service.cost.toFixed(2)}</p>
+                      </div>
+                    </div>
+                    
+                    {service.limit && (
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-xs text-muted-foreground">
+                          <span>Usage</span>
+                          <span>{service.requests} / {service.limit.toLocaleString()}</span>
+                        </div>
+                        <Progress value={usagePercent} className="h-2" />
+                      </div>
+                    )}
+
+                    {service.remaining !== undefined && (
+                      <p className="text-sm text-muted-foreground">
+                        Remaining Credits: <span className="text-foreground font-medium">{service.remaining.toLocaleString()}</span>
+                      </p>
+                    )}
+                  </div>
+                )}
               </CardContent>
             </Card>
           );
