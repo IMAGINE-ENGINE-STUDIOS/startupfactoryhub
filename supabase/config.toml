@@ -50,3 +50,6 @@ verify_jwt = true
 
 [functions.fetch-news]
 verify_jwt = false
+
+[functions.seed-demo-data]
+verify_jwt = false
