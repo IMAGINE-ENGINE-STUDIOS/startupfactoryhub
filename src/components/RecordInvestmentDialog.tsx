@@ -528,7 +528,7 @@ export default function RecordInvestmentDialog({
             />
           </div>
 
-          {/* Verification Section */}
+          {/* Verification Section - HIDDEN FOR NOW
           <div className="border rounded-lg p-4 bg-muted/30">
             <div className="flex items-center justify-between">
               <div>
@@ -564,6 +564,7 @@ export default function RecordInvestmentDialog({
               </Button>
             </div>
           </div>
+          */}
 
           {/* Actions */}
           <div className="flex gap-3 pt-4">
