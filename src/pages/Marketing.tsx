@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import marketingBg from '@/assets/marketing-bg.jpg';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
+import sfhQrCode from '@/assets/sfh-qr-code.png';
 import GIF from 'gif.js';
 
 const Marketing = () => {
@@ -14,6 +15,7 @@ const Marketing = () => {
   const [isGeneratingGif, setIsGeneratingGif] = useState(false);
   const [bgImageRef, setBgImageRef] = useState<HTMLImageElement | null>(null);
   const [logoImageRef, setLogoImageRef] = useState<HTMLImageElement | null>(null);
+  const [qrImageRef, setQrImageRef] = useState<HTMLImageElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -27,24 +29,28 @@ const Marketing = () => {
 
     const bgImage = new window.Image();
     const logoImage = new window.Image();
+    const qrImage = new window.Image();
     
     let loadedCount = 0;
 
     const tryDraw = () => {
       loadedCount++;
-      if (loadedCount === 2) {
+      if (loadedCount === 3) {
         setBgImageRef(bgImage);
         setLogoImageRef(logoImage);
-        drawMarketingGraphic(ctx, canvas.width, canvas.height, bgImage, logoImage);
+        setQrImageRef(qrImage);
+        drawMarketingGraphic(ctx, canvas.width, canvas.height, bgImage, logoImage, qrImage);
         setIsRendering(false);
       }
     };
 
     bgImage.onload = tryDraw;
     logoImage.onload = tryDraw;
+    qrImage.onload = tryDraw;
 
     bgImage.src = marketingBg;
     logoImage.src = sfhLogo;
+    qrImage.src = sfhQrCode;
   }, []);
 
   const drawMarketingGraphic = (
@@ -52,7 +58,8 @@ const Marketing = () => {
     width: number, 
     height: number,
     bgImage: HTMLImageElement,
-    logoImage: HTMLImageElement
+    logoImage: HTMLImageElement,
+    qrImage: HTMLImageElement
   ) => {
     // Draw background
     const bgRatio = bgImage.width / bgImage.height;
@@ -110,6 +117,9 @@ const Marketing = () => {
 
     // Draw corner accents
     drawCornerAccents(ctx, width, height);
+
+    // Draw QR code in top right corner
+    drawQRCode(ctx, width, qrImage);
   };
 
   const drawTechGrid = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
@@ -739,7 +749,7 @@ const Marketing = () => {
     
     // Measure website text width
     ctx.font = 'bold 24px "Segoe UI", system-ui, sans-serif';
-    const websiteText = 'www.startupfactoryhub.com';
+    const websiteText = 'startupfactoryhub.com';
     const websiteWidth = ctx.measureText(websiteText).width;
     
     // Calculate total width and center position
@@ -838,6 +848,28 @@ const Marketing = () => {
     ctx.shadowBlur = 0;
   };
 
+  const drawQRCode = (ctx: CanvasRenderingContext2D, width: number, qrImage: HTMLImageElement) => {
+    const qrSize = 150;
+    const offset = 60;
+    const x = width - offset - qrSize;
+    const y = offset;
+
+    // Draw QR code with slight rounded corners effect using clip
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(x, y, qrSize, qrSize, 12);
+    ctx.clip();
+    ctx.drawImage(qrImage, x, y, qrSize, qrSize);
+    ctx.restore();
+
+    // Draw border around QR code
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(x, y, qrSize, qrSize, 12);
+    ctx.stroke();
+  };
+
   const downloadImage = (format: 'png' | 'jpg') => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -884,7 +916,7 @@ const Marketing = () => {
   };
 
   const generateGif = async () => {
-    if (!bgImageRef || !logoImageRef) {
+    if (!bgImageRef || !logoImageRef || !qrImageRef) {
       toast.error('Images not loaded yet');
       return;
     }
@@ -911,7 +943,7 @@ const Marketing = () => {
 
       for (let frame = 0; frame < totalFrames; frame++) {
         const progress = frame / totalFrames;
-        drawAnimatedFrame(tempCtx, 960, 540, bgImageRef, logoImageRef, progress);
+        drawAnimatedFrame(tempCtx, 960, 540, bgImageRef, logoImageRef, qrImageRef, progress);
         gif.addFrame(tempCtx, { copy: true, delay: frameDelay });
       }
 
@@ -940,6 +972,7 @@ const Marketing = () => {
     height: number,
     bgImage: HTMLImageElement,
     logoImage: HTMLImageElement,
+    qrImage: HTMLImageElement,
     progress: number
   ) => {
     // Scale factor for smaller GIF
@@ -1107,7 +1140,7 @@ const Marketing = () => {
     // CTA section
     ctx.font = `bold ${12 * scale}px "Segoe UI", system-ui, sans-serif`;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.fillText('www.startupfactoryhub.com', width / 2 - 100 * scale, 970 * scale + 32 * scale);
+    ctx.fillText('startupfactoryhub.com', width / 2 - 100 * scale, 970 * scale + 32 * scale);
 
     // Button with subtle pulse
     const btnPulse = 1 + Math.sin(progress * Math.PI * 2) * 0.02;
@@ -1128,6 +1161,25 @@ const Marketing = () => {
     ctx.font = `bold ${13 * scale}px "Segoe UI", system-ui, sans-serif`;
     ctx.fillStyle = '#ffffff';
     ctx.fillText('START YOUR JOURNEY →', btnX + btnWidth / 2, btnY + btnHeight / 2 + 4 * scale);
+
+    // Draw QR code in top right corner
+    const qrSize = 150 * scale;
+    const offset = 60 * scale;
+    const qrX = width - offset - qrSize;
+    const qrY = offset;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(qrX, qrY, qrSize, qrSize, 12 * scale);
+    ctx.clip();
+    ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+    ctx.restore();
+
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.6)';
+    ctx.lineWidth = 2 * scale;
+    ctx.beginPath();
+    ctx.roundRect(qrX, qrY, qrSize, qrSize, 12 * scale);
+    ctx.stroke();
   };
 
   return (
