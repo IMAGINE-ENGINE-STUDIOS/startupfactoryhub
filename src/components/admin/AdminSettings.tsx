@@ -9,6 +9,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { 
   Settings,
   AlertTriangle,
@@ -21,7 +32,10 @@ import {
   Save,
   Loader2,
   Linkedin,
-  ExternalLink
+  ExternalLink,
+  Users,
+  Sparkles,
+  Trash2
 } from 'lucide-react';
 
 interface PlatformSettings {
@@ -49,11 +63,20 @@ interface EmailTemplates {
   notificationBody: string;
 }
 
+interface DemoStats {
+  users: number;
+  posts: number;
+  companies: number;
+}
+
 const AdminSettings = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [showApiKeys, setShowApiKeys] = useState(false);
+  const [seeding, setSeeding] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [demoStats, setDemoStats] = useState<DemoStats>({ users: 0, posts: 0, companies: 0 });
   
   const [platformSettings, setPlatformSettings] = useState<PlatformSettings>({
     maintenanceMode: false,
@@ -91,6 +114,7 @@ const AdminSettings = () => {
 
   useEffect(() => {
     loadSettings();
+    loadDemoStats();
   }, []);
 
   const loadSettings = async () => {
@@ -102,7 +126,6 @@ const AdminSettings = () => {
 
       if (error) throw error;
 
-      // Parse settings from database
       settings?.forEach((setting: any) => {
         const value = setting.setting_value;
         
@@ -122,6 +145,20 @@ const AdminSettings = () => {
       console.error('Error loading settings:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadDemoStats = async () => {
+    try {
+      const response = await supabase.functions.invoke('seed-demo-data', {
+        body: { action: 'stats' }
+      });
+      
+      if (response.data?.stats) {
+        setDemoStats(response.data.stats);
+      }
+    } catch (error) {
+      console.error('Error loading demo stats:', error);
     }
   };
 
@@ -179,6 +216,60 @@ const AdminSettings = () => {
     });
   };
 
+  const handleSeedDemoData = async () => {
+    setSeeding(true);
+    try {
+      const response = await supabase.functions.invoke('seed-demo-data', {
+        body: { action: 'seed' }
+      });
+      
+      if (response.error) throw response.error;
+      
+      toast({
+        title: "Demo Data Generated",
+        description: `Created ${response.data?.stats?.users || 20} demo users and ${response.data?.stats?.posts || 30} posts.`
+      });
+      
+      loadDemoStats();
+    } catch (error: any) {
+      console.error('Error seeding demo data:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to generate demo data",
+        variant: "destructive"
+      });
+    } finally {
+      setSeeding(false);
+    }
+  };
+
+  const handleClearDemoData = async () => {
+    setClearing(true);
+    try {
+      const response = await supabase.functions.invoke('seed-demo-data', {
+        body: { action: 'clear' }
+      });
+      
+      if (response.error) throw response.error;
+      
+      toast({
+        title: "Demo Data Cleared",
+        description: "All demo users, posts, and related data have been removed."
+      });
+      
+      loadDemoStats();
+    } catch (error: any) {
+      console.error('Error clearing demo data:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to clear demo data",
+        variant: "destructive"
+      });
+    } finally {
+      setClearing(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -190,7 +281,7 @@ const AdminSettings = () => {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="platform" className="w-full">
-        <TabsList className="tech-card border-0 p-1 grid grid-cols-4 h-auto gap-1">
+        <TabsList className="tech-card border-0 p-1 grid grid-cols-5 h-auto gap-1">
           <TabsTrigger value="platform" className="flex items-center gap-2 py-2">
             <Settings className="h-4 w-4" />
             <span className="hidden sm:inline">Platform</span>
@@ -206,6 +297,10 @@ const AdminSettings = () => {
           <TabsTrigger value="api" className="flex items-center gap-2 py-2">
             <Key className="h-4 w-4" />
             <span className="hidden sm:inline">API Keys</span>
+          </TabsTrigger>
+          <TabsTrigger value="demo" className="flex items-center gap-2 py-2">
+            <Users className="h-4 w-4" />
+            <span className="hidden sm:inline">Demo Data</span>
           </TabsTrigger>
         </TabsList>
 
@@ -449,36 +544,135 @@ const AdminSettings = () => {
                    rel="noopener noreferrer"
                    className="text-primary hover:underline ml-1"
                 >
-                  Manage in Supabase Dashboard
+                  Manage secrets →
                 </a>
               </p>
             </CardContent>
           </Card>
 
-          {/* LinkedIn Verification Card */}
-          <Card className="tech-card border-0 mt-4">
+          {/* LinkedIn Verification */}
+          <Card className="tech-card border-0 border-[#0A66C2]/20">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Linkedin className="h-5 w-5" style={{ color: '#0A66C2' }} />
-                LinkedIn App Verification
+                <Linkedin className="h-5 w-5 text-[#0A66C2]" />
+                LinkedIn Integration
               </CardTitle>
-              <CardDescription>Verify your LinkedIn developer application for OAuth and API access</CardDescription>
+              <CardDescription>Verify your LinkedIn application</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="p-4 rounded-lg border border-[#0A66C2]/30 bg-[#0A66C2]/10">
-                <p className="text-sm text-muted-foreground mb-3">
-                  Complete the LinkedIn app verification to enable OAuth login and API access for users.
-                </p>
-                <a 
-                  href="https://www.linkedin.com/developers/apps/verification/ac491359-8e1a-4d9c-9949-6240ba9fd9c3"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0A66C2] text-white hover:bg-[#0A66C2]/90 transition-colors"
+              <div className="flex items-center justify-between p-4 rounded-lg border border-border/50">
+                <div>
+                  <p className="font-medium">App Verification</p>
+                  <p className="text-sm text-muted-foreground">
+                    Complete LinkedIn app verification to enable API features
+                  </p>
+                </div>
+                <Button 
+                  variant="outline"
+                  className="border-[#0A66C2]/30 text-[#0A66C2] hover:bg-[#0A66C2]/10"
+                  onClick={() => window.open('https://www.linkedin.com/developers/apps/verification/ac491359-8e1a-4d9c-9949-6240ba9fd9c3', '_blank')}
                 >
-                  <Linkedin className="h-4 w-4" />
+                  <ExternalLink className="h-4 w-4 mr-2" />
                   Verify LinkedIn App
-                  <ExternalLink className="h-3 w-3" />
-                </a>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* Demo Data Management */}
+        <TabsContent value="demo" className="space-y-6 mt-6">
+          <Card className="tech-card border-0 border-emerald-500/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-emerald-400">
+                <Users className="h-5 w-5" />
+                Demo Data Management
+              </CardTitle>
+              <CardDescription>Generate or reset demo data for live demonstrations</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Demo Stats */}
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-4 rounded-lg bg-muted/50 border border-border/50">
+                  <p className="text-3xl font-bold text-emerald-400">{demoStats.users}</p>
+                  <p className="text-sm text-muted-foreground">Demo Users</p>
+                </div>
+                <div className="text-center p-4 rounded-lg bg-muted/50 border border-border/50">
+                  <p className="text-3xl font-bold text-blue-400">{demoStats.posts}</p>
+                  <p className="text-sm text-muted-foreground">Demo Posts</p>
+                </div>
+                <div className="text-center p-4 rounded-lg bg-muted/50 border border-border/50">
+                  <p className="text-3xl font-bold text-purple-400">{demoStats.companies}</p>
+                  <p className="text-sm text-muted-foreground">Demo Companies</p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="space-y-4 pt-4">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-emerald-500/30">
+                  <div>
+                    <p className="font-medium">Generate Demo Data</p>
+                    <p className="text-sm text-muted-foreground">
+                      Create 20 demo users with profiles, 30+ posts with images, and engagement data
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={handleSeedDemoData}
+                    disabled={seeding}
+                    className="bg-emerald-600 hover:bg-emerald-700"
+                  >
+                    {seeding ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                    {seeding ? 'Generating...' : 'Generate Demo Data'}
+                  </Button>
+                </div>
+                
+                <div className="flex items-center justify-between p-4 rounded-lg border border-red-500/30">
+                  <div>
+                    <p className="font-medium text-red-400">Clear Demo Data</p>
+                    <p className="text-sm text-muted-foreground">
+                      Remove all demo users, posts, and related data. Real users will not be affected.
+                    </p>
+                  </div>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button 
+                        variant="outline" 
+                        className="border-red-500/30 text-red-400 hover:bg-red-500/10"
+                        disabled={clearing}
+                      >
+                        {clearing ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Trash2 className="h-4 w-4 mr-2" />}
+                        {clearing ? 'Clearing...' : 'Clear Demo Data'}
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent className="tech-card border-0 !transition-none">
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Clear all demo data?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          This will remove all demo users, their posts, comments, likes, and company profiles. 
+                          Real users and their data will not be affected. This action cannot be undone.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel className="tech-card border-0">Cancel</AlertDialogCancel>
+                        <AlertDialogAction 
+                          onClick={handleClearDemoData}
+                          className="bg-red-600 hover:bg-red-700"
+                        >
+                          Clear Demo Data
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+
+              {/* Info */}
+              <div className="p-4 rounded-lg bg-muted/30 border border-border/50 mt-4">
+                <p className="text-sm text-muted-foreground">
+                  <strong>Note:</strong> Demo data is marked with a [DEMO] identifier in user bios and post content. 
+                  This allows the system to identify and safely remove only demo data without affecting real users. 
+                  Demo users include: 6 Startup Founders, 4 Investors, 3 Mentors, 3 Advisors, 3 Students, and 1 Accelerator.
+                </p>
               </div>
             </CardContent>
           </Card>
