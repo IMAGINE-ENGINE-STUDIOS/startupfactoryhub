@@ -415,6 +415,25 @@ export const GlobalResourcesMap = () => {
     };
   }, [refetchEvents]);
 
+  // Real-time subscription for resource changes (admin edits sync)
+  const { refetch: refetchResources } = useResources({});
+  useEffect(() => {
+    const channel = supabase
+      .channel('globe-resources-sync')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'resources' },
+        () => {
+          // Refetch resources when admin makes changes
+          refetchResources();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetchResources]);
+
   // Helper: Create marker icon for native markers
   const createMarkerIcon = (color: string, type: ResourceType) => {
     const size = 48;
