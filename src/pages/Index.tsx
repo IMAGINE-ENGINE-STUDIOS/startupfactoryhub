@@ -5,6 +5,7 @@ import FeaturesSection from "@/components/FeaturesSection";
 import CommunitySection from "@/components/CommunitySection";
 import AIAssistantPreview from "@/components/AIAssistantPreview";
 import AboutHero from "@/components/AboutHero";
+import TeamSection from "@/components/TeamSection";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -16,6 +17,7 @@ const Index = () => {
       <FeaturesSection />
       <CommunitySection />
       <AIAssistantPreview />
+      <TeamSection />
       <NasdaqFeature />
       <Footer />
     </div>
