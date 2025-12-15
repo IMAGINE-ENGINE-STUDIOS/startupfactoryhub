@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import RecommendationPopup from "@/components/RecommendationPopup";
-import { LanguageSelector } from "@/components/LanguageSelector";
+
 
 export function DashboardHeader() {
   const navigate = useNavigate();
@@ -91,7 +91,7 @@ export function DashboardHeader() {
           </PopoverContent>
         </Popover>
         
-        <LanguageSelector variant="icon" className="h-9 w-9 sm:h-10 sm:w-10" />
+        
         
         <div className="h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center">
           <ThemeToggle />
