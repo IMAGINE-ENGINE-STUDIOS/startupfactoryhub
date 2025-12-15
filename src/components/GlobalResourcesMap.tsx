@@ -178,7 +178,7 @@ export const GlobalResourcesMap = () => {
     fetchAcceleratorLocation();
   }, [user, role]);
 
-  const { data: resources, isLoading } = useResources({ 
+const { data: resources, isLoading, refetch: refetchResources } = useResources({ 
     type: selectedType === 'event' ? undefined : selectedType || undefined,
     search: search || undefined
   });
@@ -416,15 +416,19 @@ export const GlobalResourcesMap = () => {
   }, [refetchEvents]);
 
   // Real-time subscription for resource changes (admin edits sync)
-  const { refetch: refetchResources } = useResources({});
   useEffect(() => {
     const channel = supabase
       .channel('globe-resources-sync')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'resources' },
-        () => {
-          // Refetch resources when admin makes changes
+        (payload) => {
+          // Refetch main resources query when admin makes changes
           refetchResources();
+          
+          // Immediately update selectedResource if it was the one edited
+          if (selectedResource && payload.new && (payload.new as any).id === selectedResource.id) {
+            setSelectedResource(payload.new as Resource);
+          }
         }
       )
       .subscribe();
@@ -432,7 +436,21 @@ export const GlobalResourcesMap = () => {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [refetchResources]);
+  }, [refetchResources, selectedResource?.id]);
+
+  // Update selectedResource when resources refetch (for real-time card updates)
+  useEffect(() => {
+    if (selectedResource && resources) {
+      const updated = resources.find(r => r.id === selectedResource.id);
+      if (updated && (
+        updated.logo_url !== selectedResource.logo_url || 
+        updated.description !== selectedResource.description || 
+        updated.title !== selectedResource.title
+      )) {
+        setSelectedResource(updated);
+      }
+    }
+  }, [resources]);
 
   // Helper: Create marker icon for native markers
   const createMarkerIcon = (color: string, type: ResourceType) => {
