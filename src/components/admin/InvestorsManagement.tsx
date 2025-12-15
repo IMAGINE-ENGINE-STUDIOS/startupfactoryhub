@@ -356,26 +356,26 @@ export function InvestorsManagement() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Investors by Stage */}
         <Card className="tech-card border-0">
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-base">Investors by Stage</CardTitle>
             <p className="text-xs text-muted-foreground">Count of investors preferring each stage</p>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-hidden">
             {investorsByStageData.length > 0 ? (
-              <div className="h-[250px]">
+              <div className="h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
                       data={investorsByStageData}
                       dataKey="value"
                       nameKey="name"
-                      cx="50%"
-                      cy="45%"
-                      outerRadius={60}
-                      innerRadius={30}
+                      cx="35%"
+                      cy="50%"
+                      outerRadius={50}
+                      innerRadius={25}
                     >
                       {investorsByStageData.map((entry) => (
                         <Cell 
@@ -385,12 +385,14 @@ export function InvestorsManagement() {
                       ))}
                     </Pie>
                     <Legend 
-                      layout="horizontal" 
-                      verticalAlign="bottom" 
-                      align="center"
+                      layout="vertical" 
+                      verticalAlign="middle" 
+                      align="right"
+                      wrapperStyle={{ fontSize: '10px', maxWidth: '45%', paddingLeft: '8px' }}
                       formatter={(value, entry: any) => {
                         const item = investorsByStageData.find(d => d.name === value);
-                        return <span className="text-xs">{value} ({item?.value || 0})</span>;
+                        const displayName = value.length > 10 ? value.slice(0, 10) + '...' : value;
+                        return <span className="text-xs">{displayName} ({item?.value || 0})</span>;
                       }}
                     />
                     <ChartTooltip 
@@ -410,7 +412,7 @@ export function InvestorsManagement() {
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+              <div className="h-[220px] flex items-center justify-center text-muted-foreground">
                 No investor stage preferences
               </div>
             )}
@@ -419,22 +421,42 @@ export function InvestorsManagement() {
 
         {/* Investors by Industry */}
         <Card className="tech-card border-0">
-          <CardHeader>
+          <CardHeader className="pb-2">
             <CardTitle className="text-base">Investors by Industry</CardTitle>
             <p className="text-xs text-muted-foreground">Count of investors preferring each industry</p>
           </CardHeader>
-          <CardContent>
+          <CardContent className="overflow-hidden">
             {investorsByIndustryData.length > 0 ? (
-              <ChartContainer config={{}} className="h-[200px]">
-                <BarChart data={investorsByIndustryData} layout="vertical">
-                  <XAxis type="number" tick={{ fontSize: 10 }} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 9 }} width={80} />
-                  <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                  <ChartTooltip content={<ChartTooltipContent />} />
-                </BarChart>
-              </ChartContainer>
+              <div className="h-[220px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={investorsByIndustryData} layout="vertical" margin={{ left: 0, right: 10 }}>
+                    <XAxis type="number" tick={{ fontSize: 9 }} />
+                    <YAxis 
+                      type="category" 
+                      dataKey="name" 
+                      tick={{ fontSize: 8 }} 
+                      width={85}
+                      tickFormatter={(value) => value.length > 12 ? value.slice(0, 12) + '...' : value}
+                    />
+                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                    <ChartTooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                              <p className="text-sm font-medium">{payload[0].payload.name}</p>
+                              <p className="text-sm text-muted-foreground">{payload[0].value} investors</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
             ) : (
-              <div className="h-[200px] flex items-center justify-center text-muted-foreground">
+              <div className="h-[220px] flex items-center justify-center text-muted-foreground">
                 No investor industry preferences
               </div>
             )}
@@ -442,25 +464,39 @@ export function InvestorsManagement() {
         </Card>
 
         {/* Investment Activity */}
-        <Card className="tech-card border-0">
-          <CardHeader>
+        <Card className="tech-card border-0 md:col-span-2 lg:col-span-1">
+          <CardHeader className="pb-2">
             <CardTitle className="text-base">Investment Activity (12 Months)</CardTitle>
             <p className="text-xs text-muted-foreground">Number of deals per month</p>
           </CardHeader>
-          <CardContent>
-            <ChartContainer config={{}} className="h-[200px]">
-              <AreaChart data={activityData}>
-                <XAxis dataKey="month" tick={{ fontSize: 10 }} />
-                <YAxis tick={{ fontSize: 10 }} />
-                <Area 
-                  type="monotone" 
-                  dataKey="count" 
-                  stroke="hsl(var(--primary))" 
-                  fill="hsl(var(--primary) / 0.2)" 
-                />
-                <ChartTooltip content={<ChartTooltipContent />} />
-              </AreaChart>
-            </ChartContainer>
+          <CardContent className="overflow-hidden">
+            <div className="h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={activityData} margin={{ left: 0, right: 10 }}>
+                  <XAxis dataKey="month" tick={{ fontSize: 8 }} interval="preserveStartEnd" />
+                  <YAxis tick={{ fontSize: 9 }} width={30} />
+                  <Area 
+                    type="monotone" 
+                    dataKey="count" 
+                    stroke="hsl(var(--primary))" 
+                    fill="hsl(var(--primary) / 0.2)" 
+                  />
+                  <ChartTooltip 
+                    content={({ active, payload }) => {
+                      if (active && payload && payload.length) {
+                        return (
+                          <div className="rounded-lg border bg-background p-2 shadow-sm">
+                            <p className="text-sm font-medium">{payload[0].payload.month}</p>
+                            <p className="text-sm text-muted-foreground">{payload[0].value} deals</p>
+                          </div>
+                        );
+                      }
+                      return null;
+                    }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </CardContent>
         </Card>
       </div>

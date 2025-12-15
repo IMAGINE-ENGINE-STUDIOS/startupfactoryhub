@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,9 @@ import {
   DollarSign,
   Users,
   Calendar,
-  Rocket
+  Rocket,
+  MapPin,
+  Briefcase
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -28,6 +30,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Tooltip } from "recharts";
+import { getIndustryLabel } from "@/lib/constants";
 
 interface Accelerator {
   id: string;
@@ -44,6 +48,9 @@ interface Accelerator {
   is_accepting_applications: boolean | null;
   created_at: string;
   user_id: string;
+  industries_focus: string[] | null;
+  city: string | null;
+  country: string | null;
 }
 
 interface Cohort {
@@ -53,7 +60,19 @@ interface Cohort {
   current_startups: number | null;
   max_startups: number | null;
   application_deadline: string | null;
+  accelerator_id: string;
 }
+
+const CHART_COLORS = [
+  'hsl(160, 70%, 45%)',
+  'hsl(200, 70%, 50%)',
+  'hsl(280, 70%, 50%)',
+  'hsl(45, 80%, 50%)',
+  'hsl(15, 80%, 55%)',
+  'hsl(330, 70%, 50%)',
+  'hsl(100, 60%, 45%)',
+  'hsl(240, 60%, 55%)',
+];
 
 const AcceleratorsManagement = () => {
   const { toast } = useToast();
@@ -63,9 +82,35 @@ const AcceleratorsManagement = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedAccelerator, setSelectedAccelerator] = useState<Accelerator | null>(null);
   const [showDialog, setShowDialog] = useState(false);
+  const isMounted = useRef(true);
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    isMounted.current = true;
     fetchData();
+
+    // Real-time subscriptions
+    const acceleratorChannel = supabase
+      .channel('admin-accelerators-sync')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'accelerator_profiles' }, () => {
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => {
+          if (isMounted.current) fetchData();
+        }, 500);
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'accelerator_cohorts' }, () => {
+        if (debounceTimer.current) clearTimeout(debounceTimer.current);
+        debounceTimer.current = setTimeout(() => {
+          if (isMounted.current) fetchData();
+        }, 500);
+      })
+      .subscribe();
+
+    return () => {
+      isMounted.current = false;
+      if (debounceTimer.current) clearTimeout(debounceTimer.current);
+      supabase.removeChannel(acceleratorChannel);
+    };
   }, []);
 
   const fetchData = async () => {
@@ -79,8 +124,10 @@ const AcceleratorsManagement = () => {
       if (accResult.error) throw accResult.error;
       if (cohortResult.error) throw cohortResult.error;
 
-      setAccelerators(accResult.data || []);
-      setCohorts(cohortResult.data || []);
+      if (isMounted.current) {
+        setAccelerators(accResult.data || []);
+        setCohorts(cohortResult.data || []);
+      }
     } catch (error) {
       console.error('Error fetching data:', error);
       toast({
@@ -89,7 +136,7 @@ const AcceleratorsManagement = () => {
         variant: "destructive"
       });
     } finally {
-      setLoading(false);
+      if (isMounted.current) setLoading(false);
     }
   };
 
@@ -103,12 +150,41 @@ const AcceleratorsManagement = () => {
   const filteredAccelerators = accelerators.filter(a => 
     !searchQuery || 
     a.organization_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    a.location?.toLowerCase().includes(searchQuery.toLowerCase())
+    a.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    a.city?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    a.country?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const getAcceleratorCohorts = (acceleratorId: string) => {
-    return cohorts.filter(c => c.id === acceleratorId);
+    return cohorts.filter(c => c.accelerator_id === acceleratorId);
   };
+
+  // Demographics: Accelerators by Country
+  const locationData = (() => {
+    const counts: Record<string, number> = {};
+    accelerators.forEach(a => {
+      const country = a.country || a.location?.split(',').pop()?.trim() || 'Unknown';
+      counts[country] = (counts[country] || 0) + 1;
+    });
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8);
+  })();
+
+  // Industries Focus Distribution
+  const industryData = (() => {
+    const counts: Record<string, number> = {};
+    accelerators.forEach(a => {
+      a.industries_focus?.forEach(ind => {
+        counts[ind] = (counts[ind] || 0) + 1;
+      });
+    });
+    return Object.entries(counts)
+      .map(([name, value]) => ({ name: getIndustryLabel(name), key: name, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 8);
+  })();
 
   if (loading) {
     return (
@@ -156,6 +232,118 @@ const AcceleratorsManagement = () => {
         </Card>
       </div>
 
+      {/* Demographics Charts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Location Distribution */}
+        <Card className="tech-card border-0">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-emerald-400" />
+              Accelerators by Location
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-hidden">
+            {locationData.length > 0 ? (
+              <div className="h-[200px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={locationData}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="35%"
+                      cy="50%"
+                      outerRadius={60}
+                      innerRadius={30}
+                    >
+                      {locationData.map((_, index) => (
+                        <Cell key={index} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                              <p className="text-sm font-medium">{payload[0].name}</p>
+                              <p className="text-sm text-muted-foreground">{payload[0].value} accelerators</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[200px] flex items-center justify-center text-muted-foreground text-sm">
+                No location data available
+              </div>
+            )}
+            {locationData.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {locationData.map((item, index) => (
+                  <div key={item.name} className="flex items-center gap-1.5 text-xs">
+                    <div 
+                      className="w-2.5 h-2.5 rounded-full" 
+                      style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
+                    />
+                    <span className="text-muted-foreground">{item.name} ({item.value})</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Industries Focus Distribution */}
+        <Card className="tech-card border-0">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Briefcase className="h-4 w-4 text-blue-400" />
+              Industries Focus
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="overflow-hidden">
+            {industryData.length > 0 ? (
+              <div className="h-[220px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={industryData} layout="vertical" margin={{ left: 0, right: 10 }}>
+                    <XAxis type="number" tick={{ fontSize: 9 }} />
+                    <YAxis 
+                      type="category" 
+                      dataKey="name" 
+                      tick={{ fontSize: 8 }} 
+                      width={90}
+                      tickFormatter={(value) => value.length > 14 ? value.slice(0, 14) + '...' : value}
+                    />
+                    <Bar dataKey="value" fill="hsl(160, 70%, 45%)" radius={[0, 4, 4, 0]} />
+                    <Tooltip 
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="rounded-lg border bg-background p-2 shadow-sm">
+                              <p className="text-sm font-medium">{payload[0].payload.name}</p>
+                              <p className="text-sm text-muted-foreground">{payload[0].value} accelerators</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[220px] flex items-center justify-center text-muted-foreground text-sm">
+                No industry data available
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
       {/* Filters */}
       <Card className="tech-card border-0">
         <CardContent className="p-4">
@@ -192,9 +380,10 @@ const AcceleratorsManagement = () => {
                 <TableRow>
                   <TableHead>Organization</TableHead>
                   <TableHead>Location</TableHead>
-                  <TableHead>Funding Offered</TableHead>
-                  <TableHead>Equity</TableHead>
-                  <TableHead>Cohorts</TableHead>
+                  <TableHead className="hidden md:table-cell">Industries</TableHead>
+                  <TableHead>Funding</TableHead>
+                  <TableHead className="hidden sm:table-cell">Equity</TableHead>
+                  <TableHead className="hidden lg:table-cell">Cohorts</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
@@ -209,24 +398,56 @@ const AcceleratorsManagement = () => {
                           <AvatarFallback>{accelerator.organization_name?.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-medium">{accelerator.organization_name}</p>
+                          <p className="font-medium text-sm">{accelerator.organization_name}</p>
                           <p className="text-xs text-muted-foreground">{accelerator.program_duration || 'N/A'}</p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>{accelerator.location || 'N/A'}</TableCell>
-                    <TableCell className="font-medium">
+                    <TableCell>
+                      <div className="text-sm">
+                        {accelerator.city && accelerator.country ? (
+                          <>
+                            <p>{accelerator.city}</p>
+                            <p className="text-xs text-muted-foreground">{accelerator.country}</p>
+                          </>
+                        ) : (
+                          <span className="text-muted-foreground">{accelerator.location || 'N/A'}</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <div className="flex flex-wrap gap-1 max-w-[180px]">
+                        {accelerator.industries_focus?.slice(0, 2).map(ind => (
+                          <Badge key={ind} variant="outline" className="text-[10px] px-1.5 py-0">
+                            {getIndustryLabel(ind).slice(0, 12)}
+                          </Badge>
+                        ))}
+                        {(accelerator.industries_focus?.length || 0) > 2 && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                            +{accelerator.industries_focus!.length - 2}
+                          </Badge>
+                        )}
+                        {!accelerator.industries_focus?.length && (
+                          <span className="text-xs text-muted-foreground">N/A</span>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-medium text-sm">
                       {formatFunding(accelerator.funding_offered)}
                     </TableCell>
-                    <TableCell>{accelerator.equity_percentage ? `${accelerator.equity_percentage}%` : 'N/A'}</TableCell>
-                    <TableCell>{accelerator.total_cohorts || 0}</TableCell>
+                    <TableCell className="hidden sm:table-cell text-sm">
+                      {accelerator.equity_percentage ? `${accelerator.equity_percentage}%` : 'N/A'}
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell text-sm">
+                      {getAcceleratorCohorts(accelerator.id).length || accelerator.total_cohorts || 0}
+                    </TableCell>
                     <TableCell>
                       {accelerator.is_accepting_applications ? (
-                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30 text-xs">
                           Open
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-muted-foreground">
+                        <Badge variant="outline" className="text-muted-foreground text-xs">
                           Closed
                         </Badge>
                       )}
@@ -272,10 +493,32 @@ const AcceleratorsManagement = () => {
                 </Avatar>
                 <div>
                   <h3 className="text-lg font-semibold">{selectedAccelerator.organization_name}</h3>
-                  <p className="text-sm text-muted-foreground">{selectedAccelerator.location}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedAccelerator.city && selectedAccelerator.country 
+                      ? `${selectedAccelerator.city}, ${selectedAccelerator.country}`
+                      : selectedAccelerator.location || 'Location not specified'}
+                  </p>
                 </div>
               </div>
-              <p className="text-sm text-muted-foreground">{selectedAccelerator.description}</p>
+              
+              {selectedAccelerator.description && (
+                <p className="text-sm text-muted-foreground">{selectedAccelerator.description}</p>
+              )}
+
+              {/* Industries Focus */}
+              {selectedAccelerator.industries_focus && selectedAccelerator.industries_focus.length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Industries Focus</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {selectedAccelerator.industries_focus.map(ind => (
+                      <Badge key={ind} variant="outline" className="text-xs">
+                        {getIndustryLabel(ind)}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground">Funding Offered</p>
@@ -283,7 +526,7 @@ const AcceleratorsManagement = () => {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Equity</p>
-                  <p className="font-medium">{selectedAccelerator.equity_percentage}%</p>
+                  <p className="font-medium">{selectedAccelerator.equity_percentage ? `${selectedAccelerator.equity_percentage}%` : 'N/A'}</p>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Program Duration</p>
@@ -294,6 +537,23 @@ const AcceleratorsManagement = () => {
                   <p className="font-medium">{selectedAccelerator.total_startups_supported || 0}</p>
                 </div>
               </div>
+
+              {/* Cohorts for this accelerator */}
+              {getAcceleratorCohorts(selectedAccelerator.id).length > 0 && (
+                <div>
+                  <p className="text-sm text-muted-foreground mb-2">Active Cohorts</p>
+                  <div className="space-y-2">
+                    {getAcceleratorCohorts(selectedAccelerator.id).slice(0, 3).map(cohort => (
+                      <div key={cohort.id} className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
+                        <span className="text-sm font-medium">{cohort.name}</span>
+                        <Badge variant="outline" className="text-xs">
+                          {cohort.status || 'Active'}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
           <DialogFooter>
