@@ -19,7 +19,9 @@ import {
   Eye,
   EyeOff,
   Save,
-  Loader2
+  Loader2,
+  Linkedin,
+  ExternalLink
 } from 'lucide-react';
 
 interface PlatformSettings {
@@ -83,7 +85,8 @@ const AdminSettings = () => {
     { name: 'WHEREBY_API_KEY', value: 'eyJhbG...', masked: true },
     { name: 'WEBZ_API_TOKEN', value: 'a1b2c3...', masked: true },
     { name: 'LOVABLE_API_KEY', value: 'lov_...', masked: true },
-    { name: 'RESEND_API_KEY', value: 're_...', masked: true }
+    { name: 'RESEND_API_KEY', value: 're_...', masked: true },
+    { name: 'LINKEDIN_API', value: 'linkedin_...', masked: true }
   ];
 
   useEffect(() => {
@@ -449,6 +452,34 @@ const AdminSettings = () => {
                   Manage in Supabase Dashboard
                 </a>
               </p>
+            </CardContent>
+          </Card>
+
+          {/* LinkedIn Verification Card */}
+          <Card className="tech-card border-0 mt-4">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Linkedin className="h-5 w-5" style={{ color: '#0A66C2' }} />
+                LinkedIn App Verification
+              </CardTitle>
+              <CardDescription>Verify your LinkedIn developer application for OAuth and API access</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="p-4 rounded-lg border border-[#0A66C2]/30 bg-[#0A66C2]/10">
+                <p className="text-sm text-muted-foreground mb-3">
+                  Complete the LinkedIn app verification to enable OAuth login and API access for users.
+                </p>
+                <a 
+                  href="https://www.linkedin.com/developers/apps/verification/ac491359-8e1a-4d9c-9949-6240ba9fd9c3"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0A66C2] text-white hover:bg-[#0A66C2]/90 transition-colors"
+                >
+                  <Linkedin className="h-4 w-4" />
+                  Verify LinkedIn App
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
