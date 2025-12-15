@@ -1,35 +1,46 @@
 import { motion } from "framer-motion";
+import teamRicardo from "@/assets/team-ricardo.jpg";
+import teamSteven from "@/assets/team-steven.png";
+import teamPablo from "@/assets/team-pablo.jpg";
+import teamGary from "@/assets/team-gary.png";
+import teamHiro from "@/assets/team-hiro.png";
 
 const teamMembers = [
   {
     name: "Khalia Padilla",
     role: "Managing Partner & Founder",
     location: null,
+    image: null,
   },
   {
     name: "Ricardo Font",
     role: "Managing Partner & Founder",
     location: null,
+    image: teamRicardo,
   },
   {
     name: "Steven Lidgreen",
     role: "Managing Partner",
     location: "SFH Tokyo",
-  },
-  {
-    name: "Hiroaki Takana",
-    role: "Managing Director",
-    location: "SFH Tokyo",
-  },
-  {
-    name: "Gary Jinkins",
-    role: "Strategic Advisor",
-    location: null,
+    image: teamSteven,
   },
   {
     name: "Pablo Duenas",
     role: "Managing Partner",
     location: "SFH Chile",
+    image: teamPablo,
+  },
+  {
+    name: "Gary Jinkins",
+    role: "Strategic Advisor",
+    location: null,
+    image: teamGary,
+  },
+  {
+    name: "Hiroaki Takana",
+    role: "Managing Director",
+    location: "SFH Tokyo",
+    image: teamHiro,
   },
 ];
 
@@ -95,18 +106,25 @@ const TeamSection = () => {
                 
                 {/* Content */}
                 <div className="relative z-10 flex flex-col items-center text-center">
-                  {/* Hexagonal Avatar Frame */}
+                  {/* Avatar Frame */}
                   <div className="relative mb-6">
                     {/* Outer glow ring */}
                     <div className="absolute inset-[-8px] rounded-full bg-gradient-to-r from-primary/40 via-ocean-primary/40 to-primary/40 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                     
-                    {/* Avatar container with hexagon-inspired styling */}
+                    {/* Avatar container */}
                     <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-primary/20 to-ocean-primary/20 p-[2px] group-hover:from-primary/50 group-hover:to-ocean-primary/50 transition-all duration-500">
                       <div className="w-full h-full rounded-full bg-card flex items-center justify-center overflow-hidden">
-                        {/* Initials as placeholder */}
-                        <span className="text-2xl font-bold bg-gradient-to-br from-primary to-ocean-primary bg-clip-text text-transparent">
-                          {member.name.split(' ').map(n => n[0]).join('')}
-                        </span>
+                        {member.image ? (
+                          <img 
+                            src={member.image} 
+                            alt={member.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-2xl font-bold bg-gradient-to-br from-primary to-ocean-primary bg-clip-text text-transparent">
+                            {member.name.split(' ').map(n => n[0]).join('')}
+                          </span>
+                        )}
                       </div>
                     </div>
 
