@@ -18,7 +18,8 @@ import {
   AlertTriangle,
   TrendingUp,
   Settings,
-  Database
+  Database,
+  Linkedin
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -56,7 +57,8 @@ const SERVICE_COSTS = {
   whereby: 0.10,  // per room
   webzio: 0.01,   // per request
   gemini: 0.0001, // per token
-  resend: 0.001   // per email
+  resend: 0.001,  // per email
+  linkedin: 0.002 // per API call
 };
 
 const ApiUsageTracker = () => {
@@ -69,7 +71,8 @@ const ApiUsageTracker = () => {
     whereby: 100,
     webzio: 50,
     gemini: 200,
-    resend: 30
+    resend: 30,
+    linkedin: 75
   });
   const [showSettings, setShowSettings] = useState(false);
 
@@ -115,7 +118,8 @@ const ApiUsageTracker = () => {
       whereby: { requests: 0, cost: 0, tokens: 0 },
       webzio: { requests: 0, cost: 0, tokens: 0 },
       gemini: { requests: 0, cost: 0, tokens: 0 },
-      resend: { requests: 0, cost: 0, tokens: 0 }
+      resend: { requests: 0, cost: 0, tokens: 0 },
+      linkedin: { requests: 0, cost: 0, tokens: 0 }
     };
 
     logs.forEach(log => {
@@ -166,6 +170,14 @@ const ApiUsageTracker = () => {
         cost: stats.resend.cost > 0 ? stats.resend.cost : stats.resend.requests * SERVICE_COSTS.resend,
         color: '#F59E0B',
         limit: 3000
+      },
+      { 
+        name: 'LinkedIn', 
+        icon: Linkedin, 
+        requests: stats.linkedin.requests, 
+        cost: stats.linkedin.cost > 0 ? stats.linkedin.cost : stats.linkedin.requests * SERVICE_COSTS.linkedin,
+        color: '#0A66C2',
+        limit: 5000
       }
     ];
 
@@ -215,7 +227,8 @@ const ApiUsageTracker = () => {
           { name: 'Whereby', icon: Video, requests: 0, cost: 0, color: '#3B82F6', limit: 1000 },
           { name: 'Webz.io', icon: Newspaper, requests: 0, cost: 0, color: '#10B981', limit: 10000 },
           { name: 'Gemini AI', icon: Brain, requests: 0, cost: 0, color: '#8B5CF6', limit: 100000 },
-          { name: 'Resend', icon: Mail, requests: 0, cost: 0, color: '#F59E0B', limit: 3000 }
+          { name: 'Resend', icon: Mail, requests: 0, cost: 0, color: '#F59E0B', limit: 3000 },
+          { name: 'LinkedIn', icon: Linkedin, requests: 0, cost: 0, color: '#0A66C2', limit: 5000 }
         ]);
         setMonthlySpending([]);
       }
