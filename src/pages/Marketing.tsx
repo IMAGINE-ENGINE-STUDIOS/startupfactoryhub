@@ -849,8 +849,8 @@ const Marketing = () => {
   };
 
   const drawQRCode = (ctx: CanvasRenderingContext2D, width: number, qrImage: HTMLImageElement) => {
-    const qrSize = 150;
-    const offset = 60;
+    const qrSize = 220;
+    const offset = 50;
     const x = width - offset - qrSize;
     const y = offset;
 
@@ -1163,8 +1163,8 @@ const Marketing = () => {
     ctx.fillText('START YOUR JOURNEY →', btnX + btnWidth / 2, btnY + btnHeight / 2 + 4 * scale);
 
     // Draw QR code in top right corner
-    const qrSize = 150 * scale;
-    const offset = 60 * scale;
+    const qrSize = 220 * scale;
+    const offset = 50 * scale;
     const qrX = width - offset - qrSize;
     const qrY = offset;
 
