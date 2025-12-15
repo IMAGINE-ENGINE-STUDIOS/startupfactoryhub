@@ -3701,6 +3701,7 @@ export type Database = {
           description: string | null
           id: string
           is_featured: boolean | null
+          is_flagship: boolean | null
           is_official_partner: boolean | null
           is_verified: boolean | null
           latitude: number | null
@@ -3727,6 +3728,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_featured?: boolean | null
+          is_flagship?: boolean | null
           is_official_partner?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
@@ -3753,6 +3755,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_featured?: boolean | null
+          is_flagship?: boolean | null
           is_official_partner?: boolean | null
           is_verified?: boolean | null
           latitude?: number | null
