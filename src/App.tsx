@@ -12,10 +12,10 @@ import FloatingChat from "./components/FloatingChat";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
+import ProfileSetup from "./pages/ProfileSetup";
+import DashboardRouter from "./components/DashboardRouter";
 
 // Code-split heavy pages
-const ProfileSetup = lazy(() => import("./pages/ProfileSetup"));
-const DashboardRouter = lazy(() => import("./components/DashboardRouter"));
 const Tools = lazy(() => import("./pages/Tools"));
 const LightPaper = lazy(() => import("./pages/LightPaper"));
 const Guidelines = lazy(() => import("./pages/Guidelines"));
