@@ -24,6 +24,7 @@ const ProfileSetup = () => {
   const [skills, setSkills] = useState<string[]>([]);
   const [currentSkill, setCurrentSkill] = useState("");
   const [loading, setLoading] = useState(false);
+  const [checkingExistingRole, setCheckingExistingRole] = useState(true);
   const [formData, setFormData] = useState({
     company_name: "",
     organization_name: "",
@@ -44,15 +45,42 @@ const ProfileSetup = () => {
     funding_offered: "",
   });
   
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // Check if user already has a role - if so, redirect to dashboard
   useEffect(() => {
-    if (!user) {
-      navigate("/auth");
+    const checkExistingRole = async () => {
+      if (!user) {
+        setCheckingExistingRole(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .rpc('get_user_role', { _user_id: user.id });
+
+        if (!error && data) {
+          // User already has a role, redirect to dashboard
+          navigate("/dashboard", { replace: true });
+          return;
+        }
+      } catch (err) {
+        console.error('Error checking existing role:', err);
+      }
+      
+      setCheckingExistingRole(false);
+    };
+
+    if (!authLoading) {
+      if (!user) {
+        navigate("/auth");
+      } else {
+        checkExistingRole();
+      }
     }
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
 
   const addSkill = () => {
     if (currentSkill.trim() && !skills.includes(currentSkill.trim())) {
@@ -217,6 +245,18 @@ const ProfileSetup = () => {
       setStep(step - 1);
     }
   };
+
+  // Show loading while checking for existing role
+  if (authLoading || checkingExistingRole) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-hero p-6 relative">
