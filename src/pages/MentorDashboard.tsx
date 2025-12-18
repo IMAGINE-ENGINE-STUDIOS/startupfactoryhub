@@ -21,7 +21,7 @@ import { useUserRole } from "@/hooks/useUserRole";
 import { useMentorDashboard } from "@/hooks/useMentorDashboard";
 import AnalyticsDashboard from "@/components/AnalyticsDashboard";
 import AdvisorProfileView from "@/components/AdvisorProfileView";
-import MarketIntelligenceWidget from "@/components/MarketIntelligenceWidget";
+import { IntelligenceHub } from "@/components/intelligence/IntelligenceHub";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 import ProfilePostsMosaic from "@/components/ProfilePostsMosaic";
 import { useProfileWithRole } from "@/hooks/useProfileWithRole";
@@ -406,7 +406,7 @@ const MentorDashboard = () => {
           </TabsContent>
 
           <TabsContent value="intelligence" className="space-y-6">
-            <MarketIntelligenceWidget />
+            <IntelligenceHub />
           </TabsContent>
 
           <TabsContent value="tools" className="space-y-6">
