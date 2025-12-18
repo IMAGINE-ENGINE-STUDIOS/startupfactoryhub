@@ -23,7 +23,7 @@ import FloatingChat from '@/components/FloatingChat';
 import InvestorStartupNetwork from '@/components/InvestorStartupNetwork';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
-import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import InvestorProfileView from '@/components/InvestorProfileView';
 import PitchMeetingCard from '@/components/PitchMeetingCard';
 import VideoConferencing from '@/components/VideoConferencing';
@@ -900,7 +900,7 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="intelligence" className="space-y-4">
-            <MarketIntelligenceWidget />
+            <IntelligenceHub />
           </TabsContent>
 
           <TabsContent value="tools" className="space-y-4">

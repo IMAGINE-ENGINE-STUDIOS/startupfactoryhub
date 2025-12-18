@@ -16,7 +16,7 @@ import companyLogo from '@/assets/company-logo.png';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import FloatingChat from '@/components/FloatingChat';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
-import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 import AdvisorJobTaskViewer from '@/components/AdvisorJobTaskViewer';
@@ -702,7 +702,7 @@ export default function AdvisorDashboard() {
           </TabsContent>
 
           <TabsContent value="intelligence" className="space-y-4">
-            <MarketIntelligenceWidget />
+            <IntelligenceHub />
           </TabsContent>
 
           <TabsContent value="tools" className="space-y-4">

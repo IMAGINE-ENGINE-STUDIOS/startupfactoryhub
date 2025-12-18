@@ -12,7 +12,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
-import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
+import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import NetworkBrowser from '@/components/NetworkBrowser';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
@@ -248,7 +248,7 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="intelligence" className="space-y-4">
-            <MarketIntelligenceWidget />
+            <IntelligenceHub />
           </TabsContent>
 
           <TabsContent value="tools" className="space-y-4">
