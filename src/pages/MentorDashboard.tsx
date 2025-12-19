@@ -27,21 +27,7 @@ import MenteeSessions from "@/components/MenteeSessions";
 import MentorSessionHistory from "@/components/MentorSessionHistory";
 import ActiveMenteesCards from "@/components/ActiveMenteesCards";
 import { DashboardHeader } from "@/components/DashboardHeader";
-import { 
-  Users, 
-  Calendar as CalendarIcon,
-  Bell,
-  Plus,
-  Clock,
-  MapPin,
-  MessageCircle,
-  Network,
-  BarChart,
-  Brain,
-  Wrench,
-  Briefcase,
-  Globe
-} from "lucide-react";
+import { Users, Calendar as CalendarIcon, Bell, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe } from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
@@ -53,13 +39,23 @@ import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import VideoConferencing from '@/components/VideoConferencing';
 import { Video } from 'lucide-react';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
-
 const MentorDashboard = () => {
-  const { user } = useAuth();
+  const {
+    user
+  } = useAuth();
   const navigate = useNavigate();
-  const { role, loading: roleLoading } = useUserRole();
-  const { profile: profileWithRole } = useProfileWithRole();
-  const { activeMentees, pastMentees, todaySessions } = useMentorDashboard();
+  const {
+    role,
+    loading: roleLoading
+  } = useUserRole();
+  const {
+    profile: profileWithRole
+  } = useProfileWithRole();
+  const {
+    activeMentees,
+    pastMentees,
+    todaySessions
+  } = useMentorDashboard();
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
@@ -68,7 +64,9 @@ const MentorDashboard = () => {
   const urlTab = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(urlTab || "social");
   const [activeVideoSession, setActiveVideoSession] = useState<any>(null);
-  const { upcomingEvents } = useEvents();
+  const {
+    upcomingEvents
+  } = useEvents();
 
   // Sync URL tab param to activeTab
   useEffect(() => {
@@ -84,9 +82,7 @@ const MentorDashboard = () => {
       navigate('/dashboard');
     }
   }, [role, roleLoading, navigate]);
-
-  return (
-    <div className="min-h-screen bg-background pb-6 relative">
+  return <div className="min-h-screen bg-background pb-6 relative">
       <DashboardHeader />
       
       <div className="container mx-auto px-2 sm:px-4 md:px-6 pt-2 sm:pt-4 pb-4 sm:pb-8">
@@ -94,37 +90,21 @@ const MentorDashboard = () => {
         <div className="mb-6 sm:mb-8">
           {/* Mobile: Only Avatar */}
           <div className="md:hidden flex justify-start mb-4">
-            <RoleBasedAvatar 
-              avatarUrl={profileWithRole?.avatar_url} 
-              role="mentor"
-              fallbackText={user?.email || 'M'}
-              className="h-16 w-16"
-            />
+            <RoleBasedAvatar avatarUrl={profileWithRole?.avatar_url} role="mentor" fallbackText={user?.email || 'M'} className="h-16 w-16" />
           </div>
           
           {/* Desktop: Full Welcome Section */}
           <div className="hidden md:flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center space-x-4">
-              <RoleBasedAvatar 
-                avatarUrl={profileWithRole?.avatar_url} 
-                role="mentor"
-                fallbackText={user?.email || 'M'}
-                className="h-16 w-16"
-              />
+              <RoleBasedAvatar avatarUrl={profileWithRole?.avatar_url} role="mentor" fallbackText={user?.email || 'M'} className="h-16 w-16" />
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-foreground">Welcome back, {profileWithRole?.full_name || 'Mentor'}! 👋</h1>
                 <p className="text-sm text-muted-foreground mt-1">Ready to guide the next generation of entrepreneurs?</p>
               </div>
             </div>
             <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Button variant="outline" size="sm" className="flex-1 sm:flex-none">
-                <Bell className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Notifications</span>
-              </Button>
-              <Button variant="hero" size="sm" className="flex-1 sm:flex-none">
-                <Plus className="w-4 h-4 sm:mr-2" />
-                <span className="hidden sm:inline">Share Insights</span>
-              </Button>
+              
+              
             </div>
           </div>
         </div>
@@ -207,11 +187,7 @@ const MentorDashboard = () => {
             <MentorshipRequests />
             
             {/* Active Mentees with Expandable History */}
-            <ActiveMenteesCards 
-              mentees={activeMentees}
-              onScheduleSession={() => setCreateSessionDialogOpen(true)}
-              onMessage={(menteeId) => navigate('/messages')}
-            />
+            <ActiveMenteesCards mentees={activeMentees} onScheduleSession={() => setCreateSessionDialogOpen(true)} onMessage={menteeId => navigate('/messages')} />
             
             <MentorOffersBoard />
             
@@ -219,16 +195,14 @@ const MentorDashboard = () => {
             <MentorSessionHistory showStats={false} />
             
             {/* Past Mentees Section */}
-            {pastMentees && pastMentees.length > 0 && (
-              <Card className="tech-card border-0">
+            {pastMentees && pastMentees.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle>Past Mentees</CardTitle>
                   <CardDescription>Previous mentorship relationships</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {pastMentees.map(mentee => (
-                      <div key={mentee.id} className="flex items-center gap-3 p-3 rounded-lg border">
+                    {pastMentees.map(mentee => <div key={mentee.id} className="flex items-center gap-3 p-3 rounded-lg border">
                         <Avatar>
                           <AvatarImage src={mentee.mentee.avatar_url} />
                           <AvatarFallback>{mentee.mentee.full_name?.[0] || 'M'}</AvatarFallback>
@@ -240,12 +214,10 @@ const MentorDashboard = () => {
                           </p>
                         </div>
                         <Badge variant="secondary">Completed</Badge>
-                      </div>
-                    ))}
+                      </div>)}
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-6">
@@ -261,35 +233,21 @@ const MentorDashboard = () => {
             </div>
 
             {/* Upcoming Events with Banners */}
-            {upcomingEvents.length > 0 && (
-              <Card className="tech-card border-0">
+            {upcomingEvents.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle>Upcoming Events</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <ScrollArea className="w-full">
                     <div className="flex gap-4 pb-4">
-                      {upcomingEvents.slice(0, 6).map((event) => (
-                        <div
-                          key={event.id}
-                          className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]"
-                          onClick={() => {
-                            setSelectedEvent(event);
-                            setShowEventDetails(true);
-                          }}
-                        >
+                      {upcomingEvents.slice(0, 6).map(event => <div key={event.id} className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]" onClick={() => {
+                    setSelectedEvent(event);
+                    setShowEventDetails(true);
+                  }}>
                           <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
-                            {event.banner_url ? (
-                              <img
-                                src={event.banner_url}
-                                alt={event.title}
-                                className="w-full h-48 object-cover group-hover:scale-105 transition-transform"
-                              />
-                            ) : (
-                              <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                            {event.banner_url ? <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" /> : <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
                                 <CalendarIcon className="h-16 w-16 text-purple-500/30" />
-                              </div>
-                            )}
+                              </div>}
                             <div className="p-4 min-h-[120px] flex flex-col">
                               <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
                               <div className="space-y-1 text-sm text-muted-foreground flex-1">
@@ -297,24 +255,12 @@ const MentorDashboard = () => {
                                   <Clock className="h-3 w-3" />
                                   {format(parseISO(event.start_date), 'MMM d, h:mm a')}
                                 </div>
-                                {event.location && (
-                                  <div className="flex items-center gap-2">
+                                {event.location && <div className="flex items-center gap-2">
                                     <MapPin className="h-3 w-3" />
-                                    {event.location.startsWith('http') ? (
-                                      <a 
-                                        href={event.location}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-primary hover:underline line-clamp-1"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
+                                    {event.location.startsWith('http') ? <a href={event.location} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline line-clamp-1" onClick={e => e.stopPropagation()}>
                                         {event.location}
-                                      </a>
-                                    ) : (
-                                      <span className="line-clamp-1">{event.location}</span>
-                                    )}
-                                  </div>
-                                )}
+                                      </a> : <span className="line-clamp-1">{event.location}</span>}
+                                  </div>}
                                 <div className="flex items-center gap-2">
                                   <Users className="h-3 w-3" />
                                   {event.attendees} attending
@@ -323,28 +269,21 @@ const MentorDashboard = () => {
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        </div>)}
                     </div>
                     <ScrollBar orientation="horizontal" />
                   </ScrollArea>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
             
-            <UnifiedCalendar
-              showCreateButton={false}
-              userRole={role || 'mentor'}
-              onItemClick={(item) => {
-                if (item.type === 'event') {
-                  setSelectedEvent(item);
-                  setShowEventDetails(true);
-                } else if (item.type === 'session' && item.meeting_link) {
-                  setActiveVideoSession(item);
-                }
-              }}
-              filterTypes={['event', 'session', 'availability']}
-            />
+            <UnifiedCalendar showCreateButton={false} userRole={role || 'mentor'} onItemClick={item => {
+            if (item.type === 'event') {
+              setSelectedEvent(item);
+              setShowEventDetails(true);
+            } else if (item.type === 'session' && item.meeting_link) {
+              setActiveVideoSession(item);
+            }
+          }} filterTypes={['event', 'session', 'availability']} />
 
             {/* Availability Manager - Bottom of Calendar Tab */}
             <div className="pt-6 border-t">
@@ -373,7 +312,10 @@ const MentorDashboard = () => {
             <AIFeaturesHub />
           </TabsContent>
 
-          <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{ height: 'calc(100vh - 12rem)', minHeight: '500px' }}>
+          <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{
+          height: 'calc(100vh - 12rem)',
+          minHeight: '500px'
+        }}>
             <div className="absolute inset-0">
               <GlobalResourcesMap />
             </div>
@@ -385,47 +327,21 @@ const MentorDashboard = () => {
       <FloatingChat />
       
       {/* Video Conferencing Dialog */}
-      <Dialog open={!!activeVideoSession} onOpenChange={(open) => !open && setActiveVideoSession(null)}>
+      <Dialog open={!!activeVideoSession} onOpenChange={open => !open && setActiveVideoSession(null)}>
         <DialogContent className="max-w-6xl h-[90vh] p-0">
-          {activeVideoSession && (
-            <VideoConferencing
-              roomUrl={activeVideoSession.meeting_link}
-              userId={user?.id}
-              hostId={activeVideoSession.host_id || activeVideoSession.mentor_id}
-              userName={profileWithRole?.full_name || user?.email || 'User'}
-              meetingTitle={activeVideoSession.topic || 'Mentoring Session'}
-              onLeave={() => setActiveVideoSession(null)}
-            />
-          )}
+          {activeVideoSession && <VideoConferencing roomUrl={activeVideoSession.meeting_link} userId={user?.id} hostId={activeVideoSession.host_id || activeVideoSession.mentor_id} userName={profileWithRole?.full_name || user?.email || 'User'} meetingTitle={activeVideoSession.topic || 'Mentoring Session'} onLeave={() => setActiveVideoSession(null)} />}
         </DialogContent>
       </Dialog>
       
-      <CreateSessionDialog
-        open={createSessionDialogOpen}
-        onOpenChange={setCreateSessionDialogOpen}
-        onSessionCreated={() => {
-          setCreateSessionDialogOpen(false);
-        }}
-      />
-      <CreateEventDialog 
-        open={createEventDialogOpen}
-        onOpenChange={setCreateEventDialogOpen}
-        onEventCreated={() => {
-          setCreateEventDialogOpen(false);
-        }}
-      />
-      {selectedEvent && (
-        <EventDetailsDialog 
-          event={selectedEvent}
-          open={showEventDetails}
-          onOpenChange={setShowEventDetails}
-          onEventUpdated={() => {
-            setShowEventDetails(false);
-          }}
-        />
-      )}
-    </div>
-  );
+      <CreateSessionDialog open={createSessionDialogOpen} onOpenChange={setCreateSessionDialogOpen} onSessionCreated={() => {
+      setCreateSessionDialogOpen(false);
+    }} />
+      <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {
+      setCreateEventDialogOpen(false);
+    }} />
+      {selectedEvent && <EventDetailsDialog event={selectedEvent} open={showEventDetails} onOpenChange={setShowEventDetails} onEventUpdated={() => {
+      setShowEventDetails(false);
+    }} />}
+    </div>;
 };
-
 export default MentorDashboard;
