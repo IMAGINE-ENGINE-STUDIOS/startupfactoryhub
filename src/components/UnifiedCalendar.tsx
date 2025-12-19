@@ -111,23 +111,11 @@ export default function UnifiedCalendar({
   }, [user, userRole]);
 
   const fetchEvents = async () => {
-    let query = supabase
+    // Fetch all events without role-based filtering to match the events carousel
+    const { data: eventsData, error } = await supabase
       .from('events')
-      .select('*');
-
-    // For advisors/mentors, only show events they're organizing or attending
-    if (user && (userRole === 'advisor' || userRole === 'mentor')) {
-      const { data: attendingEvents } = await supabase
-        .from('event_attendees')
-        .select('event_id')
-        .eq('user_id', user.id);
-      
-      const attendingIds = attendingEvents?.map(a => a.event_id) || [];
-      
-      query = query.or(`organizer_id.eq.${user.id},id.in.(${attendingIds.join(',')})`);
-    }
-
-    const { data: eventsData, error } = await query.order('start_date', { ascending: true });
+      .select('*')
+      .order('start_date', { ascending: true });
 
     if (error) {
       console.error('Error fetching events:', error);
