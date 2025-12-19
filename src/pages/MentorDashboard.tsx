@@ -1,17 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MentorRoadmapWidget from "@/components/MentorRoadmapWidget";
-import MentorCalendarWidget from "@/components/MentorCalendarWidget";
 import AvailabilityManager from "@/components/AvailabilityManager";
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
 import AIFeaturesHub from "@/components/AIFeaturesHub";
 import MentorshipRequests from "@/components/MentorshipRequests";
-import ConnectionsWidget from "@/components/ConnectionsWidget";
 import FloatingChat from "@/components/FloatingChat";
 import UnifiedJobsBoard from "@/components/UnifiedJobsBoard";
 import AdvisorJobTaskViewer from "@/components/AdvisorJobTaskViewer";
@@ -25,7 +21,6 @@ import { IntelligenceHub } from "@/components/intelligence/IntelligenceHub";
 import RoleBasedAvatar from "@/components/RoleBasedAvatar";
 import ProfilePostsMosaic from "@/components/ProfilePostsMosaic";
 import { useProfileWithRole } from "@/hooks/useProfileWithRole";
-import StartupBrowser from "@/components/StartupBrowser";
 import MatchingSystem from "@/components/MatchingSystem";
 import MentorOffersBoard from "@/components/MentorOffersBoard";
 import MenteeSessions from "@/components/MenteeSessions";
@@ -34,24 +29,17 @@ import ActiveMenteesCards from "@/components/ActiveMenteesCards";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { 
   Users, 
-  TrendingUp, 
   Calendar as CalendarIcon,
-  MessageSquare,
   Bell,
-  Settings,
   Plus,
-  Award,
   Clock,
-  Target,
   MapPin,
   MessageCircle,
   Network,
   BarChart,
   Brain,
   Wrench,
-  BookOpen,
   Briefcase,
-  User,
   Globe
 } from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
@@ -185,36 +173,8 @@ const MentorDashboard = () => {
             </TabsList>
           </div>
 
-          <TabsContent value="social" className="space-y-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-8">
-                <MentorRoadmapWidget />
-                <UnifiedCommunityFeed showCreatePost={false} limit={5} />
-              </div>
-              
-              <div className="space-y-6">
-                <Card>
-                  <CardHeader>
-                    <CardTitle className="text-lg">Quick Actions</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/messages")}>
-                      <MessageSquare className="w-4 h-4 mr-2" />
-                      Message Mentees
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/calendar")}>
-                      <CalendarIcon className="w-4 h-4 mr-2" />
-                      Schedule Session
-                    </Button>
-                    <Button variant="outline" className="w-full justify-start">
-                      <Award className="w-4 h-4 mr-2" />
-                      View Programs
-                    </Button>
-                  </CardContent>
-                </Card>
-                <ConnectionsWidget />
-              </div>
-            </div>
+          <TabsContent value="social" className="space-y-4">
+            <UnifiedCommunityFeed showCreatePost={true} />
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">

@@ -139,50 +139,75 @@ export default function MentorOffersBoard() {
 
   return (
     <>
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Users className="h-5 w-5 text-primary" />
-            <span>Offer Mentorship to Startups</span>
+      <Card className="tech-card border-0 bg-gradient-to-br from-primary/5 via-emerald-500/5 to-teal-500/5">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-primary/10 ring-2 ring-primary/20">
+              <Users className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <span className="text-xl font-bold">Offer Mentorship to Startups</span>
+              <p className="text-sm text-muted-foreground font-normal mt-1">
+                Browse startups and proactively offer your mentorship
+              </p>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground mb-6">
-            Browse startups and proactively offer your mentorship to those that match your expertise.
-          </p>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {startups.map((startup) => (
-              <Card key={startup.id} className="hover:border-primary/50 transition-colors">
-                <CardContent className="p-4">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+              <div 
+                key={startup.id} 
+                className="group relative overflow-hidden rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] transition-all duration-300 hover:scale-[1.02]"
+              >
+                {/* Accent line */}
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-emerald-500 to-teal-500 opacity-60 group-hover:opacity-100 transition-opacity" />
+                
+                <div className="p-4 pl-5">
+                  <div className="flex items-start gap-3 mb-3">
+                    <Avatar className="h-12 w-12 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-emerald-500 text-primary-foreground font-bold">
                         {startup.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground truncate">{startup.name}</h3>
-                      <div className="flex gap-2 mt-1">
-                        <Badge variant="secondary" className="text-xs">{startup.stage}</Badge>
-                        <Badge variant="outline" className="text-xs">{startup.industry}</Badge>
+                      <h3 className="font-bold text-foreground truncate group-hover:text-primary transition-colors">
+                        {startup.name}
+                      </h3>
+                      <div className="flex flex-wrap gap-1.5 mt-1.5">
+                        <Badge className="text-xs bg-primary/10 text-primary border-primary/20 hover:bg-primary/20">
+                          <TrendingUp className="h-3 w-3 mr-1" />
+                          {startup.stage}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs border-border/50">
+                          {startup.industry}
+                        </Badge>
                       </div>
                     </div>
                   </div>
                   
-                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-                    {startup.description}
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-2 leading-relaxed">
+                    {startup.description || 'No description available'}
                   </p>
                   
                   {startup.looking_for && startup.looking_for.length > 0 && (
                     <div className="mb-4">
-                      <p className="text-xs font-medium text-foreground mb-1">Looking for:</p>
-                      <div className="flex flex-wrap gap-1">
+                      <p className="text-xs font-semibold text-foreground/80 mb-1.5 uppercase tracking-wide">Looking for:</p>
+                      <div className="flex flex-wrap gap-1.5">
                         {startup.looking_for.slice(0, 2).map((item, idx) => (
-                          <Badge key={idx} variant="secondary" className="text-xs">
+                          <Badge 
+                            key={idx} 
+                            variant="secondary" 
+                            className="text-xs bg-secondary/50 hover:bg-secondary/70"
+                          >
                             {item}
                           </Badge>
                         ))}
+                        {startup.looking_for.length > 2 && (
+                          <Badge variant="secondary" className="text-xs bg-muted/50">
+                            +{startup.looking_for.length - 2}
+                          </Badge>
+                        )}
                       </div>
                     </div>
                   )}
@@ -194,22 +219,26 @@ export default function MentorOffersBoard() {
                       setDialogOpen(true);
                     }}
                     disabled={processingStartupId === startup.id}
-                    className="w-full pulse-primary"
+                    className="w-full bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all"
                     size="sm"
                   >
                     <Send className="h-4 w-4 mr-2" />
                     {processingStartupId === startup.id ? 'Processing...' : 'Offer Mentorship'}
                   </Button>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
 
           {startups.length === 0 && (
-            <div className="text-center py-12">
-              <Building className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-semibold mb-2">No startups found</h3>
-              <p className="text-muted-foreground">Check back later for new startups to mentor.</p>
+            <div className="text-center py-16 px-4">
+              <div className="inline-flex p-4 rounded-2xl bg-muted/30 mb-4">
+                <Building className="h-12 w-12 text-muted-foreground" />
+              </div>
+              <h3 className="text-lg font-semibold mb-2">No startups available</h3>
+              <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                Check back later for new startups seeking mentorship guidance.
+              </p>
             </div>
           )}
         </CardContent>
