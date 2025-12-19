@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import AvailabilityManager from "@/components/AvailabilityManager";
+
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
 import AIFeaturesHub from "@/components/AIFeaturesHub";
 import MentorshipRequests from "@/components/MentorshipRequests";
@@ -285,16 +285,6 @@ const MentorDashboard = () => {
             }
           }} filterTypes={['event', 'session', 'availability']} />
 
-            {/* Availability Manager - Bottom of Calendar Tab */}
-            <div className="pt-6 border-t">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold">Availability Schedule</h3>
-                <p className="text-sm text-muted-foreground">
-                  Set your recurring weekly availability for mentoring sessions
-                </p>
-              </div>
-              <AvailabilityManager />
-            </div>
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-6">
