@@ -285,6 +285,35 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
         }
       }
     }
+
+    // If user is startup, create a company from their profile data
+    if (role === 'startup') {
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('full_name, bio, avatar_url, location')
+        .eq('id', user.id)
+        .single();
+
+      if (userProfile) {
+        const { data: newCompany, error: createError } = await supabase
+          .from('companies')
+          .insert([{
+            user_id: user.id,
+            name: userProfile.full_name || 'My Startup',
+            description: userProfile.bio || null,
+            logo_url: userProfile.avatar_url || null,
+            location: userProfile.location || null,
+            industry: 'Technology',
+            stage: 'idea'
+          }])
+          .select('id')
+          .single();
+
+        if (!createError && newCompany) {
+          setUserCompanyId(newCompany.id);
+        }
+      }
+    }
   };
 
   const fetchJobs = async () => {
