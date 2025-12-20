@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye, Copy, MoreVertical, XCircle, Search, GraduationCap, Target, Gift, ClipboardList } from 'lucide-react';
+import { Briefcase, MapPin, DollarSign, Clock, ExternalLink, CheckCircle, Users, FileText, Mail, Phone, Eye, Copy, MoreVertical, XCircle, Search, GraduationCap, Target, Gift, ClipboardList, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -739,6 +739,33 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
     }
   };
 
+  const handleDeleteJob = async (jobId: string) => {
+    try {
+      const { error } = await supabase
+        .from('jobs')
+        .delete()
+        .eq('id', jobId)
+        .eq('company_id', userCompanyId);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Job deleted',
+        description: 'The job posting has been permanently deleted',
+      });
+
+      fetchJobs();
+      fetchClosedJobs();
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete job posting',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const createInvitation = async (applicationId: string, jobId: string) => {
     try {
       const token = crypto.randomUUID();
@@ -833,7 +860,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
   }
 
   const isCompanyUser = (role === 'startup' || role === 'accelerator') && userCompanyId;
-  const canApply = role === 'student' || role === 'advisor' || role === 'mentor';
+  const canApply = !!user; // Any logged-in user can apply to jobs
 
   return (
     <div className="space-y-6">
@@ -1196,6 +1223,13 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
                               <XCircle className="h-4 w-4 mr-2" />
                               Close Job Posting
                             </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              onClick={() => handleDeleteJob(job.id)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete Permanently
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
@@ -1324,6 +1358,15 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
                       >
                         <Eye className="w-3 h-3" />
                         View Apps
+                      </Button>
+                      <Button
+                        onClick={() => handleDeleteJob(job.id)}
+                        variant="destructive"
+                        size="sm"
+                        className="gap-1"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                        Delete
                       </Button>
                     </div>
                   </CardContent>
