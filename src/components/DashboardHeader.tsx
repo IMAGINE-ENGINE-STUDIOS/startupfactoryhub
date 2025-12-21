@@ -41,7 +41,7 @@ export function DashboardHeader() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate("/profile")}
+          onClick={() => navigate("/dashboard?tab=profile")}
           className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
           title="Profile"
         >
