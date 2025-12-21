@@ -12,7 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import PitchDeckUpload from './PitchDeckUpload';
-import AvatarUpload from './AvatarUpload';
+import CompanyLogoUpload from './CompanyLogoUpload';
 import { useUserRole } from '@/hooks/useUserRole';
 import { INDUSTRIES, getIndustryLabel, normalizeIndustry } from '@/lib/constants';
 import { useRealtime } from '@/hooks/useRealtime';
@@ -177,19 +177,14 @@ export default function CompanyProfileManager() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Avatar Upload Section */}
-          <div className="flex justify-center mb-6">
-            <AvatarUpload 
-              currentAvatarUrl={userProfile?.avatar_url}
-              onUploadComplete={(url) => {
-                fetchUserProfile();
-                toast({
-                  title: "Profile Updated",
-                  description: "Your avatar has been updated successfully.",
-                });
+          {/* Company Logo Upload Section */}
+          <div className="mb-6">
+            <CompanyLogoUpload 
+              currentLogoUrl={company?.logo_url}
+              companyId={company?.id}
+              onUploadComplete={() => {
+                fetchCompany();
               }}
-              size="lg"
-              userRole={role}
             />
           </div>
 
@@ -291,6 +286,7 @@ export default function CompanyProfileManager() {
           <div className="flex items-start justify-between">
             <div className="flex items-start space-x-6">
               <Avatar className="h-20 w-20">
+                <AvatarImage src={company.logo_url} alt={company.name} />
                 <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
                   {company.name?.charAt(0)}
                 </AvatarFallback>
