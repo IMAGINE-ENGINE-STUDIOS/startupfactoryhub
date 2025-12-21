@@ -114,6 +114,62 @@ const TradingViewMarketOverview = memo(() => {
 
 TradingViewMarketOverview.displayName = 'TradingViewMarketOverview';
 
+const TradingViewHotlists = memo(() => {
+  const container = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!container.current) return;
+    
+    container.current.innerHTML = '';
+    
+    const widgetContainer = document.createElement('div');
+    widgetContainer.className = 'tradingview-widget-container__widget';
+    container.current.appendChild(widgetContainer);
+
+    const script = document.createElement("script");
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-hotlists.js";
+    script.type = "text/javascript";
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      exchange: "US",
+      colorTheme: "dark",
+      dateRange: "12M",
+      showChart: true,
+      locale: "en",
+      largeChartUrl: "",
+      isTransparent: true,
+      showSymbolLogo: true,
+      showFloatingTooltip: false,
+      plotLineColorGrowing: "rgba(8, 153, 129, 1)",
+      plotLineColorFalling: "rgba(8, 153, 129, 1)",
+      gridLineColor: "rgba(240, 243, 250, 0)",
+      scaleFontColor: "#DBDBDB",
+      belowLineFillColorGrowing: "rgba(41, 98, 255, 0.12)",
+      belowLineFillColorFalling: "rgba(41, 98, 255, 0.12)",
+      belowLineFillColorGrowingBottom: "rgba(41, 98, 255, 0)",
+      belowLineFillColorFallingBottom: "rgba(41, 98, 255, 0)",
+      symbolActiveColor: "rgba(41, 98, 255, 0.12)",
+      width: "100%",
+      height: "500"
+    });
+    
+    container.current.appendChild(script);
+
+    return () => {
+      if (container.current) {
+        container.current.innerHTML = '';
+      }
+    };
+  }, []);
+
+  return (
+    <div className="tradingview-widget-container" ref={container}>
+      <div className="tradingview-widget-container__widget"></div>
+    </div>
+  );
+});
+
+TradingViewHotlists.displayName = 'TradingViewHotlists';
 interface PlaceholderChartProps {
   title: string;
   description: string;
@@ -165,23 +221,44 @@ const upcomingCharts = [
 export const TradingViewCharts = () => {
   return (
     <div className="space-y-6">
-      {/* Main Market Overview Widget */}
-      <Card className="tech-card border-0 p-4 overflow-hidden">
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="font-semibold">Market Overview</h3>
-            <p className="text-xs text-muted-foreground">Indices, Futures, Bonds & Forex</p>
+      {/* Main Widgets Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Market Overview Widget */}
+        <Card className="tech-card border-0 p-4 overflow-hidden">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-semibold">Market Overview</h3>
+              <p className="text-xs text-muted-foreground">Indices, Futures, Bonds & Forex</p>
+            </div>
+            <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
+              Live
+            </Badge>
           </div>
-          <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
-            Live
-          </Badge>
-        </div>
-        <TradingViewMarketOverview />
-        <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
-          Data by TradingView
-        </p>
-      </Card>
+          <TradingViewMarketOverview />
+          <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
+            Data by TradingView
+          </p>
+        </Card>
+
+        {/* US Stocks Hotlists Widget */}
+        <Card className="tech-card border-0 p-4 overflow-hidden">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-semibold">US Stocks Today</h3>
+              <p className="text-xs text-muted-foreground">Top movers & trending stocks</p>
+            </div>
+            <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
+              Live
+            </Badge>
+          </div>
+          <TradingViewHotlists />
+          <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
+            Data by TradingView
+          </p>
+        </Card>
+      </div>
 
       {/* Placeholder Grid for Future Charts */}
       <div>
