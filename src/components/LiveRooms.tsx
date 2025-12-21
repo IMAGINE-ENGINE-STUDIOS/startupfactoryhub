@@ -7,10 +7,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { useLiveRooms } from '@/hooks/useLiveRooms';
 import { useAuth } from '@/contexts/AuthContext';
 import VideoMeetingDialog from '@/components/VideoMeetingDialog';
-import { Plus, Users, Video, Loader2, Radio, Trash2 } from 'lucide-react';
+import { Plus, Users, Video, Loader2, Radio, Trash2, Globe, Lock } from 'lucide-react';
 
 const LiveRooms = () => {
   const { user } = useAuth();
@@ -18,15 +19,17 @@ const LiveRooms = () => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [roomName, setRoomName] = useState('');
   const [roomDescription, setRoomDescription] = useState('');
+  const [isPublic, setIsPublic] = useState(true);
   const [activeMeeting, setActiveMeeting] = useState<{ link: string; name: string; roomId: string } | null>(null);
 
   const handleCreate = async () => {
     if (!roomName.trim()) return;
     
-    const room = await createRoom(roomName.trim(), roomDescription.trim() || undefined);
+    const room = await createRoom(roomName.trim(), roomDescription.trim() || undefined, isPublic);
     if (room) {
       setRoomName('');
       setRoomDescription('');
+      setIsPublic(true);
       setCreateDialogOpen(false);
     }
   };
@@ -98,6 +101,19 @@ const LiveRooms = () => {
                   rows={3}
                 />
               </div>
+              <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
+                <div>
+                  <Label htmlFor="public-toggle" className="text-sm font-medium">Public Room</Label>
+                  <p className="text-xs text-muted-foreground">
+                    {isPublic ? 'Visible to everyone & posted to feed' : 'Only visible to you in Meetings tab'}
+                  </p>
+                </div>
+                <Switch
+                  id="public-toggle"
+                  checked={isPublic}
+                  onCheckedChange={setIsPublic}
+                />
+              </div>
               <Button 
                 onClick={handleCreate} 
                 disabled={!roomName.trim() || creating}
@@ -150,7 +166,24 @@ const LiveRooms = () => {
                       <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{room.description}</p>
                     )}
                   </div>
-                  <Badge variant="secondary" className="ml-2 flex items-center gap-1 shrink-0 bg-green-500/10 text-green-600 border-0">
+                  <Badge variant="secondary" className={`ml-2 flex items-center gap-1 shrink-0 border-0 ${
+                    room.is_public 
+                      ? 'bg-green-500/10 text-green-600' 
+                      : 'bg-amber-500/10 text-amber-600'
+                  }`}>
+                    {room.is_public ? (
+                      <>
+                        <Globe className="h-3 w-3" />
+                        Public
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="h-3 w-3" />
+                        Private
+                      </>
+                    )}
+                  </Badge>
+                  <Badge variant="secondary" className="ml-1 flex items-center gap-1 shrink-0 bg-green-500/10 text-green-600 border-0">
                     <Radio className="h-3 w-3 animate-pulse" />
                     Live
                   </Badge>

@@ -10,6 +10,7 @@ interface LiveRoom {
   creator_id: string;
   meeting_link: string;
   is_active: boolean;
+  is_public: boolean;
   created_at: string;
   creator?: {
     full_name: string;
@@ -99,7 +100,7 @@ export const useLiveRooms = () => {
     };
   }, [fetchRooms]);
 
-  const createRoom = async (name: string, description?: string) => {
+  const createRoom = async (name: string, description?: string, isPublic: boolean = true) => {
     if (!user) {
       toast({
         title: 'Authentication Required',
@@ -132,11 +133,22 @@ export const useLiveRooms = () => {
           description: description || null,
           creator_id: user.id,
           meeting_link: meetingLink,
+          is_public: isPublic,
         })
         .select()
         .single();
 
       if (roomError) throw roomError;
+
+      // If public, create a feed post
+      if (isPublic) {
+        await supabase.from('feed_posts').insert({
+          content: `🔴 Live Room: ${name}${description ? `\n${description}` : ''}`,
+          user_id: user.id,
+          post_type: 'live_room',
+          room_data: { room_id: room.id, meeting_link: meetingLink },
+        } as any);
+      }
 
       toast({
         title: 'Room Created',
