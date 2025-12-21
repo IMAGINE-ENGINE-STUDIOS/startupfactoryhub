@@ -7,6 +7,14 @@ interface WidgetProps {
   theme: 'light' | 'dark';
 }
 
+const getCssHsl = (varName: string, fallback: string) => {
+  if (typeof window === 'undefined') return fallback;
+  const raw = getComputedStyle(document.documentElement)
+    .getPropertyValue(varName)
+    .trim();
+  return raw ? `hsl(${raw})` : fallback;
+};
+
 const TradingViewMarketOverview = memo(({ theme }: WidgetProps) => {
   const container = useRef<HTMLDivElement>(null);
 
@@ -20,6 +28,14 @@ const TradingViewMarketOverview = memo(({ theme }: WidgetProps) => {
     widgetContainer.className = 'tradingview-widget-container__widget';
     container.current.appendChild(widgetContainer);
 
+    const widgetBg = getCssHsl(
+      '--card',
+      theme === 'dark' ? 'hsl(220 25% 8%)' : 'hsl(160 50% 99%)'
+    );
+
+    container.current.style.background = widgetBg;
+    widgetContainer.style.background = widgetBg;
+
     const script = document.createElement("script");
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-market-overview.js";
     script.type = "text/javascript";
@@ -29,7 +45,7 @@ const TradingViewMarketOverview = memo(({ theme }: WidgetProps) => {
       dateRange: "12M",
       locale: "en",
       largeChartUrl: "",
-      isTransparent: true,
+      isTransparent: false,
       showFloatingTooltip: false,
       plotLineColorGrowing: "rgba(8, 153, 129, 1)",
       plotLineColorFalling: "rgba(8, 153, 129, 1)",
@@ -87,7 +103,7 @@ const TradingViewMarketOverview = memo(({ theme }: WidgetProps) => {
         }
       ],
       support_host: "https://www.tradingview.com",
-      backgroundColor: "rgba(0, 0, 0, 0)",
+      backgroundColor: widgetBg,
       width: "100%",
       height: "500",
       showSymbolLogo: true,
@@ -124,6 +140,14 @@ const TradingViewHotlists = memo(({ theme }: WidgetProps) => {
     widgetContainer.className = 'tradingview-widget-container__widget';
     container.current.appendChild(widgetContainer);
 
+    const widgetBg = getCssHsl(
+      '--card',
+      theme === 'dark' ? 'hsl(220 25% 8%)' : 'hsl(160 50% 99%)'
+    );
+
+    container.current.style.background = widgetBg;
+    widgetContainer.style.background = widgetBg;
+
     const script = document.createElement("script");
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-hotlists.js";
     script.type = "text/javascript";
@@ -135,7 +159,7 @@ const TradingViewHotlists = memo(({ theme }: WidgetProps) => {
       showChart: true,
       locale: "en",
       largeChartUrl: "",
-      isTransparent: true,
+      isTransparent: false,
       showSymbolLogo: true,
       showFloatingTooltip: false,
       plotLineColorGrowing: "rgba(8, 153, 129, 1)",
@@ -147,7 +171,7 @@ const TradingViewHotlists = memo(({ theme }: WidgetProps) => {
       belowLineFillColorGrowingBottom: "rgba(41, 98, 255, 0)",
       belowLineFillColorFallingBottom: "rgba(41, 98, 255, 0)",
       symbolActiveColor: "rgba(41, 98, 255, 0.12)",
-      backgroundColor: "rgba(0, 0, 0, 0)",
+      backgroundColor: widgetBg,
       width: "100%",
       height: "500"
     });
@@ -182,13 +206,22 @@ const TradingViewEconomicCalendar = memo(({ theme }: WidgetProps) => {
     widgetContainer.className = 'tradingview-widget-container__widget';
     container.current.appendChild(widgetContainer);
 
+    const widgetBg = getCssHsl(
+      '--card',
+      theme === 'dark' ? 'hsl(220 25% 8%)' : 'hsl(160 50% 99%)'
+    );
+
+    container.current.style.background = widgetBg;
+    widgetContainer.style.background = widgetBg;
+
     const script = document.createElement("script");
     script.src = "https://s3.tradingview.com/external-embedding/embed-widget-events.js";
     script.type = "text/javascript";
     script.async = true;
     script.innerHTML = JSON.stringify({
       colorTheme: theme,
-      isTransparent: true,
+      isTransparent: false,
+      backgroundColor: widgetBg,
       locale: "en",
       countryFilter: "ar,au,br,ca,cn,fr,de,in,id,it,jp,kr,mx,ru,sa,za,tr,gb,us,eu",
       importanceFilter: "-1,0,1",
