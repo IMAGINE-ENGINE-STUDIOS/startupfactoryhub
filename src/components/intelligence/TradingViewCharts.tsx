@@ -1,13 +1,7 @@
 import React, { useEffect, useRef, memo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  TrendingUp, 
-  BarChart2, 
-  Bitcoin, 
-  Calendar,
-  Plus
-} from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 
 const TradingViewMarketOverview = memo(() => {
   const container = useRef<HTMLDivElement>(null);
@@ -216,123 +210,63 @@ const TradingViewEconomicCalendar = memo(() => {
 
 TradingViewEconomicCalendar.displayName = 'TradingViewEconomicCalendar';
 
-interface PlaceholderChartProps {
-  title: string;
-  description: string;
-  icon: React.ReactNode;
-  gradient: string;
-}
-
-const PlaceholderChart = ({ title, description, icon, gradient }: PlaceholderChartProps) => (
-  <Card className="tech-card border-0 p-6 flex flex-col items-center justify-center min-h-[200px] group hover:scale-[1.02] transition-transform cursor-pointer">
-    <div className={`p-4 rounded-2xl bg-gradient-to-br ${gradient} text-white mb-4 opacity-50 group-hover:opacity-100 transition-opacity`}>
-      {icon}
-    </div>
-    <h3 className="font-semibold text-muted-foreground group-hover:text-foreground transition-colors">{title}</h3>
-    <p className="text-xs text-muted-foreground/70 text-center mt-1">{description}</p>
-    <Badge variant="outline" className="mt-3 text-[10px] opacity-50">
-      <Plus className="w-3 h-3 mr-1" />
-      Coming Soon
-    </Badge>
-  </Card>
-);
-
-const upcomingCharts = [
-  {
-    title: "Symbol Ticker",
-    description: "Real-time scrolling ticker with top movers",
-    icon: <TrendingUp className="w-6 h-6" />,
-    gradient: "from-blue-500 to-cyan-500"
-  },
-  {
-    title: "Technical Analysis",
-    description: "Advanced charts with indicators & signals",
-    icon: <BarChart2 className="w-6 h-6" />,
-    gradient: "from-purple-500 to-pink-500"
-  },
-  {
-    title: "Crypto Markets",
-    description: "Bitcoin, Ethereum & altcoin prices",
-    icon: <Bitcoin className="w-6 h-6" />,
-    gradient: "from-orange-500 to-amber-500"
-  }
-];
 
 export const TradingViewCharts = () => {
   return (
-    <div className="space-y-6">
-      {/* Main Widgets Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Market Overview Widget */}
-        <Card className="tech-card border-0 p-4 overflow-hidden">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-semibold">Market Overview</h3>
-              <p className="text-xs text-muted-foreground">Indices, Futures, Bonds & Forex</p>
-            </div>
-            <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
-              Live
-            </Badge>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Market Overview Widget */}
+      <Card className="tech-card border-0 p-4 overflow-hidden">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-semibold">Market Overview</h3>
+            <p className="text-xs text-muted-foreground">Indices, Futures, Bonds & Forex</p>
           </div>
-          <TradingViewMarketOverview />
-          <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
-            Data by TradingView
-          </p>
-        </Card>
-
-        {/* US Stocks Hotlists Widget */}
-        <Card className="tech-card border-0 p-4 overflow-hidden">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-semibold">US Stocks Today</h3>
-              <p className="text-xs text-muted-foreground">Top movers & trending stocks</p>
-            </div>
-            <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
-              Live
-            </Badge>
-          </div>
-          <TradingViewHotlists />
-          <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
-            Data by TradingView
-          </p>
-        </Card>
-
-        {/* Economic Calendar Widget */}
-        <Card className="tech-card border-0 p-4 overflow-hidden lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="font-semibold">Economic Calendar</h3>
-              <p className="text-xs text-muted-foreground">Upcoming events & earnings reports</p>
-            </div>
-            <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
-              Live
-            </Badge>
-          </div>
-          <TradingViewEconomicCalendar />
-          <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
-            Data by TradingView
-          </p>
-        </Card>
-      </div>
-
-      {/* Placeholder Grid for Future Charts */}
-      <div>
-        <h3 className="text-sm font-medium text-muted-foreground mb-3">More Charts Coming Soon</h3>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {upcomingCharts.map((chart) => (
-            <PlaceholderChart
-              key={chart.title}
-              title={chart.title}
-              description={chart.description}
-              icon={chart.icon}
-              gradient={chart.gradient}
-            />
-          ))}
+          <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
+            Live
+          </Badge>
         </div>
-      </div>
+        <TradingViewMarketOverview />
+        <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
+          Data by TradingView
+        </p>
+      </Card>
+
+      {/* US Stocks Hotlists Widget */}
+      <Card className="tech-card border-0 p-4 overflow-hidden">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-semibold">US Stocks Today</h3>
+            <p className="text-xs text-muted-foreground">Top movers & trending stocks</p>
+          </div>
+          <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
+            Live
+          </Badge>
+        </div>
+        <TradingViewHotlists />
+        <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
+          Data by TradingView
+        </p>
+      </Card>
+
+      {/* Economic Calendar Widget */}
+      <Card className="tech-card border-0 p-4 overflow-hidden lg:col-span-2">
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="font-semibold">Economic Calendar</h3>
+            <p className="text-xs text-muted-foreground">Upcoming events & earnings reports</p>
+          </div>
+          <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
+            Live
+          </Badge>
+        </div>
+        <TradingViewEconomicCalendar />
+        <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
+          Data by TradingView
+        </p>
+      </Card>
     </div>
   );
 };
