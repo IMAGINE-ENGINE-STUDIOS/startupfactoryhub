@@ -220,31 +220,58 @@ export const useLiveRooms = () => {
   };
 
   const deleteRoom = async (roomId: string) => {
-    if (!user) return false;
+    // IMPORTANT: use session from Supabase to ensure requests carry a valid JWT
+    const { data: { session } } = await supabase.auth.getSession();
+    const authedUserId = session?.user?.id;
+
+    if (!authedUserId) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in again to close a room',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    const closeRoom = async (actorId: string) => {
+      return supabase
+        .from('live_rooms')
+        .update({ is_active: false })
+        .eq('id', roomId)
+        .eq('creator_id', actorId);
+    };
 
     try {
-      // First remove all participants
+      // Close the room first so we don't partially delete data if closing fails.
+      let { error } = await closeRoom(authedUserId);
+
+      // If the JWT is stale, refresh once and retry.
+      if (error?.code === '42501') {
+        await supabase.auth.refreshSession();
+        const { data: { session: refreshedSession } } = await supabase.auth.getSession();
+        const refreshedUserId = refreshedSession?.user?.id;
+
+        if (!refreshedUserId) {
+          throw error;
+        }
+
+        ({ error } = await closeRoom(refreshedUserId));
+      }
+
+      if (error) throw error;
+
+      // Cleanup: remove participants and associated feed post.
       await supabase
         .from('live_room_participants')
         .delete()
         .eq('room_id', roomId);
 
-      // Delete the associated feed post
       await supabase
         .from('feed_posts')
         .delete()
-        .eq('user_id', user.id)
+        .eq('user_id', authedUserId)
         .eq('post_type', 'live_room')
         .contains('room_data', { room_id: roomId });
-
-      // Then close the room (set is_active to false)
-      const { error } = await supabase
-        .from('live_rooms')
-        .update({ is_active: false })
-        .eq('id', roomId)
-        .eq('creator_id', user.id);
-
-      if (error) throw error;
 
       toast({
         title: 'Room Closed',
@@ -253,11 +280,14 @@ export const useLiveRooms = () => {
 
       await fetchRooms();
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error closing room:', error);
       toast({
         title: 'Error',
-        description: 'Failed to close room',
+        description:
+          error?.code === '42501'
+            ? 'Permission denied: only the room creator can close this room.'
+            : 'Failed to close room',
         variant: 'destructive',
       });
       return false;
@@ -265,31 +295,55 @@ export const useLiveRooms = () => {
   };
 
   const permanentlyDeleteRoom = async (roomId: string) => {
-    if (!user) return false;
+    const { data: { session } } = await supabase.auth.getSession();
+    const authedUserId = session?.user?.id;
+
+    if (!authedUserId) {
+      toast({
+        title: 'Authentication Required',
+        description: 'Please sign in again to delete a room',
+        variant: 'destructive',
+      });
+      return false;
+    }
+
+    const deleteRoomRow = async (actorId: string) => {
+      return supabase
+        .from('live_rooms')
+        .delete()
+        .eq('id', roomId)
+        .eq('creator_id', actorId);
+    };
 
     try {
-      // Remove all participants first
+      let { error } = await deleteRoomRow(authedUserId);
+
+      if (error?.code === '42501') {
+        await supabase.auth.refreshSession();
+        const { data: { session: refreshedSession } } = await supabase.auth.getSession();
+        const refreshedUserId = refreshedSession?.user?.id;
+
+        if (!refreshedUserId) {
+          throw error;
+        }
+
+        ({ error } = await deleteRoomRow(refreshedUserId));
+      }
+
+      if (error) throw error;
+
+      // Cleanup (best-effort)
       await supabase
         .from('live_room_participants')
         .delete()
         .eq('room_id', roomId);
 
-      // Delete the associated feed post
       await supabase
         .from('feed_posts')
         .delete()
-        .eq('user_id', user.id)
+        .eq('user_id', authedUserId)
         .eq('post_type', 'live_room')
         .contains('room_data', { room_id: roomId });
-
-      // Permanently delete the room
-      const { error } = await supabase
-        .from('live_rooms')
-        .delete()
-        .eq('id', roomId)
-        .eq('creator_id', user.id);
-
-      if (error) throw error;
 
       toast({
         title: 'Room Deleted',
@@ -298,11 +352,14 @@ export const useLiveRooms = () => {
 
       await fetchRooms();
       return true;
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting room:', error);
       toast({
         title: 'Error',
-        description: 'Failed to delete room',
+        description:
+          error?.code === '42501'
+            ? 'Permission denied: only the room creator can delete this room.'
+            : 'Failed to delete room',
         variant: 'destructive',
       });
       return false;
