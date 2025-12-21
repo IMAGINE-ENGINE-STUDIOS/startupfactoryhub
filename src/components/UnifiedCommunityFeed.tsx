@@ -19,6 +19,7 @@ import { OnlineStatusIndicator } from './OnlineStatusIndicator';
 import UserProfileDialog from '@/components/UserProfileDialog';
 import { CohortPostCard } from '@/components/CohortPostCard';
 import LiveRoomPostCard from '@/components/LiveRoomPostCard';
+import { EventPostCard } from '@/components/EventPostCard';
 interface FeedPost {
   id: string;
   content: string;
@@ -28,6 +29,17 @@ interface FeedPost {
   internship_data?: any;
   cohort_data?: any;
   room_data?: { room_id: string; meeting_link: string } | any;
+  event_data?: {
+    event_id: string;
+    title: string;
+    description?: string;
+    start_date: string;
+    end_date?: string;
+    location?: string;
+    is_virtual?: boolean;
+    banner_url?: string;
+    max_attendees?: number;
+  } | null;
   media_urls?: string[] | null;
   shared_post_id?: string | null;
   profiles?: {
@@ -216,20 +228,61 @@ export default function UnifiedCommunityFeed({
       return acc;
     }, {} as Record<string, string>);
 
-    const formattedPosts = (postsData || []).map(post => ({
-      ...post,
-      profiles: profilesMap[post.user_id] || null,
-      user_role: rolesMap[post.user_id] || null,
-      company_name: companiesMap[post.user_id] || null,
-      post_comments: (post.post_comments || []).map(comment => ({
-        ...comment,
-        profiles: profilesMap[comment.user_id] || null
-      })),
-      _count: {
-        post_likes: post.post_likes?.length || 0,
-        post_comments: post.post_comments?.length || 0
+    // Fetch event data for event posts
+    const eventPostIds = (postsData || [])
+      .filter(post => post.post_type === 'event' && (post.internship_data as any)?.event_id)
+      .map(post => (post.internship_data as any).event_id);
+
+    let eventsMap: Record<string, any> = {};
+    if (eventPostIds.length > 0) {
+      const { data: eventsData } = await supabase
+        .from('events')
+        .select('id, title, description, start_date, end_date, location, is_virtual, banner_url, max_attendees')
+        .in('id', eventPostIds);
+      
+      eventsMap = (eventsData || []).reduce((acc, event) => {
+        acc[event.id] = event;
+        return acc;
+      }, {} as Record<string, any>);
+    }
+
+    const formattedPosts = (postsData || []).map(post => {
+      // Build event_data for event posts
+      let event_data = null;
+      const internshipData = post.internship_data as any;
+      if (post.post_type === 'event' && internshipData?.event_id) {
+        const eventInfo = eventsMap[internshipData.event_id];
+        if (eventInfo) {
+          event_data = {
+            event_id: eventInfo.id,
+            title: eventInfo.title,
+            description: eventInfo.description,
+            start_date: eventInfo.start_date,
+            end_date: eventInfo.end_date,
+            location: eventInfo.location,
+            is_virtual: eventInfo.is_virtual,
+            banner_url: eventInfo.banner_url,
+            max_attendees: eventInfo.max_attendees
+          };
+        }
       }
-    }));
+
+      return {
+        ...post,
+        profiles: profilesMap[post.user_id] || null,
+        user_role: rolesMap[post.user_id] || null,
+        company_name: companiesMap[post.user_id] || null,
+        event_data,
+        post_comments: (post.post_comments || []).map(comment => ({
+          ...comment,
+          profiles: profilesMap[comment.user_id] || null
+        })),
+        _count: {
+          post_likes: post.post_likes?.length || 0,
+          post_comments: post.post_comments?.length || 0
+        }
+      };
+    });
     if (loadMore) {
       setPosts(prev => [...prev, ...formattedPosts]);
       setOffset(currentOffset + limit);
@@ -814,6 +867,7 @@ export default function UnifiedCommunityFeed({
         const isJourneyCompletion = post.post_type === 'journey_completion';
         const isCohortPost = post.post_type === 'cohort' && post.cohort_data;
         const isLiveRoomPost = post.post_type === 'live_room' && post.room_data;
+        const isEventPost = post.post_type === 'event' && post.event_data;
         
         // Render live room posts with special LiveRoomPostCard (same format as CohortPostCard)
         if (isLiveRoomPost) {
@@ -866,6 +920,35 @@ export default function UnifiedCommunityFeed({
             />
           );
         }
+
+        // Render event posts with special EventPostCard
+        if (isEventPost) {
+          return (
+            <EventPostCard
+              key={post.id}
+              post={{
+                id: post.id,
+                content: post.content,
+                created_at: post.created_at,
+                user_id: post.user_id,
+                event_data: post.event_data!,
+                media_urls: post.media_urls,
+                profiles: post.profiles,
+                company_name: post.company_name
+              }}
+              isLiked={likedPosts.has(post.id)}
+              isBookmarked={bookmarkedPosts.has(post.id)}
+              likesCount={post._count?.post_likes || 0}
+              commentsCount={post._count?.post_comments || 0}
+              onLike={() => toggleLike(post.id)}
+              onBookmark={() => toggleBookmark(post.id)}
+              onComment={() => toggleComments(post.id)}
+              onShare={() => sharePost(post.id, false)}
+              onUserClick={handleUserClick}
+            />
+          );
+        }
+
         return isJourneyCompletion ? <motion.div key={post.id} initial={{
           scale: 0.95,
           opacity: 0
