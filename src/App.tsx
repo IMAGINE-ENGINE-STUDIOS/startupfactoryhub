@@ -32,6 +32,7 @@ const Sponsorship = lazy(() => import("./pages/Sponsorship"));
 const PublicCohortApplication = lazy(() => import("./pages/PublicCohortApplication"));
 const Marketing = lazy(() => import("./pages/Marketing"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const Profile = lazy(() => import("./pages/Profile"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,6 +70,7 @@ const App = () => (
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/profile-setup" element={<ProfileSetup />} />
+                    <Route path="/profile" element={<Profile />} />
                     <Route path="/dashboard" element={<DashboardRouter />} />
                     <Route path="/tools" element={<Tools />} />
                     <Route path="/lightpaper" element={<NotFound />} />

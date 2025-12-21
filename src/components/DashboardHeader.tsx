@@ -9,21 +9,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import RecommendationPopup from "@/components/RecommendationPopup";
-import CompanyProfileManager from "@/components/CompanyProfileManager";
-import ProfilePostsMosaic from "@/components/ProfilePostsMosaic";
-import { useAuth } from "@/contexts/AuthContext";
 
 
 export function DashboardHeader() {
   const navigate = useNavigate();
-  const { user } = useAuth();
   const [recommendationCount, setRecommendationCount] = useState(0);
   const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
 
@@ -48,29 +38,15 @@ export function DashboardHeader() {
           <Home className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
-              title="Profile"
-            >
-              <User className="h-4 w-4 sm:h-5 sm:w-5" />
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] p-0">
-            <ScrollArea className="max-h-[85vh] p-6">
-              <CompanyProfileManager />
-              {user && (
-                <div className="mt-6">
-                  <h3 className="text-lg font-semibold mb-4">Posts</h3>
-                  <ProfilePostsMosaic userId={user.id} isOwnProfile />
-                </div>
-              )}
-            </ScrollArea>
-          </DialogContent>
-        </Dialog>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate("/profile")}
+          className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
+          title="Profile"
+        >
+          <User className="h-4 w-4 sm:h-5 sm:w-5" />
+        </Button>
         
         <NotificationCenter className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10" />
         
