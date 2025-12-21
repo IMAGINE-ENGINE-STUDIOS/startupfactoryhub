@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { useLiveRooms } from '@/hooks/useLiveRooms';
 import { useAuth } from '@/contexts/AuthContext';
 import VideoMeetingDialog from '@/components/VideoMeetingDialog';
-import { Plus, Users, Video, Loader2, Radio, Trash2, Globe, Lock } from 'lucide-react';
+import { Plus, Users, Video, Loader2, Radio, X, Globe, Lock } from 'lucide-react';
 
 const LiveRooms = () => {
   const { user } = useAuth();
@@ -21,6 +21,8 @@ const LiveRooms = () => {
   const [roomDescription, setRoomDescription] = useState('');
   const [isPublic, setIsPublic] = useState(true);
   const [activeMeeting, setActiveMeeting] = useState<{ link: string; name: string; roomId: string } | null>(null);
+  const [roomToClose, setRoomToClose] = useState<string | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
 
   const handleCreate = async () => {
     if (!roomName.trim()) return;
@@ -52,8 +54,12 @@ const LiveRooms = () => {
     }
   };
 
-  const handleDelete = async (roomId: string) => {
-    await deleteRoom(roomId);
+  const handleCloseRoom = async () => {
+    if (!roomToClose) return;
+    setIsClosing(true);
+    await deleteRoom(roomToClose);
+    setIsClosing(false);
+    setRoomToClose(null);
   };
 
   return (
@@ -215,9 +221,9 @@ const LiveRooms = () => {
                           variant="ghost"
                           size="icon"
                           className="h-6 w-6 text-muted-foreground hover:text-destructive"
-                          onClick={() => handleDelete(room.id)}
+                          onClick={() => setRoomToClose(room.id)}
                         >
-                          <Trash2 className="h-3 w-3" />
+                          <X className="h-3 w-3" />
                         </Button>
                       )}
                       <Button size="sm" className="h-7 text-xs px-3" onClick={() => handleJoin(room)}>
@@ -244,6 +250,33 @@ const LiveRooms = () => {
           meetingTitle={activeMeeting.name}
         />
       )}
+
+      {/* Close Room Confirmation Dialog */}
+      <Dialog open={!!roomToClose} onOpenChange={(open) => !open && setRoomToClose(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Close Room</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to close this room? All participants will be removed and the room will no longer be accessible.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setRoomToClose(null)} disabled={isClosing}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleCloseRoom} disabled={isClosing}>
+              {isClosing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Closing...
+                </>
+              ) : (
+                'Close Room'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

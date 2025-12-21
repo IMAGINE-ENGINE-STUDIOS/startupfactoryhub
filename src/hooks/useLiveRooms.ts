@@ -218,6 +218,13 @@ export const useLiveRooms = () => {
     if (!user) return false;
 
     try {
+      // First remove all participants
+      await supabase
+        .from('live_room_participants')
+        .delete()
+        .eq('room_id', roomId);
+
+      // Then close the room (set is_active to false)
       const { error } = await supabase
         .from('live_rooms')
         .update({ is_active: false })
@@ -234,10 +241,47 @@ export const useLiveRooms = () => {
       await fetchRooms();
       return true;
     } catch (error) {
-      console.error('Error deleting room:', error);
+      console.error('Error closing room:', error);
       toast({
         title: 'Error',
         description: 'Failed to close room',
+        variant: 'destructive',
+      });
+      return false;
+    }
+  };
+
+  const permanentlyDeleteRoom = async (roomId: string) => {
+    if (!user) return false;
+
+    try {
+      // Remove all participants first
+      await supabase
+        .from('live_room_participants')
+        .delete()
+        .eq('room_id', roomId);
+
+      // Permanently delete the room
+      const { error } = await supabase
+        .from('live_rooms')
+        .delete()
+        .eq('id', roomId)
+        .eq('creator_id', user.id);
+
+      if (error) throw error;
+
+      toast({
+        title: 'Room Deleted',
+        description: 'The room has been permanently deleted',
+      });
+
+      await fetchRooms();
+      return true;
+    } catch (error) {
+      console.error('Error deleting room:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete room',
         variant: 'destructive',
       });
       return false;
@@ -252,6 +296,7 @@ export const useLiveRooms = () => {
     joinRoom,
     leaveRoom,
     deleteRoom,
+    permanentlyDeleteRoom,
     refetch: fetchRooms,
   };
 };
