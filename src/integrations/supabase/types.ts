@@ -2758,6 +2758,68 @@ export type Database = {
           },
         ]
       }
+      live_room_participants: {
+        Row: {
+          id: string
+          joined_at: string | null
+          room_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string | null
+          room_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string | null
+          room_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "live_room_participants_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "live_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      live_rooms: {
+        Row: {
+          created_at: string | null
+          creator_id: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          meeting_link: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          creator_id: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          meeting_link: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          creator_id?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          meeting_link?: string
+          name?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       market_themes: {
         Row: {
           created_at: string | null
