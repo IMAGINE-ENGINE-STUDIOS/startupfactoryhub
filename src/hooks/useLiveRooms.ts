@@ -12,6 +12,7 @@ interface LiveRoom {
   is_active: boolean;
   is_public: boolean;
   created_at: string;
+  expires_at: string;
   creator?: {
     full_name: string;
     avatar_url: string | null;
@@ -33,6 +34,7 @@ export const useLiveRooms = () => {
         .from('live_rooms')
         .select('*')
         .eq('is_active', true)
+        .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false });
 
       if (roomsError) throw roomsError;
@@ -112,12 +114,14 @@ export const useLiveRooms = () => {
 
     setCreating(true);
     try {
+      const expiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000).toISOString(); // 12 hours
+
       // Create Whereby room
       const { data: wherebyData, error: wherebyError } = await supabase.functions.invoke('create-whereby-room', {
         body: {
           roomName: name,
           startDate: new Date().toISOString(),
-          endDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // 24 hours
+          endDate: expiresAt,
         },
       });
 
@@ -134,6 +138,7 @@ export const useLiveRooms = () => {
           creator_id: user.id,
           meeting_link: meetingLink,
           is_public: isPublic,
+          expires_at: expiresAt,
         })
         .select()
         .single();
@@ -224,6 +229,14 @@ export const useLiveRooms = () => {
         .delete()
         .eq('room_id', roomId);
 
+      // Delete the associated feed post
+      await supabase
+        .from('feed_posts')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('post_type', 'live_room')
+        .contains('room_data', { room_id: roomId });
+
       // Then close the room (set is_active to false)
       const { error } = await supabase
         .from('live_rooms')
@@ -260,6 +273,14 @@ export const useLiveRooms = () => {
         .from('live_room_participants')
         .delete()
         .eq('room_id', roomId);
+
+      // Delete the associated feed post
+      await supabase
+        .from('feed_posts')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('post_type', 'live_room')
+        .contains('room_data', { room_id: roomId });
 
       // Permanently delete the room
       const { error } = await supabase

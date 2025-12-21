@@ -11,7 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { useLiveRooms } from '@/hooks/useLiveRooms';
 import { useAuth } from '@/contexts/AuthContext';
 import VideoMeetingDialog from '@/components/VideoMeetingDialog';
-import { Plus, Users, Video, Loader2, Radio, X, Globe, Lock } from 'lucide-react';
+import { Plus, Users, Video, Loader2, Radio, X, Globe, Lock, Clock } from 'lucide-react';
 
 const LiveRooms = () => {
   const { user } = useAuth();
@@ -60,6 +60,15 @@ const LiveRooms = () => {
     await deleteRoom(roomToClose);
     setIsClosing(false);
     setRoomToClose(null);
+  };
+
+  const getTimeRemaining = (expiresAt: string) => {
+    const diff = new Date(expiresAt).getTime() - Date.now();
+    if (diff <= 0) return 'Expired';
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    if (hours > 0) return `${hours}h ${minutes}m left`;
+    return `${minutes}m left`;
   };
 
   return (
@@ -214,6 +223,12 @@ const LiveRooms = () => {
                         <Users className="h-2.5 w-2.5" />
                         {room.participant_count}
                       </div>
+                      {room.expires_at && (
+                        <div className="flex items-center gap-0.5 text-[11px] text-amber-500">
+                          <Clock className="h-2.5 w-2.5" />
+                          {getTimeRemaining(room.expires_at)}
+                        </div>
+                      )}
                     </div>
                     <div className="flex items-center gap-1.5">
                       {user?.id === room.creator_id && (
