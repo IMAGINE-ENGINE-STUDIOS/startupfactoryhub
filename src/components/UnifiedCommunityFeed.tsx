@@ -35,6 +35,7 @@ interface FeedPost {
     avatar_url?: string;
   } | null;
   user_role?: string | null;
+  company_name?: string | null;
   post_likes: {
     user_id: string;
   }[];
@@ -196,6 +197,12 @@ export default function UnifiedCommunityFeed({
     const {
       data: rolesData
     } = await supabase.from('user_roles').select('user_id, role').in('user_id', userIds);
+
+    // Fetch company names for users
+    const {
+      data: companiesData
+    } = await supabase.from('companies').select('user_id, name').in('user_id', userIds);
+
     const profilesMap = (profilesData || []).reduce((acc, profile) => {
       acc[profile.user_id] = profile;
       return acc;
@@ -204,10 +211,16 @@ export default function UnifiedCommunityFeed({
       acc[roleEntry.user_id] = roleEntry.role;
       return acc;
     }, {} as Record<string, string>);
+    const companiesMap = (companiesData || []).reduce((acc, company) => {
+      acc[company.user_id] = company.name;
+      return acc;
+    }, {} as Record<string, string>);
+
     const formattedPosts = (postsData || []).map(post => ({
       ...post,
       profiles: profilesMap[post.user_id] || null,
       user_role: rolesMap[post.user_id] || null,
+      company_name: companiesMap[post.user_id] || null,
       post_comments: (post.post_comments || []).map(comment => ({
         ...comment,
         profiles: profilesMap[comment.user_id] || null
@@ -1028,6 +1041,11 @@ export default function UnifiedCommunityFeed({
                         <h3 className="font-semibold text-sm sm:text-base text-foreground truncate cursor-pointer hover:text-primary transition-colors" onClick={() => handleUserClick(post.user_id)}>
                           {post.profiles?.full_name || 'Anonymous User'}
                         </h3>
+                        {post.company_name && (
+                          <span className="text-xs sm:text-sm text-muted-foreground">
+                            @ {post.company_name}
+                          </span>
+                        )}
                         {post.user_role && <Badge variant="outline" className={`text-xs ${getRoleBadgeColor(post.user_role)}`}>
                             {getRoleLabel(post.user_role)}
                           </Badge>}
