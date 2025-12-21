@@ -276,6 +276,20 @@ export const EventPostCard = ({
               )}
             </div>
 
+            {/* Join Button for Virtual Events */}
+            {eventData.is_virtual && !isEventPast && (
+              <Button 
+                className="w-full mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25"
+                size="lg"
+                onClick={() => {
+                  toast({ title: 'Joining virtual event...', description: 'The meeting link will open shortly.' });
+                }}
+              >
+                <Video className="w-5 h-5 mr-2" />
+                Join Virtual Event
+              </Button>
+            )}
+
             {/* RSVP Buttons */}
             {!isEventPast && (
               <div className="flex flex-wrap gap-2 mt-4">
