@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import PitchDeckUpload from './PitchDeckUpload';
 import CompanyLogoUpload from './CompanyLogoUpload';
+import AvatarUpload from './AvatarUpload';
 import { useUserRole } from '@/hooks/useUserRole';
 import { INDUSTRIES, getIndustryLabel, normalizeIndustry } from '@/lib/constants';
 import { useRealtime } from '@/hooks/useRealtime';
@@ -177,15 +178,38 @@ export default function CompanyProfileManager() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Company Logo Upload Section */}
-          <div className="mb-6">
-            <CompanyLogoUpload 
-              currentLogoUrl={company?.logo_url}
-              companyId={company?.id}
-              onUploadComplete={() => {
-                fetchCompany();
-              }}
-            />
+          {/* User and Company Avatar Upload Section */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            {/* User Avatar */}
+            <div className="flex flex-col items-center space-y-3 p-4 bg-muted/30 rounded-lg">
+              <p className="text-sm font-medium text-muted-foreground">Your Profile Photo</p>
+              <AvatarUpload 
+                currentAvatarUrl={userProfile?.avatar_url}
+                onUploadComplete={() => {
+                  fetchUserProfile();
+                  toast({
+                    title: "Profile Updated",
+                    description: "Your avatar has been updated successfully.",
+                  });
+                }}
+                size="lg"
+                userRole={role}
+              />
+              <p className="text-sm text-muted-foreground">{userProfile?.full_name || 'Your Name'}</p>
+            </div>
+            
+            {/* Company Logo */}
+            <div className="flex flex-col items-center space-y-3 p-4 bg-muted/30 rounded-lg">
+              <p className="text-sm font-medium text-muted-foreground">Company Logo</p>
+              <CompanyLogoUpload 
+                currentLogoUrl={company?.logo_url}
+                companyId={company?.id}
+                onUploadComplete={() => {
+                  fetchCompany();
+                }}
+              />
+              <p className="text-sm text-muted-foreground">{company?.name || 'Company Name'}</p>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -285,14 +309,32 @@ export default function CompanyProfileManager() {
         <CardContent className="p-8">
           <div className="flex items-start justify-between">
             <div className="flex items-start space-x-6">
-              <Avatar className="h-20 w-20">
-                <AvatarImage src={company.logo_url} alt={company.name} />
-                <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
-                  {company.name?.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-              <div>
-                <h1 className="text-3xl font-bold text-foreground mb-2">{company.name}</h1>
+              {/* User Avatar */}
+              <div className="flex flex-col items-center">
+                <Avatar className="h-16 w-16 ring-2 ring-primary/20">
+                  <AvatarImage src={userProfile?.avatar_url} alt={userProfile?.full_name} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-xl">
+                    {userProfile?.full_name?.charAt(0) || 'U'}
+                  </AvatarFallback>
+                </Avatar>
+                <p className="text-xs text-muted-foreground mt-1">{userProfile?.full_name || 'You'}</p>
+                <Badge variant="secondary" className="text-xs mt-1 capitalize">{role || 'Founder'}</Badge>
+              </div>
+              
+              {/* Company Logo */}
+              <div className="flex flex-col items-center">
+                <Avatar className="h-20 w-20 ring-2 ring-accent/20">
+                  <AvatarImage src={company.logo_url} alt={company.name} />
+                  <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
+                    {company.name?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              </div>
+              
+              {/* Company Info */}
+              <div className="flex-1">
+                <h1 className="text-3xl font-bold text-foreground mb-1">{company.name}</h1>
+                <p className="text-sm text-muted-foreground mb-3">Founded by {userProfile?.full_name || 'You'}</p>
                 <p className="text-muted-foreground mb-4 max-w-2xl">{company.description}</p>
                 <div className="flex flex-wrap items-center gap-3">
                   {company.stage && (
