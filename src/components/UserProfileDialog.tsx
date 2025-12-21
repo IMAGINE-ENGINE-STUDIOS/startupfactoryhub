@@ -112,6 +112,33 @@ export default function UserProfileDialog({
     return () => { supabase.removeChannel(channel); };
   }, [userId, currentUser]);
 
+  // Real-time sync for company data (startup profiles - funding changes, etc.)
+  useEffect(() => {
+    if (!userId || !open) return;
+    
+    const channel = supabase
+      .channel(`company-updates-${userId}`)
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'companies', filter: `user_id=eq.${userId}` },
+        () => {
+          if (profile?.role === 'startup') {
+            fetchRoleSpecificData(userId, 'startup');
+          }
+        }
+      )
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'investments' },
+        () => {
+          if (profile?.role === 'investor') {
+            fetchRoleSpecificData(userId, 'investor');
+          }
+        }
+      )
+      .subscribe();
+    
+    return () => { supabase.removeChannel(channel); };
+  }, [userId, open, profile?.role]);
+
   const fetchProfile = async () => {
     if (!userId) return;
 

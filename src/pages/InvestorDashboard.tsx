@@ -147,6 +147,23 @@ export default function InvestorDashboard() {
       supabase.removeChannel(channel);
     };
   }, [user]);
+
+  // Real-time subscription for investments (to sync when new investments are recorded)
+  useEffect(() => {
+    if (!user) return;
+    const channel = supabase.channel('investments-changes').on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'investments',
+      filter: `investor_id=eq.${user.id}`
+    }, () => {
+      fetchInvestments();
+      fetchPortfolioValuations();
+    }).subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
   const fetchPortfolioValuations = async () => {
     if (!user) return;
 

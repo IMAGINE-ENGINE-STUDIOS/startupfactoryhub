@@ -308,15 +308,37 @@ export const useAcceleratorProfile = () => {
       // Update application status
       await updateApplicationStatus(application.id, 'accepted');
 
+      // Get cohort funding info
+      const cohort = cohorts.find(c => c.id === application.cohort_id);
+      const fundingAmount = cohort?.funding_per_startup || 0;
+
       // Add startup to cohort
       const { error: insertError } = await supabase
         .from('cohort_startups')
         .insert([{
           cohort_id: application.cohort_id,
           company_id: application.startup_id,
+          funding_received: fundingAmount,
         }]);
 
       if (insertError) throw insertError;
+
+      // Sync accelerator funding to company profile
+      if (fundingAmount > 0) {
+        const { data: company } = await supabase
+          .from('companies')
+          .select('funding_amount')
+          .eq('id', application.startup_id)
+          .single();
+        
+        await supabase
+          .from('companies')
+          .update({ 
+            funding_amount: (company?.funding_amount || 0) + fundingAmount 
+          })
+          .eq('id', application.startup_id);
+      }
+
       await fetchPortfolio();
     } catch (err) {
       console.error('Error accepting startup:', err);

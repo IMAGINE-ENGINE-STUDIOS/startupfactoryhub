@@ -255,6 +255,22 @@ export default function RecordInvestmentDialog({
           });
       }
 
+      // Explicitly sync company funding as a fallback (trigger handles this too, but ensures immediate UI update)
+      if (companyType === 'platform' && selectedCompany) {
+        const { data: totalData } = await supabase
+          .from('investments')
+          .select('amount')
+          .eq('company_id', selectedCompany.id)
+          .eq('status', 'active');
+        
+        const totalFunding = totalData?.reduce((sum, inv) => sum + (inv.amount || 0), 0) || 0;
+        
+        await supabase
+          .from('companies')
+          .update({ funding_amount: totalFunding })
+          .eq('id', selectedCompany.id);
+      }
+
       const displayName = companyType === 'platform' ? selectedCompany?.name : externalCompanyName;
       toast({
         title: "Investment Recorded",
