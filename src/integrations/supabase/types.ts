@@ -2795,6 +2795,7 @@ export type Database = {
           created_at: string | null
           creator_id: string
           description: string | null
+          expires_at: string | null
           id: string
           is_active: boolean | null
           is_public: boolean
@@ -2806,6 +2807,7 @@ export type Database = {
           created_at?: string | null
           creator_id: string
           description?: string | null
+          expires_at?: string | null
           id?: string
           is_active?: boolean | null
           is_public?: boolean
@@ -2817,6 +2819,7 @@ export type Database = {
           created_at?: string | null
           creator_id?: string
           description?: string | null
+          expires_at?: string | null
           id?: string
           is_active?: boolean | null
           is_public?: boolean
