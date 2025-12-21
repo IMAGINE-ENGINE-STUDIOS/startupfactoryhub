@@ -35,19 +35,19 @@ const intelligenceCards: IntelligenceCard[] = [
     badge: 'AI',
   },
   {
-    id: 'trending',
-    title: 'Trending Companies',
-    description: 'Hot startups and market movers',
-    icon: <BarChart3 className="w-6 h-6" />,
-    color: 'from-purple-500 to-pink-500',
-  },
-  {
     id: 'charts',
     title: 'Live Market Charts',
     description: 'Real-time indices, forex, futures & bonds',
     icon: <LineChart className="w-6 h-6" />,
     color: 'from-amber-500 to-orange-500',
     badge: 'Live',
+  },
+  {
+    id: 'trending',
+    title: 'Trending Companies',
+    description: 'Hot startups and market movers',
+    icon: <BarChart3 className="w-6 h-6" />,
+    color: 'from-purple-500 to-pink-500',
   },
   {
     id: 'news',
