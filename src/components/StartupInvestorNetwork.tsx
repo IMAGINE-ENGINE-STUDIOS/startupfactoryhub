@@ -45,6 +45,25 @@ export default function StartupInvestorNetwork() {
     }
   }, [user]);
 
+  // Real-time sync for investments and investment interests
+  useEffect(() => {
+    if (!companyId) return;
+
+    const channel = supabase
+      .channel(`startup-investments-${companyId}`)
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'investments', filter: `company_id=eq.${companyId}` },
+        () => fetchCompanyAndInvestors()
+      )
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'investment_interests', filter: `company_id=eq.${companyId}` },
+        () => fetchCompanyAndInvestors()
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [companyId]);
+
   const fetchCompanyAndInvestors = async () => {
     if (!user) return;
 

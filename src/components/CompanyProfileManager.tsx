@@ -15,6 +15,7 @@ import PitchDeckUpload from './PitchDeckUpload';
 import AvatarUpload from './AvatarUpload';
 import { useUserRole } from '@/hooks/useUserRole';
 import { INDUSTRIES, getIndustryLabel, normalizeIndustry } from '@/lib/constants';
+import { useRealtime } from '@/hooks/useRealtime';
 
 export default function CompanyProfileManager() {
   const [company, setCompany] = useState<any>(null);
@@ -31,6 +32,13 @@ export default function CompanyProfileManager() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { role } = useUserRole();
+
+  // Real-time sync for company updates (e.g., when funding changes from investments)
+  useRealtime({
+    table: 'companies',
+    filter: user ? `user_id=eq.${user.id}` : undefined,
+    onUpdate: () => fetchCompany(),
+  });
 
   useEffect(() => {
     if (user) {
