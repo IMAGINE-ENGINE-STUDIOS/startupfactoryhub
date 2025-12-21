@@ -31,6 +31,7 @@ import StartupActiveMentors from '@/components/StartupActiveMentors';
 import StartupMentoringSessions from '@/components/StartupMentoringSessions';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, UserCircle, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, ChevronRight, Presentation, Video, Bell, Check, X, ExternalLink, Sparkles, History, Star, Globe } from "lucide-react";
+import LiveRooms from '@/components/LiveRooms';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -616,6 +617,9 @@ const Dashboard = () => {
           {/* Meetings Tab */}
           {activeTab === "meetings" && (
             <TabsContent value="meetings" className="space-y-6">
+              {/* Live Rooms Section */}
+              <LiveRooms />
+
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start">
                 {/* Left Column: Investor Pitches */}
                 <div className="space-y-5">
