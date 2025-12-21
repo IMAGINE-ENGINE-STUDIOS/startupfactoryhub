@@ -6,13 +6,15 @@ import {
   Target, 
   BarChart3, 
   Sparkles,
-  ChevronRight
+  ChevronRight,
+  LineChart
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { NewsSection } from './NewsSection';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import TrendingCompanies from '@/components/TrendingCompanies';
+import { TradingViewCharts } from './TradingViewCharts';
 
 interface IntelligenceCard {
   id: string;
@@ -40,6 +42,14 @@ const intelligenceCards: IntelligenceCard[] = [
     color: 'from-purple-500 to-pink-500',
   },
   {
+    id: 'charts',
+    title: 'Live Market Charts',
+    description: 'Real-time indices, forex, futures & bonds',
+    icon: <LineChart className="w-6 h-6" />,
+    color: 'from-amber-500 to-orange-500',
+    badge: 'Live',
+  },
+  {
     id: 'news',
     title: 'Live News Feed',
     description: 'Real-time news from tech, startups & finance',
@@ -58,6 +68,8 @@ export const IntelligenceHub = () => {
         return <MarketIntelligenceWidget />;
       case 'trending':
         return <TrendingCompanies />;
+      case 'charts':
+        return <TradingViewCharts />;
       case 'news':
         return (
           <div className="tech-card border-0 p-8 text-center">
