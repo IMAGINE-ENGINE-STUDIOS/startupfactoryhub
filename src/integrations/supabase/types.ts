@@ -2028,6 +2028,7 @@ export type Database = {
           likes_count: number | null
           media_urls: string[] | null
           post_type: Database["public"]["Enums"]["post_type"]
+          room_data: Json | null
           sentiment_label: string | null
           sentiment_score: number | null
           shared_post_id: string | null
@@ -2047,6 +2048,7 @@ export type Database = {
           likes_count?: number | null
           media_urls?: string[] | null
           post_type?: Database["public"]["Enums"]["post_type"]
+          room_data?: Json | null
           sentiment_label?: string | null
           sentiment_score?: number | null
           shared_post_id?: string | null
@@ -2066,6 +2068,7 @@ export type Database = {
           likes_count?: number | null
           media_urls?: string[] | null
           post_type?: Database["public"]["Enums"]["post_type"]
+          room_data?: Json | null
           sentiment_label?: string | null
           sentiment_score?: number | null
           shared_post_id?: string | null
@@ -2794,6 +2797,7 @@ export type Database = {
           description: string | null
           id: string
           is_active: boolean | null
+          is_public: boolean
           meeting_link: string
           name: string
           updated_at: string | null
@@ -2804,6 +2808,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_public?: boolean
           meeting_link: string
           name: string
           updated_at?: string | null
@@ -2814,6 +2819,7 @@ export type Database = {
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_public?: boolean
           meeting_link?: string
           name?: string
           updated_at?: string | null

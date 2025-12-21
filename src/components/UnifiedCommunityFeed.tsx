@@ -18,6 +18,7 @@ import GuestPrompt from '@/components/GuestPrompt';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
 import UserProfileDialog from '@/components/UserProfileDialog';
 import { CohortPostCard } from '@/components/CohortPostCard';
+import LiveRoomPostCard from '@/components/LiveRoomPostCard';
 interface FeedPost {
   id: string;
   content: string;
@@ -26,6 +27,7 @@ interface FeedPost {
   post_type: string;
   internship_data?: any;
   cohort_data?: any;
+  room_data?: { room_id: string; meeting_link: string } | any;
   media_urls?: string[] | null;
   shared_post_id?: string | null;
   profiles?: {
@@ -798,6 +800,48 @@ export default function UnifiedCommunityFeed({
         {posts.map(post => {
         const isJourneyCompletion = post.post_type === 'journey_completion';
         const isCohortPost = post.post_type === 'cohort' && post.cohort_data;
+        const isLiveRoomPost = post.post_type === 'live_room' && post.room_data;
+        
+        // Render live room posts with special LiveRoomPostCard
+        if (isLiveRoomPost) {
+          return (
+            <Card key={post.id} className="tech-card border-0">
+              <CardContent className="p-4 sm:p-6 space-y-4">
+                <div className="flex space-x-3 sm:space-x-4">
+                  <div className="relative">
+                    <Avatar className="h-10 w-10 sm:h-12 sm:w-12 cursor-pointer hover:ring-2 ring-primary transition-all" onClick={() => handleUserClick(post.user_id)}>
+                      {post.profiles?.avatar_url ? <AvatarImage src={post.profiles.avatar_url} /> : null}
+                      <AvatarFallback className="bg-gradient-primary text-primary-foreground">
+                        {post.profiles?.full_name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <OnlineStatusIndicator userId={post.user_id} size="sm" className="absolute bottom-0 right-0" />
+                  </div>
+                  <div className="flex-1 space-y-2 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                        <h3 className="font-semibold text-sm sm:text-base text-foreground truncate cursor-pointer hover:text-primary transition-colors" onClick={() => handleUserClick(post.user_id)}>
+                          {post.profiles?.full_name || 'Anonymous User'}
+                        </h3>
+                        {post.user_role && <Badge variant="outline" className={`text-xs ${getRoleBadgeColor(post.user_role)}`}>
+                            {getRoleLabel(post.user_role)}
+                          </Badge>}
+                        <span className="text-muted-foreground">•</span>
+                        <span className="text-xs sm:text-sm text-muted-foreground">{formatDate(post.created_at)}</span>
+                      </div>
+                    </div>
+                    <p className="text-sm sm:text-base text-foreground leading-relaxed whitespace-pre-wrap break-words">{post.content}</p>
+                  </div>
+                </div>
+                <LiveRoomPostCard
+                  roomId={post.room_data.room_id}
+                  meetingLink={post.room_data.meeting_link}
+                  roomName={post.content.replace('🔴 Live Room: ', '').split('\n')[0]}
+                />
+              </CardContent>
+            </Card>
+          );
+        }
         
         // Render cohort posts with special CohortPostCard
         if (isCohortPost) {
