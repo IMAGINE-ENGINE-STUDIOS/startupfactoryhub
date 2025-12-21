@@ -171,6 +171,53 @@ const TradingViewHotlists = memo(() => {
 });
 
 TradingViewHotlists.displayName = 'TradingViewHotlists';
+
+const TradingViewCryptoScreener = memo(() => {
+  const container = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!container.current) return;
+    
+    container.current.innerHTML = '';
+    
+    const widgetContainer = document.createElement('div');
+    widgetContainer.className = 'tradingview-widget-container__widget';
+    container.current.appendChild(widgetContainer);
+
+    const script = document.createElement("script");
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-screener.js";
+    script.type = "text/javascript";
+    script.async = true;
+    script.innerHTML = JSON.stringify({
+      defaultColumn: "overview",
+      screener_type: "crypto_mkt",
+      displayCurrency: "USD",
+      colorTheme: "dark",
+      isTransparent: true,
+      backgroundColor: "rgba(0, 0, 0, 0)",
+      locale: "en",
+      width: "100%",
+      height: 550
+    });
+    
+    container.current.appendChild(script);
+
+    return () => {
+      if (container.current) {
+        container.current.innerHTML = '';
+      }
+    };
+  }, []);
+
+  return (
+    <div className="tradingview-widget-container" ref={container}>
+      <div className="tradingview-widget-container__widget"></div>
+    </div>
+  );
+});
+
+TradingViewCryptoScreener.displayName = 'TradingViewCryptoScreener';
+
 interface PlaceholderChartProps {
   title: string;
   description: string;
@@ -204,12 +251,6 @@ const upcomingCharts = [
     description: "Advanced charts with indicators & signals",
     icon: <BarChart2 className="w-6 h-6" />,
     gradient: "from-purple-500 to-pink-500"
-  },
-  {
-    title: "Crypto Markets",
-    description: "Bitcoin, Ethereum & altcoin tracking",
-    icon: <Bitcoin className="w-6 h-6" />,
-    gradient: "from-orange-500 to-yellow-500"
   },
   {
     title: "Economic Calendar",
@@ -255,6 +296,24 @@ export const TradingViewCharts = () => {
             </Badge>
           </div>
           <TradingViewHotlists />
+          <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
+            Data by TradingView
+          </p>
+        </Card>
+
+        {/* Crypto Markets Widget */}
+        <Card className="tech-card border-0 p-4 overflow-hidden lg:col-span-2">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="font-semibold">Crypto Markets</h3>
+              <p className="text-xs text-muted-foreground">Bitcoin, Ethereum & altcoin prices</p>
+            </div>
+            <Badge variant="secondary" className="text-[10px] bg-orange-500/10 text-orange-500 border-orange-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5 animate-pulse" />
+              Live
+            </Badge>
+          </div>
+          <TradingViewCryptoScreener />
           <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
             Data by TradingView
           </p>
