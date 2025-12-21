@@ -172,7 +172,7 @@ const TradingViewHotlists = memo(() => {
 
 TradingViewHotlists.displayName = 'TradingViewHotlists';
 
-const TradingViewCryptoScreener = memo(() => {
+const TradingViewEconomicCalendar = memo(() => {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -185,17 +185,15 @@ const TradingViewCryptoScreener = memo(() => {
     container.current.appendChild(widgetContainer);
 
     const script = document.createElement("script");
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-screener.js";
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-events.js";
     script.type = "text/javascript";
     script.async = true;
     script.innerHTML = JSON.stringify({
-      defaultColumn: "overview",
-      screener_type: "crypto_mkt",
-      displayCurrency: "USD",
       colorTheme: "dark",
       isTransparent: true,
-      backgroundColor: "rgba(0, 0, 0, 0)",
       locale: "en",
+      countryFilter: "ar,au,br,ca,cn,fr,de,in,id,it,jp,kr,mx,ru,sa,za,tr,gb,us,eu",
+      importanceFilter: "-1,0,1",
       width: "100%",
       height: 550
     });
@@ -216,7 +214,7 @@ const TradingViewCryptoScreener = memo(() => {
   );
 });
 
-TradingViewCryptoScreener.displayName = 'TradingViewCryptoScreener';
+TradingViewEconomicCalendar.displayName = 'TradingViewEconomicCalendar';
 
 interface PlaceholderChartProps {
   title: string;
@@ -253,10 +251,10 @@ const upcomingCharts = [
     gradient: "from-purple-500 to-pink-500"
   },
   {
-    title: "Economic Calendar",
-    description: "Upcoming events & earnings reports",
-    icon: <Calendar className="w-6 h-6" />,
-    gradient: "from-emerald-500 to-teal-500"
+    title: "Crypto Markets",
+    description: "Bitcoin, Ethereum & altcoin prices",
+    icon: <Bitcoin className="w-6 h-6" />,
+    gradient: "from-orange-500 to-amber-500"
   }
 ];
 
@@ -301,19 +299,19 @@ export const TradingViewCharts = () => {
           </p>
         </Card>
 
-        {/* Crypto Markets Widget */}
+        {/* Economic Calendar Widget */}
         <Card className="tech-card border-0 p-4 overflow-hidden lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="font-semibold">Crypto Markets</h3>
-              <p className="text-xs text-muted-foreground">Bitcoin, Ethereum & altcoin prices</p>
+              <h3 className="font-semibold">Economic Calendar</h3>
+              <p className="text-xs text-muted-foreground">Upcoming events & earnings reports</p>
             </div>
-            <Badge variant="secondary" className="text-[10px] bg-orange-500/10 text-orange-500 border-orange-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-orange-500 mr-1.5 animate-pulse" />
+            <Badge variant="secondary" className="text-[10px] bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse" />
               Live
             </Badge>
           </div>
-          <TradingViewCryptoScreener />
+          <TradingViewEconomicCalendar />
           <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
             Data by TradingView
           </p>
