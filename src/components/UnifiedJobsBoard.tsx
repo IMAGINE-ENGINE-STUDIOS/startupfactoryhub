@@ -268,7 +268,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
         // Create a company for the accelerator to post jobs
         const { data: newCompany, error: createError } = await supabase
           .from('companies')
-          .insert({
+          .insert([{
             user_id: user.id,
             name: acceleratorProfile.organization_name,
             description: acceleratorProfile.description,
@@ -276,7 +276,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
             location: acceleratorProfile.location,
             industry: 'Accelerator/Incubator',
             stage: 'growth'
-          })
+          }])
           .select('id')
           .single();
 
@@ -291,7 +291,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
       const { data: userProfile } = await supabase
         .from('profiles')
         .select('full_name, bio, avatar_url, location')
-        .eq('id', user.id)
+        .eq('user_id', user.id)
         .single();
 
       if (userProfile) {
@@ -305,6 +305,35 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
             location: userProfile.location || null,
             industry: 'Technology',
             stage: 'idea'
+          }])
+          .select('id')
+          .single();
+
+        if (!createError && newCompany) {
+          setUserCompanyId(newCompany.id);
+        }
+      }
+    }
+
+    // If user is investor, create a company from their profile data
+    if (role === 'investor') {
+      const { data: userProfile } = await supabase
+        .from('profiles')
+        .select('full_name, bio, avatar_url, location')
+        .eq('user_id', user.id)
+        .single();
+
+      if (userProfile) {
+        const { data: newCompany, error: createError } = await supabase
+          .from('companies')
+          .insert([{
+            user_id: user.id,
+            name: userProfile.full_name || 'Investment Firm',
+            description: userProfile.bio || null,
+            logo_url: userProfile.avatar_url || null,
+            location: userProfile.location || null,
+            industry: 'Investment',
+            stage: 'growth'
           }])
           .select('id')
           .single();
@@ -888,7 +917,7 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
     return <div className="text-center py-8">Loading jobs...</div>;
   }
 
-  const isCompanyUser = (role === 'startup' || role === 'accelerator') && userCompanyId;
+  const isCompanyUser = (role === 'startup' || role === 'accelerator' || role === 'investor') && userCompanyId;
   const canApply = !!user; // Any logged-in user can apply to jobs
 
   return (
