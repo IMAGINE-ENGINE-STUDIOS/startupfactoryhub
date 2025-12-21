@@ -172,7 +172,7 @@ const TradingViewHotlists = memo(() => {
 
 TradingViewHotlists.displayName = 'TradingViewHotlists';
 
-const TradingViewCryptoScreener = memo(() => {
+const TradingViewCryptoHeatmap = memo(() => {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -182,22 +182,28 @@ const TradingViewCryptoScreener = memo(() => {
     
     const widgetContainer = document.createElement('div');
     widgetContainer.className = 'tradingview-widget-container__widget';
+    widgetContainer.style.height = '500px';
+    widgetContainer.style.width = '100%';
     container.current.appendChild(widgetContainer);
 
     const script = document.createElement("script");
-    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-screener.js";
+    script.src = "https://s3.tradingview.com/external-embedding/embed-widget-crypto-coins-heatmap.js";
     script.type = "text/javascript";
     script.async = true;
     script.innerHTML = JSON.stringify({
-      defaultColumn: "overview",
-      screener_type: "crypto_mkt",
-      displayCurrency: "USD",
-      colorTheme: "dark",
-      isTransparent: true,
-      backgroundColor: "rgba(0, 0, 0, 0)",
+      dataSource: "Crypto",
+      blockSize: "market_cap_calc",
+      blockColor: "change",
       locale: "en",
+      symbolUrl: "",
+      colorTheme: "dark",
+      hasTopBar: false,
+      isDataSet498Enabled: false,
+      isZoomEnabled: true,
+      hasSymbolTooltip: true,
+      isMonoSize: false,
       width: "100%",
-      height: 550
+      height: "100%"
     });
     
     container.current.appendChild(script);
@@ -210,13 +216,13 @@ const TradingViewCryptoScreener = memo(() => {
   }, []);
 
   return (
-    <div className="tradingview-widget-container" ref={container}>
+    <div className="tradingview-widget-container" ref={container} style={{ height: '500px' }}>
       <div className="tradingview-widget-container__widget"></div>
     </div>
   );
 });
 
-TradingViewCryptoScreener.displayName = 'TradingViewCryptoScreener';
+TradingViewCryptoHeatmap.displayName = 'TradingViewCryptoHeatmap';
 
 interface PlaceholderChartProps {
   title: string;
@@ -313,7 +319,7 @@ export const TradingViewCharts = () => {
               Live
             </Badge>
           </div>
-          <TradingViewCryptoScreener />
+          <TradingViewCryptoHeatmap />
           <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
             Data by TradingView
           </p>
