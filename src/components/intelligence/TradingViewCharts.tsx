@@ -1,9 +1,13 @@
 import React, { useEffect, useRef, memo } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { TrendingUp } from 'lucide-react';
+import { useTheme } from 'next-themes';
 
-const TradingViewMarketOverview = memo(() => {
+interface WidgetProps {
+  theme: 'light' | 'dark';
+}
+
+const TradingViewMarketOverview = memo(({ theme }: WidgetProps) => {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,7 +25,7 @@ const TradingViewMarketOverview = memo(() => {
     script.type = "text/javascript";
     script.async = true;
     script.innerHTML = JSON.stringify({
-      colorTheme: "dark",
+      colorTheme: theme,
       dateRange: "12M",
       locale: "en",
       largeChartUrl: "",
@@ -30,7 +34,7 @@ const TradingViewMarketOverview = memo(() => {
       plotLineColorGrowing: "rgba(8, 153, 129, 1)",
       plotLineColorFalling: "rgba(8, 153, 129, 1)",
       gridLineColor: "rgba(8, 153, 129, 0.9)",
-      scaleFontColor: "#DBDBDB",
+      scaleFontColor: theme === 'dark' ? "#DBDBDB" : "#333333",
       belowLineFillColorGrowing: "rgba(41, 98, 255, 0.12)",
       belowLineFillColorFalling: "rgba(41, 98, 255, 0.12)",
       belowLineFillColorGrowingBottom: "rgba(41, 98, 255, 0)",
@@ -97,7 +101,7 @@ const TradingViewMarketOverview = memo(() => {
         container.current.innerHTML = '';
       }
     };
-  }, []);
+  }, [theme]);
 
   return (
     <div className="tradingview-widget-container" ref={container}>
@@ -108,7 +112,7 @@ const TradingViewMarketOverview = memo(() => {
 
 TradingViewMarketOverview.displayName = 'TradingViewMarketOverview';
 
-const TradingViewHotlists = memo(() => {
+const TradingViewHotlists = memo(({ theme }: WidgetProps) => {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -126,7 +130,7 @@ const TradingViewHotlists = memo(() => {
     script.async = true;
     script.innerHTML = JSON.stringify({
       exchange: "US",
-      colorTheme: "dark",
+      colorTheme: theme,
       dateRange: "12M",
       showChart: true,
       locale: "en",
@@ -137,7 +141,7 @@ const TradingViewHotlists = memo(() => {
       plotLineColorGrowing: "rgba(8, 153, 129, 1)",
       plotLineColorFalling: "rgba(8, 153, 129, 1)",
       gridLineColor: "rgba(240, 243, 250, 0)",
-      scaleFontColor: "#DBDBDB",
+      scaleFontColor: theme === 'dark' ? "#DBDBDB" : "#333333",
       belowLineFillColorGrowing: "rgba(41, 98, 255, 0.12)",
       belowLineFillColorFalling: "rgba(41, 98, 255, 0.12)",
       belowLineFillColorGrowingBottom: "rgba(41, 98, 255, 0)",
@@ -155,7 +159,7 @@ const TradingViewHotlists = memo(() => {
         container.current.innerHTML = '';
       }
     };
-  }, []);
+  }, [theme]);
 
   return (
     <div className="tradingview-widget-container" ref={container}>
@@ -166,7 +170,7 @@ const TradingViewHotlists = memo(() => {
 
 TradingViewHotlists.displayName = 'TradingViewHotlists';
 
-const TradingViewEconomicCalendar = memo(() => {
+const TradingViewEconomicCalendar = memo(({ theme }: WidgetProps) => {
   const container = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -183,7 +187,7 @@ const TradingViewEconomicCalendar = memo(() => {
     script.type = "text/javascript";
     script.async = true;
     script.innerHTML = JSON.stringify({
-      colorTheme: "dark",
+      colorTheme: theme,
       isTransparent: true,
       locale: "en",
       countryFilter: "ar,au,br,ca,cn,fr,de,in,id,it,jp,kr,mx,ru,sa,za,tr,gb,us,eu",
@@ -199,7 +203,7 @@ const TradingViewEconomicCalendar = memo(() => {
         container.current.innerHTML = '';
       }
     };
-  }, []);
+  }, [theme]);
 
   return (
     <div className="tradingview-widget-container" ref={container}>
@@ -212,6 +216,9 @@ TradingViewEconomicCalendar.displayName = 'TradingViewEconomicCalendar';
 
 
 export const TradingViewCharts = () => {
+  const { resolvedTheme } = useTheme();
+  const currentTheme = (resolvedTheme === 'dark' ? 'dark' : 'light') as 'light' | 'dark';
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Market Overview Widget */}
@@ -226,8 +233,8 @@ export const TradingViewCharts = () => {
             Live
           </Badge>
         </div>
-        <div className="tradingview-widget-wrapper bg-background rounded-lg overflow-hidden">
-          <TradingViewMarketOverview />
+        <div className="tradingview-widget-wrapper rounded-lg overflow-hidden">
+          <TradingViewMarketOverview key={`overview-${currentTheme}`} theme={currentTheme} />
         </div>
         <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
           Data by TradingView
@@ -246,8 +253,8 @@ export const TradingViewCharts = () => {
             Live
           </Badge>
         </div>
-        <div className="tradingview-widget-wrapper bg-background rounded-lg overflow-hidden">
-          <TradingViewHotlists />
+        <div className="tradingview-widget-wrapper rounded-lg overflow-hidden">
+          <TradingViewHotlists key={`hotlists-${currentTheme}`} theme={currentTheme} />
         </div>
         <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
           Data by TradingView
@@ -266,8 +273,8 @@ export const TradingViewCharts = () => {
             Live
           </Badge>
         </div>
-        <div className="tradingview-widget-wrapper bg-background rounded-lg overflow-hidden">
-          <TradingViewEconomicCalendar />
+        <div className="tradingview-widget-wrapper rounded-lg overflow-hidden">
+          <TradingViewEconomicCalendar key={`calendar-${currentTheme}`} theme={currentTheme} />
         </div>
         <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
           Data by TradingView
