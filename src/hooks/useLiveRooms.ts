@@ -143,10 +143,15 @@ export const useLiveRooms = () => {
       // If public, create a feed post
       if (isPublic) {
         await supabase.from('feed_posts').insert({
-          content: `🔴 Live Room: ${name}${description ? `\n${description}` : ''}`,
+          content: `Started a live room: ${name}`,
           user_id: user.id,
           post_type: 'live_room',
-          room_data: { room_id: room.id, meeting_link: meetingLink },
+          room_data: { 
+            room_id: room.id, 
+            meeting_link: meetingLink,
+            room_name: name,
+            description: description || null
+          },
         } as any);
       }
 
