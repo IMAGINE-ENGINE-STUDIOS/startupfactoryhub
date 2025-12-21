@@ -2,20 +2,24 @@ import { useState } from "react";
 import { Home, Brain, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import NotificationCenter from "@/components/NotificationCenter";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import RecommendationPopup from "@/components/RecommendationPopup";
+import CompanyProfileManager from "@/components/CompanyProfileManager";
 
 
 export function DashboardHeader() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [, setSearchParams] = useSearchParams();
   const [recommendationCount, setRecommendationCount] = useState(0);
   const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
 
@@ -24,15 +28,6 @@ export function DashboardHeader() {
     if (count > 0) {
       setHasNewRecommendations(true);
       setTimeout(() => setHasNewRecommendations(false), 3000);
-    }
-  };
-
-  const handleProfileClick = () => {
-    // Navigate to profile tab on current dashboard
-    if (location.pathname === '/accelerator-dashboard') {
-      setSearchParams({ tab: 'profile' });
-    } else {
-      setSearchParams({ tab: 'profile' });
     }
   };
 
@@ -49,15 +44,21 @@ export function DashboardHeader() {
           <Home className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleProfileClick}
-          className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
-          title="Profile"
-        >
-          <User className="h-4 w-4 sm:h-5 sm:w-5" />
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
+              title="Profile"
+            >
+              <User className="h-4 w-4 sm:h-5 sm:w-5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+            <CompanyProfileManager />
+          </DialogContent>
+        </Dialog>
         
         <NotificationCenter className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10" />
         
