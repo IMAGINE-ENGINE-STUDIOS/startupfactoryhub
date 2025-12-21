@@ -155,76 +155,80 @@ const LiveRooms = () => {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {rooms.map((room) => (
-            <Card key={room.id} className="tech-card border-0 hover:shadow-lg transition-shadow">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <CardTitle className="text-base font-semibold truncate">{room.name}</CardTitle>
-                    {room.description && (
-                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{room.description}</p>
-                    )}
-                  </div>
-                  <Badge variant="secondary" className={`ml-2 flex items-center gap-1 shrink-0 border-0 ${
-                    room.is_public 
-                      ? 'bg-green-500/10 text-green-600' 
-                      : 'bg-amber-500/10 text-amber-600'
-                  }`}>
-                    {room.is_public ? (
-                      <>
-                        <Globe className="h-3 w-3" />
-                        Public
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="h-3 w-3" />
-                        Private
-                      </>
-                    )}
-                  </Badge>
-                  <Badge variant="secondary" className="ml-1 flex items-center gap-1 shrink-0 bg-green-500/10 text-green-600 border-0">
-                    <Radio className="h-3 w-3 animate-pulse" />
-                    Live
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={room.creator?.avatar_url || undefined} />
-                      <AvatarFallback className="text-xs">
-                        {room.creator?.full_name?.charAt(0) || '?'}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-xs text-muted-foreground truncate max-w-[100px]">
-                      {room.creator?.full_name || 'Unknown'}
-                    </span>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                      <Users className="h-3 w-3" />
-                      {room.participant_count}
+        <div className="overflow-x-auto scrollbar-hide pb-2">
+          <div 
+            className="flex flex-wrap gap-3 pb-2"
+            style={{ 
+              height: '320px',
+              flexDirection: 'column',
+              alignContent: 'flex-start'
+            }}
+          >
+            {rooms.map((room) => (
+              <Card 
+                key={room.id} 
+                className="tech-card border-0 hover:shadow-lg transition-shadow w-[300px] h-[145px] shrink-0"
+              >
+                <CardHeader className="pb-2 pt-3 px-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-sm font-semibold truncate">{room.name}</CardTitle>
+                      {room.description && (
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{room.description}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <Badge variant="secondary" className={`text-[10px] px-1.5 py-0 h-5 flex items-center gap-0.5 border-0 ${
+                        room.is_public 
+                          ? 'bg-green-500/10 text-green-600' 
+                          : 'bg-amber-500/10 text-amber-600'
+                      }`}>
+                        {room.is_public ? <Globe className="h-2.5 w-2.5" /> : <Lock className="h-2.5 w-2.5" />}
+                      </Badge>
+                      <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-5 flex items-center gap-0.5 bg-green-500/10 text-green-600 border-0">
+                        <Radio className="h-2.5 w-2.5 animate-pulse" />
+                        Live
+                      </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    {user?.id === room.creator_id && (
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                        onClick={() => handleDelete(room.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
+                </CardHeader>
+                <CardContent className="pt-0 px-4 pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-5 w-5">
+                        <AvatarImage src={room.creator?.avatar_url || undefined} />
+                        <AvatarFallback className="text-[10px]">
+                          {room.creator?.full_name?.charAt(0) || '?'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-[11px] text-muted-foreground truncate max-w-[80px]">
+                        {room.creator?.full_name || 'Unknown'}
+                      </span>
+                      <div className="flex items-center gap-0.5 text-[11px] text-muted-foreground">
+                        <Users className="h-2.5 w-2.5" />
+                        {room.participant_count}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {user?.id === room.creator_id && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                          onClick={() => handleDelete(room.id)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      )}
+                      <Button size="sm" className="h-7 text-xs px-3" onClick={() => handleJoin(room)}>
+                        Join
                       </Button>
-                    )}
-                    <Button size="sm" onClick={() => handleJoin(room)}>
-                      Join
-                    </Button>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
 
