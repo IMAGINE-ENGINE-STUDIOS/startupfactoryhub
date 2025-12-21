@@ -226,7 +226,9 @@ export const TradingViewCharts = () => {
             Live
           </Badge>
         </div>
-        <TradingViewMarketOverview />
+        <div className="tradingview-widget-wrapper bg-background rounded-lg overflow-hidden">
+          <TradingViewMarketOverview />
+        </div>
         <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
           Data by TradingView
         </p>
@@ -244,7 +246,9 @@ export const TradingViewCharts = () => {
             Live
           </Badge>
         </div>
-        <TradingViewHotlists />
+        <div className="tradingview-widget-wrapper bg-background rounded-lg overflow-hidden">
+          <TradingViewHotlists />
+        </div>
         <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
           Data by TradingView
         </p>
@@ -262,7 +266,9 @@ export const TradingViewCharts = () => {
             Live
           </Badge>
         </div>
-        <TradingViewEconomicCalendar />
+        <div className="tradingview-widget-wrapper bg-background rounded-lg overflow-hidden">
+          <TradingViewEconomicCalendar />
+        </div>
         <p className="text-[10px] text-muted-foreground/50 mt-2 text-center">
           Data by TradingView
         </p>

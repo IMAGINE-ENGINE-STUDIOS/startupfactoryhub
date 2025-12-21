@@ -311,6 +311,24 @@ All colors MUST be HSL.
   background: hsl(var(--muted-foreground) / 0.6);
 }
 
+/* TradingView Widget Dark Theme Override */
+.dark .tradingview-widget-container {
+  background: hsl(var(--background)) !important;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.dark .tradingview-widget-container iframe {
+  background: hsl(var(--background)) !important;
+  color-scheme: dark;
+}
+
+.dark .tradingview-widget-wrapper {
+  background: hsl(var(--background)) !important;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
 /* Global Print Styles - Hide all UI elements when printing */
 @media print {
   /* Hide navigation and headers */
