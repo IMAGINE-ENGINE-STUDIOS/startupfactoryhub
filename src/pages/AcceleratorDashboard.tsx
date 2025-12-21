@@ -24,6 +24,7 @@ import { CohortManagement } from '@/components/accelerator/CohortManagement';
 import { CohortApplicationsManager } from '@/components/accelerator/CohortApplicationsManager';
 import { StartupJourneyTracker } from '@/components/accelerator/StartupJourneyTracker';
 import { AcceleratorPortfolio } from '@/components/accelerator/AcceleratorPortfolio';
+import { AlumniPortfolio } from '@/components/accelerator/AlumniPortfolio';
 import { MentorAdvisorAssignment } from '@/components/accelerator/MentorAdvisorAssignment';
 import { StartupDetailDialog } from '@/components/accelerator/StartupDetailDialog';
 import { CohortDetailsDialog } from '@/components/accelerator/CohortDetailsDialog';
@@ -391,9 +392,38 @@ const AcceleratorDashboard = () => {
             <MatchingSystem />
           </TabsContent>
 
-          {/* Cohorts Tab */}
-          <TabsContent value="cohorts">
+          {/* Cohorts Tab - Now includes Journey Tracker and Mentor/Advisor Assignments */}
+          <TabsContent value="cohorts" className="space-y-6">
+            {/* Cohort Management */}
             <CohortManagement cohorts={cohorts} onCreateCohort={createCohort} onUpdateCohort={updateCohort} onSelectCohort={handleSelectCohort} />
+            
+            {/* Active Startups Section - Filter for non-graduated startups */}
+            {(() => {
+              const activeStartups = portfolioStartups.filter(s => s.current_stage !== 'graduated');
+              if (activeStartups.length === 0) return null;
+              return (
+                <>
+                  {/* Startup Journey Tracker - For active cohort startups */}
+                  <div className="pt-6 border-t border-border/50">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                        <Users className="h-5 w-5 text-blue-500" />
+                      </div>
+                      <div>
+                        <h2 className="text-lg font-semibold text-foreground">Active Startup Journey</h2>
+                        <p className="text-xs text-muted-foreground">Track milestones for startups in active cohorts</p>
+                      </div>
+                    </div>
+                    <StartupJourneyTracker startups={activeStartups} onAddMilestone={addMilestone} onUpdateMilestone={updateMilestone} />
+                  </div>
+                  
+                  {/* Mentor/Advisor Assignment - For active cohort startups */}
+                  <div className="pt-6 border-t border-border/50">
+                    <MentorAdvisorAssignment startups={activeStartups} onAssignMentor={assignMentor} onAssignAdvisor={assignAdvisor} onRemoveMentor={removeMentorAssignment} onRemoveAdvisor={removeAdvisorAssignment} />
+                  </div>
+                </>
+              );
+            })()}
           </TabsContent>
 
           {/* Applications Tab */}
@@ -410,17 +440,16 @@ const AcceleratorDashboard = () => {
             />
           </TabsContent>
 
-          {/* Portfolio Tab */}
+          {/* Portfolio Tab - Now focused on Alumni (graduated companies) */}
           <TabsContent value="portfolio" className="space-y-6">
-            <div className="flex justify-end mb-4">
-              <Button onClick={() => setAddStartupDialogOpen(true)} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Add Startup
-              </Button>
-            </div>
-            <AcceleratorPortfolio startups={portfolioStartups} cohorts={cohorts} totalFundingRaised={profile?.total_funding_raised || 0} onViewStartup={handleViewStartup} onDeleteStartup={deletePortfolioStartup} />
-            <StartupJourneyTracker startups={portfolioStartups} onAddMilestone={addMilestone} onUpdateMilestone={updateMilestone} />
-            <MentorAdvisorAssignment startups={portfolioStartups} onAssignMentor={assignMentor} onAssignAdvisor={assignAdvisor} onRemoveMentor={removeMentorAssignment} onRemoveAdvisor={removeAdvisorAssignment} />
+            <AlumniPortfolio 
+              startups={portfolioStartups} 
+              cohorts={cohorts} 
+              totalFundingRaised={profile?.total_funding_raised || 0} 
+              onViewStartup={handleViewStartup} 
+              onDeleteStartup={deletePortfolioStartup}
+              onAddAlumni={() => setAddStartupDialogOpen(true)}
+            />
           </TabsContent>
 
           {/* Meetings Tab - Two Column Layout (Startup Dashboard Style) */}
@@ -915,14 +944,15 @@ const AcceleratorDashboard = () => {
         cohortName={cohorts.find(c => c.id === selectedStartup?.cohort_id)?.name}
       />
 
-      {/* Add Startup to Portfolio Dialog */}
+      {/* Add Alumni to Portfolio Dialog */}
       <AddStartupToPortfolioDialog
         open={addStartupDialogOpen}
         onOpenChange={setAddStartupDialogOpen}
         cohorts={cohorts}
         onStartupAdded={() => {
-          window.location.reload();
+          refetch();
         }}
+        isAlumniMode={true}
       />
 
       {/* Schedule Pitch Meeting Dialog */}
