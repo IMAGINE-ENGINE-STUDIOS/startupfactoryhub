@@ -2,20 +2,28 @@ import { useState } from "react";
 import { Home, Brain, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import NotificationCenter from "@/components/NotificationCenter";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import RecommendationPopup from "@/components/RecommendationPopup";
+import CompanyProfileManager from "@/components/CompanyProfileManager";
+import ProfilePostsMosaic from "@/components/ProfilePostsMosaic";
+import { useAuth } from "@/contexts/AuthContext";
 
 
 export function DashboardHeader() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const [, setSearchParams] = useSearchParams();
+  const { user } = useAuth();
   const [recommendationCount, setRecommendationCount] = useState(0);
   const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
 
@@ -24,15 +32,6 @@ export function DashboardHeader() {
     if (count > 0) {
       setHasNewRecommendations(true);
       setTimeout(() => setHasNewRecommendations(false), 3000);
-    }
-  };
-
-  const handleProfileClick = () => {
-    // Navigate to profile tab on current dashboard
-    if (location.pathname === '/accelerator-dashboard') {
-      setSearchParams({ tab: 'profile' });
-    } else {
-      setSearchParams({ tab: 'profile' });
     }
   };
 
@@ -49,15 +48,29 @@ export function DashboardHeader() {
           <Home className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
 
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleProfileClick}
-          className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
-          title="Profile"
-        >
-          <User className="h-4 w-4 sm:h-5 sm:w-5" />
-        </Button>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
+              title="Profile"
+            >
+              <User className="h-4 w-4 sm:h-5 sm:w-5" />
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+            <ScrollArea className="max-h-[85vh] p-6">
+              <CompanyProfileManager />
+              {user && (
+                <div className="mt-6">
+                  <h3 className="text-lg font-semibold mb-4">Posts</h3>
+                  <ProfilePostsMosaic userId={user.id} isOwnProfile />
+                </div>
+              )}
+            </ScrollArea>
+          </DialogContent>
+        </Dialog>
         
         <NotificationCenter className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10" />
         

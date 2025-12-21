@@ -64,9 +64,11 @@ export default function CompanyProfileManager() {
       .from('companies')
       .select('*')
       .eq('user_id', user.id)
-      .single();
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') {
+    if (error) {
       console.error('Error fetching company:', error);
       return;
     }
@@ -119,7 +121,7 @@ export default function CompanyProfileManager() {
     }
 
     setIsEditing(false);
-    fetchCompany();
+    await fetchCompany();
     toast({
       title: "Success",
       description: "Profile saved successfully!",
