@@ -22,6 +22,7 @@ export type Database = {
           current_startups: number | null
           description: string | null
           end_date: string | null
+          enrollment_fee: number | null
           equity_percentage: number | null
           focus_industries: string[] | null
           funding_per_startup: number | null
@@ -30,6 +31,7 @@ export type Database = {
           name: string
           start_date: string | null
           status: string | null
+          stripe_price_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -39,6 +41,7 @@ export type Database = {
           current_startups?: number | null
           description?: string | null
           end_date?: string | null
+          enrollment_fee?: number | null
           equity_percentage?: number | null
           focus_industries?: string[] | null
           funding_per_startup?: number | null
@@ -47,6 +50,7 @@ export type Database = {
           name: string
           start_date?: string | null
           status?: string | null
+          stripe_price_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -56,6 +60,7 @@ export type Database = {
           current_startups?: number | null
           description?: string | null
           end_date?: string | null
+          enrollment_fee?: number | null
           equity_percentage?: number | null
           focus_industries?: string[] | null
           funding_per_startup?: number | null
@@ -64,6 +69,7 @@ export type Database = {
           name?: string
           start_date?: string | null
           status?: string | null
+          stripe_price_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1066,7 +1072,10 @@ export type Database = {
           is_manual_entry: boolean | null
           joined_at: string | null
           notes: string | null
+          payment_completed_at: string | null
+          payment_status: string | null
           progress_percentage: number | null
+          stripe_session_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1087,7 +1096,10 @@ export type Database = {
           is_manual_entry?: boolean | null
           joined_at?: string | null
           notes?: string | null
+          payment_completed_at?: string | null
+          payment_status?: string | null
           progress_percentage?: number | null
+          stripe_session_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1108,7 +1120,10 @@ export type Database = {
           is_manual_entry?: boolean | null
           joined_at?: string | null
           notes?: string | null
+          payment_completed_at?: string | null
+          payment_status?: string | null
           progress_percentage?: number | null
+          stripe_session_id?: string | null
           updated_at?: string | null
         }
         Relationships: [

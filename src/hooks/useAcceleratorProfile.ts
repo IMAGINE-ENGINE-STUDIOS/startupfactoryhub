@@ -37,6 +37,8 @@ interface Cohort {
   funding_per_startup: number | null;
   equity_percentage: number | null;
   focus_industries: string[] | null;
+  enrollment_fee: number | null;
+  stripe_price_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -302,7 +304,7 @@ export const useAcceleratorProfile = () => {
   };
 
   const acceptStartupToCohort = async (application: CohortApplication) => {
-    if (!user) return;
+    if (!user || !profile) return;
 
     try {
       // Update application status
@@ -311,20 +313,40 @@ export const useAcceleratorProfile = () => {
       // Get cohort funding info
       const cohort = cohorts.find(c => c.id === application.cohort_id);
       const fundingAmount = cohort?.funding_per_startup || 0;
+      const enrollmentFee = (cohort as any)?.enrollment_fee || 0;
+      const equityPercentage = cohort?.equity_percentage || 0;
+
+      // Determine payment status
+      const paymentStatus = enrollmentFee > 0 ? 'pending_payment' : 'not_required';
 
       // Add startup to cohort
-      const { error: insertError } = await supabase
+      const { data: cohortStartup, error: insertError } = await supabase
         .from('cohort_startups')
         .insert([{
           cohort_id: application.cohort_id,
           company_id: application.startup_id,
           funding_received: fundingAmount,
-        }]);
+          equity_given: equityPercentage,
+          payment_status: paymentStatus,
+        }])
+        .select()
+        .single();
 
       if (insertError) throw insertError;
 
-      // Sync accelerator funding to company profile
+      // Sync investment to investments table if funding > 0
       if (fundingAmount > 0) {
+        await supabase.from('investments').insert({
+          investor_id: user.id,
+          company_id: application.startup_id,
+          amount: fundingAmount,
+          equity_percentage: equityPercentage,
+          investment_date: new Date().toISOString().split('T')[0],
+          round_type: 'accelerator',
+          notes: `Cohort: ${cohort?.name}`,
+        });
+
+        // Update company funding amount
         const { data: company } = await supabase
           .from('companies')
           .select('funding_amount')
@@ -337,6 +359,42 @@ export const useAcceleratorProfile = () => {
             funding_amount: (company?.funding_amount || 0) + fundingAmount 
           })
           .eq('id', application.startup_id);
+      }
+
+      // If enrollment fee, create Stripe payment
+      if (enrollmentFee > 0 && cohortStartup) {
+        // Get startup email
+        const { data: startupData } = await supabase
+          .from('companies')
+          .select('name, user_id')
+          .eq('id', application.startup_id)
+          .single();
+        
+        const { data: startupUserProfile } = await supabase
+          .from('profiles')
+          .select('email, full_name')
+          .eq('id', startupData?.user_id)
+          .single();
+
+        // Call payment edge function
+        const { data: paymentData, error: paymentError } = await supabase.functions.invoke('cohort-payment', {
+          body: {
+            cohortStartupId: cohortStartup.id,
+            cohortId: application.cohort_id,
+            startupEmail: startupUserProfile?.email || application.applicant_user_id,
+            startupName: startupData?.name,
+            enrollmentFee: enrollmentFee,
+            acceleratorName: profile.organization_name,
+          }
+        });
+
+        if (paymentError) {
+          console.error('Payment creation error:', paymentError);
+        } else if (paymentData?.url) {
+          // Return payment URL for UI to handle
+          await fetchPortfolio();
+          return { paymentUrl: paymentData.url };
+        }
       }
 
       await fetchPortfolio();
