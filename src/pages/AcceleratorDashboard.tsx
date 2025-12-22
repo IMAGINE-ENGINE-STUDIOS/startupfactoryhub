@@ -27,6 +27,7 @@ import { AcceleratorPortfolio } from '@/components/accelerator/AcceleratorPortfo
 import { AlumniPortfolio } from '@/components/accelerator/AlumniPortfolio';
 import { MentorAdvisorAssignment } from '@/components/accelerator/MentorAdvisorAssignment';
 import { StartupDetailDialog } from '@/components/accelerator/StartupDetailDialog';
+import { PortfolioStartupDialog } from '@/components/accelerator/PortfolioStartupDialog';
 import { CohortDetailsDialog } from '@/components/accelerator/CohortDetailsDialog';
 import AddStartupToPortfolioDialog from '@/components/accelerator/AddStartupToPortfolioDialog';
 import AcceleratorSchedulePitchDialog from '@/components/accelerator/AcceleratorSchedulePitchDialog';
@@ -107,6 +108,8 @@ const AcceleratorDashboard = () => {
   const [showCohortDetails, setShowCohortDetails] = useState(false);
   const [selectedStartup, setSelectedStartup] = useState<any>(null);
   const [showStartupDetails, setShowStartupDetails] = useState(false);
+  const [selectedPortfolioStartup, setSelectedPortfolioStartup] = useState<any>(null);
+  const [showPortfolioDetails, setShowPortfolioDetails] = useState(false);
   const [schedulePitchDialogOpen, setSchedulePitchDialogOpen] = useState(false);
   const [addStartupDialogOpen, setAddStartupDialogOpen] = useState(false);
   
@@ -170,6 +173,11 @@ const AcceleratorDashboard = () => {
   const handleViewStartup = (startup: any) => {
     setSelectedStartup(startup);
     setShowStartupDetails(true);
+  };
+
+  const handleViewPortfolioStartup = (startup: any) => {
+    setSelectedPortfolioStartup(startup);
+    setShowPortfolioDetails(true);
   };
 
   // Sync URL tab param to activeTab
@@ -446,7 +454,7 @@ const AcceleratorDashboard = () => {
               startups={portfolioStartups} 
               cohorts={cohorts} 
               totalFundingRaised={profile?.total_funding_raised || 0} 
-              onViewStartup={handleViewStartup} 
+              onViewStartup={handleViewPortfolioStartup} 
               onDeleteStartup={deletePortfolioStartup}
               onAddAlumni={() => setAddStartupDialogOpen(true)}
             />
@@ -942,6 +950,14 @@ const AcceleratorDashboard = () => {
         onAddMilestone={addMilestone}
         onUpdateMilestone={updateMilestone}
         cohortName={cohorts.find(c => c.id === selectedStartup?.cohort_id)?.name}
+      />
+
+      {/* Portfolio Startup Dialog - Company Profile & Investment Performance */}
+      <PortfolioStartupDialog
+        startup={selectedPortfolioStartup}
+        open={showPortfolioDetails}
+        onOpenChange={setShowPortfolioDetails}
+        cohortName={cohorts.find(c => c.id === selectedPortfolioStartup?.cohort_id)?.name}
       />
 
       {/* Add Alumni to Portfolio Dialog */}
