@@ -154,6 +154,31 @@ const FeedModeration = () => {
 
   const handleDeletePost = async (id: string) => {
     try {
+      // Find the post to get media URLs before deleting
+      const postToDelete = posts.find(p => p.id === id);
+      
+      // Delete media files from storage if they exist
+      if (postToDelete?.media_urls && postToDelete.media_urls.length > 0) {
+        const filePaths = postToDelete.media_urls
+          .map(url => {
+            // Extract file path from Supabase storage URL
+            const match = url.match(/\/storage\/v1\/object\/public\/feed-media\/(.+)/);
+            return match ? match[1] : null;
+          })
+          .filter(Boolean) as string[];
+        
+        if (filePaths.length > 0) {
+          const { error: storageError } = await supabase.storage
+            .from('feed-media')
+            .remove(filePaths);
+          
+          if (storageError) {
+            console.error('Error deleting media files:', storageError);
+          }
+        }
+      }
+
+      // Delete the post from database
       const { error } = await supabase
         .from('feed_posts')
         .delete()
@@ -164,13 +189,13 @@ const FeedModeration = () => {
       setPosts(prev => prev.filter(p => p.id !== id));
       toast({
         title: "Deleted",
-        description: "Post has been deleted"
+        description: "Post and media files have been deleted"
       });
     } catch (error) {
       console.error('Error deleting post:', error);
       toast({
         title: "Error",
-        description: "Failed to delete post",
+        description: "Failed to delete post. Make sure you're logged in as an admin.",
         variant: "destructive"
       });
     }
