@@ -4,6 +4,7 @@ import advisorBadge from '@/assets/advisor-badge.png';
 import investorBadge from '@/assets/investor-badge.png';
 import studentBadge from '@/assets/student-badge.png';
 import mentorBadge from '@/assets/mentor-badge.png';
+import acceleratorBadge from '@/assets/sfh-logo-sphere.png';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
 
 interface RoleBasedAvatarProps {
@@ -38,6 +39,8 @@ export default function RoleBasedAvatar({
         return investorBadge;
       case 'student':
         return studentBadge;
+      case 'accelerator':
+        return acceleratorBadge;
       default:
         return undefined;
     }
