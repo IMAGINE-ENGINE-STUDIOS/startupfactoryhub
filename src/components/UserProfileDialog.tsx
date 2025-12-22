@@ -221,28 +221,34 @@ export default function UserProfileDialog({
             .maybeSingle();
           
           if (acceleratorProfile) {
-            // Fetch active cohorts
-            const { data: cohorts } = await supabase
+            // Fetch ALL cohorts first (needed for alumni query)
+            const { data: allCohorts } = await supabase
               .from('accelerator_cohorts')
               .select('*')
               .eq('accelerator_id', acceleratorProfile.id)
-              .in('status', ['active', 'upcoming'])
-              .order('start_date', { ascending: false })
-              .limit(5);
+              .order('start_date', { ascending: false });
             
-            // Fetch alumni (graduated startups)
-            const { data: alumni } = await supabase
-              .from('cohort_startups')
-              .select(`
-                *,
-                company:companies(id, name, logo_url, industry, stage),
-                cohort:accelerator_cohorts(name)
-              `)
-              .in('cohort_id', cohorts?.map(c => c.id) || [])
-              .not('graduation_date', 'is', null)
-              .limit(10);
+            // Filter for active/upcoming cohorts to display
+            const activeCohorts = allCohorts?.filter(c => 
+              c.status === 'active' || c.status === 'upcoming'
+            ).slice(0, 5) || [];
             
-            setRoleData({ acceleratorProfile, cohorts: cohorts || [], alumni: alumni || [] });
+            // Fetch alumni (graduated startups) from ALL cohorts
+            const allCohortIds = allCohorts?.map(c => c.id) || [];
+            const { data: alumni } = allCohortIds.length > 0 
+              ? await supabase
+                  .from('cohort_startups')
+                  .select(`
+                    *,
+                    company:companies(id, name, logo_url, industry, stage),
+                    cohort:accelerator_cohorts(name)
+                  `)
+                  .in('cohort_id', allCohortIds)
+                  .or('graduation_date.not.is.null,current_stage.eq.graduated')
+                  .limit(10)
+              : { data: [] };
+            
+            setRoleData({ acceleratorProfile, cohorts: activeCohorts, alumni: alumni || [] });
           }
           break;
         }
