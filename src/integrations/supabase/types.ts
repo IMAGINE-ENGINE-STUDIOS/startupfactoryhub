@@ -3805,6 +3805,7 @@ export type Database = {
           is_flagship: boolean | null
           is_official_partner: boolean | null
           is_verified: boolean | null
+          journey_steps: string[] | null
           latitude: number | null
           linked_accelerator_id: string | null
           location_type: string
@@ -3832,6 +3833,7 @@ export type Database = {
           is_flagship?: boolean | null
           is_official_partner?: boolean | null
           is_verified?: boolean | null
+          journey_steps?: string[] | null
           latitude?: number | null
           linked_accelerator_id?: string | null
           location_type?: string
@@ -3859,6 +3861,7 @@ export type Database = {
           is_flagship?: boolean | null
           is_official_partner?: boolean | null
           is_verified?: boolean | null
+          journey_steps?: string[] | null
           latitude?: number | null
           linked_accelerator_id?: string | null
           location_type?: string

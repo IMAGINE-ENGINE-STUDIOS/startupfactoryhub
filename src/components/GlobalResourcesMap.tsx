@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import { useResources, Resource, ResourceType } from '@/hooks/useResources';
+import { useResources, Resource, ResourceType, JOURNEY_STEPS, JourneyStep } from '@/hooks/useResources';
 import { useMapTracking } from '@/hooks/useMapTracking';
 import { useSearchParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
@@ -88,6 +88,7 @@ export const GlobalResourcesMap = () => {
   const addressMarker = useRef<mapboxgl.Marker | null>(null);
   const acceleratorMarker = useRef<mapboxgl.Marker | null>(null);
   const [selectedType, setSelectedType] = useState<ResourceType | null>(null);
+  const [selectedJourneyStep, setSelectedJourneyStep] = useState<JourneyStep | null>(null);
   const [search, setSearch] = useState('');
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<MapEvent | null>(null);
@@ -180,7 +181,8 @@ export const GlobalResourcesMap = () => {
 
 const { data: resources, isLoading, refetch: refetchResources } = useResources({ 
     type: selectedType === 'event' ? undefined : selectedType || undefined,
-    search: search || undefined
+    search: search || undefined,
+    journeyStep: selectedJourneyStep || undefined
   });
 
   // Fetch events for map
@@ -1152,6 +1154,40 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     </Button>
                   );
                 })}
+              </div>
+              
+              {/* Journey Step Filter */}
+              <div className="mt-4 pt-4 border-t border-white/20">
+                <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Journey Stage</h3>
+                <div className="space-y-1">
+                  <Button
+                    variant={selectedJourneyStep === null ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setSelectedJourneyStep(null)}
+                    className={cn(
+                      "w-full justify-start gap-2 rounded-xl backdrop-blur-xl",
+                      selectedJourneyStep === null ? "bg-primary/90" : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
+                    )}
+                  >
+                    All Stages
+                  </Button>
+                  {JOURNEY_STEPS.filter(s => s.value !== 'all').map((step) => (
+                    <Button
+                      key={step.value}
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedJourneyStep(step.value)}
+                      className={cn(
+                        "w-full justify-start gap-2 rounded-xl backdrop-blur-xl text-left",
+                        selectedJourneyStep === step.value
+                          ? "bg-white/20 dark:bg-black/30 border-l-4 border-primary" 
+                          : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
+                      )}
+                    >
+                      {step.label}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </ScrollArea>
             

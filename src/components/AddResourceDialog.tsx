@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { useCreateResource, ResourceType, LocationType } from '@/hooks/useResources';
+import { Checkbox } from '@/components/ui/checkbox';
+import { useCreateResource, ResourceType, LocationType, JOURNEY_STEPS, JourneyStep } from '@/hooks/useResources';
 import { toast } from 'sonner';
 
 interface AddResourceDialogProps {
@@ -25,6 +26,7 @@ export const AddResourceDialog = ({ open, onOpenChange }: AddResourceDialogProps
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [contactEmail, setContactEmail] = useState('');
   const [isGeocoding, setIsGeocoding] = useState(false);
+  const [journeySteps, setJourneySteps] = useState<JourneyStep[]>([]);
 
   const createResource = useCreateResource();
 
@@ -79,6 +81,7 @@ export const AddResourceDialog = ({ open, onOpenChange }: AddResourceDialogProps
         longitude: coordinates.lng,
         website_url: websiteUrl || null,
         contact_email: contactEmail || null,
+        journey_steps: journeySteps.length > 0 ? journeySteps : null,
       },
       {
         onSuccess: () => {
@@ -93,6 +96,7 @@ export const AddResourceDialog = ({ open, onOpenChange }: AddResourceDialogProps
           setCountry('');
           setWebsiteUrl('');
           setContactEmail('');
+          setJourneySteps([]);
         },
       }
     );
@@ -229,6 +233,30 @@ export const AddResourceDialog = ({ open, onOpenChange }: AddResourceDialogProps
               onChange={(e) => setContactEmail(e.target.value)}
               placeholder="contact@example.com"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Journey Steps (when is this resource most useful?)</Label>
+            <div className="flex flex-wrap gap-3">
+              {JOURNEY_STEPS.map((step) => (
+                <div key={step.value} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`add-${step.value}`}
+                    checked={journeySteps.includes(step.value)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setJourneySteps([...journeySteps, step.value]);
+                      } else {
+                        setJourneySteps(journeySteps.filter(s => s !== step.value));
+                      }
+                    }}
+                  />
+                  <Label htmlFor={`add-${step.value}`} className="text-sm font-normal cursor-pointer">
+                    {step.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="flex gap-2 justify-end">

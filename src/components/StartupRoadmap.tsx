@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw, ChevronDown, Trophy, Trash2, Building2, GraduationCap, Calendar } from 'lucide-react';
+import { CheckCircle, Circle, Lock, Lightbulb, FileText, Users, TrendingUp, DollarSign, Plus, X, RotateCcw, ChevronDown, Trophy, Trash2, Building2, GraduationCap, Calendar, MapPin } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +17,8 @@ import TRLTracker from '@/components/TRLTracker';
 import RoadmapChecklist, { ChecklistItem } from '@/components/RoadmapChecklist';
 import JourneyCompletionDialog from '@/components/JourneyCompletionDialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { JourneyResourcesDialog } from '@/components/JourneyResourcesDialog';
+import { JourneyStep } from '@/hooks/useResources';
 
 interface RoadmapStep {
   id: string;
@@ -180,6 +182,8 @@ export default function StartupRoadmap() {
   const [acceleratorPrograms, setAcceleratorPrograms] = useState<AcceleratorProgram[]>([]);
   const [loadingAccelerators, setLoadingAccelerators] = useState(false);
   const [acceleratorExpanded, setAcceleratorExpanded] = useState(true);
+  const [resourcesDialogOpen, setResourcesDialogOpen] = useState(false);
+  const [selectedStepForResources, setSelectedStepForResources] = useState<{ step: JourneyStep; title: string } | null>(null);
   const roadmapProgress = useRoadmapProgress(refreshTrigger);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -1045,12 +1049,11 @@ export default function StartupRoadmap() {
                           disabled={step.locked}
                           className="text-xs sm:text-sm h-8 sm:h-9"
                           onClick={() => {
-                            toast({
-                              title: "Resource Access",
-                              description: `Opening resources for ${step.title}`,
-                            });
+                            setSelectedStepForResources({ step: step.stage as JourneyStep, title: step.title });
+                            setResourcesDialogOpen(true);
                           }}
                         >
+                          <MapPin className="w-3 h-3 mr-1" />
                           View Resources
                         </Button>
                         {!step.completed && !step.locked && (
@@ -1337,6 +1340,16 @@ export default function StartupRoadmap() {
         onShare={shareJourneyCompletion}
         totalSteps={steps.filter(s => !isNaN(parseInt(s.id)) && parseInt(s.id) <= 6).length}
       />
+
+      {/* Journey Resources Dialog */}
+      {selectedStepForResources && (
+        <JourneyResourcesDialog
+          open={resourcesDialogOpen}
+          onOpenChange={setResourcesDialogOpen}
+          journeyStep={selectedStepForResources.step}
+          stepTitle={selectedStepForResources.title}
+        />
+      )}
     </div>
   );
 }
