@@ -186,6 +186,45 @@ export default function AddStartupToPortfolioDialog({
 
       if (insertError) throw insertError;
 
+      // Sync to investments table if funding is provided
+      const fundingAmount = fundingReceived ? parseFloat(fundingReceived) : 0;
+      if (fundingAmount > 0) {
+        const investmentData: any = {
+          investor_id: user.id,
+          amount: fundingAmount,
+          equity_percentage: equityGiven ? parseFloat(equityGiven) : null,
+          investment_date: new Date().toISOString().split('T')[0],
+          investment_round: 'accelerator',
+          source: 'accelerator',
+          notes: `Portfolio entry`,
+        };
+
+        if (companyType === 'platform' && selectedCompany) {
+          investmentData.company_id = selectedCompany.id;
+          
+          // Update company funding amount
+          const { data: company } = await supabase
+            .from('companies')
+            .select('funding_amount')
+            .eq('id', selectedCompany.id)
+            .single();
+          
+          await supabase
+            .from('companies')
+            .update({ 
+              funding_amount: (company?.funding_amount || 0) + fundingAmount 
+            })
+            .eq('id', selectedCompany.id);
+        } else {
+          // External company - store external details
+          investmentData.external_company_name = externalCompanyName.trim();
+          investmentData.external_company_industry = externalCompanyIndustry || null;
+          investmentData.external_company_website = externalCompanyWebsite || null;
+        }
+
+        await supabase.from('investments').insert(investmentData);
+      }
+
       const displayName = companyType === 'platform' ? selectedCompany?.name : externalCompanyName;
       toast({
         title: isAlumniMode ? "Alumni Added" : "Startup Added",
