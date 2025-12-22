@@ -98,14 +98,14 @@ export const AlumniPortfolio = ({
 }: AlumniPortfolioProps) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCohort, setSelectedCohort] = useState<string>('all');
-  const [selectedYear, setSelectedYear] = useState<string>('all');
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [startupToDelete, setStartupToDelete] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'directory' | 'investments' | 'success'>('directory');
+  const [activeView, setActiveView] = useState<'directory' | 'investments'>('directory');
 
-  // Filter only graduated startups
-  const graduatedStartups = startups.filter(s => s.current_stage === 'graduated');
+  // Show ALL startups (not just graduated)
+  const allStartups = startups;
 
   const handleDeleteClick = (e: React.MouseEvent, startupId: string) => {
     e.stopPropagation();
@@ -141,43 +141,55 @@ export const AlumniPortfolio = ({
     return startup.company?.website;
   };
 
+  const getStartupStatus = (startup: CohortStartup) => {
+    if (startup.graduation_date || startup.current_stage === 'graduated') return 'graduated';
+    if ((startup as any).payment_status === 'pending_payment') return 'pending_payment';
+    return 'active';
+  };
+
   const getGraduationYear = (startup: CohortStartup) => {
     if (startup.graduation_year) return startup.graduation_year;
     if (startup.graduation_date) return new Date(startup.graduation_date).getFullYear();
     return null;
   };
 
-  // Get unique graduation years
-  const graduationYears = [...new Set(graduatedStartups.map(s => getGraduationYear(s)).filter(Boolean))].sort((a, b) => (b || 0) - (a || 0));
+  const getStatusBadge = (startup: CohortStartup) => {
+    const status = getStartupStatus(startup);
+    switch (status) {
+      case 'graduated':
+        return <Badge className="bg-green-500/20 text-green-400 border-green-500/30"><GraduationCap className="h-3 w-3 mr-1" /> Graduated</Badge>;
+      case 'pending_payment':
+        return <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/30">Pending Payment</Badge>;
+      default:
+        return <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">Active</Badge>;
+    }
+  };
 
-  const filteredStartups = graduatedStartups.filter(startup => {
+  const filteredStartups = allStartups.filter(startup => {
     const name = getStartupName(startup);
     const industry = getStartupIndustry(startup);
     const matchesSearch = !searchQuery || 
       name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       industry.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCohort = selectedCohort === 'all' || startup.cohort_id === selectedCohort;
-    const matchesYear = selectedYear === 'all' || getGraduationYear(startup)?.toString() === selectedYear;
-    return matchesSearch && matchesCohort && matchesYear;
+    const status = getStartupStatus(startup);
+    const matchesStatus = selectedStatus === 'all' || status === selectedStatus;
+    return matchesSearch && matchesCohort && matchesStatus;
   });
 
   const getCohortName = (cohortId: string) => {
     return cohorts.find(c => c.id === cohortId)?.name || 'Unknown';
   };
 
-  // Calculate stats
-  const totalAlumni = graduatedStartups.length;
-  const totalInvestment = graduatedStartups.reduce((sum, s) => sum + (s.funding_received || 0), 0);
-  const totalEquity = graduatedStartups.reduce((sum, s) => sum + (s.equity_given || 0), 0) / Math.max(graduatedStartups.length, 1);
+  // Calculate stats for ALL startups
+  const totalStartups = allStartups.length;
+  const activeStartups = allStartups.filter(s => getStartupStatus(s) === 'active').length;
+  const graduatedStartups = allStartups.filter(s => getStartupStatus(s) === 'graduated').length;
+  const totalInvestment = allStartups.reduce((sum, s) => sum + (s.funding_received || 0), 0);
+  const totalEquity = allStartups.reduce((sum, s) => sum + (s.equity_given || 0), 0) / Math.max(allStartups.length, 1);
   
   // Estimate ROI (simplified - funding received vs invested)
   const estimatedROI = totalInvestment > 0 ? ((totalFundingRaised / totalInvestment - 1) * 100) : 0;
-
-  // Success stories - companies with high funding
-  const successStories = graduatedStartups
-    .filter(s => (s.company?.funding_amount || 0) > 1000000)
-    .sort((a, b) => (b.company?.funding_amount || 0) - (a.company?.funding_amount || 0))
-    .slice(0, 5);
 
   return (
     <div className="space-y-6">
@@ -185,17 +197,17 @@ export const AlumniPortfolio = ({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-            <GraduationCap className="h-5 w-5 text-purple-500" />
+            <Building2 className="h-5 w-5 text-purple-500" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-foreground">Alumni Portfolio</h2>
-            <p className="text-xs text-muted-foreground">Track graduated companies and investments</p>
+            <h2 className="text-lg font-semibold text-foreground">Portfolio Startups</h2>
+            <p className="text-xs text-muted-foreground">All startups across your cohorts</p>
           </div>
         </div>
         {onAddAlumni && (
           <Button onClick={onAddAlumni} className="gap-2">
             <Plus className="h-4 w-4" />
-            Add Alumni
+            Add Startup
           </Button>
         )}
       </div>
@@ -206,11 +218,11 @@ export const AlumniPortfolio = ({
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-purple-500/10 flex items-center justify-center">
-                <GraduationCap className="w-5 h-5 text-purple-500" />
+                <Building2 className="w-5 h-5 text-purple-500" />
               </div>
               <div>
-                <p className="text-2xl font-bold">{totalAlumni}</p>
-                <p className="text-sm text-muted-foreground">Total Alumni</p>
+                <p className="text-2xl font-bold">{totalStartups}</p>
+                <p className="text-sm text-muted-foreground">Total Startups</p>
               </div>
             </div>
           </CardContent>
@@ -268,15 +280,11 @@ export const AlumniPortfolio = ({
         <TabsList className="bg-muted/50">
           <TabsTrigger value="directory" className="gap-2">
             <Building2 className="h-4 w-4" />
-            Alumni Directory
+            Startup Directory
           </TabsTrigger>
           <TabsTrigger value="investments" className="gap-2">
             <DollarSign className="h-4 w-4" />
             Investments
-          </TabsTrigger>
-          <TabsTrigger value="success" className="gap-2">
-            <Trophy className="h-4 w-4" />
-            Success Stories
           </TabsTrigger>
         </TabsList>
 
@@ -307,17 +315,15 @@ export const AlumniPortfolio = ({
                   ))}
                 </SelectContent>
               </Select>
-              <Select value={selectedYear} onValueChange={setSelectedYear}>
+              <Select value={selectedStatus} onValueChange={setSelectedStatus}>
                 <SelectTrigger className="w-[150px]">
-                  <SelectValue placeholder="All Years" />
+                  <SelectValue placeholder="All Status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All Years</SelectItem>
-                  {graduationYears.map((year) => (
-                    <SelectItem key={year} value={year?.toString() || ''}>
-                      {year}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="active">Active</SelectItem>
+                  <SelectItem value="graduated">Graduated</SelectItem>
+                  <SelectItem value="pending_payment">Pending Payment</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -564,75 +570,6 @@ export const AlumniPortfolio = ({
               </div>
             </CardContent>
           </Card>
-        </TabsContent>
-
-        {/* Success Stories */}
-        <TabsContent value="success" className="space-y-4">
-          {successStories.length === 0 ? (
-            <Card className="tech-card border-0">
-              <CardContent className="p-12 text-center">
-                <Trophy className="h-12 w-12 mx-auto text-muted-foreground/50 mb-4" />
-                <h3 className="font-semibold mb-2">No Success Stories Yet</h3>
-                <p className="text-muted-foreground text-sm">
-                  Success stories will appear when alumni raise over $1M
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {successStories.map((startup, index) => (
-                <Card key={startup.id} className="tech-card border-0 overflow-hidden">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4 mb-4">
-                      {index === 0 && (
-                        <div className="absolute -top-2 -right-2 w-12 h-12 bg-amber-500/20 rounded-full flex items-center justify-center">
-                          <Trophy className="h-6 w-6 text-amber-500" />
-                        </div>
-                      )}
-                      <Avatar className="w-16 h-16">
-                        <AvatarImage src={getStartupLogo(startup) || undefined} />
-                        <AvatarFallback className="bg-purple-500/20 text-purple-400 text-xl">
-                          {getStartupName(startup)?.charAt(0) || 'A'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
-                        <h3 className="font-semibold text-lg">{getStartupName(startup)}</h3>
-                        <p className="text-sm text-muted-foreground">{getStartupIndustry(startup)}</p>
-                        <Badge className="mt-1 bg-purple-500/20 text-purple-400 border-purple-500/30">
-                          Class of {getGraduationYear(startup)}
-                        </Badge>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-3 gap-4 p-4 rounded-lg bg-muted/30">
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-emerald-400">
-                          ${((startup.company?.funding_amount || 0) / 1000000).toFixed(1)}M
-                        </p>
-                        <p className="text-xs text-muted-foreground">Total Raised</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-lg font-bold">
-                          ${((startup.funding_received || 0) / 1000).toFixed(0)}K
-                        </p>
-                        <p className="text-xs text-muted-foreground">Our Investment</p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-lg font-bold text-blue-400">
-                          {startup.equity_given || 0}%
-                        </p>
-                        <p className="text-xs text-muted-foreground">Equity</p>
-                      </div>
-                    </div>
-                    {startup.notes && (
-                      <p className="mt-4 text-sm text-muted-foreground italic">
-                        "{startup.notes}"
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
         </TabsContent>
       </Tabs>
 

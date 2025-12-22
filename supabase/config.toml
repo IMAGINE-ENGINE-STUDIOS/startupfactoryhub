@@ -53,3 +53,9 @@ verify_jwt = false
 
 [functions.seed-demo-data]
 verify_jwt = false
+
+[functions.cohort-payment]
+verify_jwt = false
+
+[functions.verify-cohort-payment]
+verify_jwt = false

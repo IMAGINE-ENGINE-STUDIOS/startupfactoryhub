@@ -32,6 +32,7 @@ export const CreateCohortDialog = ({ open, onOpenChange, onCreateCohort }: Creat
     max_startups: 20,
     funding_per_startup: '',
     equity_percentage: '',
+    enrollment_fee: '',
     focus_industries: [] as string[],
     status: 'upcoming'
   });
@@ -58,6 +59,7 @@ export const CreateCohortDialog = ({ open, onOpenChange, onCreateCohort }: Creat
         max_startups: formData.max_startups,
         funding_per_startup: formData.funding_per_startup ? parseInt(formData.funding_per_startup) * 1000 : null,
         equity_percentage: formData.equity_percentage ? parseFloat(formData.equity_percentage) : null,
+        enrollment_fee: formData.enrollment_fee ? parseInt(formData.enrollment_fee) * 100 : 0, // Convert to cents
         focus_industries: formData.focus_industries.length > 0 ? formData.focus_industries : null,
         status: formData.status
       });
@@ -77,6 +79,7 @@ export const CreateCohortDialog = ({ open, onOpenChange, onCreateCohort }: Creat
         max_startups: 20,
         funding_per_startup: '',
         equity_percentage: '',
+        enrollment_fee: '',
         focus_industries: [],
         status: 'upcoming'
       });
@@ -170,7 +173,7 @@ export const CreateCohortDialog = ({ open, onOpenChange, onCreateCohort }: Creat
           </div>
 
           {/* Capacity & Funding */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
@@ -213,6 +216,21 @@ export const CreateCohortDialog = ({ open, onOpenChange, onCreateCohort }: Creat
                 onChange={(e) => setFormData(prev => ({ ...prev, equity_percentage: e.target.value }))}
                 className="mt-1.5"
               />
+            </div>
+            <div>
+              <Label className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4" />
+                Enrollment Fee ($)
+              </Label>
+              <Input
+                type="number"
+                min={0}
+                placeholder="e.g., 500 (leave empty for free)"
+                value={formData.enrollment_fee}
+                onChange={(e) => setFormData(prev => ({ ...prev, enrollment_fee: e.target.value }))}
+                className="mt-1.5"
+              />
+              <p className="text-xs text-muted-foreground mt-1">Charged via Stripe when startup is accepted</p>
             </div>
           </div>
 
