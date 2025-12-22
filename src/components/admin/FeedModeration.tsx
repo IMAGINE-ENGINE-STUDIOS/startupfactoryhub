@@ -22,7 +22,8 @@ import {
   AlertTriangle,
   Eye,
   Heart,
-  MessageCircle
+  MessageCircle,
+  Image as ImageIcon
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -40,6 +41,7 @@ interface Post {
   comments_count: number | null;
   created_at: string;
   user_id: string;
+  media_urls?: string[] | null;
   profiles?: {
     full_name: string | null;
     avatar_url: string | null;
@@ -315,6 +317,7 @@ const FeedModeration = () => {
                   <TableRow>
                     <TableHead>Author</TableHead>
                     <TableHead>Content</TableHead>
+                    <TableHead>Media</TableHead>
                     <TableHead>Type</TableHead>
                     <TableHead>Engagement</TableHead>
                     <TableHead>Created</TableHead>
@@ -334,7 +337,17 @@ const FeedModeration = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <p className="text-sm max-w-[400px] whitespace-pre-wrap">{post.content}</p>
+                        <p className="text-sm max-w-[300px] whitespace-pre-wrap line-clamp-2">{post.content}</p>
+                      </TableCell>
+                      <TableCell>
+                        {post.media_urls && post.media_urls.length > 0 ? (
+                          <div className="flex items-center gap-1">
+                            <ImageIcon className="h-4 w-4 text-purple-400" />
+                            <span className="text-xs text-muted-foreground">{post.media_urls.length}</span>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">-</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge variant="outline" className={getPostTypeBadge(post.post_type)}>
@@ -459,6 +472,28 @@ const FeedModeration = () => {
               <div className="p-4 bg-muted/50 rounded-lg">
                 <p className="text-sm whitespace-pre-wrap">{selectedPost.content}</p>
               </div>
+              
+              {/* Media Gallery */}
+              {selectedPost.media_urls && selectedPost.media_urls.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium flex items-center gap-2">
+                    <ImageIcon className="h-4 w-4 text-purple-400" />
+                    Media ({selectedPost.media_urls.length})
+                  </p>
+                  <div className="grid grid-cols-2 gap-2 max-h-[250px] overflow-y-auto">
+                    {selectedPost.media_urls.map((url, idx) => (
+                      <div key={idx} className="relative aspect-square rounded-lg overflow-hidden bg-muted">
+                        {url.includes('.mp4') || url.includes('.webm') || url.includes('.mov') ? (
+                          <video src={url} controls className="w-full h-full object-cover" />
+                        ) : (
+                          <img src={url} alt={`Media ${idx + 1}`} className="w-full h-full object-cover" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Heart className="h-4 w-4" /> {selectedPost.likes_count || 0} likes
