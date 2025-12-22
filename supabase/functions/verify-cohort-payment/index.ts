@@ -40,7 +40,7 @@ serve(async (req) => {
     // Get cohort startup with session ID
     const { data: cohortStartup, error: fetchError } = await supabaseClient
       .from('cohort_startups')
-      .select('stripe_session_id, payment_status')
+      .select('stripe_session_id, payment_status, stripe_subscription_id')
       .eq('id', cohortStartupId)
       .single();
 
@@ -69,22 +69,60 @@ serve(async (req) => {
     // Check session status
     const session = await stripe.checkout.sessions.retrieve(cohortStartup.stripe_session_id);
     
-    logStep("Session status", { status: session.payment_status });
+    logStep("Session status", { 
+      status: session.payment_status, 
+      mode: session.mode,
+      subscriptionId: session.subscription 
+    });
 
-    if (session.payment_status === 'paid') {
+    const isPaid = session.payment_status === 'paid';
+
+    if (isPaid) {
+      const updateData: any = {
+        payment_status: 'paid',
+        payment_completed_at: new Date().toISOString(),
+        current_stage: 'active',
+      };
+
+      // If this was a subscription, store the subscription ID
+      if (session.mode === 'subscription' && session.subscription) {
+        const subscriptionId = typeof session.subscription === 'string' 
+          ? session.subscription 
+          : session.subscription.id;
+        
+        updateData.stripe_subscription_id = subscriptionId;
+
+        // Get subscription details to get the end date
+        try {
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          if (subscription.cancel_at) {
+            const endDate = new Date(subscription.cancel_at * 1000);
+            updateData.subscription_end_date = endDate.toISOString().split('T')[0];
+            logStep("Subscription end date set", { endDate: updateData.subscription_end_date });
+          }
+        } catch (subError) {
+          logStep("Warning: Could not retrieve subscription details", { error: subError });
+        }
+
+        logStep("Subscription stored", { subscriptionId });
+      }
+
       // Update to paid
       await supabaseClient
         .from('cohort_startups')
-        .update({
-          payment_status: 'paid',
-          payment_completed_at: new Date().toISOString(),
-          current_stage: 'active',
-        })
+        .update(updateData)
         .eq('id', cohortStartupId);
 
-      logStep("Payment confirmed and updated");
+      logStep("Payment confirmed and updated", { 
+        mode: session.mode,
+        hasSubscription: !!updateData.stripe_subscription_id 
+      });
 
-      return new Response(JSON.stringify({ paid: true }), {
+      return new Response(JSON.stringify({ 
+        paid: true,
+        mode: session.mode,
+        subscriptionId: updateData.stripe_subscription_id
+      }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });

@@ -29,9 +29,12 @@ export type Database = {
           id: string
           max_startups: number | null
           name: string
+          payment_duration_months: number | null
+          payment_type: string | null
           start_date: string | null
           status: string | null
           stripe_price_id: string | null
+          stripe_product_id: string | null
           updated_at: string | null
         }
         Insert: {
@@ -48,9 +51,12 @@ export type Database = {
           id?: string
           max_startups?: number | null
           name: string
+          payment_duration_months?: number | null
+          payment_type?: string | null
           start_date?: string | null
           status?: string | null
           stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -67,9 +73,12 @@ export type Database = {
           id?: string
           max_startups?: number | null
           name?: string
+          payment_duration_months?: number | null
+          payment_type?: string | null
           start_date?: string | null
           status?: string | null
           stripe_price_id?: string | null
+          stripe_product_id?: string | null
           updated_at?: string | null
         }
         Relationships: [
@@ -1076,6 +1085,8 @@ export type Database = {
           payment_status: string | null
           progress_percentage: number | null
           stripe_session_id: string | null
+          stripe_subscription_id: string | null
+          subscription_end_date: string | null
           updated_at: string | null
         }
         Insert: {
@@ -1100,6 +1111,8 @@ export type Database = {
           payment_status?: string | null
           progress_percentage?: number | null
           stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_end_date?: string | null
           updated_at?: string | null
         }
         Update: {
@@ -1124,6 +1137,8 @@ export type Database = {
           payment_status?: string | null
           progress_percentage?: number | null
           stripe_session_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_end_date?: string | null
           updated_at?: string | null
         }
         Relationships: [

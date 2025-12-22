@@ -39,6 +39,9 @@ interface Cohort {
   focus_industries: string[] | null;
   enrollment_fee: number | null;
   stripe_price_id: string | null;
+  payment_type: string | null;
+  payment_duration_months: number | null;
+  stripe_product_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -377,7 +380,10 @@ export const useAcceleratorProfile = () => {
           .eq('id', startupData?.user_id)
           .single();
 
-        // Call payment edge function
+        // Call payment edge function with payment type and duration
+        const paymentType = cohort?.payment_type || 'one_time';
+        const durationMonths = cohort?.payment_duration_months || 1;
+
         const { data: paymentData, error: paymentError } = await supabase.functions.invoke('cohort-payment', {
           body: {
             cohortStartupId: cohortStartup.id,
@@ -386,6 +392,8 @@ export const useAcceleratorProfile = () => {
             startupName: startupData?.name,
             enrollmentFee: enrollmentFee,
             acceleratorName: profile.organization_name,
+            paymentType: paymentType,
+            durationMonths: durationMonths,
           }
         });
 
