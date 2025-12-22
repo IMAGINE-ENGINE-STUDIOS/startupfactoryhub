@@ -154,48 +154,33 @@ const FeedModeration = () => {
 
   const handleDeletePost = async (id: string) => {
     try {
-      // Find the post to get media URLs before deleting
-      const postToDelete = posts.find(p => p.id === id);
-      
-      // Delete media files from storage if they exist
-      if (postToDelete?.media_urls && postToDelete.media_urls.length > 0) {
-        const filePaths = postToDelete.media_urls
-          .map(url => {
-            // Extract file path from Supabase storage URL
-            const match = url.match(/\/storage\/v1\/object\/public\/feed-media\/(.+)/);
-            return match ? match[1] : null;
-          })
-          .filter(Boolean) as string[];
-        
-        if (filePaths.length > 0) {
-          const { error: storageError } = await supabase.storage
-            .from('feed-media')
-            .remove(filePaths);
-          
-          if (storageError) {
-            console.error('Error deleting media files:', storageError);
-          }
-        }
+      const { data, error } = await supabase.functions.invoke('admin-delete-feed-post', {
+        body: { postId: id }
+      });
+
+      if (error) {
+        throw error;
       }
 
-      // Delete the post from database
-      const { error } = await supabase
-        .from('feed_posts')
-        .delete()
-        .eq('id', id);
+      if (!data?.ok) {
+        throw new Error(data?.error || 'Delete failed');
+      }
 
-      if (error) throw error;
-
+      // Update UI immediately then refetch to guarantee DB sync
       setPosts(prev => prev.filter(p => p.id !== id));
+      await fetchData();
+
       toast({
         title: "Deleted",
-        description: "Post and media files have been deleted"
+        description: data?.deletedMediaCount
+          ? `Post deleted (removed ${data.deletedMediaCount} media file(s))`
+          : "Post deleted"
       });
-    } catch (error) {
-      console.error('Error deleting post:', error);
+    } catch (err: any) {
+      console.error('Error deleting post:', err);
       toast({
         title: "Error",
-        description: "Failed to delete post. Make sure you're logged in as an admin.",
+        description: err?.message || "Failed to delete post",
         variant: "destructive"
       });
     }
