@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, DollarSign, Users, Percent, X } from 'lucide-react';
+import { Calendar, DollarSign, Users, Percent, X, CreditCard, Clock, Info } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface CreateCohortDialogProps {
@@ -21,6 +21,15 @@ const INDUSTRIES = [
   'Space Tech', 'Robotics', 'Quantum Computing', 'Other'
 ];
 
+const DURATION_OPTIONS = [
+  { value: '1', label: '1 month' },
+  { value: '3', label: '3 months' },
+  { value: '6', label: '6 months' },
+  { value: '12', label: '12 months' },
+];
+
+const PLATFORM_FEE_PERCENTAGE = 0.10; // 10%
+
 export const CreateCohortDialog = ({ open, onOpenChange, onCreateCohort }: CreateCohortDialogProps) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -34,9 +43,33 @@ export const CreateCohortDialog = ({ open, onOpenChange, onCreateCohort }: Creat
     equity_percentage: '',
     enrollment_fee: '',
     focus_industries: [] as string[],
-    status: 'upcoming'
+    status: 'upcoming',
+    payment_type: 'one_time' as 'one_time' | 'monthly',
+    payment_duration_months: '3'
   });
   const { toast } = useToast();
+
+  // Calculate fee breakdown
+  const feeBreakdown = useMemo(() => {
+    const feeAmount = formData.enrollment_fee ? parseFloat(formData.enrollment_fee) : 0;
+    if (feeAmount <= 0) return null;
+
+    const isMonthly = formData.payment_type === 'monthly';
+    const durationMonths = isMonthly ? parseInt(formData.payment_duration_months) : 1;
+    
+    const totalAmount = isMonthly ? feeAmount * durationMonths : feeAmount;
+    const platformFee = totalAmount * PLATFORM_FEE_PERCENTAGE;
+    const acceleratorReceives = totalAmount - platformFee;
+
+    return {
+      monthlyAmount: feeAmount,
+      durationMonths,
+      totalAmount,
+      platformFee,
+      acceleratorReceives,
+      isMonthly
+    };
+  }, [formData.enrollment_fee, formData.payment_type, formData.payment_duration_months]);
 
   const handleSubmit = async () => {
     if (!formData.name) {
@@ -61,7 +94,9 @@ export const CreateCohortDialog = ({ open, onOpenChange, onCreateCohort }: Creat
         equity_percentage: formData.equity_percentage ? parseFloat(formData.equity_percentage) : null,
         enrollment_fee: formData.enrollment_fee ? parseInt(formData.enrollment_fee) * 100 : 0, // Convert to cents
         focus_industries: formData.focus_industries.length > 0 ? formData.focus_industries : null,
-        status: formData.status
+        status: formData.status,
+        payment_type: formData.payment_type,
+        payment_duration_months: formData.payment_type === 'monthly' ? parseInt(formData.payment_duration_months) : null
       });
 
       toast({
@@ -81,7 +116,9 @@ export const CreateCohortDialog = ({ open, onOpenChange, onCreateCohort }: Creat
         equity_percentage: '',
         enrollment_fee: '',
         focus_industries: [],
-        status: 'upcoming'
+        status: 'upcoming',
+        payment_type: 'one_time',
+        payment_duration_months: '3'
       });
       onOpenChange(false);
     } catch (error: any) {
@@ -217,21 +254,97 @@ export const CreateCohortDialog = ({ open, onOpenChange, onCreateCohort }: Creat
                 className="mt-1.5"
               />
             </div>
+          </div>
+
+          {/* Payment Configuration */}
+          <div className="space-y-4 p-4 rounded-lg border border-border/50 bg-muted/30">
+            <div className="flex items-center gap-2 text-sm font-medium">
+              <CreditCard className="w-4 h-4" />
+              Payment Configuration
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label>Payment Type</Label>
+                <Select 
+                  value={formData.payment_type} 
+                  onValueChange={(value: 'one_time' | 'monthly') => setFormData(prev => ({ ...prev, payment_type: value }))}
+                >
+                  <SelectTrigger className="mt-1.5">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="one_time">One-Time Payment</SelectItem>
+                    <SelectItem value="monthly">Monthly Subscription</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {formData.payment_type === 'monthly' && (
+                <div>
+                  <Label className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" />
+                    Duration
+                  </Label>
+                  <Select 
+                    value={formData.payment_duration_months} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, payment_duration_months: value }))}
+                  >
+                    <SelectTrigger className="mt-1.5">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {DURATION_OPTIONS.map(option => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
+
             <div>
               <Label className="flex items-center gap-2">
                 <DollarSign className="w-4 h-4" />
-                Enrollment Fee ($)
+                {formData.payment_type === 'monthly' ? 'Monthly Fee ($)' : 'Enrollment Fee ($)'}
               </Label>
               <Input
                 type="number"
                 min={0}
-                placeholder="e.g., 500 (leave empty for free)"
+                placeholder={formData.payment_type === 'monthly' ? 'e.g., 500 per month' : 'e.g., 500 (leave empty for free)'}
                 value={formData.enrollment_fee}
                 onChange={(e) => setFormData(prev => ({ ...prev, enrollment_fee: e.target.value }))}
                 className="mt-1.5"
               />
-              <p className="text-xs text-muted-foreground mt-1">Charged via Stripe when startup is accepted</p>
             </div>
+
+            {/* Fee Breakdown */}
+            {feeBreakdown && (
+              <div className="mt-4 p-3 rounded-md bg-background/50 border border-border/30 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Info className="w-4 h-4" />
+                  Payment Summary
+                </div>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {feeBreakdown.isMonthly && (
+                    <>
+                      <span className="text-muted-foreground">Monthly Amount:</span>
+                      <span className="text-right font-medium">${feeBreakdown.monthlyAmount.toLocaleString()}</span>
+                      <span className="text-muted-foreground">Duration:</span>
+                      <span className="text-right font-medium">{feeBreakdown.durationMonths} months</span>
+                    </>
+                  )}
+                  <span className="text-muted-foreground">Total Amount:</span>
+                  <span className="text-right font-medium">${feeBreakdown.totalAmount.toLocaleString()}</span>
+                  <span className="text-muted-foreground">Platform Fee (10%):</span>
+                  <span className="text-right font-medium text-amber-500">-${feeBreakdown.platformFee.toLocaleString()}</span>
+                  <span className="text-muted-foreground font-medium">You Receive:</span>
+                  <span className="text-right font-bold text-emerald-500">${feeBreakdown.acceleratorReceives.toLocaleString()}</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Status */}
