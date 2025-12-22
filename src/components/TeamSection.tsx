@@ -32,7 +32,7 @@ const teamMembers = [
     image: teamPablo,
   },
   {
-    name: "Gary Jinkins",
+    name: "Gary Jinks",
     role: "Strategic Advisor",
     location: null,
     image: teamGary,
