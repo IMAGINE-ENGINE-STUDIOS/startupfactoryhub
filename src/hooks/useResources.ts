@@ -22,6 +22,18 @@ export type ResourceType =
 
 export type LocationType = 'physical' | 'online' | 'hybrid';
 
+export type JourneyStep = 'idea' | 'research' | 'mvp' | 'validation' | 'launch' | 'growth' | 'all';
+
+export const JOURNEY_STEPS: { value: JourneyStep; label: string }[] = [
+  { value: 'idea', label: 'Idea Validation' },
+  { value: 'research', label: 'Market Research' },
+  { value: 'mvp', label: 'MVP Development' },
+  { value: 'validation', label: 'User Validation' },
+  { value: 'launch', label: 'Product Launch' },
+  { value: 'growth', label: 'Growth & Funding' },
+  { value: 'all', label: 'All Stages' },
+];
+
 export interface Resource {
   id: string;
   title: string;
@@ -38,12 +50,20 @@ export interface Resource {
   logo_url: string | null;
   is_verified: boolean;
   is_official_partner: boolean | null;
+  journey_steps: JourneyStep[] | null;
   author_id: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export const useResources = (filters?: { type?: ResourceType; search?: string }) => {
+export interface ResourceFilters {
+  type?: ResourceType;
+  search?: string;
+  journeyStep?: JourneyStep;
+  city?: string;
+}
+
+export const useResources = (filters?: ResourceFilters) => {
   return useQuery({
     queryKey: ['resources', filters],
     queryFn: async () => {
@@ -61,10 +81,24 @@ export const useResources = (filters?: { type?: ResourceType; search?: string })
         query = query.or(`title.ilike.%${filters.search}%,city.ilike.%${filters.search}%,country.ilike.%${filters.search}%`);
       }
 
+      if (filters?.city) {
+        query = query.ilike('city', `%${filters.city}%`);
+      }
+
       const { data, error } = await query;
 
       if (error) throw error;
-      return data as Resource[];
+      
+      // Filter by journey step client-side since it's an array
+      let filteredData = data as Resource[];
+      if (filters?.journeyStep) {
+        filteredData = filteredData.filter(resource => {
+          const steps = resource.journey_steps || [];
+          return steps.includes(filters.journeyStep!) || steps.includes('all');
+        });
+      }
+
+      return filteredData;
     },
   });
 };

@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import mapboxgl from 'mapbox-gl';
@@ -43,6 +44,18 @@ import {
 // Use the same Mapbox token as GlobalResourcesMap
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
+type JourneyStep = 'idea' | 'research' | 'mvp' | 'validation' | 'launch' | 'growth' | 'all';
+
+const JOURNEY_STEPS: { value: JourneyStep; label: string }[] = [
+  { value: 'idea', label: 'Idea Validation' },
+  { value: 'research', label: 'Market Research' },
+  { value: 'mvp', label: 'MVP Development' },
+  { value: 'validation', label: 'User Validation' },
+  { value: 'launch', label: 'Product Launch' },
+  { value: 'growth', label: 'Growth & Funding' },
+  { value: 'all', label: 'All Stages' },
+];
+
 interface Resource {
   id: string;
   title: string;
@@ -60,6 +73,7 @@ interface Resource {
   is_official_partner: boolean | null;
   is_flagship: boolean | null;
   is_verified: boolean | null;
+  journey_steps: string[] | null;
   author_id: string | null;
   created_at: string;
 }
@@ -90,6 +104,7 @@ const ResourcesManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState<string>('all');
+  const [journeyFilter, setJourneyFilter] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'all' | 'pending'>('all');
   const [selectedResource, setSelectedResource] = useState<Resource | null>(null);
   const [showDialog, setShowDialog] = useState(false);
@@ -111,7 +126,8 @@ const ResourcesManagement = () => {
     longitude: null as number | null,
     location_type: 'physical',
     is_official_partner: false,
-    is_flagship: false
+    is_flagship: false,
+    journey_steps: [] as JourneyStep[]
   });
 
   // Map state
@@ -497,7 +513,8 @@ const ResourcesManagement = () => {
           longitude: editResource.longitude,
           location_type: editResource.location_type,
           is_official_partner: editResource.is_official_partner,
-          is_flagship: editResource.is_flagship
+          is_flagship: editResource.is_flagship,
+          journey_steps: editResource.journey_steps || []
         })
         .eq('id', editResource.id);
 
@@ -548,7 +565,8 @@ const ResourcesManagement = () => {
         longitude: null,
         location_type: 'physical',
         is_official_partner: false,
-        is_flagship: false
+        is_flagship: false,
+        journey_steps: []
       });
       toast({
         title: "Added",
@@ -571,7 +589,9 @@ const ResourcesManagement = () => {
       r.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       r.city?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesType = typeFilter === 'all' || r.resource_type === typeFilter;
-    return matchesSearch && matchesType;
+    const matchesJourney = journeyFilter === 'all' || 
+      (r.journey_steps && (r.journey_steps.includes(journeyFilter as JourneyStep) || r.journey_steps.includes('all')));
+    return matchesSearch && matchesType && matchesJourney;
   });
 
   const partnerCount = resources.filter(r => r.is_official_partner).length;
@@ -673,6 +693,17 @@ const ResourcesManagement = () => {
                 ))}
               </SelectContent>
             </Select>
+            <Select value={journeyFilter} onValueChange={setJourneyFilter}>
+              <SelectTrigger className="w-[180px] tech-card border-0">
+                <SelectValue placeholder="Journey Step" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Journey Steps</SelectItem>
+                {JOURNEY_STEPS.map(step => (
+                  <SelectItem key={step.value} value={step.value}>{step.label}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <Button onClick={() => setShowAddDialog(true)} className="tech-card border-0">
               <Plus className="h-4 w-4 mr-2" />
               Add Resource
@@ -726,7 +757,21 @@ const ResourcesManagement = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{resource.resource_type?.replace(/_/g, ' ')}</Badge>
+                      <div className="flex flex-col gap-1">
+                        <Badge variant="outline">{resource.resource_type?.replace(/_/g, ' ')}</Badge>
+                        {resource.journey_steps && resource.journey_steps.length > 0 && (
+                          <div className="flex flex-wrap gap-1">
+                            {resource.journey_steps.slice(0, 2).map(step => (
+                              <Badge key={step} variant="secondary" className="text-xs">
+                                {step}
+                              </Badge>
+                            ))}
+                            {resource.journey_steps.length > 2 && (
+                              <Badge variant="secondary" className="text-xs">+{resource.journey_steps.length - 2}</Badge>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       {resource.city || resource.country ? `${resource.city || ''}, ${resource.country || ''}` : 'N/A'}
@@ -948,6 +993,29 @@ const ResourcesManagement = () => {
               />
               <Label>Flagship Location 👑</Label>
             </div>
+            <div className="md:col-span-2">
+              <Label className="mb-2 block">Journey Steps</Label>
+              <div className="flex flex-wrap gap-2">
+                {JOURNEY_STEPS.map((step) => (
+                  <div key={step.value} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`new-${step.value}`}
+                      checked={newResource.journey_steps.includes(step.value)}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setNewResource({ ...newResource, journey_steps: [...newResource.journey_steps, step.value] });
+                        } else {
+                          setNewResource({ ...newResource, journey_steps: newResource.journey_steps.filter(s => s !== step.value) });
+                        }
+                      }}
+                    />
+                    <Label htmlFor={`new-${step.value}`} className="text-sm font-normal cursor-pointer">
+                      {step.label}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setShowAddDialog(false)}>Cancel</Button>
@@ -1147,6 +1215,30 @@ const ResourcesManagement = () => {
                   onCheckedChange={(v) => setEditResource({ ...editResource, is_flagship: v })}
                 />
                 <Label>Flagship Location 👑</Label>
+              </div>
+              <div className="md:col-span-2">
+                <Label className="mb-2 block">Journey Steps</Label>
+                <div className="flex flex-wrap gap-2">
+                  {JOURNEY_STEPS.map((step) => (
+                    <div key={step.value} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`edit-${step.value}`}
+                        checked={(editResource.journey_steps || []).includes(step.value)}
+                        onCheckedChange={(checked) => {
+                          const currentSteps = editResource.journey_steps || [];
+                          if (checked) {
+                            setEditResource({ ...editResource, journey_steps: [...currentSteps, step.value] });
+                          } else {
+                            setEditResource({ ...editResource, journey_steps: currentSteps.filter(s => s !== step.value) });
+                          }
+                        }}
+                      />
+                      <Label htmlFor={`edit-${step.value}`} className="text-sm font-normal cursor-pointer">
+                        {step.label}
+                      </Label>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           )}
