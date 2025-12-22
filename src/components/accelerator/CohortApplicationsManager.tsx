@@ -76,7 +76,7 @@ interface CohortApplicationsManagerProps {
   applications: Application[];
   cohorts: Cohort[];
   onUpdateStatus: (applicationId: string, status: string, notes?: string) => Promise<void>;
-  onAcceptStartup: (application: Application) => Promise<void>;
+  onAcceptStartup: (application: Application) => Promise<void | { paymentUrl?: string | null }>;
   onSchedulePitch?: (application: Application) => void;
 }
 
