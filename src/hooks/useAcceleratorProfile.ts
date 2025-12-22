@@ -342,7 +342,8 @@ export const useAcceleratorProfile = () => {
           amount: fundingAmount,
           equity_percentage: equityPercentage,
           investment_date: new Date().toISOString().split('T')[0],
-          round_type: 'accelerator',
+          investment_round: 'accelerator',
+          source: 'accelerator',
           notes: `Cohort: ${cohort?.name}`,
         });
 
