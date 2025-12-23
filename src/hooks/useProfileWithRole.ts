@@ -32,6 +32,8 @@ export const useProfileWithRole = () => {
       return;
     }
 
+    let currentRole: AppRole | null = null;
+
     const fetchProfileWithRole = async () => {
       try {
         setLoading(true);
@@ -54,9 +56,11 @@ export const useProfileWithRole = () => {
           console.error('Error fetching role:', roleError);
         }
 
+        currentRole = roleData as AppRole;
+
         setProfile({
           ...profileData,
-          role: roleData as AppRole,
+          role: currentRole,
         });
       } catch (err) {
         console.error('Error fetching profile with role:', err);
@@ -67,6 +71,28 @@ export const useProfileWithRole = () => {
     };
 
     fetchProfileWithRole();
+
+    // Subscribe to real-time profile updates
+    const channel = supabase
+      .channel(`profile-updates-${user.id}`)
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'profiles',
+        filter: `user_id=eq.${user.id}`
+      }, (payload) => {
+        // Merge updated profile data while preserving the role
+        setProfile(prev => prev ? { 
+          ...prev, 
+          ...payload.new as Partial<ProfileWithRole>,
+          role: prev.role 
+        } : null);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [user]);
 
   return { profile, loading, error };
