@@ -18,6 +18,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useProfileWithRole } from "@/hooks/useProfileWithRole";
 import { 
   Rocket, 
   Home, 
@@ -45,6 +46,7 @@ const DashboardNavigation = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { toast } = useToast();
+  const { profile } = useProfileWithRole();
   const [recommendationCount, setRecommendationCount] = useState(0);
   const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
@@ -146,8 +148,8 @@ const DashboardNavigation = () => {
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" className="relative h-8 w-8 rounded-full">
                     <Avatar className="h-8 w-8">
-                      <AvatarImage src="/placeholder.svg" alt="User" />
-                      <AvatarFallback>JD</AvatarFallback>
+                      <AvatarImage src={profile?.avatar_url || undefined} alt="User" />
+                      <AvatarFallback>{profile?.full_name?.[0] || user?.email?.[0]?.toUpperCase() || 'U'}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
