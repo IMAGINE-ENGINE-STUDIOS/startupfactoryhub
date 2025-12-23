@@ -2,13 +2,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useResources, JourneyStep } from "@/hooks/useResources";
+import { useResources, useUserBookmarks, useBookmarkResource, useRemoveBookmark, JourneyStep } from "@/hooks/useResources";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import { 
   ExternalLink, 
   MapPin, 
   Loader2, 
   Building, 
   Bookmark,
+  BookmarkCheck,
   Beaker,
   Rocket,
   Gift,
@@ -66,10 +69,28 @@ export const JourneyResourcesDialog = ({
   stepTitle,
   userCity,
 }: JourneyResourcesDialogProps) => {
+  const { user } = useAuth();
   const { data: resources, isLoading } = useResources({
     journeyStep,
     city: userCity,
   });
+  const { data: bookmarkedIds = [] } = useUserBookmarks();
+  const bookmarkMutation = useBookmarkResource();
+  const removeBookmarkMutation = useRemoveBookmark();
+
+  const handleBookmarkToggle = (resourceId: string) => {
+    if (!user) {
+      toast.error("Please sign in to bookmark resources");
+      return;
+    }
+    
+    const isBookmarked = bookmarkedIds.includes(resourceId);
+    if (isBookmarked) {
+      removeBookmarkMutation.mutate(resourceId);
+    } else {
+      bookmarkMutation.mutate(resourceId);
+    }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -176,8 +197,14 @@ export const JourneyResourcesDialog = ({
                         size="sm" 
                         variant="ghost"
                         className="hover:bg-muted/50"
+                        onClick={() => handleBookmarkToggle(resource.id)}
+                        disabled={bookmarkMutation.isPending || removeBookmarkMutation.isPending}
                       >
-                        <Bookmark className="w-3.5 h-3.5" />
+                        {bookmarkedIds.includes(resource.id) ? (
+                          <BookmarkCheck className="w-3.5 h-3.5 text-primary" />
+                        ) : (
+                          <Bookmark className="w-3.5 h-3.5" />
+                        )}
                       </Button>
                     </div>
                   </div>

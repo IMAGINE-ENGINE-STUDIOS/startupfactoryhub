@@ -183,3 +183,21 @@ export const useRemoveBookmark = () => {
     },
   });
 };
+
+export const useUserBookmarks = () => {
+  return useQuery({
+    queryKey: ['bookmarks'],
+    queryFn: async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return [];
+
+      const { data, error } = await supabase
+        .from('resource_bookmarks')
+        .select('resource_id')
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+      return data?.map(b => b.resource_id) || [];
+    },
+  });
+};
