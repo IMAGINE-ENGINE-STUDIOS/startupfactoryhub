@@ -116,16 +116,45 @@ export default function JobTaskManager() {
       return;
     }
 
-    const { data } = await supabase
-      .from('companies')
-      .select('id')
-      .eq('user_id', user.id)
-      .maybeSingle();
+    try {
+      // Prefer a company that actually has jobs (avoids issues when duplicate company rows exist)
+      const { data: jobCompany, error: jobCompanyError } = await supabase
+        .from('jobs')
+        .select('company_id, companies!inner(user_id)')
+        .eq('companies.user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
 
-    if (data) {
-      setCompanyId(data.id);
-    } else {
-      // No company found - stop loading
+      if (jobCompanyError) {
+        console.error('Error fetching company id from jobs:', jobCompanyError);
+      }
+
+      if (jobCompany?.company_id) {
+        setCompanyId(jobCompany.company_id);
+        return;
+      }
+
+      // Fallback: grab latest company row for this user
+      const { data: company, error: companyError } = await supabase
+        .from('companies')
+        .select('id')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (companyError) {
+        console.error('Error fetching company id:', companyError);
+      }
+
+      if (company?.id) {
+        setCompanyId(company.id);
+      } else {
+        setLoading(false);
+      }
+    } catch (err) {
+      console.error('Error fetching company id:', err);
       setLoading(false);
     }
   };
