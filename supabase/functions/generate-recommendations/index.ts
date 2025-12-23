@@ -80,7 +80,7 @@ serve(async (req) => {
 
     const { data: potentialConnections } = await supabaseClient
       .from('profiles')
-      .select('user_id, full_name, role, bio')
+      .select('user_id, full_name, role, bio, location')
       .neq('user_id', user.id)
       .limit(20);
 
@@ -88,14 +88,15 @@ serve(async (req) => {
       p => !connectedIds.has(p.user_id)
     );
 
-    // Fetch investors
+    // Fetch investors with more details
     const { data: investors } = await supabaseClient
       .from('investor_profiles')
       .select(`
         *,
         profiles:user_id (
           full_name,
-          bio
+          bio,
+          location
         )
       `)
       .limit(10);
@@ -107,16 +108,48 @@ serve(async (req) => {
       .eq('is_published', true)
       .limit(10);
 
-    // Build context for AI
+    // Fetch platform resources (coworking, grants, accelerators, labs, etc.)
+    const { data: resources } = await supabaseClient
+      .from('resources')
+      .select('id, title, description, resource_type, city, country, journey_steps, is_official_partner, location_type')
+      .eq('is_verified', true)
+      .limit(25);
+
+    // Filter resources by user's location or stage for relevance
+    const userLocation = company?.location?.toLowerCase() || profile?.location?.toLowerCase() || '';
+    const userStage = company?.stage || '';
+    
+    const relevantResources = resources?.filter(r => {
+      const matchesLocation = userLocation && (
+        r.city?.toLowerCase().includes(userLocation) || 
+        r.country?.toLowerCase().includes(userLocation) ||
+        userLocation.includes(r.city?.toLowerCase() || '') ||
+        userLocation.includes(r.country?.toLowerCase() || '')
+      );
+      const matchesStage = r.journey_steps?.includes(userStage) || 
+                          r.journey_steps?.includes('all') ||
+                          !r.journey_steps?.length;
+      const isPartner = r.is_official_partner;
+      return matchesLocation || matchesStage || isPartner;
+    }) || resources;
+
+    // Build comprehensive context for AI
     const userContext = {
       role: profile?.role,
       bio: profile?.bio,
+      location: profile?.location,
       company: company ? {
         name: company.name,
         industry: company.industry,
         stage: company.stage,
         looking_for: company.looking_for,
         description: company.description,
+        // Enhanced startup data
+        location: company.location,
+        team_size: company.team_size,
+        funding_amount: company.funding_amount,
+        founded_year: company.founded_year,
+        website: company.website,
       } : null,
       student: studentProfile ? {
         major: studentProfile.major,
@@ -126,24 +159,43 @@ serve(async (req) => {
     };
 
     const systemPrompt = `You are an AI recommendation engine for a startup ecosystem platform. 
-Your task is to provide personalized, actionable recommendations based on the user's profile.
+Your task is to provide personalized, actionable recommendations based on the user's complete startup profile.
+
+ANALYZE THE FOLLOWING STARTUP DATA CAREFULLY:
+- Location: "${company?.location || profile?.location || 'Not specified'}" - Recommend LOCAL resources, investors, events, coworking spaces
+- Stage: "${company?.stage || 'Not specified'}" - Match resources appropriate for their current journey step (idea, pre-seed, seed, series A, etc.)
+- Team Size: ${company?.team_size || 'Not specified'} employees - Suggest hiring resources, team-building tools, or collaboration opportunities
+- Funding Amount: $${company?.funding_amount || 0} raised - Recommend appropriate next funding steps and investor connections
+- Industry: "${company?.industry || 'Not specified'}" - Match industry-specific mentors, investors, and courses
+- Looking For: ${JSON.stringify(company?.looking_for || [])} - Prioritize recommendations matching these needs
+- Founded Year: ${company?.founded_year || 'Not specified'}
 
 User Context: ${JSON.stringify(userContext)}
 
-Available Data:
+AVAILABLE DATA TO RECOMMEND FROM:
 - Potential Connections: ${JSON.stringify(availableConnections?.slice(0, 10))}
 - Investors: ${JSON.stringify(investors?.slice(0, 5))}
 - Courses: ${JSON.stringify(courses?.slice(0, 5))}
+- Platform Resources (coworking, grants, accelerators, labs, offices, government programs): ${JSON.stringify(relevantResources?.slice(0, 10))}
 
-Generate 3-4 specific, personalized recommendations. Each recommendation should:
-1. Be actionable (connect with X, explore investment from Y, take course Z)
-2. Explain WHY this is relevant to the user
+RECOMMENDATION PRIORITIES:
+1. If user has a location, prioritize LOCAL resources (coworking spaces, accelerators, government grants in their area)
+2. If user is early-stage (idea/pre-seed), recommend accelerators, incubators, and foundational courses
+3. If user has small team (<5), suggest hiring resources or co-founder matching
+4. If user has raised funding, recommend growth-stage resources and series-appropriate investors
+5. If user is looking for specific things (funding, mentors, etc.), prioritize those
+
+Generate 4-5 specific, personalized recommendations. Each recommendation MUST:
+1. Be actionable (connect with X, explore resource Y, take course Z, apply to accelerator W)
+2. Explain WHY this is relevant based on their location, stage, team size, funding, or stated goals
 3. Include specific names/titles from the available data
 4. Be concise (2-3 sentences max)
+5. For resources: recommend coworking spaces, grants, or accelerators matching their location/stage`;
 
-Focus on recommendations that match the user's role, industry, and goals.`;
-
-    console.log('Calling Lovable AI for recommendations...');
+    console.log('Calling Lovable AI for recommendations with enhanced context...');
+    console.log('User location:', company?.location || profile?.location);
+    console.log('Company stage:', company?.stage);
+    console.log('Resources found:', relevantResources?.length);
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -155,7 +207,7 @@ Focus on recommendations that match the user's role, industry, and goals.`;
         model: 'google/gemini-2.5-flash',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: 'Generate personalized recommendations for this user.' }
+          { role: 'user', content: 'Generate personalized recommendations for this user based on their startup profile, location, stage, and available platform resources.' }
         ],
         tools: [
           {
@@ -173,8 +225,8 @@ Focus on recommendations that match the user's role, industry, and goals.`;
                       properties: {
                         type: {
                           type: 'string',
-                          enum: ['connection', 'investor', 'course', 'general'],
-                          description: 'Type of recommendation'
+                          enum: ['connection', 'investor', 'course', 'resource', 'general'],
+                          description: 'Type of recommendation (resource includes coworking, grants, accelerators, labs)'
                         },
                         title: {
                           type: 'string',
@@ -182,7 +234,7 @@ Focus on recommendations that match the user's role, industry, and goals.`;
                         },
                         description: {
                           type: 'string',
-                          description: 'Detailed explanation of why this is recommended'
+                          description: 'Detailed explanation of why this is recommended based on user location, stage, team size, or goals'
                         },
                         action: {
                           type: 'string',
@@ -190,7 +242,7 @@ Focus on recommendations that match the user's role, industry, and goals.`;
                         },
                         reference_id: {
                           type: 'string',
-                          description: 'ID of the related entity (user_id, course_id, etc.)'
+                          description: 'ID of the related entity (user_id, course_id, resource_id, etc.)'
                         }
                       },
                       required: ['type', 'title', 'description', 'action'],
@@ -215,10 +267,10 @@ Focus on recommendations that match the user's role, industry, and goals.`;
     }
 
     const aiData = await aiResponse.json();
-    console.log('AI response:', JSON.stringify(aiData));
+    console.log('AI response received');
 
     // Estimate tokens and log usage
-    const tokensUsed = aiData.usage?.total_tokens || 800;
+    const tokensUsed = aiData.usage?.total_tokens || 1000;
     const estimatedCost = tokensUsed * 0.0001;
     await logApiUsage(supabaseClient, 'gemini', 'generate-recommendations', tokensUsed, estimatedCost);
 
