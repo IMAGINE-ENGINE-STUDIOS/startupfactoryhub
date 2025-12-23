@@ -582,6 +582,65 @@ const ResourcesManagement = () => {
     }
   };
 
+  // Bulk categorize uncategorized resources based on their type
+  const handleBulkCategorize = async () => {
+    const uncategorizedResources = resources.filter(
+      r => !r.journey_steps || r.journey_steps.length === 0
+    );
+
+    if (uncategorizedResources.length === 0) {
+      toast({
+        title: "All Categorized",
+        description: "All resources already have journey steps assigned"
+      });
+      return;
+    }
+
+    const typeToJourneySteps: Record<string, JourneyStep[]> = {
+      'accelerator_incubator': ['mvp', 'validation', 'launch', 'growth'],
+      'coworking': ['all'],
+      'lab': ['research', 'mvp'],
+      'venue': ['launch', 'growth'],
+      'perk': ['all'],
+      'government_grant': ['idea', 'research', 'mvp'],
+      'investor_network': ['growth'],
+      'university': ['idea', 'research'],
+      'technology_transfer': ['research', 'mvp'],
+      'entrepreneur_center': ['idea', 'research', 'mvp'],
+      'community': ['all'],
+      'human_capital': ['all'],
+      'office': ['mvp', 'validation', 'launch', 'growth'],
+      'event': ['all'],
+      'chamber_of_commerce': ['launch', 'growth']
+    };
+
+    try {
+      let updatedCount = 0;
+      for (const resource of uncategorizedResources) {
+        const journeySteps = typeToJourneySteps[resource.resource_type] || ['all'];
+        const { error } = await supabase
+          .from('resources')
+          .update({ journey_steps: journeySteps })
+          .eq('id', resource.id);
+
+        if (!error) updatedCount++;
+      }
+
+      await fetchResources();
+      toast({
+        title: "Bulk Categorization Complete",
+        description: `Updated ${updatedCount} resources with journey steps`
+      });
+    } catch (error) {
+      console.error('Error bulk categorizing:', error);
+      toast({
+        title: "Error",
+        description: "Failed to bulk categorize resources",
+        variant: "destructive"
+      });
+    }
+  };
+
   const currentResources = viewMode === 'pending' ? pendingResources : resources;
   
   const filteredResources = currentResources.filter(r => {
@@ -596,6 +655,7 @@ const ResourcesManagement = () => {
 
   const partnerCount = resources.filter(r => r.is_official_partner).length;
   const flagshipCount = resources.filter(r => r.is_flagship).length;
+  const uncategorizedCount = resources.filter(r => !r.journey_steps || r.journey_steps.length === 0).length;
 
 
   return (
@@ -708,6 +768,16 @@ const ResourcesManagement = () => {
               <Plus className="h-4 w-4 mr-2" />
               Add Resource
             </Button>
+            {uncategorizedCount > 0 && (
+              <Button 
+                variant="outline" 
+                onClick={handleBulkCategorize} 
+                className="tech-card border-0 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border-amber-500/30"
+              >
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Categorize ({uncategorizedCount})
+              </Button>
+            )}
             <Button variant="outline" onClick={fetchResources} className="tech-card border-0">
               <RefreshCw className="h-4 w-4" />
             </Button>

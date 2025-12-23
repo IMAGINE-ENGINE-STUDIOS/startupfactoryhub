@@ -121,8 +121,10 @@ export const JourneyResourcesDialog = ({
         ) : (
           <div className="text-center py-12 text-muted-foreground">
             <Building className="w-12 h-12 mx-auto mb-3 opacity-50" />
-            <p>No resources found for this journey step</p>
-            <p className="text-sm mt-1">Resources will appear here once they are categorized</p>
+            <p>No resources found for "{stepTitle}"</p>
+            <p className="text-sm mt-1">
+              {userCity ? `Try removing the city filter or check back later` : 'Check back later for new resources'}
+            </p>
           </div>
         )}
       </DialogContent>
