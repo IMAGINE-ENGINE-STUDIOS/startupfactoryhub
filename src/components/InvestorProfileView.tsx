@@ -38,6 +38,7 @@ export default function InvestorProfileView() {
   const [saving, setSaving] = useState(false);
   
   // Profile fields
+  const [editedFullName, setEditedFullName] = useState('');
   const [editedBio, setEditedBio] = useState('');
   const [editedLocation, setEditedLocation] = useState('');
   const [editedWebsite, setEditedWebsite] = useState('');
@@ -68,6 +69,7 @@ export default function InvestorProfileView() {
 
   const startEditing = () => {
     if (profile) {
+      setEditedFullName(profile.full_name || '');
       setEditedBio(profile.bio || '');
       setEditedLocation(profile.location || '');
       setEditedWebsite(profile.website || '');
@@ -95,6 +97,7 @@ export default function InvestorProfileView() {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
+          full_name: editedFullName,
           bio: editedBio,
           location: editedLocation,
           website: editedWebsite,
@@ -196,7 +199,16 @@ export default function InvestorProfileView() {
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground mb-2">{profile?.full_name || 'Investor'}</h1>
+                  {isEditing ? (
+                    <Input
+                      value={editedFullName}
+                      onChange={(e) => setEditedFullName(e.target.value)}
+                      placeholder="Your full name"
+                      className="text-2xl font-bold mb-2 h-12"
+                    />
+                  ) : (
+                    <h1 className="text-3xl font-bold text-foreground mb-2">{profile?.full_name || 'Investor'}</h1>
+                  )}
                   {isEditing ? (
                     <Textarea
                       value={editedBio}

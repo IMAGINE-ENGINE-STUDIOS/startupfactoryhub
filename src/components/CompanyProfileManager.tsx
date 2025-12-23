@@ -29,6 +29,14 @@ export default function CompanyProfileManager() {
     stage: '',
     website: '',
     location: '',
+    team_size: '',
+    founded_year: '',
+    looking_for: [] as string[],
+  });
+  const [profileFormData, setProfileFormData] = useState({
+    full_name: '',
+    bio: '',
+    linkedin_url: '',
   });
   const { user } = useAuth();
   const { toast } = useToast();
@@ -52,8 +60,6 @@ export default function CompanyProfileManager() {
 
   const fetchUserProfile = async () => {
     if (!user) return;
-    
-    if (!user) return;
 
     const { data } = await supabase
       .from('profiles')
@@ -63,6 +69,11 @@ export default function CompanyProfileManager() {
 
     if (data) {
       setUserProfile(data);
+      setProfileFormData({
+        full_name: data.full_name || '',
+        bio: data.bio || '',
+        linkedin_url: data.linkedin_url || '',
+      });
     }
   };
 
@@ -91,12 +102,34 @@ export default function CompanyProfileManager() {
         stage: data.stage || '',
         website: data.website || '',
         location: data.location || '',
+        team_size: data.team_size?.toString() || '',
+        founded_year: data.founded_year?.toString() || '',
+        looking_for: data.looking_for || [],
       });
     }
   };
 
   const saveCompany = async () => {
     if (!user) return;
+
+    // Update user profile first
+    const { error: profileError } = await supabase
+      .from('profiles')
+      .update({
+        full_name: profileFormData.full_name,
+        bio: profileFormData.bio,
+        linkedin_url: profileFormData.linkedin_url,
+      })
+      .eq('user_id', user.id);
+
+    if (profileError) {
+      toast({
+        title: "Error",
+        description: "Failed to save profile",
+        variant: "destructive",
+      });
+      return;
+    }
 
     const companyData = {
       name: formData.name,
@@ -105,6 +138,9 @@ export default function CompanyProfileManager() {
       stage: formData.stage as 'idea' | 'prototype' | 'mvp' | 'growth' | 'scale',
       website: formData.website,
       location: formData.location,
+      team_size: formData.team_size ? parseInt(formData.team_size) : null,
+      founded_year: formData.founded_year ? parseInt(formData.founded_year) : null,
+      looking_for: formData.looking_for,
       user_id: user.id
     };
 
@@ -123,13 +159,14 @@ export default function CompanyProfileManager() {
     if (error) {
       toast({
         title: "Error",
-        description: "Failed to save profile",
+        description: "Failed to save company profile",
         variant: "destructive",
       });
       return;
     }
 
     setIsEditing(false);
+    await fetchUserProfile();
     await fetchCompany();
     toast({
       title: "Success",
@@ -180,22 +217,53 @@ export default function CompanyProfileManager() {
         <CardContent className="space-y-6">
           {/* User and Company Avatar Upload Section */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            {/* User Avatar */}
-            <div className="flex flex-col items-center space-y-3 p-4 bg-muted/30 rounded-lg">
-              <p className="text-sm font-medium text-muted-foreground">Your Profile Photo</p>
-              <AvatarUpload 
-                currentAvatarUrl={userProfile?.avatar_url}
-                onUploadComplete={() => {
-                  fetchUserProfile();
-                  toast({
-                    title: "Profile Updated",
-                    description: "Your avatar has been updated successfully.",
-                  });
-                }}
-                size="lg"
-                userRole={role}
-              />
-              <p className="text-sm text-muted-foreground">{userProfile?.full_name || 'Your Name'}</p>
+            {/* User Avatar and Profile */}
+            <div className="flex flex-col space-y-4 p-4 bg-muted/30 rounded-lg">
+              <p className="text-sm font-medium text-muted-foreground text-center">Your Profile</p>
+              <div className="flex justify-center">
+                <AvatarUpload 
+                  currentAvatarUrl={userProfile?.avatar_url}
+                  onUploadComplete={() => {
+                    fetchUserProfile();
+                    toast({
+                      title: "Profile Updated",
+                      description: "Your avatar has been updated successfully.",
+                    });
+                  }}
+                  size="lg"
+                  userRole={role}
+                />
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <label className="text-sm font-medium text-foreground">Your Name *</label>
+                  <Input
+                    value={profileFormData.full_name}
+                    onChange={(e) => setProfileFormData({ ...profileFormData, full_name: e.target.value })}
+                    placeholder="Your full name"
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">Your Bio</label>
+                  <Textarea
+                    value={profileFormData.bio}
+                    onChange={(e) => setProfileFormData({ ...profileFormData, bio: e.target.value })}
+                    placeholder="Tell us about yourself..."
+                    className="mt-1"
+                    rows={2}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-foreground">LinkedIn URL</label>
+                  <Input
+                    value={profileFormData.linkedin_url}
+                    onChange={(e) => setProfileFormData({ ...profileFormData, linkedin_url: e.target.value })}
+                    placeholder="https://linkedin.com/in/yourprofile"
+                    className="mt-1"
+                  />
+                </div>
+              </div>
             </div>
             
             {/* Company Logo */}
@@ -286,6 +354,56 @@ export default function CompanyProfileManager() {
                 placeholder="e.g., San Francisco, CA"
                 className="mt-1"
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-foreground">Team Size</label>
+              <Input
+                type="number"
+                value={formData.team_size}
+                onChange={(e) => setFormData({ ...formData, team_size: e.target.value })}
+                placeholder="e.g., 5"
+                className="mt-1"
+                min={1}
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Founded Year</label>
+              <Input
+                type="number"
+                value={formData.founded_year}
+                onChange={(e) => setFormData({ ...formData, founded_year: e.target.value })}
+                placeholder="e.g., 2023"
+                className="mt-1"
+                min={1900}
+                max={new Date().getFullYear()}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="text-sm font-medium text-foreground">Looking For</label>
+            <p className="text-xs text-muted-foreground mb-2">Select what your startup is currently seeking</p>
+            <div className="flex flex-wrap gap-2">
+              {['Funding', 'Mentorship', 'Co-founders', 'Employees', 'Advisors', 'Customers', 'Partners', 'Office Space'].map(item => (
+                <Badge
+                  key={item}
+                  variant={formData.looking_for.includes(item) ? 'default' : 'outline'}
+                  className="cursor-pointer"
+                  onClick={() => {
+                    setFormData(prev => ({
+                      ...prev,
+                      looking_for: prev.looking_for.includes(item)
+                        ? prev.looking_for.filter(i => i !== item)
+                        : [...prev.looking_for, item]
+                    }));
+                  }}
+                >
+                  {item}
+                </Badge>
+              ))}
             </div>
           </div>
 
