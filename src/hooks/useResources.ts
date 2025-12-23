@@ -94,7 +94,10 @@ export const useResources = (filters?: ResourceFilters) => {
       if (filters?.journeyStep) {
         filteredData = filteredData.filter(resource => {
           const steps = resource.journey_steps || [];
-          return steps.includes(filters.journeyStep!) || steps.includes('all');
+          // Include resources that: match the step, have 'all', or have empty/null journey_steps (uncategorized - show everywhere)
+          return steps.includes(filters.journeyStep!) || 
+                 steps.includes('all') || 
+                 steps.length === 0;
         });
       }
 
