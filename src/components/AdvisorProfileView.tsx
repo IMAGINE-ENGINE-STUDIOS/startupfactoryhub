@@ -43,10 +43,13 @@ export default function AdvisorProfileView() {
   } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [editedFullName, setEditedFullName] = useState('');
   const [editedBio, setEditedBio] = useState('');
   const [editedLocation, setEditedLocation] = useState('');
   const [editedWebsite, setEditedWebsite] = useState('');
   const [editedLinkedin, setEditedLinkedin] = useState('');
+  const [editedExpertiseAreas, setEditedExpertiseAreas] = useState<string[]>([]);
+  const [editedYearsOfExperience, setEditedYearsOfExperience] = useState('');
   const [showExpForm, setShowExpForm] = useState(false);
   const [showEduForm, setShowEduForm] = useState(false);
   const [showAchForm, setShowAchForm] = useState(false);
@@ -93,10 +96,15 @@ export default function AdvisorProfileView() {
   };
   const startEditing = () => {
     if (profile) {
+      setEditedFullName(profile.full_name || '');
       setEditedBio(profile.bio || '');
       setEditedLocation(profile.location || '');
       setEditedWebsite(profile.website || '');
       setEditedLinkedin(profile.linkedin_url || '');
+    }
+    if (mentorProfile) {
+      setEditedExpertiseAreas(mentorProfile.expertise_areas || []);
+      setEditedYearsOfExperience(mentorProfile.years_of_experience?.toString() || '');
     }
     setIsEditing(true);
   };
@@ -107,15 +115,33 @@ export default function AdvisorProfileView() {
     if (!profile?.user_id) return;
     setSaving(true);
     try {
-      const {
-        error
-      } = await supabase.from('profiles').update({
+      // Update main profile
+      const { error: profileError } = await supabase.from('profiles').update({
+        full_name: editedFullName,
         bio: editedBio,
         location: editedLocation,
         website: editedWebsite,
         linkedin_url: editedLinkedin
       }).eq('user_id', profile.user_id);
-      if (error) throw error;
+      if (profileError) throw profileError;
+
+      // Update mentor profile if exists
+      if (mentorProfile) {
+        const { error: mentorError } = await supabase.from('mentor_profiles').update({
+          expertise_areas: editedExpertiseAreas,
+          years_of_experience: editedYearsOfExperience ? parseInt(editedYearsOfExperience) : null
+        }).eq('user_id', profile.user_id);
+        if (mentorError) throw mentorError;
+
+        // Refresh mentor profile
+        const { data: updatedMentor } = await supabase
+          .from('mentor_profiles')
+          .select('*')
+          .eq('user_id', profile.user_id)
+          .maybeSingle();
+        setMentorProfile(updatedMentor);
+      }
+
       toast({
         title: 'Profile updated successfully'
       });
@@ -148,7 +174,11 @@ export default function AdvisorProfileView() {
             <div className="flex-1">
               <div className="flex items-start justify-between">
                 <div>
-                  <h1 className="text-3xl font-bold text-foreground mb-2">{profile?.full_name || 'Advisor'}</h1>
+                  {isEditing ? (
+                    <Input value={editedFullName} onChange={e => setEditedFullName(e.target.value)} placeholder="Your full name" className="text-2xl font-bold mb-2 h-12 max-w-md" />
+                  ) : (
+                    <h1 className="text-3xl font-bold text-foreground mb-2">{profile?.full_name || 'Advisor'}</h1>
+                  )}
                   {isEditing ? <Textarea value={editedBio} onChange={e => setEditedBio(e.target.value)} placeholder="Tell us about yourself..." className="mb-4 max-w-2xl" rows={3} /> : <p className="text-muted-foreground mb-4 max-w-2xl">{profile?.bio || 'Professional Advisor & Mentor'}</p>}
                 </div>
                 <div className="flex gap-2">
@@ -293,8 +323,60 @@ export default function AdvisorProfileView() {
         <CardHeader>
           <CardTitle>About</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-4">
           {isEditing ? <Textarea value={editedBio} onChange={e => setEditedBio(e.target.value)} rows={4} placeholder="Tell us about yourself..." /> : <p className="text-muted-foreground">{profile?.bio || 'No bio provided yet.'}</p>}
+          
+          {/* Expertise Areas */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Expertise Areas</Label>
+            {isEditing ? (
+              <div className="space-y-2">
+                <div className="flex flex-wrap gap-2">
+                  {['Strategy', 'Marketing', 'Sales', 'Product', 'Technology', 'Finance', 'Operations', 'HR', 'Legal', 'Fundraising'].map(area => (
+                    <Badge
+                      key={area}
+                      variant={editedExpertiseAreas.includes(area) ? 'default' : 'outline'}
+                      className="cursor-pointer"
+                      onClick={() => {
+                        setEditedExpertiseAreas(prev => 
+                          prev.includes(area) ? prev.filter(a => a !== area) : [...prev, area]
+                        );
+                      }}
+                    >
+                      {area}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {mentorProfile?.expertise_areas?.length > 0 ? (
+                  mentorProfile.expertise_areas.map((area: string) => (
+                    <Badge key={area} variant="secondary">{area}</Badge>
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground">No expertise areas set</p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Years of Experience */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Years of Experience</Label>
+            {isEditing ? (
+              <Input
+                type="number"
+                value={editedYearsOfExperience}
+                onChange={e => setEditedYearsOfExperience(e.target.value)}
+                placeholder="e.g., 10"
+                className="w-32"
+                min={0}
+              />
+            ) : (
+              <p className="text-muted-foreground">{mentorProfile?.years_of_experience ? `${mentorProfile.years_of_experience} years` : 'Not set'}</p>
+            )}
+          </div>
         </CardContent>
       </Card>
 

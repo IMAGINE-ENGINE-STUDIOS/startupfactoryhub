@@ -49,6 +49,7 @@ export default function AcceleratorProfileView() {
   const [saving, setSaving] = useState(false);
   
   // Profile fields
+  const [editedFullName, setEditedFullName] = useState('');
   const [editedBio, setEditedBio] = useState('');
   const [editedLocation, setEditedLocation] = useState('');
   const [editedWebsite, setEditedWebsite] = useState('');
@@ -154,6 +155,7 @@ export default function AcceleratorProfileView() {
 
   const startEditing = () => {
     if (profile) {
+      setEditedFullName(profile.full_name || '');
       setEditedBio(profile.bio || '');
       setEditedLocation(profile.location || '');
       setEditedWebsite(profile.website || '');
@@ -220,6 +222,7 @@ export default function AcceleratorProfileView() {
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
+          full_name: editedFullName,
           bio: editedBio,
           location: editedLocation,
           website: editedWebsite,
