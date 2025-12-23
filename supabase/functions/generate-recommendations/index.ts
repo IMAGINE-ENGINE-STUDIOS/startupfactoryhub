@@ -158,15 +158,15 @@ serve(async (req) => {
       } : null,
     };
 
-    const systemPrompt = `You are an AI recommendation engine for a startup ecosystem platform. 
-Your task is to provide personalized, actionable recommendations based on the user's complete startup profile.
+    const systemPrompt = `You are an expert startup advisor and AI recommendation engine for a startup ecosystem platform. 
+Your task is to provide personalized, actionable recommendations INCLUDING strategic tips, growth strategies, and resources.
 
 ANALYZE THE FOLLOWING STARTUP DATA CAREFULLY:
 - Location: "${company?.location || profile?.location || 'Not specified'}" - Recommend LOCAL resources, investors, events, coworking spaces
-- Stage: "${company?.stage || 'Not specified'}" - Match resources appropriate for their current journey step (idea, pre-seed, seed, series A, etc.)
-- Team Size: ${company?.team_size || 'Not specified'} employees - Suggest hiring resources, team-building tools, or collaboration opportunities
-- Funding Amount: $${company?.funding_amount || 0} raised - Recommend appropriate next funding steps and investor connections
-- Industry: "${company?.industry || 'Not specified'}" - Match industry-specific mentors, investors, and courses
+- Stage: "${company?.stage || 'Not specified'}" - Match resources appropriate for their current journey step
+- Team Size: ${company?.team_size || 'Not specified'} employees - Suggest hiring resources, team-building tools
+- Funding Amount: $${company?.funding_amount || 0} raised - Recommend appropriate next funding steps
+- Industry: "${company?.industry || 'Not specified'}" - Match industry-specific mentors, investors, courses
 - Looking For: ${JSON.stringify(company?.looking_for || [])} - Prioritize recommendations matching these needs
 - Founded Year: ${company?.founded_year || 'Not specified'}
 
@@ -176,21 +176,42 @@ AVAILABLE DATA TO RECOMMEND FROM:
 - Potential Connections: ${JSON.stringify(availableConnections?.slice(0, 10))}
 - Investors: ${JSON.stringify(investors?.slice(0, 5))}
 - Courses: ${JSON.stringify(courses?.slice(0, 5))}
-- Platform Resources (coworking, grants, accelerators, labs, offices, government programs): ${JSON.stringify(relevantResources?.slice(0, 10))}
+- Platform Resources: ${JSON.stringify(relevantResources?.slice(0, 10))}
 
-RECOMMENDATION PRIORITIES:
-1. If user has a location, prioritize LOCAL resources (coworking spaces, accelerators, government grants in their area)
-2. If user is early-stage (idea/pre-seed), recommend accelerators, incubators, and foundational courses
-3. If user has small team (<5), suggest hiring resources or co-founder matching
-4. If user has raised funding, recommend growth-stage resources and series-appropriate investors
-5. If user is looking for specific things (funding, mentors, etc.), prioritize those
+Generate 5-6 DIVERSE recommendations that include a MIX of:
 
-Generate 4-5 specific, personalized recommendations. Each recommendation MUST:
-1. Be actionable (connect with X, explore resource Y, take course Z, apply to accelerator W)
-2. Explain WHY this is relevant based on their location, stage, team size, funding, or stated goals
-3. Include specific names/titles from the available data
-4. Be concise (2-3 sentences max)
-5. For resources: recommend coworking spaces, grants, or accelerators matching their location/stage`;
+1. **STRATEGIC TIPS** (type: "strategy") - Actionable business advice based on their stage:
+   - For idea/pre-seed: Customer discovery tactics, MVP validation, lean startup methods
+   - For seed: Go-to-market strategies, product-market fit indicators, early traction tips
+   - For series A+: Scaling strategies, team growth tactics, market expansion
+
+2. **GROWTH TACTICS** (type: "tip") - Specific actionable tips:
+   - Marketing strategies relevant to their industry
+   - Sales tactics for B2B/B2C based on their product
+   - Networking approaches for their location
+   - Competitive positioning advice
+   - Fundraising preparation tips based on their stage
+
+3. **RESOURCE RECOMMENDATIONS** (type: "resource") - Platform resources:
+   - Coworking spaces, grants, accelerators matching location/stage
+   - Government programs and entrepreneur centers
+   - Labs and technology transfer offices if relevant
+
+4. **CONNECTIONS & COURSES** (type: "connection", "investor", "course"):
+   - Mentors/investors matching their industry and stage
+   - Courses for skill gaps based on team size and needs
+
+5. **ACTIONABLE NEXT STEPS** (type: "action") - Concrete actions for THIS WEEK:
+   - Specific people to reach out to
+   - Documents to prepare (pitch deck, financial model)
+   - Metrics to track based on their stage
+
+Each recommendation MUST:
+- Have a clear, SPECIFIC title (not generic like "Network more")
+- Include WHY this is relevant to THEIR specific situation
+- Provide 1-2 concrete action items they can do immediately
+- Be tailored to their industry, location, stage, and team size
+- Be concise (2-3 sentences max)`;
 
     console.log('Calling Lovable AI for recommendations with enhanced context...');
     console.log('User location:', company?.location || profile?.location);
@@ -225,8 +246,8 @@ Generate 4-5 specific, personalized recommendations. Each recommendation MUST:
                       properties: {
                         type: {
                           type: 'string',
-                          enum: ['connection', 'investor', 'course', 'resource', 'general'],
-                          description: 'Type of recommendation (resource includes coworking, grants, accelerators, labs)'
+                          enum: ['connection', 'investor', 'course', 'resource', 'strategy', 'tip', 'action', 'general'],
+                          description: 'Type: strategy (business advice), tip (growth tactics), action (next steps), resource (coworking/grants), connection, investor, course, general'
                         },
                         title: {
                           type: 'string',
