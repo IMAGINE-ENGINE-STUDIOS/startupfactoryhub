@@ -111,16 +111,22 @@ export default function JobTaskManager() {
   }, [companyId]);
 
   const fetchCompanyId = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     const { data } = await supabase
       .from('companies')
       .select('id')
       .eq('user_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (data) {
       setCompanyId(data.id);
+    } else {
+      // No company found - stop loading
+      setLoading(false);
     }
   };
 
@@ -256,6 +262,18 @@ export default function JobTaskManager() {
 
   if (loading) {
     return <div className="text-center py-8">Loading tasks...</div>;
+  }
+
+  if (!companyId) {
+    return (
+      <Card className="tech-card border-0">
+        <CardContent className="py-8">
+          <p className="text-center text-muted-foreground">
+            You need to create a company profile first to manage job tasks. Go to the Profile tab to set up your company.
+          </p>
+        </CardContent>
+      </Card>
+    );
   }
 
   return (
