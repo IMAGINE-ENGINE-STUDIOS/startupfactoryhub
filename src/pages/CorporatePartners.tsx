@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import MatrixBackground from "@/components/MatrixBackground";
 
 const FEATURED_PARTNERS = [
   {
@@ -244,72 +245,114 @@ export default function CorporatePartners() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Navigation />
+    <div className="min-h-screen bg-background relative">
+      {/* Matrix Background */}
+      <div className="fixed inset-0 z-0">
+        <MatrixBackground />
+      </div>
       
-      {/* Hero Section */}
-      <section className="relative py-20 px-4 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
-        <div className="max-w-6xl mx-auto relative z-10">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate(-1)}
-            className="mb-6"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Button>
-          
-          <div className="text-center space-y-6">
-            <Badge variant="secondary" className="text-sm px-4 py-1">
-              <Handshake className="h-4 w-4 mr-2" />
-              Strategic Partnerships
-            </Badge>
+      <div className="relative z-10">
+        <Navigation />
+        
+        {/* Hero Section */}
+        <section className="relative py-20 px-4 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-accent/10" />
+          <div className="max-w-6xl mx-auto relative z-10">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate(-1)}
+              className="mb-6"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back
+            </Button>
             
-            <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
-              Corporate Partners & Collaborators
-            </h1>
-            
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Join our ecosystem of leading organizations supporting the next generation of innovative startups.
-            </p>
+            <div className="text-center space-y-6">
+              <Badge variant="secondary" className="text-sm px-4 py-1">
+                <Handshake className="h-4 w-4 mr-2" />
+                Strategic Partnerships
+              </Badge>
+              
+              <h1 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
+                Corporate Partners & Collaborators
+              </h1>
+              
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                Join our ecosystem of leading organizations supporting the next generation of innovative startups.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* Featured Partners Grid */}
-      <section className="py-16 px-4 bg-muted/30">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">Our Trusted Partners</h2>
-            <p className="text-muted-foreground">
-              Working together to accelerate startup success worldwide
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {FEATURED_PARTNERS.map((partner, index) => (
-              <Card 
-                key={partner.name}
-                className="p-6 text-center group hover:shadow-lg transition-all duration-300 hover:scale-105"
-                style={{ animationDelay: `${index * 0.1}s` }}
-              >
-                <div className="h-16 flex items-center justify-center mb-4">
-                  <img
-                    src={partner.logo}
-                    alt={partner.name}
-                    className="max-h-full max-w-full object-contain filter group-hover:brightness-110 transition-all"
-                  />
+        {/* Featured Partners Grid */}
+        <section className="py-16 px-4 bg-background/80 backdrop-blur-sm">
+          <div className="max-w-6xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">Our Trusted Partners</h2>
+              <p className="text-muted-foreground">
+                Working together to accelerate startup success worldwide
+              </p>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {FEATURED_PARTNERS.map((partner, index) => (
+                <div 
+                  key={partner.name}
+                  className="group relative animate-fade-in"
+                  style={{ animationDelay: `${index * 0.05}s` }}
+                >
+                  {/* Tech card with glowing border */}
+                  <div className="relative p-[1px] rounded-lg bg-gradient-to-br from-primary/50 via-accent/30 to-primary/50 overflow-hidden">
+                    {/* Animated border glow */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm" />
+                    
+                    {/* Card content */}
+                    <div className="relative bg-background/95 backdrop-blur-md rounded-lg p-6 h-full">
+                      {/* Corner accents */}
+                      <div className="absolute top-0 left-0 w-3 h-3 border-l-2 border-t-2 border-primary/60" />
+                      <div className="absolute top-0 right-0 w-3 h-3 border-r-2 border-t-2 border-primary/60" />
+                      <div className="absolute bottom-0 left-0 w-3 h-3 border-l-2 border-b-2 border-primary/60" />
+                      <div className="absolute bottom-0 right-0 w-3 h-3 border-r-2 border-b-2 border-primary/60" />
+                      
+                      {/* Scan line effect */}
+                      <div className="absolute inset-0 overflow-hidden rounded-lg pointer-events-none">
+                        <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent top-0 group-hover:animate-pulse" />
+                      </div>
+                      
+                      {/* Logo container with hex pattern */}
+                      <div className="h-16 flex items-center justify-center mb-4 relative">
+                        <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_center,_hsl(var(--primary))_1px,_transparent_1px)] bg-[length:8px_8px]" />
+                        <img
+                          src={partner.logo}
+                          alt={partner.name}
+                          className="max-h-full max-w-full object-contain filter group-hover:brightness-125 group-hover:drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-all duration-300"
+                        />
+                      </div>
+                      
+                      {/* Partner name with tech styling */}
+                      <h3 className="font-mono font-semibold text-sm mb-2 text-center tracking-wide group-hover:text-primary transition-colors">
+                        {partner.name}
+                      </h3>
+                      
+                      {/* Tech-styled badge */}
+                      <div className="flex justify-center">
+                        <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-1 bg-primary/10 text-primary border border-primary/30 rounded">
+                          {partner.tier}
+                        </span>
+                      </div>
+                      
+                      {/* Status indicator */}
+                      <div className="absolute top-3 right-3 flex items-center gap-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                        <span className="text-[8px] font-mono text-primary/70 uppercase">Active</span>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-                <h3 className="font-semibold text-sm mb-2">{partner.name}</h3>
-                <Badge variant="outline" className="text-xs">
-                  {partner.tier}
-                </Badge>
-              </Card>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
       {/* Benefits Section */}
       <section className="py-16 px-4">
@@ -533,7 +576,8 @@ export default function CorporatePartners() {
         </div>
       </section>
 
-      <Footer />
+        <Footer />
+      </div>
     </div>
   );
 }
