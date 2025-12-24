@@ -24,6 +24,7 @@ import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import JobTaskManager from '@/components/JobTaskManager';
+import ManageJobPosts from '@/components/ManageJobPosts';
 import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
 import PitchMeetingCard from '@/components/PitchMeetingCard';
 import StartupMentorshipOffers from '@/components/StartupMentorshipOffers';
@@ -565,9 +566,12 @@ const Dashboard = () => {
           {activeTab === "jobs" && (
             <TabsContent value="jobs" className="space-y-4">
               <Tabs defaultValue="opportunities" className="w-full">
-                <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
+                <TabsList className="grid w-full max-w-lg grid-cols-3 mb-6">
                   <TabsTrigger value="opportunities">
                     Job Opportunities
+                  </TabsTrigger>
+                  <TabsTrigger value="manage-posts">
+                    Manage Job Posts
                   </TabsTrigger>
                   <TabsTrigger value="manage-tasks">
                     Manage Tasks
@@ -576,6 +580,10 @@ const Dashboard = () => {
                 
                 <TabsContent value="opportunities">
                   <UnifiedJobsBoard />
+                </TabsContent>
+                
+                <TabsContent value="manage-posts">
+                  <ManageJobPosts />
                 </TabsContent>
                 
                 <TabsContent value="manage-tasks">
