@@ -99,6 +99,31 @@ const FEATURED_PARTNERS = [
     name: "Duquesne University",
     logo: "https://www.duq.edu/assets/images/duquesne-university-logo.svg",
     tier: "Academic Partner"
+  },
+  {
+    name: "IWG",
+    logo: "https://www.iwgplc.com/~/media/IWG/Images/Logos/IWG-logo.svg",
+    tier: "Workspace Partner"
+  },
+  {
+    name: "LOT Network",
+    logo: "https://lotnet.com/wp-content/uploads/2020/01/LOT-Network-Logo.png",
+    tier: "Legal Partner"
+  },
+  {
+    name: "Flippa",
+    logo: "https://flippa.com/images/flippa-logo.svg",
+    tier: "Marketplace Partner"
+  },
+  {
+    name: "HubSpot",
+    logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png",
+    tier: "Marketing Partner"
+  },
+  {
+    name: "SumUp",
+    logo: "https://www.sumup.com/favicon.ico",
+    tier: "Payments Partner"
   }
 ];
 
