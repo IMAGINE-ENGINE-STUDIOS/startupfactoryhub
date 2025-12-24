@@ -48,12 +48,6 @@ const Navigation = () => {
               </SheetTrigger>
               <SheetContent side="right" className="w-[280px] sm:w-[350px]">
                 <div className="flex flex-col space-y-4 mt-8 px-2">
-                  <Button variant="outline" className="w-full min-h-[48px] text-base" onClick={() => {
-                  navigate("/partners");
-                  closeMenu();
-                }}>
-                    Partners
-                  </Button>
                   {user ? <>
                       <Button variant="outline" className="w-full min-h-[48px] text-base" onClick={() => {
                     navigate("/dashboard");
