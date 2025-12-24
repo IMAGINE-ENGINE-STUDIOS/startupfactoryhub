@@ -49,6 +49,46 @@ const FEATURED_PARTNERS = [
     name: "NVIDIA Inception",
     logo: "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/logo-and-brand/01-nvidia-logo-horiz-500x200-2c50-d.png",
     tier: "AI Partner"
+  },
+  {
+    name: "Latham Pools",
+    logo: "https://www.lathampool.com/wp-content/uploads/2021/10/latham-logo.svg",
+    tier: "Corporate Sponsor"
+  },
+  {
+    name: "Pitch Perfecter",
+    logo: "https://uploads-ssl.webflow.com/6388a088c5eb4d4c50dd4f9a/6388a088c5eb4d1a71dd4fce_pp-logo-dark.svg",
+    tier: "Startup Partner"
+  },
+  {
+    name: "F6S",
+    logo: "https://www.f6s.com/content-resource/images/logos/f6s-logo-blue.svg",
+    tier: "Startup Partner"
+  },
+  {
+    name: "Arias Incostas Nouel",
+    logo: "https://www.ariaslaw.com/wp-content/uploads/2020/01/logo-arias.png",
+    tier: "Legal Partner"
+  },
+  {
+    name: "Nasdaq Entrepreneurial Center",
+    logo: "/nasdaq-logo.png",
+    tier: "Entrepreneurship Partner"
+  },
+  {
+    name: "Orlandopreneur",
+    logo: "https://images.squarespace-cdn.com/content/v1/5f4e0c7e7f74731dd56c21e0/1599015149012-7LQNKN8IHKC0JRCYWXLZ/Orlandopreneur+Logo.png",
+    tier: "Community Partner"
+  },
+  {
+    name: "UK Venture",
+    logo: "https://ukventure.com/wp-content/uploads/2022/01/uk-venture-logo.png",
+    tier: "Investment Partner"
+  },
+  {
+    name: "Advantary Capital Partners",
+    logo: "https://advantary.com/wp-content/uploads/2021/06/advantary-logo.png",
+    tier: "Investment Partner"
   }
 ];
 
