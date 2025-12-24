@@ -127,13 +127,18 @@ const [searchQuery, setSearchQuery] = useState('');
 const displayedJobs = filteredJobs.slice(0, displayCount);
   const hasMoreJobs = displayCount < filteredJobs.length;
 
+  // Fetch jobs for everyone (including guests) - RLS allows public viewing of active jobs
   useEffect(() => {
-    if (user && role !== undefined) {
+    fetchJobs();
+  }, [categoryFilter]);
+
+  // Fetch user-specific data only when logged in
+  useEffect(() => {
+    if (user) {
       fetchUserCompany();
-      fetchJobs();
       fetchAppliedJobs();
     }
-  }, [user, categoryFilter, role]);
+  }, [user, role]);
 
   useEffect(() => {
     if (userCompanyId) {
