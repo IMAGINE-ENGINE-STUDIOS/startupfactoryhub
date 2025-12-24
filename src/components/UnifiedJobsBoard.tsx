@@ -249,105 +249,20 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
   const fetchUserCompany = async () => {
     if (!user) return;
     
-    // First check if user has a company
+    // Get the OLDEST company for this user to ensure consistency
+    // This prevents issues with duplicate companies
     const { data, error } = await supabase
       .from('companies')
       .select('id')
       .eq('user_id', user.id)
-      .single();
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle();
 
     if (!error && data) {
       setUserCompanyId(data.id);
-      return;
     }
-
-    // If user is accelerator, check if they have an accelerator profile and create company if needed
-    if (role === 'accelerator') {
-      const { data: acceleratorProfile } = await supabase
-        .from('accelerator_profiles')
-        .select('id, organization_name, description, logo_url, location')
-        .eq('user_id', user.id)
-        .single();
-
-      if (acceleratorProfile) {
-        // Create a company for the accelerator to post jobs
-        const { data: newCompany, error: createError } = await supabase
-          .from('companies')
-          .insert([{
-            user_id: user.id,
-            name: acceleratorProfile.organization_name,
-            description: acceleratorProfile.description,
-            logo_url: acceleratorProfile.logo_url,
-            location: acceleratorProfile.location,
-            industry: 'Accelerator/Incubator',
-            stage: 'growth'
-          }])
-          .select('id')
-          .single();
-
-        if (!createError && newCompany) {
-          setUserCompanyId(newCompany.id);
-        }
-      }
-    }
-
-    // If user is startup, create a company from their profile data
-    if (role === 'startup') {
-      const { data: userProfile } = await supabase
-        .from('profiles')
-        .select('full_name, bio, avatar_url, location')
-        .eq('user_id', user.id)
-        .single();
-
-      if (userProfile) {
-        const { data: newCompany, error: createError } = await supabase
-          .from('companies')
-          .insert([{
-            user_id: user.id,
-            name: userProfile.full_name || 'My Startup',
-            description: userProfile.bio || null,
-            logo_url: userProfile.avatar_url || null,
-            location: userProfile.location || null,
-            industry: 'Technology',
-            stage: 'idea'
-          }])
-          .select('id')
-          .single();
-
-        if (!createError && newCompany) {
-          setUserCompanyId(newCompany.id);
-        }
-      }
-    }
-
-    // If user is investor, create a company from their profile data
-    if (role === 'investor') {
-      const { data: userProfile } = await supabase
-        .from('profiles')
-        .select('full_name, bio, avatar_url, location')
-        .eq('user_id', user.id)
-        .single();
-
-      if (userProfile) {
-        const { data: newCompany, error: createError } = await supabase
-          .from('companies')
-          .insert([{
-            user_id: user.id,
-            name: userProfile.full_name || 'Investment Firm',
-            description: userProfile.bio || null,
-            logo_url: userProfile.avatar_url || null,
-            location: userProfile.location || null,
-            industry: 'Investment',
-            stage: 'growth'
-          }])
-          .select('id')
-          .single();
-
-        if (!createError && newCompany) {
-          setUserCompanyId(newCompany.id);
-        }
-      }
-    }
+    // Don't auto-create companies here - let users create through CompanyProfileManager
   };
 
   const fetchJobs = async () => {

@@ -80,11 +80,12 @@ export default function CompanyProfileManager() {
   const fetchCompany = async () => {
     if (!user) return;
 
+    // Get the OLDEST company for consistency - prevents issues with duplicates
     const { data, error } = await supabase
       .from('companies')
       .select('*')
       .eq('user_id', user.id)
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: true })
       .limit(1)
       .maybeSingle();
 
