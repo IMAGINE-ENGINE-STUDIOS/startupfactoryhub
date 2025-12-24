@@ -92,6 +92,7 @@ export default function UnifiedJobsBoard() {
   const [closeJobId, setCloseJobId] = useState<string | null>(null);
 const [searchQuery, setSearchQuery] = useState('');
   const [displayCount, setDisplayCount] = useState(6);
+  const [activeSubTab, setActiveSubTab] = useState<'opportunities' | 'manage'>('opportunities');
   const [selectedJobForDetails, setSelectedJobForDetails] = useState<Job | null>(null);
   
   // Apply dialog state
@@ -105,26 +106,37 @@ const [searchQuery, setSearchQuery] = useState('');
   const [useProfileResume, setUseProfileResume] = useState(true);
   const [uploadingNewResume, setUploadingNewResume] = useState(false);
 
-  // Filter and deduplicate jobs
+  // Filter and deduplicate jobs for the opportunities view (excluding user's own jobs)
   const filteredJobs = useMemo(() => {
     // Deduplicate by ID
     const uniqueJobs = Array.from(
       new Map(jobs.map(job => [job.id, job])).values()
     );
     
+    // Exclude user's own jobs if they have a company
+    const jobsToShow = userCompanyId 
+      ? uniqueJobs.filter(job => job.companies?.id !== userCompanyId)
+      : uniqueJobs;
+    
     // Filter by search query
-    if (!searchQuery.trim()) return uniqueJobs;
+    if (!searchQuery.trim()) return jobsToShow;
     
     const query = searchQuery.toLowerCase();
-    return uniqueJobs.filter(job =>
+    return jobsToShow.filter(job =>
       job.title.toLowerCase().includes(query) ||
       job.companies?.name?.toLowerCase().includes(query) ||
       job.description?.toLowerCase().includes(query) ||
       job.location?.toLowerCase().includes(query)
     );
-  }, [jobs, searchQuery]);
+  }, [jobs, searchQuery, userCompanyId]);
 
-const displayedJobs = filteredJobs.slice(0, displayCount);
+  // Get user's own posted jobs (active only)
+  const myPostedJobs = useMemo(() => {
+    if (!userCompanyId) return [];
+    return jobs.filter(job => job.companies?.id === userCompanyId);
+  }, [jobs, userCompanyId]);
+
+  const displayedJobs = filteredJobs.slice(0, displayCount);
   const hasMoreJobs = displayCount < filteredJobs.length;
 
   // Fetch jobs for everyone (including guests) - RLS allows public viewing of active jobs
@@ -1029,189 +1041,576 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
         </CardHeader>
       </Card>
 
-      {/* Search Input */}
-      <Card className="tech-card border-0">
-        <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search jobs by title, company, location, or description..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                setDisplayCount(6); // Reset pagination on search
-              }}
-              className="pl-10 bg-background/50"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      {/* Sub-tabs for company users */}
+      {isCompanyUser ? (
+        <Tabs value={activeSubTab} onValueChange={(v) => setActiveSubTab(v as 'opportunities' | 'manage')} className="space-y-6">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="opportunities" className="gap-2">
+              <Briefcase className="h-4 w-4" />
+              Job Opportunities
+            </TabsTrigger>
+            <TabsTrigger value="manage" className="gap-2">
+              <ClipboardList className="h-4 w-4" />
+              Manage Job Posts
+            </TabsTrigger>
+          </TabsList>
 
-      {/* Filters */}
-      <div className="flex gap-2 flex-wrap">
-        <Button
-          variant={categoryFilter === 'all' ? 'default' : 'outline'}
-          onClick={() => setCategoryFilter('all')}
-        >
-          All Jobs
-        </Button>
-        <Button
-          variant={categoryFilter === 'full-time' ? 'default' : 'outline'}
-          onClick={() => setCategoryFilter('full-time')}
-        >
-          Full-Time
-        </Button>
-        <Button
-          variant={categoryFilter === 'part-time' ? 'default' : 'outline'}
-          onClick={() => setCategoryFilter('part-time')}
-        >
-          Part-Time
-        </Button>
-        <Button
-          variant={categoryFilter === 'contract' ? 'default' : 'outline'}
-          onClick={() => setCategoryFilter('contract')}
-        >
-          Contract
-        </Button>
-        <Button
-          variant={categoryFilter === 'internship' ? 'default' : 'outline'}
-          onClick={() => setCategoryFilter('internship')}
-        >
-          Internships
-        </Button>
-      </div>
+          {/* Job Opportunities Tab */}
+          <TabsContent value="opportunities" className="space-y-6 mt-0">
+            {/* Search Input */}
+            <Card className="tech-card border-0">
+              <CardContent className="p-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search jobs by title, company, location, or description..."
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setDisplayCount(6);
+                    }}
+                    className="pl-10 bg-background/50"
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-      {/* Results count */}
-      {filteredJobs.length > 0 && (
-        <p className="text-sm text-muted-foreground">
-          Showing {displayedJobs.length} of {filteredJobs.length} jobs
-        </p>
-      )}
+            {/* Filters */}
+            <div className="flex gap-2 flex-wrap">
+              <Button
+                variant={categoryFilter === 'all' ? 'default' : 'outline'}
+                onClick={() => setCategoryFilter('all')}
+              >
+                All Jobs
+              </Button>
+              <Button
+                variant={categoryFilter === 'full-time' ? 'default' : 'outline'}
+                onClick={() => setCategoryFilter('full-time')}
+              >
+                Full-Time
+              </Button>
+              <Button
+                variant={categoryFilter === 'part-time' ? 'default' : 'outline'}
+                onClick={() => setCategoryFilter('part-time')}
+              >
+                Part-Time
+              </Button>
+              <Button
+                variant={categoryFilter === 'contract' ? 'default' : 'outline'}
+                onClick={() => setCategoryFilter('contract')}
+              >
+                Contract
+              </Button>
+              <Button
+                variant={categoryFilter === 'internship' ? 'default' : 'outline'}
+                onClick={() => setCategoryFilter('internship')}
+              >
+                Internships
+              </Button>
+            </div>
 
-      {/* Jobs Grid */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-start">
-        {displayedJobs.length === 0 ? (
-          <Card className="col-span-full tech-card border-0">
-            <CardContent className="py-8">
-              <p className="text-center text-muted-foreground">
-                {searchQuery ? 'No jobs match your search' : 'No jobs found'}
+            {/* Results count */}
+            {filteredJobs.length > 0 && (
+              <p className="text-sm text-muted-foreground">
+                Showing {displayedJobs.length} of {filteredJobs.length} jobs
               </p>
+            )}
+
+            {/* Jobs Grid */}
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-start">
+              {displayedJobs.length === 0 ? (
+                <Card className="col-span-full tech-card border-0">
+                  <CardContent className="py-8">
+                    <p className="text-center text-muted-foreground">
+                      {searchQuery ? 'No jobs match your search' : 'No jobs found'}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                displayedJobs.map((job) => (
+                  <Card key={job.id} className="tech-card border-0 flex flex-col h-[300px]">
+                    <CardHeader className="pb-2">
+                      <div className="flex items-start gap-3 sm:gap-4">
+                        {job.companies?.logo_url && (
+                          <img 
+                            src={job.companies.logo_url} 
+                            alt={job.companies.name} 
+                            className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover flex-shrink-0"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1 min-w-0">
+                              <CardTitle className="text-base sm:text-lg break-words line-clamp-1">{job.title}</CardTitle>
+                              <CardDescription className="text-sm truncate">{job.companies?.name}</CardDescription>
+                            </div>
+                            <Badge className={getCategoryColor(job.category)}>
+                              {job.category}
+                            </Badge>
+                          </div>
+                        </div>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-3 flex-1 flex flex-col">
+                      <p className="text-sm text-muted-foreground break-words line-clamp-2 flex-shrink-0">
+                        {job.description}
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground flex-shrink-0">
+                        {job.location && (
+                          <div className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                            <span className="truncate max-w-[100px]">{job.location}</span>
+                          </div>
+                        )}
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                          <span className="truncate max-w-[120px]">{getCompensationDisplay(job)}</span>
+                        </div>
+                        {job.is_task_based && (
+                          <Badge variant="outline" className="gap-1 text-xs h-5">
+                            <CheckCircle className="w-3 h-3" />
+                            Task-Based
+                          </Badge>
+                        )}
+                      </div>
+
+                      <div className="flex-1" />
+
+                      <div className="flex flex-col gap-2 pt-2 mt-auto">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedJobForDetails(job)}
+                          className="w-full justify-center gap-1 text-xs h-8"
+                        >
+                          <Eye className="w-4 h-4" />
+                          View Details
+                        </Button>
+                        
+                        <div className="flex items-center justify-between w-full gap-2">
+                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                            <Users className="w-3 h-3" />
+                            {job.applications_count} applicants
+                          </div>
+                          {canApply && (
+                            appliedJobs.has(job.id) ? (
+                              <Button
+                                disabled
+                                variant="secondary"
+                                size="sm"
+                                className="h-8 text-xs"
+                              >
+                                <CheckCircle className="mr-1 h-3 w-3" />
+                                Applied
+                              </Button>
+                            ) : (
+                              <Button
+                                onClick={() => handleApply(job.id, job.external_application_url)}
+                                variant={job.external_application_url ? 'outline' : 'default'}
+                                size="sm"
+                                className="h-8 text-xs"
+                              >
+                                {job.external_application_url ? (
+                                  <>
+                                    Apply
+                                    <ExternalLink className="ml-1 h-3 w-3" />
+                                  </>
+                                ) : (
+                                  'Apply Now'
+                                )}
+                              </Button>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))
+              )}
+            </div>
+
+            {/* Load More Button */}
+            {hasMoreJobs && (
+              <div className="flex justify-center pt-4">
+                <Button
+                  variant="outline"
+                  onClick={() => setDisplayCount(prev => prev + 6)}
+                  className="gap-2"
+                >
+                  Load More Jobs ({filteredJobs.length - displayCount} remaining)
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Manage Job Posts Tab */}
+          <TabsContent value="manage" className="space-y-6 mt-0">
+            {/* Stats Summary */}
+            <Card className="tech-card border-0">
+              <CardContent className="p-4">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex gap-6">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-primary">{myPostedJobs.length}</p>
+                      <p className="text-xs text-muted-foreground">Active Jobs</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-muted-foreground">{closedJobs.length}</p>
+                      <p className="text-xs text-muted-foreground">Closed Jobs</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-green-500">
+                        {myPostedJobs.reduce((sum, job) => sum + (job.applications_count || 0), 0) + 
+                         closedJobs.reduce((sum, job) => sum + (job.applications_count || 0), 0)}
+                      </p>
+                      <p className="text-xs text-muted-foreground">Total Applications</p>
+                    </div>
+                  </div>
+                  <Button onClick={() => setShowPostDialog(true)} className="gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    Post New Job
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Active Posted Jobs */}
+            {myPostedJobs.length === 0 && closedJobs.length === 0 ? (
+              <Card className="tech-card border-0">
+                <CardContent className="py-12 text-center">
+                  <Briefcase className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="font-semibold mb-2">No job postings yet</h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Create your first job posting to start receiving applications
+                  </p>
+                  <Button onClick={() => setShowPostDialog(true)} className="gap-2">
+                    <Briefcase className="h-4 w-4" />
+                    Post Your First Job
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                {/* Active Jobs */}
+                {myPostedJobs.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold flex items-center gap-2">
+                      <CheckCircle className="h-5 w-5 text-green-500" />
+                      Active Job Postings ({myPostedJobs.length})
+                    </h3>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {myPostedJobs.map((job) => (
+                        <Card key={job.id} className="tech-card border-0">
+                          <CardHeader className="pb-2">
+                            <div className="flex items-start gap-3">
+                              {job.companies?.logo_url && (
+                                <img 
+                                  src={job.companies.logo_url} 
+                                  alt={job.companies.name} 
+                                  className="w-10 h-10 rounded object-cover flex-shrink-0"
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <CardTitle className="text-base break-words line-clamp-1">{job.title}</CardTitle>
+                                    <CardDescription className="text-sm">{job.location || 'No location'}</CardDescription>
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <Badge className={getCategoryColor(job.category)}>
+                                      {job.category}
+                                    </Badge>
+                                    <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500/20">
+                                      Active
+                                    </Badge>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <p className="text-sm text-muted-foreground line-clamp-2">{job.description}</p>
+                            
+                            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <DollarSign className="w-3 h-3" />
+                                <span>{getCompensationDisplay(job)}</span>
+                              </div>
+                              <div className="flex items-center gap-1">
+                                <Users className="w-3 h-3" />
+                                {job.applications_count} applications
+                              </div>
+                              {job.is_task_based && (
+                                <Badge variant="outline" className="gap-1 text-xs h-5">
+                                  <CheckCircle className="w-3 h-3" />
+                                  Task-Based
+                                </Badge>
+                              )}
+                            </div>
+
+                            <div className="flex flex-wrap gap-2 pt-2">
+                              <Button
+                                variant="default"
+                                size="sm"
+                                onClick={() => handleViewApplications(job.id)}
+                                className="gap-1 flex-1"
+                              >
+                                <Users className="w-3 h-3" />
+                                View Applications ({job.applications_count})
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleCopyPublicLink(job.id)}
+                                className="gap-1"
+                                title="Copy public application link"
+                              >
+                                <Copy className="w-3 h-3" />
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="outline" size="sm" className="px-2">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => setSelectedJobForDetails(job)}>
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    View Details
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => handleCloseJob(job.id)}>
+                                    <XCircle className="h-4 w-4 mr-2" />
+                                    Close Job Posting
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem 
+                                    onClick={() => handleDeleteJob(job.id)}
+                                    className="text-destructive focus:text-destructive"
+                                  >
+                                    <Trash2 className="h-4 w-4 mr-2" />
+                                    Delete Permanently
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Closed Jobs */}
+                {closedJobs.length > 0 && (
+                  <div className="space-y-4">
+                    <h3 className="font-semibold flex items-center gap-2 text-muted-foreground">
+                      <XCircle className="h-5 w-5" />
+                      Closed Job Postings ({closedJobs.length})
+                    </h3>
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {closedJobs.map((job) => (
+                        <Card key={job.id} className="tech-card border-0 opacity-70 hover:opacity-100 transition-opacity">
+                          <CardHeader className="pb-2">
+                            <div className="flex items-start gap-3">
+                              {job.companies?.logo_url && (
+                                <img 
+                                  src={job.companies.logo_url} 
+                                  alt={job.companies.name} 
+                                  className="w-10 h-10 rounded object-cover flex-shrink-0"
+                                />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <CardTitle className="text-base break-words line-clamp-1">{job.title}</CardTitle>
+                                    <CardDescription className="text-sm">{job.location || 'No location'}</CardDescription>
+                                  </div>
+                                  <Badge variant="destructive">CLOSED</Badge>
+                                </div>
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <p className="text-sm text-muted-foreground line-clamp-2">{job.description}</p>
+                            
+                            <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
+                              <div className="flex items-center gap-1">
+                                <Users className="w-3 h-3" />
+                                {job.applications_count} applications received
+                              </div>
+                            </div>
+
+                            <div className="flex gap-2 pt-2">
+                              <Button
+                                onClick={() => handleReopenJob(job.id)}
+                                variant="outline"
+                                size="sm"
+                                className="flex-1"
+                              >
+                                Reopen Job
+                              </Button>
+                              <Button
+                                onClick={() => handleViewApplications(job.id)}
+                                variant="outline"
+                                size="sm"
+                                className="gap-1"
+                              >
+                                <Eye className="w-3 h-3" />
+                                Apps
+                              </Button>
+                              <Button
+                                onClick={() => handleDeleteJob(job.id)}
+                                variant="destructive"
+                                size="sm"
+                                className="gap-1"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </Button>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
+      ) : (
+        /* Non-company users: Show only opportunities view */
+        <div className="space-y-6">
+          {/* Search Input */}
+          <Card className="tech-card border-0">
+            <CardContent className="p-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search jobs by title, company, location, or description..."
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setDisplayCount(6);
+                  }}
+                  className="pl-10 bg-background/50"
+                />
+              </div>
             </CardContent>
           </Card>
-        ) : (
-          displayedJobs.map((job) => (
-            <Card key={job.id} className="tech-card border-0 flex flex-col h-[300px]">
-              <CardHeader className="pb-2">
-                <div className="flex items-start gap-3 sm:gap-4">
-                  {job.companies?.logo_url && (
-                    <img 
-                      src={job.companies.logo_url} 
-                      alt={job.companies.name} 
-                      className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover flex-shrink-0"
-                    />
-                  )}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-2">
+
+          {/* Filters */}
+          <div className="flex gap-2 flex-wrap">
+            <Button
+              variant={categoryFilter === 'all' ? 'default' : 'outline'}
+              onClick={() => setCategoryFilter('all')}
+            >
+              All Jobs
+            </Button>
+            <Button
+              variant={categoryFilter === 'full-time' ? 'default' : 'outline'}
+              onClick={() => setCategoryFilter('full-time')}
+            >
+              Full-Time
+            </Button>
+            <Button
+              variant={categoryFilter === 'part-time' ? 'default' : 'outline'}
+              onClick={() => setCategoryFilter('part-time')}
+            >
+              Part-Time
+            </Button>
+            <Button
+              variant={categoryFilter === 'contract' ? 'default' : 'outline'}
+              onClick={() => setCategoryFilter('contract')}
+            >
+              Contract
+            </Button>
+            <Button
+              variant={categoryFilter === 'internship' ? 'default' : 'outline'}
+              onClick={() => setCategoryFilter('internship')}
+            >
+              Internships
+            </Button>
+          </div>
+
+          {/* Results count */}
+          {filteredJobs.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              Showing {displayedJobs.length} of {filteredJobs.length} jobs
+            </p>
+          )}
+
+          {/* Jobs Grid */}
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 items-start">
+            {displayedJobs.length === 0 ? (
+              <Card className="col-span-full tech-card border-0">
+                <CardContent className="py-8">
+                  <p className="text-center text-muted-foreground">
+                    {searchQuery ? 'No jobs match your search' : 'No jobs found'}
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              displayedJobs.map((job) => (
+                <Card key={job.id} className="tech-card border-0 flex flex-col h-[300px]">
+                  <CardHeader className="pb-2">
+                    <div className="flex items-start gap-3 sm:gap-4">
+                      {job.companies?.logo_url && (
+                        <img 
+                          src={job.companies.logo_url} 
+                          alt={job.companies.name} 
+                          className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover flex-shrink-0"
+                        />
+                      )}
                       <div className="flex-1 min-w-0">
-                        <CardTitle className="text-base sm:text-lg break-words line-clamp-1">{job.title}</CardTitle>
-                        <CardDescription className="text-sm truncate">{job.companies?.name}</CardDescription>
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <CardTitle className="text-base sm:text-lg break-words line-clamp-1">{job.title}</CardTitle>
+                            <CardDescription className="text-sm truncate">{job.companies?.name}</CardDescription>
+                          </div>
+                          <Badge className={getCategoryColor(job.category)}>
+                            {job.category}
+                          </Badge>
+                        </div>
                       </div>
-                      <Badge className={getCategoryColor(job.category)}>
-                        {job.category}
-                      </Badge>
                     </div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-3 flex-1 flex flex-col">
-                {/* Description - always truncated */}
-                <p className="text-sm text-muted-foreground break-words line-clamp-2 flex-shrink-0">
-                  {job.description}
-                </p>
-                
-                {/* Quick info */}
-                <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground flex-shrink-0">
-                  {job.location && (
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                      <span className="truncate max-w-[100px]">{job.location}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1">
-                    <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                    <span className="truncate max-w-[120px]">{getCompensationDisplay(job)}</span>
-                  </div>
-                  {job.is_task_based && (
-                    <Badge variant="outline" className="gap-1 text-xs h-5">
-                      <CheckCircle className="w-3 h-3" />
-                      Task-Based
-                    </Badge>
-                  )}
-                </div>
-
-                {/* Spacer */}
-                <div className="flex-1" />
-
-                {/* Action buttons - always at bottom */}
-                <div className="flex flex-col gap-2 pt-2 mt-auto">
-                  {/* View Details button */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setSelectedJobForDetails(job)}
-                    className="w-full justify-center gap-1 text-xs h-8"
-                  >
-                    <Eye className="w-4 h-4" />
-                    View Details
-                  </Button>
-                  
-                  {/* Company controls or apply button */}
-                  <div className="flex items-center justify-between gap-2">
-                    {isCompanyUser && job.companies?.id === userCompanyId ? (
-                      <div className="flex flex-wrap items-center gap-1 w-full">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewApplications(job.id)}
-                          className="gap-1 text-xs h-8 flex-1"
-                        >
-                          <Users className="w-3 h-3" />
-                          Apps ({job.applications_count})
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleCopyPublicLink(job.id);
-                          }}
-                          className="gap-1 text-xs h-8"
-                          title="Copy public application link"
-                        >
-                          <Copy className="w-3 h-3" />
-                        </Button>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={() => handleCloseJob(job.id)}>
-                              <XCircle className="h-4 w-4 mr-2" />
-                              Close Job Posting
-                            </DropdownMenuItem>
-                            <DropdownMenuItem 
-                              onClick={() => handleDeleteJob(job.id)}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete Permanently
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                  </CardHeader>
+                  <CardContent className="space-y-3 flex-1 flex flex-col">
+                    <p className="text-sm text-muted-foreground break-words line-clamp-2 flex-shrink-0">
+                      {job.description}
+                    </p>
+                    
+                    <div className="flex flex-wrap gap-2 sm:gap-3 text-xs sm:text-sm text-muted-foreground flex-shrink-0">
+                      {job.location && (
+                        <div className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                          <span className="truncate max-w-[100px]">{job.location}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1">
+                        <DollarSign className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                        <span className="truncate max-w-[120px]">{getCompensationDisplay(job)}</span>
                       </div>
-                    ) : (
+                      {job.is_task_based && (
+                        <Badge variant="outline" className="gap-1 text-xs h-5">
+                          <CheckCircle className="w-3 h-3" />
+                          Task-Based
+                        </Badge>
+                      )}
+                    </div>
+
+                    <div className="flex-1" />
+
+                    <div className="flex flex-col gap-2 pt-2 mt-auto">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setSelectedJobForDetails(job)}
+                        className="w-full justify-center gap-1 text-xs h-8"
+                      >
+                        <Eye className="w-4 h-4" />
+                        View Details
+                      </Button>
+                      
                       <div className="flex items-center justify-between w-full gap-2">
                         <div className="flex items-center gap-1 text-xs text-muted-foreground">
                           <Users className="w-3 h-3" />
@@ -1247,112 +1646,26 @@ const displayedJobs = filteredJobs.slice(0, displayCount);
                           )
                         )}
                       </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))
-        )}
-      </div>
-
-      {/* Load More Button */}
-      {hasMoreJobs && (
-        <div className="flex justify-center pt-4">
-          <Button
-            variant="outline"
-            onClick={() => setDisplayCount(prev => prev + 6)}
-            className="gap-2"
-          >
-            Load More Jobs ({filteredJobs.length - displayCount} remaining)
-          </Button>
-        </div>
-      )}
-
-      {/* Closed Jobs Section (Company Owners Only) */}
-      {isCompanyUser && closedJobs.length > 0 && (
-        <Card className="tech-card border-0">
-          <CardHeader>
-            <div className="flex items-center gap-2">
-              <XCircle className="h-5 w-5 text-muted-foreground" />
-              <CardTitle>Closed Job Postings</CardTitle>
-            </div>
-            <CardDescription>Previously closed positions that can be reopened</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 md:grid-cols-2">
-              {closedJobs.map((job) => (
-                <Card key={job.id} className="tech-card border-0 opacity-60 hover:opacity-100 transition-opacity">
-                  <CardHeader>
-                    <div className="flex items-start gap-3 sm:gap-4">
-                      {job.companies?.logo_url && (
-                        <img 
-                          src={job.companies.logo_url} 
-                          alt={job.companies.name} 
-                          className="w-10 h-10 sm:w-12 sm:h-12 rounded object-cover flex-shrink-0"
-                        />
-                      )}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex-1 min-w-0">
-                            <CardTitle className="text-base sm:text-lg break-words">{job.title}</CardTitle>
-                            <CardDescription className="text-sm truncate">{job.companies?.name}</CardDescription>
-                          </div>
-                          <Badge variant="destructive">CLOSED</Badge>
-                        </div>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <p className="text-sm text-muted-foreground line-clamp-2">{job.description}</p>
-                    
-                    <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                      {job.location && (
-                        <div className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          <span className="truncate">{job.location}</span>
-                        </div>
-                      )}
-                      <div className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        {job.applications_count} applications received
-                      </div>
-                    </div>
-
-                    <div className="flex gap-2 pt-2">
-                      <Button
-                        onClick={() => handleReopenJob(job.id)}
-                        variant="outline"
-                        size="sm"
-                        className="flex-1"
-                      >
-                        Reopen Job Posting
-                      </Button>
-                      <Button
-                        onClick={() => handleViewApplications(job.id)}
-                        variant="outline"
-                        size="sm"
-                        className="gap-1"
-                      >
-                        <Eye className="w-3 h-3" />
-                        View Apps
-                      </Button>
-                      <Button
-                        onClick={() => handleDeleteJob(job.id)}
-                        variant="destructive"
-                        size="sm"
-                        className="gap-1"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                        Delete
-                      </Button>
                     </div>
                   </CardContent>
                 </Card>
-              ))}
+              ))
+            )}
+          </div>
+
+          {/* Load More Button */}
+          {hasMoreJobs && (
+            <div className="flex justify-center pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setDisplayCount(prev => prev + 6)}
+                className="gap-2"
+              >
+                Load More Jobs ({filteredJobs.length - displayCount} remaining)
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </div>
       )}
 
       {/* Applications Dialog */}
