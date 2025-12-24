@@ -90,9 +90,8 @@ export default function UnifiedJobsBoard() {
   const [appliedJobs, setAppliedJobs] = useState<Set<string>>(new Set());
   const [closedJobs, setClosedJobs] = useState<Job[]>([]);
   const [closeJobId, setCloseJobId] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
+const [searchQuery, setSearchQuery] = useState('');
   const [displayCount, setDisplayCount] = useState(6);
-  const [activeSubTab, setActiveSubTab] = useState<'opportunities' | 'posted'>('opportunities');
   const [selectedJobForDetails, setSelectedJobForDetails] = useState<Job | null>(null);
   
   // Apply dialog state
@@ -114,36 +113,19 @@ export default function UnifiedJobsBoard() {
     );
     
     // Filter by search query
-    let filtered = uniqueJobs;
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(job =>
-        job.title.toLowerCase().includes(query) ||
-        job.companies?.name?.toLowerCase().includes(query) ||
-        job.description?.toLowerCase().includes(query) ||
-        job.location?.toLowerCase().includes(query)
-      );
-    }
+    if (!searchQuery.trim()) return uniqueJobs;
     
-    return filtered;
+    const query = searchQuery.toLowerCase();
+    return uniqueJobs.filter(job =>
+      job.title.toLowerCase().includes(query) ||
+      job.companies?.name?.toLowerCase().includes(query) ||
+      job.description?.toLowerCase().includes(query) ||
+      job.location?.toLowerCase().includes(query)
+    );
   }, [jobs, searchQuery]);
 
-  // Jobs posted by the current user's company (for "My Posted Jobs" tab)
-  const myPostedJobs = useMemo(() => {
-    if (!userCompanyId) return [];
-    return filteredJobs.filter(job => job.companies?.id === userCompanyId);
-  }, [filteredJobs, userCompanyId]);
-
-  // Jobs from other companies (for "Job Opportunities" tab) - excludes user's own jobs
-  const opportunityJobs = useMemo(() => {
-    if (!userCompanyId) return filteredJobs;
-    return filteredJobs.filter(job => job.companies?.id !== userCompanyId);
-  }, [filteredJobs, userCompanyId]);
-
-  // Choose which jobs to display based on active sub-tab
-  const currentJobsList = activeSubTab === 'posted' && userCompanyId ? myPostedJobs : opportunityJobs;
-  const displayedJobs = currentJobsList.slice(0, displayCount);
-  const hasMoreJobs = displayCount < currentJobsList.length;
+const displayedJobs = filteredJobs.slice(0, displayCount);
+  const hasMoreJobs = displayCount < filteredJobs.length;
 
   // Fetch jobs for everyone (including guests) - RLS allows public viewing of active jobs
   useEffect(() => {
@@ -1132,67 +1114,13 @@ export default function UnifiedJobsBoard() {
         </CardHeader>
       </Card>
 
-      {/* Sub-tabs for company users */}
-      {isCompanyUser && (
-        <Tabs value={activeSubTab} onValueChange={(v) => {
-          setActiveSubTab(v as 'opportunities' | 'posted');
-          setDisplayCount(6); // Reset pagination when switching tabs
-        }}>
-          <TabsList className="grid w-full grid-cols-2 max-w-md">
-            <TabsTrigger value="opportunities" className="gap-2">
-              <Search className="h-4 w-4" />
-              Job Opportunities
-            </TabsTrigger>
-            <TabsTrigger value="posted" className="gap-2">
-              <Briefcase className="h-4 w-4" />
-              My Posted Jobs
-              {myPostedJobs.length > 0 && (
-                <Badge variant="secondary" className="ml-1 h-5 px-1.5">
-                  {myPostedJobs.length}
-                </Badge>
-              )}
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      )}
-
-      {/* Stats for My Posted Jobs tab */}
-      {isCompanyUser && activeSubTab === 'posted' && (
-        <Card className="tech-card border-0">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-6 text-sm">
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-green-500" />
-                <span className="text-muted-foreground">Active:</span>
-                <span className="font-medium">{myPostedJobs.length}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-2 h-2 rounded-full bg-red-500" />
-                <span className="text-muted-foreground">Closed:</span>
-                <span className="font-medium">{closedJobs.length}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="text-muted-foreground">Total Applications:</span>
-                <span className="font-medium">
-                  {myPostedJobs.reduce((acc, job) => acc + job.applications_count, 0) + 
-                   closedJobs.reduce((acc, job) => acc + job.applications_count, 0)}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       {/* Search Input */}
       <Card className="tech-card border-0">
         <CardContent className="p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder={activeSubTab === 'posted' 
-                ? "Search your posted jobs..." 
-                : "Search jobs by title, company, location, or description..."}
+              placeholder="Search jobs by title, company, location, or description..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value);
@@ -1204,46 +1132,44 @@ export default function UnifiedJobsBoard() {
         </CardContent>
       </Card>
 
-      {/* Filters - only show for opportunities tab or non-company users */}
-      {(activeSubTab === 'opportunities' || !isCompanyUser) && (
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            variant={categoryFilter === 'all' ? 'default' : 'outline'}
-            onClick={() => setCategoryFilter('all')}
-          >
-            All Jobs
-          </Button>
-          <Button
-            variant={categoryFilter === 'full-time' ? 'default' : 'outline'}
-            onClick={() => setCategoryFilter('full-time')}
-          >
-            Full-Time
-          </Button>
-          <Button
-            variant={categoryFilter === 'part-time' ? 'default' : 'outline'}
-            onClick={() => setCategoryFilter('part-time')}
-          >
-            Part-Time
-          </Button>
-          <Button
-            variant={categoryFilter === 'contract' ? 'default' : 'outline'}
-            onClick={() => setCategoryFilter('contract')}
-          >
-            Contract
-          </Button>
-          <Button
-            variant={categoryFilter === 'internship' ? 'default' : 'outline'}
-            onClick={() => setCategoryFilter('internship')}
-          >
-            Internships
-          </Button>
-        </div>
-      )}
+      {/* Filters */}
+      <div className="flex gap-2 flex-wrap">
+        <Button
+          variant={categoryFilter === 'all' ? 'default' : 'outline'}
+          onClick={() => setCategoryFilter('all')}
+        >
+          All Jobs
+        </Button>
+        <Button
+          variant={categoryFilter === 'full-time' ? 'default' : 'outline'}
+          onClick={() => setCategoryFilter('full-time')}
+        >
+          Full-Time
+        </Button>
+        <Button
+          variant={categoryFilter === 'part-time' ? 'default' : 'outline'}
+          onClick={() => setCategoryFilter('part-time')}
+        >
+          Part-Time
+        </Button>
+        <Button
+          variant={categoryFilter === 'contract' ? 'default' : 'outline'}
+          onClick={() => setCategoryFilter('contract')}
+        >
+          Contract
+        </Button>
+        <Button
+          variant={categoryFilter === 'internship' ? 'default' : 'outline'}
+          onClick={() => setCategoryFilter('internship')}
+        >
+          Internships
+        </Button>
+      </div>
 
       {/* Results count */}
-      {currentJobsList.length > 0 && (
+      {filteredJobs.length > 0 && (
         <p className="text-sm text-muted-foreground">
-          Showing {displayedJobs.length} of {currentJobsList.length} {activeSubTab === 'posted' ? 'posted jobs' : 'jobs'}
+          Showing {displayedJobs.length} of {filteredJobs.length} jobs
         </p>
       )}
 
@@ -1253,11 +1179,7 @@ export default function UnifiedJobsBoard() {
           <Card className="col-span-full tech-card border-0">
             <CardContent className="py-8">
               <p className="text-center text-muted-foreground">
-                {searchQuery 
-                  ? 'No jobs match your search' 
-                  : activeSubTab === 'posted' 
-                    ? "You haven't posted any jobs yet. Click 'Post Job' to create your first listing."
-                    : 'No job opportunities available'}
+                {searchQuery ? 'No jobs match your search' : 'No jobs found'}
               </p>
             </CardContent>
           </Card>
@@ -1427,13 +1349,13 @@ export default function UnifiedJobsBoard() {
             onClick={() => setDisplayCount(prev => prev + 6)}
             className="gap-2"
           >
-            Load More {activeSubTab === 'posted' ? 'Posted Jobs' : 'Jobs'} ({currentJobsList.length - displayCount} remaining)
+            Load More Jobs ({filteredJobs.length - displayCount} remaining)
           </Button>
         </div>
       )}
 
-      {/* Closed Jobs Section (Company Owners Only - only in "posted" tab) */}
-      {isCompanyUser && activeSubTab === 'posted' && closedJobs.length > 0 && (
+      {/* Closed Jobs Section (Company Owners Only) */}
+      {isCompanyUser && closedJobs.length > 0 && (
         <Card className="tech-card border-0">
           <CardHeader>
             <div className="flex items-center gap-2">
