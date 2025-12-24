@@ -142,6 +142,8 @@ export default function ManageJobPosts() {
       .from('companies')
       .select('id')
       .eq('user_id', user.id)
+      .order('created_at', { ascending: true })
+      .limit(1)
       .maybeSingle();
       
     if (data) {
@@ -157,6 +159,8 @@ export default function ManageJobPosts() {
         .from('companies')
         .select('id')
         .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
+        .limit(1)
         .maybeSingle();
 
       if (!companyData) return;
