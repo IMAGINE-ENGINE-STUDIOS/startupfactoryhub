@@ -1401,6 +1401,69 @@ export type Database = {
         }
         Relationships: []
       }
+      corporate_partners: {
+        Row: {
+          company_name: string
+          company_size: string | null
+          company_website: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          is_featured: boolean | null
+          logo_url: string | null
+          message: string | null
+          notes: string | null
+          partnership_interests: string[] | null
+          partnership_type: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          company_name: string
+          company_size?: string | null
+          company_website?: string | null
+          contact_email: string
+          contact_name: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          is_featured?: boolean | null
+          logo_url?: string | null
+          message?: string | null
+          notes?: string | null
+          partnership_interests?: string[] | null
+          partnership_type: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          company_size?: string | null
+          company_website?: string | null
+          contact_email?: string
+          contact_name?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          is_featured?: boolean | null
+          logo_url?: string | null
+          message?: string | null
+          notes?: string | null
+          partnership_interests?: string[] | null
+          partnership_type?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       course_completions: {
         Row: {
           completed_at: string | null
