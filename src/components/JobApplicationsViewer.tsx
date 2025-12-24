@@ -40,7 +40,9 @@ export const JobApplicationsViewer = () => {
         .from('companies')
         .select('id')
         .eq('user_id', user.id)
-        .single();
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
 
       if (!company) {
         setLoading(false);

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useRealtime } from '@/hooks/useRealtime';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -110,6 +111,29 @@ export default function ManageJobPosts() {
     }
   }, [user]);
 
+  // Realtime subscriptions for applications
+  useRealtime({
+    table: 'job_applications',
+    onInsert: () => {
+      fetchJobs();
+      if (selectedJobId) handleViewApplications(selectedJobId);
+    },
+    onUpdate: () => {
+      if (selectedJobId) handleViewApplications(selectedJobId);
+    },
+  });
+
+  useRealtime({
+    table: 'public_job_applications',
+    onInsert: () => {
+      fetchJobs();
+      if (selectedJobId) handleViewApplications(selectedJobId);
+    },
+    onUpdate: () => {
+      if (selectedJobId) handleViewApplications(selectedJobId);
+    },
+  });
+
   const fetchJobs = async () => {
     setLoading(true);
     try {
@@ -192,30 +216,41 @@ export default function ManageJobPosts() {
     setShowApplicationsDialog(true);
     
     try {
-      const { data, error } = await supabase
+      // Fetch internal applications
+      const { data: internalData, error: internalError } = await supabase
         .from('job_applications')
         .select('*')
         .eq('job_id', jobId)
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (internalError) throw internalError;
       
-      // Fetch profiles for user IDs
-      const userIds = (data || []).filter(a => a.user_id).map(a => a.user_id!);
+      // Fetch external applications
+      const { data: externalData, error: externalError } = await supabase
+        .from('public_job_applications')
+        .select('*')
+        .eq('job_id', jobId)
+        .order('created_at', { ascending: false });
+
+      if (externalError) throw externalError;
+      
+      // Fetch profiles for internal applications
+      const userIds = (internalData || []).filter(a => a.user_id).map(a => a.user_id!);
       let profilesMap: Record<string, { full_name: string | null; email: string | null; avatar_url: string | null }> = {};
       
       if (userIds.length > 0) {
         const { data: profiles } = await supabase
           .from('profiles')
-          .select('user_id, full_name, avatar_url')
+          .select('user_id, full_name, avatar_url, email')
           .in('user_id', userIds);
         
         profiles?.forEach(p => {
-          profilesMap[p.user_id] = { full_name: p.full_name, email: null, avatar_url: p.avatar_url };
+          profilesMap[p.user_id] = { full_name: p.full_name, email: p.email, avatar_url: p.avatar_url };
         });
       }
       
-      const appsWithProfiles: JobApplication[] = (data || []).map(app => ({
+      // Format internal applications
+      const internalApps: JobApplication[] = (internalData || []).map(app => ({
         id: app.id,
         status: app.status,
         created_at: app.created_at,
@@ -229,7 +264,27 @@ export default function ManageJobPosts() {
         profiles: app.user_id ? profilesMap[app.user_id] || null : null,
       }));
       
-      setApplications(appsWithProfiles);
+      // Format external applications
+      const externalApps: JobApplication[] = (externalData || []).map(app => ({
+        id: app.id,
+        status: app.status,
+        created_at: app.created_at,
+        applicant_name: app.applicant_name,
+        applicant_email: app.applicant_email,
+        applicant_phone: app.applicant_phone,
+        cover_letter: app.cover_letter,
+        resume_url: app.resume_url,
+        user_id: null,
+        application_type: 'external' as const,
+        profiles: null,
+      }));
+      
+      // Merge and sort by created_at
+      const allApps = [...internalApps, ...externalApps].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      
+      setApplications(allApps);
     } catch (error) {
       console.error('Error fetching applications:', error);
       toast({
@@ -244,16 +299,34 @@ export default function ManageJobPosts() {
 
   const handleUpdateApplicationStatus = async (applicationId: string, status: string) => {
     setUpdatingApplicationId(applicationId);
+    
+    // Find the application to determine its type
+    const app = applications.find(a => a.id === applicationId);
+    if (!app) {
+      setUpdatingApplicationId(null);
+      return;
+    }
+    
+    const table = app.application_type === 'internal' ? 'job_applications' : 'public_job_applications';
+    
     try {
       const { error } = await supabase
-        .from('job_applications')
+        .from(table)
         .update({ status })
         .eq('id', applicationId);
 
       if (error) throw error;
 
+      // If accepting an external application for a task-based job, create invitation
+      if (status === 'accepted' && app.application_type === 'external' && app.applicant_email) {
+        const job = jobs.find(j => j.id === selectedJobId) || closedJobs.find(j => j.id === selectedJobId);
+        if (job?.is_task_based) {
+          await createInvitation(applicationId, app.applicant_email);
+        }
+      }
+
       setApplications(prev => 
-        prev.map(app => app.id === applicationId ? { ...app, status } : app)
+        prev.map(a => a.id === applicationId ? { ...a, status } : a)
       );
 
       toast({
@@ -269,6 +342,36 @@ export default function ManageJobPosts() {
       });
     } finally {
       setUpdatingApplicationId(null);
+    }
+  };
+
+  const createInvitation = async (applicationId: string, email: string) => {
+    try {
+      const token = crypto.randomUUID();
+      const expiresAt = new Date();
+      expiresAt.setHours(expiresAt.getHours() + 48);
+
+      const { error } = await supabase
+        .from('application_invitations')
+        .insert({
+          application_id: applicationId,
+          applicant_email: email,
+          invitation_token: token,
+          expires_at: expiresAt.toISOString(),
+        });
+
+      if (error) throw error;
+
+      await supabase.functions.invoke('send-application-invitation', {
+        body: { email, token, applicationId }
+      });
+
+      toast({
+        title: 'Invitation Sent',
+        description: 'An invitation email has been sent to the applicant.',
+      });
+    } catch (error) {
+      console.error('Error creating invitation:', error);
     }
   };
 
