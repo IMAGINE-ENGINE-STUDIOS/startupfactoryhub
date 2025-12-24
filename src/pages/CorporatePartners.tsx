@@ -89,6 +89,16 @@ const FEATURED_PARTNERS = [
     name: "Advantary Capital Partners",
     logo: "https://advantary.com/wp-content/uploads/2021/06/advantary-logo.png",
     tier: "Investment Partner"
+  },
+  {
+    name: "Hacked Earth",
+    logo: "https://hackedearth.com/wp-content/uploads/2021/01/hacked-earth-logo.png",
+    tier: "Technology Partner"
+  },
+  {
+    name: "Duquesne University",
+    logo: "https://www.duq.edu/assets/images/duquesne-university-logo.svg",
+    tier: "Academic Partner"
   }
 ];
 
