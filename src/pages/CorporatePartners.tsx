@@ -124,6 +124,16 @@ const FEATURED_PARTNERS = [
     name: "SumUp",
     logo: "https://www.sumup.com/favicon.ico",
     tier: "Payments Partner"
+  },
+  {
+    name: "Connectd",
+    logo: "https://connectd.com/wp-content/uploads/2021/01/connectd-logo.png",
+    tier: "Investment Partner"
+  },
+  {
+    name: "Regus",
+    logo: "https://www.regus.com/favicon.ico",
+    tier: "Workspace Partner"
   }
 ];
 
