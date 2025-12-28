@@ -112,8 +112,8 @@ export default function JoinAsMentor() {
       }
     }
 
-    toast.success("Welcome to the Mentor Program! Please check your email to verify your account.");
-    navigate("/auth");
+      toast.success("Welcome to the Mentor Program! Your account has been created successfully.");
+      navigate("/mentor-dashboard");
     setLoading(false);
   };
 

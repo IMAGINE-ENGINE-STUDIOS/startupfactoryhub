@@ -112,8 +112,8 @@ export default function JoinAsAdvisor() {
       }
     }
 
-    toast.success("Welcome to the Advisor Program! Please check your email to verify your account.");
-    navigate("/auth");
+      toast.success("Welcome to the Advisor Program! Your account has been created successfully.");
+      navigate("/advisor-dashboard");
     setLoading(false);
   };
 
