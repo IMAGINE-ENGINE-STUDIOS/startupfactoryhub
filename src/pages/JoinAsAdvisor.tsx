@@ -107,6 +107,7 @@ export default function JoinAsAdvisor() {
           location,
           website: website || null,
           linkedin_url: website?.includes('linkedin') ? website : null,
+          industry: industry || null,
         })
         .eq('user_id', user.id);
 
@@ -128,6 +129,23 @@ export default function JoinAsAdvisor() {
 
         if (skillsError) {
           console.error('Error saving advisor skills:', skillsError);
+        }
+      }
+
+      // Save user goals to user_goals table
+      if (goals.length > 0) {
+        const goalsToInsert = goals.map(goalId => ({
+          user_id: user.id,
+          goal_id: goalId,
+          goal_type: 'advisor',
+        }));
+
+        const { error: goalsError } = await supabase
+          .from('user_goals')
+          .insert(goalsToInsert);
+
+        if (goalsError) {
+          console.error('Error saving user goals:', goalsError);
         }
       }
     }
