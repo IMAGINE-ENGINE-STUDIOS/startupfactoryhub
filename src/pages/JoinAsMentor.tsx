@@ -97,23 +97,39 @@ export default function JoinAsMentor() {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (user) {
-      // Update the profile with additional data
+      // Update the profile with additional data matching the profiles table schema
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
+          full_name: fullName,
+          email,
           bio,
           location,
-          website,
+          website: website || null,
+          linkedin_url: website?.includes('linkedin') ? website : null,
         })
         .eq('user_id', user.id);
 
       if (profileError) {
         console.error('Error updating profile:', profileError);
       }
+
+      // Create/update mentor_profiles with expertise areas (skills)
+      const { error: mentorProfileError } = await supabase
+        .from('mentor_profiles')
+        .upsert({
+          user_id: user.id,
+          expertise_areas: skills.length > 0 ? skills : null,
+          is_accepting_mentees: true,
+        }, { onConflict: 'user_id' });
+
+      if (mentorProfileError) {
+        console.error('Error updating mentor profile:', mentorProfileError);
+      }
     }
 
-      toast.success("Welcome to the Mentor Program! Your account has been created successfully.");
-      navigate("/mentor-dashboard");
+    toast.success("Welcome to the Mentor Program! Your account has been created successfully.");
+    navigate("/mentor-dashboard");
     setLoading(false);
   };
 

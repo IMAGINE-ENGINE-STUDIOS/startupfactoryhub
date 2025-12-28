@@ -97,23 +97,43 @@ export default function JoinAsAdvisor() {
     const { data: { user } } = await supabase.auth.getUser();
     
     if (user) {
-      // Update the profile with additional data
+      // Update the profile with additional data matching the profiles table schema
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
+          full_name: fullName,
+          email,
           bio,
           location,
-          website,
+          website: website || null,
+          linkedin_url: website?.includes('linkedin') ? website : null,
         })
         .eq('user_id', user.id);
 
       if (profileError) {
         console.error('Error updating profile:', profileError);
       }
+
+      // Save advisor skills to advisor_skills table
+      if (skills.length > 0) {
+        const skillsToInsert = skills.map(skill => ({
+          user_id: user.id,
+          skill_name: skill,
+          category: industry || null,
+        }));
+
+        const { error: skillsError } = await supabase
+          .from('advisor_skills')
+          .insert(skillsToInsert);
+
+        if (skillsError) {
+          console.error('Error saving advisor skills:', skillsError);
+        }
+      }
     }
 
-      toast.success("Welcome to the Advisor Program! Your account has been created successfully.");
-      navigate("/advisor-dashboard");
+    toast.success("Welcome to the Advisor Program! Your account has been created successfully.");
+    navigate("/advisor-dashboard");
     setLoading(false);
   };
 
