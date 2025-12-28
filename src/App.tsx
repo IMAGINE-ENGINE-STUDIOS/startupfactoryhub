@@ -33,6 +33,8 @@ const PublicCohortApplication = lazy(() => import("./pages/PublicCohortApplicati
 const Marketing = lazy(() => import("./pages/Marketing"));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const CorporatePartners = lazy(() => import("./pages/CorporatePartners"));
+const JoinAsMentor = lazy(() => import("./pages/JoinAsMentor"));
+const JoinAsAdvisor = lazy(() => import("./pages/JoinAsAdvisor"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -87,6 +89,8 @@ const App = () => (
                     <Route path="/marketing" element={<Marketing />} />
                     <Route path="/admin" element={<AdminDashboard />} />
                     <Route path="/partners" element={<CorporatePartners />} />
+                    <Route path="/join/mentor" element={<JoinAsMentor />} />
+                    <Route path="/join/advisor" element={<JoinAsAdvisor />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
