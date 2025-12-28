@@ -3575,6 +3575,7 @@ export type Database = {
           following_count: number | null
           full_name: string | null
           id: string
+          industry: string | null
           is_online: boolean | null
           last_profile_update: string | null
           last_seen: string | null
@@ -3596,6 +3597,7 @@ export type Database = {
           following_count?: number | null
           full_name?: string | null
           id?: string
+          industry?: string | null
           is_online?: boolean | null
           last_profile_update?: string | null
           last_seen?: string | null
@@ -3617,6 +3619,7 @@ export type Database = {
           following_count?: number | null
           full_name?: string | null
           id?: string
+          industry?: string | null
           is_online?: boolean | null
           last_profile_update?: string | null
           last_seen?: string | null
@@ -4614,6 +4617,30 @@ export type Database = {
           max_members?: number | null
           name?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_goals: {
+        Row: {
+          created_at: string | null
+          goal_id: string
+          goal_type: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          goal_id: string
+          goal_type?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          goal_id?: string
+          goal_type?: string
+          id?: string
+          user_id?: string
         }
         Relationships: []
       }
