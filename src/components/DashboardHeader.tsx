@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import RecommendationPopup from "@/components/RecommendationPopup";
-
+import { StartupPerksButton } from "@/components/StartupPerksButton";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
@@ -80,7 +80,7 @@ export function DashboardHeader() {
           </PopoverContent>
         </Popover>
         
-        
+        <StartupPerksButton />
         
         <div className="h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center">
           <ThemeToggle />
