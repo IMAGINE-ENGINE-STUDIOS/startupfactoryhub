@@ -30,7 +30,8 @@ import {
   MapPin,
   Globe,
   MessageSquare,
-  Link2
+  Link2,
+  Download
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -237,6 +238,56 @@ const UsersManagement = () => {
     });
   };
 
+  const handleExportCSV = () => {
+    if (filteredUsers.length === 0) {
+      toast({
+        title: "No data to export",
+        description: "There are no users matching your current filters.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    const headers = ['Full Name', 'Email', 'Role', 'Status', 'Location', 'Website', 'LinkedIn', 'Bio', 'Joined', 'Last Seen'];
+    
+    const escapeCSV = (value: string) => {
+      if (!value) return '';
+      const escaped = value.replace(/"/g, '""');
+      return escaped.includes(',') || escaped.includes('\n') || escaped.includes('"') 
+        ? `"${escaped}"` 
+        : escaped;
+    };
+
+    const rows = filteredUsers.map(user => [
+      escapeCSV(user.full_name || ''),
+      escapeCSV(user.email || ''),
+      escapeCSV(user.role || 'No role'),
+      user.is_online ? 'Online' : 'Offline',
+      escapeCSV(user.location || ''),
+      escapeCSV(user.website || ''),
+      escapeCSV(user.linkedin_url || ''),
+      escapeCSV(user.bio || ''),
+      format(new Date(user.created_at), 'yyyy-MM-dd'),
+      user.last_seen ? format(new Date(user.last_seen), 'yyyy-MM-dd HH:mm') : 'Never'
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `users_export_${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast({
+      title: "Export successful",
+      description: `Exported ${filteredUsers.length} users to CSV.`
+    });
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -276,6 +327,10 @@ const UsersManagement = () => {
                 <SelectItem value="admin">Admin</SelectItem>
               </SelectContent>
             </Select>
+            <Button variant="outline" onClick={handleExportCSV} className="tech-card border-0">
+              <Download className="h-4 w-4 mr-2" />
+              Export CSV ({filteredUsers.length})
+            </Button>
             <Button variant="outline" onClick={fetchUsers} className="tech-card border-0">
               <RefreshCw className="h-4 w-4 mr-2" />
               Refresh
