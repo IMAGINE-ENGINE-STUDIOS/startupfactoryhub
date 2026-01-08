@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Clock, MapPin, Search, Plus, X, Play, Pause, RotateCcw, Timer } from "lucide-react";
+import { Clock, MapPin, Search, Plus, X, Play, Pause, RotateCcw, Timer, RefreshCw, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,24 +19,86 @@ import {
   getCountryForTimezone,
   getFlagForTimezone,
   TimezoneInfo,
+  detectRealLocation,
+  getCachedLocation,
+  setCachedLocation,
+  GeoLocation,
 } from "@/lib/timezoneUtils";
 
 const STORAGE_KEY = "globalClock_pinnedTimezones";
 
 export function GlobalClock() {
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [userTimezone] = useState(getUserTimezone());
+  const [userTimezone, setUserTimezone] = useState(getUserTimezone());
   const [userLocation, setUserLocation] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<TimezoneInfo[]>([]);
   const [pinnedTimezones, setPinnedTimezones] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   
+  // Geolocation state
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationSynced, setLocationSynced] = useState(false);
+  const [geoLocation, setGeoLocation] = useState<GeoLocation | null>(null);
+  
   // Timer state
   const [timerMode, setTimerMode] = useState<'stopwatch' | 'countdown'>('stopwatch');
   const [timerValue, setTimerValue] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [countdownPreset, setCountdownPreset] = useState(0);
+
+  // Detect real location
+  const detectLocation = useCallback(async () => {
+    setIsLocating(true);
+    
+    // Try cached location first
+    const cached = getCachedLocation();
+    if (cached) {
+      setGeoLocation(cached);
+      if (cached.timezone) {
+        setUserTimezone(cached.timezone);
+      }
+      if (cached.city && cached.country) {
+        setUserLocation(`${cached.city}, ${cached.country}`);
+      }
+      setLocationSynced(true);
+    }
+    
+    // Then try real geolocation
+    const realLocation = await detectRealLocation();
+    setIsLocating(false);
+    
+    if (realLocation) {
+      setGeoLocation(realLocation);
+      setCachedLocation(realLocation);
+      
+      if (realLocation.timezone) {
+        setUserTimezone(realLocation.timezone);
+      }
+      
+      if (realLocation.city && realLocation.country) {
+        setUserLocation(`${realLocation.city}, ${realLocation.country}`);
+      } else if (realLocation.city) {
+        setUserLocation(realLocation.city);
+      } else {
+        const { city } = parseTimezone(realLocation.timezone || userTimezone);
+        const country = getCountryForTimezone(realLocation.timezone || userTimezone);
+        setUserLocation(`${city}, ${country}`);
+      }
+      
+      setLocationSynced(true);
+    } else if (!cached) {
+      const { city } = parseTimezone(userTimezone);
+      const country = getCountryForTimezone(userTimezone);
+      setUserLocation(`${city}, ${country}`);
+      setLocationSynced(false);
+    }
+  }, [userTimezone]);
+
+  // Initial location detection
+  useEffect(() => {
+    detectLocation();
+  }, [detectLocation]);
 
   // Load pinned timezones from localStorage
   useEffect(() => {
@@ -83,14 +145,7 @@ export function GlobalClock() {
     return () => clearInterval(interval);
   }, [isTimerRunning, timerMode]);
 
-  // Detect user location
-  useEffect(() => {
-    const { city } = parseTimezone(userTimezone);
-    const country = getCountryForTimezone(userTimezone);
-    setUserLocation(`${city}, ${country}`);
-  }, [userTimezone]);
-
-  // Search handler with debounce
+  // Search handler
   useEffect(() => {
     if (searchQuery.trim()) {
       const results = searchTimezones(searchQuery);
@@ -162,17 +217,22 @@ export function GlobalClock() {
           className="neon-glow hover:scale-105 transition-all duration-300 h-9 sm:h-10 px-2 sm:px-3 gap-1.5 sm:gap-2 group relative overflow-hidden"
           title="Global Clock & Timer"
         >
-          {/* Metallic border effect */}
           <div className="absolute inset-0 rounded-md bg-gradient-to-br from-amber-500/20 via-transparent to-slate-500/20 opacity-0 group-hover:opacity-100 transition-opacity" />
           
           <Clock className="h-4 w-4 text-amber-500 group-hover:text-amber-400 transition-colors" />
           <span className="font-mono text-xs sm:text-sm font-medium tabular-nums tracking-tight">
-            {formatTime(currentTime)}
+            {formatTime(currentTime, userTimezone)}
           </span>
           <span className="hidden sm:inline text-[10px] text-muted-foreground font-medium">
             {timezoneAbbr}
           </span>
-          <MapPin className="h-3 w-3 text-muted-foreground hidden lg:inline" />
+          {locationSynced ? (
+            <CheckCircle className="h-3 w-3 text-green-500 hidden lg:inline" />
+          ) : isLocating ? (
+            <RefreshCw className="h-3 w-3 text-muted-foreground animate-spin hidden lg:inline" />
+          ) : (
+            <MapPin className="h-3 w-3 text-muted-foreground hidden lg:inline" />
+          )}
         </Button>
       </PopoverTrigger>
       
@@ -186,15 +246,21 @@ export function GlobalClock() {
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(251,191,36,0.1),transparent_70%)]" />
           
           <div className="relative text-center">
-            <div className="text-xs text-amber-400/80 font-medium tracking-widest mb-1">
-              GLOBAL TIME
+            <div className="flex items-center justify-center gap-2 text-xs text-amber-400/80 font-medium tracking-widest mb-1">
+              <span>GLOBAL TIME</span>
+              {isLocating ? (
+                <RefreshCw className="h-3 w-3 animate-spin" />
+              ) : locationSynced ? (
+                <CheckCircle className="h-3 w-3 text-green-400" />
+              ) : (
+                <AlertCircle className="h-3 w-3 text-yellow-400" />
+              )}
             </div>
             
-            {/* Main clock display */}
             <div className="relative inline-flex items-center justify-center">
               <div className="absolute inset-0 -m-2 rounded-full border border-amber-500/30" />
               <div className="font-mono text-4xl font-bold tracking-tight tabular-nums text-slate-100">
-                {formatTime(currentTime)}
+                {formatTime(currentTime, userTimezone)}
               </div>
             </div>
             
@@ -204,9 +270,28 @@ export function GlobalClock() {
             
             <div className="mt-1 flex items-center justify-center gap-1.5 text-xs text-slate-400">
               <MapPin className="h-3 w-3" />
-              <span>{userLocation}</span>
+              <span>{userLocation || 'Detecting...'}</span>
               <span className="text-amber-400">({timezoneAbbr})</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5 ml-1 text-slate-400 hover:text-amber-400"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  detectLocation();
+                }}
+                disabled={isLocating}
+                title="Refresh location"
+              >
+                <RefreshCw className={`h-3 w-3 ${isLocating ? 'animate-spin' : ''}`} />
+              </Button>
             </div>
+            
+            {geoLocation?.latitude && geoLocation?.longitude && (
+              <div className="mt-1 text-[10px] text-slate-500">
+                {geoLocation.latitude.toFixed(4)}°, {geoLocation.longitude.toFixed(4)}°
+              </div>
+            )}
           </div>
         </div>
         
@@ -217,7 +302,6 @@ export function GlobalClock() {
           </TabsList>
           
           <TabsContent value="world" className="mt-0 p-3 space-y-3">
-            {/* Search input */}
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
@@ -228,7 +312,6 @@ export function GlobalClock() {
               />
             </div>
             
-            {/* Search results */}
             {searchResults.length > 0 && (
               <ScrollArea className="h-[140px] rounded-md border bg-muted/30">
                 <div className="p-1">
@@ -272,7 +355,6 @@ export function GlobalClock() {
               </ScrollArea>
             )}
             
-            {/* Pinned timezones */}
             {pinnedTimezones.length > 0 && (
               <div className="space-y-1.5">
                 <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -321,7 +403,6 @@ export function GlobalClock() {
           </TabsContent>
           
           <TabsContent value="timer" className="mt-0 p-3 space-y-4">
-            {/* Timer mode tabs */}
             <div className="flex gap-2">
               <Button
                 variant={timerMode === 'stopwatch' ? 'default' : 'outline'}
@@ -351,14 +432,12 @@ export function GlobalClock() {
               </Button>
             </div>
             
-            {/* Timer display */}
             <div className="text-center py-4">
               <div className="font-mono text-4xl font-bold tabular-nums">
                 {formatTimer(timerValue)}
               </div>
             </div>
             
-            {/* Countdown presets */}
             {timerMode === 'countdown' && !isTimerRunning && timerValue === 0 && (
               <div className="grid grid-cols-4 gap-2">
                 {[15, 30, 45, 60].map((mins) => (
@@ -375,7 +454,6 @@ export function GlobalClock() {
               </div>
             )}
             
-            {/* Timer controls */}
             <div className="flex justify-center gap-3">
               <Button
                 variant="outline"
