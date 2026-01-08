@@ -47,8 +47,8 @@ export function StartupPerksButton() {
   return <Popover>
       <PopoverTrigger asChild>
         <Button variant="ghost" size="icon" className="neon-glow hover:scale-110 transition-transform duration-300 relative h-9 w-9 sm:h-10 sm:w-10 group" title="StartupPerks - Exclusive Benefits">
-          <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500 group-hover:text-amber-400 animate-pulse" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full flex items-center justify-center">
+          <Gift className="h-4 w-4 sm:h-5 sm:w-5 text-purple-500 group-hover:text-purple-400 animate-pulse" />
+          <span className="absolute -top-1 -right-1 w-3 h-3 bg-purple-500 rounded-full flex items-center justify-center">
             <Sparkles className="h-2 w-2 text-white" />
           </span>
         </Button>
