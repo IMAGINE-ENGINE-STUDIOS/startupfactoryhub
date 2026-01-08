@@ -266,3 +266,167 @@ export function getPopularTimezones(): TimezoneInfo[] {
 export function getUserTimezone(): string {
   return Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
+
+export interface GeoLocation {
+  latitude: number;
+  longitude: number;
+  city?: string;
+  country?: string;
+  timezone?: string;
+}
+
+export async function detectRealLocation(): Promise<GeoLocation | null> {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) {
+      resolve(null);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        
+        // Get timezone and location details from coordinates
+        const locationData = await reverseGeocodeLocation(latitude, longitude);
+        
+        resolve({
+          latitude,
+          longitude,
+          ...locationData,
+        });
+      },
+      () => {
+        // Geolocation denied or failed
+        resolve(null);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 300000, // Cache for 5 minutes
+      }
+    );
+  });
+}
+
+async function reverseGeocodeLocation(lat: number, lng: number): Promise<{ city?: string; country?: string; timezone?: string }> {
+  try {
+    // Use OpenStreetMap Nominatim for reverse geocoding (free, no API key needed)
+    const response = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10`,
+      {
+        headers: {
+          'Accept-Language': 'en',
+          'User-Agent': 'StartupFactoryHub/1.0',
+        },
+      }
+    );
+    
+    if (!response.ok) {
+      return getTimezoneFromCoordinates(lat, lng);
+    }
+    
+    const data = await response.json();
+    const address = data.address || {};
+    
+    const city = address.city || address.town || address.village || address.municipality || address.county;
+    const country = address.country;
+    
+    // Find matching timezone from our known timezones
+    const timezone = findTimezoneForLocation(city, country, lat, lng);
+    
+    return { city, country, timezone };
+  } catch {
+    return getTimezoneFromCoordinates(lat, lng);
+  }
+}
+
+function getTimezoneFromCoordinates(lat: number, lng: number): { timezone?: string } {
+  // Approximate timezone from longitude
+  // Each 15° of longitude ≈ 1 hour offset from UTC
+  const offsetHours = Math.round(lng / 15);
+  
+  // Find a timezone that matches this offset
+  const allTimezones = getAllTimezones();
+  const now = new Date();
+  
+  for (const tzId of allTimezones) {
+    try {
+      const formatter = new Intl.DateTimeFormat('en-US', {
+        timeZone: tzId,
+        timeZoneName: 'shortOffset',
+      });
+      const parts = formatter.formatToParts(now);
+      const offsetPart = parts.find(p => p.type === 'timeZoneName');
+      if (offsetPart) {
+        const match = offsetPart.value.match(/GMT([+-]?\d+)?/);
+        if (match) {
+          const tzOffset = match[1] ? parseInt(match[1]) : 0;
+          if (tzOffset === offsetHours) {
+            return { timezone: tzId };
+          }
+        }
+      }
+    } catch {
+      continue;
+    }
+  }
+  
+  return { timezone: getUserTimezone() };
+}
+
+function findTimezoneForLocation(city?: string, country?: string, lat?: number, lng?: number): string {
+  // Try to find exact match in our regionToCountry mapping
+  const allTimezones = getAllTimezones();
+  
+  if (city) {
+    const normalizedCity = city.toLowerCase().replace(/\s+/g, '_');
+    for (const tzId of allTimezones) {
+      if (tzId.toLowerCase().includes(normalizedCity)) {
+        return tzId;
+      }
+    }
+  }
+  
+  // Try country match
+  if (country) {
+    for (const [tzId, tzCountry] of Object.entries(regionToCountry)) {
+      if (tzCountry.toLowerCase() === country.toLowerCase()) {
+        return tzId;
+      }
+    }
+  }
+  
+  // Fallback to coordinate-based
+  if (lat !== undefined && lng !== undefined) {
+    return getTimezoneFromCoordinates(lat, lng).timezone || getUserTimezone();
+  }
+  
+  return getUserTimezone();
+}
+
+export function getCachedLocation(): GeoLocation | null {
+  try {
+    const cached = localStorage.getItem('globalClock_location');
+    if (cached) {
+      const data = JSON.parse(cached);
+      // Check if cache is less than 1 hour old
+      if (Date.now() - data.timestamp < 3600000) {
+        return data.location;
+      }
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return null;
+}
+
+export function setCachedLocation(location: GeoLocation): void {
+  try {
+    localStorage.setItem('globalClock_location', JSON.stringify({
+      location,
+      timestamp: Date.now(),
+    }));
+  } catch {
+    // Ignore storage errors
+  }
+}
