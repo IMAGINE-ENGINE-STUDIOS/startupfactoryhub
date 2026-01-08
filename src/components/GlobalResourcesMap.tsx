@@ -552,10 +552,10 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
             'interpolate',
             ['linear'],
             ['zoom'],
-            0, 0.4,
-            5, 0.6,
-            10, 0.8,
-            15, 1.0
+            0, 0.8,
+            5, 0.9,
+            10, 1.0,
+            15, 1.2
           ],
           'icon-anchor': 'bottom',
           'icon-allow-overlap': true,
