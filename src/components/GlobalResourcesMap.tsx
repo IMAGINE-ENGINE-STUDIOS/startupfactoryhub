@@ -692,6 +692,19 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     return null;
   }, []);
 
+  // Clear stale geocoding cache entries for resources that now have coordinates
+  useEffect(() => {
+    if (!resources) return;
+    
+    resources.forEach(r => {
+      if (r.latitude !== null && r.latitude !== undefined && 
+          r.longitude !== null && r.longitude !== undefined) {
+        // Resource has actual coordinates - remove from geocoding cache
+        geocodedCoordsRef.current.delete(r.id);
+      }
+    });
+  }, [resources]);
+
   useEffect(() => {
     if (!map.current || !resources) return;
 
@@ -699,10 +712,14 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     markers.current.forEach(marker => marker.remove());
     markers.current = [];
 
-    // Filter resources for display
-    const resourcesWithCoords = resources.filter(r => r.latitude && r.longitude);
+    // Filter resources for display - use explicit null/undefined checks
+    const hasValidCoordinates = (r: Resource) => 
+      r.latitude !== null && r.latitude !== undefined && 
+      r.longitude !== null && r.longitude !== undefined;
+    
+    const resourcesWithCoords = resources.filter(hasValidCoordinates);
     const resourcesWithCityOnly = resources.filter(r => 
-      (!r.latitude || !r.longitude) && 
+      !hasValidCoordinates(r) && 
       (r.city || r.country) && 
       r.location_type !== 'online'
     );
@@ -712,11 +729,13 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       const newGeocodedMap = new Map(geocodedCoordsRef.current);
       
       for (const resource of resourcesWithCityOnly) {
-        if (!newGeocodedMap.has(resource.id)) {
-          const coords = await geocodeCity(resource);
-          if (coords) {
-            newGeocodedMap.set(resource.id, coords);
-          }
+        // Skip if already geocoded or if resource now has coordinates
+        if (newGeocodedMap.has(resource.id) || hasValidCoordinates(resource)) {
+          continue;
+        }
+        const coords = await geocodeCity(resource);
+        if (coords) {
+          newGeocodedMap.set(resource.id, coords);
         }
       }
       
