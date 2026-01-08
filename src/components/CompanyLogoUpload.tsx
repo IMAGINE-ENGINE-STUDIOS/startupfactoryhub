@@ -110,56 +110,65 @@ export default function CompanyLogoUpload({
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center space-x-4">
-        <div className="relative group">
-          <div className="w-24 h-24 rounded-lg border-2 border-dashed border-border flex items-center justify-center bg-accent/5 overflow-hidden">
-            {logoUrl ? (
-              <img src={logoUrl} alt="Company logo" className="w-full h-full object-contain" />
-            ) : (
-              <Building className="h-10 w-10 text-muted-foreground" />
-            )}
-          </div>
-          
-          {logoUrl && (
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={uploading}
-              className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
-            >
-              {uploading ? (
-                <Loader2 className="h-6 w-6 text-white animate-spin" />
-              ) : (
-                <Upload className="h-6 w-6 text-white" />
-              )}
-            </button>
+    <div className="flex flex-col items-center space-y-4">
+      {/* Logo Preview - Larger and centered */}
+      <div className="relative group">
+        <div className="w-32 h-32 rounded-xl border-2 border-dashed border-primary/30 flex items-center justify-center bg-gradient-to-br from-primary/5 to-accent/5 overflow-hidden transition-all hover:border-primary/50 hover:shadow-lg">
+          {logoUrl ? (
+            <img src={logoUrl} alt="Company logo" className="w-full h-full object-contain p-2" />
+          ) : (
+            <div className="flex flex-col items-center text-muted-foreground">
+              <Building className="h-12 w-12 mb-2" />
+              <span className="text-xs">No Logo</span>
+            </div>
           )}
         </div>
-
-        <div className="flex-1">
-          <h4 className="text-sm font-medium mb-1">Company Logo</h4>
-          <p className="text-xs text-muted-foreground mb-3">
-            PNG, JPG, WEBP or SVG (max 5MB)
-          </p>
-          <Button
-            variant="outline"
-            size="sm"
+        
+        {/* Hover overlay for existing logo */}
+        {logoUrl && (
+          <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
+            className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer"
           >
             {uploading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Uploading...
-              </>
+              <Loader2 className="h-8 w-8 text-white animate-spin" />
             ) : (
               <>
-                <Upload className="mr-2 h-4 w-4" />
-                {logoUrl ? 'Change Logo' : 'Upload Logo'}
+                <Upload className="h-8 w-8 text-white mb-1" />
+                <span className="text-xs text-white">Change</span>
               </>
             )}
-          </Button>
-        </div>
+          </button>
+        )}
+      </div>
+
+      {/* Upload info and button - below the logo */}
+      <div className="text-center space-y-2">
+        <p className="text-xs text-muted-foreground">
+          PNG, JPG, WEBP or SVG
+          <br />
+          Max 5MB
+        </p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+          className="w-full"
+        >
+          {uploading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Uploading...
+            </>
+          ) : (
+            <>
+              <Upload className="mr-2 h-4 w-4" />
+              {logoUrl ? 'Change Logo' : 'Upload Logo'}
+            </>
+          )}
+        </Button>
       </div>
 
       <input

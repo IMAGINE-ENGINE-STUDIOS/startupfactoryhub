@@ -268,8 +268,8 @@ export default function CompanyProfileManager() {
             </div>
             
             {/* Company Logo */}
-            <div className="flex flex-col items-center space-y-3 p-4 bg-muted/30 rounded-lg">
-              <p className="text-sm font-medium text-muted-foreground">Company Logo</p>
+            <div className="flex flex-col items-center justify-center p-6 bg-muted/30 rounded-lg min-h-[280px]">
+              <p className="text-sm font-medium text-muted-foreground mb-4">Company Logo</p>
               <CompanyLogoUpload 
                 currentLogoUrl={company?.logo_url}
                 companyId={company?.id}
@@ -277,7 +277,9 @@ export default function CompanyProfileManager() {
                   fetchCompany();
                 }}
               />
-              <p className="text-sm text-muted-foreground">{company?.name || 'Company Name'}</p>
+              {company?.name && (
+                <p className="text-sm font-medium text-foreground mt-4">{company.name}</p>
+              )}
             </div>
           </div>
 
