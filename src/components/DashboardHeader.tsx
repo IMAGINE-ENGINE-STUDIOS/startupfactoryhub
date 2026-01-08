@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/popover";
 import RecommendationPopup from "@/components/RecommendationPopup";
 import { StartupPerksButton } from "@/components/StartupPerksButton";
+import { GlobalClock } from "@/components/GlobalClock";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
@@ -28,6 +29,8 @@ export function DashboardHeader() {
   return (
     <>
       <div className="absolute sm:fixed top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-1.5 sm:gap-2 z-40">
+        <GlobalClock />
+        
         <Button
           variant="ghost"
           size="icon"
