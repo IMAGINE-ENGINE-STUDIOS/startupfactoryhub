@@ -864,7 +864,19 @@ const ResourcesManagement = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      {resource.city || resource.country ? `${resource.city || ''}, ${resource.country || ''}` : 'N/A'}
+                      <div className="flex flex-col gap-1">
+                        <span>{resource.city || resource.country ? `${resource.city || ''}, ${resource.country || ''}` : 'N/A'}</span>
+                        {resource.location_type === 'physical' && (!resource.latitude || !resource.longitude) && (
+                          <Badge variant="outline" className="text-orange-500 border-orange-500/50 text-xs w-fit">
+                            No coordinates
+                          </Badge>
+                        )}
+                        {resource.location_type === 'online' && (
+                          <Badge variant="outline" className="text-blue-500 border-blue-500/50 text-xs w-fit">
+                            Online
+                          </Badge>
+                        )}
+                      </div>
                     </TableCell>
                     {viewMode === 'all' && (
                       <TableCell>
