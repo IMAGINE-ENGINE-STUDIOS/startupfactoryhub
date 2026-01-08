@@ -487,11 +487,14 @@ export default function MatchingSystem() {
   };
 
   const fetchMentorMatchesForStartup = async () => {
-    // Fetch advisor role IDs
+    if (!user) return;
+    
+    // Fetch advisor role IDs (excluding current user)
     const { data: advisorRoles } = await supabase
       .from('user_roles')
       .select('user_id')
       .in('role', ['advisor', 'mentor'])
+      .neq('user_id', user.id)
       .limit(20);
 
     const advisorIds = advisorRoles?.map(r => r.user_id) || [];
@@ -547,11 +550,12 @@ export default function MatchingSystem() {
       return;
     }
 
-    // Fetch advisor/mentor role IDs
+    // Fetch advisor/mentor role IDs (excluding current user)
     const { data: advisorRoles } = await supabase
       .from('user_roles')
       .select('user_id')
       .in('role', ['advisor', 'mentor'])
+      .neq('user_id', user.id)
       .limit(30);
 
     const advisorIds = advisorRoles?.map(r => r.user_id) || [];
@@ -624,11 +628,14 @@ export default function MatchingSystem() {
   };
 
   const fetchInvestorMatchesForStartup = async () => {
-    // Fetch investor role IDs
+    if (!user) return;
+    
+    // Fetch investor role IDs (excluding current user)
     const { data: investorRoles } = await supabase
       .from('user_roles')
       .select('user_id')
       .eq('role', 'investor')
+      .neq('user_id', user.id)
       .limit(20);
 
     const investorIds = investorRoles?.map(r => r.user_id) || [];
@@ -673,10 +680,13 @@ export default function MatchingSystem() {
   };
 
   const fetchAcceleratorMatchesForStartup = async () => {
-    // Fetch all accelerator profiles
+    if (!user) return;
+    
+    // Fetch all accelerator profiles (excluding current user)
     const { data: acceleratorProfiles } = await supabase
       .from('accelerator_profiles')
       .select('*')
+      .neq('user_id', user.id)
       .limit(20);
 
     if (!acceleratorProfiles || acceleratorProfiles.length === 0) return;
@@ -734,10 +744,11 @@ export default function MatchingSystem() {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    // Fetch all companies
+    // Fetch all companies (excluding current user's company)
     const { data: companies } = await supabase
       .from('companies')
       .select('*')
+      .neq('user_id', user.id)
       .limit(30);
 
     if (!companies || companies.length === 0) return;
@@ -751,7 +762,7 @@ export default function MatchingSystem() {
 
     const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
-    // Calculate scores and create matches
+    // Calculate scores and create matches (use company logo for startups)
     const matches: Match[] = companies.map(company => {
       const { score, reasons } = investorProfile
         ? calculateInvestorStartupScore(company, investorProfile)
@@ -764,7 +775,7 @@ export default function MatchingSystem() {
         description: company.description || 'Innovative startup seeking growth',
         industry: company.industry || 'General',
         stage: company.stage,
-        avatar: profileMap.get(company.user_id)?.avatar_url,
+        avatar: company.logo_url || profileMap.get(company.user_id)?.avatar_url,
         compatibility_score: score,
         match_reasons: reasons.length > 0 ? reasons : ['Available for investment'],
       };
@@ -786,10 +797,11 @@ export default function MatchingSystem() {
 
     const skills = mentorSkills?.map(s => s.skill_name) || [];
 
-    // Fetch all companies
+    // Fetch all companies (excluding current user's company)
     const { data: companies } = await supabase
       .from('companies')
       .select('*')
+      .neq('user_id', user.id)
       .limit(30);
 
     if (!companies || companies.length === 0) return;
@@ -803,7 +815,7 @@ export default function MatchingSystem() {
 
     const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
 
-    // Calculate scores and create matches
+    // Calculate scores and create matches (use company logo for startups)
     const matches: Match[] = companies.map(company => {
       const { score, reasons } = calculateMentorStartupScore(company, skills);
 
@@ -814,7 +826,7 @@ export default function MatchingSystem() {
         description: company.description || 'Innovative startup seeking guidance',
         industry: company.industry || 'General',
         stage: company.stage,
-        avatar: profileMap.get(company.user_id)?.avatar_url,
+        avatar: company.logo_url || profileMap.get(company.user_id)?.avatar_url,
         compatibility_score: score,
         match_reasons: reasons.length > 0 ? reasons : ['Open to mentorship'],
       };
