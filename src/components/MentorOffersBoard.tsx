@@ -34,17 +34,44 @@ export default function MentorOffersBoard() {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchStartups();
-  }, []);
+    if (user) {
+      fetchStartups();
+    }
+  }, [user]);
+
+  // Real-time subscription for mentorship relationship changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('mentor-offers-sync')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'mentorship_relationships',
+          filter: `mentor_id=eq.${user.id}`,
+        },
+        () => {
+          fetchStartups();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
 
   const fetchStartups = async () => {
     if (!user) return;
 
-    // Fetch all companies
+    // Fetch all companies (now unique per user due to constraint)
     const { data: allCompanies, error: companiesError } = await supabase
       .from('companies')
       .select('*')
-      .order('created_at', { ascending: false })
+      .order('created_at', { ascending: true })
       .limit(50);
 
     if (companiesError || !allCompanies) {
@@ -58,13 +85,13 @@ export default function MentorOffersBoard() {
       .select('mentee_id')
       .eq('mentor_id', user.id);
 
-    // Filter out companies where mentorship already exists
+    // Filter out companies where mentorship already exists and the current user's own company
     const existingMenteeIds = new Set(
       (existingRelationships || []).map(r => r.mentee_id)
     );
 
     const availableStartups = allCompanies.filter(
-      company => !existingMenteeIds.has(company.user_id)
+      company => company.user_id !== user.id && !existingMenteeIds.has(company.user_id)
     );
 
     setStartups(availableStartups.slice(0, 20));
