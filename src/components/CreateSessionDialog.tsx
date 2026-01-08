@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Loader2, Clock, Calendar, AlertCircle } from 'lucide-react';
+import { Loader2, Clock, Calendar, AlertCircle, Users } from 'lucide-react';
 import { format, addDays, setHours, setMinutes, startOfWeek, parse } from 'date-fns';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
@@ -17,6 +17,7 @@ interface CreateSessionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSessionCreated: () => void;
+  preSelectedMentorId?: string;
 }
 
 interface MentorOption {
@@ -39,7 +40,7 @@ interface TimeSlot {
   day: string;
 }
 
-export default function CreateSessionDialog({ open, onOpenChange, onSessionCreated }: CreateSessionDialogProps) {
+export default function CreateSessionDialog({ open, onOpenChange, onSessionCreated, preSelectedMentorId }: CreateSessionDialogProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
@@ -65,6 +66,13 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
       fetchMentors();
     }
   }, [open]);
+
+  // Pre-select mentor when provided
+  useEffect(() => {
+    if (preSelectedMentorId && open) {
+      setFormData(prev => ({ ...prev, mentor_id: preSelectedMentorId }));
+    }
+  }, [preSelectedMentorId, open]);
 
   useEffect(() => {
     if (formData.mentor_id) {
@@ -122,7 +130,7 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
       if (profileError) throw profileError;
 
       // Combine data - only show mentors with availability
-      const mentorOptions: MentorOption[] = profiles
+      let mentorOptions: MentorOption[] = profiles
         ?.filter(profile => mentorsWithAvailability.has(profile.user_id))
         .map(profile => {
           const mentorProfile = mentorData?.find(m => m.user_id === profile.user_id);
@@ -132,6 +140,23 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
             expertise_areas: mentorProfile?.expertise_areas || [],
           };
         }) || [];
+
+      // If pre-selected mentor is not in the list, fetch their profile
+      if (preSelectedMentorId && !mentorOptions.some(m => m.user_id === preSelectedMentorId)) {
+        const { data: preSelectedProfile } = await supabase
+          .from('profiles')
+          .select('user_id, full_name')
+          .eq('user_id', preSelectedMentorId)
+          .maybeSingle();
+
+        if (preSelectedProfile) {
+          mentorOptions = [{
+            user_id: preSelectedProfile.user_id,
+            full_name: preSelectedProfile.full_name || 'Unknown',
+            expertise_areas: [],
+          }, ...mentorOptions];
+        }
+      }
 
       setMentors(mentorOptions);
     } catch (error) {
@@ -317,6 +342,13 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
             {loadingMentors ? (
               <div className="flex items-center justify-center py-4">
                 <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : preSelectedMentorId ? (
+              <div className="flex items-center gap-2 p-3 bg-muted rounded-lg border">
+                <Users className="h-4 w-4 text-muted-foreground" />
+                <span className="font-medium">
+                  {mentors.find(m => m.user_id === preSelectedMentorId)?.full_name || 'Selected Mentor'}
+                </span>
               </div>
             ) : (
               <Select
