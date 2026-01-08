@@ -654,6 +654,44 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     };
   }, [userLocation]);
 
+  // State for geocoded city coordinates (fallback for resources without exact coords)
+  const geocodedCoordsRef = useRef<Map<string, { lat: number; lng: number }>>(new Map());
+  const [geocodedResources, setGeocodedResources] = useState<Map<string, { lat: number; lng: number }>>(new Map());
+
+  // Geocode city for resources without coordinates
+  const geocodeCity = useCallback(async (resource: Resource): Promise<{ lat: number; lng: number } | null> => {
+    const cacheKey = resource.id;
+    
+    // Check cache first
+    if (geocodedCoordsRef.current.has(cacheKey)) {
+      return geocodedCoordsRef.current.get(cacheKey)!;
+    }
+    
+    const searchQuery = resource.city 
+      ? `${resource.city}, ${resource.country || ''}`
+      : resource.country || '';
+    
+    if (!searchQuery) return null;
+    
+    try {
+      const response = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${mapboxgl.accessToken}&types=place,country&limit=1`
+      );
+      const data = await response.json();
+      
+      if (data.features && data.features.length > 0) {
+        const [lng, lat] = data.features[0].center;
+        const coords = { lat, lng };
+        geocodedCoordsRef.current.set(cacheKey, coords);
+        return coords;
+      }
+    } catch (error) {
+      console.error('City geocoding error:', error);
+    }
+    
+    return null;
+  }, []);
+
   useEffect(() => {
     if (!map.current || !resources) return;
 
@@ -661,23 +699,70 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     markers.current.forEach(marker => marker.remove());
     markers.current = [];
 
-    // Separate resources: with logos (HTML markers) vs without (native markers)
-    const resourcesWithLogos = resources.filter(r => r.logo_url && r.latitude && r.longitude);
-    const resourcesWithoutLogos = resources.filter(r => !r.logo_url && r.latitude && r.longitude);
+    // Filter resources for display
+    const resourcesWithCoords = resources.filter(r => r.latitude && r.longitude);
+    const resourcesWithCityOnly = resources.filter(r => 
+      (!r.latitude || !r.longitude) && 
+      (r.city || r.country) && 
+      r.location_type !== 'online'
+    );
 
-    // Update GeoJSON source with resources WITHOUT logos (native markers)
+    // Geocode resources with city only (async)
+    const geocodeCityResources = async () => {
+      const newGeocodedMap = new Map(geocodedCoordsRef.current);
+      
+      for (const resource of resourcesWithCityOnly) {
+        if (!newGeocodedMap.has(resource.id)) {
+          const coords = await geocodeCity(resource);
+          if (coords) {
+            newGeocodedMap.set(resource.id, coords);
+          }
+        }
+      }
+      
+      if (newGeocodedMap.size > geocodedResources.size) {
+        setGeocodedResources(new Map(newGeocodedMap));
+      }
+    };
+    
+    geocodeCityResources();
+
+    // Combine resources with coordinates and geocoded city resources
+    const allDisplayableResources = [
+      ...resourcesWithCoords.map(r => ({
+        ...r,
+        displayLat: r.latitude!,
+        displayLng: r.longitude!,
+        isApproximate: false
+      })),
+      ...resourcesWithCityOnly
+        .filter(r => geocodedCoordsRef.current.has(r.id))
+        .map(r => {
+          const coords = geocodedCoordsRef.current.get(r.id)!;
+          return {
+            ...r,
+            displayLat: coords.lat,
+            displayLng: coords.lng,
+            isApproximate: true
+          };
+        })
+    ];
+
+    // Update GeoJSON source for resources WITHOUT logos (native markers)
+    const resourcesForGeoJSON = allDisplayableResources.filter(r => !r.logo_url);
     const geojsonData = {
       type: 'FeatureCollection' as const,
-      features: resourcesWithoutLogos.map(resource => ({
+      features: resourcesForGeoJSON.map(resource => ({
         type: 'Feature' as const,
         geometry: {
           type: 'Point' as const,
-          coordinates: [resource.longitude!, resource.latitude!]
+          coordinates: [resource.displayLng, resource.displayLat]
         },
         properties: {
           id: resource.id,
           title: resource.title,
-          resourceType: resource.resource_type
+          resourceType: resource.resource_type,
+          isApproximate: resource.isApproximate
         }
       }))
     };
@@ -687,14 +772,15 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       source.setData(geojsonData);
     }
 
-    // Add HTML markers for resources WITH logos
+    // Add HTML markers for ALL resources WITH logos (unified marker system)
+    const resourcesWithLogos = allDisplayableResources.filter(r => r.logo_url);
     resourcesWithLogos.forEach(resource => {
       const config = RESOURCE_CONFIG[resource.resource_type];
       const isOfficialPartner = resource.is_official_partner === true;
-      const isFlagshipHub = resource.title?.includes('Startup Factory Hub') && isOfficialPartner;
+      const isFlagshipHub = resource.is_flagship === true || (resource.title?.includes('Startup Factory Hub') && isOfficialPartner);
       
       const markerSize = isFlagshipHub ? 44 : 28;
-      const badgeEmoji = isFlagshipHub ? '👑' : '⭐';
+      const badgeEmoji = isFlagshipHub ? '👑' : isOfficialPartner ? '⭐' : '';
       
       // Create marker element
       const el = document.createElement('div');
@@ -703,6 +789,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         width: ${markerSize}px;
         height: ${markerSize}px;
         cursor: pointer;
+        position: relative;
       `;
       
       // Logo container - perfectly centered
@@ -718,15 +805,16 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           : `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`};
         transition: all 0.2s;
         ${isFlagshipHub ? 'animation: pulse-glow 2s ease-in-out infinite;' : ''}
+        ${resource.isApproximate ? 'opacity: 0.85;' : ''}
       `;
       
       el.appendChild(logoEl);
       
-      // Badge for official partners
-      if (isOfficialPartner) {
-        const starEl = document.createElement('div');
-        starEl.innerHTML = badgeEmoji;
-        starEl.style.cssText = `
+      // Badge for official partners or approximate location
+      if (badgeEmoji || resource.isApproximate) {
+        const badgeEl = document.createElement('div');
+        badgeEl.innerHTML = badgeEmoji || '📍';
+        badgeEl.style.cssText = `
           position: absolute;
           top: -6px;
           right: -6px;
@@ -735,7 +823,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           pointer-events: none;
           z-index: 10;
         `;
-        el.appendChild(starEl);
+        el.appendChild(badgeEl);
       }
 
       // Hover effect
@@ -755,9 +843,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       // Click handler
       el.addEventListener('click', () => {
         setSelectedResource(resource);
-        if (map.current && resource.latitude && resource.longitude) {
+        if (map.current) {
           map.current.flyTo({
-            center: [resource.longitude, resource.latitude],
+            center: [resource.displayLng, resource.displayLat],
             zoom: 12,
             duration: 2000,
           });
@@ -770,12 +858,12 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         anchor: 'center',
         offset: [0, 0]
       })
-        .setLngLat([resource.longitude!, resource.latitude!])
+        .setLngLat([resource.displayLng, resource.displayLat])
         .addTo(map.current!);
 
       markers.current.push(marker);
     });
-  }, [resources]);
+  }, [resources, geocodedResources, geocodeCity]);
 
   // Add event markers to map
   useEffect(() => {
@@ -1326,7 +1414,30 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] overflow-hidden flex flex-col rounded-3xl">
           {selectedResource && (
             <>
-              <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
+              {/* Banner Image */}
+              {selectedResource.banner_url && (
+                <div className="relative h-40 w-full">
+                  <img 
+                    src={selectedResource.banner_url} 
+                    alt="" 
+                    className="w-full h-full object-cover" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedResource(null)}
+                    className="absolute top-2 right-2 backdrop-blur-xl bg-white/20 hover:bg-white/30 rounded-xl"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+              
+              <div className={cn(
+                "p-4 border-b border-white/30 dark:border-white/20 backdrop-blur",
+                selectedResource.banner_url && "pt-2"
+              )}>
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2 flex-wrap">
@@ -1344,25 +1455,34 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                           <span>⭐</span> Official Partner
                         </Badge>
                       )}
+                      {selectedResource.is_flagship && (
+                        <Badge className="bg-gradient-to-r from-yellow-500 to-amber-400 text-black font-semibold rounded-xl flex items-center gap-1">
+                          <span>👑</span> Flagship
+                        </Badge>
+                      )}
                     </div>
-                    <h3 className="text-lg font-semibold">{selectedResource.title}</h3>
+                    <div className="flex items-center gap-3">
+                      {selectedResource.logo_url && (
+                        <img 
+                          src={selectedResource.logo_url} 
+                          alt="" 
+                          className="w-12 h-12 rounded-xl object-cover border-2 border-white/30" 
+                        />
+                      )}
+                      <h3 className="text-lg font-semibold">{selectedResource.title}</h3>
+                    </div>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setSelectedResource(null)}
-                    className="shrink-0 backdrop-blur-xl bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/30 rounded-xl"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
+                  {!selectedResource.banner_url && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setSelectedResource(null)}
+                      className="shrink-0 backdrop-blur-xl bg-white/10 dark:bg-black/20 hover:bg-white/20 dark:hover:bg-black/30 rounded-xl"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  )}
                 </div>
-                {selectedResource.logo_url && (
-                  <img 
-                    src={selectedResource.logo_url} 
-                    alt="" 
-                    className="w-full h-32 rounded-2xl object-cover mb-3" 
-                  />
-                )}
               </div>
 
               <ScrollArea className="flex-1">
@@ -1371,20 +1491,40 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     {selectedResource.description}
                   </p>
 
-                  {selectedResource.location_type === 'physical' && selectedResource.address && (
+                  {/* Journey Steps */}
+                  {selectedResource.journey_steps && selectedResource.journey_steps.length > 0 && (
+                    <div className="flex flex-wrap gap-1">
+                      {selectedResource.journey_steps.map((step) => (
+                        <Badge 
+                          key={step} 
+                          variant="secondary" 
+                          className="text-xs backdrop-blur-xl bg-white/10 rounded-lg"
+                        >
+                          {JOURNEY_STEPS.find(s => s.value === step)?.label || step}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Location Info */}
+                  {(selectedResource.location_type === 'physical' || selectedResource.location_type === 'hybrid') && (selectedResource.address || selectedResource.city) && (
                     <div className="flex items-start gap-2 text-sm">
                       <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
                       <div>
-                        <p>{selectedResource.address}</p>
+                        {selectedResource.address && <p>{selectedResource.address}</p>}
                         <p className="text-muted-foreground">
-                          {selectedResource.city}, {selectedResource.country}
+                          {[selectedResource.city, selectedResource.country].filter(Boolean).join(', ')}
                         </p>
                       </div>
                     </div>
                   )}
                   
-                  {selectedResource.location_type !== 'physical' && (
+                  {selectedResource.location_type === 'online' && (
                     <Badge variant="outline" className="backdrop-blur-xl rounded-xl">Online Resource</Badge>
+                  )}
+                  
+                  {selectedResource.location_type === 'hybrid' && (
+                    <Badge variant="outline" className="backdrop-blur-xl rounded-xl bg-blue-500/10 border-blue-500/30 text-blue-400">Hybrid (Online + Physical)</Badge>
                   )}
 
                   <div className="flex flex-col gap-2 pt-2">

@@ -62,6 +62,7 @@ interface Resource {
   description: string | null;
   resource_type: string;
   logo_url: string | null;
+  banner_url: string | null;
   website_url: string | null;
   contact_email: string | null;
   address: string | null;
@@ -119,6 +120,7 @@ const ResourcesManagement = () => {
     description: '',
     resource_type: 'perk',
     logo_url: '',
+    banner_url: '',
     website_url: '',
     contact_email: '',
     address: '',
@@ -447,9 +449,39 @@ const ResourcesManagement = () => {
 
   const handleApproveResource = async (resource: Resource) => {
     try {
+      let updateData: any = { is_verified: true };
+      
+      // If resource lacks coordinates but has city/address, geocode first
+      if ((!resource.latitude || !resource.longitude) && (resource.city || resource.address)) {
+        const searchQuery = resource.address 
+          ? `${resource.address}, ${resource.city || ''}, ${resource.country || ''}`
+          : `${resource.city || ''}, ${resource.country || ''}`;
+        
+        try {
+          const response = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(searchQuery)}.json?access_token=${mapboxgl.accessToken}&types=place,address,poi&limit=1`
+          );
+          const data = await response.json();
+          
+          if (data.features && data.features.length > 0) {
+            const [lng, lat] = data.features[0].center;
+            updateData.latitude = lat;
+            updateData.longitude = lng;
+            
+            toast({
+              title: "Geocoded",
+              description: `Location set to ${data.features[0].place_name}`
+            });
+          }
+        } catch (geocodeError) {
+          console.error('Geocoding error during approval:', geocodeError);
+          // Continue with approval even if geocoding fails
+        }
+      }
+
       const { error } = await supabase
         .from('resources')
-        .update({ is_verified: true })
+        .update(updateData)
         .eq('id', resource.id);
 
       if (error) {
@@ -457,9 +489,15 @@ const ResourcesManagement = () => {
         throw error;
       }
 
-      // Move from pending to verified
+      // Move from pending to verified with updated coordinates
+      const updatedResource = { 
+        ...resource, 
+        is_verified: true,
+        latitude: updateData.latitude || resource.latitude,
+        longitude: updateData.longitude || resource.longitude
+      };
       setPendingResources(prev => prev.filter(r => r.id !== resource.id));
-      setResources(prev => [{ ...resource, is_verified: true }, ...prev]);
+      setResources(prev => [updatedResource, ...prev]);
 
       toast({
         title: "Approved",
@@ -576,6 +614,7 @@ const ResourcesManagement = () => {
         description: '',
         resource_type: 'perk',
         logo_url: '',
+        banner_url: '',
         website_url: '',
         contact_email: '',
         address: '',
