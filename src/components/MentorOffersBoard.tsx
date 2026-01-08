@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -193,6 +193,9 @@ export default function MentorOffersBoard() {
                 <div className="p-4 pl-5">
                   <div className="flex items-start gap-3 mb-3">
                     <Avatar className="h-12 w-12 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
+                      {startup.logo_url && (
+                        <AvatarImage src={startup.logo_url} alt={startup.name} />
+                      )}
                       <AvatarFallback className="bg-gradient-to-br from-primary to-emerald-500 text-primary-foreground font-bold">
                         {startup.name.charAt(0)}
                       </AvatarFallback>

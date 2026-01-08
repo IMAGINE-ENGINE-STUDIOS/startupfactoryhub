@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Building, TrendingUp, DollarSign, Users, Filter, Sparkles, FileText, Presentation } from 'lucide-react';
@@ -59,10 +59,18 @@ export default function StartupBrowser() {
 
   const fetchCompanies = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    
+    // Fetch companies excluding current user's own company
+    let query = supabase
       .from('companies')
       .select('*')
       .order('created_at', { ascending: false });
+    
+    if (user?.id) {
+      query = query.neq('user_id', user.id);
+    }
+    
+    const { data, error } = await query;
 
     if (!error && data) {
       setCompanies(data);
@@ -256,6 +264,9 @@ export default function StartupBrowser() {
                   <CardContent className="p-4 flex flex-col h-full">
                     <div className="flex items-start gap-3">
                       <Avatar className="h-12 w-12">
+                        {company.logo_url && (
+                          <AvatarImage src={company.logo_url} alt={company.name} />
+                        )}
                         <AvatarFallback className="bg-gradient-primary text-primary-foreground">
                           {company.name.charAt(0)}
                         </AvatarFallback>
