@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,6 +41,7 @@ export const CohortApplicationDialog = ({
 }: CohortApplicationDialogProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [companies, setCompanies] = useState<any[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<string>('');
@@ -158,7 +160,7 @@ export const CohortApplicationDialog = ({
               <p className="text-muted-foreground mb-4">
                 Please sign in to apply to this accelerator program.
               </p>
-              <Button onClick={() => window.location.href = '/auth'}>
+              <Button onClick={() => navigate('/auth')}>
                 Sign In
               </Button>
             </CardContent>
@@ -170,7 +172,7 @@ export const CohortApplicationDialog = ({
               <p className="text-muted-foreground mb-4">
                 You need to create a startup profile before applying to accelerator programs.
               </p>
-              <Button onClick={() => window.location.href = '/dashboard?tab=profile'}>
+              <Button onClick={() => navigate('/dashboard?tab=profile')}>
                 Create Startup
               </Button>
             </CardContent>
