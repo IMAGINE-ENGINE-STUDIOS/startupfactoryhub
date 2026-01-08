@@ -35,6 +35,7 @@ const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
 const CorporatePartners = lazy(() => import("./pages/CorporatePartners"));
 const JoinAsMentor = lazy(() => import("./pages/JoinAsMentor"));
 const JoinAsAdvisor = lazy(() => import("./pages/JoinAsAdvisor"));
+const JapanAccelerator = lazy(() => import("./pages/JapanAccelerator"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,6 +92,7 @@ const App = () => (
                     <Route path="/partners" element={<CorporatePartners />} />
                     <Route path="/join/mentor" element={<JoinAsMentor />} />
                     <Route path="/join/advisor" element={<JoinAsAdvisor />} />
+                    <Route path="/japan-accelerator" element={<JapanAccelerator />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
