@@ -136,7 +136,15 @@ export default function NetworkBrowser() {
           };
         });
 
-        setCurrentConnections(profilesWithRoles);
+        // Deduplicate by user_id to prevent showing duplicate connections
+        const seen = new Set<string>();
+        const uniqueConnections = profilesWithRoles.filter(profile => {
+          if (seen.has(profile.user_id)) return false;
+          seen.add(profile.user_id);
+          return true;
+        });
+
+        setCurrentConnections(uniqueConnections);
       }
     } catch (error) {
       console.error('Error fetching connections:', error);
@@ -187,7 +195,15 @@ export default function NetworkBrowser() {
           };
         });
 
-        setPendingRequests(profilesWithRoles);
+        // Deduplicate by user_id to prevent showing duplicate pending requests
+        const seen = new Set<string>();
+        const uniqueRequests = profilesWithRoles.filter(profile => {
+          if (seen.has(profile.user_id)) return false;
+          seen.add(profile.user_id);
+          return true;
+        });
+
+        setPendingRequests(uniqueRequests);
       }
     } catch (error) {
       console.error('Error fetching pending requests:', error);
@@ -393,7 +409,15 @@ export default function NetworkBrowser() {
           };
         });
 
-        setSuggestedUsers(profilesWithRoles);
+        // Deduplicate by user_id to prevent showing duplicate suggested users
+        const seen = new Set<string>();
+        const uniqueSuggested = profilesWithRoles.filter(profile => {
+          if (seen.has(profile.user_id)) return false;
+          seen.add(profile.user_id);
+          return true;
+        });
+
+        setSuggestedUsers(uniqueSuggested);
       }
     } catch (error) {
       console.error('Error fetching suggested users:', error);

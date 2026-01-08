@@ -53,6 +53,31 @@ export default function MentorshipRequests({ onRequestHandled }: MentorshipReque
     }
   }, [user]);
 
+  // Real-time subscription for mentorship relationship changes
+  useEffect(() => {
+    if (!user) return;
+
+    const channel = supabase
+      .channel('mentorship-requests-sync')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'mentorship_relationships',
+          filter: `mentor_id=eq.${user.id}`,
+        },
+        () => {
+          fetchPendingRequests();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user]);
+
   const fetchPendingRequests = async () => {
     if (!user) return;
 
@@ -93,7 +118,15 @@ export default function MentorshipRequests({ onRequestHandled }: MentorshipReque
         })
       );
 
-      setRequests(requestsWithCompanies as any);
+      // Deduplicate by mentee_id to prevent showing duplicate requests
+      const seen = new Set<string>();
+      const uniqueRequests = requestsWithCompanies.filter((request: any) => {
+        if (seen.has(request.mentee_id)) return false;
+        seen.add(request.mentee_id);
+        return true;
+      });
+
+      setRequests(uniqueRequests as any);
     }
   };
 
