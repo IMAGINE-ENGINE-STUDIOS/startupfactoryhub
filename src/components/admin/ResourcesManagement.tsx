@@ -92,7 +92,9 @@ const RESOURCE_TYPES = [
   'university',
   'investor_network',
   'human_capital',
-  'event'
+  'event',
+  'office',
+  'other'
 ];
 
 const LOCATION_TYPES = ['physical', 'online', 'hybrid'];
@@ -450,7 +452,10 @@ const ResourcesManagement = () => {
         .update({ is_verified: true })
         .eq('id', resource.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Approve error details:', error);
+        throw error;
+      }
 
       // Move from pending to verified
       setPendingResources(prev => prev.filter(r => r.id !== resource.id));
@@ -460,11 +465,11 @@ const ResourcesManagement = () => {
         title: "Approved",
         description: `"${resource.title}" has been approved and is now visible on the map`
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error approving resource:', error);
       toast({
         title: "Error",
-        description: "Failed to approve resource",
+        description: error.message || "Failed to approve resource",
         variant: "destructive"
       });
     }
@@ -477,18 +482,21 @@ const ResourcesManagement = () => {
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Reject error details:', error);
+        throw error;
+      }
 
       setPendingResources(prev => prev.filter(r => r.id !== id));
       toast({
         title: "Rejected",
         description: `"${title}" has been rejected and removed`
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error rejecting resource:', error);
       toast({
         title: "Error",
-        description: "Failed to reject resource",
+        description: error.message || "Failed to reject resource",
         variant: "destructive"
       });
     }
@@ -539,17 +547,29 @@ const ResourcesManagement = () => {
   };
 
   const handleAddResource = async () => {
+    if (!newResource.title?.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Title is required",
+        variant: "destructive"
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('resources')
         .insert([{ 
           ...newResource, 
           is_verified: true 
-        }]); // Admin-added resources are auto-verified
+        }]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Insert error details:', error);
+        throw error;
+      }
 
-      fetchResources();
+      await fetchResources();
       setShowAddDialog(false);
       setNewResource({
         title: '',
@@ -570,13 +590,13 @@ const ResourcesManagement = () => {
       });
       toast({
         title: "Added",
-        description: "Resource has been added"
+        description: "Resource has been added successfully"
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding resource:', error);
       toast({
         title: "Error",
-        description: "Failed to add resource",
+        description: error.message || "Failed to add resource. Check console for details.",
         variant: "destructive"
       });
     }
