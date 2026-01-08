@@ -48,10 +48,8 @@ export interface Resource {
   website_url: string | null;
   contact_email: string | null;
   logo_url: string | null;
-  banner_url: string | null;
   is_verified: boolean;
   is_official_partner: boolean | null;
-  is_flagship: boolean | null;
   journey_steps: JourneyStep[] | null;
   author_id: string | null;
   created_at: string;
