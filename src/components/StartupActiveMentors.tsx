@@ -36,6 +36,7 @@ interface StartupActiveMentorsProps {
 export default function StartupActiveMentors({ onSessionScheduled, onJoin }: StartupActiveMentorsProps = {}) {
   const [mentors, setMentors] = useState<ActiveMentor[]>([]);
   const [sessionDialogOpen, setSessionDialogOpen] = useState(false);
+  const [selectedMentorId, setSelectedMentorId] = useState<string | null>(null);
   const { user } = useAuth();
 
   useEffect(() => {
@@ -324,15 +325,22 @@ export default function StartupActiveMentors({ onSessionScheduled, onJoin }: Sta
             nextSession: mentor.nextSession,
           }}
           variant="active"
-          onSchedule={() => setSessionDialogOpen(true)}
+          onSchedule={() => {
+            setSelectedMentorId(mentor.mentor_id);
+            setSessionDialogOpen(true);
+          }}
           onJoin={onJoin}
         />
       ))}
 
       <CreateSessionDialog 
         open={sessionDialogOpen} 
-        onOpenChange={setSessionDialogOpen}
+        onOpenChange={(open) => {
+          setSessionDialogOpen(open);
+          if (!open) setSelectedMentorId(null);
+        }}
         onSessionCreated={handleSessionCreated}
+        preSelectedMentorId={selectedMentorId || undefined}
       />
     </div>
   );
