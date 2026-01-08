@@ -53,6 +53,7 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
   const [selectedTime, setSelectedTime] = useState('');
   const [manualDateTime, setManualDateTime] = useState('');
   const [useManualEntry, setUseManualEntry] = useState(false);
+  const [bookedSessions, setBookedSessions] = useState<Date[]>([]);
   
   const [formData, setFormData] = useState({
     mentor_id: '',
@@ -74,16 +75,66 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
     }
   }, [preSelectedMentorId, open]);
 
+  // Fetch availability and booked sessions when mentor changes
   useEffect(() => {
     if (formData.mentor_id) {
       fetchMentorAvailability(formData.mentor_id);
+      fetchMentorBookedSessions(formData.mentor_id);
     } else {
       setAvailability([]);
       setAvailableTimeSlots([]);
+      setBookedSessions([]);
       setSelectedDate('');
       setSelectedTime('');
     }
   }, [formData.mentor_id]);
+
+  // Real-time sync for mentor's calendar
+  useEffect(() => {
+    if (!open || !formData.mentor_id) return;
+
+    const channel = supabase
+      .channel(`mentor-schedule-${formData.mentor_id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'mentor_availability',
+        filter: `mentor_id=eq.${formData.mentor_id}`
+      }, () => {
+        fetchMentorAvailability(formData.mentor_id);
+      })
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'mentoring_sessions',
+        filter: `mentor_id=eq.${formData.mentor_id}`
+      }, () => {
+        fetchMentorBookedSessions(formData.mentor_id);
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [open, formData.mentor_id]);
+
+  // Fetch booked sessions for conflict detection
+  const fetchMentorBookedSessions = async (mentorId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('mentoring_sessions')
+        .select('scheduled_at, duration_minutes')
+        .eq('mentor_id', mentorId)
+        .in('status', ['scheduled', 'confirmed'])
+        .gte('scheduled_at', new Date().toISOString());
+
+      if (error) throw error;
+
+      setBookedSessions(data?.map(s => new Date(s.scheduled_at)) || []);
+    } catch (error) {
+      console.error('Error fetching booked sessions:', error);
+    }
+  };
 
   const fetchMentors = async () => {
     try {
@@ -204,7 +255,7 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
     }
   };
 
-  const generateAvailableTimeSlots = (slots: AvailabilitySlot[]) => {
+  const generateAvailableTimeSlots = (slots: AvailabilitySlot[], bookedTimes: Date[] = []) => {
     const timeSlots: TimeSlot[] = [];
     const today = new Date();
     const startWeek = startOfWeek(today, { weekStartsOn: 1 }); // Monday
@@ -226,8 +277,13 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
         while (currentHour < endHour) {
           const slotTime = setMinutes(setHours(currentDate, currentHour), 0);
           
-          // Only show future time slots
-          if (slotTime > today) {
+          // Check if slot conflicts with any booked session (within 1 hour)
+          const isBooked = bookedTimes.some(
+            bookedTime => Math.abs(slotTime.getTime() - bookedTime.getTime()) < 60 * 60 * 1000
+          );
+          
+          // Only show future time slots that are not booked
+          if (slotTime > today && !isBooked) {
             timeSlots.push({
               datetime: slotTime,
               display: format(slotTime, 'h:mm a'),
@@ -243,38 +299,78 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
     setAvailableTimeSlots(timeSlots);
   };
 
+  // Regenerate slots when booked sessions change
+  useEffect(() => {
+    if (availability.length > 0) {
+      generateAvailableTimeSlots(availability, bookedSessions);
+    }
+  }, [bookedSessions, availability]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!user) return;
 
-    if (!selectedDate || !selectedTime) {
+    let scheduledTime: Date;
+
+    // Handle manual entry vs time slot selection
+    if (useManualEntry && manualDateTime) {
+      scheduledTime = new Date(manualDateTime);
+      if (scheduledTime <= new Date()) {
+        toast({
+          title: 'Invalid Time',
+          description: 'Please select a future date and time',
+          variant: 'destructive',
+        });
+        return;
+      }
+    } else if (selectedDate && selectedTime) {
+      const selectedSlot = availableTimeSlots.find(
+        slot => format(slot.datetime, 'yyyy-MM-dd') === selectedDate && 
+                format(slot.datetime, 'HH:mm') === selectedTime
+      );
+      if (!selectedSlot) {
+        toast({
+          title: 'Invalid Selection',
+          description: 'The selected time slot is no longer available',
+          variant: 'destructive',
+        });
+        return;
+      }
+      scheduledTime = selectedSlot.datetime;
+    } else {
       toast({
         title: 'Missing Information',
-        description: 'Please select both a date and time',
+        description: 'Please select a date and time',
         variant: 'destructive',
       });
+      return;
+    }
+
+    // Double-check for conflicts before submitting
+    const hasConflict = bookedSessions.some(
+      bookedTime => Math.abs(scheduledTime.getTime() - bookedTime.getTime()) < 60 * 60 * 1000
+    );
+
+    if (hasConflict) {
+      toast({
+        title: 'Time Conflict',
+        description: 'This time slot was just booked. Please select another time.',
+        variant: 'destructive',
+      });
+      // Refresh booked sessions
+      fetchMentorBookedSessions(formData.mentor_id);
       return;
     }
 
     try {
       setLoading(true);
 
-      // Combine date and time
-      const selectedSlot = availableTimeSlots.find(
-        slot => format(slot.datetime, 'yyyy-MM-dd') === selectedDate && 
-                format(slot.datetime, 'HH:mm') === selectedTime
-      );
-
-      if (!selectedSlot) {
-        throw new Error('Invalid time slot selected');
-      }
-
       // Create Whereby room
       const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
         body: { 
           roomName: `sess-${Math.random().toString(36).substring(2, 10)}`,
-          startDate: selectedSlot.datetime.toISOString()
+          startDate: scheduledTime.toISOString()
         }
       });
 
@@ -286,13 +382,13 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
         .insert({
           mentor_id: formData.mentor_id,
           mentee_id: user.id,
-          scheduled_at: selectedSlot.datetime.toISOString(),
+          scheduled_at: scheduledTime.toISOString(),
           duration_minutes: parseInt(formData.duration_minutes),
           topic: formData.topic,
           description: formData.description,
           meeting_link: meetingLink,
           status: 'scheduled',
-          host_id: formData.mentor_id // Set mentor/advisor as host
+          host_id: formData.mentor_id
         });
 
       if (error) throw error;
@@ -314,6 +410,8 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
       });
       setSelectedDate('');
       setSelectedTime('');
+      setManualDateTime('');
+      setUseManualEntry(false);
     } catch (error) {
       console.error('Error creating session:', error);
       toast({
