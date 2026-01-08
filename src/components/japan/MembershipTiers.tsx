@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Check, Star, Zap, Crown, Building } from "lucide-react";
+import { Check, Star, Zap, Crown, Building, Rocket, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const tiers = [
@@ -8,8 +8,14 @@ const tiers = [
     price: "$0",
     period: "forever",
     icon: Star,
-    description: "Get started with basic access",
-    features: ["Limited platform access", "Community forums", "Basic resources", "Monthly newsletter"],
+    target: "Entry-level founders",
+    description: "Get started with basic access to the ecosystem",
+    features: [
+      "Limited platform access",
+      "Self-paced access to limited resources",
+      "Community forums",
+      "Monthly newsletter",
+    ],
     color: "from-gray-500 to-gray-600",
     popular: false,
   },
@@ -18,8 +24,15 @@ const tiers = [
     price: "$300",
     period: "/month",
     icon: Zap,
+    target: "Early MVP-stage founders",
     description: "Digital access for growing startups",
-    features: ["Full digital access", "Virtual events", "Mentor matching", "AI tools (limited)", "Online workshops"],
+    features: [
+      "Full digital platform access",
+      "Virtual events & workshops",
+      "Community & mentor interactions",
+      "Full resource library access",
+      "AI tools (limited)",
+    ],
     color: "from-blue-500 to-cyan-500",
     popular: false,
   },
@@ -28,8 +41,15 @@ const tiers = [
     price: "$500",
     period: "/month",
     icon: Building,
-    description: "Physical presence with mentorship",
-    features: ["Coworking access (Japan)", "1:1 mentorship", "Full AI platform", "Investor introductions", "Local events priority"],
+    target: "Founders needing flexible workspace",
+    description: "Physical presence with mentorship access",
+    features: [
+      "All Community features",
+      "Local coworking access (1 country)",
+      "1:1 mentor matching & sessions",
+      "Full AI platform access",
+      "Priority event access",
+    ],
     color: "from-primary to-teal-400",
     popular: true,
   },
@@ -38,8 +58,16 @@ const tiers = [
     price: "$950",
     period: "/month",
     icon: Crown,
-    description: "Unlimited global workspace",
-    features: ["5,600+ sites globally", "130+ countries access", "Priority mentor matching", "Full analytics suite", "Dedicated support"],
+    target: "Globally distributed teams",
+    description: "Unlimited worldwide workspace",
+    features: [
+      "All Self-Paced features",
+      "5,600+ sites globally",
+      "130+ countries access",
+      "11-country travel included",
+      "Full analytics suite",
+      "Dedicated support",
+    ],
     color: "from-purple-500 to-pink-500",
     popular: false,
   },
@@ -47,17 +75,44 @@ const tiers = [
     name: "Corporate",
     price: "$1,500",
     period: "/month",
-    icon: Building,
+    icon: Users,
+    target: "Scale-ups or corporate venture units",
     description: "Enterprise team solution",
-    features: ["Team dashboard", "Unlimited travel days", "Custom reporting", "API access", "White-label options"],
+    features: [
+      "All Global Access features",
+      "Team dashboard & management",
+      "Unlimited travel days",
+      "Custom reporting & analytics",
+      "API access",
+      "White-label options",
+    ],
     color: "from-orange-500 to-red-500",
+    popular: false,
+  },
+  {
+    name: "In-Person Cohort",
+    price: "No Fee",
+    period: "selected startups",
+    icon: Rocket,
+    target: "Selected deep-tech startups",
+    description: "Full accelerator experience",
+    features: [
+      "All platform features included",
+      "Direct investor introductions",
+      "Accelerated tier access",
+      "Demo day participation",
+      "Full mentor network access",
+      "Priority deal flow visibility",
+    ],
+    color: "from-green-500 to-emerald-500",
     popular: false,
   },
 ];
 
 const MembershipTiers = () => {
   return (
-    <section className="relative py-24 overflow-hidden">
+    <section className="relative py-32 overflow-hidden">
+      {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/5 to-background" />
       
       <div className="container mx-auto px-4 relative z-10">
@@ -67,15 +122,19 @@ const MembershipTiers = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+            <Crown className="w-4 h-4 text-primary" />
+            <span className="text-sm font-medium text-primary">MEMBERSHIP PLANS</span>
+          </div>
+          <h2 className="text-4xl md:text-6xl font-bold mb-4">
             Membership <span className="text-primary">Tiers</span>
           </h2>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Flexible plans for startups at every stage
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+            Flexible plans designed for startups at every stage of their journey
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
           {tiers.map((tier, index) => (
             <motion.div
               key={tier.name}
@@ -86,24 +145,30 @@ const MembershipTiers = () => {
               className={`relative group ${tier.popular ? 'lg:-mt-4 lg:mb-4' : ''}`}
             >
               {tier.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-primary text-primary-foreground text-sm font-bold z-10">
-                  Most Popular
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1.5 rounded-full bg-gradient-to-r from-primary to-teal-400 text-primary-foreground text-sm font-bold z-10 shadow-lg">
+                  Recommended
                 </div>
               )}
               
               {/* Glow for popular */}
               {tier.popular && (
-                <div className="absolute -inset-1 bg-gradient-to-r from-primary to-teal-400 rounded-2xl opacity-30 blur-lg" />
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary via-teal-400 to-primary rounded-2xl opacity-30 blur-xl animate-pulse" />
               )}
+
+              {/* Hover glow */}
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary/50 to-teal-400/50 rounded-2xl opacity-0 group-hover:opacity-100 blur transition-all duration-500" />
               
-              <div className={`relative h-full p-6 rounded-2xl bg-card border ${tier.popular ? 'border-primary' : 'border-border'} transition-all group-hover:border-primary/50`}>
+              <div className={`relative h-full p-6 rounded-2xl bg-card/90 backdrop-blur-xl border ${tier.popular ? 'border-primary' : 'border-border'} group-hover:border-transparent transition-all`}>
                 {/* Icon */}
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tier.color} flex items-center justify-center mb-4`}>
-                  <tier.icon className="w-6 h-6 text-white" />
+                <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${tier.color} flex items-center justify-center mb-4 shadow-lg`}>
+                  <tier.icon className="w-7 h-7 text-white" />
                 </div>
 
-                {/* Name & Price */}
+                {/* Header */}
                 <h3 className="text-xl font-bold text-foreground mb-1">{tier.name}</h3>
+                <p className="text-xs text-primary font-medium mb-2">{tier.target}</p>
+                
+                {/* Price */}
                 <div className="flex items-baseline gap-1 mb-2">
                   <span className="text-3xl font-bold text-foreground">{tier.price}</span>
                   <span className="text-sm text-muted-foreground">{tier.period}</span>
@@ -121,7 +186,7 @@ const MembershipTiers = () => {
                 </ul>
 
                 <Button 
-                  className={`w-full ${tier.popular ? 'bg-primary hover:bg-primary/90' : 'bg-card border border-primary text-primary hover:bg-primary hover:text-primary-foreground'}`}
+                  className={`w-full ${tier.popular ? 'bg-gradient-to-r from-primary to-teal-400 hover:from-primary/90 hover:to-teal-400/90' : ''}`}
                   variant={tier.popular ? "default" : "outline"}
                 >
                   Get Started
