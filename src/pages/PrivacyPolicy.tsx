@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import MatrixBackground from "@/components/MatrixBackground";
@@ -159,7 +160,7 @@ const PrivacyPolicy = () => {
                 We use cookies and similar tracking technologies to enhance your experience on our platform. 
                 You can control cookie preferences through your browser settings. For more information, 
                 please see our{" "}
-                <a href="/cookie-policy" className="text-primary hover:underline">Cookie Policy</a>.
+                <Link to="/cookie-policy" className="text-primary hover:underline">Cookie Policy</Link>.
               </p>
             </section>
 

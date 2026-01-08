@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { Users, Target, Rocket, TrendingUp } from "lucide-react";
 
 const AboutSection = () => {
@@ -102,13 +103,13 @@ const AboutSection = () => {
 
         {/* CTA */}
         <div className="text-center mt-16">
-          <a 
-            href="/auth"
+          <Link 
+            to="/auth"
             className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-primary text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
           >
             <Rocket className="h-5 w-5" />
             Join Our Community Today
-          </a>
+          </Link>
         </div>
       </div>
     </section>

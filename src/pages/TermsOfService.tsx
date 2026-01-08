@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import MatrixBackground from "@/components/MatrixBackground";
@@ -170,7 +171,7 @@ const TermsOfService = () => {
               </div>
               <p className="text-muted-foreground leading-relaxed">
                 Your use of the Platform is also governed by our{" "}
-                <a href="/privacy-policy" className="text-primary hover:underline">Privacy Policy</a>, 
+                <Link to="/privacy-policy" className="text-primary hover:underline">Privacy Policy</Link>, 
                 which explains how we collect, use, and protect your personal information. By using the Platform, 
                 you consent to our data practices as described in the Privacy Policy.
               </p>

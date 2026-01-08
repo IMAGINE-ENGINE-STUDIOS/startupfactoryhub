@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import MatrixBackground from "@/components/MatrixBackground";
@@ -252,7 +253,7 @@ const CookiePolicy = () => {
               <h2 className="text-2xl font-bold mb-4 text-foreground">More Information</h2>
               <p className="text-muted-foreground leading-relaxed">
                 For more information about how we process your personal data, please see our{" "}
-                <a href="/privacy-policy" className="text-primary hover:underline">Privacy Policy</a>.
+                <Link to="/privacy-policy" className="text-primary hover:underline">Privacy Policy</Link>.
                 For questions about our use of cookies and other tracking technologies, please refer to the 
                 contact information below.
               </p>
