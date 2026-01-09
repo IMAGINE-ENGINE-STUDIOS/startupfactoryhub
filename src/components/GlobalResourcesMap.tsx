@@ -105,6 +105,9 @@ export const GlobalResourcesMap = () => {
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
   const [userEventStatus, setUserEventStatus] = useState<string | null>(null);
   const [isUpdatingRsvp, setIsUpdatingRsvp] = useState(false);
+  
+  // Ref to store current resources for click handler (avoids stale closure)
+  const resourcesRef = useRef<Resource[] | undefined>(undefined);
 
   // Address search state
   const [isSearchingAddress, setIsSearchingAddress] = useState(false);
@@ -186,6 +189,11 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     search: search || undefined,
     journeyStep: selectedJourneyStep || undefined
   });
+
+  // Keep resourcesRef in sync with latest resources data
+  useEffect(() => {
+    resourcesRef.current = resources;
+  }, [resources]);
 
   // Fetch events for map
   const { data: mapEvents, isLoading: isLoadingEvents, refetch: refetchEvents } = useEventsForMap();
@@ -524,7 +532,8 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         if (!e.features || e.features.length === 0) return;
         const feature = e.features[0];
         const resourceId = feature.properties?.id;
-        const resource = resources?.find(r => r.id === resourceId);
+        // Use resourcesRef to access current resources (avoids stale closure)
+        const resource = resourcesRef.current?.find(r => r.id === resourceId);
         if (resource) {
           setSelectedResource(resource);
           if (resource.latitude && resource.longitude) {
