@@ -108,13 +108,14 @@ export const AddResourceDialog = ({ open, onOpenChange }: AddResourceDialogProps
   };
 
   const geocodeAddress = async () => {
-    if (!address || locationType !== 'physical') return { lat: null, lng: null };
+    // Skip geocoding for online-only resources
+    if (!address || locationType === 'online') return { lat: null, lng: null };
 
     setIsGeocoding(true);
     try {
       const fullAddress = `${address}, ${city}, ${country}`;
       const response = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(fullAddress)}.json?access_token=pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(fullAddress)}.json?access_token=pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ&types=address,place,poi&limit=1`
       );
       const data = await response.json();
       
@@ -141,7 +142,8 @@ export const AddResourceDialog = ({ open, onOpenChange }: AddResourceDialogProps
     }
 
     let coordinates = { lat: null, lng: null };
-    if (locationType === 'physical' && address) {
+    // Geocode for both physical and hybrid resources
+    if ((locationType === 'physical' || locationType === 'hybrid') && address) {
       coordinates = await geocodeAddress();
     }
 

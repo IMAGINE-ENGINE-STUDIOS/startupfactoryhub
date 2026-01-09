@@ -447,9 +447,56 @@ const ResourcesManagement = () => {
 
   const handleApproveResource = async (resource: Resource) => {
     try {
+      let updatedResource = { ...resource };
+      
+      // Auto-geocode physical/hybrid resources that are missing coordinates
+      const needsGeocode = 
+        (resource.location_type === 'physical' || resource.location_type === 'hybrid') &&
+        (!resource.latitude || !resource.longitude) &&
+        resource.address;
+      
+      if (needsGeocode) {
+        setIsGeocoding(true);
+        try {
+          const fullAddress = `${resource.address}, ${resource.city || ''}, ${resource.country || ''}`;
+          const response = await fetch(
+            `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(fullAddress)}.json?access_token=${mapboxgl.accessToken}&types=address,place,poi&limit=1`
+          );
+          const data = await response.json();
+          
+          if (data.features && data.features.length > 0) {
+            const [lng, lat] = data.features[0].center;
+            updatedResource.latitude = lat;
+            updatedResource.longitude = lng;
+            
+            // Extract city/country if missing
+            const feature = data.features[0];
+            feature.context?.forEach((ctx: any) => {
+              if (ctx.id.startsWith('place') && !updatedResource.city) {
+                updatedResource.city = ctx.text;
+              }
+              if (ctx.id.startsWith('country') && !updatedResource.country) {
+                updatedResource.country = ctx.text;
+              }
+            });
+          }
+        } catch (geocodeError) {
+          console.error('Geocoding error during approval:', geocodeError);
+          // Continue with approval even if geocoding fails
+        } finally {
+          setIsGeocoding(false);
+        }
+      }
+
       const { error } = await supabase
         .from('resources')
-        .update({ is_verified: true })
+        .update({ 
+          is_verified: true,
+          latitude: updatedResource.latitude,
+          longitude: updatedResource.longitude,
+          city: updatedResource.city,
+          country: updatedResource.country
+        })
         .eq('id', resource.id);
 
       if (error) {
@@ -459,11 +506,15 @@ const ResourcesManagement = () => {
 
       // Move from pending to verified
       setPendingResources(prev => prev.filter(r => r.id !== resource.id));
-      setResources(prev => [{ ...resource, is_verified: true }, ...prev]);
+      setResources(prev => [{ ...updatedResource, is_verified: true }, ...prev]);
 
+      const geocodeMsg = needsGeocode && updatedResource.latitude 
+        ? ' (coordinates auto-detected)' 
+        : '';
+      
       toast({
         title: "Approved",
-        description: `"${resource.title}" has been approved and is now visible on the map`
+        description: `"${resource.title}" has been approved and is now visible on the map${geocodeMsg}`
       });
     } catch (error: any) {
       console.error('Error approving resource:', error);
