@@ -466,6 +466,8 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
 
   // Store for dynamically added image keys
   const addedImageKeys = useRef<Set<string>>(new Set());
+  // Track icons currently being generated/loaded to prevent duplicate work
+  const loadingImageKeys = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
@@ -639,106 +641,162 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       if (!map.current) return;
 
       const physicalResources = resources!.filter(r => r.latitude && r.longitude);
-      
-      // Pre-load type icons once (fast, no network)
+
+      const source = map.current!.getSource('resources') as mapboxgl.GeoJSONSource;
+      if (!source) return;
+
+      // Local helpers
+      const getTypeIconKey = (resourceType: ResourceType) => `type-${resourceType}`;
+      const getLogoIconKey = (id: string) => `res-${id}`;
+
+      const buildFeatures = (): GeoJSON.Feature[] =>
+        physicalResources.map((resource) => {
+          const typeKey = getTypeIconKey(resource.resource_type);
+          const logoKey = getLogoIconKey(resource.id);
+
+          // IMPORTANT: default to type icons so markers show immediately.
+          // Switch to logo icon only after the image exists in the style.
+          const iconKey = resource.logo_url && (addedImageKeys.current.has(logoKey) || map.current?.hasImage(logoKey))
+            ? logoKey
+            : typeKey;
+
+          return {
+            type: 'Feature' as const,
+            geometry: {
+              type: 'Point' as const,
+              coordinates: [resource.longitude!, resource.latitude!],
+            },
+            properties: {
+              id: resource.id,
+              iconKey,
+              resourceType: resource.resource_type,
+            },
+          };
+        });
+
+      const applySourceData = () => {
+        if (!map.current) return;
+        source.setData({
+          type: 'FeatureCollection',
+          features: buildFeatures(),
+        });
+      };
+
+      // Load marker icon helpers once
       const { createCircleMarkerIcon, createTypeIcon } = await import('@/lib/mapMarkerIcons');
-      
-      // Pre-generate all type icons first (instant, no async)
-      const typeIconsToAdd: { key: string; color: string; type: ResourceType }[] = [];
-      const logoIconsToLoad: { key: string; resource: Resource; config: typeof RESOURCE_CONFIG[ResourceType]; isOfficialPartner: boolean; isFlagshipHub: boolean }[] = [];
-      
+
+      // Ensure type icons exist for ALL types present (needed as placeholders)
+      const seenTypeKeys = new Set<string>();
       for (const resource of physicalResources) {
+        const config = RESOURCE_CONFIG[resource.resource_type];
+        const typeKey = getTypeIconKey(resource.resource_type);
+
+        if (
+          !seenTypeKeys.has(typeKey) &&
+          !addedImageKeys.current.has(typeKey) &&
+          !map.current.hasImage(typeKey)
+        ) {
+          seenTypeKeys.add(typeKey);
+          const imageData = createTypeIcon(config.color, resource.resource_type, 48);
+          map.current.addImage(typeKey, imageData);
+          addedImageKeys.current.add(typeKey);
+        }
+      }
+
+      // Show markers immediately using type icons
+      applySourceData();
+
+      // Collect logo icons to load (in background)
+      const logoIconsToLoad: {
+        key: string;
+        resource: Resource;
+        config: typeof RESOURCE_CONFIG[ResourceType];
+        isOfficialPartner: boolean;
+        isFlagshipHub: boolean;
+      }[] = [];
+
+      for (const resource of physicalResources) {
+        if (!resource.logo_url) continue;
+
+        const key = getLogoIconKey(resource.id);
         const config = RESOURCE_CONFIG[resource.resource_type];
         const isOfficialPartner = resource.is_official_partner === true;
         const isFlagshipHub = resource.title?.includes('Startup Factory Hub') && isOfficialPartner;
-        
-        if (resource.logo_url) {
-          const iconKey = `res-${resource.id}`;
-          if (!addedImageKeys.current.has(iconKey) && !map.current?.hasImage(iconKey)) {
-            logoIconsToLoad.push({ key: iconKey, resource, config, isOfficialPartner, isFlagshipHub });
-          }
-        } else {
-          const iconKey = `type-${resource.resource_type}`;
-          if (!addedImageKeys.current.has(iconKey) && !map.current?.hasImage(iconKey)) {
-            typeIconsToAdd.push({ key: iconKey, color: config.color, type: resource.resource_type });
-          }
+
+        if (
+          !addedImageKeys.current.has(key) &&
+          !loadingImageKeys.current.has(key) &&
+          !map.current.hasImage(key)
+        ) {
+          logoIconsToLoad.push({ key, resource, config, isOfficialPartner, isFlagshipHub });
         }
       }
-      
-      // Add type icons synchronously (fast)
-      for (const { key, color, type } of typeIconsToAdd) {
-        if (map.current && !map.current.hasImage(key)) {
-          const imageData = createTypeIcon(color, type, 48);
-          map.current.addImage(key, imageData);
-          addedImageKeys.current.add(key);
-        }
-      }
-      
-      // Build features immediately (don't wait for logos)
-      const features: GeoJSON.Feature[] = physicalResources.map(resource => {
-        const iconKey = resource.logo_url 
-          ? `res-${resource.id}` 
-          : `type-${resource.resource_type}`;
-        return {
-          type: 'Feature' as const,
-          geometry: {
-            type: 'Point' as const,
-            coordinates: [resource.longitude!, resource.latitude!]
-          },
-          properties: {
-            id: resource.id,
-            iconKey,
-            resourceType: resource.resource_type
-          }
-        };
-      });
-      
-      // Update GeoJSON source immediately with type icons
-      const source = map.current!.getSource('resources') as mapboxgl.GeoJSONSource;
-      if (source) {
-        source.setData({
-          type: 'FeatureCollection',
-          features
-        });
-      }
-      
-      // Load logo icons in parallel in background (non-blocking)
-      if (logoIconsToLoad.length > 0) {
-        Promise.all(
-          logoIconsToLoad.map(async ({ key, resource, config, isOfficialPartner, isFlagshipHub }) => {
-            const size = isFlagshipHub ? 64 : 48;
+
+      if (logoIconsToLoad.length === 0) return;
+
+      // Debounced refresh to swap type icons -> logos as they become available
+      let refreshTimer: number | null = null;
+      const scheduleRefresh = () => {
+        if (refreshTimer) return;
+        refreshTimer = window.setTimeout(() => {
+          refreshTimer = null;
+          applySourceData();
+        }, 250);
+      };
+
+      const CONCURRENCY = 6;
+      let index = 0;
+
+      const loadNext = async () => {
+        while (map.current && index < logoIconsToLoad.length) {
+          const item = logoIconsToLoad[index++];
+          const { key, resource, config, isOfficialPartner, isFlagshipHub } = item;
+
+          // Mark as loading immediately so we don't start it again if updateResourceMarkers reruns
+          loadingImageKeys.current.add(key);
+
+          const size = isFlagshipHub ? 64 : 48;
+
+          try {
+            let imageData: ImageData;
+
             try {
-              const imageData = await createCircleMarkerIcon({
+              imageData = await createCircleMarkerIcon({
                 size,
                 borderColor: config.color,
                 backgroundColor: config.color,
                 logoUrl: resource.logo_url!,
                 resourceType: resource.resource_type,
                 isOfficialPartner,
-                isFlagshipHub
+                isFlagshipHub,
               });
-              if (map.current && !map.current.hasImage(key)) {
-                map.current.addImage(key, imageData);
-                addedImageKeys.current.add(key);
-              }
             } catch {
-              // Fallback to type icon
-              const fallback = createTypeIcon(config.color, resource.resource_type, size);
-              if (map.current && !map.current.hasImage(key)) {
-                map.current.addImage(key, fallback);
-                addedImageKeys.current.add(key);
-              }
+              // If logo fails, still add a stable fallback under the same key
+              imageData = createTypeIcon(config.color, resource.resource_type, size);
             }
-          })
-        ).then(() => {
-          // Trigger re-render after logos load
-          if (map.current && source) {
-            map.current.triggerRepaint();
+
+            if (map.current && !map.current.hasImage(key)) {
+              map.current.addImage(key, imageData);
+            }
+
+            // Mark as available regardless of addImage outcome (prevents infinite retries)
+            addedImageKeys.current.add(key);
+            scheduleRefresh();
+          } finally {
+            loadingImageKeys.current.delete(key);
           }
-        });
-      }
+        }
+      };
+
+      // Run workers in parallel (capped)
+      Promise.all(
+        Array.from({ length: Math.min(CONCURRENCY, logoIconsToLoad.length) }, () => loadNext())
+      ).finally(() => {
+        scheduleRefresh();
+      });
     }
   }, [resources]);
+
 
 
   // Add event markers to map
