@@ -44,7 +44,8 @@ import {
   Home,
   CalendarDays,
   Clock,
-  Users2
+  Users2,
+  Globe2
 } from 'lucide-react';
 import { AddResourceDialog } from './AddResourceDialog';
 import { TrackingSessionDialog } from './TrackingSessionDialog';
@@ -100,6 +101,7 @@ export const GlobalResourcesMap = () => {
   const [isRotating, setIsRotating] = useState(true);
   const isRotatingRef = useRef(true);
   const [isPerksExpanded, setIsPerksExpanded] = useState(true);
+  const [isOnlineResourcesExpanded, setIsOnlineResourcesExpanded] = useState(false);
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
   const [userEventStatus, setUserEventStatus] = useState<string | null>(null);
   const [isUpdatingRsvp, setIsUpdatingRsvp] = useState(false);
@@ -661,37 +663,15 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     markers.current.forEach(marker => marker.remove());
     markers.current = [];
 
-    // Separate resources: with logos (HTML markers) vs without (native markers)
-    const resourcesWithLogos = resources.filter(r => r.logo_url && r.latitude && r.longitude);
-    const resourcesWithoutLogos = resources.filter(r => !r.logo_url && r.latitude && r.longitude);
+    // Filter only resources with coordinates (both with and without logos)
+    const resourcesWithCoords = resources.filter(r => r.latitude && r.longitude);
 
-    // Update GeoJSON source with resources WITHOUT logos (native markers)
-    const geojsonData = {
-      type: 'FeatureCollection' as const,
-      features: resourcesWithoutLogos.map(resource => ({
-        type: 'Feature' as const,
-        geometry: {
-          type: 'Point' as const,
-          coordinates: [resource.longitude!, resource.latitude!]
-        },
-        properties: {
-          id: resource.id,
-          title: resource.title,
-          resourceType: resource.resource_type
-        }
-      }))
-    };
-
-    const source = map.current.getSource('resources') as mapboxgl.GeoJSONSource;
-    if (source) {
-      source.setData(geojsonData);
-    }
-
-    // Add HTML markers for resources WITH logos
-    resourcesWithLogos.forEach(resource => {
+    // Create unified HTML markers for ALL resources
+    resourcesWithCoords.forEach(resource => {
       const config = RESOURCE_CONFIG[resource.resource_type];
       const isOfficialPartner = resource.is_official_partner === true;
       const isFlagshipHub = resource.title?.includes('Startup Factory Hub') && isOfficialPartner;
+      const hasLogo = !!resource.logo_url;
       
       const markerSize = isFlagshipHub ? 44 : 28;
       const badgeEmoji = isFlagshipHub ? '👑' : '⭐';
@@ -703,22 +683,54 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         width: ${markerSize}px;
         height: ${markerSize}px;
         cursor: pointer;
+        position: relative;
       `;
       
-      // Logo container - perfectly centered
+      // Logo/icon container - perfectly centered
       const logoEl = document.createElement('div');
-      logoEl.style.cssText = `
-        width: 100%;
-        height: 100%;
-        background: url(${resource.logo_url}) center/cover, white;
-        border: ${isFlagshipHub ? '3px solid #FFD700' : `2px solid ${config.color}`};
-        border-radius: 50%;
-        box-shadow: ${isFlagshipHub 
-          ? '0 4px 16px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(0,0,0,0.3)' 
-          : `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`};
-        transition: all 0.2s;
-        ${isFlagshipHub ? 'animation: pulse-glow 2s ease-in-out infinite;' : ''}
-      `;
+      
+      if (hasLogo) {
+        // Resource has logo - show logo
+        logoEl.style.cssText = `
+          width: 100%;
+          height: 100%;
+          background: url(${resource.logo_url}) center/cover, white;
+          border: ${isFlagshipHub ? '3px solid #FFD700' : `2px solid ${config.color}`};
+          border-radius: 50%;
+          box-shadow: ${isFlagshipHub 
+            ? '0 4px 16px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(0,0,0,0.3)' 
+            : `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`};
+          transition: all 0.2s;
+          ${isFlagshipHub ? 'animation: pulse-glow 2s ease-in-out infinite;' : ''}
+        `;
+      } else {
+        // Resource has no logo - show colored circle with type icon
+        logoEl.style.cssText = `
+          width: 100%;
+          height: 100%;
+          background: ${config.color};
+          border: 2px solid white;
+          border-radius: 50%;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30;
+          transition: all 0.2s;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `;
+        
+        // Add SVG icon inside
+        const iconWrapper = document.createElement('div');
+        iconWrapper.style.cssText = `
+          width: 60%;
+          height: 60%;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        `;
+        iconWrapper.innerHTML = getResourceIconSVG(resource.resource_type);
+        logoEl.appendChild(iconWrapper);
+      }
       
       el.appendChild(logoEl);
       
@@ -741,15 +753,23 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       // Hover effect
       el.addEventListener('mouseenter', () => {
         logoEl.style.transform = 'scale(1.15)';
-        logoEl.style.boxShadow = isFlagshipHub
-          ? '0 6px 24px rgba(16, 185, 129, 0.7), 0 0 30px rgba(16, 185, 129, 0.5), 0 4px 12px rgba(0,0,0,0.4)'
-          : `0 4px 12px rgba(0,0,0,0.4), 0 0 0 3px ${config.color}50`;
+        if (hasLogo) {
+          logoEl.style.boxShadow = isFlagshipHub
+            ? '0 6px 24px rgba(16, 185, 129, 0.7), 0 0 30px rgba(16, 185, 129, 0.5), 0 4px 12px rgba(0,0,0,0.4)'
+            : `0 4px 12px rgba(0,0,0,0.4), 0 0 0 3px ${config.color}50`;
+        } else {
+          logoEl.style.boxShadow = `0 4px 12px rgba(0,0,0,0.4), 0 0 0 3px ${config.color}50`;
+        }
       });
       el.addEventListener('mouseleave', () => {
         logoEl.style.transform = 'scale(1)';
-        logoEl.style.boxShadow = isFlagshipHub
-          ? '0 4px 16px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(0,0,0,0.3)'
-          : `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`;
+        if (hasLogo) {
+          logoEl.style.boxShadow = isFlagshipHub
+            ? '0 4px 16px rgba(16, 185, 129, 0.5), 0 0 20px rgba(16, 185, 129, 0.3), 0 2px 8px rgba(0,0,0,0.3)'
+            : `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`;
+        } else {
+          logoEl.style.boxShadow = `0 2px 8px rgba(0,0,0,0.3), 0 0 0 2px ${config.color}30`;
+        }
       });
 
       // Click handler
@@ -776,6 +796,29 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       markers.current.push(marker);
     });
   }, [resources]);
+
+  // Helper function to get SVG icon for resource type
+  const getResourceIconSVG = (type: ResourceType): string => {
+    const icons: Record<ResourceType, string> = {
+      office: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M21 9H9"/></svg>',
+      lab: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 3h6v6l4 9H5l4-9V3z"/></svg>',
+      venue: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+      perk: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 12v6a2 2 0 01-2 2H6a2 2 0 01-2-2v-6M12 2v10M8 6l4 4 4-4"/><rect x="2" y="10" width="20" height="4" rx="1"/></svg>',
+      chamber_of_commerce: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M3 7v14M21 7v14M12 3L2 8h20L12 3z"/></svg>',
+      technology_transfer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>',
+      community: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>',
+      government_grant: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>',
+      accelerator_incubator: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09zM12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/></svg>',
+      entrepreneur_center: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
+      university: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
+      coworking: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3h-8l-2 4h12l-2-4z"/></svg>',
+      investor_network: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+      human_capital: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>',
+      event: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+      other: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    };
+    return icons[type] || icons.other;
+  };
 
   // Add event markers to map
   useEffect(() => {
@@ -1203,6 +1246,118 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         </div>
       </div>
 
+      {/* Online Resources Section - Collapsible */}
+      {resources && (() => {
+        const onlineResources = resources.filter(r => r.location_type === 'online' && r.resource_type !== 'perk');
+        if (onlineResources.length === 0) return null;
+        
+        // Group by resource type
+        const groupedByType = onlineResources.reduce((acc, resource) => {
+          const type = resource.resource_type;
+          if (!acc[type]) acc[type] = [];
+          acc[type].push(resource);
+          return acc;
+        }, {} as Record<ResourceType, Resource[]>);
+        
+        // Collapsed state - pill on the right
+        if (!isOnlineResourcesExpanded) {
+          return (
+            <div className="absolute bottom-36 right-4 z-10 pointer-events-auto">
+              <Button
+                onClick={() => setIsOnlineResourcesExpanded(true)}
+                className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl px-3 py-6 flex flex-col items-center gap-2 hover:ring-1 hover:ring-blue-500/50"
+                variant="ghost"
+              >
+                <ChevronLeft className="w-4 h-4 text-blue-400" />
+                <Globe2 className="w-5 h-5 text-blue-400" />
+                <span className="text-xs font-semibold text-blue-400 [writing-mode:vertical-rl]">{onlineResources.length}</span>
+              </Button>
+            </div>
+          );
+        }
+        
+        // Expanded state
+        return (
+          <div className={cn(
+            "absolute bottom-36 right-4 z-10 pointer-events-auto transition-all duration-300 max-w-[600px]",
+            isLeftPanelOpen ? "left-[348px]" : "left-4"
+          )}>
+            <div className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl p-4 overflow-hidden">
+              <div className="flex items-center justify-between gap-2 mb-3">
+                <div className="flex items-center gap-2">
+                  <Globe2 className="w-4 h-4 text-blue-400" />
+                  <h3 className="text-sm font-semibold">Online Resources</h3>
+                  <Badge variant="outline" className="text-xs bg-blue-500/20 border-blue-500/50 text-blue-400">
+                    {onlineResources.length} available
+                  </Badge>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsOnlineResourcesExpanded(false)}
+                  className="h-6 w-6 rounded-lg backdrop-blur-xl bg-white/10 dark:bg-black/20 hover:bg-white/20"
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+              
+              <ScrollArea className="max-h-48">
+                <div className="space-y-3">
+                  {Object.entries(groupedByType).map(([type, typeResources]) => {
+                    const config = RESOURCE_CONFIG[type as ResourceType];
+                    const Icon = config.icon;
+                    return (
+                      <div key={type}>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Icon className="w-3 h-3" style={{ color: config.color }} />
+                          <span className="text-xs text-muted-foreground font-medium">{config.label} ({typeResources.length})</span>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          {typeResources.slice(0, 5).map((resource) => (
+                            <Card
+                              key={resource.id}
+                              className="tech-card border-0 min-w-[180px] max-w-[180px] cursor-pointer hover:ring-1 flex-shrink-0"
+                              style={{ '--tw-ring-color': config.color } as any}
+                              onClick={() => setSelectedResource(resource)}
+                            >
+                              <CardContent className="p-2">
+                                <div className="flex items-center gap-2">
+                                  {resource.logo_url ? (
+                                    <img src={resource.logo_url} alt="" className="w-6 h-6 rounded-md object-cover" />
+                                  ) : (
+                                    <div 
+                                      className="w-6 h-6 rounded-md flex items-center justify-center"
+                                      style={{ backgroundColor: config.color }}
+                                    >
+                                      <Icon className="w-3 h-3 text-white" />
+                                    </div>
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-medium text-xs truncate">{resource.title}</h4>
+                                    {resource.is_official_partner && (
+                                      <span className="text-[10px] text-amber-400">⭐ Partner</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          ))}
+                          {typeResources.length > 5 && (
+                            <div className="text-xs text-muted-foreground flex items-center">
+                              +{typeResources.length - 5} more
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Bottom Perks Section - Collapsible */}
       {resources && resources.filter(r => r.resource_type === 'perk').length > 0 && (() => {
         const perks = resources.filter(r => r.resource_type === 'perk');
@@ -1356,12 +1511,24 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     <X className="w-4 h-4" />
                   </Button>
                 </div>
-                {selectedResource.logo_url && (
+                {selectedResource.logo_url ? (
                   <img 
                     src={selectedResource.logo_url} 
                     alt="" 
                     className="w-full h-32 rounded-2xl object-cover mb-3" 
                   />
+                ) : (
+                  <div 
+                    className="w-full h-32 rounded-2xl mb-3 flex items-center justify-center"
+                    style={{ 
+                      background: `linear-gradient(135deg, ${RESOURCE_CONFIG[selectedResource.resource_type].color}, ${RESOURCE_CONFIG[selectedResource.resource_type].color}99)` 
+                    }}
+                  >
+                    {(() => {
+                      const Icon = RESOURCE_CONFIG[selectedResource.resource_type].icon;
+                      return <Icon className="w-12 h-12 text-white/80" />;
+                    })()}
+                  </div>
                 )}
               </div>
 
