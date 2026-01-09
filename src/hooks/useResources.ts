@@ -67,9 +67,10 @@ export const useResources = (filters?: ResourceFilters) => {
   return useQuery({
     queryKey: ['resources', filters],
     queryFn: async () => {
+      // Only select needed columns for map display to reduce payload
       let query = supabase
         .from('resources')
-        .select('*')
+        .select('id, title, description, resource_type, location_type, address, city, country, latitude, longitude, website_url, contact_email, logo_url, is_verified, is_official_partner, journey_steps, created_at')
         .eq('is_verified', true)
         .order('created_at', { ascending: false });
 
@@ -94,13 +95,14 @@ export const useResources = (filters?: ResourceFilters) => {
       if (filters?.journeyStep) {
         filteredData = filteredData.filter(resource => {
           const steps = resource.journey_steps || [];
-          // Only show resources that specifically match the step OR are marked for 'all' stages
           return steps.includes(filters.journeyStep!) || steps.includes('all');
         });
       }
 
       return filteredData;
     },
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    gcTime: 1000 * 60 * 10, // Keep in cache for 10 minutes
   });
 };
 
