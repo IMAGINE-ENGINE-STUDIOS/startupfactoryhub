@@ -750,79 +750,25 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       markers.current.push(marker);
     });
 
-    // === Part 2: Native teardrop markers for resources WITHOUT logos (anchor: bottom) ===
-    resourcesWithoutLogos.forEach(resource => {
-      const config = RESOURCE_CONFIG[resource.resource_type];
-      const isOfficialPartner = resource.is_official_partner === true;
-      
-      // Create teardrop-shaped marker element
-      const el = document.createElement('div');
-      el.className = 'resource-marker-pin';
-      el.style.cssText = `
-        width: 30px;
-        height: 40px;
-        cursor: pointer;
-        position: relative;
-      `;
-      
-      // Teardrop SVG with type color
-      el.innerHTML = `
-        <svg viewBox="0 0 30 40" width="30" height="40">
-          <path d="M15 0C6.716 0 0 6.716 0 15c0 8.284 15 25 15 25s15-16.716 15-25C30 6.716 23.284 0 15 0z" 
-                fill="${config.color}" 
-                stroke="white" 
-                stroke-width="2"/>
-          <circle cx="15" cy="14" r="8" fill="white" fill-opacity="0.9"/>
-        </svg>
-      `;
-      
-      // Add partner badge if applicable
-      if (isOfficialPartner) {
-        const starEl = document.createElement('div');
-        starEl.innerHTML = '⭐';
-        starEl.style.cssText = `
-          position: absolute;
-          top: -4px;
-          right: -4px;
-          font-size: 12px;
-          filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
-          pointer-events: none;
-          z-index: 10;
-        `;
-        el.appendChild(starEl);
-      }
-
-      el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.15)';
-        el.style.filter = 'drop-shadow(0 4px 8px rgba(0,0,0,0.3))';
+    // === Part 2: Native symbol-layer pins for resources WITHOUT logos (anchor: bottom) ===
+    // Update the GeoJSON source used by the existing Mapbox symbol layer (resource-markers).
+    const resourcesSource = map.current.getSource('resources') as mapboxgl.GeoJSONSource | undefined;
+    if (resourcesSource) {
+      resourcesSource.setData({
+        type: 'FeatureCollection',
+        features: resourcesWithoutLogos.map((resource) => ({
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [resource.longitude!, resource.latitude!],
+          },
+          properties: {
+            id: resource.id,
+            resourceType: resource.resource_type,
+          },
+        })),
       });
-      el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1)';
-        el.style.filter = 'none';
-      });
-
-      el.addEventListener('click', () => {
-        setSelectedResource(resource);
-        if (map.current && resource.latitude && resource.longitude) {
-          map.current.flyTo({
-            center: [resource.longitude, resource.latitude],
-            zoom: 12,
-            duration: 2000,
-          });
-        }
-      });
-
-      // Use anchor: 'bottom' so the pin tip points at the exact location
-      const marker = new mapboxgl.Marker({ 
-        element: el, 
-        anchor: 'bottom',
-        offset: [0, 0]
-      })
-        .setLngLat([resource.longitude!, resource.latitude!])
-        .addTo(map.current!);
-
-      markers.current.push(marker);
-    });
+    }
   }, [resources]);
 
   // Add event markers to map
