@@ -316,11 +316,11 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
+    // Hint to the browser that decoding can happen off the main thread
+    (img as any).decoding = 'async';
     img.onload = () => resolve(img);
     img.onerror = reject;
-    // Add cache buster for CORS issues
-    const separator = src.includes('?') ? '&' : '?';
-    img.src = `${src}${separator}t=${Date.now()}`;
+    img.src = src;
   });
 }
 
