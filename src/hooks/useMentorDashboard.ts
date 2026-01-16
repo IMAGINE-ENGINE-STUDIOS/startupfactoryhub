@@ -211,7 +211,7 @@ export const useMentorDashboard = () => {
   });
 
   const pendingRequests = mentorships.filter(m => m.status === 'pending');
-  const activeMentees = mentorships.filter(m => m.status === 'active' && m.hasSessions === true);
+  const activeMentees = mentorships.filter(m => m.status === 'active');
   const pastMentees = mentorships.filter(m => m.status === 'completed' || m.status === 'ended');
 
   return {
