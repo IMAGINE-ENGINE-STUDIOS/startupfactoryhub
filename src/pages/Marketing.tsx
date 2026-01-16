@@ -598,7 +598,7 @@ const Marketing = () => {
     ctx.lineTo(centerX + lineLength + diamondOffset, dividerY);
     ctx.stroke();
 
-    // User type cards - matching first banner's premium design
+    // User type cards - EXACTLY matching first banner's design
     const userTypes = [
       { iconType: 'rocket', name: 'Startups', color: '#10b981', glowColor: 'rgba(16, 185, 129, 0.25)' },
       { iconType: 'lightbulb', name: 'Mentors', color: '#06b6d4', glowColor: 'rgba(6, 182, 212, 0.25)' },
@@ -608,22 +608,24 @@ const Marketing = () => {
       { iconType: 'building', name: 'Accelerators', color: '#14b8a6', glowColor: 'rgba(20, 184, 166, 0.25)' }
     ];
 
-    const cardWidth = 170;
-    const cardHeight = 100;
+    // Scale factor for 1200x630 vs 1920x1080 (approx 0.6)
+    const scale = 0.58;
+    const cardWidth = Math.round(280 * scale);  // 162
+    const cardHeight = Math.round(160 * scale); // 93
     const cardsPerRow = 3;
-    const gap = 18;
+    const gap = Math.round(25 * scale);  // 15
     const totalRowWidth = cardsPerRow * cardWidth + (cardsPerRow - 1) * gap;
     const startX = (width - totalRowWidth) / 2;
-    const startY = 350;
+    const startY = 345;
 
     userTypes.forEach((type, i) => {
       const row = Math.floor(i / cardsPerRow);
       const col = i % cardsPerRow;
       const x = startX + col * (cardWidth + gap);
-      const y = startY + row * (cardHeight + 12);
+      const y = startY + row * (cardHeight + 10);
       const cardCenterX = x + cardWidth / 2;
 
-      // Card background glow (matching first banner)
+      // Card background glow (EXACTLY like first banner)
       const bgGlow = ctx.createRadialGradient(cardCenterX, y + cardHeight / 2, 0, cardCenterX, y + cardHeight / 2, cardWidth);
       bgGlow.addColorStop(0, type.glowColor);
       bgGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
@@ -632,13 +634,13 @@ const Marketing = () => {
       ctx.arc(cardCenterX, y + cardHeight / 2, cardWidth / 1.5, 0, Math.PI * 2);
       ctx.fill();
 
-      // Card background
+      // Card background (EXACTLY like first banner)
       ctx.fillStyle = 'rgba(0, 20, 40, 0.75)';
       ctx.beginPath();
-      ctx.roundRect(x, y, cardWidth, cardHeight, 14);
+      ctx.roundRect(x, y, cardWidth, cardHeight, Math.round(20 * scale));
       ctx.fill();
 
-      // Card border gradient (matching first banner)
+      // Card border gradient (EXACTLY like first banner)
       const borderGrad = ctx.createLinearGradient(x, y, x + cardWidth, y + cardHeight);
       borderGrad.addColorStop(0, type.color);
       borderGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
@@ -646,31 +648,31 @@ const Marketing = () => {
       ctx.strokeStyle = borderGrad;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.roundRect(x, y, cardWidth, cardHeight, 14);
+      ctx.roundRect(x, y, cardWidth, cardHeight, Math.round(20 * scale));
       ctx.stroke();
 
-      // Top glow line (matching first banner)
+      // Top glow line (EXACTLY like first banner)
       ctx.strokeStyle = `${type.color}aa`;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = Math.round(3 * scale);
       ctx.beginPath();
-      ctx.moveTo(x + 25, y);
-      ctx.lineTo(x + cardWidth - 25, y);
+      ctx.moveTo(x + Math.round(40 * scale), y);
+      ctx.lineTo(x + cardWidth - Math.round(40 * scale), y);
       ctx.stroke();
 
-      // Hexagon icon container (matching first banner)
-      const hexY = y + 42;
-      const hexSize = 22;
+      // Hexagon icon container (EXACTLY like first banner)
+      const hexY = y + cardHeight / 2 - Math.round(15 * scale);
+      const hexSize = Math.round(38 * scale);
 
-      // Hexagon glow
-      const hexGlow = ctx.createRadialGradient(cardCenterX, hexY, 0, cardCenterX, hexY, hexSize + 12);
+      // Hexagon glow (EXACTLY like first banner)
+      const hexGlow = ctx.createRadialGradient(cardCenterX, hexY, 0, cardCenterX, hexY, hexSize + Math.round(20 * scale));
       hexGlow.addColorStop(0, type.glowColor);
       hexGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = hexGlow;
       ctx.beginPath();
-      ctx.arc(cardCenterX, hexY, hexSize + 12, 0, Math.PI * 2);
+      ctx.arc(cardCenterX, hexY, hexSize + Math.round(20 * scale), 0, Math.PI * 2);
       ctx.fill();
 
-      // Hexagon background
+      // Hexagon background (EXACTLY like first banner)
       ctx.beginPath();
       for (let j = 0; j < 6; j++) {
         const angle = (Math.PI / 3) * j - Math.PI / 2;
@@ -686,37 +688,66 @@ const Marketing = () => {
       ctx.fillStyle = hexFill;
       ctx.fill();
       ctx.strokeStyle = type.color;
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth = 2;
       ctx.stroke();
 
-      // Orbit ring around hexagon (matching first banner)
+      // Orbit ring around hexagon (EXACTLY like first banner)
       ctx.beginPath();
       ctx.strokeStyle = `${type.color}50`;
-      ctx.lineWidth = 1;
-      ctx.setLineDash([3, 3]);
-      ctx.arc(cardCenterX, hexY, hexSize + 8, 0, Math.PI * 2);
+      ctx.lineWidth = Math.round(1.5 * scale);
+      ctx.setLineDash([Math.round(5 * scale), Math.round(5 * scale)]);
+      ctx.arc(cardCenterX, hexY, hexSize + Math.round(12 * scale), 0, Math.PI * 2);
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // Orbit dots (matching first banner)
+      // Orbit dots (EXACTLY like first banner)
       [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach(angle => {
-        const dotX = cardCenterX + Math.cos(angle) * (hexSize + 8);
-        const dotY = hexY + Math.sin(angle) * (hexSize + 8);
+        const dotX = cardCenterX + Math.cos(angle) * (hexSize + Math.round(12 * scale));
+        const dotY = hexY + Math.sin(angle) * (hexSize + Math.round(12 * scale));
         ctx.fillStyle = type.color;
         ctx.beginPath();
-        ctx.arc(dotX, dotY, 2, 0, Math.PI * 2);
+        ctx.arc(dotX, dotY, Math.round(3 * scale), 0, Math.PI * 2);
         ctx.fill();
       });
 
-      // Draw styled icon (matching first banner)
-      drawStyledIconSmall(ctx, type.iconType, cardCenterX, hexY, 10, type.color);
+      // Draw styled icon (using same function as first banner, scaled)
+      drawStyledIcon(ctx, type.iconType, cardCenterX, hexY, Math.round(16 * scale), type.color);
 
-      // Title (matching first banner style)
-      ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
+      // Title (EXACTLY like first banner)
+      ctx.font = `bold ${Math.round(24 * scale)}px "Segoe UI", system-ui, sans-serif`;
       ctx.fillStyle = '#ffffff';
       ctx.textBaseline = 'alphabetic';
       ctx.textAlign = 'center';
-      ctx.fillText(type.name, cardCenterX, y + cardHeight - 12);
+      ctx.fillText(type.name, cardCenterX, y + cardHeight - Math.round(20 * scale));
+
+      // Corner accents on card (EXACTLY like first banner)
+      ctx.strokeStyle = type.color;
+      ctx.lineWidth = 2;
+      const cornerSize = Math.round(20 * scale);
+      // Top left
+      ctx.beginPath();
+      ctx.moveTo(x + cornerSize, y);
+      ctx.lineTo(x, y);
+      ctx.lineTo(x, y + cornerSize);
+      ctx.stroke();
+      // Top right
+      ctx.beginPath();
+      ctx.moveTo(x + cardWidth - cornerSize, y);
+      ctx.lineTo(x + cardWidth, y);
+      ctx.lineTo(x + cardWidth, y + cornerSize);
+      ctx.stroke();
+      // Bottom left
+      ctx.beginPath();
+      ctx.moveTo(x, y + cardHeight - cornerSize);
+      ctx.lineTo(x, y + cardHeight);
+      ctx.lineTo(x + cornerSize, y + cardHeight);
+      ctx.stroke();
+      // Bottom right
+      ctx.beginPath();
+      ctx.moveTo(x + cardWidth, y + cardHeight - cornerSize);
+      ctx.lineTo(x + cardWidth, y + cardHeight);
+      ctx.lineTo(x + cardWidth - cornerSize, y + cardHeight);
+      ctx.stroke();
     });
 
     // QR Code - bottom right (moved up since we removed CTA)
