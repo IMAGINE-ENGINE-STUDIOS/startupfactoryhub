@@ -461,8 +461,13 @@ export default function MatchingSystem() {
   const fetchMatches = async () => {
     if (!user) return;
 
-    // For startups/students: fetch mentor, investor, and accelerator matches
-    if (!userRole || userRole === 'startup' || userRole === 'student') {
+    // For startups: only fetch startup matches (other startups to connect with)
+    if (userRole === 'startup') {
+      await fetchStartupMatchesForInvestor(); // Reuse this to fetch other startups
+    }
+
+    // For students: fetch mentor, investor, and accelerator matches
+    if (!userRole || userRole === 'student') {
       await fetchMentorMatchesForStartup();
       await fetchInvestorMatchesForStartup();
       await fetchAcceleratorMatchesForStartup();
@@ -1102,9 +1107,17 @@ export default function MatchingSystem() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue={userRole === 'mentor' || userRole === 'advisor' || userRole === 'investor' || userRole === 'accelerator' ? 'startups' : 'mentors'} className="space-y-6">
-        <TabsList className={`grid w-full ${(!userRole || userRole === 'startup' || userRole === 'student') ? 'grid-cols-5' : userRole === 'accelerator' ? 'grid-cols-4' : 'grid-cols-2'} max-w-xl`}>
-          {(!userRole || userRole === 'startup' || userRole === 'student') && (
+      <Tabs defaultValue={userRole === 'mentor' || userRole === 'advisor' || userRole === 'investor' || userRole === 'accelerator' || userRole === 'startup' ? 'startups' : 'mentors'} className="space-y-6">
+        <TabsList className={`grid w-full ${userRole === 'student' || !userRole ? 'grid-cols-5' : userRole === 'accelerator' ? 'grid-cols-4' : 'grid-cols-2'} max-w-xl`}>
+          {/* Startup users: only Startups and Network tabs */}
+          {userRole === 'startup' && (
+            <>
+              <TabsTrigger value="startups">Startups</TabsTrigger>
+              <TabsTrigger value="mynetwork">Network</TabsTrigger>
+            </>
+          )}
+          {/* Students: all matching tabs */}
+          {(!userRole || userRole === 'student') && (
             <>
               <TabsTrigger value="mentors">Mentors</TabsTrigger>
               <TabsTrigger value="investors">Investors</TabsTrigger>
@@ -1129,7 +1142,7 @@ export default function MatchingSystem() {
           )}
         </TabsList>
 
-        {(!userRole || userRole === 'startup' || userRole === 'student') && (
+        {(!userRole || userRole === 'student') && (
           <TabsContent value="mentors" className="space-y-4">
           <Card className="tech-card border-0">
             <CardHeader>
@@ -1167,7 +1180,7 @@ export default function MatchingSystem() {
         </TabsContent>
         )}
 
-        {(!userRole || userRole === 'startup' || userRole === 'student' || userRole === 'accelerator') && (
+        {(!userRole || userRole === 'student' || userRole === 'accelerator') && (
           <TabsContent value="investors" className="space-y-4">
           <Card className="tech-card border-0">
             <CardHeader>
@@ -1206,7 +1219,7 @@ export default function MatchingSystem() {
         )}
 
         {/* Accelerators Tab for Startups/Students */}
-        {(!userRole || userRole === 'startup' || userRole === 'student') && (
+        {(!userRole || userRole === 'student') && (
           <TabsContent value="accelerators" className="space-y-4">
             <Card className="tech-card border-0">
               <CardHeader>
