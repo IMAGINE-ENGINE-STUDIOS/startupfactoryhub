@@ -101,7 +101,7 @@ const Marketing = () => {
     qrImage.src = sfhQrCode;
   }, []);
 
-  // Third banner useEffect - Coworking with User Types
+  // Third banner useEffect - Coworking with User Types (HD resolution)
   useEffect(() => {
     const canvas = canvas3Ref.current;
     if (!canvas) return;
@@ -109,8 +109,17 @@ const Marketing = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = 1200;
-    canvas.height = 630;
+    // Use 2x resolution for HD quality
+    const dpr = 2;
+    const displayWidth = 1200;
+    const displayHeight = 630;
+    
+    canvas.width = displayWidth * dpr;
+    canvas.height = displayHeight * dpr;
+    canvas.style.width = `${displayWidth}px`;
+    canvas.style.height = `${displayHeight}px`;
+    
+    ctx.scale(dpr, dpr);
 
     const coworkingImage = new window.Image();
     const logoImage = new window.Image();
@@ -121,7 +130,7 @@ const Marketing = () => {
     const tryDraw = () => {
       loadedCount++;
       if (loadedCount === 3) {
-        drawCoworkingBanner(ctx, canvas.width, canvas.height, coworkingImage, logoImage, qrImage);
+        drawCoworkingBanner(ctx, displayWidth, displayHeight, coworkingImage, logoImage, qrImage);
         setIsRendering3(false);
       }
     };
@@ -135,7 +144,7 @@ const Marketing = () => {
     qrImage.src = sfhQrCode;
   }, []);
 
-  // Fourth banner useEffect - ISS Space Station - Tech Acceleration
+  // Fourth banner useEffect - ISS Space Station - Tech Acceleration (HD resolution)
   useEffect(() => {
     const canvas = canvas4Ref.current;
     if (!canvas) return;
@@ -143,8 +152,17 @@ const Marketing = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = 1200;
-    canvas.height = 630;
+    // Use 2x resolution for HD quality
+    const dpr = 2;
+    const displayWidth = 1200;
+    const displayHeight = 630;
+    
+    canvas.width = displayWidth * dpr;
+    canvas.height = displayHeight * dpr;
+    canvas.style.width = `${displayWidth}px`;
+    canvas.style.height = `${displayHeight}px`;
+    
+    ctx.scale(dpr, dpr);
 
     const issImage = new window.Image();
     const logoImage = new window.Image();
@@ -155,7 +173,7 @@ const Marketing = () => {
     const tryDraw = () => {
       loadedCount++;
       if (loadedCount === 3) {
-        drawISSBanner(ctx, canvas.width, canvas.height, issImage, logoImage, qrImage);
+        drawISSBanner(ctx, displayWidth, displayHeight, issImage, logoImage, qrImage);
         setIsRendering4(false);
       }
     };
@@ -169,7 +187,7 @@ const Marketing = () => {
     qrImage.src = sfhQrCode;
   }, []);
 
-  // Fifth banner useEffect - Moon Earth - Global Reach
+  // Fifth banner useEffect - Moon Earth - Global Reach (HD resolution)
   useEffect(() => {
     const canvas = canvas5Ref.current;
     if (!canvas) return;
@@ -177,8 +195,17 @@ const Marketing = () => {
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    canvas.width = 1200;
-    canvas.height = 630;
+    // Use 2x resolution for HD quality
+    const dpr = 2;
+    const displayWidth = 1200;
+    const displayHeight = 630;
+    
+    canvas.width = displayWidth * dpr;
+    canvas.height = displayHeight * dpr;
+    canvas.style.width = `${displayWidth}px`;
+    canvas.style.height = `${displayHeight}px`;
+    
+    ctx.scale(dpr, dpr);
 
     const moonImage = new window.Image();
     const logoImage = new window.Image();
@@ -189,7 +216,7 @@ const Marketing = () => {
     const tryDraw = () => {
       loadedCount++;
       if (loadedCount === 3) {
-        drawMoonBanner(ctx, canvas.width, canvas.height, moonImage, logoImage, qrImage);
+        drawMoonBanner(ctx, displayWidth, displayHeight, moonImage, logoImage, qrImage);
         setIsRendering5(false);
       }
     };
@@ -784,8 +811,9 @@ const Marketing = () => {
         ctx.fill();
       });
 
-      // Draw styled icon (using same function as first banner, scaled)
-      drawStyledIcon(ctx, type.iconType, cardCenterX, hexY, Math.round(16 * scale), type.color);
+      // Draw styled icon (larger size for visibility)
+      const iconSize = Math.round(22 * scale);
+      drawStyledIcon(ctx, type.iconType, cardCenterX, hexY, iconSize, type.color);
 
       // Title (EXACTLY like first banner)
       ctx.font = `bold ${Math.round(24 * scale)}px "Segoe UI", system-ui, sans-serif`;
