@@ -128,12 +128,6 @@ const PartnersCarousel = () => {
                       />
                     </div>
                     
-                    {/* Partner tier badge */}
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-                      <span className="text-[9px] font-mono text-primary/80 uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20">
-                        {partner.tier}
-                      </span>
-                    </div>
 
                     {/* Corner dots */}
                     <div className="absolute top-2 left-2 w-1 h-1 rounded-full bg-primary/30 group-hover:bg-primary transition-colors" />
