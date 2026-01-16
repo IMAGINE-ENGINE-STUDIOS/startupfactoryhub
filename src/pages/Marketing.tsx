@@ -2192,6 +2192,25 @@ const Marketing = () => {
         ctx.lineTo(x + size * 0.6, y + size * 0.7);
         ctx.stroke();
         break;
+
+      case 'briefcase':
+        // Briefcase body
+        ctx.beginPath();
+        ctx.roundRect(x - size * 0.7, y - size * 0.2, size * 1.4, size * 0.9, 3);
+        ctx.stroke();
+        // Handle
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.3, y - size * 0.2);
+        ctx.lineTo(x - size * 0.3, y - size * 0.5);
+        ctx.lineTo(x + size * 0.3, y - size * 0.5);
+        ctx.lineTo(x + size * 0.3, y - size * 0.2);
+        ctx.stroke();
+        // Center clasp
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.15, y + size * 0.15);
+        ctx.lineTo(x + size * 0.15, y + size * 0.15);
+        ctx.stroke();
+        break;
     }
 
     ctx.restore();
