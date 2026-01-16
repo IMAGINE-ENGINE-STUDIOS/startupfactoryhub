@@ -187,6 +187,7 @@ export default function CorporatePartners() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [failedLogos, setFailedLogos] = useState<Set<string>>(new Set());
   const [formData, setFormData] = useState({
     companyName: "",
     contactName: "",
@@ -198,6 +199,12 @@ export default function CorporatePartners() {
     interests: [] as string[],
     message: ""
   });
+
+  const handleLogoError = (partnerName: string) => {
+    setFailedLogos(prev => new Set(prev).add(partnerName));
+  };
+
+  const visiblePartners = FEATURED_PARTNERS.filter(p => !failedLogos.has(p.name));
 
   const handleInterestToggle = (interest: string) => {
     setFormData(prev => ({
@@ -320,7 +327,7 @@ export default function CorporatePartners() {
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {FEATURED_PARTNERS.map((partner, index) => (
+              {visiblePartners.map((partner, index) => (
                 <div 
                   key={partner.name}
                   className="group relative animate-fade-in"
@@ -351,6 +358,7 @@ export default function CorporatePartners() {
                           src={partner.logo}
                           alt={partner.name}
                           className="max-h-full max-w-full object-contain filter group-hover:brightness-125 group-hover:drop-shadow-[0_0_8px_hsl(var(--primary)/0.5)] transition-all duration-300"
+                          onError={() => handleLogoError(partner.name)}
                         />
                       </div>
                       
