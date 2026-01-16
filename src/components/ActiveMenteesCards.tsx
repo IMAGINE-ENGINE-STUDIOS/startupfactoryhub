@@ -16,6 +16,7 @@ interface MenteeWithCompany {
   goals: string | null;
   created_at: string;
   start_date: string | null;
+  totalSessions?: number;
   mentee: {
     full_name: string;
     avatar_url: string;
@@ -184,6 +185,11 @@ export default function ActiveMenteesCards({
                               </Button>
                             </div>
                             <div className="flex flex-wrap items-center gap-1.5 mt-1">
+                              {mentee.totalSessions === 0 && (
+                                <Badge variant="outline" className="text-[10px] font-medium px-1.5 py-0 text-amber-500 border-amber-500/30 bg-amber-500/10">
+                                  No sessions yet
+                                </Badge>
+                              )}
                               {company?.stage && <Badge variant="outline" className={cn("text-[10px] font-medium px-1.5 py-0", getStageColor(company.stage))}>
                                   {company.stage}
                                 </Badge>}
