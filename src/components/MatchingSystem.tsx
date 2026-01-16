@@ -71,6 +71,7 @@ export default function MatchingSystem() {
   const [connections, setConnections] = useState<any[]>([]);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [roleLoading, setRoleLoading] = useState(true);
   const [userCompany, setUserCompany] = useState<Company | null>(null);
   const [userAcceleratorProfile, setUserAcceleratorProfile] = useState<AcceleratorProfile | null>(null);
   const { user } = useAuth();
@@ -114,16 +115,23 @@ export default function MatchingSystem() {
   }, [user, userRole, userCompany]);
 
   const fetchUserRole = async () => {
-    if (!user) return;
+    if (!user) {
+      setRoleLoading(false);
+      return;
+    }
     
-    const { data, error } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .maybeSingle();
-      
-    if (!error && data) {
-      setUserRole(data.role);
+    try {
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id)
+        .maybeSingle();
+        
+      if (!error && data) {
+        setUserRole(data.role);
+      }
+    } finally {
+      setRoleLoading(false);
     }
   };
 
@@ -461,34 +469,14 @@ export default function MatchingSystem() {
   const fetchMatches = async () => {
     if (!user) return;
 
-    // For startups: only fetch startup matches (other startups to connect with)
-    if (userRole === 'startup') {
-      await fetchStartupMatchesForInvestor(); // Reuse this to fetch other startups
-    }
-
-    // For students: fetch mentor, investor, and accelerator matches
-    if (!userRole || userRole === 'student') {
-      await fetchMentorMatchesForStartup();
-      await fetchInvestorMatchesForStartup();
-      await fetchAcceleratorMatchesForStartup();
-    }
-
-    // For investors: fetch startup matches
-    if (userRole === 'investor') {
-      await fetchStartupMatchesForInvestor();
-    }
-
-    // For mentors/advisors: fetch startup matches
-    if (userRole === 'mentor' || userRole === 'advisor') {
-      await fetchStartupMatchesForMentor();
-    }
-
-    // For accelerators: fetch proper matches with industry/experience scoring
-    if (userRole === 'accelerator') {
-      await fetchMentorMatchesForAccelerator();
-      await fetchInvestorMatchesForStartup();
-      await fetchStartupMatchesForInvestor();
-    }
+    // Fetch ALL categories for ALL users so every tab has data
+    // Each function fetches the respective role type (mentors, investors, accelerators, startups)
+    await Promise.all([
+      fetchMentorMatchesForStartup(),      // Fetch mentors/advisors
+      fetchInvestorMatchesForStartup(),    // Fetch investors
+      fetchAcceleratorMatchesForStartup(), // Fetch accelerators
+      fetchStartupMatchesForInvestor(),    // Fetch startups
+    ]);
   };
 
   const fetchMentorMatchesForStartup = async () => {
@@ -1089,6 +1077,20 @@ export default function MatchingSystem() {
     </Card>
   );
 
+  // Show loading state while role is being fetched
+  if (roleLoading) {
+    return (
+      <div className="space-y-6">
+        <Card className="tech-card border-0">
+          <CardContent className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-3 text-muted-foreground">Loading your matches...</span>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -1107,159 +1109,16 @@ export default function MatchingSystem() {
         </CardContent>
       </Card>
 
-      <Tabs defaultValue={userRole === 'mentor' || userRole === 'advisor' || userRole === 'investor' || userRole === 'accelerator' || userRole === 'startup' ? 'startups' : 'mentors'} className="space-y-6">
-        <TabsList className={`grid w-full ${userRole === 'student' || !userRole ? 'grid-cols-5' : userRole === 'accelerator' ? 'grid-cols-4' : 'grid-cols-2'} max-w-xl`}>
-          {/* Startup users: only Startups and Network tabs */}
-          {userRole === 'startup' && (
-            <>
-              <TabsTrigger value="startups">Startups</TabsTrigger>
-              <TabsTrigger value="mynetwork">Network</TabsTrigger>
-            </>
-          )}
-          {/* Students: all matching tabs */}
-          {(!userRole || userRole === 'student') && (
-            <>
-              <TabsTrigger value="mentors">Mentors</TabsTrigger>
-              <TabsTrigger value="investors">Investors</TabsTrigger>
-              <TabsTrigger value="accelerators">Accelerators</TabsTrigger>
-              <TabsTrigger value="startups">Startups</TabsTrigger>
-              <TabsTrigger value="mynetwork">Network</TabsTrigger>
-            </>
-          )}
-          {userRole === 'accelerator' && (
-            <>
-              <TabsTrigger value="startups">Startups</TabsTrigger>
-              <TabsTrigger value="investors">Investors</TabsTrigger>
-              <TabsTrigger value="mentors">Mentors</TabsTrigger>
-              <TabsTrigger value="mynetwork">My Network</TabsTrigger>
-            </>
-          )}
-          {(userRole === 'investor' || userRole === 'mentor' || userRole === 'advisor') && (
-            <>
-              <TabsTrigger value="startups">Startups</TabsTrigger>
-              <TabsTrigger value="mynetwork">My Network</TabsTrigger>
-            </>
-          )}
+      <Tabs defaultValue="mentors" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5 max-w-xl">
+          <TabsTrigger value="mentors">Mentors</TabsTrigger>
+          <TabsTrigger value="investors">Investors</TabsTrigger>
+          <TabsTrigger value="accelerators">Accelerators</TabsTrigger>
+          <TabsTrigger value="startups">Startups</TabsTrigger>
+          <TabsTrigger value="mynetwork">Network</TabsTrigger>
         </TabsList>
 
-        {(!userRole || userRole === 'student') && (
-          <TabsContent value="mentors" className="space-y-4">
-          <Card className="tech-card border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <UserCheck className="h-5 w-5 text-primary" />
-                <span>Recommended Mentors</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {mentorMatches.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {mentorMatches.map((mentor) => (
-                    <MatchCard
-                      key={mentor.id}
-                      match={mentor}
-                      onConnect={() => sendConnectionRequest(mentor.id, mentor.name, () => {
-                        setMentorMatches(mentorMatches.filter(m => m.id !== mentor.id));
-                      })}
-                      onPass={() => {
-                        setMentorMatches(mentorMatches.filter(m => m.id !== mentor.id));
-                        toast({ title: "Mentor passed", description: "We'll find better matches for you." });
-                      }}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No mentor matches yet</h3>
-                  <p className="text-muted-foreground">Complete your profile to get better matches</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        )}
-
-        {(!userRole || userRole === 'student' || userRole === 'accelerator') && (
-          <TabsContent value="investors" className="space-y-4">
-          <Card className="tech-card border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <TrendingUp className="h-5 w-5 text-primary" />
-                <span>Recommended Investors</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {investorMatches.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {investorMatches.map((investor) => (
-                    <MatchCard
-                      key={investor.id}
-                      match={investor}
-                      onConnect={() => sendConnectionRequest(investor.id, investor.name, () => {
-                        setInvestorMatches(investorMatches.filter(i => i.id !== investor.id));
-                      })}
-                      onPass={() => {
-                        setInvestorMatches(investorMatches.filter(i => i.id !== investor.id));
-                        toast({ title: "Investor passed", description: "We'll find better matches for you." });
-                      }}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <TrendingUp className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No investor matches yet</h3>
-                  <p className="text-muted-foreground">Complete your startup profile to attract investors</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        )}
-
-        {/* Accelerators Tab for Startups/Students */}
-        {(!userRole || userRole === 'student') && (
-          <TabsContent value="accelerators" className="space-y-4">
-            <Card className="tech-card border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Rocket className="h-5 w-5 text-primary" />
-                  <span>Recommended Accelerators</span>
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {acceleratorMatches.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {acceleratorMatches.map((accelerator) => (
-                      <MatchCard
-                        key={accelerator.id}
-                        match={accelerator}
-                        onConnect={() => sendConnectionRequest(accelerator.id, accelerator.name, () => {
-                          setAcceleratorMatches(acceleratorMatches.filter(a => a.id !== accelerator.id));
-                        }, 'Accelerator')}
-                        onPass={() => {
-                          setAcceleratorMatches(acceleratorMatches.filter(a => a.id !== accelerator.id));
-                          toast({ title: "Accelerator passed", description: "We'll find better program matches for you." });
-                        }}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12">
-                    <Rocket className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold mb-2">No accelerator matches yet</h3>
-                    <p className="text-muted-foreground">Complete your startup profile to find the best programs</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-        )}
-
-        {/* Mentors tab for accelerators */}
-        {userRole === 'accelerator' && (
-          <TabsContent value="mentors" className="space-y-4">
+        <TabsContent value="mentors" className="space-y-4">
           <Card className="tech-card border-0">
             <CardHeader>
               <CardTitle className="flex items-center space-x-2">
@@ -1294,7 +1153,78 @@ export default function MatchingSystem() {
             </CardContent>
           </Card>
         </TabsContent>
-        )}
+
+        <TabsContent value="investors" className="space-y-4">
+          <Card className="tech-card border-0">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                <span>Investors</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {investorMatches.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {investorMatches.map((investor) => (
+                    <MatchCard
+                      key={investor.id}
+                      match={investor}
+                      onConnect={() => sendConnectionRequest(investor.id, investor.name, () => {
+                        setInvestorMatches(investorMatches.filter(i => i.id !== investor.id));
+                      })}
+                      onPass={() => {
+                        setInvestorMatches(investorMatches.filter(i => i.id !== investor.id));
+                        toast({ title: "Investor passed", description: "We'll find better matches for you." });
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <TrendingUp className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No investor matches yet</h3>
+                  <p className="text-muted-foreground">Complete your startup profile to attract investors</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="accelerators" className="space-y-4">
+          <Card className="tech-card border-0">
+            <CardHeader>
+              <CardTitle className="flex items-center space-x-2">
+                <Rocket className="h-5 w-5 text-primary" />
+                <span>Accelerators</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {acceleratorMatches.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {acceleratorMatches.map((accelerator) => (
+                    <MatchCard
+                      key={accelerator.id}
+                      match={accelerator}
+                      onConnect={() => sendConnectionRequest(accelerator.id, accelerator.name, () => {
+                        setAcceleratorMatches(acceleratorMatches.filter(a => a.id !== accelerator.id));
+                      }, 'Accelerator')}
+                      onPass={() => {
+                        setAcceleratorMatches(acceleratorMatches.filter(a => a.id !== accelerator.id));
+                        toast({ title: "Accelerator passed", description: "We'll find better program matches for you." });
+                      }}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <Rocket className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">No accelerator matches yet</h3>
+                  <p className="text-muted-foreground">Complete your startup profile to find the best programs</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
 
         <TabsContent value="startups" className="space-y-6">
           <Card className="tech-card border-0">
