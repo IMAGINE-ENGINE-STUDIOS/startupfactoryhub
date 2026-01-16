@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Handshake } from "lucide-react";
 
 const PARTNERS = [
+  { name: "Lovable", logo: "/partners/lovable-logo.png", tier: "Technology" },
   { name: "Decahedron Ventures", logo: "/partners/decahedron-ventures-logo.jpg", tier: "Investment" },
   { name: "Flusso Capital", logo: "/partners/flusso-capital-logo.png", tier: "Investment" },
   { name: "LivePlan", logo: "/partners/liveplan-logo.png", tier: "Accelerator" },
