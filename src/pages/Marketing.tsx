@@ -6,6 +6,8 @@ import { toast } from 'sonner';
 import marketingBg from '@/assets/marketing-bg.jpg';
 import spaceCapsuleBg from '@/assets/space-capsule-bg.jpg';
 import coworkingBg from '@/assets/coworking-space.jpg';
+import issSpaceBg from '@/assets/iss-space-station.jpg';
+import moonEarthBg from '@/assets/moon-earth.jpg';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
 import sfhQrCode from '@/assets/sfh-qr-code.png';
 import GIF from 'gif.js';
@@ -14,10 +16,14 @@ const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvas2Ref = useRef<HTMLCanvasElement>(null);
   const canvas3Ref = useRef<HTMLCanvasElement>(null);
+  const canvas4Ref = useRef<HTMLCanvasElement>(null);
+  const canvas5Ref = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
   const [isRendering, setIsRendering] = useState(true);
   const [isRendering2, setIsRendering2] = useState(true);
   const [isRendering3, setIsRendering3] = useState(true);
+  const [isRendering4, setIsRendering4] = useState(true);
+  const [isRendering5, setIsRendering5] = useState(true);
   const [isGeneratingGif, setIsGeneratingGif] = useState(false);
   const [bgImageRef, setBgImageRef] = useState<HTMLImageElement | null>(null);
   const [logoImageRef, setLogoImageRef] = useState<HTMLImageElement | null>(null);
@@ -125,6 +131,74 @@ const Marketing = () => {
     qrImage.onload = tryDraw;
 
     coworkingImage.src = coworkingBg;
+    logoImage.src = sfhLogo;
+    qrImage.src = sfhQrCode;
+  }, []);
+
+  // Fourth banner useEffect - ISS Space Station - Tech Acceleration
+  useEffect(() => {
+    const canvas = canvas4Ref.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = 1200;
+    canvas.height = 630;
+
+    const issImage = new window.Image();
+    const logoImage = new window.Image();
+    const qrImage = new window.Image();
+    
+    let loadedCount = 0;
+
+    const tryDraw = () => {
+      loadedCount++;
+      if (loadedCount === 3) {
+        drawISSBanner(ctx, canvas.width, canvas.height, issImage, logoImage, qrImage);
+        setIsRendering4(false);
+      }
+    };
+
+    issImage.onload = tryDraw;
+    logoImage.onload = tryDraw;
+    qrImage.onload = tryDraw;
+
+    issImage.src = issSpaceBg;
+    logoImage.src = sfhLogo;
+    qrImage.src = sfhQrCode;
+  }, []);
+
+  // Fifth banner useEffect - Moon Earth - Global Reach
+  useEffect(() => {
+    const canvas = canvas5Ref.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = 1200;
+    canvas.height = 630;
+
+    const moonImage = new window.Image();
+    const logoImage = new window.Image();
+    const qrImage = new window.Image();
+    
+    let loadedCount = 0;
+
+    const tryDraw = () => {
+      loadedCount++;
+      if (loadedCount === 3) {
+        drawMoonBanner(ctx, canvas.width, canvas.height, moonImage, logoImage, qrImage);
+        setIsRendering5(false);
+      }
+    };
+
+    moonImage.onload = tryDraw;
+    logoImage.onload = tryDraw;
+    qrImage.onload = tryDraw;
+
+    moonImage.src = moonEarthBg;
     logoImage.src = sfhLogo;
     qrImage.src = sfhQrCode;
   }, []);
@@ -804,6 +878,506 @@ const Marketing = () => {
     ctx.moveTo(20, height - 60);
     ctx.lineTo(20, height - 20);
     ctx.lineTo(60, height - 20);
+    ctx.stroke();
+  };
+
+  // Banner 4 - ISS Space Station - Tech Acceleration
+  const drawISSBanner = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    bgImage: HTMLImageElement,
+    logoImage: HTMLImageElement,
+    qrImage: HTMLImageElement
+  ) => {
+    // Draw background - cover the canvas
+    const bgRatio = bgImage.width / bgImage.height;
+    const canvasRatio = width / height;
+    
+    let drawWidth = width;
+    let drawHeight = height;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (bgRatio > canvasRatio) {
+      drawWidth = height * bgRatio;
+      offsetX = -(drawWidth - width) / 2;
+    } else {
+      drawHeight = width / bgRatio;
+      offsetY = -(drawHeight - height) / 2;
+    }
+
+    ctx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
+
+    // Dark overlay gradient - bottom heavier for text
+    const overlayGradient = ctx.createLinearGradient(0, 0, 0, height);
+    overlayGradient.addColorStop(0, 'rgba(0, 12, 22, 0.4)');
+    overlayGradient.addColorStop(0.5, 'rgba(0, 15, 28, 0.65)');
+    overlayGradient.addColorStop(1, 'rgba(0, 18, 35, 0.92)');
+    ctx.fillStyle = overlayGradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Add geometric elements
+    drawTechGridSmall(ctx, width, height);
+    drawFloatingHexagonsSmall(ctx, width, height);
+    drawEnergyLinesSmall(ctx, width, height);
+
+    // Logo - top left with glow
+    const logoSize = 70;
+    const logoX = 50;
+    const logoY = 40;
+    
+    const logoGlow = ctx.createRadialGradient(logoX + logoSize/2, logoY + logoSize/2, 0, logoX + logoSize/2, logoY + logoSize/2, logoSize);
+    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.4)');
+    logoGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.fillStyle = logoGlow;
+    ctx.beginPath();
+    ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/2, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
+    ctx.restore();
+
+    // Orbit ring around logo
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath();
+    ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/2 + 10, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Main headline - ACCELERATE
+    ctx.textAlign = 'center';
+    ctx.font = '900 72px "Segoe UI", system-ui, sans-serif';
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.6)';
+    ctx.shadowBlur = 30;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('ACCELERATE', width / 2, 260);
+    ctx.shadowBlur = 0;
+
+    // Sub headline with gradient
+    ctx.font = '900 56px "Segoe UI", system-ui, sans-serif';
+    const techGrad = ctx.createLinearGradient(width/2 - 200, 320, width/2 + 200, 320);
+    techGrad.addColorStop(0, '#0d9488');
+    techGrad.addColorStop(0.5, '#14b8a6');
+    techGrad.addColorStop(1, '#22d3ee');
+    ctx.fillStyle = techGrad;
+    ctx.fillText('TECH STARTUPS', width / 2, 340);
+
+    // Divider line with diamonds
+    const divY = 390;
+    const lineLen = 180;
+    
+    // Left line
+    const leftGrad = ctx.createLinearGradient(width/2 - lineLen - 80, divY, width/2 - 80, divY);
+    leftGrad.addColorStop(0, 'rgba(20, 184, 166, 0)');
+    leftGrad.addColorStop(1, 'rgba(20, 184, 166, 0.8)');
+    ctx.strokeStyle = leftGrad;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(width/2 - lineLen - 80, divY);
+    ctx.lineTo(width/2 - 80, divY);
+    ctx.stroke();
+
+    // Left diamond
+    ctx.fillStyle = '#14b8a6';
+    ctx.save();
+    ctx.translate(width/2 - 70, divY);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-5, -5, 10, 10);
+    ctx.restore();
+
+    // Center text
+    ctx.font = 'bold 16px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('STARTUP FACTORY HUB', width/2, divY + 5);
+
+    // Right diamond
+    ctx.save();
+    ctx.translate(width/2 + 70, divY);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-5, -5, 10, 10);
+    ctx.restore();
+
+    // Right line
+    const rightGrad = ctx.createLinearGradient(width/2 + 80, divY, width/2 + lineLen + 80, divY);
+    rightGrad.addColorStop(0, 'rgba(20, 184, 166, 0.8)');
+    rightGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.strokeStyle = rightGrad;
+    ctx.beginPath();
+    ctx.moveTo(width/2 + 80, divY);
+    ctx.lineTo(width/2 + lineLen + 80, divY);
+    ctx.stroke();
+
+    // Feature cards - 3 in a row
+    const features = [
+      { icon: '🚀', title: 'AI-Powered Tools', desc: 'Smart roadmaps & analytics' },
+      { icon: '🌐', title: 'Global Network', desc: 'Connect with 500+ mentors' },
+      { icon: '💎', title: 'Investor Access', desc: 'Direct pitch opportunities' }
+    ];
+
+    const cardW = 220;
+    const cardH = 100;
+    const cardGap = 30;
+    const totalCardsW = features.length * cardW + (features.length - 1) * cardGap;
+    const cardsStartX = (width - totalCardsW) / 2;
+    const cardsY = 430;
+
+    features.forEach((feat, i) => {
+      const cx = cardsStartX + i * (cardW + cardGap);
+
+      // Card glow
+      const glow = ctx.createRadialGradient(cx + cardW/2, cardsY + cardH/2, 0, cx + cardW/2, cardsY + cardH/2, cardW);
+      glow.addColorStop(0, 'rgba(20, 184, 166, 0.15)');
+      glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(cx + cardW/2, cardsY + cardH/2, cardW/1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Card background
+      ctx.fillStyle = 'rgba(0, 20, 40, 0.7)';
+      ctx.beginPath();
+      ctx.roundRect(cx, cardsY, cardW, cardH, 12);
+      ctx.fill();
+
+      // Card border
+      const borderG = ctx.createLinearGradient(cx, cardsY, cx + cardW, cardsY + cardH);
+      borderG.addColorStop(0, '#14b8a6');
+      borderG.addColorStop(0.5, 'rgba(255,255,255,0.15)');
+      borderG.addColorStop(1, '#14b8a6');
+      ctx.strokeStyle = borderG;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(cx, cardsY, cardW, cardH, 12);
+      ctx.stroke();
+
+      // Top glow line
+      ctx.strokeStyle = 'rgba(20, 184, 166, 0.7)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx + 30, cardsY);
+      ctx.lineTo(cx + cardW - 30, cardsY);
+      ctx.stroke();
+
+      // Icon
+      ctx.font = '32px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(feat.icon, cx + cardW/2, cardsY + 40);
+
+      // Title
+      ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(feat.title, cx + cardW/2, cardsY + 65);
+
+      // Description
+      ctx.font = '400 11px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.7)';
+      ctx.fillText(feat.desc, cx + cardW/2, cardsY + 85);
+
+      // Corner accents
+      ctx.strokeStyle = '#14b8a6';
+      ctx.lineWidth = 2;
+      const cs = 12;
+      ctx.beginPath();
+      ctx.moveTo(cx + cs, cardsY);
+      ctx.lineTo(cx, cardsY);
+      ctx.lineTo(cx, cardsY + cs);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + cardW - cs, cardsY);
+      ctx.lineTo(cx + cardW, cardsY);
+      ctx.lineTo(cx + cardW, cardsY + cs);
+      ctx.stroke();
+    });
+
+    // QR Code - bottom right
+    const qrSize = 75;
+    const qrX = width - qrSize - 30;
+    const qrY = height - qrSize - 30;
+
+    ctx.fillStyle = 'rgba(0, 20, 35, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 10);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 10);
+    ctx.stroke();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(qrX, qrY, qrSize, qrSize, 6);
+    ctx.clip();
+    ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+    ctx.restore();
+
+    ctx.font = 'bold 9px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
+    ctx.textAlign = 'center';
+    ctx.fillText('SCAN ME', qrX + qrSize / 2, qrY - 12);
+
+    // Corner accents for banner
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(20, 50);
+    ctx.lineTo(20, 20);
+    ctx.lineTo(50, 20);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(width - 50, 20);
+    ctx.lineTo(width - 20, 20);
+    ctx.lineTo(width - 20, 50);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(20, height - 50);
+    ctx.lineTo(20, height - 20);
+    ctx.lineTo(50, height - 20);
+    ctx.stroke();
+  };
+
+  // Banner 5 - Moon Earth - Global Reach / Launch Beyond
+  const drawMoonBanner = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    bgImage: HTMLImageElement,
+    logoImage: HTMLImageElement,
+    qrImage: HTMLImageElement
+  ) => {
+    // Draw background - cover the canvas
+    const bgRatio = bgImage.width / bgImage.height;
+    const canvasRatio = width / height;
+    
+    let drawWidth = width;
+    let drawHeight = height;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (bgRatio > canvasRatio) {
+      drawWidth = height * bgRatio;
+      offsetX = -(drawWidth - width) / 2;
+    } else {
+      drawHeight = width / bgRatio;
+      offsetY = -(drawHeight - height) / 2;
+    }
+
+    ctx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
+
+    // Subtle overlay - keep the moon visible
+    const overlayGradient = ctx.createLinearGradient(0, 0, width, height);
+    overlayGradient.addColorStop(0, 'rgba(0, 8, 16, 0.5)');
+    overlayGradient.addColorStop(0.5, 'rgba(0, 12, 24, 0.4)');
+    overlayGradient.addColorStop(1, 'rgba(0, 15, 30, 0.7)');
+    ctx.fillStyle = overlayGradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Add geometric elements
+    drawTechGridSmall(ctx, width, height);
+    drawFloatingHexagonsSmall(ctx, width, height);
+    drawEnergyLinesSmall(ctx, width, height);
+
+    // Left side content panel
+    const panelWidth = 550;
+    const panelGrad = ctx.createLinearGradient(0, 0, panelWidth + 50, 0);
+    panelGrad.addColorStop(0, 'rgba(0, 15, 30, 0.95)');
+    panelGrad.addColorStop(0.7, 'rgba(0, 15, 30, 0.6)');
+    panelGrad.addColorStop(1, 'rgba(0, 15, 30, 0)');
+    ctx.fillStyle = panelGrad;
+    ctx.fillRect(0, 0, panelWidth + 50, height);
+
+    // Vertical accent line
+    ctx.strokeStyle = '#14b8a6';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(35, 50);
+    ctx.lineTo(35, height - 50);
+    ctx.stroke();
+
+    // Glowing dots on accent line
+    const dotYs = [70, 200, 350, 520];
+    dotYs.forEach(dy => {
+      const glow = ctx.createRadialGradient(35, dy, 0, 35, dy, 15);
+      glow.addColorStop(0, 'rgba(20, 184, 166, 0.7)');
+      glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(35, dy, 15, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#14b8a6';
+      ctx.beginPath();
+      ctx.arc(35, dy, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Logo - top left
+    const logoSize = 65;
+    const logoX = 70;
+    const logoY = 45;
+    
+    const logoGlow = ctx.createRadialGradient(logoX + logoSize/2, logoY + logoSize/2, 0, logoX + logoSize/2, logoY + logoSize/2, logoSize);
+    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.35)');
+    logoGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.fillStyle = logoGlow;
+    ctx.beginPath();
+    ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/2, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
+    ctx.restore();
+
+    // Main headline
+    ctx.textAlign = 'left';
+    ctx.font = '900 58px "Segoe UI", system-ui, sans-serif';
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.5)';
+    ctx.shadowBlur = 25;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText('LAUNCH', 70, 200);
+    ctx.shadowBlur = 0;
+
+    // Second line with gradient
+    ctx.font = '900 58px "Segoe UI", system-ui, sans-serif';
+    const beyondGrad = ctx.createLinearGradient(70, 260, 320, 260);
+    beyondGrad.addColorStop(0, '#0d9488');
+    beyondGrad.addColorStop(0.5, '#14b8a6');
+    beyondGrad.addColorStop(1, '#22d3ee');
+    ctx.fillStyle = beyondGrad;
+    ctx.fillText('BEYOND', 70, 265);
+
+    // Tagline
+    ctx.font = '400 18px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.fillText('Where deep tech startups reach', 70, 320);
+    ctx.font = '700 18px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#14b8a6';
+    ctx.fillText('global markets.', 70, 345);
+
+    // Stats cards - vertical stack
+    const stats = [
+      { value: '500+', label: 'Mentors & Advisors' },
+      { value: '50+', label: 'Countries Reached' },
+      { value: '$10M+', label: 'Funding Facilitated' }
+    ];
+
+    const statCardW = 200;
+    const statCardH = 55;
+    const statGap = 12;
+    const statsStartY = 390;
+
+    stats.forEach((stat, i) => {
+      const sy = statsStartY + i * (statCardH + statGap);
+      const sx = 70;
+
+      // Card glow
+      const glow = ctx.createRadialGradient(sx + statCardW/2, sy + statCardH/2, 0, sx + statCardW/2, sy + statCardH/2, statCardW);
+      glow.addColorStop(0, 'rgba(20, 184, 166, 0.1)');
+      glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(sx + statCardW/2, sy + statCardH/2, statCardW/1.5, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Card background
+      ctx.fillStyle = 'rgba(0, 25, 45, 0.7)';
+      ctx.beginPath();
+      ctx.roundRect(sx, sy, statCardW, statCardH, 10);
+      ctx.fill();
+
+      // Border
+      const borderG = ctx.createLinearGradient(sx, sy, sx + statCardW, sy + statCardH);
+      borderG.addColorStop(0, '#14b8a6');
+      borderG.addColorStop(0.5, 'rgba(255,255,255,0.12)');
+      borderG.addColorStop(1, '#14b8a6');
+      ctx.strokeStyle = borderG;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(sx, sy, statCardW, statCardH, 10);
+      ctx.stroke();
+
+      // Value
+      ctx.textAlign = 'left';
+      ctx.font = 'bold 22px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = '#14b8a6';
+      ctx.fillText(stat.value, sx + 15, sy + 28);
+
+      // Label
+      ctx.font = '400 12px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255,255,255,0.8)';
+      ctx.fillText(stat.label, sx + 15, sy + 45);
+
+      // Corner accents
+      ctx.strokeStyle = '#14b8a6';
+      ctx.lineWidth = 2;
+      const cs = 10;
+      ctx.beginPath();
+      ctx.moveTo(sx + cs, sy);
+      ctx.lineTo(sx, sy);
+      ctx.lineTo(sx, sy + cs);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(sx + statCardW - cs, sy);
+      ctx.lineTo(sx + statCardW, sy);
+      ctx.lineTo(sx + statCardW, sy + cs);
+      ctx.stroke();
+    });
+
+    // QR Code - bottom right
+    const qrSize = 75;
+    const qrX = width - qrSize - 30;
+    const qrY = height - qrSize - 30;
+
+    ctx.fillStyle = 'rgba(0, 20, 35, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 10);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 10);
+    ctx.stroke();
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(qrX, qrY, qrSize, qrSize, 6);
+    ctx.clip();
+    ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+    ctx.restore();
+
+    ctx.font = 'bold 9px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
+    ctx.textAlign = 'center';
+    ctx.fillText('SCAN ME', qrX + qrSize / 2, qrY - 12);
+
+    // Corner accents for banner
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(20, 50);
+    ctx.lineTo(20, 20);
+    ctx.lineTo(50, 20);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(width - 50, 20);
+    ctx.lineTo(width - 20, 20);
+    ctx.lineTo(width - 20, 50);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(width - 20, height - 50);
+    ctx.lineTo(width - 20, height - 20);
+    ctx.lineTo(width - 50, height - 20);
     ctx.stroke();
   };
 
@@ -1834,14 +2408,28 @@ const Marketing = () => {
     ctx.stroke();
   };
 
-  const downloadImage = (format: 'png' | 'jpg', canvasNum: 1 | 2 | 3 = 1) => {
-    const canvas = canvasNum === 1 ? canvasRef.current : canvasNum === 2 ? canvas2Ref.current : canvas3Ref.current;
+  const downloadImage = (format: 'png' | 'jpg', canvasNum: 1 | 2 | 3 | 4 | 5 = 1) => {
+    const canvasMap = {
+      1: canvasRef.current,
+      2: canvas2Ref.current,
+      3: canvas3Ref.current,
+      4: canvas4Ref.current,
+      5: canvas5Ref.current
+    };
+    const canvas = canvasMap[canvasNum];
     if (!canvas) return;
 
     const link = document.createElement('a');
     const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
     const quality = format === 'jpg' ? 0.95 : undefined;
-    const suffix = canvasNum === 1 ? 'marketing' : canvasNum === 2 ? 'social-media' : 'user-types';
+    const suffixMap = {
+      1: 'marketing',
+      2: 'social-media',
+      3: 'user-types',
+      4: 'tech-acceleration',
+      5: 'global-launch'
+    };
+    const suffix = suffixMap[canvasNum];
     
     link.download = `startup-factory-hub-${suffix}.${format}`;
     link.href = canvas.toDataURL(mimeType, quality);
@@ -2284,6 +2872,82 @@ const Marketing = () => {
               <div className="relative w-full" style={{ aspectRatio: '1200/630' }}>
                 <canvas ref={canvas3Ref} className="w-full h-full object-contain rounded-lg" style={{ maxWidth: '100%', height: 'auto' }} />
                 {isRendering3 && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                      <span className="text-muted-foreground">Rendering graphic...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Banner 4 - Tech Acceleration 1200x630 */}
+          <div>
+            <div className="tech-card border-0 p-6 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground mb-2">Tech Acceleration Banner (1200×630)</h2>
+                  <p className="text-muted-foreground text-sm">
+                    ISS-themed banner focusing on accelerating tech startups with AI-powered tools.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => downloadImage('png', 4)} disabled={isRendering4} className="gap-2">
+                    <Download className="h-4 w-4" />
+                    PNG
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => downloadImage('jpg', 4)} disabled={isRendering4} className="gap-2">
+                    <Image className="h-4 w-4" />
+                    JPG
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="tech-card border-0 p-4 overflow-hidden">
+              <div className="relative w-full" style={{ aspectRatio: '1200/630' }}>
+                <canvas ref={canvas4Ref} className="w-full h-full object-contain rounded-lg" style={{ maxWidth: '100%', height: 'auto' }} />
+                {isRendering4 && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                      <span className="text-muted-foreground">Rendering graphic...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Banner 5 - Global Launch 1200x630 */}
+          <div>
+            <div className="tech-card border-0 p-6 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground mb-2">Global Launch Banner (1200×630)</h2>
+                  <p className="text-muted-foreground text-sm">
+                    Moon-Earth themed banner showcasing global reach and launch capabilities.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => downloadImage('png', 5)} disabled={isRendering5} className="gap-2">
+                    <Download className="h-4 w-4" />
+                    PNG
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => downloadImage('jpg', 5)} disabled={isRendering5} className="gap-2">
+                    <Image className="h-4 w-4" />
+                    JPG
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="tech-card border-0 p-4 overflow-hidden">
+              <div className="relative w-full" style={{ aspectRatio: '1200/630' }}>
+                <canvas ref={canvas5Ref} className="w-full h-full object-contain rounded-lg" style={{ maxWidth: '100%', height: 'auto' }} />
+                {isRendering5 && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
                     <div className="flex flex-col items-center gap-3">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
