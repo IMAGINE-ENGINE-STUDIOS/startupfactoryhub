@@ -355,7 +355,7 @@ const Marketing = () => {
     ctx.font = '400 12px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
     ctx.textAlign = 'center';
-    ctx.fillText('startupfactoryhub.lovable.app', qrX + qrSize/2, qrY - 35);
+    ctx.fillText('startupfactoryhub.com', qrX + qrSize/2, qrY - 35);
 
     // "SCAN ME" text above QR
     ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
