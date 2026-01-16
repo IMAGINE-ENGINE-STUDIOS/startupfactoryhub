@@ -136,12 +136,25 @@ export default function Auth() {
           variant: "destructive",
         });
       }
-    } else {
+      setLoading(false);
+      return;
+    }
+    
+    // Automatically sign in after successful signup
+    const { error: signInError } = await signIn(email, password);
+    
+    if (signInError) {
       toast({
         title: "Account created!",
-        description: "You can now sign in to your account.",
+        description: "Please sign in with your new credentials.",
       });
       clearForm();
+    } else {
+      toast({
+        title: "Welcome!",
+        description: "Your account has been created and you're now signed in.",
+      });
+      navigate('/dashboard');
     }
     
     setLoading(false);
