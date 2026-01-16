@@ -4,18 +4,22 @@ import { Download, Printer, Image, ArrowLeft, Film } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import marketingBg from '@/assets/marketing-bg.jpg';
+import spaceCapsuleBg from '@/assets/space-capsule-bg.jpg';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
 import sfhQrCode from '@/assets/sfh-qr-code.png';
 import GIF from 'gif.js';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvas2Ref = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
   const [isRendering, setIsRendering] = useState(true);
+  const [isRendering2, setIsRendering2] = useState(true);
   const [isGeneratingGif, setIsGeneratingGif] = useState(false);
   const [bgImageRef, setBgImageRef] = useState<HTMLImageElement | null>(null);
   const [logoImageRef, setLogoImageRef] = useState<HTMLImageElement | null>(null);
   const [qrImageRef, setQrImageRef] = useState<HTMLImageElement | null>(null);
+  const [spaceBgRef, setSpaceBgRef] = useState<HTMLImageElement | null>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -49,6 +53,41 @@ const Marketing = () => {
     qrImage.onload = tryDraw;
 
     bgImage.src = marketingBg;
+    logoImage.src = sfhLogo;
+    qrImage.src = sfhQrCode;
+  }, []);
+
+  // Second banner useEffect - Space Capsule theme
+  useEffect(() => {
+    const canvas = canvas2Ref.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = 1200;
+    canvas.height = 630;
+
+    const spaceBgImage = new window.Image();
+    const logoImage = new window.Image();
+    const qrImage = new window.Image();
+    
+    let loadedCount = 0;
+
+    const tryDraw = () => {
+      loadedCount++;
+      if (loadedCount === 3) {
+        setSpaceBgRef(spaceBgImage);
+        drawSpaceBanner(ctx, canvas.width, canvas.height, spaceBgImage, logoImage, qrImage);
+        setIsRendering2(false);
+      }
+    };
+
+    spaceBgImage.onload = tryDraw;
+    logoImage.onload = tryDraw;
+    qrImage.onload = tryDraw;
+
+    spaceBgImage.src = spaceCapsuleBg;
     logoImage.src = sfhLogo;
     qrImage.src = sfhQrCode;
   }, []);
@@ -120,6 +159,263 @@ const Marketing = () => {
 
     // Draw QR code in top right corner
     drawQRCode(ctx, width, qrImage);
+  };
+
+  // Draw Space Capsule Banner - Different structure with left-aligned content
+  const drawSpaceBanner = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    bgImage: HTMLImageElement,
+    logoImage: HTMLImageElement,
+    qrImage: HTMLImageElement
+  ) => {
+    // Draw space background - cover the canvas
+    const bgRatio = bgImage.width / bgImage.height;
+    const canvasRatio = width / height;
+    
+    let drawWidth = width;
+    let drawHeight = height;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (bgRatio > canvasRatio) {
+      drawWidth = height * bgRatio;
+      offsetX = -(drawWidth - width) / 2;
+    } else {
+      drawHeight = width / bgRatio;
+      offsetY = -(drawHeight - height) / 2;
+    }
+
+    ctx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
+
+    // Gradient overlay - left side darker for text
+    const overlayGradient = ctx.createLinearGradient(0, 0, width, 0);
+    overlayGradient.addColorStop(0, 'rgba(0, 12, 20, 0.95)');
+    overlayGradient.addColorStop(0.5, 'rgba(0, 15, 25, 0.75)');
+    overlayGradient.addColorStop(1, 'rgba(0, 18, 30, 0.4)');
+    ctx.fillStyle = overlayGradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Add subtle scan lines
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.03)';
+    ctx.lineWidth = 1;
+    for (let y = 0; y < height; y += 4) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+
+    // Left side content container background
+    const contentWidth = 550;
+    const contentGrad = ctx.createLinearGradient(0, 0, contentWidth + 100, 0);
+    contentGrad.addColorStop(0, 'rgba(0, 20, 35, 0.9)');
+    contentGrad.addColorStop(0.7, 'rgba(0, 20, 35, 0.6)');
+    contentGrad.addColorStop(1, 'rgba(0, 20, 35, 0)');
+    ctx.fillStyle = contentGrad;
+    ctx.fillRect(0, 0, contentWidth + 100, height);
+
+    // Vertical accent line
+    ctx.strokeStyle = '#14b8a6';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(40, 60);
+    ctx.lineTo(40, height - 60);
+    ctx.stroke();
+
+    // Glowing dots on the accent line
+    const dotPositions = [80, 180, 350, 500];
+    dotPositions.forEach(y => {
+      const glow = ctx.createRadialGradient(40, y, 0, 40, y, 20);
+      glow.addColorStop(0, 'rgba(20, 184, 166, 0.8)');
+      glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(40, y, 20, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = '#14b8a6';
+      ctx.beginPath();
+      ctx.arc(40, y, 5, 0, Math.PI * 2);
+      ctx.fill();
+    });
+
+    // Logo - smaller, top left
+    const logoSize = 80;
+    const logoX = 80;
+    const logoY = 60;
+    
+    // Logo glow
+    const logoGlow = ctx.createRadialGradient(logoX + logoSize/2, logoY + logoSize/2, 0, logoX + logoSize/2, logoY + logoSize/2, logoSize);
+    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.3)');
+    logoGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.fillStyle = logoGlow;
+    ctx.beginPath();
+    ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw logo
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/2, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
+    ctx.restore();
+
+    // Logo ring
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(logoX + logoSize/2, logoY + logoSize/2, logoSize/2 + 5, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Main Title - "LAUNCH YOUR"
+    ctx.textAlign = 'left';
+    ctx.font = '300 48px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.fillText('LAUNCH YOUR', 80, 220);
+
+    // "STARTUP" with gradient
+    ctx.font = '900 72px "Segoe UI", system-ui, sans-serif';
+    const startupGrad = ctx.createLinearGradient(80, 280, 400, 280);
+    startupGrad.addColorStop(0, '#14b8a6');
+    startupGrad.addColorStop(0.5, '#22d3ee');
+    startupGrad.addColorStop(1, '#14b8a6');
+    ctx.fillStyle = startupGrad;
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.5)';
+    ctx.shadowBlur = 30;
+    ctx.fillText('STARTUP', 80, 290);
+    ctx.shadowBlur = 0;
+
+    // "INTO ORBIT" 
+    ctx.font = '300 48px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.fillText('INTO ORBIT', 80, 355);
+
+    // Tagline with icon indicators
+    ctx.font = '400 18px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    
+    const features = [
+      '🚀 Deep Tech Acceleration',
+      '💡 Expert Mentorship',
+      '💰 Investor Network'
+    ];
+    
+    features.forEach((feature, i) => {
+      ctx.fillText(feature, 80, 420 + i * 32);
+    });
+
+    // CTA Button
+    const btnX = 80;
+    const btnY = 530;
+    const btnWidth = 220;
+    const btnHeight = 50;
+
+    // Button glow
+    const btnGlow = ctx.createRadialGradient(btnX + btnWidth/2, btnY + btnHeight/2, 0, btnX + btnWidth/2, btnY + btnHeight/2, 150);
+    btnGlow.addColorStop(0, 'rgba(20, 184, 166, 0.3)');
+    btnGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.fillStyle = btnGlow;
+    ctx.beginPath();
+    ctx.arc(btnX + btnWidth/2, btnY + btnHeight/2, 150, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Button background
+    const btnGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnWidth, btnY);
+    btnGrad.addColorStop(0, '#0d9488');
+    btnGrad.addColorStop(0.5, '#14b8a6');
+    btnGrad.addColorStop(1, '#0d9488');
+    ctx.fillStyle = btnGrad;
+    ctx.beginPath();
+    ctx.roundRect(btnX, btnY, btnWidth, btnHeight, 25);
+    ctx.fill();
+
+    // Button border glow
+    ctx.strokeStyle = 'rgba(34, 211, 238, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(btnX, btnY, btnWidth, btnHeight, 25);
+    ctx.stroke();
+
+    // Button text
+    ctx.font = 'bold 16px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText('JOIN NOW →', btnX + btnWidth/2, btnY + btnHeight/2 + 6);
+
+    // Website URL below button
+    ctx.font = '400 14px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.textAlign = 'left';
+    ctx.fillText('startupfactoryhub.com', 80, btnY + btnHeight + 30);
+
+    // QR Code - bottom right
+    const qrSize = 100;
+    const qrX = width - qrSize - 40;
+    const qrY = height - qrSize - 40;
+
+    // QR background
+    ctx.fillStyle = 'rgba(0, 20, 35, 0.8)';
+    ctx.beginPath();
+    ctx.roundRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 12);
+    ctx.fill();
+
+    // QR border
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, 12);
+    ctx.stroke();
+
+    // Draw QR
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(qrX, qrY, qrSize, qrSize, 8);
+    ctx.clip();
+    ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+    ctx.restore();
+
+    // "SCAN ME" text above QR
+    ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
+    ctx.textAlign = 'center';
+    ctx.fillText('SCAN ME', qrX + qrSize/2, qrY - 20);
+
+    // Top right decorative elements - mission badge style
+    ctx.textAlign = 'right';
+    ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.8)';
+    ctx.fillText('STARTUP FACTORY HUB', width - 40, 40);
+    
+    ctx.font = '400 12px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.fillText('MISSION // DEEP TECH', width - 40, 60);
+
+    // Decorative corner brackets
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.4)';
+    ctx.lineWidth = 2;
+    
+    // Top right corner
+    ctx.beginPath();
+    ctx.moveTo(width - 20, 20);
+    ctx.lineTo(width - 20, 80);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(width - 80, 20);
+    ctx.lineTo(width - 20, 20);
+    ctx.stroke();
+
+    // Bottom left corner
+    ctx.beginPath();
+    ctx.moveTo(20, height - 20);
+    ctx.lineTo(20, height - 80);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(20, height - 20);
+    ctx.lineTo(80, height - 20);
+    ctx.stroke();
   };
 
   const drawTechGrid = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
@@ -870,15 +1166,16 @@ const Marketing = () => {
     ctx.stroke();
   };
 
-  const downloadImage = (format: 'png' | 'jpg') => {
-    const canvas = canvasRef.current;
+  const downloadImage = (format: 'png' | 'jpg', canvasNum: 1 | 2 = 1) => {
+    const canvas = canvasNum === 1 ? canvasRef.current : canvas2Ref.current;
     if (!canvas) return;
 
     const link = document.createElement('a');
     const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
     const quality = format === 'jpg' ? 0.95 : undefined;
+    const suffix = canvasNum === 1 ? 'marketing' : 'social-media';
     
-    link.download = `startup-factory-hub-marketing.${format}`;
+    link.download = `startup-factory-hub-${suffix}.${format}`;
     link.href = canvas.toDataURL(mimeType, quality);
     link.click();
     
@@ -1215,36 +1512,91 @@ const Marketing = () => {
       </div>
 
       <div className="pt-20 pb-8 px-4">
-        <div className="container mx-auto">
-          <div className="tech-card border-0 p-6 mb-6">
-            <h2 className="text-xl font-semibold text-foreground mb-2">Marketing Banner (1920×1080)</h2>
-            <p className="text-muted-foreground text-sm">
-              High-resolution marketing graphic ready for print, social media, or presentations.
-            </p>
-          </div>
-          
-          <div className="tech-card border-0 p-4 overflow-hidden">
-            <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
-              <canvas ref={canvasRef} className="w-full h-full object-contain rounded-lg" style={{ maxWidth: '100%', height: 'auto' }} />
-              {isRendering && (
-                <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
-                  <div className="flex flex-col items-center gap-3">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-                    <span className="text-muted-foreground">Rendering graphic...</span>
-                  </div>
+        <div className="container mx-auto space-y-10">
+          {/* Banner 1 - Original 1920x1080 */}
+          <div>
+            <div className="tech-card border-0 p-6 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground mb-2">Marketing Banner (1920×1080)</h2>
+                  <p className="text-muted-foreground text-sm">
+                    High-resolution marketing graphic ready for print, social media, or presentations.
+                  </p>
                 </div>
-              )}
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => downloadImage('png', 1)} disabled={isRendering} className="gap-2">
+                    <Download className="h-4 w-4" />
+                    PNG
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => downloadImage('jpg', 1)} disabled={isRendering} className="gap-2">
+                    <Image className="h-4 w-4" />
+                    JPG
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="tech-card border-0 p-4 overflow-hidden">
+              <div className="relative w-full" style={{ aspectRatio: '16/9' }}>
+                <canvas ref={canvasRef} className="w-full h-full object-contain rounded-lg" style={{ maxWidth: '100%', height: 'auto' }} />
+                {isRendering && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                      <span className="text-muted-foreground">Rendering graphic...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-4 mt-6">
+          {/* Banner 2 - Social Media 1200x630 */}
+          <div>
+            <div className="tech-card border-0 p-6 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground mb-2">Social Media Banner (1200×630)</h2>
+                  <p className="text-muted-foreground text-sm">
+                    Optimized for Facebook, LinkedIn, and Twitter social sharing. Space capsule theme.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => downloadImage('png', 2)} disabled={isRendering2} className="gap-2">
+                    <Download className="h-4 w-4" />
+                    PNG
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => downloadImage('jpg', 2)} disabled={isRendering2} className="gap-2">
+                    <Image className="h-4 w-4" />
+                    JPG
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="tech-card border-0 p-4 overflow-hidden">
+              <div className="relative w-full" style={{ aspectRatio: '1200/630' }}>
+                <canvas ref={canvas2Ref} className="w-full h-full object-contain rounded-lg" style={{ maxWidth: '100%', height: 'auto' }} />
+                {isRendering2 && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                      <span className="text-muted-foreground">Rendering graphic...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
               <h3 className="font-medium text-foreground mb-1">Print Ready</h3>
               <p className="text-sm text-muted-foreground">1920×1080 resolution for banners and presentations.</p>
             </div>
             <div className="tech-card border-0 p-4">
               <h3 className="font-medium text-foreground mb-1">Social Media</h3>
-              <p className="text-sm text-muted-foreground">Optimized 16:9 for LinkedIn, Twitter, and YouTube.</p>
+              <p className="text-sm text-muted-foreground">1200×630 optimized for Facebook, LinkedIn, Twitter.</p>
             </div>
             <div className="tech-card border-0 p-4">
               <h3 className="font-medium text-foreground mb-1">Brand Consistent</h3>
