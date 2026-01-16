@@ -24,7 +24,7 @@ const PARTNERS = [
   { name: "MongoDB", logo: "/mongodb-logo.webp", tier: "Infrastructure" },
   { name: "Datadog", logo: "https://imgix.datadoghq.com/img/dd_logo_n_70x75.png", tier: "Technology" },
   { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png", tier: "Cloud" },
-  { name: "NVIDIA Inception", logo: "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/logo-and-brand/01-nvidia-logo-horiz-500x200-2c50-d.png", tier: "AI" },
+  
   { name: "Nasdaq", logo: "/nasdaq-logo.png", tier: "Entrepreneurship" },
   { name: "HubSpot", logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png", tier: "Marketing" },
 ];

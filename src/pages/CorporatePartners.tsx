@@ -122,11 +122,6 @@ const FEATURED_PARTNERS = [
     tier: "Cloud Partner"
   },
   {
-    name: "NVIDIA Inception",
-    logo: "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/logo-and-brand/01-nvidia-logo-horiz-500x200-2c50-d.png",
-    tier: "AI Partner"
-  },
-  {
     name: "Latham Pools",
     logo: "https://www.lathampool.com/wp-content/uploads/2021/10/latham-logo.svg",
     tier: "Corporate Sponsor"
