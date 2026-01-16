@@ -17,6 +17,11 @@ import MatrixBackground from "@/components/MatrixBackground";
 
 const FEATURED_PARTNERS = [
   {
+    name: "UK Venture Partners",
+    logo: "/partners/uk-venture-logo.jpg",
+    tier: "Investment Partner"
+  },
+  {
     name: "Flippa",
     logo: "/partners/flippa-logo.png",
     tier: "Marketplace Partner"
