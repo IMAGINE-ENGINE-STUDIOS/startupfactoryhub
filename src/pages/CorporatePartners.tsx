@@ -17,6 +17,56 @@ import MatrixBackground from "@/components/MatrixBackground";
 
 const FEATURED_PARTNERS = [
   {
+    name: "Flippa",
+    logo: "/partners/flippa-logo.png",
+    tier: "Marketplace Partner"
+  },
+  {
+    name: "Ducere University",
+    logo: "/partners/ducere-logo.png",
+    tier: "Academic Partner"
+  },
+  {
+    name: "HackerEarth",
+    logo: "/partners/hackerearth-logo.png",
+    tier: "Technology Partner"
+  },
+  {
+    name: "Advantary Capital Partners",
+    logo: "/partners/advantary-logo.jpg",
+    tier: "Investment Partner"
+  },
+  {
+    name: "Orlandopreneur",
+    logo: "/partners/orlandopreneur-logo.png",
+    tier: "Community Partner"
+  },
+  {
+    name: "Grupo Incostas",
+    logo: "/partners/incostas-logo.png",
+    tier: "Business Partner"
+  },
+  {
+    name: "Nouel Consult",
+    logo: "/partners/nouel-logo.png",
+    tier: "Legal Partner"
+  },
+  {
+    name: "PitchPerfecter.AI",
+    logo: "/partners/pitchperfecter-logo.png",
+    tier: "Startup Partner"
+  },
+  {
+    name: "LOT Network",
+    logo: "/partners/lotnetwork-logo.png",
+    tier: "Legal Partner"
+  },
+  {
+    name: "F6S",
+    logo: "/partners/f6s-logo.png",
+    tier: "Startup Partner"
+  },
+  {
     name: "NASA",
     logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/200px-NASA_logo.svg.png",
     tier: "Technology Partner"
@@ -37,11 +87,6 @@ const FEATURED_PARTNERS = [
     tier: "Infrastructure Partner"
   },
   {
-    name: "Datadog",
-    logo: "https://imgix.datadoghq.com/img/dd_logo_n_70x75.png",
-    tier: "Technology Partner"
-  },
-  {
     name: "Google",
     logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png",
     tier: "Cloud Partner"
@@ -52,89 +97,9 @@ const FEATURED_PARTNERS = [
     tier: "AI Partner"
   },
   {
-    name: "Latham Pools",
-    logo: "https://www.lathampool.com/wp-content/uploads/2021/10/latham-logo.svg",
-    tier: "Corporate Sponsor"
-  },
-  {
-    name: "Pitch Perfecter",
-    logo: "https://uploads-ssl.webflow.com/6388a088c5eb4d4c50dd4f9a/6388a088c5eb4d1a71dd4fce_pp-logo-dark.svg",
-    tier: "Startup Partner"
-  },
-  {
-    name: "F6S",
-    logo: "https://www.f6s.com/content-resource/images/logos/f6s-logo-blue.svg",
-    tier: "Startup Partner"
-  },
-  {
-    name: "Arias Incostas Nouel",
-    logo: "https://www.ariaslaw.com/wp-content/uploads/2020/01/logo-arias.png",
-    tier: "Legal Partner"
-  },
-  {
     name: "Nasdaq Entrepreneurial Center",
     logo: "/nasdaq-logo.png",
     tier: "Entrepreneurship Partner"
-  },
-  {
-    name: "Orlandopreneur",
-    logo: "https://images.squarespace-cdn.com/content/v1/5f4e0c7e7f74731dd56c21e0/1599015149012-7LQNKN8IHKC0JRCYWXLZ/Orlandopreneur+Logo.png",
-    tier: "Community Partner"
-  },
-  {
-    name: "UK Venture",
-    logo: "https://ukventure.com/wp-content/uploads/2022/01/uk-venture-logo.png",
-    tier: "Investment Partner"
-  },
-  {
-    name: "Advantary Capital Partners",
-    logo: "https://advantary.com/wp-content/uploads/2021/06/advantary-logo.png",
-    tier: "Investment Partner"
-  },
-  {
-    name: "Hacked Earth",
-    logo: "https://hackedearth.com/wp-content/uploads/2021/01/hacked-earth-logo.png",
-    tier: "Technology Partner"
-  },
-  {
-    name: "Duquesne University",
-    logo: "https://www.duq.edu/assets/images/duquesne-university-logo.svg",
-    tier: "Academic Partner"
-  },
-  {
-    name: "IWG",
-    logo: "https://www.iwgplc.com/~/media/IWG/Images/Logos/IWG-logo.svg",
-    tier: "Workspace Partner"
-  },
-  {
-    name: "LOT Network",
-    logo: "https://lotnet.com/wp-content/uploads/2020/01/LOT-Network-Logo.png",
-    tier: "Legal Partner"
-  },
-  {
-    name: "Flippa",
-    logo: "https://flippa.com/images/flippa-logo.svg",
-    tier: "Marketplace Partner"
-  },
-  {
-    name: "HubSpot",
-    logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png",
-    tier: "Marketing Partner"
-  },
-  {
-    name: "SumUp",
-    logo: "https://www.sumup.com/favicon.ico",
-    tier: "Payments Partner"
-  },
-  {
-    name: "Connectd",
-    logo: "https://connectd.com/wp-content/uploads/2021/01/connectd-logo.png",
-    tier: "Investment Partner"
-  },
-  {
-    name: "Regus",
-    logo: "https://www.regus.com/favicon.ico",
-    tier: "Workspace Partner"
   }
 ];
 
