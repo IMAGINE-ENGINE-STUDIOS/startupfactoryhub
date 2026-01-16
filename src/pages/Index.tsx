@@ -6,6 +6,7 @@ import CommunitySection from "@/components/CommunitySection";
 import AIAssistantPreview from "@/components/AIAssistantPreview";
 import AboutHero from "@/components/AboutHero";
 import TeamSection from "@/components/TeamSection";
+import PartnersCarousel from "@/components/PartnersCarousel";
 import Footer from "@/components/Footer";
 
 const Index = () => {
@@ -17,6 +18,7 @@ const Index = () => {
       <FeaturesSection />
       <CommunitySection />
       <AIAssistantPreview />
+      <PartnersCarousel />
       <TeamSection />
       <NasdaqFeature />
       <Footer />
