@@ -335,16 +335,9 @@ export default function CorporatePartners() {
                       </div>
                       
                       {/* Partner name with tech styling */}
-                      <h3 className="font-mono font-semibold text-sm mb-2 text-center tracking-wide group-hover:text-primary transition-colors">
+                      <h3 className="font-mono font-semibold text-sm text-center tracking-wide group-hover:text-primary transition-colors">
                         {partner.name}
                       </h3>
-                      
-                      {/* Tech-styled badge */}
-                      <div className="flex justify-center">
-                        <span className="text-[10px] font-mono uppercase tracking-widest px-2 py-1 bg-primary/10 text-primary border border-primary/30 rounded">
-                          {partner.tier}
-                        </span>
-                      </div>
                       
                       {/* Status indicator */}
                       <div className="absolute top-3 right-3 flex items-center gap-1">
