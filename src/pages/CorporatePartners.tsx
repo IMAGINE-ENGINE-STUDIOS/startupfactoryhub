@@ -17,6 +17,11 @@ import MatrixBackground from "@/components/MatrixBackground";
 
 const FEATURED_PARTNERS = [
   {
+    name: "Lovable",
+    logo: "/partners/lovable-logo.png",
+    tier: "Technology Partner"
+  },
+  {
     name: "Decahedron Ventures",
     logo: "/partners/decahedron-ventures-logo.jpg",
     tier: "Investment Partner"

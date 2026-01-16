@@ -1,6 +1,6 @@
 import logo from "@/assets/logo.png";
 import { Link } from "react-router-dom";
-import { BookOpen, Mail, FileText, Shield, Cookie, Rocket } from "lucide-react";
+import { BookOpen, Mail, FileText, Shield, Cookie, Rocket, Handshake } from "lucide-react";
 import { LanguageSelector } from "@/components/LanguageSelector";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -69,6 +69,15 @@ const Footer = () => {
                 >
                   <Rocket className="h-3 w-3" />
                   {t('nav.sponsorship')}
+                </Link>
+              </li>
+              <li>
+                <Link 
+                  to="/partners" 
+                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
+                >
+                  <Handshake className="h-3 w-3" />
+                  Partners
                 </Link>
               </li>
             </ul>
