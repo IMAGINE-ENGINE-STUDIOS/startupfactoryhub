@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { DashboardHeader } from '@/components/DashboardHeader';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useAuth } from '@/contexts/AuthContext';
 import { 
   BarChart3, 
   Users, 
@@ -17,7 +18,8 @@ import {
   Activity,
   DollarSign,
   RefreshCw,
-  Handshake
+  Handshake,
+  AlertTriangle
 } from 'lucide-react';
 
 // Admin components
@@ -36,7 +38,9 @@ import { InvestorsManagement } from '@/components/admin/InvestorsManagement';
 import CorporatePartnersManagement from '@/components/admin/CorporatePartnersManagement';
 
 const AdminDashboard = () => {
+  const { user, loading: authLoading } = useAuth();
   const { role, loading: roleLoading } = useUserRole();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState(() => searchParams.get('tab') || "overview");
   const [refreshing, setRefreshing] = useState(false);
@@ -47,12 +51,38 @@ const AdminDashboard = () => {
     window.location.reload();
   };
 
-  if (roleLoading) {
+  // Show loading while checking auth and role
+  if (authLoading || roleLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Loading admin dashboard...</p>
+          <p className="text-muted-foreground">Verifying admin access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to auth if not logged in
+  if (!user) {
+    navigate('/auth');
+    return null;
+  }
+
+  // Block access if not admin - show access denied page
+  if (role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center max-w-md p-8">
+          <AlertTriangle className="h-16 w-16 text-destructive mx-auto mb-4" />
+          <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
+          <p className="text-muted-foreground mb-6">
+            You don't have permission to access the admin dashboard. 
+            This area is restricted to administrators only.
+          </p>
+          <Button onClick={() => navigate('/dashboard')}>
+            Go to Dashboard
+          </Button>
         </div>
       </div>
     );
