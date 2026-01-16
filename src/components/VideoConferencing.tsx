@@ -29,15 +29,8 @@ export default function VideoConferencing({
   const handleJoin = async () => {
     setIsLoading(true);
     
-    // If we already have a Whereby room URL, use it
-    if (roomUrl && roomUrl.includes('whereby.com')) {
-      setActiveRoomUrl(roomUrl);
-      setIsCallActive(true);
-      setIsLoading(false);
-      return;
-    }
-    
-    // Otherwise, create a new room via API
+    // Always create a fresh room to avoid expired room issues
+    // Whereby rooms can expire, so we generate a new one each time
     try {
       const response = await fetch(
         'https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/create-whereby-room',
@@ -48,7 +41,7 @@ export default function VideoConferencing({
             'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI',
           },
           body: JSON.stringify({
-            roomName: eventId ? `event-${eventId}` : `room-${Date.now()}`,
+            roomName: eventId ? `event-${eventId}` : meetingTitle ? `meet-${meetingTitle.substring(0, 15).replace(/\s+/g, '-')}` : `room-${Date.now()}`,
           }),
         }
       );
