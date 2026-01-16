@@ -492,6 +492,12 @@ const Marketing = () => {
     ctx.fillStyle = overlayGradient;
     ctx.fillRect(0, 0, width, height);
 
+    // Draw geometric elements (scaled for 1200x630)
+    drawTechGridSmall(ctx, width, height);
+    drawFloatingHexagonsSmall(ctx, width, height);
+    drawEnergyLinesSmall(ctx, width, height);
+    drawEnhancedCornerAccents(ctx, width, height);
+
     // Logo - top center
     const logoSize = 90;
     const logoX = width / 2 - logoSize / 2;
@@ -698,6 +704,159 @@ const Marketing = () => {
     ctx.lineTo(20, height - 20);
     ctx.lineTo(60, height - 20);
     ctx.stroke();
+  };
+
+  // Scaled geometric functions for third banner (1200x630)
+  const drawTechGridSmall = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.04)';
+    ctx.lineWidth = 1;
+
+    // Horizontal lines - smaller spacing for 1200x630
+    for (let y = 0; y < height; y += 30) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(width, y);
+      ctx.stroke();
+    }
+
+    // Vertical lines
+    for (let x = 0; x < width; x += 30) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, height);
+      ctx.stroke();
+    }
+
+    // Grid intersection dots
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.08)';
+    for (let x = 0; x < width; x += 60) {
+      for (let y = 0; y < height; y += 60) {
+        ctx.beginPath();
+        ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  };
+
+  const drawFloatingHexagonsSmall = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    const hexagons = [
+      { x: 50, y: 80, size: 25, opacity: 0.1 },
+      { x: 1150, y: 60, size: 30, opacity: 0.08 },
+      { x: 30, y: 550, size: 22, opacity: 0.07 },
+      { x: 1170, y: 580, size: 28, opacity: 0.09 },
+      { x: 100, y: 300, size: 18, opacity: 0.06 },
+      { x: 1100, y: 320, size: 20, opacity: 0.07 },
+      { x: 70, y: 450, size: 35, opacity: 0.08 },
+      { x: 1130, y: 200, size: 32, opacity: 0.06 },
+    ];
+
+    hexagons.forEach(hex => {
+      ctx.strokeStyle = `rgba(20, 184, 166, ${hex.opacity})`;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = (Math.PI / 3) * i - Math.PI / 2;
+        const px = hex.x + hex.size * Math.cos(angle);
+        const py = hex.y + hex.size * Math.sin(angle);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.stroke();
+    });
+  };
+
+  const drawEnergyLinesSmall = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    // Left sweeping arcs - scaled down
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.1)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(-80, height / 2, 280, -Math.PI / 3, Math.PI / 3);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(-80, height / 2, 350, -Math.PI / 4, Math.PI / 4);
+    ctx.stroke();
+
+    // Right sweeping arcs
+    ctx.beginPath();
+    ctx.arc(width + 80, height / 2, 280, Math.PI * 0.67, Math.PI * 1.33);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(width + 80, height / 2, 350, Math.PI * 0.75, Math.PI * 1.25);
+    ctx.stroke();
+
+    // Glowing particles at corners
+    const particles = [
+      { x: 80, y: 100 },
+      { x: 150, y: 60 },
+      { x: 1050, y: 80 },
+      { x: 1120, y: 130 },
+      { x: 60, y: 520 },
+      { x: 130, y: 580 },
+      { x: 1070, y: 550 },
+      { x: 1140, y: 490 },
+    ];
+
+    particles.forEach((p, i) => {
+      // Outer glow
+      const glow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 12);
+      glow.addColorStop(0, 'rgba(20, 184, 166, 0.5)');
+      glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Core
+      ctx.fillStyle = 'rgba(20, 184, 166, 0.8)';
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Connect adjacent particles
+      if (i % 2 === 0 && i < particles.length - 1) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(20, 184, 166, 0.06)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 6]);
+        ctx.moveTo(p.x, p.y);
+        ctx.lineTo(particles[i + 1].x, particles[i + 1].y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    });
+  };
+
+  const drawEnhancedCornerAccents = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+    // Enhanced corner accents with glowing dots
+    const corners = [
+      { x: 20, y: 20, dx: 1, dy: 1 },
+      { x: width - 20, y: 20, dx: -1, dy: 1 },
+      { x: 20, y: height - 20, dx: 1, dy: -1 },
+      { x: width - 20, y: height - 20, dx: -1, dy: -1 },
+    ];
+
+    corners.forEach(corner => {
+      // Skip bottom right (QR code area)
+      if (corner.x > width / 2 && corner.y > height / 2) return;
+
+      // Glowing dot at corner intersection
+      const glow = ctx.createRadialGradient(corner.x, corner.y, 0, corner.x, corner.y, 15);
+      glow.addColorStop(0, 'rgba(20, 184, 166, 0.6)');
+      glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(corner.x, corner.y, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Core dot
+      ctx.fillStyle = '#14b8a6';
+      ctx.beginPath();
+      ctx.arc(corner.x, corner.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+    });
   };
 
   const drawTechGrid = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
