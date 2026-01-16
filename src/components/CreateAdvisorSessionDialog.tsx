@@ -91,16 +91,10 @@ export default function CreateAdvisorSessionDialog({
     try {
       setLoadingMentees(true);
       
-      // Fetch active mentorship relationships where this user is the mentor
+      // Step 1: Fetch active mentorship relationships
       const { data: relationships, error: relError } = await supabase
         .from('mentorship_relationships')
-        .select(`
-          mentee_id,
-          mentee:profiles!mentorship_relationships_mentee_id_fkey (
-            full_name,
-            user_id
-          )
-        `)
+        .select('mentee_id')
         .eq('mentor_id', user.id)
         .eq('status', 'active');
 
@@ -111,18 +105,24 @@ export default function CreateAdvisorSessionDialog({
         return;
       }
 
-      // Get company info for each mentee
+      // Step 2: Fetch profiles and companies separately for each mentee
       const menteeOptions: StartupOption[] = await Promise.all(
-        relationships.map(async (rel: any) => {
+        relationships.map(async (rel) => {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, user_id')
+            .eq('user_id', rel.mentee_id)
+            .maybeSingle();
+
           const { data: company } = await supabase
             .from('companies')
             .select('name, stage')
-            .eq('user_id', rel.mentee?.user_id)
+            .eq('user_id', rel.mentee_id)
             .maybeSingle();
 
           return {
             user_id: rel.mentee_id,
-            full_name: rel.mentee?.full_name || 'Unknown',
+            full_name: profile?.full_name || 'Unknown',
             company_name: company?.name || null,
             company_stage: company?.stage || null,
             is_mentee: true,
