@@ -60,17 +60,31 @@ export default function StartupBrowser() {
   const fetchCompanies = async () => {
     setLoading(true);
     
-    // Fetch companies excluding current user's own company
-    let query = supabase
-      .from('companies')
-      .select('*')
-      .order('created_at', { ascending: false });
+    // First, get user IDs that have 'startup' role (excluding current user)
+    let roleQuery = supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', 'startup');
     
     if (user?.id) {
-      query = query.neq('user_id', user.id);
+      roleQuery = roleQuery.neq('user_id', user.id);
     }
     
-    const { data, error } = await query;
+    const { data: startupRoles } = await roleQuery;
+    const startupUserIds = startupRoles?.map(r => r.user_id) || [];
+    
+    if (startupUserIds.length === 0) {
+      setCompanies([]);
+      setLoading(false);
+      return;
+    }
+
+    // Fetch companies ONLY for users with startup role
+    const { data, error } = await supabase
+      .from('companies')
+      .select('*')
+      .in('user_id', startupUserIds)
+      .order('created_at', { ascending: false });
 
     if (!error && data) {
       setCompanies(data);
