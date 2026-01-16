@@ -86,7 +86,7 @@ const PartnersCarousel = () => {
             ref={scrollRef}
             className="flex gap-6"
             animate={{
-              x: isPaused ? undefined : [0, -50 * visiblePartners.length * 3.5],
+              x: isPaused ? undefined : [0, -70 * visiblePartners.length * 4],
             }}
             transition={{
               x: {
@@ -103,15 +103,15 @@ const PartnersCarousel = () => {
                 key={`${partner.name}-${index}`}
                 className="group flex-shrink-0"
               >
-                <div className="relative w-44 h-28 rounded-2xl bg-gradient-to-br from-card/80 to-card/40 border border-primary/5 backdrop-blur-md transition-all duration-500 hover:border-primary/20 hover:shadow-[0_0_40px_-15px_hsl(var(--primary)/0.4)] hover:scale-105">
+                <div className="relative w-64 h-44 rounded-3xl bg-gradient-to-br from-card/80 to-card/40 border border-primary/5 backdrop-blur-md transition-all duration-500 hover:border-primary/20 hover:shadow-[0_0_40px_-15px_hsl(var(--primary)/0.4)] hover:scale-105">
                   {/* Glow effect on hover */}
-                  <div className="absolute -inset-px rounded-2xl bg-gradient-to-r from-primary/20 via-ocean-primary/20 to-primary/20 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500" />
+                  <div className="absolute -inset-px rounded-3xl bg-gradient-to-r from-primary/20 via-ocean-primary/20 to-primary/20 opacity-0 group-hover:opacity-100 blur-sm transition-opacity duration-500" />
                   
                   {/* Inner container */}
-                  <div className="relative h-full w-full rounded-2xl bg-card/90 p-4 flex flex-col items-center justify-center gap-2 overflow-hidden">
+                  <div className="relative h-full w-full rounded-3xl bg-card/90 p-6 flex flex-col items-center justify-center gap-2 overflow-hidden">
                     {/* Animated border */}
-                    <div className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                      <div className="absolute inset-0 rounded-2xl" style={{
+                    <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                      <div className="absolute inset-0 rounded-3xl" style={{
                         background: `linear-gradient(90deg, transparent, hsl(var(--primary)/0.3), transparent)`,
                         backgroundSize: '200% 100%',
                         animation: 'shimmer 2s infinite',
@@ -123,7 +123,7 @@ const PartnersCarousel = () => {
                       <img
                         src={partner.logo}
                         alt={partner.name}
-                        className="max-h-10 max-w-[120px] object-contain filter grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
+                        className="max-h-16 max-w-[180px] object-contain filter grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-500"
                         onError={() => handleLogoError(partner.name)}
                       />
                     </div>
