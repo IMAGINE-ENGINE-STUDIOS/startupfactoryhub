@@ -417,180 +417,244 @@ export default function CorporatePartners() {
       </section>
 
       {/* Application Form */}
-      <section className="py-16 px-4 bg-muted/30">
-        <div className="max-w-3xl mx-auto">
-          <Card className="p-8">
-            <div className="text-center mb-8">
-              <Building2 className="h-12 w-12 text-primary mx-auto mb-4" />
-              <h2 className="text-2xl font-bold mb-2">Become a Partner</h2>
-              <p className="text-muted-foreground">
-                Fill out the form below and our team will be in touch
-              </p>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="companyName">Company Name *</Label>
-                  <Input
-                    id="companyName"
-                    value={formData.companyName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
-                    placeholder="Your organization name"
-                    required
-                  />
+      <section className="py-16 px-4">
+        <div className="max-w-5xl mx-auto">
+          {/* Tech-style card wrapper */}
+          <div className="relative p-[1px] rounded-xl bg-gradient-to-br from-primary/60 via-accent/40 to-primary/60 overflow-hidden">
+            {/* Animated border glow */}
+            <div className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-primary opacity-30 blur-sm animate-pulse" />
+            
+            {/* Main card content */}
+            <div className="relative bg-background/95 backdrop-blur-md rounded-xl p-8 md:p-12">
+              {/* Corner accents */}
+              <div className="absolute top-0 left-0 w-6 h-6 border-l-2 border-t-2 border-primary/70" />
+              <div className="absolute top-0 right-0 w-6 h-6 border-r-2 border-t-2 border-primary/70" />
+              <div className="absolute bottom-0 left-0 w-6 h-6 border-l-2 border-b-2 border-primary/70" />
+              <div className="absolute bottom-0 right-0 w-6 h-6 border-r-2 border-b-2 border-primary/70" />
+              
+              {/* Scan lines effect */}
+              <div className="absolute inset-0 overflow-hidden rounded-xl pointer-events-none">
+                <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent top-0" />
+                <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent bottom-0" />
+                <div className="absolute inset-y-0 w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent left-0" />
+                <div className="absolute inset-y-0 w-px bg-gradient-to-b from-transparent via-primary/30 to-transparent right-0" />
+              </div>
+              
+              {/* Hex pattern background */}
+              <div className="absolute inset-0 opacity-5 bg-[radial-gradient(circle_at_center,_hsl(var(--primary))_1px,_transparent_1px)] bg-[length:20px_20px] rounded-xl" />
+              
+              {/* Header */}
+              <div className="text-center mb-10 relative">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-lg bg-primary/10 border border-primary/30 mb-4 relative">
+                  <Building2 className="h-8 w-8 text-primary" />
+                  <div className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-primary animate-pulse" />
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="contactName">Contact Name *</Label>
-                  <Input
-                    id="contactName"
-                    value={formData.contactName}
-                    onChange={(e) => setFormData(prev => ({ ...prev, contactName: e.target.value }))}
-                    placeholder="Your full name"
-                    required
-                  />
-                </div>
+                <h2 className="text-3xl font-bold mb-3 font-mono tracking-tight">
+                  <span className="text-primary">&lt;</span>
+                  Become_Partner
+                  <span className="text-primary">/&gt;</span>
+                </h2>
+                <p className="text-muted-foreground font-mono text-sm">
+                  // Initialize partnership connection
+                </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="contactEmail">Email Address *</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+              <form onSubmit={handleSubmit} className="space-y-8 relative">
+                {/* Section divider */}
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+                  <span className="text-xs font-mono text-primary/70 uppercase tracking-wider">Company Info</span>
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-primary/40 to-transparent" />
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="companyName" className="font-mono text-sm text-primary/80">Company_Name *</Label>
                     <Input
-                      id="contactEmail"
-                      type="email"
-                      value={formData.contactEmail}
-                      onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
-                      placeholder="email@company.com"
-                      className="pl-10"
+                      id="companyName"
+                      value={formData.companyName}
+                      onChange={(e) => setFormData(prev => ({ ...prev, companyName: e.target.value }))}
+                      placeholder="Your organization name"
+                      className="bg-background/50 border-primary/30 focus:border-primary font-mono"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="contactName" className="font-mono text-sm text-primary/80">Contact_Name *</Label>
+                    <Input
+                      id="contactName"
+                      value={formData.contactName}
+                      onChange={(e) => setFormData(prev => ({ ...prev, contactName: e.target.value }))}
+                      placeholder="Your full name"
+                      className="bg-background/50 border-primary/30 focus:border-primary font-mono"
                       required
                     />
                   </div>
                 </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="contactPhone">Phone Number</Label>
-                  <div className="relative">
-                    <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="contactPhone"
-                      type="tel"
-                      value={formData.contactPhone}
-                      onChange={(e) => setFormData(prev => ({ ...prev, contactPhone: e.target.value }))}
-                      placeholder="+1 (555) 000-0000"
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-              </div>
 
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="companyWebsite">Company Website</Label>
-                  <div className="relative">
-                    <Globe className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="companyWebsite"
-                      type="url"
-                      value={formData.companyWebsite}
-                      onChange={(e) => setFormData(prev => ({ ...prev, companyWebsite: e.target.value }))}
-                      placeholder="https://company.com"
-                      className="pl-10"
-                    />
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="contactEmail" className="font-mono text-sm text-primary/80">Email_Address *</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-primary/60" />
+                      <Input
+                        id="contactEmail"
+                        type="email"
+                        value={formData.contactEmail}
+                        onChange={(e) => setFormData(prev => ({ ...prev, contactEmail: e.target.value }))}
+                        placeholder="email@company.com"
+                        className="pl-10 bg-background/50 border-primary/30 focus:border-primary font-mono"
+                        required
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="contactPhone" className="font-mono text-sm text-primary/80">Phone_Number</Label>
+                    <div className="relative">
+                      <Phone className="absolute left-3 top-3 h-4 w-4 text-primary/60" />
+                      <Input
+                        id="contactPhone"
+                        type="tel"
+                        value={formData.contactPhone}
+                        onChange={(e) => setFormData(prev => ({ ...prev, contactPhone: e.target.value }))}
+                        placeholder="+1 (555) 000-0000"
+                        className="pl-10 bg-background/50 border-primary/30 focus:border-primary font-mono"
+                      />
+                    </div>
                   </div>
                 </div>
-                
+
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="companyWebsite" className="font-mono text-sm text-primary/80">Company_Website</Label>
+                    <div className="relative">
+                      <Globe className="absolute left-3 top-3 h-4 w-4 text-primary/60" />
+                      <Input
+                        id="companyWebsite"
+                        type="url"
+                        value={formData.companyWebsite}
+                        onChange={(e) => setFormData(prev => ({ ...prev, companyWebsite: e.target.value }))}
+                        placeholder="https://company.com"
+                        className="pl-10 bg-background/50 border-primary/30 focus:border-primary font-mono"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="companySize" className="font-mono text-sm text-primary/80">Company_Size</Label>
+                    <Select
+                      value={formData.companySize}
+                      onValueChange={(value) => setFormData(prev => ({ ...prev, companySize: value }))}
+                    >
+                      <SelectTrigger className="bg-background/50 border-primary/30 focus:border-primary font-mono">
+                        <SelectValue placeholder="Select size" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="1-50">1-50 employees</SelectItem>
+                        <SelectItem value="51-200">51-200 employees</SelectItem>
+                        <SelectItem value="201-1000">201-1,000 employees</SelectItem>
+                        <SelectItem value="1001-5000">1,001-5,000 employees</SelectItem>
+                        <SelectItem value="5000+">5,000+ employees</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Section divider */}
+                <div className="flex items-center gap-4 pt-4">
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+                  <span className="text-xs font-mono text-accent/70 uppercase tracking-wider">Partnership Details</span>
+                  <div className="h-px flex-1 bg-gradient-to-r from-transparent via-accent/40 to-transparent" />
+                </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="companySize">Company Size</Label>
+                  <Label htmlFor="partnershipType" className="font-mono text-sm text-primary/80">Partnership_Type *</Label>
                   <Select
-                    value={formData.companySize}
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, companySize: value }))}
+                    value={formData.partnershipType}
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, partnershipType: value }))}
+                    required
                   >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select size" />
+                    <SelectTrigger className="bg-background/50 border-primary/30 focus:border-primary font-mono">
+                      <SelectValue placeholder="Select partnership type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="1-50">1-50 employees</SelectItem>
-                      <SelectItem value="51-200">51-200 employees</SelectItem>
-                      <SelectItem value="201-1000">201-1,000 employees</SelectItem>
-                      <SelectItem value="1001-5000">1,001-5,000 employees</SelectItem>
-                      <SelectItem value="5000+">5,000+ employees</SelectItem>
+                      {PARTNERSHIP_TYPES.map(type => (
+                        <SelectItem key={type.value} value={type.value}>
+                          {type.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="partnershipType">Partnership Type *</Label>
-                <Select
-                  value={formData.partnershipType}
-                  onValueChange={(value) => setFormData(prev => ({ ...prev, partnershipType: value }))}
-                  required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select partnership type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {PARTNERSHIP_TYPES.map(type => (
-                      <SelectItem key={type.value} value={type.value}>
-                        {type.label}
-                      </SelectItem>
+                <div className="space-y-4">
+                  <Label className="font-mono text-sm text-primary/80">Areas_of_Interest</Label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {INTEREST_AREAS.map(interest => (
+                      <div 
+                        key={interest} 
+                        className={`flex items-center space-x-2 p-3 rounded-lg border transition-all cursor-pointer ${
+                          formData.interests.includes(interest) 
+                            ? 'border-primary bg-primary/10' 
+                            : 'border-primary/20 bg-background/30 hover:border-primary/50'
+                        }`}
+                        onClick={() => handleInterestToggle(interest)}
+                      >
+                        <Checkbox
+                          id={interest}
+                          checked={formData.interests.includes(interest)}
+                          onCheckedChange={() => handleInterestToggle(interest)}
+                          className="border-primary/50 data-[state=checked]:bg-primary"
+                        />
+                        <Label htmlFor={interest} className="text-xs font-mono cursor-pointer">
+                          {interest}
+                        </Label>
+                      </div>
                     ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-3">
-                <Label>Areas of Interest</Label>
-                <div className="grid grid-cols-2 gap-3">
-                  {INTEREST_AREAS.map(interest => (
-                    <div key={interest} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={interest}
-                        checked={formData.interests.includes(interest)}
-                        onCheckedChange={() => handleInterestToggle(interest)}
-                      />
-                      <Label htmlFor={interest} className="text-sm cursor-pointer">
-                        {interest}
-                      </Label>
-                    </div>
-                  ))}
+                  </div>
                 </div>
-              </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="message">Additional Information</Label>
-                <Textarea
-                  id="message"
-                  value={formData.message}
-                  onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
-                  placeholder="Tell us about your partnership goals and how you'd like to collaborate..."
-                  rows={4}
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="message" className="font-mono text-sm text-primary/80">Additional_Info</Label>
+                  <Textarea
+                    id="message"
+                    value={formData.message}
+                    onChange={(e) => setFormData(prev => ({ ...prev, message: e.target.value }))}
+                    placeholder="// Tell us about your partnership goals and how you'd like to collaborate..."
+                    rows={4}
+                    className="bg-background/50 border-primary/30 focus:border-primary font-mono resize-none"
+                  />
+                </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
-                size="lg"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <span className="animate-spin mr-2">⏳</span>
-                    Submitting...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 className="h-5 w-5 mr-2" />
-                    Submit Partnership Application
-                  </>
-                )}
-              </Button>
-            </form>
-          </Card>
+                <Button 
+                  type="submit" 
+                  className="w-full font-mono text-base py-6 bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 border border-primary/50 shadow-[0_0_20px_hsl(var(--primary)/0.3)] hover:shadow-[0_0_30px_hsl(var(--primary)/0.5)] transition-all duration-300" 
+                  size="lg"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <span className="animate-spin mr-2">⏳</span>
+                      Initializing...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="h-5 w-5 mr-2" />
+                      Execute_Partnership_Request()
+                    </>
+                  )}
+                </Button>
+                
+                {/* Status indicator */}
+                <div className="flex items-center justify-center gap-2 text-xs font-mono text-muted-foreground">
+                  <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                  <span>System ready for new connections</span>
+                </div>
+              </form>
+            </div>
+          </div>
         </div>
       </section>
 
