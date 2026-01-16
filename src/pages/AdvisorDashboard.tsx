@@ -56,6 +56,7 @@ export default function AdvisorDashboard() {
   const [selectedStartup, setSelectedStartup] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
+  const [selectedMenteeId, setSelectedMenteeId] = useState<string | null>(null);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -541,7 +542,10 @@ export default function AdvisorDashboard() {
               </Card>}
 
             {/* Active Mentees */}
-            <ActiveMenteesCards mentees={activeMentees} onScheduleSession={() => setCreateSessionDialogOpen(true)} onMessage={menteeId => navigate('/messages')} />
+            <ActiveMenteesCards mentees={activeMentees} onScheduleSession={(menteeId) => {
+              setSelectedMenteeId(menteeId);
+              setCreateSessionDialogOpen(true);
+            }} onMessage={menteeId => navigate('/messages')} />
 
             {/* Session History with Ratings */}
             <MentorSessionHistory showStats={false} />
@@ -730,10 +734,19 @@ export default function AdvisorDashboard() {
         </DialogContent>
       </Dialog>
 
-      <CreateAdvisorSessionDialog open={createSessionDialogOpen} onOpenChange={setCreateSessionDialogOpen} onSessionCreated={() => {
-      setCreateSessionDialogOpen(false);
-      refetch();
-    }} />
+      <CreateAdvisorSessionDialog 
+        open={createSessionDialogOpen} 
+        onOpenChange={(open) => {
+          setCreateSessionDialogOpen(open);
+          if (!open) setSelectedMenteeId(null);
+        }}
+        onSessionCreated={() => {
+          setCreateSessionDialogOpen(false);
+          setSelectedMenteeId(null);
+          refetch();
+        }}
+        preSelectedMenteeId={selectedMenteeId || undefined}
+      />
       <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {
       setCreateEventDialogOpen(false);
     }} />
