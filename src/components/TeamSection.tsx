@@ -38,7 +38,7 @@ const teamMembers = [
     image: teamGary,
   },
   {
-    name: "Hiroaki Takana",
+    name: "Hiroaki Tanaka",
     role: "Managing Director",
     location: "SFH Tokyo",
     image: teamHiro,
