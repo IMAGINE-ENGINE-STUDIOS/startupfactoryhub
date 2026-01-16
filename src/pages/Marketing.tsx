@@ -345,11 +345,6 @@ const Marketing = () => {
     ctx.textAlign = 'center';
     ctx.fillText('JOIN NOW →', btnX + btnWidth/2, btnY + btnHeight/2 + 6);
 
-    // Website URL below button
-    ctx.font = '400 14px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.textAlign = 'left';
-    ctx.fillText('startupfactoryhub.com', 80, btnY + btnHeight + 30);
 
     // QR Code - bottom right
     const qrSize = 100;
