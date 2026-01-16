@@ -1014,85 +1014,150 @@ const Marketing = () => {
     ctx.lineTo(width/2 + lineLen + 80, divY);
     ctx.stroke();
 
-    // Feature cards - 3 in a row
+    // Feature cards - 3 in a row with styled hexagon icons (matching first banner style)
     const features = [
-      { icon: '🚀', title: 'AI-Powered Tools', desc: 'Smart roadmaps & analytics' },
-      { icon: '🌐', title: 'Global Network', desc: 'Connect with 500+ mentors' },
-      { icon: '💎', title: 'Investor Access', desc: 'Direct pitch opportunities' }
+      { iconType: 'lightbulb', title: 'AI-Powered Tools', desc: 'Smart roadmaps & analytics', color: '#06b6d4', glowColor: 'rgba(6, 182, 212, 0.25)' },
+      { iconType: 'building', title: 'Global Network', desc: 'Connect with 500+ mentors', color: '#10b981', glowColor: 'rgba(16, 185, 129, 0.25)' },
+      { iconType: 'diamond', title: 'Investor Access', desc: 'Direct pitch opportunities', color: '#8b5cf6', glowColor: 'rgba(139, 92, 246, 0.25)' }
     ];
 
-    const cardW = 220;
-    const cardH = 100;
-    const cardGap = 30;
+    const cardW = 280;
+    const cardH = 130;
+    const cardGap = 40;
     const totalCardsW = features.length * cardW + (features.length - 1) * cardGap;
     const cardsStartX = (width - totalCardsW) / 2;
-    const cardsY = 430;
+    const cardsY = 420;
 
     features.forEach((feat, i) => {
       const cx = cardsStartX + i * (cardW + cardGap);
+      const centerX = cx + cardW / 2;
 
-      // Card glow
-      const glow = ctx.createRadialGradient(cx + cardW/2, cardsY + cardH/2, 0, cx + cardW/2, cardsY + cardH/2, cardW);
-      glow.addColorStop(0, 'rgba(20, 184, 166, 0.15)');
-      glow.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = glow;
+      // Card background glow
+      const bgGlow = ctx.createRadialGradient(centerX, cardsY + cardH / 2, 0, centerX, cardsY + cardH / 2, cardW);
+      bgGlow.addColorStop(0, feat.glowColor);
+      bgGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = bgGlow;
       ctx.beginPath();
-      ctx.arc(cx + cardW/2, cardsY + cardH/2, cardW/1.5, 0, Math.PI * 2);
+      ctx.arc(centerX, cardsY + cardH / 2, cardW / 1.5, 0, Math.PI * 2);
       ctx.fill();
 
       // Card background
-      ctx.fillStyle = 'rgba(0, 20, 40, 0.7)';
+      ctx.fillStyle = 'rgba(0, 20, 40, 0.75)';
       ctx.beginPath();
-      ctx.roundRect(cx, cardsY, cardW, cardH, 12);
+      ctx.roundRect(cx, cardsY, cardW, cardH, 16);
       ctx.fill();
 
-      // Card border
-      const borderG = ctx.createLinearGradient(cx, cardsY, cx + cardW, cardsY + cardH);
-      borderG.addColorStop(0, '#14b8a6');
-      borderG.addColorStop(0.5, 'rgba(255,255,255,0.15)');
-      borderG.addColorStop(1, '#14b8a6');
-      ctx.strokeStyle = borderG;
+      // Card border gradient
+      const borderGrad = ctx.createLinearGradient(cx, cardsY, cx + cardW, cardsY + cardH);
+      borderGrad.addColorStop(0, feat.color);
+      borderGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
+      borderGrad.addColorStop(1, feat.color);
+      ctx.strokeStyle = borderGrad;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.roundRect(cx, cardsY, cardW, cardH, 12);
+      ctx.roundRect(cx, cardsY, cardW, cardH, 16);
       ctx.stroke();
 
       // Top glow line
-      ctx.strokeStyle = 'rgba(20, 184, 166, 0.7)';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = `${feat.color}aa`;
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.moveTo(cx + 30, cardsY);
-      ctx.lineTo(cx + cardW - 30, cardsY);
+      ctx.moveTo(cx + 40, cardsY);
+      ctx.lineTo(cx + cardW - 40, cardsY);
       ctx.stroke();
 
-      // Icon
-      ctx.font = '32px Arial';
-      ctx.textAlign = 'center';
-      ctx.fillText(feat.icon, cx + cardW/2, cardsY + 40);
+      // Hexagon icon container - centered in card
+      const hexY = cardsY + cardH / 2 - 10;
+      const hexSize = 30;
+
+      // Hexagon glow
+      const hexGlow = ctx.createRadialGradient(centerX, hexY, 0, centerX, hexY, hexSize + 15);
+      hexGlow.addColorStop(0, feat.glowColor);
+      hexGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = hexGlow;
+      ctx.beginPath();
+      ctx.arc(centerX, hexY, hexSize + 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hexagon background
+      ctx.beginPath();
+      for (let j = 0; j < 6; j++) {
+        const angle = (Math.PI / 3) * j - Math.PI / 2;
+        const px = centerX + hexSize * Math.cos(angle);
+        const py = hexY + hexSize * Math.sin(angle);
+        if (j === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      const hexFill = ctx.createLinearGradient(centerX - hexSize, hexY - hexSize, centerX + hexSize, hexY + hexSize);
+      hexFill.addColorStop(0, feat.color);
+      hexFill.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
+      ctx.fillStyle = hexFill;
+      ctx.fill();
+      ctx.strokeStyle = feat.color;
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Orbit ring around hexagon
+      ctx.beginPath();
+      ctx.strokeStyle = `${feat.color}50`;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.arc(centerX, hexY, hexSize + 10, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Orbit dots
+      [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach(angle => {
+        const dotX = centerX + Math.cos(angle) * (hexSize + 10);
+        const dotY = hexY + Math.sin(angle) * (hexSize + 10);
+        ctx.fillStyle = feat.color;
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Draw styled icon
+      drawStyledIcon(ctx, feat.iconType, centerX, hexY, 14, feat.color);
 
       // Title
-      ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
+      ctx.font = 'bold 16px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = '#ffffff';
-      ctx.fillText(feat.title, cx + cardW/2, cardsY + 65);
+      ctx.textAlign = 'center';
+      ctx.fillText(feat.title, centerX, cardsY + cardH - 30);
 
       // Description
-      ctx.font = '400 11px "Segoe UI", system-ui, sans-serif';
+      ctx.font = '400 12px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = 'rgba(255,255,255,0.7)';
-      ctx.fillText(feat.desc, cx + cardW/2, cardsY + 85);
+      ctx.fillText(feat.desc, centerX, cardsY + cardH - 12);
 
-      // Corner accents
-      ctx.strokeStyle = '#14b8a6';
+      // Corner accents on card
+      ctx.strokeStyle = feat.color;
       ctx.lineWidth = 2;
-      const cs = 12;
+      const cornerSize = 15;
+      // Top left
       ctx.beginPath();
-      ctx.moveTo(cx + cs, cardsY);
+      ctx.moveTo(cx + cornerSize, cardsY);
       ctx.lineTo(cx, cardsY);
-      ctx.lineTo(cx, cardsY + cs);
+      ctx.lineTo(cx, cardsY + cornerSize);
       ctx.stroke();
+      // Top right
       ctx.beginPath();
-      ctx.moveTo(cx + cardW - cs, cardsY);
+      ctx.moveTo(cx + cardW - cornerSize, cardsY);
       ctx.lineTo(cx + cardW, cardsY);
-      ctx.lineTo(cx + cardW, cardsY + cs);
+      ctx.lineTo(cx + cardW, cardsY + cornerSize);
+      ctx.stroke();
+      // Bottom left
+      ctx.beginPath();
+      ctx.moveTo(cx, cardsY + cardH - cornerSize);
+      ctx.lineTo(cx, cardsY + cardH);
+      ctx.lineTo(cx + cornerSize, cardsY + cardH);
+      ctx.stroke();
+      // Bottom right
+      ctx.beginPath();
+      ctx.moveTo(cx + cardW, cardsY + cardH - cornerSize);
+      ctx.lineTo(cx + cardW, cardsY + cardH);
+      ctx.lineTo(cx + cardW - cornerSize, cardsY + cardH);
       ctx.stroke();
     });
 
