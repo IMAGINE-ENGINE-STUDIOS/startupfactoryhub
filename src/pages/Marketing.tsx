@@ -550,25 +550,68 @@ const Marketing = () => {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.fillText('Built for Everyone in the Startup Ecosystem', width / 2, 270);
 
-    // User Types Section Title
-    ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = '#14b8a6';
-    ctx.fillText('━━━  USER TYPES  ━━━', width / 2, 320);
+    // User Types Section Title with decorative elements (matching first banner's divider)
+    const centerX = width / 2;
+    const dividerY = 315;
+    const lineLength = 120;
+    const diamondOffset = 100;
 
-    // User type cards
+    // Left decorative line
+    const leftGrad = ctx.createLinearGradient(centerX - lineLength - diamondOffset, dividerY, centerX - diamondOffset, dividerY);
+    leftGrad.addColorStop(0, 'rgba(20, 184, 166, 0)');
+    leftGrad.addColorStop(1, 'rgba(20, 184, 166, 0.7)');
+    ctx.strokeStyle = leftGrad;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(centerX - lineLength - diamondOffset, dividerY);
+    ctx.lineTo(centerX - diamondOffset, dividerY);
+    ctx.stroke();
+
+    // Left diamond
+    ctx.fillStyle = '#14b8a6';
+    ctx.save();
+    ctx.translate(centerX - diamondOffset + 5, dividerY);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-4, -4, 8, 8);
+    ctx.restore();
+
+    // User Types text
+    ctx.font = 'bold 18px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText('Built for Everyone', centerX, dividerY + 6);
+
+    // Right diamond
+    ctx.save();
+    ctx.translate(centerX + diamondOffset - 5, dividerY);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-4, -4, 8, 8);
+    ctx.restore();
+
+    // Right decorative line
+    const rightGrad = ctx.createLinearGradient(centerX + diamondOffset, dividerY, centerX + lineLength + diamondOffset, dividerY);
+    rightGrad.addColorStop(0, 'rgba(20, 184, 166, 0.7)');
+    rightGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.strokeStyle = rightGrad;
+    ctx.beginPath();
+    ctx.moveTo(centerX + diamondOffset, dividerY);
+    ctx.lineTo(centerX + lineLength + diamondOffset, dividerY);
+    ctx.stroke();
+
+    // User type cards - matching first banner's premium design
     const userTypes = [
-      { name: 'STARTUPS', icon: '🚀', color: '#10b981', desc: 'Launch & Scale' },
-      { name: 'MENTORS', icon: '🎯', color: '#06b6d4', desc: 'Guide & Advise' },
-      { name: 'INVESTORS', icon: '💎', color: '#8b5cf6', desc: 'Fund & Grow' },
-      { name: 'STUDENTS', icon: '📚', color: '#ec4899', desc: 'Learn & Intern' },
-      { name: 'ADVISORS', icon: '💼', color: '#f59e0b', desc: 'Strategic Support' },
-      { name: 'ACCELERATORS', icon: '⚡', color: '#14b8a6', desc: 'Programs & Cohorts' }
+      { iconType: 'rocket', name: 'Startups', color: '#10b981', glowColor: 'rgba(16, 185, 129, 0.25)' },
+      { iconType: 'lightbulb', name: 'Mentors', color: '#06b6d4', glowColor: 'rgba(6, 182, 212, 0.25)' },
+      { iconType: 'diamond', name: 'Investors', color: '#8b5cf6', glowColor: 'rgba(139, 92, 246, 0.25)' },
+      { iconType: 'gradcap', name: 'Students', color: '#ec4899', glowColor: 'rgba(236, 72, 153, 0.25)' },
+      { iconType: 'briefcase', name: 'Advisors', color: '#f59e0b', glowColor: 'rgba(245, 158, 11, 0.25)' },
+      { iconType: 'building', name: 'Accelerators', color: '#14b8a6', glowColor: 'rgba(20, 184, 166, 0.25)' }
     ];
 
-    const cardWidth = 160;
-    const cardHeight = 90;
+    const cardWidth = 170;
+    const cardHeight = 100;
     const cardsPerRow = 3;
-    const gap = 20;
+    const gap = 18;
     const totalRowWidth = cardsPerRow * cardWidth + (cardsPerRow - 1) * gap;
     const startX = (width - totalRowWidth) / 2;
     const startY = 350;
@@ -577,41 +620,103 @@ const Marketing = () => {
       const row = Math.floor(i / cardsPerRow);
       const col = i % cardsPerRow;
       const x = startX + col * (cardWidth + gap);
-      const y = startY + row * (cardHeight + 15);
+      const y = startY + row * (cardHeight + 12);
+      const cardCenterX = x + cardWidth / 2;
 
-      // Card background with glass effect
-      ctx.fillStyle = 'rgba(0, 25, 50, 0.7)';
+      // Card background glow (matching first banner)
+      const bgGlow = ctx.createRadialGradient(cardCenterX, y + cardHeight / 2, 0, cardCenterX, y + cardHeight / 2, cardWidth);
+      bgGlow.addColorStop(0, type.glowColor);
+      bgGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = bgGlow;
       ctx.beginPath();
-      ctx.roundRect(x, y, cardWidth, cardHeight, 12);
+      ctx.arc(cardCenterX, y + cardHeight / 2, cardWidth / 1.5, 0, Math.PI * 2);
       ctx.fill();
 
-      // Card border with type color
-      ctx.strokeStyle = type.color;
+      // Card background
+      ctx.fillStyle = 'rgba(0, 20, 40, 0.75)';
+      ctx.beginPath();
+      ctx.roundRect(x, y, cardWidth, cardHeight, 14);
+      ctx.fill();
+
+      // Card border gradient (matching first banner)
+      const borderGrad = ctx.createLinearGradient(x, y, x + cardWidth, y + cardHeight);
+      borderGrad.addColorStop(0, type.color);
+      borderGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.15)');
+      borderGrad.addColorStop(1, type.color);
+      ctx.strokeStyle = borderGrad;
       ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.roundRect(x, y, cardWidth, cardHeight, 12);
+      ctx.roundRect(x, y, cardWidth, cardHeight, 14);
       ctx.stroke();
 
-      // Top accent bar
-      ctx.fillStyle = type.color;
+      // Top glow line (matching first banner)
+      ctx.strokeStyle = `${type.color}aa`;
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.roundRect(x, y, cardWidth, 4, [12, 12, 0, 0]);
+      ctx.moveTo(x + 25, y);
+      ctx.lineTo(x + cardWidth - 25, y);
+      ctx.stroke();
+
+      // Hexagon icon container (matching first banner)
+      const hexY = y + 42;
+      const hexSize = 22;
+
+      // Hexagon glow
+      const hexGlow = ctx.createRadialGradient(cardCenterX, hexY, 0, cardCenterX, hexY, hexSize + 12);
+      hexGlow.addColorStop(0, type.glowColor);
+      hexGlow.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = hexGlow;
+      ctx.beginPath();
+      ctx.arc(cardCenterX, hexY, hexSize + 12, 0, Math.PI * 2);
       ctx.fill();
 
-      // Icon
-      ctx.font = '28px Arial';
-      ctx.fillText(type.icon, x + cardWidth / 2, y + 40);
+      // Hexagon background
+      ctx.beginPath();
+      for (let j = 0; j < 6; j++) {
+        const angle = (Math.PI / 3) * j - Math.PI / 2;
+        const px = cardCenterX + hexSize * Math.cos(angle);
+        const py = hexY + hexSize * Math.sin(angle);
+        if (j === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      const hexFill = ctx.createLinearGradient(cardCenterX - hexSize, hexY - hexSize, cardCenterX + hexSize, hexY + hexSize);
+      hexFill.addColorStop(0, type.color);
+      hexFill.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
+      ctx.fillStyle = hexFill;
+      ctx.fill();
+      ctx.strokeStyle = type.color;
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
 
-      // Type name
-      ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
+      // Orbit ring around hexagon (matching first banner)
+      ctx.beginPath();
+      ctx.strokeStyle = `${type.color}50`;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.arc(cardCenterX, hexY, hexSize + 8, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // Orbit dots (matching first banner)
+      [0, Math.PI / 2, Math.PI, Math.PI * 1.5].forEach(angle => {
+        const dotX = cardCenterX + Math.cos(angle) * (hexSize + 8);
+        const dotY = hexY + Math.sin(angle) * (hexSize + 8);
+        ctx.fillStyle = type.color;
+        ctx.beginPath();
+        ctx.arc(dotX, dotY, 2, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Draw styled icon (matching first banner)
+      drawStyledIconSmall(ctx, type.iconType, cardCenterX, hexY, 10, type.color);
+
+      // Title (matching first banner style)
+      ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = '#ffffff';
+      ctx.textBaseline = 'alphabetic';
       ctx.textAlign = 'center';
-      ctx.fillText(type.name, x + cardWidth / 2, y + 62);
-
-      // Description
-      ctx.font = '400 10px "Segoe UI", system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.fillText(type.desc, x + cardWidth / 2, y + 80);
+      ctx.fillText(type.name, cardCenterX, y + cardHeight - 12);
     });
 
     // CTA Section at bottom
@@ -857,6 +962,132 @@ const Marketing = () => {
       ctx.arc(corner.x, corner.y, 4, 0, Math.PI * 2);
       ctx.fill();
     });
+  };
+
+  // Scaled-down styled icons for third banner cards
+  const drawStyledIconSmall = (ctx: CanvasRenderingContext2D, iconType: string, x: number, y: number, size: number, color: string) => {
+    ctx.save();
+    ctx.strokeStyle = '#ffffff';
+    ctx.fillStyle = '#ffffff';
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+
+    switch (iconType) {
+      case 'rocket':
+        // Rocket body
+        ctx.beginPath();
+        ctx.moveTo(x, y - size);
+        ctx.lineTo(x + size * 0.5, y + size * 0.3);
+        ctx.lineTo(x, y + size * 0.1);
+        ctx.lineTo(x - size * 0.5, y + size * 0.3);
+        ctx.closePath();
+        ctx.fill();
+        // Fins
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.3, y + size * 0.2);
+        ctx.lineTo(x - size * 0.6, y + size * 0.6);
+        ctx.lineTo(x - size * 0.2, y + size * 0.3);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x + size * 0.3, y + size * 0.2);
+        ctx.lineTo(x + size * 0.6, y + size * 0.6);
+        ctx.lineTo(x + size * 0.2, y + size * 0.3);
+        ctx.stroke();
+        break;
+
+      case 'lightbulb':
+        // Bulb
+        ctx.beginPath();
+        ctx.arc(x, y - size * 0.2, size * 0.5, Math.PI, 2 * Math.PI);
+        ctx.lineTo(x + size * 0.3, y + size * 0.3);
+        ctx.lineTo(x - size * 0.3, y + size * 0.3);
+        ctx.closePath();
+        ctx.fill();
+        // Base lines
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.25, y + size * 0.5);
+        ctx.lineTo(x + size * 0.25, y + size * 0.5);
+        ctx.moveTo(x - size * 0.2, y + size * 0.7);
+        ctx.lineTo(x + size * 0.2, y + size * 0.7);
+        ctx.stroke();
+        break;
+
+      case 'diamond':
+        // Diamond shape
+        ctx.beginPath();
+        ctx.moveTo(x, y - size * 0.8);
+        ctx.lineTo(x + size * 0.6, y);
+        ctx.lineTo(x, y + size * 0.8);
+        ctx.lineTo(x - size * 0.6, y);
+        ctx.closePath();
+        ctx.fill();
+        // Inner facets
+        ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+        ctx.beginPath();
+        ctx.moveTo(x, y - size * 0.8);
+        ctx.lineTo(x, y + size * 0.8);
+        ctx.moveTo(x - size * 0.6, y);
+        ctx.lineTo(x + size * 0.6, y);
+        ctx.stroke();
+        break;
+
+      case 'gradcap':
+        // Hat top
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.7, y);
+        ctx.lineTo(x, y - size * 0.5);
+        ctx.lineTo(x + size * 0.7, y);
+        ctx.lineTo(x, y + size * 0.2);
+        ctx.closePath();
+        ctx.fill();
+        // Tassel
+        ctx.beginPath();
+        ctx.moveTo(x, y - size * 0.5);
+        ctx.lineTo(x + size * 0.5, y + size * 0.6);
+        ctx.stroke();
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(x + size * 0.5, y + size * 0.7, size * 0.15, 0, Math.PI * 2);
+        ctx.fill();
+        break;
+
+      case 'briefcase':
+        // Case body
+        ctx.beginPath();
+        ctx.roundRect(x - size * 0.6, y - size * 0.3, size * 1.2, size * 0.9, 2);
+        ctx.fill();
+        // Handle
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.25, y - size * 0.3);
+        ctx.lineTo(x - size * 0.25, y - size * 0.5);
+        ctx.lineTo(x + size * 0.25, y - size * 0.5);
+        ctx.lineTo(x + size * 0.25, y - size * 0.3);
+        ctx.stroke();
+        break;
+
+      case 'building':
+        // Building structure
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.5, y + size * 0.7);
+        ctx.lineTo(x - size * 0.5, y - size * 0.5);
+        ctx.lineTo(x, y - size * 0.8);
+        ctx.lineTo(x + size * 0.5, y - size * 0.5);
+        ctx.lineTo(x + size * 0.5, y + size * 0.7);
+        ctx.stroke();
+        // Windows
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.2, y + size * 0.6);
+        ctx.lineTo(x - size * 0.2, y - size * 0.2);
+        ctx.moveTo(x + size * 0.2, y + size * 0.6);
+        ctx.lineTo(x + size * 0.2, y - size * 0.2);
+        ctx.stroke();
+        break;
+    }
+
+    ctx.restore();
   };
 
   const drawTechGrid = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
