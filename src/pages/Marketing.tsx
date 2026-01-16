@@ -356,6 +356,18 @@ const Marketing = () => {
     const qrX = width - qrSize - 40;
     const qrY = height - qrSize - 40;
 
+    // Website URL above QR
+    ctx.font = '400 12px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.textAlign = 'center';
+    ctx.fillText('startupfactoryhub.lovable.app', qrX + qrSize/2, qrY - 35);
+
+    // "SCAN ME" text above QR
+    ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
+    ctx.textAlign = 'center';
+    ctx.fillText('SCAN ME', qrX + qrSize/2, qrY - 20);
+
     // QR background
     ctx.fillStyle = 'rgba(0, 20, 35, 0.8)';
     ctx.beginPath();
@@ -376,12 +388,6 @@ const Marketing = () => {
     ctx.clip();
     ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
     ctx.restore();
-
-    // "SCAN ME" text above QR
-    ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
-    ctx.textAlign = 'center';
-    ctx.fillText('SCAN ME', qrX + qrSize/2, qrY - 20);
 
     // Top right decorative elements - mission badge style
     ctx.textAlign = 'right';
