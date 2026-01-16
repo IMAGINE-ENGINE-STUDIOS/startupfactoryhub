@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import marketingBg from '@/assets/marketing-bg.jpg';
 import spaceCapsuleBg from '@/assets/space-capsule-bg.jpg';
+import coworkingBg from '@/assets/coworking-space.jpg';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
 import sfhQrCode from '@/assets/sfh-qr-code.png';
 import GIF from 'gif.js';
@@ -12,9 +13,11 @@ import GIF from 'gif.js';
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const canvas2Ref = useRef<HTMLCanvasElement>(null);
+  const canvas3Ref = useRef<HTMLCanvasElement>(null);
   const navigate = useNavigate();
   const [isRendering, setIsRendering] = useState(true);
   const [isRendering2, setIsRendering2] = useState(true);
+  const [isRendering3, setIsRendering3] = useState(true);
   const [isGeneratingGif, setIsGeneratingGif] = useState(false);
   const [bgImageRef, setBgImageRef] = useState<HTMLImageElement | null>(null);
   const [logoImageRef, setLogoImageRef] = useState<HTMLImageElement | null>(null);
@@ -88,6 +91,40 @@ const Marketing = () => {
     qrImage.onload = tryDraw;
 
     spaceBgImage.src = spaceCapsuleBg;
+    logoImage.src = sfhLogo;
+    qrImage.src = sfhQrCode;
+  }, []);
+
+  // Third banner useEffect - Coworking with User Types
+  useEffect(() => {
+    const canvas = canvas3Ref.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = 1200;
+    canvas.height = 630;
+
+    const coworkingImage = new window.Image();
+    const logoImage = new window.Image();
+    const qrImage = new window.Image();
+    
+    let loadedCount = 0;
+
+    const tryDraw = () => {
+      loadedCount++;
+      if (loadedCount === 3) {
+        drawCoworkingBanner(ctx, canvas.width, canvas.height, coworkingImage, logoImage, qrImage);
+        setIsRendering3(false);
+      }
+    };
+
+    coworkingImage.onload = tryDraw;
+    logoImage.onload = tryDraw;
+    qrImage.onload = tryDraw;
+
+    coworkingImage.src = coworkingBg;
     logoImage.src = sfhLogo;
     qrImage.src = sfhQrCode;
   }, []);
@@ -416,6 +453,250 @@ const Marketing = () => {
     ctx.beginPath();
     ctx.moveTo(20, height - 20);
     ctx.lineTo(80, height - 20);
+    ctx.stroke();
+  };
+
+  // Draw Coworking Banner with User Types
+  const drawCoworkingBanner = (
+    ctx: CanvasRenderingContext2D,
+    width: number,
+    height: number,
+    bgImage: HTMLImageElement,
+    logoImage: HTMLImageElement,
+    qrImage: HTMLImageElement
+  ) => {
+    // Draw coworking background - cover the canvas
+    const bgRatio = bgImage.width / bgImage.height;
+    const canvasRatio = width / height;
+    
+    let drawWidth = width;
+    let drawHeight = height;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    if (bgRatio > canvasRatio) {
+      drawWidth = height * bgRatio;
+      offsetX = -(drawWidth - width) / 2;
+    } else {
+      drawHeight = width / bgRatio;
+      offsetY = -(drawHeight - height) / 2;
+    }
+
+    ctx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
+
+    // Dark overlay with gradient
+    const overlayGradient = ctx.createLinearGradient(0, 0, 0, height);
+    overlayGradient.addColorStop(0, 'rgba(0, 15, 30, 0.85)');
+    overlayGradient.addColorStop(0.5, 'rgba(0, 20, 40, 0.75)');
+    overlayGradient.addColorStop(1, 'rgba(0, 15, 30, 0.9)');
+    ctx.fillStyle = overlayGradient;
+    ctx.fillRect(0, 0, width, height);
+
+    // Logo - top center
+    const logoSize = 90;
+    const logoX = width / 2 - logoSize / 2;
+    const logoY = 30;
+    
+    // Logo glow
+    const logoGlow = ctx.createRadialGradient(width / 2, logoY + logoSize / 2, 0, width / 2, logoY + logoSize / 2, logoSize);
+    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.4)');
+    logoGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.fillStyle = logoGlow;
+    ctx.beginPath();
+    ctx.arc(width / 2, logoY + logoSize / 2, logoSize, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Draw logo
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(width / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
+    ctx.clip();
+    ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
+    ctx.restore();
+
+    // Logo ring
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.7)';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(width / 2, logoY + logoSize / 2, logoSize / 2 + 5, 0, Math.PI * 2);
+    ctx.stroke();
+
+    // Title
+    ctx.textAlign = 'center';
+    ctx.font = '300 32px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.fillText('JOIN THE', width / 2, 170);
+
+    // Brand name with gradient
+    ctx.font = '900 52px "Segoe UI", system-ui, sans-serif';
+    const brandGrad = ctx.createLinearGradient(width / 2 - 200, 210, width / 2 + 200, 210);
+    brandGrad.addColorStop(0, '#14b8a6');
+    brandGrad.addColorStop(0.5, '#22d3ee');
+    brandGrad.addColorStop(1, '#14b8a6');
+    ctx.fillStyle = brandGrad;
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.5)';
+    ctx.shadowBlur = 25;
+    ctx.fillText('STARTUP FACTORY HUB', width / 2, 230);
+    ctx.shadowBlur = 0;
+
+    // Subtitle
+    ctx.font = '400 18px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.fillText('Built for Everyone in the Startup Ecosystem', width / 2, 270);
+
+    // User Types Section Title
+    ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#14b8a6';
+    ctx.fillText('━━━  USER TYPES  ━━━', width / 2, 320);
+
+    // User type cards
+    const userTypes = [
+      { name: 'STARTUPS', icon: '🚀', color: '#10b981', desc: 'Launch & Scale' },
+      { name: 'MENTORS', icon: '🎯', color: '#06b6d4', desc: 'Guide & Advise' },
+      { name: 'INVESTORS', icon: '💎', color: '#8b5cf6', desc: 'Fund & Grow' },
+      { name: 'STUDENTS', icon: '📚', color: '#ec4899', desc: 'Learn & Intern' },
+      { name: 'ADVISORS', icon: '💼', color: '#f59e0b', desc: 'Strategic Support' },
+      { name: 'ACCELERATORS', icon: '⚡', color: '#14b8a6', desc: 'Programs & Cohorts' }
+    ];
+
+    const cardWidth = 160;
+    const cardHeight = 90;
+    const cardsPerRow = 3;
+    const gap = 20;
+    const totalRowWidth = cardsPerRow * cardWidth + (cardsPerRow - 1) * gap;
+    const startX = (width - totalRowWidth) / 2;
+    const startY = 350;
+
+    userTypes.forEach((type, i) => {
+      const row = Math.floor(i / cardsPerRow);
+      const col = i % cardsPerRow;
+      const x = startX + col * (cardWidth + gap);
+      const y = startY + row * (cardHeight + 15);
+
+      // Card background with glass effect
+      ctx.fillStyle = 'rgba(0, 25, 50, 0.7)';
+      ctx.beginPath();
+      ctx.roundRect(x, y, cardWidth, cardHeight, 12);
+      ctx.fill();
+
+      // Card border with type color
+      ctx.strokeStyle = type.color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(x, y, cardWidth, cardHeight, 12);
+      ctx.stroke();
+
+      // Top accent bar
+      ctx.fillStyle = type.color;
+      ctx.beginPath();
+      ctx.roundRect(x, y, cardWidth, 4, [12, 12, 0, 0]);
+      ctx.fill();
+
+      // Icon
+      ctx.font = '28px Arial';
+      ctx.fillText(type.icon, x + cardWidth / 2, y + 40);
+
+      // Type name
+      ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.fillText(type.name, x + cardWidth / 2, y + 62);
+
+      // Description
+      ctx.font = '400 10px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fillText(type.desc, x + cardWidth / 2, y + 80);
+    });
+
+    // CTA Section at bottom
+    const ctaY = 560;
+    
+    // Website URL
+    ctx.font = '400 14px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+    ctx.textAlign = 'center';
+    ctx.fillText('startupfactoryhub.com', width / 2, ctaY);
+
+    // CTA Button
+    const btnWidth = 180;
+    const btnHeight = 42;
+    const btnX = width / 2 - btnWidth / 2;
+    const btnY = ctaY + 10;
+
+    const btnGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnWidth, btnY);
+    btnGrad.addColorStop(0, '#0d9488');
+    btnGrad.addColorStop(0.5, '#14b8a6');
+    btnGrad.addColorStop(1, '#0d9488');
+    ctx.fillStyle = btnGrad;
+    ctx.beginPath();
+    ctx.roundRect(btnX, btnY, btnWidth, btnHeight, 21);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(34, 211, 238, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(btnX, btnY, btnWidth, btnHeight, 21);
+    ctx.stroke();
+
+    ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText('GET STARTED →', width / 2, btnY + btnHeight / 2 + 5);
+
+    // QR Code - bottom right
+    const qrSize = 80;
+    const qrX = width - qrSize - 30;
+    const qrY = height - qrSize - 30;
+
+    // QR background
+    ctx.fillStyle = 'rgba(0, 20, 35, 0.9)';
+    ctx.beginPath();
+    ctx.roundRect(qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 10);
+    ctx.fill();
+
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 10);
+    ctx.stroke();
+
+    // Draw QR
+    ctx.save();
+    ctx.beginPath();
+    ctx.roundRect(qrX, qrY, qrSize, qrSize, 6);
+    ctx.clip();
+    ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
+    ctx.restore();
+
+    // Scan me label
+    ctx.font = 'bold 10px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
+    ctx.textAlign = 'center';
+    ctx.fillText('SCAN ME', qrX + qrSize / 2, qrY - 15);
+
+    // Corner accents
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.4)';
+    ctx.lineWidth = 2;
+    
+    // Top left
+    ctx.beginPath();
+    ctx.moveTo(20, 60);
+    ctx.lineTo(20, 20);
+    ctx.lineTo(60, 20);
+    ctx.stroke();
+
+    // Top right
+    ctx.beginPath();
+    ctx.moveTo(width - 60, 20);
+    ctx.lineTo(width - 20, 20);
+    ctx.lineTo(width - 20, 60);
+    ctx.stroke();
+
+    // Bottom left
+    ctx.beginPath();
+    ctx.moveTo(20, height - 60);
+    ctx.lineTo(20, height - 20);
+    ctx.lineTo(60, height - 20);
     ctx.stroke();
   };
 
@@ -1167,14 +1448,14 @@ const Marketing = () => {
     ctx.stroke();
   };
 
-  const downloadImage = (format: 'png' | 'jpg', canvasNum: 1 | 2 = 1) => {
-    const canvas = canvasNum === 1 ? canvasRef.current : canvas2Ref.current;
+  const downloadImage = (format: 'png' | 'jpg', canvasNum: 1 | 2 | 3 = 1) => {
+    const canvas = canvasNum === 1 ? canvasRef.current : canvasNum === 2 ? canvas2Ref.current : canvas3Ref.current;
     if (!canvas) return;
 
     const link = document.createElement('a');
     const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
     const quality = format === 'jpg' ? 0.95 : undefined;
-    const suffix = canvasNum === 1 ? 'marketing' : 'social-media';
+    const suffix = canvasNum === 1 ? 'marketing' : canvasNum === 2 ? 'social-media' : 'user-types';
     
     link.download = `startup-factory-hub-${suffix}.${format}`;
     link.href = canvas.toDataURL(mimeType, quality);
@@ -1579,6 +1860,44 @@ const Marketing = () => {
               <div className="relative w-full" style={{ aspectRatio: '1200/630' }}>
                 <canvas ref={canvas2Ref} className="w-full h-full object-contain rounded-lg" style={{ maxWidth: '100%', height: 'auto' }} />
                 {isRendering2 && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+                      <span className="text-muted-foreground">Rendering graphic...</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Banner 3 - User Types 1200x630 */}
+          <div>
+            <div className="tech-card border-0 p-6 mb-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-semibold text-foreground mb-2">User Types Banner (1200×630)</h2>
+                  <p className="text-muted-foreground text-sm">
+                    Showcase all user types: Startups, Mentors, Investors, Students, Advisors & Accelerators.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" onClick={() => downloadImage('png', 3)} disabled={isRendering3} className="gap-2">
+                    <Download className="h-4 w-4" />
+                    PNG
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={() => downloadImage('jpg', 3)} disabled={isRendering3} className="gap-2">
+                    <Image className="h-4 w-4" />
+                    JPG
+                  </Button>
+                </div>
+              </div>
+            </div>
+            
+            <div className="tech-card border-0 p-4 overflow-hidden">
+              <div className="relative w-full" style={{ aspectRatio: '1200/630' }}>
+                <canvas ref={canvas3Ref} className="w-full h-full object-contain rounded-lg" style={{ maxWidth: '100%', height: 'auto' }} />
+                {isRendering3 && (
                   <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
                     <div className="flex flex-col items-center gap-3">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
