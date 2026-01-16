@@ -719,42 +719,7 @@ const Marketing = () => {
       ctx.fillText(type.name, cardCenterX, y + cardHeight - 12);
     });
 
-    // CTA Section at bottom
-    const ctaY = 560;
-    
-    // Website URL
-    ctx.font = '400 14px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-    ctx.textAlign = 'center';
-    ctx.fillText('startupfactoryhub.com', width / 2, ctaY);
-
-    // CTA Button
-    const btnWidth = 180;
-    const btnHeight = 42;
-    const btnX = width / 2 - btnWidth / 2;
-    const btnY = ctaY + 10;
-
-    const btnGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnWidth, btnY);
-    btnGrad.addColorStop(0, '#0d9488');
-    btnGrad.addColorStop(0.5, '#14b8a6');
-    btnGrad.addColorStop(1, '#0d9488');
-    ctx.fillStyle = btnGrad;
-    ctx.beginPath();
-    ctx.roundRect(btnX, btnY, btnWidth, btnHeight, 21);
-    ctx.fill();
-
-    ctx.strokeStyle = 'rgba(34, 211, 238, 0.5)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(btnX, btnY, btnWidth, btnHeight, 21);
-    ctx.stroke();
-
-    ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.fillText('GET STARTED →', width / 2, btnY + btnHeight / 2 + 5);
-
-    // QR Code - bottom right
+    // QR Code - bottom right (moved up since we removed CTA)
     const qrSize = 80;
     const qrX = width - qrSize - 30;
     const qrY = height - qrSize - 30;
