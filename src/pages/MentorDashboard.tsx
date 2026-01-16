@@ -29,7 +29,7 @@ import ActiveMenteesCards from "@/components/ActiveMenteesCards";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { Users, Calendar as CalendarIcon, Bell, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe } from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
-import CreateSessionDialog from '@/components/CreateSessionDialog';
+import CreateAdvisorSessionDialog from '@/components/CreateAdvisorSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { useEvents } from '@/hooks/useEvents';
@@ -57,6 +57,7 @@ const MentorDashboard = () => {
     todaySessions
   } = useMentorDashboard();
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
+  const [selectedMenteeId, setSelectedMenteeId] = useState<string | null>(null);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
@@ -187,7 +188,10 @@ const MentorDashboard = () => {
             <MentorshipRequests />
             
             {/* Active Mentees with Expandable History */}
-            <ActiveMenteesCards mentees={activeMentees} onScheduleSession={() => setCreateSessionDialogOpen(true)} onMessage={menteeId => navigate('/messages')} />
+            <ActiveMenteesCards mentees={activeMentees} onScheduleSession={(menteeId) => {
+              setSelectedMenteeId(menteeId);
+              setCreateSessionDialogOpen(true);
+            }} onMessage={menteeId => navigate('/messages')} />
             
             <MentorOffersBoard />
             
@@ -323,9 +327,18 @@ const MentorDashboard = () => {
         </DialogContent>
       </Dialog>
       
-      <CreateSessionDialog open={createSessionDialogOpen} onOpenChange={setCreateSessionDialogOpen} onSessionCreated={() => {
-      setCreateSessionDialogOpen(false);
-    }} />
+      <CreateAdvisorSessionDialog 
+        open={createSessionDialogOpen} 
+        onOpenChange={(open) => {
+          setCreateSessionDialogOpen(open);
+          if (!open) setSelectedMenteeId(null);
+        }}
+        onSessionCreated={() => {
+          setCreateSessionDialogOpen(false);
+          setSelectedMenteeId(null);
+        }}
+        preSelectedMenteeId={selectedMenteeId || undefined}
+      />
       <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {
       setCreateEventDialogOpen(false);
     }} />
