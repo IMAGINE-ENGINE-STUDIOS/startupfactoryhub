@@ -87,6 +87,11 @@ const FEATURED_PARTNERS = [
     tier: "Infrastructure Partner"
   },
   {
+    name: "Datadog",
+    logo: "https://imgix.datadoghq.com/img/dd_logo_n_70x75.png",
+    tier: "Technology Partner"
+  },
+  {
     name: "Google",
     logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png",
     tier: "Cloud Partner"
@@ -97,9 +102,44 @@ const FEATURED_PARTNERS = [
     tier: "AI Partner"
   },
   {
+    name: "Latham Pools",
+    logo: "https://www.lathampool.com/wp-content/uploads/2021/10/latham-logo.svg",
+    tier: "Corporate Sponsor"
+  },
+  {
     name: "Nasdaq Entrepreneurial Center",
     logo: "/nasdaq-logo.png",
     tier: "Entrepreneurship Partner"
+  },
+  {
+    name: "UK Venture",
+    logo: "https://ukventure.com/wp-content/uploads/2022/01/uk-venture-logo.png",
+    tier: "Investment Partner"
+  },
+  {
+    name: "IWG",
+    logo: "https://www.iwgplc.com/~/media/IWG/Images/Logos/IWG-logo.svg",
+    tier: "Workspace Partner"
+  },
+  {
+    name: "HubSpot",
+    logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png",
+    tier: "Marketing Partner"
+  },
+  {
+    name: "SumUp",
+    logo: "https://www.sumup.com/favicon.ico",
+    tier: "Payments Partner"
+  },
+  {
+    name: "Connectd",
+    logo: "https://connectd.com/wp-content/uploads/2021/01/connectd-logo.png",
+    tier: "Investment Partner"
+  },
+  {
+    name: "Regus",
+    logo: "https://www.regus.com/favicon.ico",
+    tier: "Workspace Partner"
   }
 ];
 
