@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { 
   Users, FileText, Briefcase, Calendar as CalendarIcon, Globe, MessageCircle, 
   Building2, Plus, Clock, MapPin, Network, BarChart, Presentation, 
-  ChevronDown, Check, X, Bell, Brain, User
+  ChevronDown, Check, X, Brain
 } from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
@@ -23,7 +23,6 @@ import { useRealtime } from '@/hooks/useRealtime';
 import { CohortManagement } from '@/components/accelerator/CohortManagement';
 import { CohortApplicationsManager } from '@/components/accelerator/CohortApplicationsManager';
 import { StartupJourneyTracker } from '@/components/accelerator/StartupJourneyTracker';
-import { AcceleratorPortfolio } from '@/components/accelerator/AcceleratorPortfolio';
 import { AlumniPortfolio } from '@/components/accelerator/AlumniPortfolio';
 import { MentorAdvisorAssignment } from '@/components/accelerator/MentorAdvisorAssignment';
 import { StartupDetailDialog } from '@/components/accelerator/StartupDetailDialog';

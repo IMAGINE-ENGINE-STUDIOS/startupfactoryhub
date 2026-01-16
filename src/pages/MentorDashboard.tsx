@@ -27,17 +27,16 @@ import MenteeSessions from "@/components/MenteeSessions";
 import MentorSessionHistory from "@/components/MentorSessionHistory";
 import ActiveMenteesCards from "@/components/ActiveMenteesCards";
 import { DashboardHeader } from "@/components/DashboardHeader";
-import { Users, Calendar as CalendarIcon, Bell, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe } from "lucide-react";
+import { Users, Calendar as CalendarIcon, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe } from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateAdvisorSessionDialog from '@/components/CreateAdvisorSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import VideoConferencing from '@/components/VideoConferencing';
-import { Video } from 'lucide-react';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 const MentorDashboard = () => {
   const {
@@ -53,8 +52,7 @@ const MentorDashboard = () => {
   } = useProfileWithRole();
   const {
     activeMentees,
-    pastMentees,
-    todaySessions
+    pastMentees
   } = useMentorDashboard();
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [selectedMenteeId, setSelectedMenteeId] = useState<string | null>(null);
