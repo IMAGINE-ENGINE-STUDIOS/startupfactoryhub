@@ -730,6 +730,20 @@ export default function MatchingSystem() {
   const fetchStartupMatchesForInvestor = async () => {
     if (!user) return;
 
+    // First, get user IDs that have 'startup' role (excluding current user)
+    const { data: startupRoles } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', 'startup')
+      .neq('user_id', user.id)
+      .limit(50);
+
+    const startupUserIds = startupRoles?.map(r => r.user_id) || [];
+    if (startupUserIds.length === 0) {
+      setStartupMatches([]);
+      return;
+    }
+
     // Fetch investor's profile for matching criteria
     const { data: investorProfile } = await supabase
       .from('investor_profiles')
@@ -737,14 +751,17 @@ export default function MatchingSystem() {
       .eq('user_id', user.id)
       .maybeSingle();
 
-    // Fetch all companies (excluding current user's company)
+    // Fetch companies ONLY for users with startup role
     const { data: companies } = await supabase
       .from('companies')
       .select('*')
-      .neq('user_id', user.id)
+      .in('user_id', startupUserIds)
       .limit(30);
 
-    if (!companies || companies.length === 0) return;
+    if (!companies || companies.length === 0) {
+      setStartupMatches([]);
+      return;
+    }
 
     // Get profile info for each startup
     const startupIds = companies.map(c => c.user_id);
@@ -782,6 +799,20 @@ export default function MatchingSystem() {
   const fetchStartupMatchesForMentor = async () => {
     if (!user) return;
 
+    // First, get user IDs that have 'startup' role (excluding current user)
+    const { data: startupRoles } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', 'startup')
+      .neq('user_id', user.id)
+      .limit(50);
+
+    const startupUserIds = startupRoles?.map(r => r.user_id) || [];
+    if (startupUserIds.length === 0) {
+      setStartupMatches([]);
+      return;
+    }
+
     // Fetch mentor's skills
     const { data: mentorSkills } = await supabase
       .from('advisor_skills')
@@ -790,14 +821,17 @@ export default function MatchingSystem() {
 
     const skills = mentorSkills?.map(s => s.skill_name) || [];
 
-    // Fetch all companies (excluding current user's company)
+    // Fetch companies ONLY for users with startup role
     const { data: companies } = await supabase
       .from('companies')
       .select('*')
-      .neq('user_id', user.id)
+      .in('user_id', startupUserIds)
       .limit(30);
 
-    if (!companies || companies.length === 0) return;
+    if (!companies || companies.length === 0) {
+      setStartupMatches([]);
+      return;
+    }
 
     // Get profile info for each startup
     const startupIds = companies.map(c => c.user_id);
