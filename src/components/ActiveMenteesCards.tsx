@@ -146,175 +146,186 @@ export default function ActiveMenteesCards({
         <Badge variant="secondary">{mentees.length}</Badge>
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {mentees.map(mentee => {
-        const isExpanded = expandedMentee === mentee.mentee_id;
-        const history = sessionHistory[mentee.mentee_id] || [];
-        const avgRating = getAverageRating(history);
-        const completedSessions = history.filter(s => s.status === 'completed').length;
-        const upcomingSessions = history.filter(s => s.status === 'scheduled' && new Date(s.scheduled_at) > new Date()).length;
-        const company = mentee.companies;
-        return <Collapsible key={mentee.id} open={isExpanded} onOpenChange={() => handleToggleExpand(mentee.mentee_id)}>
-              <div className={cn("tech-card rounded-xl border-0 transition-all duration-300 overflow-hidden aspect-square flex flex-col", isExpanded ? "shadow-lg aspect-auto col-span-1 md:col-span-2 lg:col-span-3" : "hover:scale-[1.02]")}>
-                {/* Startup Profile Card */}
-                <CollapsibleTrigger asChild>
-                  <div className={cn("cursor-pointer flex flex-col", !isExpanded && "h-full")}>
-                    {/* Company Header with Logo */}
-                    <div className={cn("bg-gradient-to-br from-primary/5 via-transparent to-transparent p-4 flex-1 flex flex-col", !isExpanded && "justify-between")}>
-                      {/* Top Section */}
-                      <div>
-                        <div className="flex items-start gap-3">
-                          {/* Company Logo */}
-                          <div className="relative flex-shrink-0">
-                            <div className={cn("rounded-xl bg-background border-2 border-border overflow-hidden flex items-center justify-center", isExpanded ? "h-16 w-16" : "h-14 w-14")}>
-                              {company?.logo_url ? <img src={company.logo_url} alt={company.name} className="h-full w-full object-cover" /> : <Building2 className={cn("text-muted-foreground/50", isExpanded ? "h-8 w-8" : "h-6 w-6")} />}
-                            </div>
-                            <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-background">
-                              <span className="h-1.5 w-1.5 rounded-full bg-white" />
-                            </span>
-                          </div>
-
-                          {/* Company Info */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-1">
-                              <h4 className={cn("font-bold text-foreground truncate", isExpanded ? "text-lg" : "text-base")}>
-                                {company?.name || 'Startup'}
-                              </h4>
-                              <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0 -mr-1 -mt-1">
-                                {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
-                              </Button>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-1.5 mt-1">
-                              {mentee.totalSessions === 0 && (
-                                <Badge variant="outline" className="text-[10px] font-medium px-1.5 py-0 text-amber-500 border-amber-500/30 bg-amber-500/10">
-                                  No sessions yet
-                                </Badge>
-                              )}
-                              {company?.stage && <Badge variant="outline" className={cn("text-[10px] font-medium px-1.5 py-0", getStageColor(company.stage))}>
-                                  {company.stage}
-                                </Badge>}
-                              {company?.industry && <Badge variant="outline" className="text-[10px] px-1.5 py-0">
-                                  {company.industry}
-                                </Badge>}
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Company Description - only show if expanded or in compact form */}
-                        {company?.description && <p className={cn("text-xs text-muted-foreground mt-2", isExpanded ? "line-clamp-2" : "line-clamp-2")}>
-                            {company.description}
-                          </p>}
-
-                        {/* Company Meta - compact on square view */}
-                        {isExpanded && <div className="flex flex-wrap items-center gap-3 mt-3 text-xs text-muted-foreground">
-                            {company?.location && <div className="flex items-center gap-1">
-                                <MapPin className="h-3 w-3" />
-                                <span>{company.location}</span>
-                              </div>}
-                            {company?.team_size && <div className="flex items-center gap-1">
-                                <Users className="h-3 w-3" />
-                                <span>{company.team_size} team</span>
-                              </div>}
-                            {company?.website && <div className="flex items-center gap-1">
-                                <Globe className="h-3 w-3" />
-                                <a href={company.website} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline" onClick={e => e.stopPropagation()}>
-                                  Website
-                                </a>
-                              </div>}
-                          </div>}
-                      </div>
-
-                      {/* Bottom Section - Founder Info & Stats */}
-                      <div className={cn("flex items-center justify-between pt-2 border-t border-border/50", isExpanded ? "mt-4" : "mt-auto")}>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage src={mentee.mentee.avatar_url} />
-                            <AvatarFallback className="text-[10px]">
-                              {mentee.mentee.full_name?.[0] || 'F'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <p className="text-xs font-medium truncate max-w-[80px]">{mentee.mentee.full_name}</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
-                          {completedSessions > 0 && <div className="flex items-center gap-0.5">
-                              <History className="h-3 w-3" />
-                              <span>{completedSessions}</span>
-                            </div>}
-                          {avgRating && <div className="flex items-center gap-0.5 text-amber-500">
-                              <Star className="h-3 w-3 fill-current" />
-                              <span>{avgRating}</span>
-                            </div>}
-                        </div>
-                      </div>
+          const isExpanded = expandedMentee === mentee.mentee_id;
+          const history = sessionHistory[mentee.mentee_id] || [];
+          const avgRating = getAverageRating(history);
+          const completedSessions = history.filter(s => s.status === 'completed').length;
+          const company = mentee.companies;
+          
+          return (
+            <Collapsible key={mentee.id} open={isExpanded} onOpenChange={() => handleToggleExpand(mentee.mentee_id)}>
+              <Card className={cn(
+                "tech-card border-0 transition-all duration-200",
+                isExpanded && "ring-1 ring-primary/20"
+              )}>
+                <CardContent className="p-4">
+                  {/* Compact Header Row */}
+                  <div className="flex items-start gap-3">
+                    {/* Company Logo - Compact */}
+                    <div className="relative flex-shrink-0">
+                      <Avatar className="h-10 w-10">
+                        <AvatarImage src={company?.logo_url} />
+                        <AvatarFallback className="bg-primary/10 text-primary">
+                          <Building2 className="h-5 w-5" />
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="absolute -bottom-0.5 -right-0.5 flex h-3 w-3 items-center justify-center rounded-full bg-emerald-500 ring-2 ring-background">
+                        <span className="h-1.5 w-1.5 rounded-full bg-white" />
+                      </span>
                     </div>
 
-                    {/* Quick Actions */}
-                    <div className={cn("flex items-center gap-2 px-3 py-2 bg-muted/30 border-t border-border/50", isExpanded ? "px-4 py-3" : "")}>
-                      <Button size="sm" className={cn("flex-1", isExpanded ? "h-9" : "h-7 text-xs")} onClick={e => {
-                    e.stopPropagation();
-                    onScheduleSession?.(mentee.mentee_id);
-                  }}>
-                        <Video className={cn("mr-1", isExpanded ? "h-4 w-4" : "h-3 w-3")} />
-                        {isExpanded ? "Schedule Session" : "Schedule"}
-                      </Button>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="font-semibold text-sm truncate">{company?.name || 'Startup'}</h4>
+                        <CollapsibleTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0">
+                            {isExpanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                          </Button>
+                        </CollapsibleTrigger>
+                      </div>
                       
+                      {/* Description - single line */}
+                      {company?.description && (
+                        <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">
+                          {company.description}
+                        </p>
+                      )}
+
+                      {/* Badges Row */}
+                      <div className="flex flex-wrap items-center gap-1 mt-1.5">
+                        {mentee.totalSessions === 0 && (
+                          <Badge variant="outline" className="text-[10px] font-medium px-1.5 py-0 h-4 text-amber-500 border-amber-500/30 bg-amber-500/10">
+                            No sessions yet
+                          </Badge>
+                        )}
+                        {company?.stage && (
+                          <Badge variant="outline" className={cn("text-[10px] font-medium px-1.5 py-0 h-4", getStageColor(company.stage))}>
+                            {company.stage}
+                          </Badge>
+                        )}
+                        {company?.industry && (
+                          <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-4">
+                            {company.industry}
+                          </Badge>
+                        )}
+                      </div>
+
+                      {/* Stats Row */}
+                      <div className="flex items-center gap-3 mt-2 text-[11px] text-muted-foreground">
+                        {company?.location && (
+                          <div className="flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            <span className="truncate max-w-[80px]">{company.location}</span>
+                          </div>
+                        )}
+                        {company?.team_size && (
+                          <div className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            <span>{company.team_size}</span>
+                          </div>
+                        )}
+                        {completedSessions > 0 && (
+                          <div className="flex items-center gap-1">
+                            <History className="h-3 w-3" />
+                            <span>{completedSessions} sessions</span>
+                          </div>
+                        )}
+                        {avgRating && (
+                          <div className="flex items-center gap-0.5 text-amber-500">
+                            <Star className="h-3 w-3 fill-current" />
+                            <span>{avgRating}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                </CollapsibleTrigger>
 
-                {/* Expanded Content - Session History */}
-                <CollapsibleContent>
-                  <div className="px-4 pb-4 bg-muted/10">
-                    <div className="pt-4">
-                      <h5 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                        <History className="h-4 w-4 text-primary" />
-                        Session History with {company?.name || 'this startup'}
+                  {/* Founder + Actions Row */}
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/50">
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-5 w-5">
+                        <AvatarImage src={mentee.mentee.avatar_url} />
+                        <AvatarFallback className="text-[8px]">
+                          {mentee.mentee.full_name?.[0] || 'F'}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="text-xs text-muted-foreground">{mentee.mentee.full_name}</span>
+                    </div>
+                    <Button 
+                      size="sm" 
+                      className="h-7 text-xs"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onScheduleSession?.(mentee.mentee_id);
+                      }}
+                    >
+                      <Video className="h-3 w-3 mr-1" />
+                      Schedule
+                    </Button>
+                  </div>
+
+                  {/* Expanded Session History */}
+                  <CollapsibleContent>
+                    <div className="mt-4 pt-3 border-t border-border/50">
+                      <h5 className="text-xs font-semibold mb-2 flex items-center gap-1.5 text-muted-foreground">
+                        <History className="h-3.5 w-3.5" />
+                        Session History
                       </h5>
                       
-                      {loadingHistory === mentee.mentee_id ? <div className="text-center py-4 text-sm text-muted-foreground">
-                          Loading history...
-                        </div> : history.length === 0 ? <div className="text-center py-4 text-sm text-muted-foreground">
-                          No sessions yet. Schedule your first session!
-                        </div> : <div className="space-y-2 max-h-64 overflow-y-auto">
-                          {history.map(session => {
-                      const isPast = new Date(session.scheduled_at) < new Date();
-                      const isUpcoming = session.status === 'scheduled' && !isPast;
-                      return <div key={session.id} className={cn("p-3 rounded-lg border text-sm", isUpcoming ? "bg-emerald-500/5 border-emerald-500/20" : "bg-background border-border")}>
-                                <div className="flex items-start justify-between gap-2">
-                                  <div className="flex-1 min-w-0">
-                                    <p className="font-medium truncate">
-                                      {session.topic || 'Mentoring Session'}
-                                    </p>
-                                    <div className="flex items-center gap-2 mt-1 text-xs text-muted-foreground">
-                                      <Clock className="h-3 w-3" />
-                                      <span>{format(new Date(session.scheduled_at), 'MMM d, yyyy • h:mm a')}</span>
-                                      <span>•</span>
-                                      <span>{session.duration_minutes} min</span>
-                                    </div>
-                                  </div>
-                                  <div className="flex flex-col items-end gap-1">
-                                    <Badge variant={isUpcoming ? "default" : "secondary"} className={cn("text-[10px]", isUpcoming && "bg-emerald-500")}>
-                                      {isUpcoming ? 'Upcoming' : session.status}
-                                    </Badge>
-                                    {session.rating && <div className="flex items-center gap-0.5 text-amber-500">
-                                        {[...Array(5)].map((_, i) => <Star key={i} className={cn("h-3 w-3", i < session.rating! ? "fill-current" : "text-muted")} />)}
-                                      </div>}
-                                  </div>
+                      {loadingHistory === mentee.mentee_id ? (
+                        <p className="text-xs text-muted-foreground py-2">Loading...</p>
+                      ) : history.length === 0 ? (
+                        <p className="text-xs text-muted-foreground py-2">No sessions yet</p>
+                      ) : (
+                        <div className="space-y-1.5 max-h-40 overflow-y-auto">
+                          {history.slice(0, 5).map(session => {
+                            const isPast = new Date(session.scheduled_at) < new Date();
+                            const isUpcoming = session.status === 'scheduled' && !isPast;
+                            return (
+                              <div 
+                                key={session.id} 
+                                className={cn(
+                                  "p-2 rounded-md text-xs flex items-center justify-between",
+                                  isUpcoming ? "bg-emerald-500/10 border border-emerald-500/20" : "bg-muted/50"
+                                )}
+                              >
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium truncate text-[11px]">
+                                    {session.topic || 'Mentoring Session'}
+                                  </p>
+                                  <p className="text-[10px] text-muted-foreground">
+                                    {format(new Date(session.scheduled_at), 'MMM d, h:mm a')}
+                                  </p>
                                 </div>
-                                {session.feedback_text && <p className="mt-2 text-xs text-muted-foreground italic line-clamp-2">
-                                    "{session.feedback_text}"
-                                  </p>}
-                              </div>;
-                    })}
-                        </div>}
+                                <div className="flex items-center gap-1.5">
+                                  {session.rating && (
+                                    <div className="flex items-center gap-0.5 text-amber-500">
+                                      <Star className="h-2.5 w-2.5 fill-current" />
+                                      <span className="text-[10px]">{session.rating}</span>
+                                    </div>
+                                  )}
+                                  <Badge 
+                                    variant={isUpcoming ? "default" : "secondary"} 
+                                    className={cn("text-[9px] px-1 py-0 h-4", isUpcoming && "bg-emerald-500")}
+                                  >
+                                    {isUpcoming ? 'Upcoming' : session.status}
+                                  </Badge>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
                     </div>
-                  </div>
-                </CollapsibleContent>
-              </div>
-            </Collapsible>;
-      })}
+                  </CollapsibleContent>
+                </CardContent>
+              </Card>
+            </Collapsible>
+          );
+        })}
       </div>
     </div>;
 }
