@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Calendar, MapPin, Clock, Users, CheckCircle, Loader2, ArrowLeft, Video, Building } from 'lucide-react';
 import { format, parseISO, isPast } from 'date-fns';
 import { z } from 'zod';
+import MatrixBackground from '@/components/MatrixBackground';
 
 // Validation schema
 const registrationSchema = z.object({
@@ -146,16 +147,18 @@ const PublicEventRegistration = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden">
+        <MatrixBackground />
+        <Loader2 className="h-8 w-8 animate-spin text-primary relative z-10" />
       </div>
     );
   }
 
   if (!event) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-        <Card className="max-w-md w-full">
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4 relative overflow-hidden">
+        <MatrixBackground />
+        <Card className="max-w-md w-full relative z-10">
           <CardContent className="pt-6 text-center">
             <h2 className="text-xl font-semibold mb-2">Event Not Found</h2>
             <p className="text-muted-foreground mb-4">This event may have been removed or the link is invalid.</p>
@@ -178,8 +181,9 @@ const PublicEventRegistration = () => {
 
   if (registered) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 py-12 px-4">
-        <div className="max-w-lg mx-auto">
+      <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 py-12 px-4 relative overflow-hidden">
+        <MatrixBackground />
+        <div className="max-w-lg mx-auto relative z-10">
           <Card className="border-green-500/50">
             <CardContent className="pt-8 pb-6 text-center">
               <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
@@ -225,8 +229,9 @@ const PublicEventRegistration = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 py-8 px-4">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 py-8 px-4 relative overflow-hidden">
+      <MatrixBackground />
+      <div className="max-w-2xl mx-auto relative z-10">
         <Link to="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
           <ArrowLeft className="h-4 w-4 mr-1" />
           Back to Homepage
