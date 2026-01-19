@@ -35,6 +35,7 @@ const CorporatePartners = lazy(() => import("./pages/CorporatePartners"));
 const JoinAsMentor = lazy(() => import("./pages/JoinAsMentor"));
 const JoinAsAdvisor = lazy(() => import("./pages/JoinAsAdvisor"));
 const JapanAccelerator = lazy(() => import("./pages/JapanAccelerator"));
+const PublicEventRegistration = lazy(() => import("./pages/PublicEventRegistration"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -92,6 +93,7 @@ const App = () => (
                     <Route path="/join/mentor" element={<JoinAsMentor />} />
                     <Route path="/join/advisor" element={<JoinAsAdvisor />} />
                     <Route path="/japan-accelerator" element={<JapanAccelerator />} />
+                    <Route path="/events/:eventId/register" element={<PublicEventRegistration />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, Users, Clock, UserPlus, Check, X, Video, Pencil, ExternalLink } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, UserPlus, Check, X, Video, Pencil, ExternalLink, Copy, Link as LinkIcon } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import VideoConferencing from './VideoConferencing';
@@ -328,6 +328,37 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
                   And {attendees.length - 8} more...
                 </p>
               )}
+            </div>
+          )}
+
+          {/* Share Registration Link (Organizer Only) */}
+          {isOrganizer && (
+            <div className="pt-4 border-t">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <LinkIcon className="h-4 w-4" />
+                Share Event Registration
+              </h3>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  readOnly
+                  value={`${window.location.origin}/events/${event.id}/register`}
+                  className="flex-1 px-3 py-2 text-sm bg-muted rounded-md border border-border"
+                />
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/events/${event.id}/register`);
+                    toast({ title: 'Link copied!', description: 'Share this link for external registrations.' });
+                  }}
+                >
+                  <Copy className="h-4 w-4 mr-2" />
+                  Copy
+                </Button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">
+                Anyone with this link can register for your event without an account
+              </p>
             </div>
           )}
 
