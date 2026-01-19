@@ -24,6 +24,7 @@ interface EditEventDialogProps {
     end_date: string;
     max_attendees: number | null;
     banner_url: string | null;
+    external_registration_url?: string | null;
   } | null;
 }
 
@@ -41,6 +42,7 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
     end_time: '',
     max_attendees: '',
     banner_url: '',
+    external_registration_url: '',
   });
   const { user } = useAuth();
   const { toast } = useToast();
@@ -60,6 +62,7 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
         end_time: format(endDate, 'HH:mm'),
         max_attendees: event.max_attendees?.toString() || '',
         banner_url: event.banner_url || '',
+        external_registration_url: event.external_registration_url || '',
       });
       
       setIsOnlineEvent(event.location?.includes('whereby.com') || false);
@@ -151,6 +154,7 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
           end_date: endDateTime.toISOString(),
           max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
           banner_url: formData.banner_url || null,
+          external_registration_url: formData.external_registration_url || null,
         })
         .eq('id', event.id)
         .eq('organizer_id', user.id);
@@ -363,6 +367,21 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
               onChange={e => setFormData(prev => ({ ...prev, max_attendees: e.target.value }))}
               placeholder="Leave empty for unlimited"
             />
+          </div>
+
+          {/* External Registration URL */}
+          <div className="space-y-2">
+            <Label htmlFor="external_registration_url">External Registration Link (Optional)</Label>
+            <Input
+              id="external_registration_url"
+              type="url"
+              value={formData.external_registration_url}
+              onChange={e => setFormData(prev => ({ ...prev, external_registration_url: e.target.value }))}
+              placeholder="https://eventbrite.com/your-event or https://lu.ma/..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Add a link to Eventbrite, Luma, Meetup, or any external registration platform
+            </p>
           </div>
 
           <div className="flex justify-end gap-2 pt-4">

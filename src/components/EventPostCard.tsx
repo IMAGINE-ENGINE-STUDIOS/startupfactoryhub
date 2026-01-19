@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format, differenceInDays, differenceInHours, isPast } from 'date-fns';
-import { Calendar, MapPin, Users, Clock, Heart, MessageCircle, Share, Bookmark, Video, Check, HelpCircle, X } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, Heart, MessageCircle, Share, Bookmark, Video, Check, HelpCircle, X, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -20,6 +20,7 @@ interface EventData {
   is_virtual?: boolean;
   banner_url?: string;
   max_attendees?: number;
+  external_registration_url?: string;
 }
 
 interface EventPostCardProps {
@@ -275,6 +276,19 @@ export const EventPostCard = ({
                 </div>
               )}
             </div>
+
+            {/* External Registration Link */}
+            {eventData.external_registration_url && !isEventPast && (
+              <a
+                href={eventData.external_registration_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full mt-4 px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-lg font-medium transition-all shadow-lg shadow-emerald-500/25"
+              >
+                <ExternalLink className="w-5 h-5" />
+                Register Externally
+              </a>
+            )}
 
             {/* Join Button for Virtual Events */}
             {eventData.is_virtual && !isEventPast && (

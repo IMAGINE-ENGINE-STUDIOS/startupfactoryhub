@@ -2053,6 +2053,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           end_date: string
+          external_registration_url: string | null
           host_id: string | null
           id: string
           is_public: boolean | null
@@ -2073,6 +2074,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           end_date: string
+          external_registration_url?: string | null
           host_id?: string | null
           id?: string
           is_public?: boolean | null
@@ -2093,6 +2095,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           end_date?: string
+          external_registration_url?: string | null
           host_id?: string | null
           id?: string
           is_public?: boolean | null

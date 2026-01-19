@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, Users, Clock, UserPlus, Check, X, Video, Pencil } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, UserPlus, Check, X, Video, Pencil, ExternalLink } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import VideoConferencing from './VideoConferencing';
@@ -23,6 +23,7 @@ interface Event {
   location: string | null;
   organizer_id: string;
   max_attendees: number | null;
+  external_registration_url?: string | null;
   profiles?: {
     full_name: string;
   };
@@ -403,6 +404,37 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
             <div className="p-4 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg mt-4">
               <p className="text-sm text-yellow-800 dark:text-yellow-200">
                 ⚠️ Video link not available. Please contact the organizer.
+              </p>
+            </div>
+          )}
+
+          {/* External Registration Link */}
+          {event.external_registration_url && (
+            <div className="pt-4 border-t">
+              <a
+                href={event.external_registration_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white rounded-lg font-medium transition-all shadow-lg shadow-emerald-500/25"
+              >
+                <ExternalLink className="h-5 w-5" />
+                Register on {(() => {
+                  try {
+                    const url = new URL(event.external_registration_url);
+                    const hostname = url.hostname.replace('www.', '');
+                    if (hostname.includes('eventbrite')) return 'Eventbrite';
+                    if (hostname.includes('lu.ma')) return 'Luma';
+                    if (hostname.includes('meetup')) return 'Meetup';
+                    if (hostname.includes('zoom')) return 'Zoom';
+                    if (hostname.includes('forms.google')) return 'Google Forms';
+                    return hostname.split('.')[0].charAt(0).toUpperCase() + hostname.split('.')[0].slice(1);
+                  } catch {
+                    return 'External Site';
+                  }
+                })()}
+              </a>
+              <p className="text-xs text-muted-foreground text-center mt-2">
+                You'll be redirected to an external registration page
               </p>
             </div>
           )}

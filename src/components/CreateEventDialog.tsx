@@ -34,7 +34,8 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
     end_time: '',
     max_attendees: '',
     banner_url: '',
-    post_to_feed: true
+    post_to_feed: true,
+    external_registration_url: ''
   });
   
   // Geocoding state
@@ -197,6 +198,7 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         longitude: !isOnlineEvent && selectedCoords ? selectedCoords.longitude : null,
         city: !isOnlineEvent && selectedCoords ? selectedCoords.city : null,
         country: !isOnlineEvent && selectedCoords ? selectedCoords.country : null,
+        external_registration_url: formData.external_registration_url || null,
       } as any).select().single();
 
       if (error) throw error;
@@ -241,7 +243,8 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         end_time: '',
         max_attendees: '',
         banner_url: '',
-        post_to_feed: true
+        post_to_feed: true,
+        external_registration_url: ''
       });
       setIsOnlineEvent(false);
       setSelectedCoords(null);
@@ -459,6 +462,21 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
               onChange={e => setFormData(prev => ({ ...prev, max_attendees: e.target.value }))}
               placeholder="Leave empty for unlimited"
             />
+          </div>
+
+          {/* External Registration URL */}
+          <div className="space-y-2">
+            <Label htmlFor="external_registration_url">External Registration Link (Optional)</Label>
+            <Input
+              id="external_registration_url"
+              type="url"
+              value={formData.external_registration_url}
+              onChange={e => setFormData(prev => ({ ...prev, external_registration_url: e.target.value }))}
+              placeholder="https://eventbrite.com/your-event or https://lu.ma/..."
+            />
+            <p className="text-xs text-muted-foreground">
+              Add a link to Eventbrite, Luma, Meetup, or any external registration platform
+            </p>
           </div>
 
           {/* Post to Feed Option */}
