@@ -11,6 +11,7 @@ import { format, parseISO } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import VideoConferencing from './VideoConferencing';
 import { EditEventDialog } from './EditEventDialog';
+import { ExternalRegistrationsViewer } from './ExternalRegistrationsViewer';
 import { cn } from '@/lib/utils';
 
 interface Event {
@@ -359,6 +360,17 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
               <p className="text-xs text-muted-foreground mt-2">
                 Anyone with this link can register for your event without an account
               </p>
+            </div>
+          )}
+
+          {/* External Registrations Viewer (Organizer Only) */}
+          {isOrganizer && (
+            <div className="pt-4 border-t">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                External Registrations
+              </h3>
+              <ExternalRegistrationsViewer eventId={event.id} eventTitle={event.title} />
             </div>
           )}
 
