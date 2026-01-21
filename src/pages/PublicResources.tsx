@@ -13,6 +13,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import MatrixBackground from '@/components/MatrixBackground';
 import logo from '@/assets/logo.png';
+import { AddResourceDialog } from '@/components/AddResourceDialog';
 import { 
   Building2, 
   Beaker, 
@@ -41,7 +42,8 @@ import {
   CalendarDays,
   Globe2,
   ArrowRight,
-  Share2
+  Share2,
+  Plus
 } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 
@@ -85,6 +87,7 @@ const PublicResources = () => {
   const isRotatingRef = useRef(true);
   const [isPerksExpanded, setIsPerksExpanded] = useState(true);
   const [isOnlineResourcesExpanded, setIsOnlineResourcesExpanded] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
   
   const resourcesRef = useRef<Resource[] | undefined>(undefined);
 
@@ -485,16 +488,25 @@ const PublicResources = () => {
                 </div>
               </div>
             </ScrollArea>
+            
+            {/* Add Resource Button */}
+            <Button 
+              onClick={() => setShowAddDialog(true)} 
+              className="w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20 rounded-2xl mt-4 flex-shrink-0"
+            >
+              <Plus className="w-4 h-4" />
+              Add Resource
+            </Button>
           </div>
         </div>
       </div>
 
       {/* Online Resources Section - Collapsible (Same as GlobalResourcesMap) */}
       {onlineResources.length > 0 && (() => {
-        // Collapsed state - pill on the right
+        // Collapsed state - pill on the right (higher to not overlap with perks)
         if (!isOnlineResourcesExpanded) {
           return (
-            <div className="absolute bottom-36 right-4 z-10 pointer-events-auto">
+            <div className="absolute bottom-44 right-4 z-10 pointer-events-auto">
               <Button
                 onClick={() => setIsOnlineResourcesExpanded(true)}
                 className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl px-3 py-6 flex flex-col items-center gap-2 hover:ring-1 hover:ring-blue-500/50"
@@ -508,10 +520,10 @@ const PublicResources = () => {
           );
         }
         
-        // Expanded state
+        // Expanded state - positioned higher (bottom-44 to be above perks)
         return (
           <div className={cn(
-            "absolute bottom-36 right-4 z-10 pointer-events-auto transition-all duration-300 max-w-[600px]",
+            "absolute bottom-44 right-4 z-10 pointer-events-auto transition-all duration-300 max-w-[600px]",
             isLeftPanelOpen ? "left-[348px]" : "left-4"
           )}>
             <div className="tech-card border-0 !transition-none backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl p-4 overflow-hidden">
@@ -595,7 +607,7 @@ const PublicResources = () => {
         // Collapsed state - pill on the right
         if (!isPerksExpanded) {
           return (
-            <div className="absolute bottom-20 right-4 z-10 pointer-events-auto">
+            <div className="absolute bottom-24 right-4 z-10 pointer-events-auto">
               <Button
                 onClick={() => setIsPerksExpanded(true)}
                 className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl px-3 py-6 flex flex-col items-center gap-2 hover:ring-1 hover:ring-green-500/50"
@@ -609,10 +621,10 @@ const PublicResources = () => {
           );
         }
         
-        // Expanded state
+        // Expanded state - positioned higher to be above messaging icon
         return (
           <div className={cn(
-            "absolute bottom-4 right-4 z-10 pointer-events-auto transition-all duration-300",
+            "absolute bottom-20 right-4 z-10 pointer-events-auto transition-all duration-300",
             isLeftPanelOpen ? "left-[348px]" : "left-4"
           )}>
             <div className="tech-card border-0 !transition-none backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-2xl p-4 overflow-hidden">
@@ -829,6 +841,12 @@ const PublicResources = () => {
           </div>
         </div>
       )}
+
+      {/* Add Resource Dialog - Syncs with Admin Dashboard */}
+      <AddResourceDialog 
+        open={showAddDialog} 
+        onOpenChange={setShowAddDialog}
+      />
     </div>
   );
 };
