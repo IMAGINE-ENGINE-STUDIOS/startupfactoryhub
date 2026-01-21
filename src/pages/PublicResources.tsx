@@ -214,31 +214,38 @@ const PublicResources = () => {
 
       const el = document.createElement('div');
       el.className = 'resource-marker cursor-pointer';
-      el.style.pointerEvents = 'auto';
-      el.innerHTML = `
-        <div style="
-          width: 36px;
-          height: 36px;
-          background: ${config.color};
-          border: 3px solid white;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-          transition: transform 0.2s;
-          pointer-events: auto;
-        ">
-          ${resource.logo_url ? `<img src="${resource.logo_url}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; pointer-events: none;" />` : ''}
-        </div>
+      el.style.cssText = 'pointer-events: auto; position: relative;';
+      
+      const innerDiv = document.createElement('div');
+      innerDiv.style.cssText = `
+        width: 36px;
+        height: 36px;
+        background: ${config.color};
+        border: 3px solid white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        transition: transform 0.2s ease;
+        pointer-events: none;
       `;
+      
+      if (resource.logo_url) {
+        const img = document.createElement('img');
+        img.src = resource.logo_url;
+        img.style.cssText = 'width: 24px; height: 24px; border-radius: 50%; object-fit: cover; pointer-events: none;';
+        innerDiv.appendChild(img);
+      }
+      
+      el.appendChild(innerDiv);
 
       el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.2)';
+        innerDiv.style.transform = 'scale(1.2)';
         el.style.zIndex = '100';
       });
       el.addEventListener('mouseleave', () => {
-        el.style.transform = 'scale(1)';
+        innerDiv.style.transform = 'scale(1)';
         el.style.zIndex = '1';
       });
       el.addEventListener('click', (e) => {
