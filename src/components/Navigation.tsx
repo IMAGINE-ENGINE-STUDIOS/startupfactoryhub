@@ -25,7 +25,7 @@ const Navigation = () => {
           
           {/* Desktop Right Side */}
           <div className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" onClick={() => navigate("/resources")} className="min-h-[44px]">Resources</Button>
+            
             {user ? <>
                 <Button variant="ghost" onClick={() => navigate("/dashboard")} className="min-h-[44px]">Dashboard</Button>
                 <Button variant="hero" size="lg" onClick={async () => {
@@ -49,9 +49,9 @@ const Navigation = () => {
               <SheetContent side="right" className="w-[280px] sm:w-[350px]">
                 <div className="flex flex-col space-y-4 mt-8 px-2">
                   <Button variant="outline" className="w-full min-h-[48px] text-base" onClick={() => {
-                    navigate("/resources");
-                    closeMenu();
-                  }}>
+                  navigate("/resources");
+                  closeMenu();
+                }}>
                     Resources
                   </Button>
                   {user ? <>
