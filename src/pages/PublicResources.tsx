@@ -305,9 +305,9 @@ const PublicResources = () => {
       {/* Map Container */}
       <div ref={mapContainer} className="absolute inset-0 z-0" />
 
-      {/* Header */}
+      {/* Header - Centered Title/Logo */}
       <div className="absolute top-0 left-0 right-0 z-20 p-4 pointer-events-none">
-        <div className="flex items-center justify-between pointer-events-auto">
+        <div className="flex items-center justify-center pointer-events-auto">
           <div 
             className="flex items-center space-x-3 cursor-pointer"
             onClick={() => navigate('/')}
@@ -317,22 +317,23 @@ const PublicResources = () => {
               Startup Resources
             </span>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/auth')}
-              className="tech-card border-0 bg-primary/90 hover:bg-primary text-primary-foreground"
-            >
-              Join Platform
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
-          </div>
+        </div>
+        
+        {/* Join Platform Button - Top Right */}
+        <div className="absolute top-4 right-4 pointer-events-auto">
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/auth')}
+            className="tech-card border-0 bg-primary/90 hover:bg-primary text-primary-foreground"
+          >
+            Join Platform
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Button>
         </div>
       </div>
 
-      {/* Control Buttons */}
-      <div className="absolute top-20 right-4 z-10 flex flex-col gap-2 pointer-events-auto">
+      {/* Control Buttons - Below Mapbox Controls (top-32 to be under mapbox nav) */}
+      <div className="absolute top-32 right-3 z-10 flex flex-col gap-2 pointer-events-auto">
         <Button
           variant="ghost"
           size="icon"
