@@ -450,56 +450,146 @@ export default function Deck() {
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 print:text-black">The Problem</h2>
             
             {/* Main Problem Statement */}
-            <div className="max-w-3xl w-full mb-10">
-              <div className="bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-rose-500/10 border border-rose-500/40 rounded-lg p-6 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
-                <p className="text-xl md:text-2xl text-center text-white leading-relaxed print:text-black">
-                  Startups don't fail due to lack of ideas — <span className="text-rose-400 font-semibold print:text-rose-700">they fail because execution breaks between stages.</span>
-                </p>
-              </div>
+            <div className="max-w-3xl w-full mb-8">
+              <p className="text-lg md:text-xl text-center text-slate-300 leading-relaxed print:text-gray-700">
+                Startups don't fail due to lack of ideas — <span className="text-rose-400 font-semibold print:text-rose-700">they fail because execution breaks between stages.</span>
+              </p>
             </div>
             
+            {/* Visual Broken System Flow */}
+            <div className="relative max-w-5xl w-full mb-8">
+              {/* Broken flow line */}
+              <div className="absolute top-12 left-0 right-0 h-1 print:hidden">
+                <div className="absolute left-0 w-[18%] h-full bg-gradient-to-r from-teal-500/60 to-rose-500/60" />
+                <div className="absolute left-[20%] w-4 h-4 -top-1.5 rotate-45 border-2 border-rose-500 bg-slate-950 flex items-center justify-center">
+                  <span className="text-rose-500 text-xs font-bold">✕</span>
+                </div>
+                <div className="absolute left-[24%] w-[14%] h-full bg-gradient-to-r from-rose-500/30 to-rose-500/60 opacity-50" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, currentColor 4px, currentColor 8px)' }} />
+                <div className="absolute left-[40%] w-4 h-4 -top-1.5 rotate-45 border-2 border-rose-500 bg-slate-950 flex items-center justify-center">
+                  <span className="text-rose-500 text-xs font-bold">✕</span>
+                </div>
+                <div className="absolute left-[44%] w-[14%] h-full bg-gradient-to-r from-rose-500/30 to-rose-500/60 opacity-50" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, currentColor 4px, currentColor 8px)' }} />
+                <div className="absolute left-[60%] w-4 h-4 -top-1.5 rotate-45 border-2 border-rose-500 bg-slate-950 flex items-center justify-center">
+                  <span className="text-rose-500 text-xs font-bold">✕</span>
+                </div>
+                <div className="absolute left-[64%] w-[14%] h-full bg-gradient-to-r from-rose-500/30 to-rose-500/60 opacity-50" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, currentColor 4px, currentColor 8px)' }} />
+                <div className="absolute left-[80%] w-4 h-4 -top-1.5 rotate-45 border-2 border-rose-500 bg-slate-950 flex items-center justify-center">
+                  <span className="text-rose-500 text-xs font-bold">✕</span>
+                </div>
+                <div className="absolute left-[84%] w-[16%] h-full bg-gradient-to-r from-rose-500/30 to-slate-500/20 opacity-50" />
+              </div>
+              
+              {/* Journey Stages - Disconnected */}
+              <div className="grid grid-cols-5 gap-2 relative">
+                {/* Stage 1: Education */}
+                <div className="flex flex-col items-center">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-teal-500/30 to-teal-600/20 border-2 border-teal-500/60 flex items-center justify-center z-10 print:bg-white print:border-teal-400">
+                    <GraduationCap className="h-6 w-6 text-teal-400 print:text-teal-700" />
+                  </div>
+                  <div className="mt-3 text-center">
+                    <h5 className="text-xs font-bold text-teal-400 print:text-teal-700">Education</h5>
+                  </div>
+                </div>
+
+                {/* Stage 2: Product */}
+                <div className="flex flex-col items-center opacity-70">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-rose-500/40 border-dashed flex items-center justify-center z-10 print:bg-white print:border-gray-400">
+                    <Cpu className="h-6 w-6 text-slate-500 print:text-gray-500" />
+                  </div>
+                  <div className="mt-3 text-center">
+                    <h5 className="text-xs font-bold text-slate-500 print:text-gray-500">Product</h5>
+                  </div>
+                </div>
+
+                {/* Stage 3: Market */}
+                <div className="flex flex-col items-center opacity-70">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-rose-500/40 border-dashed flex items-center justify-center z-10 print:bg-white print:border-gray-400">
+                    <Target className="h-6 w-6 text-slate-500 print:text-gray-500" />
+                  </div>
+                  <div className="mt-3 text-center">
+                    <h5 className="text-xs font-bold text-slate-500 print:text-gray-500">Market</h5>
+                  </div>
+                </div>
+
+                {/* Stage 4: Revenue */}
+                <div className="flex flex-col items-center opacity-70">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-rose-500/40 border-dashed flex items-center justify-center z-10 print:bg-white print:border-gray-400">
+                    <DollarSign className="h-6 w-6 text-slate-500 print:text-gray-500" />
+                  </div>
+                  <div className="mt-3 text-center">
+                    <h5 className="text-xs font-bold text-slate-500 print:text-gray-500">Revenue</h5>
+                  </div>
+                </div>
+
+                {/* Stage 5: Scale */}
+                <div className="flex flex-col items-center opacity-40">
+                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-slate-600/40 border-dashed flex items-center justify-center z-10 print:bg-white print:border-gray-400">
+                    <TrendingUp className="h-6 w-6 text-slate-600 print:text-gray-400" />
+                  </div>
+                  <div className="mt-3 text-center">
+                    <h5 className="text-xs font-bold text-slate-600 print:text-gray-400">Scale</h5>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <SectionDivider title="Core Gaps" />
             
-            {/* Core Gaps Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 max-w-5xl w-full">
-              {/* Gap 1 */}
-              <div className="bg-slate-900/80 border border-rose-500/30 rounded-lg p-4 backdrop-blur-sm hover:border-rose-500/60 transition-all print:bg-gray-50 print:border-gray-300">
-                <div className="w-10 h-10 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
-                  <Network className="h-5 w-5 text-rose-400 print:text-rose-700" />
+            {/* Core Gaps - Visual Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 max-w-5xl w-full">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-rose-500/10 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
+                <div className="relative bg-slate-900/80 border border-rose-500/30 rounded-lg p-3 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Network className="h-4 w-4 text-rose-400 print:text-rose-700" />
+                    <span className="text-xs font-bold text-rose-400 print:text-rose-700">01</span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">Fragmented tools & platforms</p>
                 </div>
-                <p className="text-sm text-slate-300 text-center leading-relaxed print:text-gray-600">Fragmented tools & platforms</p>
               </div>
 
-              {/* Gap 2 */}
-              <div className="bg-slate-900/80 border border-rose-500/30 rounded-lg p-4 backdrop-blur-sm hover:border-rose-500/60 transition-all print:bg-gray-50 print:border-gray-300">
-                <div className="w-10 h-10 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
-                  <Calendar className="h-5 w-5 text-rose-400 print:text-rose-700" />
+              <div className="relative group">
+                <div className="absolute inset-0 bg-rose-500/10 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
+                <div className="relative bg-slate-900/80 border border-rose-500/30 rounded-lg p-3 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Calendar className="h-4 w-4 text-rose-400 print:text-rose-700" />
+                    <span className="text-xs font-bold text-rose-400 print:text-rose-700">02</span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">No support post-demo day</p>
                 </div>
-                <p className="text-sm text-slate-300 text-center leading-relaxed print:text-gray-600">No continuous support post-demo day</p>
               </div>
 
-              {/* Gap 3 */}
-              <div className="bg-slate-900/80 border border-rose-500/30 rounded-lg p-4 backdrop-blur-sm hover:border-rose-500/60 transition-all print:bg-gray-50 print:border-gray-300">
-                <div className="w-10 h-10 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
-                  <Users className="h-5 w-5 text-rose-400 print:text-rose-700" />
+              <div className="relative group">
+                <div className="absolute inset-0 bg-rose-500/10 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
+                <div className="relative bg-slate-900/80 border border-rose-500/30 rounded-lg p-3 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Users className="h-4 w-4 text-rose-400 print:text-rose-700" />
+                    <span className="text-xs font-bold text-rose-400 print:text-rose-700">03</span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">Limited access to operators</p>
                 </div>
-                <p className="text-sm text-slate-300 text-center leading-relaxed print:text-gray-600">Limited access to real operators</p>
               </div>
 
-              {/* Gap 4 */}
-              <div className="bg-slate-900/80 border border-rose-500/30 rounded-lg p-4 backdrop-blur-sm hover:border-rose-500/60 transition-all print:bg-gray-50 print:border-gray-300">
-                <div className="w-10 h-10 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
-                  <DollarSign className="h-5 w-5 text-rose-400 print:text-rose-700" />
+              <div className="relative group">
+                <div className="absolute inset-0 bg-rose-500/10 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
+                <div className="relative bg-slate-900/80 border border-rose-500/30 rounded-lg p-3 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                  <div className="flex items-center gap-2 mb-2">
+                    <DollarSign className="h-4 w-4 text-rose-400 print:text-rose-700" />
+                    <span className="text-xs font-bold text-rose-400 print:text-rose-700">04</span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">Capital ≠ execution</p>
                 </div>
-                <p className="text-sm text-slate-300 text-center leading-relaxed print:text-gray-600">Capital disconnected from execution</p>
               </div>
 
-              {/* Gap 5 */}
-              <div className="bg-slate-900/80 border border-rose-500/30 rounded-lg p-4 backdrop-blur-sm hover:border-rose-500/60 transition-all print:bg-gray-50 print:border-gray-300">
-                <div className="w-10 h-10 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
-                  <TrendingUp className="h-5 w-5 text-rose-400 print:text-rose-700" />
+              <div className="relative group">
+                <div className="absolute inset-0 bg-rose-500/10 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
+                <div className="relative bg-slate-900/80 border border-rose-500/30 rounded-lg p-3 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                  <div className="flex items-center gap-2 mb-2">
+                    <TrendingUp className="h-4 w-4 text-rose-400 print:text-rose-700" />
+                    <span className="text-xs font-bold text-rose-400 print:text-rose-700">05</span>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">Education ≠ revenue</p>
                 </div>
-                <p className="text-sm text-slate-300 text-center leading-relaxed print:text-gray-600">Education ≠ product ≠ market ≠ revenue</p>
               </div>
             </div>
           </div>
