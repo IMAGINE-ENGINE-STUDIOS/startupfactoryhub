@@ -972,37 +972,138 @@ export default function Deck() {
           </div>
         </SlideContainer>
 
-        {/* SLIDE 7: Business Model */}
+        {/* SLIDE 7: Financial & Growth Model */}
         <SlideContainer>
           <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-4 mb-3">
               <IconBadge icon={DollarSign} color="emerald" />
-              <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">Business Model</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Financial & Growth Model</h2>
             </div>
-            <p className="text-xl text-slate-400 text-center mb-12 print:text-gray-600">Sustainable Revenue Streams</p>
+            <p className="text-base text-slate-400 text-center mb-4 print:text-gray-600">
+              Freemium adoption drives monetization through tiered subscriptions + enterprise revenue streams
+            </p>
             
-            <div className="grid md:grid-cols-2 gap-6 max-w-4xl w-full">
-              <TechCard glowColor="emerald">
-                <h3 className="font-semibold text-lg mb-4 text-emerald-400 flex items-center gap-2 print:text-emerald-700">
-                  <Award className="h-5 w-5" /> Subscription Tiers
+            {/* Core Growth Model */}
+            <div className="grid grid-cols-3 gap-3 max-w-5xl w-full mb-4">
+              <TechCard glowColor="teal" className="p-3">
+                <h3 className="font-semibold text-xs text-teal-400 mb-2 flex items-center gap-1.5">
+                  <TrendingUp className="h-3.5 w-3.5" /> Growth Engine
                 </h3>
-                <ul className="space-y-3 text-slate-300 print:text-gray-600">
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-emerald-500" /> Free tier for startups</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-emerald-500" /> Premium for advanced features</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-emerald-500" /> Enterprise for accelerators</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-emerald-500" /> Investor Pro access</li>
-                </ul>
+                <div className="space-y-1.5 text-[10px] text-slate-300 print:text-gray-600">
+                  <p><span className="text-teal-400 font-medium">Start:</span> 100 startups Month 1</p>
+                  <p><span className="text-teal-400 font-medium">Growth:</span> 10% MoM compound</p>
+                  <p><span className="text-teal-400 font-medium">Model:</span> 40% Free / 60% Paid</p>
+                </div>
               </TechCard>
-              <TechCard glowColor="purple">
-                <h3 className="font-semibold text-lg mb-4 text-purple-400 flex items-center gap-2 print:text-purple-700">
-                  <Handshake className="h-5 w-5" /> Additional Revenue
+              
+              <TechCard glowColor="emerald" className="p-3">
+                <h3 className="font-semibold text-xs text-emerald-400 mb-2 flex items-center gap-1.5">
+                  <Award className="h-3.5 w-3.5" /> Subscription Tiers
                 </h3>
-                <ul className="space-y-3 text-slate-300 print:text-gray-600">
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-purple-500" /> Cohort enrollment fees</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-purple-500" /> Success-based commissions</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-purple-500" /> Corporate partnerships</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-purple-500" /> Sponsored events</li>
-                </ul>
+                <div className="space-y-1 text-[10px] text-slate-300 print:text-gray-600">
+                  <div className="flex justify-between"><span>Early Stage</span><span className="text-emerald-400">$300/mo</span></div>
+                  <div className="flex justify-between"><span>Build Stage</span><span className="text-emerald-400">$500/mo</span></div>
+                  <div className="flex justify-between"><span>Growth Stage</span><span className="text-emerald-400">$950/mo</span></div>
+                  <div className="flex justify-between"><span>Scale Stage</span><span className="text-emerald-400">$1,500/mo</span></div>
+                  <div className="flex justify-between border-t border-emerald-500/30 pt-1 mt-1"><span className="font-medium">Blended ARPU</span><span className="text-emerald-400 font-bold">$750/mo</span></div>
+                </div>
+              </TechCard>
+              
+              <TechCard glowColor="cyan" className="p-3">
+                <h3 className="font-semibold text-xs text-cyan-400 mb-2 flex items-center gap-1.5">
+                  <BarChart3 className="h-3.5 w-3.5" /> 5-Year Startup Growth
+                </h3>
+                <div className="space-y-1 text-[10px] text-slate-300 print:text-gray-600">
+                  <div className="flex justify-between"><span>Year 1</span><span className="text-cyan-400">~190 startups</span></div>
+                  <div className="flex justify-between"><span>Year 2</span><span className="text-cyan-400">~540 startups</span></div>
+                  <div className="flex justify-between"><span>Year 3</span><span className="text-cyan-400">~1,550 startups</span></div>
+                  <div className="flex justify-between"><span>Year 4</span><span className="text-cyan-400">~4,420 startups</span></div>
+                  <div className="flex justify-between"><span>Year 5</span><span className="text-cyan-400 font-bold">~12,650 startups</span></div>
+                </div>
+              </TechCard>
+            </div>
+            
+            {/* Revenue Streams Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-5xl w-full mb-4">
+              <TechCard glowColor="purple" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-purple-500/20 flex items-center justify-center">
+                    <Building2 className="h-3.5 w-3.5 text-purple-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-purple-400">Corporate Partners</h3>
+                </div>
+                <p className="text-[10px] text-slate-300 print:text-gray-600">
+                  <span className="text-purple-400 font-medium">$100K/year</span> per partner
+                </p>
+              </TechCard>
+              
+              <TechCard glowColor="amber" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-amber-500/20 flex items-center justify-center">
+                    <Target className="h-3.5 w-3.5 text-amber-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-amber-400">Pilot Programs</h3>
+                </div>
+                <p className="text-[10px] text-slate-300 print:text-gray-600">
+                  <span className="text-amber-400 font-medium">$200K</span> per pilot (2+/year)
+                </p>
+              </TechCard>
+              
+              <TechCard glowColor="rose" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-rose-500/20 flex items-center justify-center">
+                    <Globe className="h-3.5 w-3.5 text-rose-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-rose-400">New Chapters</h3>
+                </div>
+                <p className="text-[10px] text-slate-300 print:text-gray-600">
+                  <span className="text-rose-400 font-medium">$200K</span> per chapter (2+/year)
+                </p>
+              </TechCard>
+              
+              <TechCard glowColor="teal" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-teal-500/20 flex items-center justify-center">
+                    <Award className="h-3.5 w-3.5 text-teal-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-teal-400">Sponsorships</h3>
+                </div>
+                <p className="text-[10px] text-slate-300 print:text-gray-600">
+                  <span className="text-teal-400 font-medium">$5K-$50K</span> (avg $20K/sponsor)
+                </p>
+              </TechCard>
+              
+              <TechCard glowColor="cyan" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-cyan-500/20 flex items-center justify-center">
+                    <GraduationCap className="h-3.5 w-3.5 text-cyan-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-cyan-400">Education Programs</h3>
+                </div>
+                <p className="text-[10px] text-slate-300 print:text-gray-600">
+                  <span className="text-cyan-400 font-medium">$10K avg</span> (100 students Y1, 2x/year)
+                </p>
+              </TechCard>
+              
+              <TechCard glowColor="emerald" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-emerald-500/20 flex items-center justify-center">
+                    <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-emerald-400">Revenue Formula</h3>
+                </div>
+                <p className="text-[9px] text-slate-300 print:text-gray-600">
+                  Subscriptions + Corporate + Pilots + Chapters + Sponsors + Education
+                </p>
+              </TechCard>
+            </div>
+            
+            {/* Key Narrative */}
+            <div className="max-w-5xl w-full">
+              <TechCard glowColor="teal" className="p-3">
+                <p className="text-[10px] text-center text-slate-300 print:text-gray-600">
+                  <span className="text-teal-400 font-semibold">Model Summary:</span> Startup Factory Hub scales by onboarding 100 startups in Month 1, growing adoption at 10% MoM, monetizing through tiered subscriptions ($750 ARPU), and compounding revenue with enterprise partnerships, pilot programs, education, and global chapter expansion.
+                </p>
               </TechCard>
             </div>
           </div>
