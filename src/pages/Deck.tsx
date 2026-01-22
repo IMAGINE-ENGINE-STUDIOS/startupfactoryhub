@@ -2,71 +2,136 @@ import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail,
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
+import rocketLaunchBg from '@/assets/rocket-launch-bg.jpg';
 
-// Geometric Pattern Components
+// Enhanced Geometric Pattern Components (matching marketing banners)
 const TechGrid = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
     {/* Horizontal lines */}
-    {[...Array(20)].map((_, i) => (
+    {[...Array(25)].map((_, i) => (
       <div 
         key={`h-${i}`} 
-        className="absolute w-full h-px bg-gradient-to-r from-transparent via-teal-500/10 to-transparent"
-        style={{ top: `${(i + 1) * 5}%` }}
+        className="absolute w-full h-px bg-gradient-to-r from-transparent via-teal-500/8 to-transparent"
+        style={{ top: `${(i + 1) * 4}%` }}
       />
     ))}
     {/* Vertical lines */}
-    {[...Array(20)].map((_, i) => (
+    {[...Array(25)].map((_, i) => (
       <div 
         key={`v-${i}`} 
-        className="absolute h-full w-px bg-gradient-to-b from-transparent via-teal-500/10 to-transparent"
-        style={{ left: `${(i + 1) * 5}%` }}
+        className="absolute h-full w-px bg-gradient-to-b from-transparent via-teal-500/8 to-transparent"
+        style={{ left: `${(i + 1) * 4}%` }}
       />
+    ))}
+    {/* Grid intersection dots */}
+    {[...Array(6)].map((_, i) => (
+      [...Array(6)].map((_, j) => (
+        <div 
+          key={`dot-${i}-${j}`} 
+          className="absolute w-1 h-1 rounded-full bg-teal-500/20"
+          style={{ top: `${(i + 1) * 16}%`, left: `${(j + 1) * 16}%` }}
+        />
+      ))
     ))}
   </div>
 );
 
 const FloatingHexagons = () => (
   <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
-    {/* Top right hexagon cluster */}
-    <div className="absolute top-20 right-20 w-32 h-32 border border-teal-500/20 rotate-12" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
-    <div className="absolute top-32 right-32 w-20 h-20 border border-cyan-500/15 -rotate-6" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
-    {/* Bottom left hexagon cluster */}
-    <div className="absolute bottom-20 left-20 w-24 h-24 border border-teal-500/15 rotate-45" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
-    <div className="absolute bottom-32 left-10 w-16 h-16 border border-cyan-500/10 -rotate-12" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+    {/* Large hexagon top right */}
+    <div className="absolute top-[10%] right-[5%] w-40 h-40 border-2 border-teal-500/15 rotate-12" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+    {/* Medium hexagon top right */}
+    <div className="absolute top-[18%] right-[12%] w-24 h-24 border border-cyan-500/12 -rotate-6" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+    {/* Small hexagon top left */}
+    <div className="absolute top-[15%] left-[8%] w-20 h-20 border border-teal-500/10 rotate-30" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+    {/* Bottom left cluster */}
+    <div className="absolute bottom-[15%] left-[5%] w-32 h-32 border-2 border-teal-500/12 rotate-45" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+    <div className="absolute bottom-[25%] left-[2%] w-16 h-16 border border-cyan-500/10 -rotate-12" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+    {/* Bottom right */}
+    <div className="absolute bottom-[10%] right-[8%] w-28 h-28 border border-teal-500/10 rotate-15" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+  </div>
+);
+
+const EnergyLines = () => (
+  <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
+    {/* Left sweeping arc */}
+    <div className="absolute top-1/4 -left-32 w-96 h-96 border-2 border-teal-500/10 rounded-full" />
+    <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] border border-teal-500/5 rounded-full" />
+    {/* Right sweeping arc */}
+    <div className="absolute top-1/4 -right-32 w-96 h-96 border-2 border-cyan-500/10 rounded-full" />
+    <div className="absolute top-1/3 -right-40 w-[500px] h-[500px] border border-cyan-500/5 rounded-full" />
+    {/* Glowing particles */}
+    <div className="absolute top-[20%] left-[10%] w-2 h-2 bg-teal-400 rounded-full shadow-lg shadow-teal-500/50" />
+    <div className="absolute top-[30%] left-[15%] w-1.5 h-1.5 bg-cyan-400 rounded-full shadow-lg shadow-cyan-500/50" />
+    <div className="absolute top-[25%] right-[12%] w-2 h-2 bg-teal-400 rounded-full shadow-lg shadow-teal-500/50" />
+    <div className="absolute top-[35%] right-[8%] w-1.5 h-1.5 bg-cyan-400 rounded-full shadow-lg shadow-cyan-500/50" />
+    <div className="absolute bottom-[30%] left-[8%] w-1.5 h-1.5 bg-teal-400 rounded-full shadow-lg shadow-teal-500/50" />
+    <div className="absolute bottom-[25%] right-[15%] w-2 h-2 bg-cyan-400 rounded-full shadow-lg shadow-cyan-500/50" />
+    {/* Connection lines (dashed) */}
+    <div className="absolute top-[22%] left-[11%] w-16 h-px bg-gradient-to-r from-teal-500/30 to-transparent rotate-45" />
+    <div className="absolute top-[27%] right-[10%] w-20 h-px bg-gradient-to-l from-cyan-500/30 to-transparent -rotate-30" />
   </div>
 );
 
 const CornerAccents = () => (
   <div className="absolute inset-0 pointer-events-none print:hidden">
     {/* Top left */}
-    <div className="absolute top-4 left-4">
-      <div className="w-12 h-px bg-gradient-to-r from-teal-500 to-transparent" />
-      <div className="w-px h-12 bg-gradient-to-b from-teal-500 to-transparent" />
+    <div className="absolute top-6 left-6">
+      <div className="w-16 h-0.5 bg-gradient-to-r from-teal-500 to-transparent" />
+      <div className="w-0.5 h-16 bg-gradient-to-b from-teal-500 to-transparent" />
     </div>
     {/* Top right */}
-    <div className="absolute top-4 right-4">
-      <div className="w-12 h-px bg-gradient-to-l from-teal-500 to-transparent ml-auto" />
-      <div className="w-px h-12 bg-gradient-to-b from-teal-500 to-transparent ml-auto" />
+    <div className="absolute top-6 right-6">
+      <div className="w-16 h-0.5 bg-gradient-to-l from-teal-500 to-transparent ml-auto" />
+      <div className="w-0.5 h-16 bg-gradient-to-b from-teal-500 to-transparent ml-auto" />
     </div>
     {/* Bottom left */}
-    <div className="absolute bottom-4 left-4">
-      <div className="w-px h-12 bg-gradient-to-t from-teal-500 to-transparent" />
-      <div className="w-12 h-px bg-gradient-to-r from-teal-500 to-transparent" />
+    <div className="absolute bottom-6 left-6">
+      <div className="w-0.5 h-16 bg-gradient-to-t from-teal-500 to-transparent" />
+      <div className="w-16 h-0.5 bg-gradient-to-r from-teal-500 to-transparent" />
     </div>
     {/* Bottom right */}
-    <div className="absolute bottom-4 right-4">
-      <div className="w-px h-12 bg-gradient-to-t from-teal-500 to-transparent ml-auto" />
-      <div className="w-12 h-px bg-gradient-to-l from-teal-500 to-transparent ml-auto" />
+    <div className="absolute bottom-6 right-6">
+      <div className="w-0.5 h-16 bg-gradient-to-t from-teal-500 to-transparent ml-auto" />
+      <div className="w-16 h-0.5 bg-gradient-to-l from-teal-500 to-transparent ml-auto" />
     </div>
   </div>
 );
 
+// Cover slide with background image
+const CoverSlideContainer = ({ children }: { children: React.ReactNode }) => (
+  <section className="relative min-h-screen flex flex-col items-center justify-center p-8 md:p-16 overflow-hidden print:min-h-0 print:py-12 print:break-after-page print:bg-white">
+    {/* Background image */}
+    <div 
+      className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden"
+      style={{ backgroundImage: `url(${rocketLaunchBg})` }}
+    />
+    {/* Dark cinematic overlay */}
+    <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
+    {/* Scan lines effect */}
+    <div className="absolute inset-0 print:hidden" style={{ 
+      backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(20, 184, 166, 0.02) 2px, rgba(20, 184, 166, 0.02) 4px)',
+    }} />
+    {/* Border frame */}
+    <div className="absolute inset-4 border-2 border-teal-500/40 rounded-lg print:border-gray-300" />
+    <TechGrid />
+    <FloatingHexagons />
+    <EnergyLines />
+    <CornerAccents />
+    <div className="relative z-10 w-full max-w-6xl mx-auto">
+      {children}
+    </div>
+  </section>
+);
+
+// Standard slide container
 const SlideContainer = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
   <section className={`relative min-h-screen flex flex-col items-center justify-center p-8 md:p-16 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 print:min-h-0 print:py-12 print:break-after-page print:bg-white ${className}`}>
     {/* Border frame */}
     <div className="absolute inset-4 border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
     <TechGrid />
     <FloatingHexagons />
+    <EnergyLines />
     <CornerAccents />
     <div className="relative z-10 w-full max-w-6xl mx-auto">
       {children}
@@ -148,7 +213,7 @@ export default function Deck() {
       {/* Scrollable Content */}
       <div className="pt-16 print:pt-0">
         {/* SLIDE 1: Cover */}
-        <SlideContainer>
+        <CoverSlideContainer>
           <div className="flex flex-col items-center text-center">
             {/* Logo with glow */}
             <div className="relative mb-6">
@@ -202,7 +267,7 @@ export default function Deck() {
               </p>
             </div>
           </div>
-        </SlideContainer>
+        </CoverSlideContainer>
 
         {/* SLIDE 2: Company Summary */}
         <SlideContainer>
