@@ -238,25 +238,68 @@ export default function Deck() {
               </p>
             </div>
             
-            <SectionDivider title="Execution Algorithm" />
+            <SectionDivider title="Built for Everyone" />
             
-            {/* Four Pillars */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl w-full mb-6">
-              <div className="flex flex-col items-center p-3 bg-slate-900/60 border border-teal-500/30 rounded-lg print:bg-gray-50 print:border-gray-300">
-                <Cpu className="h-6 w-6 text-teal-400 mb-2 print:text-teal-700" />
-                <span className="text-sm text-slate-300 text-center print:text-gray-700">Digital Infrastructure</span>
+            {/* User Types Grid - 5 columns */}
+            <div className="grid grid-cols-5 gap-3 max-w-4xl w-full mb-6">
+              {/* Startups */}
+              <div className="relative group">
+                <div className="absolute inset-0 bg-teal-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
+                <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-teal-500/40 rounded-lg hover:border-teal-500/80 transition-all print:bg-gray-50 print:border-gray-300">
+                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
+                    <div className="absolute w-12 h-12 bg-gradient-to-br from-teal-500/30 to-teal-600/30 border border-teal-500/60" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+                    <Rocket className="h-5 w-5 text-teal-400 z-10 print:text-teal-700" />
+                  </div>
+                  <span className="text-sm font-medium text-slate-200 print:text-gray-700">Startups</span>
+                </div>
               </div>
-              <div className="flex flex-col items-center p-3 bg-slate-900/60 border border-cyan-500/30 rounded-lg print:bg-gray-50 print:border-gray-300">
-                <Users className="h-6 w-6 text-cyan-400 mb-2 print:text-cyan-700" />
-                <span className="text-sm text-slate-300 text-center print:text-gray-700">Human Expertise</span>
+
+              {/* Mentors */}
+              <div className="relative group">
+                <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
+                <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-cyan-500/40 rounded-lg hover:border-cyan-500/80 transition-all print:bg-gray-50 print:border-gray-300">
+                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
+                    <div className="absolute w-12 h-12 bg-gradient-to-br from-cyan-500/30 to-cyan-600/30 border border-cyan-500/60" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+                    <Users className="h-5 w-5 text-cyan-400 z-10 print:text-cyan-700" />
+                  </div>
+                  <span className="text-sm font-medium text-slate-200 print:text-gray-700">Mentors</span>
+                </div>
               </div>
-              <div className="flex flex-col items-center p-3 bg-slate-900/60 border border-purple-500/30 rounded-lg print:bg-gray-50 print:border-gray-300">
-                <Building2 className="h-6 w-6 text-purple-400 mb-2 print:text-purple-700" />
-                <span className="text-sm text-slate-300 text-center print:text-gray-700">Corporate Partnerships</span>
+
+              {/* Investors */}
+              <div className="relative group">
+                <div className="absolute inset-0 bg-purple-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
+                <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-purple-500/40 rounded-lg hover:border-purple-500/80 transition-all print:bg-gray-50 print:border-gray-300">
+                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
+                    <div className="absolute w-12 h-12 bg-gradient-to-br from-purple-500/30 to-purple-600/30 border border-purple-500/60" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+                    <Diamond className="h-5 w-5 text-purple-400 z-10 print:text-purple-700" />
+                  </div>
+                  <span className="text-sm font-medium text-slate-200 print:text-gray-700">Investors</span>
+                </div>
               </div>
-              <div className="flex flex-col items-center p-3 bg-slate-900/60 border border-emerald-500/30 rounded-lg print:bg-gray-50 print:border-gray-300">
-                <DollarSign className="h-6 w-6 text-emerald-400 mb-2 print:text-emerald-700" />
-                <span className="text-sm text-slate-300 text-center print:text-gray-700">Capital Access</span>
+
+              {/* Students */}
+              <div className="relative group">
+                <div className="absolute inset-0 bg-rose-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
+                <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-rose-500/40 rounded-lg hover:border-rose-500/80 transition-all print:bg-gray-50 print:border-gray-300">
+                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
+                    <div className="absolute w-12 h-12 bg-gradient-to-br from-rose-500/30 to-rose-600/30 border border-rose-500/60" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+                    <GraduationCap className="h-5 w-5 text-rose-400 z-10 print:text-rose-700" />
+                  </div>
+                  <span className="text-sm font-medium text-slate-200 print:text-gray-700">Students</span>
+                </div>
+              </div>
+
+              {/* Accelerators */}
+              <div className="relative group">
+                <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
+                <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-emerald-500/40 rounded-lg hover:border-emerald-500/80 transition-all print:bg-gray-50 print:border-gray-300">
+                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
+                    <div className="absolute w-12 h-12 bg-gradient-to-br from-emerald-500/30 to-emerald-600/30 border border-emerald-500/60" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+                    <Building2 className="h-5 w-5 text-emerald-400 z-10 print:text-emerald-700" />
+                  </div>
+                  <span className="text-sm font-medium text-slate-200 print:text-gray-700">Accelerators</span>
+                </div>
               </div>
             </div>
             
