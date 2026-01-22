@@ -628,63 +628,82 @@ export default function Deck() {
           </section>
         </SlideWrapper>
 
-        {/* SLIDE 3: Our Solution */}
+        {/* SLIDE 4: Solution */}
         <SlideContainer>
           <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-4">
+            <div className="flex items-center gap-3 mb-2">
               <IconBadge icon={Lightbulb} color="teal" />
-              <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">Our Solution</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Solution</h2>
             </div>
-            <p className="text-xl text-slate-400 text-center mb-12 print:text-gray-600">All-in-One Innovation Platform</p>
+            <p className="text-base md:text-lg text-teal-400 font-semibold text-center mb-1 print:text-teal-700">AI-Powered Hybrid Acceleration Platform</p>
+            <p className="text-xs md:text-sm text-slate-400 text-center mb-6 max-w-3xl print:text-gray-600">
+              Startup Factory Hub provides a unified execution platform that combines AI, human expertise, physical infrastructure, and capital access to help startups move from idea to growth-stage scale.
+            </p>
             
-            <div className="grid md:grid-cols-2 gap-6 max-w-4xl w-full">
-              <TechCard glowColor="emerald">
-                <div className="flex items-center gap-3 mb-4">
-                  <IconBadge icon={Rocket} color="emerald" />
-                  <h3 className="font-semibold text-lg text-emerald-400 print:text-emerald-700">For Startups</h3>
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 max-w-5xl w-full">
+              {/* AI-Driven Execution Engine */}
+              <TechCard glowColor="teal" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-teal-500/20 flex items-center justify-center">
+                    <Cpu className="h-3.5 w-3.5 text-teal-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-teal-400 print:text-teal-700">AI-Driven Execution Engine</h3>
                 </div>
-                <ul className="space-y-2 text-slate-300 print:text-gray-600">
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-emerald-500" /> AI-powered mentor matching</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-emerald-500" /> Investor network access</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-emerald-500" /> Growth roadmap tracking</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-emerald-500" /> Resource library & tools</li>
-                </ul>
+                <p className="text-[10px] leading-relaxed text-slate-400 print:text-gray-600">
+                  A comprehensive algorithm guides startups through strategy, product development, market validation, go-to-market, and scaling—reducing execution risk at every stage.
+                </p>
               </TechCard>
-              <TechCard glowColor="purple">
-                <div className="flex items-center gap-3 mb-4">
-                  <IconBadge icon={Diamond} color="purple" />
-                  <h3 className="font-semibold text-lg text-purple-400 print:text-purple-700">For Investors</h3>
+
+              {/* Hybrid Digital + Physical Model */}
+              <TechCard glowColor="cyan" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-cyan-500/20 flex items-center justify-center">
+                    <Globe className="h-3.5 w-3.5 text-cyan-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-cyan-400 print:text-cyan-700">Hybrid Digital + Physical</h3>
                 </div>
-                <ul className="space-y-2 text-slate-300 print:text-gray-600">
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-purple-500" /> Curated deal flow</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-purple-500" /> Portfolio management</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-purple-500" /> Due diligence tools</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-purple-500" /> Investment tracking</li>
-                </ul>
+                <p className="text-[10px] leading-relaxed text-slate-400 print:text-gray-600">
+                  Startups operate digitally through the platform while accessing local innovation hubs worldwide through partnerships with IWG, enabling founders to work from 5,800+ locations across 130 countries.
+                </p>
               </TechCard>
-              <TechCard glowColor="cyan">
-                <div className="flex items-center gap-3 mb-4">
-                  <IconBadge icon={Lightbulb} color="cyan" />
-                  <h3 className="font-semibold text-lg text-cyan-400 print:text-cyan-700">For Mentors</h3>
+
+              {/* Human Capital & Expertise */}
+              <TechCard glowColor="purple" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-purple-500/20 flex items-center justify-center">
+                    <Users className="h-3.5 w-3.5 text-purple-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-purple-400 print:text-purple-700">Human Capital & Expertise</h3>
                 </div>
-                <ul className="space-y-2 text-slate-300 print:text-gray-600">
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-cyan-500" /> Session scheduling</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-cyan-500" /> Mentee management</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-cyan-500" /> Impact tracking</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-cyan-500" /> Endorsement system</li>
-                </ul>
+                <p className="text-[10px] leading-relaxed text-slate-400 print:text-gray-600">
+                  On-demand access to mentors, operators, technical experts, interns, and advisors aligned to each startup's specific execution needs.
+                </p>
               </TechCard>
-              <TechCard glowColor="amber">
-                <div className="flex items-center gap-3 mb-4">
-                  <IconBadge icon={Building2} color="amber" />
-                  <h3 className="font-semibold text-lg text-amber-400 print:text-amber-700">For Accelerators</h3>
+
+              {/* Corporate & Market Access */}
+              <TechCard glowColor="amber" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-amber-500/20 flex items-center justify-center">
+                    <Building2 className="h-3.5 w-3.5 text-amber-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-amber-400 print:text-amber-700">Corporate & Market Access</h3>
                 </div>
-                <ul className="space-y-2 text-slate-300 print:text-gray-600">
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-amber-500" /> Cohort management</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-amber-500" /> Startup journey tracking</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-amber-500" /> Alumni portfolio</li>
-                  <li className="flex items-center gap-2"><Zap className="h-4 w-4 text-amber-500" /> Demo day organization</li>
-                </ul>
+                <p className="text-[10px] leading-relaxed text-slate-400 print:text-gray-600">
+                  Direct pathways to corporate partnerships, pilot programs, customers, and industry collaborators to accelerate real-world traction.
+                </p>
+              </TechCard>
+
+              {/* Capital & Investor Connectivity */}
+              <TechCard glowColor="emerald" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-emerald-500/20 flex items-center justify-center">
+                    <Diamond className="h-3.5 w-3.5 text-emerald-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-emerald-400 print:text-emerald-700">Capital & Investor Connectivity</h3>
+                </div>
+                <p className="text-[10px] leading-relaxed text-slate-400 print:text-gray-600">
+                  Integrated investor engagement, pitch readiness, and access to VCs, family offices, and strategic capital—connected directly to execution progress.
+                </p>
               </TechCard>
             </div>
           </div>
