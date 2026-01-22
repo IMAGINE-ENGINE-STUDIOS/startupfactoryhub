@@ -438,43 +438,69 @@ export default function Deck() {
           </div>
         </section>
 
-        {/* SLIDE 3: The Problem */}
+        {/* SLIDE 3: The Problem - System Failure */}
         <SlideContainer>
           <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-4">
-              <IconBadge icon={Target} color="rose" />
-              <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">The Problem</h2>
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-3 h-3 bg-rose-500 rotate-45" />
+              <span className="text-sm font-semibold text-rose-400 tracking-[0.3em] uppercase print:text-gray-600">System Failure</span>
+              <div className="w-3 h-3 bg-rose-500 rotate-45" />
             </div>
-            <p className="text-xl text-slate-400 text-center mb-12 print:text-gray-600">Fragmented Startup Ecosystem</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4 print:text-black">The Problem</h2>
             
-            <div className="grid gap-6 max-w-3xl w-full">
-              <TechCard glowColor="rose">
-                <div className="flex items-start gap-4">
-                  <IconBadge icon={Search} color="rose" />
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2 text-rose-400 print:text-rose-700">Limited Access</h3>
-                    <p className="text-slate-300 print:text-gray-600">Startups struggle to find the right mentors, investors, and resources at critical stages.</p>
-                  </div>
+            {/* Main Problem Statement */}
+            <div className="max-w-3xl w-full mb-10">
+              <div className="bg-gradient-to-r from-rose-500/10 via-rose-500/5 to-rose-500/10 border border-rose-500/40 rounded-lg p-6 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                <p className="text-xl md:text-2xl text-center text-white leading-relaxed print:text-black">
+                  Startups don't fail due to lack of ideas — <span className="text-rose-400 font-semibold print:text-rose-700">they fail because execution breaks between stages.</span>
+                </p>
+              </div>
+            </div>
+            
+            <SectionDivider title="Core Gaps" />
+            
+            {/* Core Gaps Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4 max-w-5xl w-full">
+              {/* Gap 1 */}
+              <div className="bg-slate-900/80 border border-rose-500/30 rounded-lg p-4 backdrop-blur-sm hover:border-rose-500/60 transition-all print:bg-gray-50 print:border-gray-300">
+                <div className="w-10 h-10 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
+                  <Network className="h-5 w-5 text-rose-400 print:text-rose-700" />
                 </div>
-              </TechCard>
-              <TechCard glowColor="rose">
-                <div className="flex items-start gap-4">
-                  <IconBadge icon={Network} color="rose" />
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2 text-rose-400 print:text-rose-700">Disconnected Networks</h3>
-                    <p className="text-slate-300 print:text-gray-600">Investors miss quality deals, mentors can't reach promising founders efficiently.</p>
-                  </div>
+                <p className="text-sm text-slate-300 text-center leading-relaxed print:text-gray-600">Fragmented tools & platforms</p>
+              </div>
+
+              {/* Gap 2 */}
+              <div className="bg-slate-900/80 border border-rose-500/30 rounded-lg p-4 backdrop-blur-sm hover:border-rose-500/60 transition-all print:bg-gray-50 print:border-gray-300">
+                <div className="w-10 h-10 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
+                  <Calendar className="h-5 w-5 text-rose-400 print:text-rose-700" />
                 </div>
-              </TechCard>
-              <TechCard glowColor="rose">
-                <div className="flex items-start gap-4">
-                  <IconBadge icon={BarChart3} color="rose" />
-                  <div>
-                    <h3 className="font-semibold text-lg mb-2 text-rose-400 print:text-rose-700">Lack of Structure</h3>
-                    <p className="text-slate-300 print:text-gray-600">No unified platform for accelerators to manage cohorts and track startup progress.</p>
-                  </div>
+                <p className="text-sm text-slate-300 text-center leading-relaxed print:text-gray-600">No continuous support post-demo day</p>
+              </div>
+
+              {/* Gap 3 */}
+              <div className="bg-slate-900/80 border border-rose-500/30 rounded-lg p-4 backdrop-blur-sm hover:border-rose-500/60 transition-all print:bg-gray-50 print:border-gray-300">
+                <div className="w-10 h-10 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
+                  <Users className="h-5 w-5 text-rose-400 print:text-rose-700" />
                 </div>
-              </TechCard>
+                <p className="text-sm text-slate-300 text-center leading-relaxed print:text-gray-600">Limited access to real operators</p>
+              </div>
+
+              {/* Gap 4 */}
+              <div className="bg-slate-900/80 border border-rose-500/30 rounded-lg p-4 backdrop-blur-sm hover:border-rose-500/60 transition-all print:bg-gray-50 print:border-gray-300">
+                <div className="w-10 h-10 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
+                  <DollarSign className="h-5 w-5 text-rose-400 print:text-rose-700" />
+                </div>
+                <p className="text-sm text-slate-300 text-center leading-relaxed print:text-gray-600">Capital disconnected from execution</p>
+              </div>
+
+              {/* Gap 5 */}
+              <div className="bg-slate-900/80 border border-rose-500/30 rounded-lg p-4 backdrop-blur-sm hover:border-rose-500/60 transition-all print:bg-gray-50 print:border-gray-300">
+                <div className="w-10 h-10 rounded-lg bg-rose-500/20 border border-rose-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
+                  <TrendingUp className="h-5 w-5 text-rose-400 print:text-rose-700" />
+                </div>
+                <p className="text-sm text-slate-300 text-center leading-relaxed print:text-gray-600">Education ≠ product ≠ market ≠ revenue</p>
+              </div>
             </div>
           </div>
         </SlideContainer>
