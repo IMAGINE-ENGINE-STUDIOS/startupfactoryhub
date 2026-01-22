@@ -1098,6 +1098,42 @@ export default function Deck() {
               </TechCard>
             </div>
             
+            {/* 5-Year Total Revenue Projection */}
+            <div className="max-w-5xl w-full mb-4">
+              <TechCard glowColor="emerald" className="p-4">
+                <h3 className="font-semibold text-sm text-emerald-400 mb-3 flex items-center justify-center gap-2">
+                  <DollarSign className="h-4 w-4" /> 5-Year Total Revenue Projection
+                </h3>
+                <div className="flex items-end justify-between gap-2 h-32 px-4">
+                  {[
+                    { year: "Year 1", revenue: "$5.34M", height: "23%" },
+                    { year: "Year 2", revenue: "$9.65M", height: "42%" },
+                    { year: "Year 3", revenue: "$16.50M", height: "58%" },
+                    { year: "Year 4", revenue: "$27.30M", height: "78%" },
+                    { year: "Year 5", revenue: "$46.00M", height: "100%" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex flex-col items-center flex-1">
+                      <span className="text-[10px] font-bold text-emerald-400 mb-1">{item.revenue}</span>
+                      <div 
+                        className="w-full bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-sm relative overflow-hidden"
+                        style={{ height: item.height }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                        <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-300/50" />
+                      </div>
+                      <span className="text-[9px] text-slate-400 mt-1 print:text-gray-600">{item.year}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex items-center justify-center gap-2 mt-3 pt-2 border-t border-emerald-500/20">
+                  <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
+                  <span className="text-[10px] text-slate-300 print:text-gray-600">
+                    <span className="text-emerald-400 font-semibold">8.6x revenue growth</span> from Year 1 to Year 5
+                  </span>
+                </div>
+              </TechCard>
+            </div>
+            
             {/* Key Narrative */}
             <div className="max-w-5xl w-full">
               <TechCard glowColor="teal" className="p-3">
