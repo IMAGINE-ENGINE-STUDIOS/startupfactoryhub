@@ -151,36 +151,56 @@ export default function Deck() {
         <SlideContainer>
           <div className="flex flex-col items-center text-center">
             {/* Logo with glow */}
-            <div className="relative mb-8">
+            <div className="relative mb-6">
               <div className="absolute inset-0 bg-teal-500/30 blur-3xl rounded-full print:hidden" />
-              <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-32 h-32 md:w-40 md:h-40 object-contain" />
+              <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-28 h-28 md:w-36 md:h-36 object-contain" />
               {/* Orbit ring */}
               <div className="absolute inset-[-20px] border border-dashed border-teal-500/40 rounded-full animate-spin print:hidden" style={{ animationDuration: '20s' }} />
             </div>
             
-            <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tight print:text-black">
+            <h1 className="text-4xl md:text-5xl font-black text-white mb-3 tracking-tight print:text-black">
               Startup Factory Hub
             </h1>
             
-            <p className="text-xl md:text-2xl font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-4 print:text-teal-700">
-              AI-Powered Hybrid Acceleration Platform
+            <p className="text-xl md:text-2xl font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-6 print:text-teal-700">
+              The Central Operating Hub for Tech Startups
             </p>
             
-            <div className="flex items-center gap-3 text-lg md:text-xl text-slate-300 mb-8 print:text-gray-700">
-              <span>From Idea</span>
-              <ArrowRight className="h-5 w-5 text-teal-500" />
-              <span>Product</span>
-              <ArrowRight className="h-5 w-5 text-teal-500" />
-              <span>Revenue</span>
-              <ArrowRight className="h-5 w-5 text-teal-500" />
-              <span>Capital</span>
+            {/* Key Value Proposition */}
+            <div className="max-w-3xl mb-6">
+              <p className="text-base md:text-lg text-slate-300 leading-relaxed print:text-gray-700">
+                An AI-powered hybrid technology platform that connects founders with partners, resources, and capital—guiding startups from idea to growth-stage scale.
+              </p>
             </div>
             
-            <SectionDivider title="Infrastructure" />
+            <SectionDivider title="Execution Algorithm" />
             
-            <p className="text-lg text-slate-400 max-w-2xl print:text-gray-600">
-              Digital Infrastructure + Human Capital + Corporate & Investor Access
-            </p>
+            {/* Four Pillars */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl w-full mb-6">
+              <div className="flex flex-col items-center p-3 bg-slate-900/60 border border-teal-500/30 rounded-lg print:bg-gray-50 print:border-gray-300">
+                <Cpu className="h-6 w-6 text-teal-400 mb-2 print:text-teal-700" />
+                <span className="text-sm text-slate-300 text-center print:text-gray-700">Digital Infrastructure</span>
+              </div>
+              <div className="flex flex-col items-center p-3 bg-slate-900/60 border border-cyan-500/30 rounded-lg print:bg-gray-50 print:border-gray-300">
+                <Users className="h-6 w-6 text-cyan-400 mb-2 print:text-cyan-700" />
+                <span className="text-sm text-slate-300 text-center print:text-gray-700">Human Expertise</span>
+              </div>
+              <div className="flex flex-col items-center p-3 bg-slate-900/60 border border-purple-500/30 rounded-lg print:bg-gray-50 print:border-gray-300">
+                <Building2 className="h-6 w-6 text-purple-400 mb-2 print:text-purple-700" />
+                <span className="text-sm text-slate-300 text-center print:text-gray-700">Corporate Partnerships</span>
+              </div>
+              <div className="flex flex-col items-center p-3 bg-slate-900/60 border border-emerald-500/30 rounded-lg print:bg-gray-50 print:border-gray-300">
+                <DollarSign className="h-6 w-6 text-emerald-400 mb-2 print:text-emerald-700" />
+                <span className="text-sm text-slate-300 text-center print:text-gray-700">Capital Access</span>
+              </div>
+            </div>
+            
+            {/* Differentiator */}
+            <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-teal-500/10 border border-teal-500/30 rounded-lg px-6 py-4 max-w-3xl print:bg-gray-50 print:border-gray-300">
+              <p className="text-sm md:text-base text-slate-300 print:text-gray-700">
+                <span className="text-teal-400 font-semibold print:text-teal-700">Unlike traditional accelerators:</span> A continuous execution environment supporting founders before, during, and after acceleration—with a global, hybrid-first model that scales alongside the startup.
+              </p>
+            </div>
           </div>
         </SlideContainer>
 
