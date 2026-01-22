@@ -35,12 +35,17 @@ export default function Deck() {
           <h1 className="text-4xl md:text-6xl font-bold text-center text-black mb-4">
             Startup Factory Hub
           </h1>
-          <p className="text-xl md:text-2xl text-gray-600 text-center mb-8">
-            Empowering the Next Generation of Innovators
+          <p className="text-xl md:text-2xl text-blue-600 font-semibold text-center mb-4">
+            AI-Powered Hybrid Acceleration Platform
           </p>
-          <p className="text-lg text-gray-500 text-center max-w-2xl">
-            A comprehensive platform connecting startups, investors, mentors, and accelerators worldwide.
+          <p className="text-lg md:text-xl text-gray-700 text-center mb-8 font-medium">
+            From Idea → Product → Revenue → Capital
           </p>
+          <div className="border-t-2 border-gray-200 pt-6 mt-2">
+            <p className="text-lg text-gray-500 text-center max-w-2xl">
+              Digital Infrastructure + Human Capital + Corporate & Investor Access
+            </p>
+          </div>
         </section>
 
         {/* Section 2: The Problem */}
