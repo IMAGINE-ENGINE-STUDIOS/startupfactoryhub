@@ -1102,169 +1102,108 @@ export default function Deck() {
 
         {/* SLIDE 8: Financial Projections */}
         <SlideContainer>
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-2">
+          <div className="flex flex-col items-center h-full">
+            <div className="flex items-center gap-3 mb-2">
               <IconBadge icon={BarChart3} color="emerald" />
-              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">5-Year Financial Projections</h2>
+              <h2 className="text-xl md:text-2xl font-bold text-white print:text-black">5-Year Financial Projections</h2>
             </div>
-            <p className="text-sm text-slate-400 text-center mb-4 print:text-gray-600">
+            <p className="text-xs text-slate-400 text-center mb-3 print:text-gray-600">
               Compounding growth delivers <span className="text-emerald-400 font-semibold">8.6x revenue increase</span> over 5 years
             </p>
             
-            {/* Main Chart Visualization */}
-            <div className="max-w-5xl w-full mb-4">
+            {/* Main Chart - Clean Bar Chart */}
+            <div className="max-w-4xl w-full mb-3">
               <TechCard glowColor="emerald" className="p-4">
-                <div className="relative h-64">
-                  {/* Y-Axis Labels */}
-                  <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col justify-between text-[10px] text-slate-500">
-                    <span>$50M</span>
-                    <span>$40M</span>
-                    <span>$30M</span>
-                    <span>$20M</span>
-                    <span>$10M</span>
-                    <span>$0</span>
-                  </div>
-                  
-                  {/* Grid Lines */}
-                  <div className="absolute left-14 right-4 top-0 bottom-8">
-                    {[0, 1, 2, 3, 4, 5].map((i) => (
-                      <div 
-                        key={i} 
-                        className="absolute w-full h-px bg-slate-700/50" 
-                        style={{ top: `${i * 20}%` }} 
-                      />
-                    ))}
-                  </div>
-                  
-                  {/* Chart Area */}
-                  <div className="absolute left-14 right-4 top-0 bottom-8">
-                    {/* Area Fill with SVG */}
-                    <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
-                      <defs>
-                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity="0.4" />
-                          <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity="0.05" />
-                        </linearGradient>
-                        <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
-                          <stop offset="0%" stopColor="rgb(20, 184, 166)" />
-                          <stop offset="100%" stopColor="rgb(16, 185, 129)" />
-                        </linearGradient>
-                      </defs>
-                      {/* Area fill */}
-                      <path 
-                        d="M 0 88.4 L 25 78.4 L 50 66 L 75 44 L 100 0 L 100 100 L 0 100 Z" 
-                        fill="url(#areaGradient)"
-                        className="print:fill-emerald-100"
-                      />
-                      {/* Line */}
-                      <path 
-                        d="M 0 88.4 L 25 78.4 L 50 66 L 75 44 L 100 0" 
-                        fill="none" 
-                        stroke="url(#lineGradient)" 
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="print:stroke-emerald-600"
-                      />
-                    </svg>
-                    
-                    {/* Data Points with Labels */}
-                    {[
-                      { year: "Y1", revenue: "$5.34M", percent: 11.6, left: 0 },
-                      { year: "Y2", revenue: "$9.65M", percent: 21.0, left: 25 },
-                      { year: "Y3", revenue: "$16.50M", percent: 35.9, left: 50 },
-                      { year: "Y4", revenue: "$27.30M", percent: 59.3, left: 75 },
-                      { year: "Y5", revenue: "$46.00M", percent: 100, left: 100 },
-                    ].map((point, i) => (
-                      <div 
-                        key={i} 
-                        className="absolute flex flex-col items-center"
-                        style={{ 
-                          left: `${point.left}%`, 
-                          bottom: `${point.percent}%`,
-                          transform: 'translate(-50%, 50%)'
-                        }}
-                      >
+                <div className="flex items-end justify-between gap-3 h-40 px-2">
+                  {[
+                    { year: "Year 1", revenue: "$5.34M", value: 5.34, color: "from-teal-600 to-teal-400" },
+                    { year: "Year 2", revenue: "$9.65M", value: 9.65, color: "from-teal-500 to-cyan-400" },
+                    { year: "Year 3", revenue: "$16.50M", value: 16.50, color: "from-cyan-500 to-cyan-400" },
+                    { year: "Year 4", revenue: "$27.30M", value: 27.30, color: "from-cyan-500 to-emerald-400" },
+                    { year: "Year 5", revenue: "$46.00M", value: 46.00, color: "from-emerald-500 to-emerald-400" },
+                  ].map((item, i) => {
+                    const heightPercent = (item.value / 46) * 100;
+                    return (
+                      <div key={i} className="flex-1 flex flex-col items-center">
                         {/* Revenue Label */}
-                        <div className="absolute -top-8 bg-slate-900/90 border border-emerald-500/50 rounded px-2 py-1 print:bg-white print:border-emerald-300">
-                          <span className="text-xs font-bold text-emerald-400 whitespace-nowrap print:text-emerald-700">{point.revenue}</span>
+                        <span className="text-[10px] md:text-xs font-bold text-emerald-400 mb-1">{item.revenue}</span>
+                        {/* Bar */}
+                        <div className="w-full flex justify-center">
+                          <div 
+                            className={`w-10 md:w-14 bg-gradient-to-t ${item.color} rounded-t-md relative overflow-hidden transition-all`}
+                            style={{ height: `${heightPercent}%`, minHeight: '16px' }}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0" />
+                            <div className="absolute top-0 left-0 right-0 h-0.5 bg-white/40" />
+                          </div>
                         </div>
-                        {/* Dot */}
-                        <div className="relative">
-                          <div className="absolute inset-0 w-4 h-4 bg-emerald-500/50 rounded-full animate-ping print:hidden" />
-                          <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-emerald-300 shadow-lg shadow-emerald-500/50 print:border-emerald-600" />
-                        </div>
+                        {/* Year Label */}
+                        <span className="text-[9px] md:text-[10px] text-slate-400 mt-1.5">{item.year}</span>
                       </div>
-                    ))}
-                  </div>
-                  
-                  {/* X-Axis Labels */}
-                  <div className="absolute left-14 right-4 bottom-0 h-6 flex justify-between text-xs text-slate-400">
-                    <span>Year 1</span>
-                    <span>Year 2</span>
-                    <span>Year 3</span>
-                    <span>Year 4</span>
-                    <span>Year 5</span>
-                  </div>
+                    );
+                  })}
                 </div>
                 
-                {/* Growth Indicator */}
-                <div className="flex items-center justify-center gap-4 mt-2 pt-3 border-t border-emerald-500/20">
-                  <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full" />
-                    <span className="text-xs text-slate-400">Revenue Growth Trajectory</span>
-                  </div>
-                  <div className="h-4 w-px bg-slate-700" />
-                  <div className="flex items-center gap-2">
-                    <TrendingUp className="h-4 w-4 text-emerald-400" />
-                    <span className="text-sm font-semibold text-emerald-400">+762% Total Growth</span>
-                  </div>
+                {/* Growth Arrow Indicator */}
+                <div className="flex items-center justify-center gap-2 mt-3 pt-2 border-t border-emerald-500/20">
+                  <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
+                  <span className="text-[10px] text-slate-300">
+                    <span className="text-emerald-400 font-semibold">+762%</span> total growth • 10% MoM compound
+                  </span>
                 </div>
               </TechCard>
             </div>
             
-            {/* Revenue Breakdown Cards */}
-            <div className="grid grid-cols-5 gap-3 max-w-5xl w-full mb-3">
+            {/* Year 5 Revenue Breakdown - Horizontal Stacked Bar */}
+            <div className="max-w-4xl w-full mb-3">
+              <TechCard glowColor="teal" className="p-3">
+                <h4 className="text-[10px] font-semibold text-center text-teal-400 mb-2">Year 5 Revenue Mix: $46M</h4>
+                <div className="flex items-center h-7 rounded-lg overflow-hidden border border-slate-700/50">
+                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center relative" style={{ width: '74%' }}>
+                    <span className="text-[8px] md:text-[9px] font-medium text-white">Subscriptions $34.2M</span>
+                    <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
+                  </div>
+                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center relative" style={{ width: '18%' }}>
+                    <span className="text-[8px] font-medium text-white">Edu</span>
+                    <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
+                  </div>
+                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center" style={{ width: '8%' }}>
+                    <span className="text-[8px] font-medium text-white">+</span>
+                  </div>
+                </div>
+                <div className="flex justify-between text-[8px] text-slate-500 mt-1 px-1">
+                  <span>Subscriptions (74%)</span>
+                  <span>Education (18%)</span>
+                  <span>Other (8%)</span>
+                </div>
+              </TechCard>
+            </div>
+            
+            {/* Revenue Streams Summary - Compact Grid */}
+            <div className="grid grid-cols-6 gap-2 max-w-4xl w-full mb-2">
               {[
-                { year: "Year 1", revenue: "$5.34M", growth: "Base", color: "teal" },
-                { year: "Year 2", revenue: "$9.65M", growth: "+81%", color: "cyan" },
-                { year: "Year 3", revenue: "$16.50M", growth: "+71%", color: "purple" },
-                { year: "Year 4", revenue: "$27.30M", growth: "+65%", color: "amber" },
-                { year: "Year 5", revenue: "$46.00M", growth: "+69%", color: "emerald" },
+                { label: "Startups Y5", value: "~12,650", icon: Rocket, color: "teal" },
+                { label: "ARPU", value: "$750/mo", icon: DollarSign, color: "emerald" },
+                { label: "Corporate", value: "$100K/yr", icon: Building2, color: "purple" },
+                { label: "Pilots", value: "$200K ea", icon: Target, color: "amber" },
+                { label: "Chapters", value: "$200K ea", icon: Globe, color: "rose" },
+                { label: "Education", value: "2x/yr", icon: GraduationCap, color: "cyan" },
               ].map((item, i) => (
-                <TechCard key={i} glowColor={item.color} className="p-3 text-center">
-                  <p className="text-[10px] text-slate-400 mb-1">{item.year}</p>
-                  <p className={`text-base font-bold text-${item.color}-400`}>{item.revenue}</p>
-                  <p className={`text-[10px] mt-1 text-${item.color}-400/80`}>{item.growth}</p>
-                </TechCard>
+                <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-2 text-center">
+                  <item.icon className={`h-3 w-3 mx-auto mb-1 text-${item.color}-400`} />
+                  <p className={`text-[9px] font-bold text-${item.color}-400`}>{item.value}</p>
+                  <p className="text-[7px] text-slate-500">{item.label}</p>
+                </div>
               ))}
             </div>
             
-            {/* Year 5 Revenue Mix */}
-            <div className="max-w-5xl w-full mb-3">
-              <TechCard glowColor="teal" className="p-3">
-                <h4 className="text-xs font-semibold text-center text-teal-400 mb-3">Year 5 Revenue Breakdown</h4>
-                <div className="flex items-center h-6 rounded-lg overflow-hidden border border-slate-700">
-                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center" style={{ width: '74%' }}>
-                    <span className="text-[9px] font-medium text-white">Subscriptions $34.2M (74%)</span>
-                  </div>
-                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center" style={{ width: '18%' }}>
-                    <span className="text-[9px] font-medium text-white">Edu $8.0M</span>
-                  </div>
-                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center" style={{ width: '8%' }}>
-                    <span className="text-[9px] font-medium text-white">Other</span>
-                  </div>
-                </div>
-              </TechCard>
-            </div>
-            
-            {/* Key Narrative */}
-            <div className="max-w-5xl w-full">
-              <TechCard glowColor="emerald" className="p-3">
-                <p className="text-xs text-center text-slate-300 print:text-gray-600">
-                  <span className="text-emerald-400 font-semibold">Growth Narrative:</span> Starting with 100 startups at 10% MoM growth, revenue compounds through $750 ARPU subscriptions, corporate partnerships ($100K/yr), pilot programs ($200K each), global chapters, and education programs (doubling annually).
+            {/* Model Summary */}
+            <div className="max-w-4xl w-full">
+              <div className="bg-slate-900/40 border border-emerald-500/20 rounded-lg px-3 py-2">
+                <p className="text-[9px] text-center text-slate-400">
+                  <span className="text-emerald-400 font-medium">Model:</span> 100 startups → 10% MoM growth → 60% paid ($750 ARPU) + enterprise streams = $46M Year 5
                 </p>
-              </TechCard>
+              </div>
             </div>
           </div>
         </SlideContainer>
