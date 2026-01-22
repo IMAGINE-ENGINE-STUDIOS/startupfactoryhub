@@ -322,22 +322,47 @@ export default function Deck() {
               <div className="w-3 h-3 bg-teal-500 rotate-45" />
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 print:text-black">Company Summary</h2>
-            <p className="text-lg text-slate-400 text-center mb-8 print:text-gray-600">The Execution Mechanism</p>
+            <p className="text-lg text-slate-400 text-center mb-6 print:text-gray-600">The Execution Mechanism</p>
             
-            {/* Central Core Hub */}
-            <div className="relative mb-8">
-              <div className="absolute inset-0 bg-teal-500/20 blur-2xl rounded-full print:hidden" />
-              <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-teal-500/30 to-cyan-500/30 border-2 border-teal-500/60 flex items-center justify-center print:bg-gray-100 print:border-gray-400">
-                <div className="absolute inset-2 rounded-full border border-dashed border-teal-500/40 animate-spin print:hidden" style={{ animationDuration: '15s' }} />
-                <div className="absolute inset-4 rounded-full border border-cyan-500/30 animate-spin print:hidden" style={{ animationDuration: '10s', animationDirection: 'reverse' }} />
-                <div className="text-center z-10">
-                  <Cpu className="h-8 w-8 text-teal-400 mx-auto mb-1 print:text-teal-700" />
-                  <span className="text-xs font-bold text-teal-400 print:text-teal-700">AI ENGINE</span>
+            {/* Company Description Text */}
+            <div className="max-w-4xl w-full mb-8 space-y-4">
+              <div className="bg-slate-900/60 border border-teal-500/30 rounded-lg p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                <p className="text-base text-slate-300 leading-relaxed text-center print:text-gray-700">
+                  <span className="text-teal-400 font-semibold print:text-teal-700">Startup Factory Hub</span> is an AI-powered hybrid technology platform designed to help tech startups succeed. The platform serves as a <span className="text-cyan-400 font-medium print:text-cyan-700">central operating hub</span> for the entire startup ecosystem, connecting founders with partners, resources, and capital while guiding startups from idea to growth-stage scale.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-slate-900/60 border border-cyan-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Cpu className="h-4 w-4 text-cyan-400 print:text-cyan-700" />
+                    <span className="text-sm font-semibold text-cyan-400 print:text-cyan-700">AI-Driven Execution</span>
+                  </div>
+                  <p className="text-sm text-slate-400 leading-relaxed print:text-gray-600">
+                    Integrates digital infrastructure, human expertise, corporate partnerships, and capital access to accelerate company building and reduce execution friction.
+                  </p>
+                </div>
+                <div className="bg-slate-900/60 border border-purple-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Globe className="h-4 w-4 text-purple-400 print:text-purple-700" />
+                    <span className="text-sm font-semibold text-purple-400 print:text-purple-700">Global Hybrid Model</span>
+                  </div>
+                  <p className="text-sm text-slate-400 leading-relaxed print:text-gray-600">
+                    Unlike traditional accelerators, operates as a continuous execution environment supporting founders before, during, and after acceleration.
+                  </p>
                 </div>
               </div>
-              {/* Connection lines from core */}
-              <div className="absolute top-1/2 -left-12 w-12 h-0.5 bg-gradient-to-r from-transparent to-teal-500/60 print:hidden" />
-              <div className="absolute top-1/2 -right-12 w-12 h-0.5 bg-gradient-to-l from-transparent to-teal-500/60 print:hidden" />
+            </div>
+
+            {/* Central Core Hub */}
+            <div className="relative mb-6">
+              <div className="absolute inset-0 bg-teal-500/20 blur-2xl rounded-full print:hidden" />
+              <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-teal-500/30 to-cyan-500/30 border-2 border-teal-500/60 flex items-center justify-center print:bg-gray-100 print:border-gray-400">
+                <div className="absolute inset-2 rounded-full border border-dashed border-teal-500/40 animate-spin print:hidden" style={{ animationDuration: '15s' }} />
+                <div className="text-center z-10">
+                  <Cpu className="h-6 w-6 text-teal-400 mx-auto mb-1 print:text-teal-700" />
+                  <span className="text-[10px] font-bold text-teal-400 print:text-teal-700">AI ENGINE</span>
+                </div>
+              </div>
             </div>
 
             {/* Mechanism Flow - 4 Pillars */}
