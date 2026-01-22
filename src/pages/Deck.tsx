@@ -1103,71 +1103,166 @@ export default function Deck() {
         {/* SLIDE 8: Financial Projections */}
         <SlideContainer>
           <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-3">
+            <div className="flex items-center gap-4 mb-2">
               <IconBadge icon={BarChart3} color="emerald" />
               <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">5-Year Financial Projections</h2>
             </div>
-            <p className="text-base text-slate-400 text-center mb-6 print:text-gray-600">
-              Compounding growth delivers 8.6x revenue increase over 5 years
+            <p className="text-sm text-slate-400 text-center mb-4 print:text-gray-600">
+              Compounding growth delivers <span className="text-emerald-400 font-semibold">8.6x revenue increase</span> over 5 years
             </p>
             
-            {/* 5-Year Total Revenue Projection */}
-            <div className="max-w-4xl w-full mb-6">
-              <TechCard glowColor="emerald" className="p-6">
-                <h3 className="font-semibold text-lg text-emerald-400 mb-4 flex items-center justify-center gap-2">
-                  <DollarSign className="h-5 w-5" /> Total Revenue Projection
-                </h3>
-                <div className="flex items-end justify-between gap-4 h-48 px-6">
-                  {[
-                    { year: "Year 1", revenue: "$5.34M", height: "23%" },
-                    { year: "Year 2", revenue: "$9.65M", height: "42%" },
-                    { year: "Year 3", revenue: "$16.50M", height: "58%" },
-                    { year: "Year 4", revenue: "$27.30M", height: "78%" },
-                    { year: "Year 5", revenue: "$46.00M", height: "100%" },
-                  ].map((item, i) => (
-                    <div key={i} className="flex flex-col items-center flex-1">
-                      <span className="text-sm font-bold text-emerald-400 mb-2">{item.revenue}</span>
+            {/* Main Chart Visualization */}
+            <div className="max-w-5xl w-full mb-4">
+              <TechCard glowColor="emerald" className="p-4">
+                <div className="relative h-64">
+                  {/* Y-Axis Labels */}
+                  <div className="absolute left-0 top-0 bottom-8 w-12 flex flex-col justify-between text-[10px] text-slate-500">
+                    <span>$50M</span>
+                    <span>$40M</span>
+                    <span>$30M</span>
+                    <span>$20M</span>
+                    <span>$10M</span>
+                    <span>$0</span>
+                  </div>
+                  
+                  {/* Grid Lines */}
+                  <div className="absolute left-14 right-4 top-0 bottom-8">
+                    {[0, 1, 2, 3, 4, 5].map((i) => (
                       <div 
-                        className="w-full bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-md relative overflow-hidden"
-                        style={{ height: item.height }}
+                        key={i} 
+                        className="absolute w-full h-px bg-slate-700/50" 
+                        style={{ top: `${i * 20}%` }} 
+                      />
+                    ))}
+                  </div>
+                  
+                  {/* Chart Area */}
+                  <div className="absolute left-14 right-4 top-0 bottom-8">
+                    {/* Area Fill with SVG */}
+                    <svg className="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+                      <defs>
+                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="rgb(16, 185, 129)" stopOpacity="0.4" />
+                          <stop offset="100%" stopColor="rgb(16, 185, 129)" stopOpacity="0.05" />
+                        </linearGradient>
+                        <linearGradient id="lineGradient" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="rgb(20, 184, 166)" />
+                          <stop offset="100%" stopColor="rgb(16, 185, 129)" />
+                        </linearGradient>
+                      </defs>
+                      {/* Area fill */}
+                      <path 
+                        d="M 0 88.4 L 25 78.4 L 50 66 L 75 44 L 100 0 L 100 100 L 0 100 Z" 
+                        fill="url(#areaGradient)"
+                        className="print:fill-emerald-100"
+                      />
+                      {/* Line */}
+                      <path 
+                        d="M 0 88.4 L 25 78.4 L 50 66 L 75 44 L 100 0" 
+                        fill="none" 
+                        stroke="url(#lineGradient)" 
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="print:stroke-emerald-600"
+                      />
+                    </svg>
+                    
+                    {/* Data Points with Labels */}
+                    {[
+                      { year: "Y1", revenue: "$5.34M", percent: 11.6, left: 0 },
+                      { year: "Y2", revenue: "$9.65M", percent: 21.0, left: 25 },
+                      { year: "Y3", revenue: "$16.50M", percent: 35.9, left: 50 },
+                      { year: "Y4", revenue: "$27.30M", percent: 59.3, left: 75 },
+                      { year: "Y5", revenue: "$46.00M", percent: 100, left: 100 },
+                    ].map((point, i) => (
+                      <div 
+                        key={i} 
+                        className="absolute flex flex-col items-center"
+                        style={{ 
+                          left: `${point.left}%`, 
+                          bottom: `${point.percent}%`,
+                          transform: 'translate(-50%, 50%)'
+                        }}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                        <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-300/50" />
+                        {/* Revenue Label */}
+                        <div className="absolute -top-8 bg-slate-900/90 border border-emerald-500/50 rounded px-2 py-1 print:bg-white print:border-emerald-300">
+                          <span className="text-xs font-bold text-emerald-400 whitespace-nowrap print:text-emerald-700">{point.revenue}</span>
+                        </div>
+                        {/* Dot */}
+                        <div className="relative">
+                          <div className="absolute inset-0 w-4 h-4 bg-emerald-500/50 rounded-full animate-ping print:hidden" />
+                          <div className="w-4 h-4 bg-emerald-500 rounded-full border-2 border-emerald-300 shadow-lg shadow-emerald-500/50 print:border-emerald-600" />
+                        </div>
                       </div>
-                      <span className="text-xs text-slate-400 mt-2 print:text-gray-600">{item.year}</span>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                  
+                  {/* X-Axis Labels */}
+                  <div className="absolute left-14 right-4 bottom-0 h-6 flex justify-between text-xs text-slate-400">
+                    <span>Year 1</span>
+                    <span>Year 2</span>
+                    <span>Year 3</span>
+                    <span>Year 4</span>
+                    <span>Year 5</span>
+                  </div>
                 </div>
-                <div className="flex items-center justify-center gap-3 mt-4 pt-3 border-t border-emerald-500/20">
-                  <TrendingUp className="h-4 w-4 text-emerald-400" />
-                  <span className="text-sm text-slate-300 print:text-gray-600">
-                    <span className="text-emerald-400 font-semibold">8.6x revenue growth</span> from Year 1 to Year 5
-                  </span>
+                
+                {/* Growth Indicator */}
+                <div className="flex items-center justify-center gap-4 mt-2 pt-3 border-t border-emerald-500/20">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-full" />
+                    <span className="text-xs text-slate-400">Revenue Growth Trajectory</span>
+                  </div>
+                  <div className="h-4 w-px bg-slate-700" />
+                  <div className="flex items-center gap-2">
+                    <TrendingUp className="h-4 w-4 text-emerald-400" />
+                    <span className="text-sm font-semibold text-emerald-400">+762% Total Growth</span>
+                  </div>
                 </div>
               </TechCard>
             </div>
             
-            {/* Revenue Breakdown Summary */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl w-full mb-4">
-              <TechCard glowColor="teal" className="p-4 text-center">
-                <p className="text-[10px] text-slate-400 mb-1">Year 5 Subscriptions</p>
-                <p className="text-lg font-bold text-teal-400">$34.2M</p>
-              </TechCard>
-              <TechCard glowColor="purple" className="p-4 text-center">
-                <p className="text-[10px] text-slate-400 mb-1">Year 5 Corporate</p>
-                <p className="text-lg font-bold text-purple-400">$2.0M</p>
-              </TechCard>
-              <TechCard glowColor="cyan" className="p-4 text-center">
-                <p className="text-[10px] text-slate-400 mb-1">Year 5 Education</p>
-                <p className="text-lg font-bold text-cyan-400">$16.0M</p>
+            {/* Revenue Breakdown Cards */}
+            <div className="grid grid-cols-5 gap-3 max-w-5xl w-full mb-3">
+              {[
+                { year: "Year 1", revenue: "$5.34M", growth: "Base", color: "teal" },
+                { year: "Year 2", revenue: "$9.65M", growth: "+81%", color: "cyan" },
+                { year: "Year 3", revenue: "$16.50M", growth: "+71%", color: "purple" },
+                { year: "Year 4", revenue: "$27.30M", growth: "+65%", color: "amber" },
+                { year: "Year 5", revenue: "$46.00M", growth: "+69%", color: "emerald" },
+              ].map((item, i) => (
+                <TechCard key={i} glowColor={item.color} className="p-3 text-center">
+                  <p className="text-[10px] text-slate-400 mb-1">{item.year}</p>
+                  <p className={`text-base font-bold text-${item.color}-400`}>{item.revenue}</p>
+                  <p className={`text-[10px] mt-1 text-${item.color}-400/80`}>{item.growth}</p>
+                </TechCard>
+              ))}
+            </div>
+            
+            {/* Year 5 Revenue Mix */}
+            <div className="max-w-5xl w-full mb-3">
+              <TechCard glowColor="teal" className="p-3">
+                <h4 className="text-xs font-semibold text-center text-teal-400 mb-3">Year 5 Revenue Breakdown</h4>
+                <div className="flex items-center h-6 rounded-lg overflow-hidden border border-slate-700">
+                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center" style={{ width: '74%' }}>
+                    <span className="text-[9px] font-medium text-white">Subscriptions $34.2M (74%)</span>
+                  </div>
+                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center" style={{ width: '18%' }}>
+                    <span className="text-[9px] font-medium text-white">Edu $8.0M</span>
+                  </div>
+                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center" style={{ width: '8%' }}>
+                    <span className="text-[9px] font-medium text-white">Other</span>
+                  </div>
+                </div>
               </TechCard>
             </div>
             
             {/* Key Narrative */}
-            <div className="max-w-4xl w-full">
-              <TechCard glowColor="teal" className="p-4">
-                <p className="text-sm text-center text-slate-300 print:text-gray-600">
-                  <span className="text-teal-400 font-semibold">Model Summary:</span> Startup Factory Hub scales by onboarding 100 startups in Month 1, growing adoption at 10% MoM, monetizing through tiered subscriptions ($750 ARPU), and compounding revenue with enterprise partnerships, pilot programs, education, and global chapter expansion.
+            <div className="max-w-5xl w-full">
+              <TechCard glowColor="emerald" className="p-3">
+                <p className="text-xs text-center text-slate-300 print:text-gray-600">
+                  <span className="text-emerald-400 font-semibold">Growth Narrative:</span> Starting with 100 startups at 10% MoM growth, revenue compounds through $750 ARPU subscriptions, corporate partnerships ($100K/yr), pilot programs ($200K each), global chapters, and education programs (doubling annually).
                 </p>
               </TechCard>
             </div>
