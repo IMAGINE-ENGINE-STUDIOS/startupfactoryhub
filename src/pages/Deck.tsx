@@ -269,54 +269,154 @@ export default function Deck() {
           </div>
         </CoverSlideContainer>
 
-        {/* SLIDE 2: Company Summary */}
+        {/* SLIDE 2: Company Summary - Mechanism Journey */}
         <SlideContainer>
           <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-4">
-              <IconBadge icon={Briefcase} color="teal" />
-              <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">Company Summary</h2>
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-3 h-3 bg-teal-500 rotate-45" />
+              <span className="text-sm font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">System Architecture</span>
+              <div className="w-3 h-3 bg-teal-500 rotate-45" />
             </div>
-            <p className="text-xl text-slate-400 text-center mb-10 print:text-gray-600">What We Do</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 print:text-black">Company Summary</h2>
+            <p className="text-lg text-slate-400 text-center mb-8 print:text-gray-600">The Execution Mechanism</p>
             
-            <div className="max-w-4xl w-full space-y-6">
-              {/* Main Description */}
-              <TechCard glowColor="teal">
-                <div className="flex items-start gap-4">
-                  <IconBadge icon={Rocket} color="teal" />
-                  <div>
-                    <h3 className="font-semibold text-lg mb-3 text-teal-400 print:text-teal-700">AI-Powered Hybrid Technology Platform</h3>
-                    <p className="text-slate-300 leading-relaxed print:text-gray-600">
-                      Startup Factory Hub is designed to help tech startups succeed. The platform serves as a central operating hub for the entire startup ecosystem, connecting founders with partners, resources, and capital while guiding startups from idea to growth-stage scale.
-                    </p>
-                  </div>
+            {/* Central Core Hub */}
+            <div className="relative mb-8">
+              <div className="absolute inset-0 bg-teal-500/20 blur-2xl rounded-full print:hidden" />
+              <div className="relative w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-teal-500/30 to-cyan-500/30 border-2 border-teal-500/60 flex items-center justify-center print:bg-gray-100 print:border-gray-400">
+                <div className="absolute inset-2 rounded-full border border-dashed border-teal-500/40 animate-spin print:hidden" style={{ animationDuration: '15s' }} />
+                <div className="absolute inset-4 rounded-full border border-cyan-500/30 animate-spin print:hidden" style={{ animationDuration: '10s', animationDirection: 'reverse' }} />
+                <div className="text-center z-10">
+                  <Cpu className="h-8 w-8 text-teal-400 mx-auto mb-1 print:text-teal-700" />
+                  <span className="text-xs font-bold text-teal-400 print:text-teal-700">AI ENGINE</span>
                 </div>
-              </TechCard>
+              </div>
+              {/* Connection lines from core */}
+              <div className="absolute top-1/2 -left-12 w-12 h-0.5 bg-gradient-to-r from-transparent to-teal-500/60 print:hidden" />
+              <div className="absolute top-1/2 -right-12 w-12 h-0.5 bg-gradient-to-l from-transparent to-teal-500/60 print:hidden" />
+            </div>
 
-              {/* Execution Algorithm */}
-              <TechCard glowColor="cyan">
-                <div className="flex items-start gap-4">
-                  <IconBadge icon={Cpu} color="cyan" />
-                  <div>
-                    <h3 className="font-semibold text-lg mb-3 text-cyan-400 print:text-cyan-700">AI-Driven Execution Algorithm</h3>
-                    <p className="text-slate-300 leading-relaxed print:text-gray-600">
-                      Through a comprehensive AI-driven execution algorithm, Startup Factory Hub integrates digital infrastructure, human expertise, corporate partnerships, and capital access to accelerate company building and reduce execution friction.
-                    </p>
+            {/* Mechanism Flow - 4 Pillars */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-5xl w-full mb-8">
+              {/* Pillar 1 */}
+              <div className="relative group">
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-teal-500/60 to-teal-500/20 print:hidden" />
+                <div className="bg-slate-900/80 border border-teal-500/40 rounded-lg p-4 backdrop-blur-sm hover:border-teal-500/80 transition-all print:bg-gray-50 print:border-gray-300">
+                  <div className="w-10 h-10 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
+                    <Cpu className="h-5 w-5 text-teal-400 print:text-teal-700" />
                   </div>
+                  <h4 className="text-sm font-bold text-teal-400 text-center mb-2 print:text-teal-700">Digital Infrastructure</h4>
+                  <p className="text-xs text-slate-400 text-center leading-relaxed print:text-gray-600">AI-powered tools & automation</p>
                 </div>
-              </TechCard>
+              </div>
 
-              {/* Key Differentiator */}
-              <TechCard glowColor="purple">
-                <div className="flex items-start gap-4">
-                  <IconBadge icon={Globe} color="purple" />
-                  <div>
-                    <h3 className="font-semibold text-lg mb-3 text-purple-400 print:text-purple-700">Continuous Execution Environment</h3>
-                    <p className="text-slate-300 leading-relaxed print:text-gray-600">
-                      Unlike traditional accelerators, Startup Factory Hub operates as a continuous execution environment, supporting founders before, during, and after acceleration, with a global, hybrid-first model that scales alongside the startup.
-                    </p>
+              {/* Pillar 2 */}
+              <div className="relative group">
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-cyan-500/60 to-cyan-500/20 print:hidden" />
+                <div className="bg-slate-900/80 border border-cyan-500/40 rounded-lg p-4 backdrop-blur-sm hover:border-cyan-500/80 transition-all print:bg-gray-50 print:border-gray-300">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
+                    <Users className="h-5 w-5 text-cyan-400 print:text-cyan-700" />
+                  </div>
+                  <h4 className="text-sm font-bold text-cyan-400 text-center mb-2 print:text-cyan-700">Human Expertise</h4>
+                  <p className="text-xs text-slate-400 text-center leading-relaxed print:text-gray-600">Mentors, advisors & network</p>
+                </div>
+              </div>
+
+              {/* Pillar 3 */}
+              <div className="relative group">
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-purple-500/60 to-purple-500/20 print:hidden" />
+                <div className="bg-slate-900/80 border border-purple-500/40 rounded-lg p-4 backdrop-blur-sm hover:border-purple-500/80 transition-all print:bg-gray-50 print:border-gray-300">
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
+                    <Building2 className="h-5 w-5 text-purple-400 print:text-purple-700" />
+                  </div>
+                  <h4 className="text-sm font-bold text-purple-400 text-center mb-2 print:text-purple-700">Corporate Partners</h4>
+                  <p className="text-xs text-slate-400 text-center leading-relaxed print:text-gray-600">Strategic alliances & deals</p>
+                </div>
+              </div>
+
+              {/* Pillar 4 */}
+              <div className="relative group">
+                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-emerald-500/60 to-emerald-500/20 print:hidden" />
+                <div className="bg-slate-900/80 border border-emerald-500/40 rounded-lg p-4 backdrop-blur-sm hover:border-emerald-500/80 transition-all print:bg-gray-50 print:border-gray-300">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
+                    <DollarSign className="h-5 w-5 text-emerald-400 print:text-emerald-700" />
+                  </div>
+                  <h4 className="text-sm font-bold text-emerald-400 text-center mb-2 print:text-emerald-700">Capital Access</h4>
+                  <p className="text-xs text-slate-400 text-center leading-relaxed print:text-gray-600">Investor network & funding</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Journey Flow - Horizontal Timeline */}
+            <div className="relative max-w-5xl w-full mb-8">
+              {/* Flow line */}
+              <div className="absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-500/20 via-teal-500/60 to-teal-500/20 print:bg-gray-300" />
+              
+              <div className="grid grid-cols-3 gap-4 relative">
+                {/* Stage 1 */}
+                <div className="flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-teal-500/60 flex items-center justify-center z-10 print:bg-white print:border-gray-400">
+                    <Lightbulb className="h-7 w-7 text-teal-400 print:text-teal-700" />
+                  </div>
+                  <div className="mt-4 text-center">
+                    <span className="text-xs font-bold text-teal-400 tracking-wider print:text-teal-700">PHASE 01</span>
+                    <h5 className="text-sm font-semibold text-white mt-1 print:text-black">Idea to MVP</h5>
+                    <p className="text-xs text-slate-500 mt-1 print:text-gray-500">Foundation & validation</p>
                   </div>
                 </div>
-              </TechCard>
+
+                {/* Arrow */}
+                <div className="absolute top-8 left-[33%] -translate-y-1/2 print:hidden">
+                  <ArrowRight className="h-4 w-4 text-teal-500/60" />
+                </div>
+
+                {/* Stage 2 */}
+                <div className="flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-cyan-500/60 flex items-center justify-center z-10 print:bg-white print:border-gray-400">
+                    <Rocket className="h-7 w-7 text-cyan-400 print:text-cyan-700" />
+                  </div>
+                  <div className="mt-4 text-center">
+                    <span className="text-xs font-bold text-cyan-400 tracking-wider print:text-cyan-700">PHASE 02</span>
+                    <h5 className="text-sm font-semibold text-white mt-1 print:text-black">Launch & Scale</h5>
+                    <p className="text-xs text-slate-500 mt-1 print:text-gray-500">Market entry & growth</p>
+                  </div>
+                </div>
+
+                {/* Arrow */}
+                <div className="absolute top-8 left-[66%] -translate-y-1/2 print:hidden">
+                  <ArrowRight className="h-4 w-4 text-cyan-500/60" />
+                </div>
+
+                {/* Stage 3 */}
+                <div className="flex flex-col items-center">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-emerald-500/60 flex items-center justify-center z-10 print:bg-white print:border-gray-400">
+                    <TrendingUp className="h-7 w-7 text-emerald-400 print:text-emerald-700" />
+                  </div>
+                  <div className="mt-4 text-center">
+                    <span className="text-xs font-bold text-emerald-400 tracking-wider print:text-emerald-700">PHASE 03</span>
+                    <h5 className="text-sm font-semibold text-white mt-1 print:text-black">Growth Stage</h5>
+                    <p className="text-xs text-slate-500 mt-1 print:text-gray-500">Expansion & maturity</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom Differentiator Banner */}
+            <div className="relative max-w-4xl w-full">
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/10 to-teal-500/5 rounded-lg print:hidden" />
+              <div className="relative border border-teal-500/30 rounded-lg p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse print:animate-none" />
+                    <span className="text-xs font-bold text-teal-400 tracking-widest uppercase print:text-teal-700">Continuous Execution</span>
+                  </div>
+                  <div className="flex-1 h-px bg-gradient-to-r from-teal-500/40 to-transparent print:bg-gray-300" />
+                </div>
+                <p className="text-sm text-slate-300 leading-relaxed print:text-gray-600">
+                  <span className="text-teal-400 font-semibold print:text-teal-700">Unlike traditional accelerators:</span> Startup Factory Hub operates as a continuous execution environment, supporting founders <span className="text-cyan-400 font-medium print:text-cyan-700">before, during, and after</span> acceleration—with a global, hybrid-first model that scales alongside the startup.
+                </p>
+              </div>
             </div>
           </div>
         </SlideContainer>
