@@ -155,6 +155,17 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
       const startDateTime = new Date(`${formData.start_date}T${formData.start_time}`);
       const endDateTime = new Date(`${formData.end_date}T${formData.end_time}`);
 
+      // Validate end date is after start date
+      if (endDateTime <= startDateTime) {
+        toast({ 
+          title: 'Invalid dates', 
+          description: 'End date and time must be after start date and time.',
+          variant: 'destructive' 
+        });
+        setLoading(false);
+        return;
+      }
+
       let meetingLocation = formData.location;
 
       // If online event, create Whereby room

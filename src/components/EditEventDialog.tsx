@@ -107,6 +107,17 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
       const startDateTime = new Date(`${formData.start_date}T${formData.start_time}`);
       const endDateTime = new Date(`${formData.end_date}T${formData.end_time}`);
 
+      // Validate end date is after start date
+      if (endDateTime <= startDateTime) {
+        toast({ 
+          title: 'Invalid dates', 
+          description: 'End date and time must be after start date and time.',
+          variant: 'destructive' 
+        });
+        setLoading(false);
+        return;
+      }
+
       let meetingLocation = formData.location;
       const wasOnline = event.location?.includes('whereby.com');
       const nowOnline = isOnlineEvent;
