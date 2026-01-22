@@ -353,18 +353,6 @@ export default function Deck() {
               </div>
             </div>
 
-            {/* Central Core Hub */}
-            <div className="relative mb-6">
-              <div className="absolute inset-0 bg-teal-500/20 blur-2xl rounded-full print:hidden" />
-              <div className="relative w-24 h-24 md:w-28 md:h-28 rounded-full bg-gradient-to-br from-teal-500/30 to-cyan-500/30 border-2 border-teal-500/60 flex items-center justify-center print:bg-gray-100 print:border-gray-400">
-                <div className="absolute inset-2 rounded-full border border-dashed border-teal-500/40 animate-spin print:hidden" style={{ animationDuration: '15s' }} />
-                <div className="text-center z-10">
-                  <Cpu className="h-6 w-6 text-teal-400 mx-auto mb-1 print:text-teal-700" />
-                  <span className="text-[10px] font-bold text-teal-400 print:text-teal-700">AI ENGINE</span>
-                </div>
-              </div>
-            </div>
-
             {/* Mechanism Flow - 4 Pillars */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-5xl w-full mb-8">
               {/* Pillar 1 */}
