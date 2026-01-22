@@ -972,12 +972,12 @@ export default function Deck() {
           </div>
         </SlideContainer>
 
-        {/* SLIDE 7: Financial & Growth Model */}
+        {/* SLIDE 7: Business Model & Revenue Streams */}
         <SlideContainer>
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-4 mb-3">
               <IconBadge icon={DollarSign} color="emerald" />
-              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Financial & Growth Model</h2>
+              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Business Model & Revenue Streams</h2>
             </div>
             <p className="text-base text-slate-400 text-center mb-4 print:text-gray-600">
               Freemium adoption drives monetization through tiered subscriptions + enterprise revenue streams
@@ -1024,7 +1024,7 @@ export default function Deck() {
             </div>
             
             {/* Revenue Streams Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-5xl w-full mb-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-5xl w-full">
               <TechCard glowColor="purple" className="p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-6 h-6 rounded bg-purple-500/20 flex items-center justify-center">
@@ -1097,14 +1097,27 @@ export default function Deck() {
                 </p>
               </TechCard>
             </div>
+          </div>
+        </SlideContainer>
+
+        {/* SLIDE 8: Financial Projections */}
+        <SlideContainer>
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-4 mb-3">
+              <IconBadge icon={BarChart3} color="emerald" />
+              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">5-Year Financial Projections</h2>
+            </div>
+            <p className="text-base text-slate-400 text-center mb-6 print:text-gray-600">
+              Compounding growth delivers 8.6x revenue increase over 5 years
+            </p>
             
             {/* 5-Year Total Revenue Projection */}
-            <div className="max-w-5xl w-full mb-4">
-              <TechCard glowColor="emerald" className="p-4">
-                <h3 className="font-semibold text-sm text-emerald-400 mb-3 flex items-center justify-center gap-2">
-                  <DollarSign className="h-4 w-4" /> 5-Year Total Revenue Projection
+            <div className="max-w-4xl w-full mb-6">
+              <TechCard glowColor="emerald" className="p-6">
+                <h3 className="font-semibold text-lg text-emerald-400 mb-4 flex items-center justify-center gap-2">
+                  <DollarSign className="h-5 w-5" /> Total Revenue Projection
                 </h3>
-                <div className="flex items-end justify-between gap-2 h-32 px-4">
+                <div className="flex items-end justify-between gap-4 h-48 px-6">
                   {[
                     { year: "Year 1", revenue: "$5.34M", height: "23%" },
                     { year: "Year 2", revenue: "$9.65M", height: "42%" },
@@ -1113,31 +1126,47 @@ export default function Deck() {
                     { year: "Year 5", revenue: "$46.00M", height: "100%" },
                   ].map((item, i) => (
                     <div key={i} className="flex flex-col items-center flex-1">
-                      <span className="text-[10px] font-bold text-emerald-400 mb-1">{item.revenue}</span>
+                      <span className="text-sm font-bold text-emerald-400 mb-2">{item.revenue}</span>
                       <div 
-                        className="w-full bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-sm relative overflow-hidden"
+                        className="w-full bg-gradient-to-t from-emerald-600 to-emerald-400 rounded-t-md relative overflow-hidden"
                         style={{ height: item.height }}
                       >
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
                         <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-300/50" />
                       </div>
-                      <span className="text-[9px] text-slate-400 mt-1 print:text-gray-600">{item.year}</span>
+                      <span className="text-xs text-slate-400 mt-2 print:text-gray-600">{item.year}</span>
                     </div>
                   ))}
                 </div>
-                <div className="flex items-center justify-center gap-2 mt-3 pt-2 border-t border-emerald-500/20">
-                  <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
-                  <span className="text-[10px] text-slate-300 print:text-gray-600">
+                <div className="flex items-center justify-center gap-3 mt-4 pt-3 border-t border-emerald-500/20">
+                  <TrendingUp className="h-4 w-4 text-emerald-400" />
+                  <span className="text-sm text-slate-300 print:text-gray-600">
                     <span className="text-emerald-400 font-semibold">8.6x revenue growth</span> from Year 1 to Year 5
                   </span>
                 </div>
               </TechCard>
             </div>
             
+            {/* Revenue Breakdown Summary */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-4xl w-full mb-4">
+              <TechCard glowColor="teal" className="p-4 text-center">
+                <p className="text-[10px] text-slate-400 mb-1">Year 5 Subscriptions</p>
+                <p className="text-lg font-bold text-teal-400">$34.2M</p>
+              </TechCard>
+              <TechCard glowColor="purple" className="p-4 text-center">
+                <p className="text-[10px] text-slate-400 mb-1">Year 5 Corporate</p>
+                <p className="text-lg font-bold text-purple-400">$2.0M</p>
+              </TechCard>
+              <TechCard glowColor="cyan" className="p-4 text-center">
+                <p className="text-[10px] text-slate-400 mb-1">Year 5 Education</p>
+                <p className="text-lg font-bold text-cyan-400">$16.0M</p>
+              </TechCard>
+            </div>
+            
             {/* Key Narrative */}
-            <div className="max-w-5xl w-full">
-              <TechCard glowColor="teal" className="p-3">
-                <p className="text-[10px] text-center text-slate-300 print:text-gray-600">
+            <div className="max-w-4xl w-full">
+              <TechCard glowColor="teal" className="p-4">
+                <p className="text-sm text-center text-slate-300 print:text-gray-600">
                   <span className="text-teal-400 font-semibold">Model Summary:</span> Startup Factory Hub scales by onboarding 100 startups in Month 1, growing adoption at 10% MoM, monetizing through tiered subscriptions ($750 ARPU), and compounding revenue with enterprise partnerships, pilot programs, education, and global chapter expansion.
                 </p>
               </TechCard>
