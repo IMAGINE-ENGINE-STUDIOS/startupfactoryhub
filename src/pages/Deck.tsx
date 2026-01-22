@@ -404,61 +404,6 @@ export default function Deck() {
               </div>
             </div>
 
-            {/* Journey Flow - Horizontal Timeline */}
-            <div className="relative max-w-5xl w-full mb-8">
-              {/* Flow line */}
-              <div className="absolute top-8 left-0 right-0 h-0.5 bg-gradient-to-r from-teal-500/20 via-teal-500/60 to-teal-500/20 print:bg-gray-300" />
-              
-              <div className="grid grid-cols-3 gap-4 relative">
-                {/* Stage 1 */}
-                <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-teal-500/60 flex items-center justify-center z-10 print:bg-white print:border-gray-400">
-                    <Lightbulb className="h-7 w-7 text-teal-400 print:text-teal-700" />
-                  </div>
-                  <div className="mt-4 text-center">
-                    <span className="text-xs font-bold text-teal-400 tracking-wider print:text-teal-700">PHASE 01</span>
-                    <h5 className="text-sm font-semibold text-white mt-1 print:text-black">Idea to MVP</h5>
-                    <p className="text-xs text-slate-500 mt-1 print:text-gray-500">Foundation & validation</p>
-                  </div>
-                </div>
-
-                {/* Arrow */}
-                <div className="absolute top-8 left-[33%] -translate-y-1/2 print:hidden">
-                  <ArrowRight className="h-4 w-4 text-teal-500/60" />
-                </div>
-
-                {/* Stage 2 */}
-                <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-cyan-500/60 flex items-center justify-center z-10 print:bg-white print:border-gray-400">
-                    <Rocket className="h-7 w-7 text-cyan-400 print:text-cyan-700" />
-                  </div>
-                  <div className="mt-4 text-center">
-                    <span className="text-xs font-bold text-cyan-400 tracking-wider print:text-cyan-700">PHASE 02</span>
-                    <h5 className="text-sm font-semibold text-white mt-1 print:text-black">Launch & Scale</h5>
-                    <p className="text-xs text-slate-500 mt-1 print:text-gray-500">Market entry & growth</p>
-                  </div>
-                </div>
-
-                {/* Arrow */}
-                <div className="absolute top-8 left-[66%] -translate-y-1/2 print:hidden">
-                  <ArrowRight className="h-4 w-4 text-cyan-500/60" />
-                </div>
-
-                {/* Stage 3 */}
-                <div className="flex flex-col items-center">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-emerald-500/60 flex items-center justify-center z-10 print:bg-white print:border-gray-400">
-                    <TrendingUp className="h-7 w-7 text-emerald-400 print:text-emerald-700" />
-                  </div>
-                  <div className="mt-4 text-center">
-                    <span className="text-xs font-bold text-emerald-400 tracking-wider print:text-emerald-700">PHASE 03</span>
-                    <h5 className="text-sm font-semibold text-white mt-1 print:text-black">Growth Stage</h5>
-                    <p className="text-xs text-slate-500 mt-1 print:text-gray-500">Expansion & maturity</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Differentiator Banner */}
             <div className="relative max-w-4xl w-full">
               <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/10 to-teal-500/5 rounded-lg print:hidden" />
               <div className="relative border border-teal-500/30 rounded-lg p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
