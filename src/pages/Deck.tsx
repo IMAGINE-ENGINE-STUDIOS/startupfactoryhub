@@ -204,7 +204,59 @@ export default function Deck() {
           </div>
         </SlideContainer>
 
-        {/* SLIDE 2: The Problem */}
+        {/* SLIDE 2: Company Summary */}
+        <SlideContainer>
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-4 mb-4">
+              <IconBadge icon={Briefcase} color="teal" />
+              <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">Company Summary</h2>
+            </div>
+            <p className="text-xl text-slate-400 text-center mb-10 print:text-gray-600">What We Do</p>
+            
+            <div className="max-w-4xl w-full space-y-6">
+              {/* Main Description */}
+              <TechCard glowColor="teal">
+                <div className="flex items-start gap-4">
+                  <IconBadge icon={Rocket} color="teal" />
+                  <div>
+                    <h3 className="font-semibold text-lg mb-3 text-teal-400 print:text-teal-700">AI-Powered Hybrid Technology Platform</h3>
+                    <p className="text-slate-300 leading-relaxed print:text-gray-600">
+                      Startup Factory Hub is designed to help tech startups succeed. The platform serves as a central operating hub for the entire startup ecosystem, connecting founders with partners, resources, and capital while guiding startups from idea to growth-stage scale.
+                    </p>
+                  </div>
+                </div>
+              </TechCard>
+
+              {/* Execution Algorithm */}
+              <TechCard glowColor="cyan">
+                <div className="flex items-start gap-4">
+                  <IconBadge icon={Cpu} color="cyan" />
+                  <div>
+                    <h3 className="font-semibold text-lg mb-3 text-cyan-400 print:text-cyan-700">AI-Driven Execution Algorithm</h3>
+                    <p className="text-slate-300 leading-relaxed print:text-gray-600">
+                      Through a comprehensive AI-driven execution algorithm, Startup Factory Hub integrates digital infrastructure, human expertise, corporate partnerships, and capital access to accelerate company building and reduce execution friction.
+                    </p>
+                  </div>
+                </div>
+              </TechCard>
+
+              {/* Key Differentiator */}
+              <TechCard glowColor="purple">
+                <div className="flex items-start gap-4">
+                  <IconBadge icon={Globe} color="purple" />
+                  <div>
+                    <h3 className="font-semibold text-lg mb-3 text-purple-400 print:text-purple-700">Continuous Execution Environment</h3>
+                    <p className="text-slate-300 leading-relaxed print:text-gray-600">
+                      Unlike traditional accelerators, Startup Factory Hub operates as a continuous execution environment, supporting founders before, during, and after acceleration, with a global, hybrid-first model that scales alongside the startup.
+                    </p>
+                  </div>
+                </div>
+              </TechCard>
+            </div>
+          </div>
+        </SlideContainer>
+
+        {/* SLIDE 3: The Problem */}
         <SlideContainer>
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-4 mb-4">
