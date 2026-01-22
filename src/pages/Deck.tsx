@@ -722,7 +722,158 @@ export default function Deck() {
           </div>
         </SlideContainer>
 
-        {/* SLIDE 4: Key Features */}
+        {/* SLIDE 5: User Types */}
+        <SlideContainer>
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-3 mb-2">
+              <IconBadge icon={Users} color="teal" />
+              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Platform Users</h2>
+            </div>
+            <p className="text-base md:text-lg text-teal-400 font-semibold text-center mb-1 print:text-teal-700">A Unified Ecosystem for Every Stakeholder</p>
+            <p className="text-xs md:text-sm text-slate-400 text-center mb-6 max-w-3xl print:text-gray-600">
+              Each user type has a dedicated dashboard with role-specific tools, features, and workflows tailored to their unique needs.
+            </p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-5xl w-full">
+              {/* Startups */}
+              <TechCard glowColor="emerald" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-emerald-500/20 flex items-center justify-center">
+                    <Rocket className="h-3.5 w-3.5 text-emerald-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-emerald-400 print:text-emerald-700">Startups</h3>
+                </div>
+                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
+                  <li>• AI-guided journey roadmap</li>
+                  <li>• Mentor & investor matching</li>
+                  <li>• Pitch deck management</li>
+                  <li>• Valuation tracking</li>
+                  <li>• Resource & perk access</li>
+                </ul>
+              </TechCard>
+
+              {/* Investors */}
+              <TechCard glowColor="purple" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-purple-500/20 flex items-center justify-center">
+                    <Diamond className="h-3.5 w-3.5 text-purple-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-purple-400 print:text-purple-700">Investors</h3>
+                </div>
+                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
+                  <li>• Curated deal flow pipeline</li>
+                  <li>• Portfolio management</li>
+                  <li>• Pitch meeting scheduling</li>
+                  <li>• Investment tracking</li>
+                  <li>• Due diligence tools</li>
+                </ul>
+              </TechCard>
+
+              {/* Mentors */}
+              <TechCard glowColor="cyan" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-cyan-500/20 flex items-center justify-center">
+                    <Lightbulb className="h-3.5 w-3.5 text-cyan-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-cyan-400 print:text-cyan-700">Mentors</h3>
+                </div>
+                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
+                  <li>• Session scheduling & calendar</li>
+                  <li>• Active mentee management</li>
+                  <li>• Impact & progress tracking</li>
+                  <li>• Endorsement system</li>
+                  <li>• Video conferencing</li>
+                </ul>
+              </TechCard>
+
+              {/* Advisors */}
+              <TechCard glowColor="amber" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-amber-500/20 flex items-center justify-center">
+                    <Award className="h-3.5 w-3.5 text-amber-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-amber-400 print:text-amber-700">Advisors</h3>
+                </div>
+                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
+                  <li>• Professional background showcase</li>
+                  <li>• Skills & expertise management</li>
+                  <li>• Advisory session booking</li>
+                  <li>• Achievement tracking</li>
+                  <li>• Task & job assignments</li>
+                </ul>
+              </TechCard>
+
+              {/* Students */}
+              <TechCard glowColor="rose" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-rose-500/20 flex items-center justify-center">
+                    <GraduationCap className="h-3.5 w-3.5 text-rose-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-rose-400 print:text-rose-700">Students</h3>
+                </div>
+                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
+                  <li>• Internship opportunities</li>
+                  <li>• Educational courses</li>
+                  <li>• Job board access</li>
+                  <li>• Study groups & rooms</li>
+                  <li>• Certificate earning</li>
+                </ul>
+              </TechCard>
+
+              {/* Accelerators */}
+              <TechCard glowColor="teal" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-teal-500/20 flex items-center justify-center">
+                    <Building2 className="h-3.5 w-3.5 text-teal-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-teal-400 print:text-teal-700">Accelerators</h3>
+                </div>
+                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
+                  <li>• Cohort management</li>
+                  <li>• Application review pipeline</li>
+                  <li>• Startup journey tracking</li>
+                  <li>• Alumni portfolio</li>
+                  <li>• Mentor/advisor assignment</li>
+                </ul>
+              </TechCard>
+
+              {/* Corporate Partners */}
+              <TechCard glowColor="indigo" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-indigo-500/20 flex items-center justify-center">
+                    <Handshake className="h-3.5 w-3.5 text-indigo-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-indigo-400 print:text-indigo-700">Corporate Partners</h3>
+                </div>
+                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
+                  <li>• Innovation partnerships</li>
+                  <li>• Pilot program access</li>
+                  <li>• Startup discovery</li>
+                  <li>• Sponsorship visibility</li>
+                  <li>• Talent pipeline access</li>
+                </ul>
+              </TechCard>
+
+              {/* Admins */}
+              <TechCard glowColor="slate" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-slate-500/20 flex items-center justify-center">
+                    <Network className="h-3.5 w-3.5 text-slate-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-slate-300 print:text-slate-700">Platform Admins</h3>
+                </div>
+                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
+                  <li>• User & role management</li>
+                  <li>• Content moderation</li>
+                  <li>• Analytics dashboard</li>
+                  <li>• Resource approval</li>
+                  <li>• API usage tracking</li>
+                </ul>
+              </TechCard>
+            </div>
+          </div>
+        </SlideContainer>
+
         <SlideContainer>
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-4 mb-4">
