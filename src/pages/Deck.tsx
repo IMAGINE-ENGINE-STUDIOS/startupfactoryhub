@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
 import rocketLaunchBg from '@/assets/rocket-launch-bg.jpg';
 import astronautBg from '@/assets/astronaut-bg.jpg';
+import moonEarthBg from '@/assets/moon-earth.jpg';
 
 // Enhanced Geometric Pattern Components (matching marketing banners)
 const TechGrid = () => (
@@ -439,7 +440,21 @@ export default function Deck() {
         </section>
 
         {/* SLIDE 3: The Problem - System Failure */}
-        <SlideContainer>
+        <section className="relative min-h-screen flex flex-col items-center justify-center p-8 md:p-16 overflow-hidden print:min-h-0 print:py-12 print:break-after-page print:bg-white">
+          {/* Background image */}
+          <div 
+            className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden"
+            style={{ backgroundImage: `url(${moonEarthBg})` }}
+          />
+          {/* Dark overlay */}
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/85 via-slate-900/80 to-slate-950/85 print:hidden" />
+          {/* Border frame */}
+          <div className="absolute inset-4 border-2 border-rose-500/30 rounded-lg print:border-gray-300" />
+          <TechGrid />
+          <FloatingHexagons />
+          <EnergyLines />
+          <CornerAccents />
+          <div className="relative z-10 w-full max-w-6xl mx-auto">
           <div className="flex flex-col items-center">
             {/* Header */}
             <div className="flex items-center gap-3 mb-2">
@@ -593,7 +608,8 @@ export default function Deck() {
               </div>
             </div>
           </div>
-        </SlideContainer>
+          </div>
+        </section>
 
         {/* SLIDE 3: Our Solution */}
         <SlideContainer>
