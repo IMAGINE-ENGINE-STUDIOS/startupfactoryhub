@@ -100,45 +100,58 @@ const CornerAccents = () => (
   </div>
 );
 
-// Cover slide with background image
-const CoverSlideContainer = ({ children }: { children: React.ReactNode }) => (
-  <section className="relative min-h-screen flex flex-col items-center justify-center p-8 md:p-16 overflow-hidden print:min-h-0 print:py-12 print:break-after-page print:bg-white">
-    {/* Background image */}
-    <div 
-      className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden"
-      style={{ backgroundImage: `url(${rocketLaunchBg})` }}
-    />
-    {/* Dark cinematic overlay */}
-    <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
-    {/* Scan lines effect */}
-    <div className="absolute inset-0 print:hidden" style={{ 
-      backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(20, 184, 166, 0.02) 2px, rgba(20, 184, 166, 0.02) 4px)',
-    }} />
-    {/* Border frame */}
-    <div className="absolute inset-4 border-2 border-teal-500/40 rounded-lg print:border-gray-300" />
-    <TechGrid />
-    <FloatingHexagons />
-    <EnergyLines />
-    <CornerAccents />
-    <div className="relative z-10 w-full max-w-6xl mx-auto">
+// Slide wrapper for consistent 16:9 aspect ratio scaling
+const SlideWrapper = ({ children }: { children: React.ReactNode }) => (
+  <div className="w-full min-h-screen flex items-center justify-center bg-slate-950 p-2 sm:p-4 print:min-h-0 print:p-0 print:bg-white">
+    <div className="relative w-full max-w-[1920px] aspect-video overflow-hidden print:aspect-auto print:max-w-none">
       {children}
     </div>
-  </section>
+  </div>
+);
+
+// Cover slide with background image
+const CoverSlideContainer = ({ children }: { children: React.ReactNode }) => (
+  <SlideWrapper>
+    <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+      {/* Background image */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden"
+        style={{ backgroundImage: `url(${rocketLaunchBg})` }}
+      />
+      {/* Dark cinematic overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
+      {/* Scan lines effect */}
+      <div className="absolute inset-0 print:hidden" style={{ 
+        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(20, 184, 166, 0.02) 2px, rgba(20, 184, 166, 0.02) 4px)',
+      }} />
+      {/* Border frame */}
+      <div className="absolute inset-[2%] border-2 border-teal-500/40 rounded-lg print:border-gray-300" />
+      <TechGrid />
+      <FloatingHexagons />
+      <EnergyLines />
+      <CornerAccents />
+      <div className="relative z-10 w-full max-w-[90%] mx-auto">
+        {children}
+      </div>
+    </section>
+  </SlideWrapper>
 );
 
 // Standard slide container
 const SlideContainer = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <section className={`relative min-h-screen flex flex-col items-center justify-center p-8 md:p-16 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 print:min-h-0 print:py-12 print:break-after-page print:bg-white ${className}`}>
-    {/* Border frame */}
-    <div className="absolute inset-4 border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
-    <TechGrid />
-    <FloatingHexagons />
-    <EnergyLines />
-    <CornerAccents />
-    <div className="relative z-10 w-full max-w-6xl mx-auto">
-      {children}
-    </div>
-  </section>
+  <SlideWrapper>
+    <section className={`absolute inset-0 flex flex-col items-center justify-center p-[4%] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 print:relative print:p-8 print:break-after-page print:bg-white ${className}`}>
+      {/* Border frame */}
+      <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
+      <TechGrid />
+      <FloatingHexagons />
+      <EnergyLines />
+      <CornerAccents />
+      <div className="relative z-10 w-full max-w-[90%] mx-auto">
+        {children}
+      </div>
+    </section>
+  </SlideWrapper>
 );
 
 const SectionDivider = ({ title }: { title: string }) => (
@@ -315,22 +328,23 @@ export default function Deck() {
         </CoverSlideContainer>
 
         {/* SLIDE 2: Company Summary - Mechanism Journey */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center p-8 md:p-16 overflow-hidden print:min-h-0 print:py-12 print:break-after-page print:bg-white">
-          {/* Background image */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden"
-            style={{ backgroundImage: `url(${astronautBg})` }}
-          />
-          {/* Dark overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
-          {/* Border frame */}
-          <div className="absolute inset-4 border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
-          <TechGrid />
-          <FloatingHexagons />
-          <EnergyLines />
-          <CornerAccents />
-          <div className="relative z-10 w-full max-w-6xl mx-auto">
-          <div className="flex flex-col items-center">
+        <SlideWrapper>
+          <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+            {/* Background image */}
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden"
+              style={{ backgroundImage: `url(${astronautBg})` }}
+            />
+            {/* Dark overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
+            {/* Border frame */}
+            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
+            <TechGrid />
+            <FloatingHexagons />
+            <EnergyLines />
+            <CornerAccents />
+            <div className="relative z-10 w-full max-w-[90%] mx-auto">
+              <div className="flex flex-col items-center">
             {/* Header */}
             <div className="flex items-center gap-3 mb-2">
               <div className="w-3 h-3 bg-teal-500 rotate-45" />
@@ -435,27 +449,29 @@ export default function Deck() {
                 </p>
               </div>
             </div>
-          </div>
-          </div>
-        </section>
+            </div>
+            </div>
+          </section>
+        </SlideWrapper>
 
         {/* SLIDE 3: The Problem - System Failure */}
-        <section className="relative min-h-screen flex flex-col items-center justify-center p-8 md:p-16 overflow-hidden print:min-h-0 print:py-12 print:break-after-page print:bg-white">
-          {/* Background image */}
-          <div 
-            className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden"
-            style={{ backgroundImage: `url(${moonEarthBg})` }}
-          />
-          {/* Dark overlay */}
-          <div className="absolute inset-0 bg-gradient-to-br from-slate-950/85 via-slate-900/80 to-slate-950/85 print:hidden" />
-          {/* Border frame */}
-          <div className="absolute inset-4 border-2 border-rose-500/30 rounded-lg print:border-gray-300" />
-          <TechGrid />
-          <FloatingHexagons />
-          <EnergyLines />
-          <CornerAccents />
-          <div className="relative z-10 w-full max-w-6xl mx-auto">
-          <div className="flex flex-col items-center">
+        <SlideWrapper>
+          <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+            {/* Background image */}
+            <div 
+              className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden"
+              style={{ backgroundImage: `url(${moonEarthBg})` }}
+            />
+            {/* Dark overlay */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/85 via-slate-900/80 to-slate-950/85 print:hidden" />
+            {/* Border frame */}
+            <div className="absolute inset-[2%] border-2 border-rose-500/30 rounded-lg print:border-gray-300" />
+            <TechGrid />
+            <FloatingHexagons />
+            <EnergyLines />
+            <CornerAccents />
+            <div className="relative z-10 w-full max-w-[90%] mx-auto">
+              <div className="flex flex-col items-center">
             {/* Header */}
             <div className="flex items-center gap-3 mb-2">
               <div className="w-3 h-3 bg-rose-500 rotate-45" />
@@ -607,9 +623,10 @@ export default function Deck() {
                 </div>
               </div>
             </div>
-          </div>
-          </div>
-        </section>
+            </div>
+            </div>
+          </section>
+        </SlideWrapper>
 
         {/* SLIDE 3: Our Solution */}
         <SlideContainer>
