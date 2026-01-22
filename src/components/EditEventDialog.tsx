@@ -121,6 +121,13 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
       let meetingLocation = formData.location;
       const wasOnline = event.location?.includes('whereby.com');
       const nowOnline = isOnlineEvent;
+      const originalEndDate = new Date(event.end_date);
+      const now = new Date();
+
+      // Check if room might be expired (original end date was in the past)
+      const roomMightBeExpired = wasOnline && originalEndDate < now;
+      // Check if new end date is in the future
+      const newEndDateIsFuture = endDateTime > now;
 
       // Handle online event scenarios
       if (nowOnline && !wasOnline) {
@@ -150,8 +157,33 @@ export function EditEventDialog({ open, onOpenChange, onEventUpdated, event }: E
       } else if (!nowOnline && wasOnline) {
         // Changed from online to physical - clear Whereby link
         meetingLocation = formData.location;
+      } else if (nowOnline && wasOnline && roomMightBeExpired && newEndDateIsFuture) {
+        // Room expired but end date extended to future - regenerate room
+        const { data: roomData, error: roomError } = await supabase.functions.invoke('create-whereby-room', {
+          body: {
+            roomName: `evt-${formData.title.substring(0, 20).replace(/\s+/g, '-')}-${Date.now().toString(36).slice(-8)}`,
+            startDate: startDateTime.toISOString(),
+            endDate: endDateTime.toISOString()
+          }
+        });
+
+        if (roomError) {
+          console.error('Failed to regenerate Whereby room:', roomError);
+          toast({ 
+            title: 'Warning: Video room regeneration failed',
+            description: 'The existing meeting link may be expired.',
+            variant: 'destructive'
+          });
+          meetingLocation = event.location;
+        } else if (roomData?.roomUrl) {
+          meetingLocation = roomData.roomUrl;
+          toast({ 
+            title: 'Video room regenerated!', 
+            description: 'A new meeting link has been created since the previous one expired.',
+          });
+        }
       } else if (nowOnline && wasOnline) {
-        // Stays online - keep existing Whereby link
+        // Stays online with valid room - keep existing Whereby link
         meetingLocation = event.location;
       }
 
