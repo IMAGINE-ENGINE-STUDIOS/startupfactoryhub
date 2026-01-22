@@ -1,4 +1,4 @@
-import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, ExternalLink, Printer, Search, Network, BarChart3, Briefcase, GraduationCap, Building2, Diamond, Video, FileText, Calendar, Cpu, DollarSign, Handshake, Zap, ArrowRight } from 'lucide-react';
+import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, ExternalLink, Printer, Search, Network, BarChart3, Briefcase, GraduationCap, Building2, Diamond, Video, FileText, Calendar, Cpu, DollarSign, Handshake, Zap, ArrowRight, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
@@ -640,7 +640,7 @@ export default function Deck() {
               Startup Factory Hub provides a unified execution platform that combines AI, human expertise, physical infrastructure, and capital access to help startups move from idea to growth-stage scale.
             </p>
             
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 max-w-5xl w-full">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-5xl w-full">
               {/* AI-Driven Execution Engine */}
               <TechCard glowColor="teal" className="p-3">
                 <div className="flex items-center gap-2 mb-2">
@@ -658,7 +658,7 @@ export default function Deck() {
               <TechCard glowColor="cyan" className="p-3">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-6 h-6 rounded bg-cyan-500/20 flex items-center justify-center">
-                    <Globe className="h-3.5 w-3.5 text-cyan-400" />
+                    <MapPin className="h-3.5 w-3.5 text-cyan-400" />
                   </div>
                   <h3 className="font-semibold text-xs text-cyan-400 print:text-cyan-700">Hybrid Digital + Physical</h3>
                 </div>
@@ -703,6 +703,19 @@ export default function Deck() {
                 </div>
                 <p className="text-[10px] leading-relaxed text-slate-400 print:text-gray-600">
                   Integrated investor engagement, pitch readiness, and access to VCs, family offices, and strategic capital—connected directly to execution progress.
+                </p>
+              </TechCard>
+
+              {/* Global Resource Map */}
+              <TechCard glowColor="rose" className="p-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="w-6 h-6 rounded bg-rose-500/20 flex items-center justify-center">
+                    <Globe className="h-3.5 w-3.5 text-rose-400" />
+                  </div>
+                  <h3 className="font-semibold text-xs text-rose-400 print:text-rose-700">Global Resource Map</h3>
+                </div>
+                <p className="text-[10px] leading-relaxed text-slate-400 print:text-gray-600">
+                  A comprehensive 3D global visualization tool to map resources across the world—coworking spaces, labs, accelerators, grants, and partners in one interactive view.
                 </p>
               </TechCard>
             </div>
