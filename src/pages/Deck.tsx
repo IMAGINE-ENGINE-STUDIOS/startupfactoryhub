@@ -7,55 +7,47 @@ import astronautBg from '@/assets/astronaut-bg.jpg';
 import moonEarthBg from '@/assets/moon-earth.jpg';
 
 // Enhanced Geometric Pattern Components (matching marketing banners)
-const TechGrid = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
+const TechGrid = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
     {/* Horizontal lines */}
-    {[...Array(25)].map((_, i) => (
-      <div 
-        key={`h-${i}`} 
-        className="absolute w-full h-px bg-gradient-to-r from-transparent via-teal-500/8 to-transparent"
-        style={{ top: `${(i + 1) * 4}%` }}
-      />
-    ))}
+    {[...Array(25)].map((_, i) => <div key={`h-${i}`} className="absolute w-full h-px bg-gradient-to-r from-transparent via-teal-500/8 to-transparent" style={{
+    top: `${(i + 1) * 4}%`
+  }} />)}
     {/* Vertical lines */}
-    {[...Array(25)].map((_, i) => (
-      <div 
-        key={`v-${i}`} 
-        className="absolute h-full w-px bg-gradient-to-b from-transparent via-teal-500/8 to-transparent"
-        style={{ left: `${(i + 1) * 4}%` }}
-      />
-    ))}
+    {[...Array(25)].map((_, i) => <div key={`v-${i}`} className="absolute h-full w-px bg-gradient-to-b from-transparent via-teal-500/8 to-transparent" style={{
+    left: `${(i + 1) * 4}%`
+  }} />)}
     {/* Grid intersection dots */}
-    {[...Array(6)].map((_, i) => (
-      [...Array(6)].map((_, j) => (
-        <div 
-          key={`dot-${i}-${j}`} 
-          className="absolute w-1 h-1 rounded-full bg-teal-500/20"
-          style={{ top: `${(i + 1) * 16}%`, left: `${(j + 1) * 16}%` }}
-        />
-      ))
-    ))}
-  </div>
-);
-
-const FloatingHexagons = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
+    {[...Array(6)].map((_, i) => [...Array(6)].map((_, j) => <div key={`dot-${i}-${j}`} className="absolute w-1 h-1 rounded-full bg-teal-500/20" style={{
+    top: `${(i + 1) * 16}%`,
+    left: `${(j + 1) * 16}%`
+  }} />))}
+  </div>;
+const FloatingHexagons = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
     {/* Large hexagon top right */}
-    <div className="absolute top-[10%] right-[5%] w-40 h-40 border-2 border-teal-500/15 rotate-12" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+    <div className="absolute top-[10%] right-[5%] w-40 h-40 border-2 border-teal-500/15 rotate-12" style={{
+    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+  }} />
     {/* Medium hexagon top right */}
-    <div className="absolute top-[18%] right-[12%] w-24 h-24 border border-cyan-500/12 -rotate-6" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+    <div className="absolute top-[18%] right-[12%] w-24 h-24 border border-cyan-500/12 -rotate-6" style={{
+    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+  }} />
     {/* Small hexagon top left */}
-    <div className="absolute top-[15%] left-[8%] w-20 h-20 border border-teal-500/10 rotate-30" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+    <div className="absolute top-[15%] left-[8%] w-20 h-20 border border-teal-500/10 rotate-30" style={{
+    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+  }} />
     {/* Bottom left cluster */}
-    <div className="absolute bottom-[15%] left-[5%] w-32 h-32 border-2 border-teal-500/12 rotate-45" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
-    <div className="absolute bottom-[25%] left-[2%] w-16 h-16 border border-cyan-500/10 -rotate-12" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+    <div className="absolute bottom-[15%] left-[5%] w-32 h-32 border-2 border-teal-500/12 rotate-45" style={{
+    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+  }} />
+    <div className="absolute bottom-[25%] left-[2%] w-16 h-16 border border-cyan-500/10 -rotate-12" style={{
+    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+  }} />
     {/* Bottom right */}
-    <div className="absolute bottom-[10%] right-[8%] w-28 h-28 border border-teal-500/10 rotate-15" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
-  </div>
-);
-
-const EnergyLines = () => (
-  <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
+    <div className="absolute bottom-[10%] right-[8%] w-28 h-28 border border-teal-500/10 rotate-15" style={{
+    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+  }} />
+  </div>;
+const EnergyLines = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
     {/* Left sweeping arc */}
     <div className="absolute top-1/4 -left-32 w-96 h-96 border-2 border-teal-500/10 rounded-full" />
     <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] border border-teal-500/5 rounded-full" />
@@ -72,11 +64,8 @@ const EnergyLines = () => (
     {/* Connection lines (dashed) */}
     <div className="absolute top-[22%] left-[11%] w-16 h-px bg-gradient-to-r from-teal-500/30 to-transparent rotate-45" />
     <div className="absolute top-[27%] right-[10%] w-20 h-px bg-gradient-to-l from-cyan-500/30 to-transparent -rotate-30" />
-  </div>
-);
-
-const CornerAccents = () => (
-  <div className="absolute inset-0 pointer-events-none print:hidden">
+  </div>;
+const CornerAccents = () => <div className="absolute inset-0 pointer-events-none print:hidden">
     {/* Top left */}
     <div className="absolute top-6 left-6">
       <div className="w-16 h-0.5 bg-gradient-to-r from-teal-500 to-transparent" />
@@ -97,33 +86,36 @@ const CornerAccents = () => (
       <div className="w-0.5 h-16 bg-gradient-to-t from-teal-500 to-transparent ml-auto" />
       <div className="w-16 h-0.5 bg-gradient-to-l from-teal-500 to-transparent ml-auto" />
     </div>
-  </div>
-);
+  </div>;
 
 // Slide wrapper for consistent 16:9 aspect ratio scaling
-const SlideWrapper = ({ children }: { children: React.ReactNode }) => (
-  <div className="w-full min-h-screen flex items-center justify-center bg-slate-950 p-2 sm:p-4 print:min-h-0 print:p-0 print:bg-white">
+const SlideWrapper = ({
+  children
+}: {
+  children: React.ReactNode;
+}) => <div className="w-full min-h-screen flex items-center justify-center bg-slate-950 p-2 sm:p-4 print:min-h-0 print:p-0 print:bg-white">
     <div className="relative w-full max-w-[1920px] aspect-video overflow-hidden print:aspect-auto print:max-w-none">
       {children}
     </div>
-  </div>
-);
+  </div>;
 
 // Cover slide with background image
-const CoverSlideContainer = ({ children }: { children: React.ReactNode }) => (
-  <SlideWrapper>
+const CoverSlideContainer = ({
+  children
+}: {
+  children: React.ReactNode;
+}) => <SlideWrapper>
     <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
       {/* Background image */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden"
-        style={{ backgroundImage: `url(${rocketLaunchBg})` }}
-      />
+      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{
+      backgroundImage: `url(${rocketLaunchBg})`
+    }} />
       {/* Dark cinematic overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
       {/* Scan lines effect */}
-      <div className="absolute inset-0 print:hidden" style={{ 
-        backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(20, 184, 166, 0.02) 2px, rgba(20, 184, 166, 0.02) 4px)',
-      }} />
+      <div className="absolute inset-0 print:hidden" style={{
+      backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(20, 184, 166, 0.02) 2px, rgba(20, 184, 166, 0.02) 4px)'
+    }} />
       {/* Border frame */}
       <div className="absolute inset-[2%] border-2 border-teal-500/40 rounded-lg print:border-gray-300" />
       <TechGrid />
@@ -134,12 +126,16 @@ const CoverSlideContainer = ({ children }: { children: React.ReactNode }) => (
         {children}
       </div>
     </section>
-  </SlideWrapper>
-);
+  </SlideWrapper>;
 
 // Standard slide container
-const SlideContainer = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
-  <SlideWrapper>
+const SlideContainer = ({
+  children,
+  className = ""
+}: {
+  children: React.ReactNode;
+  className?: string;
+}) => <SlideWrapper>
     <section className={`absolute inset-0 flex flex-col items-center justify-center p-[4%] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 print:relative print:p-8 print:break-after-page print:bg-white ${className}`}>
       {/* Border frame */}
       <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
@@ -151,11 +147,12 @@ const SlideContainer = ({ children, className = "" }: { children: React.ReactNod
         {children}
       </div>
     </section>
-  </SlideWrapper>
-);
-
-const SectionDivider = ({ title }: { title: string }) => (
-  <div className="flex items-center gap-4 mb-8">
+  </SlideWrapper>;
+const SectionDivider = ({
+  title
+}: {
+  title: string;
+}) => <div className="flex items-center gap-4 mb-8">
     <div className="flex-1 h-px bg-gradient-to-r from-transparent via-teal-500/50 to-teal-500" />
     <div className="flex items-center gap-2">
       <div className="w-2 h-2 bg-teal-500 rotate-45" />
@@ -163,52 +160,57 @@ const SectionDivider = ({ title }: { title: string }) => (
       <div className="w-2 h-2 bg-teal-500 rotate-45" />
     </div>
     <div className="flex-1 h-px bg-gradient-to-l from-transparent via-teal-500/50 to-teal-500" />
-  </div>
-);
-
-const TechCard = ({ children, className = "", glowColor = "teal" }: { children: React.ReactNode; className?: string; glowColor?: string }) => {
+  </div>;
+const TechCard = ({
+  children,
+  className = "",
+  glowColor = "teal"
+}: {
+  children: React.ReactNode;
+  className?: string;
+  glowColor?: string;
+}) => {
   const glowClasses = {
     teal: "border-teal-500/40 hover:border-teal-500/60 shadow-teal-500/10",
     cyan: "border-cyan-500/40 hover:border-cyan-500/60 shadow-cyan-500/10",
     purple: "border-purple-500/40 hover:border-purple-500/60 shadow-purple-500/10",
     emerald: "border-emerald-500/40 hover:border-emerald-500/60 shadow-emerald-500/10",
     amber: "border-amber-500/40 hover:border-amber-500/60 shadow-amber-500/10",
-    rose: "border-rose-500/40 hover:border-rose-500/60 shadow-rose-500/10",
+    rose: "border-rose-500/40 hover:border-rose-500/60 shadow-rose-500/10"
   };
-  return (
-    <div className={`relative bg-slate-900/80 border-2 rounded-lg p-6 backdrop-blur-sm shadow-lg print:bg-white print:border-gray-300 print:shadow-none ${glowClasses[glowColor as keyof typeof glowClasses] || glowClasses.teal} ${className}`}>
+  return <div className={`relative bg-slate-900/80 border-2 rounded-lg p-6 backdrop-blur-sm shadow-lg print:bg-white print:border-gray-300 print:shadow-none ${glowClasses[glowColor as keyof typeof glowClasses] || glowClasses.teal} ${className}`}>
       {/* Top glow line */}
       <div className={`absolute top-0 left-8 right-8 h-0.5 bg-gradient-to-r from-transparent via-${glowColor}-500/60 to-transparent print:hidden`} />
       {children}
-    </div>
-  );
+    </div>;
 };
-
-const IconBadge = ({ icon: Icon, color = "teal" }: { icon: React.ComponentType<{ className?: string }>; color?: string }) => {
+const IconBadge = ({
+  icon: Icon,
+  color = "teal"
+}: {
+  icon: React.ComponentType<{
+    className?: string;
+  }>;
+  color?: string;
+}) => {
   const colorClasses = {
     teal: "bg-teal-500/20 text-teal-400 border-teal-500/40",
     cyan: "bg-cyan-500/20 text-cyan-400 border-cyan-500/40",
     purple: "bg-purple-500/20 text-purple-400 border-purple-500/40",
     emerald: "bg-emerald-500/20 text-emerald-400 border-emerald-500/40",
     amber: "bg-amber-500/20 text-amber-400 border-amber-500/40",
-    rose: "bg-rose-500/20 text-rose-400 border-rose-500/40",
+    rose: "bg-rose-500/20 text-rose-400 border-rose-500/40"
   };
-  return (
-    <div className={`w-12 h-12 rounded-lg border flex items-center justify-center print:bg-gray-100 print:border-gray-300 ${colorClasses[color as keyof typeof colorClasses] || colorClasses.teal}`}>
+  return <div className={`w-12 h-12 rounded-lg border flex items-center justify-center print:bg-gray-100 print:border-gray-300 ${colorClasses[color as keyof typeof colorClasses] || colorClasses.teal}`}>
       <Icon className="h-6 w-6 print:text-gray-700" />
-    </div>
-  );
+    </div>;
 };
-
 export default function Deck() {
   const navigate = useNavigate();
-
   const handlePrint = () => {
     window.print();
   };
-
-  return (
-    <div className="min-h-screen bg-slate-950 text-white print:bg-white print:text-black">
+  return <div className="min-h-screen bg-slate-950 text-white print:bg-white print:text-black">
       {/* Navigation Bar - Hidden in Print */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-slate-950/95 backdrop-blur-sm border-b border-teal-500/30 print:hidden">
         <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2 text-white hover:bg-slate-800 hover:text-teal-400">
@@ -235,7 +237,9 @@ export default function Deck() {
               <div className="absolute inset-0 bg-teal-500/30 blur-3xl rounded-full print:hidden" />
               <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-28 h-28 md:w-36 md:h-36 object-contain" />
               {/* Orbit ring */}
-              <div className="absolute inset-[-20px] border border-dashed border-teal-500/40 rounded-full animate-spin print:hidden" style={{ animationDuration: '20s' }} />
+              <div className="absolute inset-[-20px] border border-dashed border-teal-500/40 rounded-full animate-spin print:hidden" style={{
+              animationDuration: '20s'
+            }} />
             </div>
             
             <h1 className="text-4xl md:text-5xl font-black text-white mb-3 tracking-tight print:text-black">
@@ -261,8 +265,12 @@ export default function Deck() {
               <div className="relative group">
                 <div className="absolute inset-0 bg-teal-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
                 <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-teal-500/40 rounded-lg hover:border-teal-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
-                    <div className="absolute w-12 h-12 bg-gradient-to-br from-teal-500/30 to-teal-600/30 border border-teal-500/60" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{
+                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+                }}>
+                    <div className="absolute w-12 h-12 bg-gradient-to-br from-teal-500/30 to-teal-600/30 border border-teal-500/60" style={{
+                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+                  }} />
                     <Rocket className="h-5 w-5 text-teal-400 z-10 print:text-teal-700" />
                   </div>
                   <span className="text-sm font-medium text-slate-200 print:text-gray-700">Startups</span>
@@ -273,8 +281,12 @@ export default function Deck() {
               <div className="relative group">
                 <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
                 <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-cyan-500/40 rounded-lg hover:border-cyan-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
-                    <div className="absolute w-12 h-12 bg-gradient-to-br from-cyan-500/30 to-cyan-600/30 border border-cyan-500/60" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{
+                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+                }}>
+                    <div className="absolute w-12 h-12 bg-gradient-to-br from-cyan-500/30 to-cyan-600/30 border border-cyan-500/60" style={{
+                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+                  }} />
                     <Users className="h-5 w-5 text-cyan-400 z-10 print:text-cyan-700" />
                   </div>
                   <span className="text-sm font-medium text-slate-200 print:text-gray-700">Mentors</span>
@@ -285,8 +297,12 @@ export default function Deck() {
               <div className="relative group">
                 <div className="absolute inset-0 bg-purple-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
                 <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-purple-500/40 rounded-lg hover:border-purple-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
-                    <div className="absolute w-12 h-12 bg-gradient-to-br from-purple-500/30 to-purple-600/30 border border-purple-500/60" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{
+                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+                }}>
+                    <div className="absolute w-12 h-12 bg-gradient-to-br from-purple-500/30 to-purple-600/30 border border-purple-500/60" style={{
+                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+                  }} />
                     <Diamond className="h-5 w-5 text-purple-400 z-10 print:text-purple-700" />
                   </div>
                   <span className="text-sm font-medium text-slate-200 print:text-gray-700">Investors</span>
@@ -297,8 +313,12 @@ export default function Deck() {
               <div className="relative group">
                 <div className="absolute inset-0 bg-rose-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
                 <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-rose-500/40 rounded-lg hover:border-rose-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
-                    <div className="absolute w-12 h-12 bg-gradient-to-br from-rose-500/30 to-rose-600/30 border border-rose-500/60" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{
+                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+                }}>
+                    <div className="absolute w-12 h-12 bg-gradient-to-br from-rose-500/30 to-rose-600/30 border border-rose-500/60" style={{
+                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+                  }} />
                     <GraduationCap className="h-5 w-5 text-rose-400 z-10 print:text-rose-700" />
                   </div>
                   <span className="text-sm font-medium text-slate-200 print:text-gray-700">Students</span>
@@ -309,8 +329,12 @@ export default function Deck() {
               <div className="relative group">
                 <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
                 <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-emerald-500/40 rounded-lg hover:border-emerald-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
-                    <div className="absolute w-12 h-12 bg-gradient-to-br from-emerald-500/30 to-emerald-600/30 border border-emerald-500/60" style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }} />
+                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{
+                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+                }}>
+                    <div className="absolute w-12 h-12 bg-gradient-to-br from-emerald-500/30 to-emerald-600/30 border border-emerald-500/60" style={{
+                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+                  }} />
                     <Building2 className="h-5 w-5 text-emerald-400 z-10 print:text-emerald-700" />
                   </div>
                   <span className="text-sm font-medium text-slate-200 print:text-gray-700">Accelerators</span>
@@ -331,10 +355,9 @@ export default function Deck() {
         <SlideWrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
             {/* Background image */}
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden"
-              style={{ backgroundImage: `url(${astronautBg})` }}
-            />
+            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{
+            backgroundImage: `url(${astronautBg})`
+          }} />
             {/* Dark overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
             {/* Border frame */}
@@ -458,10 +481,9 @@ export default function Deck() {
         <SlideWrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
             {/* Background image */}
-            <div 
-              className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden"
-              style={{ backgroundImage: `url(${moonEarthBg})` }}
-            />
+            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{
+            backgroundImage: `url(${moonEarthBg})`
+          }} />
             {/* Dark overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950/85 via-slate-900/80 to-slate-950/85 print:hidden" />
             {/* Border frame */}
@@ -495,15 +517,21 @@ export default function Deck() {
                 <div className="absolute left-[20%] w-4 h-4 -top-1.5 rotate-45 border-2 border-rose-500 bg-slate-950 flex items-center justify-center">
                   <span className="text-rose-500 text-xs font-bold">✕</span>
                 </div>
-                <div className="absolute left-[24%] w-[14%] h-full bg-gradient-to-r from-rose-500/30 to-rose-500/60 opacity-50" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, currentColor 4px, currentColor 8px)' }} />
+                <div className="absolute left-[24%] w-[14%] h-full bg-gradient-to-r from-rose-500/30 to-rose-500/60 opacity-50" style={{
+                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, currentColor 4px, currentColor 8px)'
+                  }} />
                 <div className="absolute left-[40%] w-4 h-4 -top-1.5 rotate-45 border-2 border-rose-500 bg-slate-950 flex items-center justify-center">
                   <span className="text-rose-500 text-xs font-bold">✕</span>
                 </div>
-                <div className="absolute left-[44%] w-[14%] h-full bg-gradient-to-r from-rose-500/30 to-rose-500/60 opacity-50" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, currentColor 4px, currentColor 8px)' }} />
+                <div className="absolute left-[44%] w-[14%] h-full bg-gradient-to-r from-rose-500/30 to-rose-500/60 opacity-50" style={{
+                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, currentColor 4px, currentColor 8px)'
+                  }} />
                 <div className="absolute left-[60%] w-4 h-4 -top-1.5 rotate-45 border-2 border-rose-500 bg-slate-950 flex items-center justify-center">
                   <span className="text-rose-500 text-xs font-bold">✕</span>
                 </div>
-                <div className="absolute left-[64%] w-[14%] h-full bg-gradient-to-r from-rose-500/30 to-rose-500/60 opacity-50" style={{ backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, currentColor 4px, currentColor 8px)' }} />
+                <div className="absolute left-[64%] w-[14%] h-full bg-gradient-to-r from-rose-500/30 to-rose-500/60 opacity-50" style={{
+                    backgroundImage: 'repeating-linear-gradient(90deg, transparent, transparent 4px, currentColor 4px, currentColor 8px)'
+                  }} />
                 <div className="absolute left-[80%] w-4 h-4 -top-1.5 rotate-45 border-2 border-rose-500 bg-slate-950 flex items-center justify-center">
                   <span className="text-rose-500 text-xs font-bold">✕</span>
                 </div>
@@ -883,22 +911,43 @@ export default function Deck() {
             <p className="text-xl text-slate-400 text-center mb-12 print:text-gray-600">Powered by Innovation</p>
             
             <div className="grid md:grid-cols-3 gap-4 max-w-5xl w-full">
-              {[
-                { icon: Cpu, title: "AI Recommendations", desc: "Smart matching algorithms for optimal connections", color: "teal" },
-                { icon: Video, title: "Video Conferencing", desc: "Integrated virtual meetings and pitch sessions", color: "cyan" },
-                { icon: FileText, title: "Document Suite", desc: "LightPaper productivity and collaboration tools", color: "purple" },
-                { icon: Calendar, title: "Global Events", desc: "Networking opportunities and demo days", color: "emerald" },
-                { icon: Briefcase, title: "Job Board", desc: "Talent acquisition and career opportunities", color: "amber" },
-                { icon: BarChart3, title: "Market Intelligence", desc: "Real-time insights and analytics", color: "rose" },
-              ].map((feature, i) => (
-                <TechCard key={i} glowColor={feature.color} className="text-center">
+              {[{
+              icon: Cpu,
+              title: "AI Recommendations",
+              desc: "Smart matching algorithms for optimal connections",
+              color: "teal"
+            }, {
+              icon: Video,
+              title: "Video Conferencing",
+              desc: "Integrated virtual meetings and pitch sessions",
+              color: "cyan"
+            }, {
+              icon: FileText,
+              title: "Document Suite",
+              desc: "LightPaper productivity and collaboration tools",
+              color: "purple"
+            }, {
+              icon: Calendar,
+              title: "Global Events",
+              desc: "Networking opportunities and demo days",
+              color: "emerald"
+            }, {
+              icon: Briefcase,
+              title: "Job Board",
+              desc: "Talent acquisition and career opportunities",
+              color: "amber"
+            }, {
+              icon: BarChart3,
+              title: "Market Intelligence",
+              desc: "Real-time insights and analytics",
+              color: "rose"
+            }].map((feature, i) => <TechCard key={i} glowColor={feature.color} className="text-center">
                   <div className="flex justify-center mb-3">
                     <IconBadge icon={feature.icon} color={feature.color} />
                   </div>
                   <h4 className={`font-semibold text-${feature.color}-400 mb-2 print:text-gray-700`}>{feature.title}</h4>
                   <p className="text-sm text-slate-400 print:text-gray-600">{feature.desc}</p>
-                </TechCard>
-              ))}
+                </TechCard>)}
             </div>
           </div>
         </SlideContainer>
@@ -1084,33 +1133,50 @@ export default function Deck() {
             <div className="max-w-4xl w-full mb-3">
               <TechCard glowColor="emerald" className="p-4">
                 <div className="flex items-end justify-between gap-3 h-40 px-2">
-                  {[
-                    { year: "Year 1", revenue: "$5.34M", value: 5.34, color: "from-teal-600 to-teal-400" },
-                    { year: "Year 2", revenue: "$9.65M", value: 9.65, color: "from-teal-500 to-cyan-400" },
-                    { year: "Year 3", revenue: "$16.50M", value: 16.50, color: "from-cyan-500 to-cyan-400" },
-                    { year: "Year 4", revenue: "$27.30M", value: 27.30, color: "from-cyan-500 to-emerald-400" },
-                    { year: "Year 5", revenue: "$46.00M", value: 46.00, color: "from-emerald-500 to-emerald-400" },
-                  ].map((item, i) => {
-                    const heightPercent = (item.value / 46) * 100;
-                    return (
-                      <div key={i} className="flex-1 flex flex-col items-center">
+                  {[{
+                  year: "Year 1",
+                  revenue: "$5.34M",
+                  value: 5.34,
+                  color: "from-teal-600 to-teal-400"
+                }, {
+                  year: "Year 2",
+                  revenue: "$9.65M",
+                  value: 9.65,
+                  color: "from-teal-500 to-cyan-400"
+                }, {
+                  year: "Year 3",
+                  revenue: "$16.50M",
+                  value: 16.50,
+                  color: "from-cyan-500 to-cyan-400"
+                }, {
+                  year: "Year 4",
+                  revenue: "$27.30M",
+                  value: 27.30,
+                  color: "from-cyan-500 to-emerald-400"
+                }, {
+                  year: "Year 5",
+                  revenue: "$46.00M",
+                  value: 46.00,
+                  color: "from-emerald-500 to-emerald-400"
+                }].map((item, i) => {
+                  const heightPercent = item.value / 46 * 100;
+                  return <div key={i} className="flex-1 flex flex-col items-center">
                         {/* Revenue Label */}
                         <span className="text-[10px] md:text-xs font-bold text-emerald-400 mb-1">{item.revenue}</span>
                         {/* Bar */}
                         <div className="w-full flex justify-center">
-                          <div 
-                            className={`w-10 md:w-14 bg-gradient-to-t ${item.color} rounded-t-md relative overflow-hidden transition-all`}
-                            style={{ height: `${heightPercent}%`, minHeight: '16px' }}
-                          >
+                          <div className={`w-10 md:w-14 bg-gradient-to-t ${item.color} rounded-t-md relative overflow-hidden transition-all`} style={{
+                        height: `${heightPercent}%`,
+                        minHeight: '16px'
+                      }}>
                             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0" />
                             <div className="absolute top-0 left-0 right-0 h-0.5 bg-white/40" />
                           </div>
                         </div>
                         {/* Year Label */}
                         <span className="text-[9px] md:text-[10px] text-slate-400 mt-1.5">{item.year}</span>
-                      </div>
-                    );
-                  })}
+                      </div>;
+                })}
                 </div>
                 
                 {/* Growth Arrow Indicator */}
@@ -1128,15 +1194,21 @@ export default function Deck() {
               <TechCard glowColor="teal" className="p-3">
                 <h4 className="text-[10px] font-semibold text-center text-teal-400 mb-2">Year 5 Revenue Mix: $46M</h4>
                 <div className="flex items-center h-7 rounded-lg overflow-hidden border border-slate-700/50">
-                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center relative" style={{ width: '74%' }}>
+                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center relative" style={{
+                  width: '74%'
+                }}>
                     <span className="text-[8px] md:text-[9px] font-medium text-white">Subscriptions $34.2M</span>
                     <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
                   </div>
-                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center relative" style={{ width: '18%' }}>
+                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center relative" style={{
+                  width: '18%'
+                }}>
                     <span className="text-[8px] font-medium text-white">Edu</span>
                     <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
                   </div>
-                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center" style={{ width: '8%' }}>
+                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center" style={{
+                  width: '8%'
+                }}>
                     <span className="text-[8px] font-medium text-white">+</span>
                   </div>
                 </div>
@@ -1150,20 +1222,41 @@ export default function Deck() {
             
             {/* Revenue Streams Summary - Compact Grid */}
             <div className="grid grid-cols-6 gap-2 max-w-4xl w-full mb-2">
-              {[
-                { label: "Startups Y5", value: "~12,650", icon: Rocket, color: "teal" },
-                { label: "ARPU", value: "$750/mo", icon: DollarSign, color: "emerald" },
-                { label: "Corporate", value: "$100K/yr", icon: Building2, color: "purple" },
-                { label: "Pilots", value: "$200K ea", icon: Target, color: "amber" },
-                { label: "Chapters", value: "$200K ea", icon: Globe, color: "rose" },
-                { label: "Education", value: "2x/yr", icon: GraduationCap, color: "cyan" },
-              ].map((item, i) => (
-                <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-2 text-center">
+              {[{
+              label: "Startups Y5",
+              value: "~12,650",
+              icon: Rocket,
+              color: "teal"
+            }, {
+              label: "ARPU",
+              value: "$750/mo",
+              icon: DollarSign,
+              color: "emerald"
+            }, {
+              label: "Corporate",
+              value: "$100K/yr",
+              icon: Building2,
+              color: "purple"
+            }, {
+              label: "Pilots",
+              value: "$200K ea",
+              icon: Target,
+              color: "amber"
+            }, {
+              label: "Chapters",
+              value: "$200K ea",
+              icon: Globe,
+              color: "rose"
+            }, {
+              label: "Education",
+              value: "2x/yr",
+              icon: GraduationCap,
+              color: "cyan"
+            }].map((item, i) => <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-2 text-center">
                   <item.icon className={`h-3 w-3 mx-auto mb-1 text-${item.color}-400`} />
                   <p className={`text-[9px] font-bold text-${item.color}-400`}>{item.value}</p>
                   <p className="text-[7px] text-slate-500">{item.label}</p>
-                </div>
-              ))}
+                </div>)}
             </div>
             
             {/* Model Summary */}
@@ -1191,22 +1284,11 @@ export default function Deck() {
             </p>
             
             <div className="flex flex-wrap gap-4 justify-center mb-8">
-              <a 
-                href="mailto:contact@startupfactoryhub.com" 
-                className="inline-flex items-center gap-3 bg-slate-900/80 border-2 border-teal-500/40 rounded-lg px-6 py-3 hover:border-teal-500/60 transition-colors print:bg-white print:border-gray-300"
-              >
+              <a href="mailto:contact@startupfactoryhub.com" className="inline-flex items-center gap-3 bg-slate-900/80 border-2 border-teal-500/40 rounded-lg px-6 py-3 hover:border-teal-500/60 transition-colors print:bg-white print:border-gray-300">
                 <Mail className="h-5 w-5 text-teal-400 print:text-gray-700" />
                 <span className="text-slate-200 font-medium print:text-gray-700">contact@startupfactoryhub.com</span>
               </a>
-              <a 
-                href="https://startupfactoryhub.lovable.app" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="inline-flex items-center gap-3 bg-slate-900/80 border-2 border-cyan-500/40 rounded-lg px-6 py-3 hover:border-cyan-500/60 transition-colors print:bg-white print:border-gray-300"
-              >
-                <ExternalLink className="h-5 w-5 text-cyan-400 print:text-gray-700" />
-                <span className="text-slate-200 font-medium print:text-gray-700">startupfactoryhub.lovable.app</span>
-              </a>
+              
             </div>
             
             <div className="relative">
@@ -1218,6 +1300,5 @@ export default function Deck() {
           </div>
         </SlideContainer>
       </div>
-    </div>
-  );
+    </div>;
 }
