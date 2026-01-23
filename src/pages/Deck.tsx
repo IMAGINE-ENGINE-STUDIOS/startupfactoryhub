@@ -902,37 +902,6 @@ export default function Deck() {
             </div>
           </div>
         </SlideContainer>
-
-        {/* SLIDE 5: Our Network */}
-        <SlideContainer>
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-4">
-              <IconBadge icon={Users} color="teal" />
-              <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">Our Network</h2>
-            </div>
-            <p className="text-xl text-slate-400 text-center mb-12 print:text-gray-600">Growing Global Community</p>
-            
-            <div className="grid md:grid-cols-4 gap-6 max-w-4xl w-full">
-              {[
-                { icon: Rocket, value: "500+", label: "Startups", color: "emerald" },
-                { icon: Lightbulb, value: "150+", label: "Mentors", color: "cyan" },
-                { icon: Diamond, value: "75+", label: "Investors", color: "purple" },
-                { icon: Globe, value: "25+", label: "Countries", color: "amber" },
-              ].map((stat, i) => (
-                <TechCard key={i} glowColor={stat.color} className="text-center py-8">
-                  <div className="flex justify-center mb-4">
-                    <IconBadge icon={stat.icon} color={stat.color} />
-                  </div>
-                  <div className={`text-4xl md:text-5xl font-black bg-gradient-to-r from-${stat.color}-400 to-${stat.color}-300 bg-clip-text text-transparent mb-2`}>
-                    {stat.value}
-                  </div>
-                  <div className="text-slate-400 font-medium print:text-gray-600">{stat.label}</div>
-                </TechCard>
-              ))}
-            </div>
-          </div>
-        </SlideContainer>
-
         {/* SLIDE 6: Market Opportunity */}
         <SlideContainer>
           <div className="flex flex-col items-center">
