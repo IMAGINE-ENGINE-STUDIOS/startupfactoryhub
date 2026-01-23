@@ -1269,8 +1269,71 @@ export default function Deck() {
             </div>
           </div>
         </SlideContainer>
+        {/* SLIDE 8: Our Partners */}
+        <SlideContainer>
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-4 mb-3">
+              <IconBadge icon={Handshake} color="teal" />
+              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Our Partners & Network</h2>
+            </div>
+            <p className="text-base text-slate-400 text-center mb-6 print:text-gray-600">
+              Backed by industry leaders and innovators shaping the future
+            </p>
+            
+            {/* Partners Grid - Compact 6 columns */}
+            <div className="grid grid-cols-4 md:grid-cols-6 gap-3 max-w-5xl w-full">
+              {[
+                { name: "NASA", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/200px-NASA_logo.svg.png" },
+                { name: "GitHub", logo: "/github-logo.png" },
+                { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" },
+                { name: "MongoDB", logo: "/mongodb-logo.webp" },
+                { name: "Nasdaq", logo: "/nasdaq-logo.png" },
+                { name: "HubSpot", logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png" },
+                { name: "Lovable", logo: "/partners/lovable-logo.png" },
+                { name: "Lehigh University", logo: "/lehigh-university-logo.png" },
+                { name: "Datadog", logo: "https://imgix.datadoghq.com/img/dd_logo_n_70x75.png" },
+                { name: "LivePlan", logo: "/partners/liveplan-logo.png" },
+                { name: "Flippa", logo: "/partners/flippa-logo.png" },
+                { name: "F6S", logo: "/partners/f6s-logo.png" },
+                { name: "Decahedron Ventures", logo: "/partners/decahedron-ventures-logo.jpg" },
+                { name: "Flusso Capital", logo: "/partners/flusso-capital-logo.png" },
+                { name: "UK Venture Partners", logo: "/partners/uk-venture-logo.jpg" },
+                { name: "Advantary Capital", logo: "/partners/advantary-logo.jpg" },
+                { name: "Ducere University", logo: "/partners/ducere-logo.png" },
+                { name: "HackerEarth", logo: "/partners/hackerearth-logo.png" },
+                { name: "Orlandopreneur", logo: "/partners/orlandopreneur-logo.png" },
+                { name: "Grupo Incostas", logo: "/partners/incostas-logo.png" },
+                { name: "LOT Network", logo: "/partners/lotnetwork-logo.png" },
+                { name: "Nouel Consult", logo: "/partners/nouel-logo.png" },
+                { name: "PitchPerfecter.AI", logo: "/partners/pitchperfecter-logo.png" },
+                { name: "WorkingAdvantage", logo: "/working-advantage-logo.png" },
+              ].map((partner, i) => (
+                <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-2 flex items-center justify-center h-14 hover:border-teal-500/40 transition-colors print:bg-gray-50 print:border-gray-300">
+                  <img 
+                    src={partner.logo} 
+                    alt={partner.name}
+                    className="max-h-8 max-w-[80px] object-contain filter brightness-90 hover:brightness-110 transition-all print:filter-none"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+            
+            {/* Partner categories */}
+            <div className="flex flex-wrap justify-center gap-2 mt-4">
+              {["Technology", "Investment", "Academic", "Marketplace", "Legal", "Community"].map((category, i) => (
+                <span key={i} className="px-2 py-0.5 text-[9px] font-medium bg-slate-800/60 border border-teal-500/20 rounded-full text-teal-400/80 print:bg-gray-100 print:border-gray-300 print:text-gray-600">
+                  {category}
+                </span>
+              ))}
+            </div>
+          </div>
+        </SlideContainer>
 
-        {/* SLIDE 8: Contact */}
+        {/* SLIDE 9: Contact */}
         <SlideContainer className="print:break-after-avoid">
           <div className="flex flex-col items-center text-center">
             <div className="flex items-center gap-4 mb-4">
