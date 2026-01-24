@@ -26,6 +26,12 @@ const MOCK_WORKSPACES = [
     daily_rate_max: 180,
     rating: 4.7,
     image_url: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800",
+      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
+      "https://images.unsplash.com/photo-1564069114553-7215e1ff1890?w=800"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-sf-1"
   },
@@ -45,6 +51,11 @@ const MOCK_WORKSPACES = [
     daily_rate_max: 250,
     rating: 4.5,
     image_url: "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
+      "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800",
+      "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-sf-2"
   },
@@ -65,6 +76,12 @@ const MOCK_WORKSPACES = [
     daily_rate_max: 220,
     rating: 4.8,
     image_url: "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800",
+      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800",
+      "https://images.unsplash.com/photo-1572025442646-866d16c84a54?w=800",
+      "https://images.unsplash.com/photo-1568992687947-868a62a9f521?w=800"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-nyc-1"
   },
@@ -84,6 +101,11 @@ const MOCK_WORKSPACES = [
     daily_rate_max: 300,
     rating: 4.9,
     image_url: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800",
+      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800",
+      "https://images.unsplash.com/photo-1462826303086-329426d1aef5?w=800"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-nyc-2"
   },
@@ -104,6 +126,12 @@ const MOCK_WORKSPACES = [
     daily_rate_max: 160,
     rating: 4.6,
     image_url: "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800",
+      "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800",
+      "https://images.unsplash.com/photo-1564069114553-7215e1ff1890?w=800",
+      "https://images.unsplash.com/photo-1572025442646-866d16c84a54?w=800"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-london-1"
   },
@@ -123,6 +151,11 @@ const MOCK_WORKSPACES = [
     daily_rate_max: 200,
     rating: 4.7,
     image_url: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800",
+      "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800",
+      "https://images.unsplash.com/photo-1568992687947-868a62a9f521?w=800"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-london-2"
   },
@@ -143,6 +176,12 @@ const MOCK_WORKSPACES = [
     daily_rate_max: 240,
     rating: 4.8,
     image_url: "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800",
+      "https://images.unsplash.com/photo-1462826303086-329426d1aef5?w=800",
+      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
+      "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-tokyo-1"
   },
@@ -162,6 +201,11 @@ const MOCK_WORKSPACES = [
     daily_rate_max: 200,
     rating: 4.5,
     image_url: "https://images.unsplash.com/photo-1462826303086-329426d1aef5?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1462826303086-329426d1aef5?w=800",
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
+      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-tokyo-2"
   },
@@ -182,6 +226,12 @@ const MOCK_WORKSPACES = [
     daily_rate_max: 180,
     rating: 4.7,
     image_url: "https://images.unsplash.com/photo-1497215842964-222b430dc094?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1497215842964-222b430dc094?w=800",
+      "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800",
+      "https://images.unsplash.com/photo-1564069114553-7215e1ff1890?w=800",
+      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-singapore-1"
   },
@@ -201,6 +251,11 @@ const MOCK_WORKSPACES = [
     daily_rate_max: 140,
     rating: 4.6,
     image_url: "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1527192491265-7e15c55b1ed2?w=800",
+      "https://images.unsplash.com/photo-1568992687947-868a62a9f521?w=800",
+      "https://images.unsplash.com/photo-1572025442646-866d16c84a54?w=800"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-singapore-2"
   },
@@ -221,6 +276,12 @@ const MOCK_WORKSPACES = [
     daily_rate_max: 400,
     rating: 4.9,
     image_url: "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1582407947304-fd86f028f716?w=800",
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800",
+      "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800",
+      "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-dubai-1"
   },
@@ -240,6 +301,12 @@ const MOCK_WORKSPACES = [
     daily_rate_max: 240,
     rating: 4.8,
     image_url: "https://images.unsplash.com/photo-1577412647305-991150c7d163?w=800",
+    images: [
+      "https://images.unsplash.com/photo-1577412647305-991150c7d163?w=800",
+      "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800",
+      "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800",
+      "https://images.unsplash.com/photo-1462826303086-329426d1aef5?w=800"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-dubai-2"
   },

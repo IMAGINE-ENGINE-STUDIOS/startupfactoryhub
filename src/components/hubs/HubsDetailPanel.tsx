@@ -3,6 +3,14 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi
+} from '@/components/ui/carousel';
+import { 
   X, 
   MapPin, 
   Star, 
@@ -23,6 +31,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useState, useEffect, useMemo } from 'react';
 
 interface HubsDetailPanelProps {
   workspace: Workspace | null;
@@ -63,6 +72,36 @@ const getAmenityLabel = (amenity: string) => {
 
 export const HubsDetailPanel = ({ workspace, onClose, onBook }: HubsDetailPanelProps) => {
   const isMobile = useIsMobile();
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  
+  // Combine image_url and images array for carousel
+  const allImages = useMemo(() => {
+    const imgs: string[] = [];
+    if (workspace?.images?.length) {
+      imgs.push(...workspace.images);
+    } else if (workspace?.image_url) {
+      imgs.push(workspace.image_url);
+    }
+    return imgs;
+  }, [workspace]);
+
+  useEffect(() => {
+    if (!carouselApi) return;
+    
+    const onSelect = () => {
+      setCurrentSlide(carouselApi.selectedScrollSnap());
+    };
+    
+    carouselApi.on('select', onSelect);
+    return () => { carouselApi.off('select', onSelect); };
+  }, [carouselApi]);
+
+  // Reset slide when workspace changes
+  useEffect(() => {
+    setCurrentSlide(0);
+    carouselApi?.scrollTo(0);
+  }, [workspace?.id, carouselApi]);
   
   const getDirections = () => {
     if (workspace?.latitude && workspace?.longitude) {
@@ -93,10 +132,11 @@ export const HubsDetailPanel = ({ workspace, onClose, onBook }: HubsDetailPanelP
   const primaryType = workspace?.workspace_types[0] || 'coworking';
   const config = WORKSPACE_CONFIG[primaryType];
   const Icon = config?.icon || Building2;
+  const gradient = `linear-gradient(135deg, ${config?.color || '#10b981'}, ${config?.color || '#10b981'}dd)`;
 
   return (
     <div className={cn(
-      "absolute right-2 top-2 bottom-2 w-96 z-10 transition-all duration-300",
+      "absolute right-2 top-2 bottom-2 w-[28rem] z-10 transition-all duration-300",
       workspace 
         ? "translate-x-0 opacity-100" 
         : "translate-x-full opacity-0 pointer-events-none",
@@ -104,20 +144,46 @@ export const HubsDetailPanel = ({ workspace, onClose, onBook }: HubsDetailPanelP
     )}>
       {workspace && (
         <div className="h-full backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 dark:border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] flex flex-col rounded-3xl overflow-hidden">
-          {/* Header Image - matching GlobalResourcesMap resource panel */}
-          <div className="relative h-32 flex-shrink-0">
-            {workspace.image_url ? (
-              <img
-                src={workspace.image_url}
-                alt={workspace.name}
-                className="w-full h-full object-cover"
-              />
+          {/* Header Image Carousel */}
+          <div className="relative h-56 flex-shrink-0">
+            {allImages.length > 0 ? (
+              <Carousel 
+                className="w-full h-full" 
+                setApi={setCarouselApi}
+                opts={{ loop: true }}
+              >
+                <CarouselContent className="-ml-0">
+                  {allImages.map((imageUrl, index) => (
+                    <CarouselItem key={index} className="pl-0">
+                      <img
+                        src={imageUrl}
+                        alt={`${workspace.name} - Image ${index + 1}`}
+                        className="w-full h-56 object-cover"
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                
+                {allImages.length > 1 && (
+                  <>
+                    <CarouselPrevious className="left-3 h-8 w-8 backdrop-blur-xl bg-black/30 border-0 text-white hover:bg-black/50 hover:text-white" />
+                    <CarouselNext className="right-3 h-8 w-8 backdrop-blur-xl bg-black/30 border-0 text-white hover:bg-black/50 hover:text-white" />
+                  </>
+                )}
+                
+                {/* Image Counter Indicator */}
+                {allImages.length > 1 && (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full backdrop-blur-xl bg-black/40 text-white text-xs font-medium">
+                    {currentSlide + 1} / {allImages.length}
+                  </div>
+                )}
+              </Carousel>
             ) : (
               <div 
                 className="w-full h-full flex items-center justify-center"
-                style={{ background: `linear-gradient(135deg, ${config?.color || '#10b981'}, ${config?.color || '#10b981'}dd)` }}
+                style={{ background: gradient }}
               >
-                <Icon className="h-16 w-16 text-white/60" />
+                <Icon className="h-20 w-20 text-white/60" />
               </div>
             )}
             
@@ -126,7 +192,7 @@ export const HubsDetailPanel = ({ workspace, onClose, onBook }: HubsDetailPanelP
               variant="ghost"
               size="icon"
               onClick={onClose}
-              className="absolute top-3 right-3 h-8 w-8 rounded-xl backdrop-blur-xl bg-black/30 hover:bg-black/50 text-white"
+              className="absolute top-3 right-3 h-8 w-8 rounded-xl backdrop-blur-xl bg-black/30 hover:bg-black/50 text-white z-10"
             >
               <X className="w-4 h-4" />
             </Button>
@@ -134,14 +200,34 @@ export const HubsDetailPanel = ({ workspace, onClose, onBook }: HubsDetailPanelP
             {/* Provider Badge */}
             <Badge 
               variant="secondary" 
-              className="absolute top-3 left-3 text-xs backdrop-blur-xl bg-black/30 text-white border-0"
+              className="absolute top-3 left-3 text-xs backdrop-blur-xl bg-black/30 text-white border-0 z-10"
             >
               {workspace.provider === 'liquidspace' ? 'LiquidSpace' : 'SFH Network'}
             </Badge>
 
             {/* Gradient Overlay */}
-            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 to-transparent" />
+            <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/60 to-transparent pointer-events-none" />
           </div>
+
+          {/* Thumbnail Preview Row */}
+          {allImages.length > 1 && (
+            <div className="flex gap-2 p-3 overflow-x-auto border-b border-white/10 flex-shrink-0">
+              {allImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => carouselApi?.scrollTo(idx)}
+                  className={cn(
+                    "w-16 h-12 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all",
+                    currentSlide === idx 
+                      ? "border-primary ring-2 ring-primary/30" 
+                      : "border-transparent opacity-70 hover:opacity-100"
+                  )}
+                >
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Content */}
           <ScrollArea className="flex-1">
