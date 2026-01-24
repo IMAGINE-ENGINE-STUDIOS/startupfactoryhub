@@ -2257,6 +2257,132 @@ export type Database = {
         }
         Relationships: []
       }
+      hub_bookings: {
+        Row: {
+          created_at: string
+          currency: string | null
+          from_datetime: string
+          id: string
+          notes: string | null
+          payment_intent_id: string | null
+          price: number | null
+          provider: string
+          provider_booking_id: string | null
+          status: string
+          to_datetime: string
+          updated_at: string
+          user_id: string
+          venue_id: string
+          venue_name: string
+          workspace_type: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string | null
+          from_datetime: string
+          id?: string
+          notes?: string | null
+          payment_intent_id?: string | null
+          price?: number | null
+          provider?: string
+          provider_booking_id?: string | null
+          status?: string
+          to_datetime: string
+          updated_at?: string
+          user_id: string
+          venue_id: string
+          venue_name: string
+          workspace_type: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string | null
+          from_datetime?: string
+          id?: string
+          notes?: string | null
+          payment_intent_id?: string | null
+          price?: number | null
+          provider?: string
+          provider_booking_id?: string | null
+          status?: string
+          to_datetime?: string
+          updated_at?: string
+          user_id?: string
+          venue_id?: string
+          venue_name?: string
+          workspace_type?: string
+        }
+        Relationships: []
+      }
+      hub_venues_cache: {
+        Row: {
+          address: string | null
+          amenities: string[] | null
+          cached_at: string
+          city: string
+          country: string
+          created_at: string
+          daily_rate_max: number | null
+          daily_rate_min: number | null
+          external_venue_id: string | null
+          hourly_rate_max: number | null
+          hourly_rate_min: number | null
+          id: string
+          image_url: string | null
+          is_hotel: boolean
+          is_professional: boolean
+          latitude: number | null
+          longitude: number | null
+          name: string
+          rating: number | null
+          workspace_types: string[] | null
+        }
+        Insert: {
+          address?: string | null
+          amenities?: string[] | null
+          cached_at?: string
+          city: string
+          country: string
+          created_at?: string
+          daily_rate_max?: number | null
+          daily_rate_min?: number | null
+          external_venue_id?: string | null
+          hourly_rate_max?: number | null
+          hourly_rate_min?: number | null
+          id?: string
+          image_url?: string | null
+          is_hotel?: boolean
+          is_professional?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          rating?: number | null
+          workspace_types?: string[] | null
+        }
+        Update: {
+          address?: string | null
+          amenities?: string[] | null
+          cached_at?: string
+          city?: string
+          country?: string
+          created_at?: string
+          daily_rate_max?: number | null
+          daily_rate_min?: number | null
+          external_venue_id?: string | null
+          hourly_rate_max?: number | null
+          hourly_rate_min?: number | null
+          id?: string
+          image_url?: string | null
+          is_hotel?: boolean
+          is_professional?: boolean
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          rating?: number | null
+          workspace_types?: string[] | null
+        }
+        Relationships: []
+      }
       internship_applications: {
         Row: {
           cover_letter: string | null

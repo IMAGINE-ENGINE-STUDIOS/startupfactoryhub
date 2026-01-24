@@ -59,3 +59,12 @@ verify_jwt = false
 
 [functions.verify-cohort-payment]
 verify_jwt = false
+
+[functions.hub-search-workspaces]
+verify_jwt = true
+
+[functions.hub-book-workspace]
+verify_jwt = true
+
+[functions.hub-ai-assistant]
+verify_jwt = true
