@@ -107,6 +107,10 @@ export const GlobalResourcesMap = () => {
   const [userEventStatus, setUserEventStatus] = useState<string | null>(null);
   const [isUpdatingRsvp, setIsUpdatingRsvp] = useState(false);
   
+  // Loading progress state for marker loading feedback
+  const [loadingProgress, setLoadingProgress] = useState(0);
+  const [totalToLoad, setTotalToLoad] = useState(0);
+  
   // Ref to store current resources for click handler (avoids stale closure)
   const resourcesRef = useRef<Resource[] | undefined>(undefined);
 
@@ -413,20 +417,35 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     }
   };
 
-  // Real-time subscription for event attendees
+  // Real-time subscription for event attendees (debounced)
   useEffect(() => {
     const channel = supabase
       .channel('map-event-attendees')
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'event_attendees' },
-        () => refetchEvents()
+        () => {
+          // Debounce event refetch to prevent rapid rebuilds
+          if (debouncedRefetchEvents.current) {
+            clearTimeout(debouncedRefetchEvents.current);
+          }
+          debouncedRefetchEvents.current = setTimeout(() => {
+            refetchEvents();
+          }, 1500);
+        }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
+      if (debouncedRefetchEvents.current) {
+        clearTimeout(debouncedRefetchEvents.current);
+      }
     };
   }, [refetchEvents]);
+
+  // Debounced refetch for real-time updates (prevents UI stutter)
+  const debouncedRefetchResources = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const debouncedRefetchEvents = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Real-time subscription for resource changes (admin edits sync)
   useEffect(() => {
@@ -435,19 +454,27 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       .on('postgres_changes', 
         { event: '*', schema: 'public', table: 'resources' },
         (payload) => {
-          // Refetch main resources query when admin makes changes
-          refetchResources();
-          
           // Immediately update selectedResource if it was the one edited
           if (selectedResource && payload.new && (payload.new as any).id === selectedResource.id) {
             setSelectedResource(payload.new as Resource);
           }
+          
+          // Debounce the full refetch to avoid rebuilding markers on every rapid change
+          if (debouncedRefetchResources.current) {
+            clearTimeout(debouncedRefetchResources.current);
+          }
+          debouncedRefetchResources.current = setTimeout(() => {
+            refetchResources();
+          }, 2000);
         }
       )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
+      if (debouncedRefetchResources.current) {
+        clearTimeout(debouncedRefetchResources.current);
+      }
     };
   }, [refetchResources, selectedResource?.id]);
 
@@ -733,7 +760,40 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         }
       }
 
-      if (logoIconsToLoad.length === 0) return;
+      if (logoIconsToLoad.length === 0) {
+        setTotalToLoad(0);
+        setLoadingProgress(0);
+        return;
+      }
+
+      // OPTIMIZATION: Viewport-based prioritization - load visible markers first
+      const getVisibleResourceIds = (): Set<string> => {
+        if (!map.current) return new Set();
+        try {
+          const bounds = map.current.getBounds();
+          if (!bounds) return new Set();
+          return new Set(
+            physicalResources
+              .filter(r => r.longitude && r.latitude && bounds.contains([r.longitude, r.latitude]))
+              .map(r => r.id)
+          );
+        } catch {
+          return new Set();
+        }
+      };
+
+      const visibleIds = getVisibleResourceIds();
+      
+      // Sort: visible resources first, then others
+      logoIconsToLoad.sort((a, b) => {
+        const aVisible = visibleIds.has(a.resource.id) ? 0 : 1;
+        const bVisible = visibleIds.has(b.resource.id) ? 0 : 1;
+        return aVisible - bVisible;
+      });
+
+      // Set loading progress state
+      setTotalToLoad(logoIconsToLoad.length);
+      setLoadingProgress(0);
 
       // Debounced refresh to swap type icons -> logos as they become available
       let refreshTimer: number | null = null;
@@ -745,8 +805,10 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         }, 250);
       };
 
-      const CONCURRENCY = 6;
+      // OPTIMIZATION: Increased concurrency from 6 to 10 for faster loading
+      const CONCURRENCY = 10;
       let index = 0;
+      let completed = 0;
 
       const loadNext = async () => {
         while (map.current && index < logoIconsToLoad.length) {
@@ -785,6 +847,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
             scheduleRefresh();
           } finally {
             loadingImageKeys.current.delete(key);
+            // Update progress counter
+            completed++;
+            setLoadingProgress(completed);
           }
         }
       };
@@ -794,6 +859,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         Array.from({ length: Math.min(CONCURRENCY, logoIconsToLoad.length) }, () => loadNext())
       ).finally(() => {
         scheduleRefresh();
+        // Clear loading state when done
+        setTotalToLoad(0);
+        setLoadingProgress(0);
       });
     }
   }, [resources]);
@@ -1049,6 +1117,14 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       
       {/* User Tracking Markers */}
       <UserTrackingMarkers map={map.current} trackedUsers={trackedUsers} />
+      
+      {/* Loading Progress Indicator */}
+      {totalToLoad > 0 && loadingProgress < totalToLoad && (
+        <div className="absolute bottom-20 left-4 backdrop-blur-xl bg-slate-900/80 border border-white/20 px-4 py-2 rounded-xl text-xs text-white flex items-center gap-2 z-20">
+          <Loader2 className="w-3 h-3 animate-spin" />
+          <span>Loading markers: {loadingProgress}/{totalToLoad}</span>
+        </div>
+      )}
       
       {/* Single Toggle Button - works for both open and closed states */}
       {/* On mobile, hide when menu is open (use close button inside menu instead) */}
