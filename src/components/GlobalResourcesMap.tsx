@@ -46,8 +46,17 @@ import {
   Clock,
   Users2,
   Globe2,
-  Share2
+  Share2,
+  Satellite,
+  Map,
+  Layers
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { AddResourceDialog } from './AddResourceDialog';
 import { TrackingSessionDialog } from './TrackingSessionDialog';
 import { UserTrackingMarkers } from './UserTrackingMarkers';
@@ -59,6 +68,26 @@ import { useEventsForMap, MapEvent } from '@/hooks/useEventsForMap';
 import { format } from 'date-fns';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
+
+type MapStyleType = 'default' | 'satellite' | 'satelliteStreets';
+
+const MAP_STYLES: Record<MapStyleType, { url: string; label: string; icon: any }> = {
+  default: { 
+    url: 'mapbox://styles/imagineengine/cmhfkp1ie001d01qi2hyg82lp', 
+    label: 'Globe', 
+    icon: Globe2 
+  },
+  satellite: { 
+    url: 'mapbox://styles/mapbox/satellite-v9', 
+    label: 'Satellite', 
+    icon: Satellite 
+  },
+  satelliteStreets: { 
+    url: 'mapbox://styles/mapbox/satellite-streets-v12', 
+    label: 'Satellite + Streets', 
+    icon: Map 
+  },
+};
 
 const RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: string }> = {
   office: { icon: Building2, color: '#ef4444', label: 'Office' },
@@ -101,6 +130,7 @@ export const GlobalResourcesMap = () => {
   const [acceleratorLocation, setAcceleratorLocation] = useState<{lat: number; lng: number; name: string; logo?: string} | null>(null);
   const [isRotating, setIsRotating] = useState(false);
   const isRotatingRef = useRef(false);
+  const [mapStyle, setMapStyle] = useState<MapStyleType>('satelliteStreets');
   const [isPerksExpanded, setIsPerksExpanded] = useState(true);
   const [isOnlineResourcesExpanded, setIsOnlineResourcesExpanded] = useState(false);
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
@@ -475,7 +505,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
 
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
-      style: 'mapbox://styles/imagineengine/cmhfkp1ie001d01qi2hyg82lp',
+      style: MAP_STYLES.satelliteStreets.url,
       projection: { name: 'globe' },
       zoom: 2.5,
       center: [-122.4, 37.8],
@@ -590,6 +620,67 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   useEffect(() => {
     isRotatingRef.current = isRotating;
   }, [isRotating]);
+
+  // Handle map style change
+  const handleStyleChange = useCallback((style: MapStyleType) => {
+    if (!map.current) return;
+    setMapStyle(style);
+    map.current.setStyle(MAP_STYLES[style].url);
+    
+    // Re-apply fog and sources after style loads
+    map.current.once('style.load', () => {
+      if (!map.current) return;
+      
+      map.current.setFog({
+        color: '#0f172a',
+        'high-color': '#1e293b',
+        'horizon-blend': 0.02,
+        'space-color': '#020617',
+        'star-intensity': 0.15
+      });
+      
+      // Re-add GeoJSON source for resource markers
+      if (!map.current.getSource('resources')) {
+        map.current.addSource('resources', {
+          type: 'geojson',
+          data: {
+            type: 'FeatureCollection',
+            features: []
+          }
+        });
+        
+        map.current.addLayer({
+          id: 'resource-markers',
+          type: 'symbol',
+          source: 'resources',
+          layout: {
+            'icon-image': ['get', 'iconKey'],
+            'icon-size': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              0, 0.5,
+              5, 0.7,
+              10, 0.9,
+              15, 1.0
+            ],
+            'icon-anchor': 'center',
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true
+          }
+        });
+      }
+      
+      // Clear added image keys so they get re-added
+      addedImageKeys.current.clear();
+      loadingImageKeys.current.clear();
+    });
+    
+    toast({
+      title: "Map Style Changed",
+      description: `Switched to ${MAP_STYLES[style].label}`,
+    });
+  }, []);
 
   // User location marker
   useEffect(() => {
@@ -943,6 +1034,41 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         >
           {isRotating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
         </Button>
+
+        {/* Map Style Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              size="icon"
+              className="backdrop-blur-2xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-2xl hover:bg-white/20 dark:hover:bg-black/30 transition-all"
+              title="Change map style"
+            >
+              <Layers className="w-4 h-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="center" className="backdrop-blur-2xl bg-black/80 border border-white/20">
+            {(Object.keys(MAP_STYLES) as MapStyleType[]).map((styleKey) => {
+              const style = MAP_STYLES[styleKey];
+              const IconComponent = style.icon;
+              return (
+                <DropdownMenuItem
+                  key={styleKey}
+                  onClick={() => handleStyleChange(styleKey)}
+                  className={cn(
+                    "flex items-center gap-2 cursor-pointer",
+                    mapStyle === styleKey && "bg-white/10"
+                  )}
+                >
+                  <IconComponent className="w-4 h-4" />
+                  <span>{style.label}</span>
+                  {mapStyle === styleKey && (
+                    <Badge variant="secondary" className="ml-auto text-xs">Active</Badge>
+                  )}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         {/* My Location Button */}
         <Button
