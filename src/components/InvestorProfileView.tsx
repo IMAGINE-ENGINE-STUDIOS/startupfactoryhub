@@ -67,7 +67,38 @@ export default function InvestorProfileView() {
     fetchInvestorData();
   }, [profile?.user_id]);
 
+  // Real-time subscription for investor profile changes
+  useEffect(() => {
+    if (!profile?.user_id) return;
+    
+    const channel = supabase
+      .channel(`investor-profile-${profile.user_id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'investor_profiles',
+        filter: `user_id=eq.${profile.user_id}`
+      }, (payload) => {
+        if (payload.eventType !== 'DELETE') {
+          setInvestorProfile(payload.new);
+        }
+      })
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [profile?.user_id]);
+
   const startEditing = () => {
+    // Guard against editing before data loads
+    if (profileLoading || !profile) {
+      toast({ 
+        title: 'Please wait', 
+        description: 'Profile data is still loading...' 
+      });
+      return;
+    }
     if (profile) {
       setEditedFullName(profile.full_name || '');
       setEditedBio(profile.bio || '');
@@ -187,6 +218,10 @@ export default function InvestorProfileView() {
                 size="lg"
                 userRole="investor"
                 showGradientBorder
+                onUploadComplete={(url) => {
+                  // Real-time subscription will handle the update
+                  toast({ title: 'Avatar updated successfully' });
+                }}
               />
             ) : (
               <Avatar className="h-20 w-20">

@@ -67,6 +67,29 @@ export default function AdvisorProfileView() {
     };
     fetchMentorProfile();
   }, [profile?.user_id]);
+
+  // Real-time subscription for mentor profile changes
+  useEffect(() => {
+    if (!profile?.user_id) return;
+    
+    const channel = supabase
+      .channel(`mentor-profile-${profile.user_id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'mentor_profiles',
+        filter: `user_id=eq.${profile.user_id}`
+      }, (payload) => {
+        if (payload.eventType !== 'DELETE') {
+          setMentorProfile(payload.new);
+        }
+      })
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [profile?.user_id]);
   const updateMentorSettings = async (field: string, value: any) => {
     if (!profile?.user_id) return;
     setUpdatingSettings(true);
@@ -95,6 +118,14 @@ export default function AdvisorProfileView() {
     }
   };
   const startEditing = () => {
+    // Guard against editing before data loads
+    if (profileLoading || !profile) {
+      toast({ 
+        title: 'Please wait', 
+        description: 'Profile data is still loading...' 
+      });
+      return;
+    }
     if (profile) {
       setEditedFullName(profile.full_name || '');
       setEditedBio(profile.bio || '');
@@ -165,7 +196,7 @@ export default function AdvisorProfileView() {
       <Card className="tech-card border-0">
         <CardContent className="p-8">
           <div className="flex items-start space-x-6">
-            {isEditing ? <AvatarUpload currentAvatarUrl={profile?.avatar_url} size="lg" userRole="advisor" showGradientBorder /> : <Avatar className="h-20 w-20">
+            {isEditing ? <AvatarUpload currentAvatarUrl={profile?.avatar_url} size="lg" userRole="advisor" showGradientBorder onUploadComplete={(url) => { toast({ title: 'Avatar updated successfully' }); }} /> : <Avatar className="h-20 w-20">
                 <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name} />
                 <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
                   {profile?.full_name?.charAt(0) || 'A'}

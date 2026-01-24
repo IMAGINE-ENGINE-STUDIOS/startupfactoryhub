@@ -65,6 +65,29 @@ export default function StudentProfileView() {
     }
   }, [profile, studentProfile]);
 
+  // Real-time subscription for student profile changes
+  useEffect(() => {
+    if (!user?.id) return;
+    
+    const channel = supabase
+      .channel(`student-profile-${user.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'student_profiles',
+        filter: `user_id=eq.${user.id}`
+      }, (payload) => {
+        if (payload.eventType !== 'DELETE') {
+          setStudentProfile(payload.new);
+        }
+      })
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user?.id]);
+
   const fetchStudentData = async () => {
     if (!user) return;
 
@@ -189,6 +212,9 @@ export default function StudentProfileView() {
                 userRole="student"
                 size="lg"
                 showGradientBorder={true}
+                onUploadComplete={(url) => {
+                  toast({ title: 'Avatar updated successfully' });
+                }}
               />
               <div className="text-center sm:text-left space-y-2">
                 <h2 className="text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
