@@ -312,42 +312,16 @@ function drawTypeIcon(ctx: CanvasRenderingContext2D, type: string, size: number)
   ctx.restore();
 }
 
-// Global image cache to prevent re-fetching logos across filter changes
-const imageCache = new Map<string, HTMLImageElement>();
-
 function loadImage(src: string): Promise<HTMLImageElement> {
-  // Check cache first - avoids network request entirely
-  if (imageCache.has(src)) {
-    return Promise.resolve(imageCache.get(src)!);
-  }
-
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossOrigin = 'anonymous';
     // Hint to the browser that decoding can happen off the main thread
-    img.decoding = 'async';
-    img.onload = () => {
-      // Cache the loaded image for future use
-      imageCache.set(src, img);
-      resolve(img);
-    };
+    (img as any).decoding = 'async';
+    img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = src;
   });
-}
-
-/**
- * Clear the image cache. Useful for memory management in long sessions.
- */
-export function clearImageCache(): void {
-  imageCache.clear();
-}
-
-/**
- * Get the current size of the image cache.
- */
-export function getImageCacheSize(): number {
-  return imageCache.size;
 }
 
 /**
