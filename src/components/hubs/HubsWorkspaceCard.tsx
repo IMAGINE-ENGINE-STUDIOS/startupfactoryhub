@@ -57,39 +57,42 @@ export const HubsWorkspaceCard = ({
     return (
       <Card
         className={cn(
-          "cursor-pointer transition-all duration-200 hover:shadow-lg border-border/50",
-          "bg-card/50 backdrop-blur-sm",
-          isSelected && "ring-2 ring-primary border-primary"
+          "cursor-pointer transition-all duration-200 tech-card border-0",
+          "backdrop-blur-xl bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20",
+          isSelected && "ring-2 ring-primary bg-white/15 dark:bg-black/30"
         )}
         onClick={onSelect}
       >
         <CardContent className="p-3">
           <div className="flex items-start gap-3">
+            {/* Larger image for compact view */}
             {workspace.image_url ? (
               <img
                 src={workspace.image_url}
                 alt={workspace.name}
-                className="w-16 h-16 rounded-lg object-cover shrink-0"
+                className="w-20 h-20 rounded-xl object-cover shrink-0"
               />
             ) : (
-              <div className="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center shrink-0">
-                <Icon className="h-6 w-6 text-primary" />
+              <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center shrink-0">
+                <Icon className="h-8 w-8 text-primary" />
               </div>
             )}
             
             <div className="flex-1 min-w-0">
-              <h3 className="font-medium text-sm truncate">{workspace.name}</h3>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                <MapPin className="h-3 w-3" />
+              <h3 className="font-medium text-sm line-clamp-2">{workspace.name}</h3>
+              <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
+                <MapPin className="h-3 w-3 shrink-0" />
                 <span className="truncate">{workspace.city}, {workspace.country}</span>
               </div>
               
-              <div className="flex items-center gap-2 mt-2">
-                {workspace.hourly_rate_min && (
-                  <span className="text-xs font-medium text-primary">
-                    ${workspace.hourly_rate_min}/hr
-                  </span>
-                )}
+              <div className="flex items-center justify-between mt-2">
+                <div className="flex items-center gap-2">
+                  {workspace.hourly_rate_min && (
+                    <span className="text-sm font-bold text-primary">
+                      ${workspace.hourly_rate_min}/hr
+                    </span>
+                  )}
+                </div>
                 {workspace.rating && (
                   <div className="flex items-center gap-0.5 text-xs text-amber-500">
                     <Star className="h-3 w-3 fill-current" />
@@ -104,17 +107,18 @@ export const HubsWorkspaceCard = ({
     );
   }
 
+  // Full card view (for list mode)
   return (
     <Card
       className={cn(
-        "cursor-pointer transition-all duration-200 hover:shadow-xl overflow-hidden",
-        "bg-card/80 backdrop-blur-sm border-border/50 h-full flex flex-col",
-        isSelected && "ring-2 ring-primary border-primary"
+        "cursor-pointer transition-all duration-200 overflow-hidden h-full flex flex-col",
+        "tech-card border-0 backdrop-blur-xl bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20",
+        isSelected && "ring-2 ring-primary"
       )}
       onClick={onSelect}
     >
-      {/* Image */}
-      <div className="relative h-40 bg-gradient-to-br from-primary/20 to-purple-500/20">
+      {/* Image - Larger */}
+      <div className="relative h-48 bg-gradient-to-br from-primary/20 to-purple-500/20 flex-shrink-0">
         {workspace.image_url ? (
           <img
             src={workspace.image_url}
@@ -130,7 +134,7 @@ export const HubsWorkspaceCard = ({
         {/* Provider badge */}
         <Badge 
           variant="secondary" 
-          className="absolute top-2 right-2 text-xs bg-background/80 backdrop-blur-sm"
+          className="absolute top-3 right-3 text-xs backdrop-blur-xl bg-black/30 text-white border-0"
         >
           {workspace.provider === 'liquidspace' ? 'LiquidSpace' : 'SFH Network'}
         </Badge>
@@ -150,7 +154,11 @@ export const HubsWorkspaceCard = ({
             {workspace.workspace_types.slice(0, 3).map((type) => {
               const TypeIcon = getWorkspaceIcon(type);
               return (
-                <Badge key={type} variant="outline" className="text-xs gap-1">
+                <Badge 
+                  key={type} 
+                  variant="outline" 
+                  className="text-xs gap-1 backdrop-blur-xl bg-white/10 dark:bg-black/20 border-white/30"
+                >
                   <TypeIcon className="h-3 w-3" />
                   {getWorkspaceLabel(type)}
                 </Badge>
@@ -173,7 +181,7 @@ export const HubsWorkspaceCard = ({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/50">
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/20">
           <div>
             {workspace.hourly_rate_min ? (
               <div className="text-lg font-bold text-primary">

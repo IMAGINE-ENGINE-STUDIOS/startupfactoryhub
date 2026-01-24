@@ -3,11 +3,8 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Workspace } from '@/hooks/useHubsSearch';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent } from '@/components/ui/card';
-import { Locate, Loader2, MapPin, Star, Calendar, Building2, X } from 'lucide-react';
+import { Locate, Loader2, Pause, Play } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
@@ -28,7 +25,6 @@ export const HubsMapView = ({
   const map = useRef<mapboxgl.Map | null>(null);
   const markers = useRef<mapboxgl.Marker[]>([]);
   const userMarker = useRef<mapboxgl.Marker | null>(null);
-  const popupRef = useRef<mapboxgl.Popup | null>(null);
   
   const [isLocating, setIsLocating] = useState(false);
   const [isRotating, setIsRotating] = useState(true);
@@ -42,7 +38,7 @@ export const HubsMapView = ({
       container: mapContainer.current,
       style: 'mapbox://styles/imagineengine/cmhfkp1ie001d01qi2hyg82lp',
       projection: { name: 'globe' },
-      zoom: 2,
+      zoom: 2.5,
       center: [-40, 30],
       pitch: 45,
       antialias: true,
@@ -65,29 +61,27 @@ export const HubsMapView = ({
       });
     });
 
-    // Auto-rotate globe
+    // Globe rotation
     const rotateGlobe = () => {
       if (!map.current || !isRotatingRef.current) return;
       const center = map.current.getCenter();
-      center.lng -= 0.5;
-      map.current.easeTo({ center, duration: 1000, easing: (n) => n });
+      center.lng += 0.01;
+      map.current.setCenter(center);
+      requestAnimationFrame(rotateGlobe);
     };
+    rotateGlobe();
 
-    const interval = setInterval(rotateGlobe, 100);
-
-    // Stop rotation on interaction
+    // Stop rotation on user interaction
     map.current.on('mousedown', () => {
       isRotatingRef.current = false;
       setIsRotating(false);
     });
-
     map.current.on('touchstart', () => {
       isRotatingRef.current = false;
       setIsRotating(false);
     });
 
     return () => {
-      clearInterval(interval);
       map.current?.remove();
       map.current = null;
     };
@@ -104,9 +98,10 @@ export const HubsMapView = ({
     workspaces.forEach((workspace) => {
       if (!workspace.latitude || !workspace.longitude) return;
 
-      // Create marker element
+      // Create marker element with proper centering
       const el = document.createElement('div');
-      el.className = 'workspace-marker';
+      el.className = 'workspace-marker cursor-pointer';
+      el.style.pointerEvents = 'auto';
       el.innerHTML = `
         <div style="
           width: 36px;
@@ -117,9 +112,9 @@ export const HubsMapView = ({
           display: flex;
           align-items: center;
           justify-content: center;
-          cursor: pointer;
           box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-          transition: transform 0.2s, box-shadow 0.2s;
+          transition: transform 0.2s;
+          pointer-events: auto;
         ">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="4" y="2" width="16" height="20" rx="2" ry="2"></rect>
@@ -138,19 +133,29 @@ export const HubsMapView = ({
       `;
 
       el.addEventListener('mouseenter', () => {
-        el.style.transform = 'scale(1.1)';
+        el.style.transform = 'scale(1.2)';
+        el.style.zIndex = '100';
       });
       el.addEventListener('mouseleave', () => {
         el.style.transform = 'scale(1)';
+        el.style.zIndex = '1';
       });
 
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+      // Use anchor: 'center' to ensure marker is centered on coordinates
+      const marker = new mapboxgl.Marker({ 
+        element: el, 
+        anchor: 'center' 
+      })
         .setLngLat([workspace.longitude, workspace.latitude])
         .addTo(map.current!);
 
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         onWorkspaceSelect(workspace);
+        
+        // Stop rotation when selecting
+        isRotatingRef.current = false;
+        setIsRotating(false);
         
         map.current?.flyTo({
           center: [workspace.longitude, workspace.latitude],
@@ -201,7 +206,7 @@ export const HubsMapView = ({
           "></div>
         `;
 
-        userMarker.current = new mapboxgl.Marker({ element: el })
+        userMarker.current = new mapboxgl.Marker({ element: el, anchor: 'center' })
           .setLngLat([longitude, latitude])
           .addTo(map.current!);
 
@@ -232,100 +237,45 @@ export const HubsMapView = ({
     );
   }, []);
 
+  const toggleRotation = useCallback(() => {
+    isRotatingRef.current = !isRotatingRef.current;
+    setIsRotating(!isRotating);
+    if (isRotatingRef.current) {
+      const rotateGlobe = () => {
+        if (!map.current || !isRotatingRef.current) return;
+        const center = map.current.getCenter();
+        center.lng += 0.01;
+        map.current.setCenter(center);
+        requestAnimationFrame(rotateGlobe);
+      };
+      rotateGlobe();
+    }
+  }, [isRotating]);
+
   return (
-    <div className="relative h-full w-full">
+    <div className="absolute inset-0 z-0">
       <div ref={mapContainer} className="absolute inset-0" />
 
-      {/* Controls */}
-      <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
+      {/* Control Buttons - Below Mapbox Controls */}
+      <div className="absolute top-32 right-3 z-10 flex flex-col gap-2 pointer-events-auto">
         <Button
-          variant="secondary"
-          size="sm"
+          variant="ghost"
+          size="icon"
+          onClick={toggleRotation}
+          className="tech-card border-0 backdrop-blur-xl bg-white/10 dark:bg-black/20 rounded-xl hover:bg-white/20"
+        >
+          {isRotating ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+        </Button>
+        
+        <Button
+          variant="ghost"
+          size="icon"
           onClick={handleLocateUser}
           disabled={isLocating}
-          className="bg-background/80 backdrop-blur-sm shadow-lg"
+          className="tech-card border-0 backdrop-blur-xl bg-white/10 dark:bg-black/20 rounded-xl hover:bg-white/20"
         >
-          {isLocating ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Locate className="h-4 w-4" />
-          )}
-          <span className="ml-2">My Location</span>
+          {isLocating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Locate className="w-4 h-4" />}
         </Button>
-      </div>
-
-      {/* Selected Workspace Card */}
-      {selectedWorkspace && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-md z-10">
-          <Card className="bg-background/95 backdrop-blur-xl border-border/50 shadow-2xl">
-            <CardContent className="p-4">
-              <div className="flex items-start gap-4">
-                {selectedWorkspace.image_url ? (
-                  <img
-                    src={selectedWorkspace.image_url}
-                    alt={selectedWorkspace.name}
-                    className="w-20 h-20 rounded-lg object-cover shrink-0"
-                  />
-                ) : (
-                  <div className="w-20 h-20 rounded-lg bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center shrink-0">
-                    <Building2 className="h-8 w-8 text-primary" />
-                  </div>
-                )}
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <h3 className="font-semibold truncate">{selectedWorkspace.name}</h3>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
-                        <MapPin className="h-3 w-3" />
-                        {selectedWorkspace.city}, {selectedWorkspace.country}
-                      </div>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="shrink-0 h-8 w-8"
-                      onClick={() => onWorkspaceSelect(null as any)}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center gap-3">
-                      {selectedWorkspace.hourly_rate_min && (
-                        <span className="font-bold text-primary">
-                          ${selectedWorkspace.hourly_rate_min}/hr
-                        </span>
-                      )}
-                      {selectedWorkspace.rating && (
-                        <div className="flex items-center gap-1 text-amber-500">
-                          <Star className="h-4 w-4 fill-current" />
-                          {selectedWorkspace.rating.toFixed(1)}
-                        </div>
-                      )}
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={() => onWorkspaceBook(selectedWorkspace)}
-                      className="gap-1.5"
-                    >
-                      <Calendar className="h-4 w-4" />
-                      Book Now
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      )}
-
-      {/* Stats Overlay */}
-      <div className="absolute bottom-4 right-4 z-10">
-        <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm">
-          {workspaces.length} workspaces
-        </Badge>
       </div>
     </div>
   );

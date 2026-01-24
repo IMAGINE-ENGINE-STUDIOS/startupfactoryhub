@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { WorkspaceFilters, WorkspaceType, useWorkspaceLocations } from '@/hooks/useHubsSearch';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,7 +7,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { 
-  Search, 
   Building2, 
   Users, 
   DoorOpen, 
@@ -18,8 +16,7 @@ import {
   ParkingCircle,
   Printer,
   Phone,
-  X,
-  Filter
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -47,10 +44,6 @@ const AMENITIES = [
 export const HubsSearchFilters = ({ filters, onFiltersChange }: HubsSearchFiltersProps) => {
   const { data: locations } = useWorkspaceLocations();
   const [showAllAmenities, setShowAllAmenities] = useState(false);
-
-  const handleSearchChange = (search: string) => {
-    onFiltersChange({ ...filters, search });
-  };
 
   const handleCityChange = (city: string) => {
     onFiltersChange({ ...filters, city: city === 'all' ? undefined : city });
@@ -84,7 +77,6 @@ export const HubsSearchFilters = ({ filters, onFiltersChange }: HubsSearchFilter
   };
 
   const hasActiveFilters = 
-    filters.search || 
     filters.city || 
     (filters.workspaceType && filters.workspaceType.length > 0) ||
     (filters.amenities && filters.amenities.length > 0) ||
@@ -92,25 +84,14 @@ export const HubsSearchFilters = ({ filters, onFiltersChange }: HubsSearchFilter
 
   return (
     <div className="space-y-4">
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Search workspaces..."
-          value={filters.search || ''}
-          onChange={(e) => handleSearchChange(e.target.value)}
-          className="pl-9 bg-muted/50"
-        />
-      </div>
-
       {/* Location Selector */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground uppercase tracking-wide">Location</Label>
         <Select value={filters.city || 'all'} onValueChange={handleCityChange}>
-          <SelectTrigger className="bg-muted/50">
+          <SelectTrigger className="backdrop-blur-xl bg-white/10 dark:bg-black/20 border-white/30 rounded-xl">
             <SelectValue placeholder="All locations" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="tech-card border-0">
             <SelectItem value="all">All locations</SelectItem>
             {locations?.map((loc) => (
               <SelectItem key={`${loc.city}-${loc.country}`} value={loc.city || ''}>
@@ -128,10 +109,12 @@ export const HubsSearchFilters = ({ filters, onFiltersChange }: HubsSearchFilter
           {WORKSPACE_TYPES.map(({ value, label, icon: Icon }) => (
             <Badge
               key={value}
-              variant={filters.workspaceType?.includes(value) ? 'default' : 'outline'}
+              variant="outline"
               className={cn(
-                "cursor-pointer transition-all hover:scale-105",
-                filters.workspaceType?.includes(value) && "bg-primary"
+                "cursor-pointer transition-all hover:scale-105 backdrop-blur-xl",
+                filters.workspaceType?.includes(value) 
+                  ? "bg-primary/90 border-primary text-primary-foreground" 
+                  : "bg-white/10 dark:bg-black/20 border-white/30 hover:bg-white/20"
               )}
               onClick={() => handleWorkspaceTypeToggle(value)}
             >
@@ -150,10 +133,10 @@ export const HubsSearchFilters = ({ filters, onFiltersChange }: HubsSearchFilter
             <div
               key={value}
               className={cn(
-                "flex items-center gap-2 p-2 rounded-lg border cursor-pointer transition-colors",
+                "flex items-center gap-2 p-2 rounded-xl border cursor-pointer transition-colors backdrop-blur-xl",
                 filters.amenities?.includes(value)
-                  ? "border-primary bg-primary/10"
-                  : "border-border/50 hover:border-primary/50"
+                  ? "border-primary bg-primary/20"
+                  : "border-white/30 bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
               )}
               onClick={() => handleAmenityToggle(value)}
             >
@@ -162,7 +145,7 @@ export const HubsSearchFilters = ({ filters, onFiltersChange }: HubsSearchFilter
                 className="pointer-events-none"
               />
               <Icon className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm">{label}</span>
+              <span className="text-xs">{label}</span>
             </div>
           ))}
         </div>
@@ -170,7 +153,7 @@ export const HubsSearchFilters = ({ filters, onFiltersChange }: HubsSearchFilter
           <Button
             variant="ghost"
             size="sm"
-            className="w-full text-xs"
+            className="w-full text-xs hover:bg-white/10"
             onClick={() => setShowAllAmenities(!showAllAmenities)}
           >
             {showAllAmenities ? 'Show less' : `Show ${AMENITIES.length - 4} more`}
@@ -202,7 +185,7 @@ export const HubsSearchFilters = ({ filters, onFiltersChange }: HubsSearchFilter
           variant="outline"
           size="sm"
           onClick={clearFilters}
-          className="w-full gap-2"
+          className="w-full gap-2 backdrop-blur-xl bg-white/10 border-white/30 hover:bg-white/20 rounded-xl"
         >
           <X className="h-4 w-4" />
           Clear all filters

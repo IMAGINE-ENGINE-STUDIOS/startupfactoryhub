@@ -1,29 +1,44 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { HubsMapView } from '@/components/hubs/HubsMapView';
 import { HubsSearchFilters } from '@/components/hubs/HubsSearchFilters';
 import { HubsWorkspaceCard } from '@/components/hubs/HubsWorkspaceCard';
 import { HubsBookingModal } from '@/components/hubs/HubsBookingModal';
+import { HubsDetailPanel } from '@/components/hubs/HubsDetailPanel';
 import { HubsAIAssistant } from '@/components/hubs/HubsAIAssistant';
 import { useHubsSearch, WorkspaceFilters, Workspace } from '@/hooks/useHubsSearch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Map, List, Bot, X, Building2, ArrowLeft } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { 
+  Loader2, 
+  Building2, 
+  Menu, 
+  ChevronLeft, 
+  ChevronRight,
+  Search,
+  Bot,
+  X
+} from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn } from '@/lib/utils';
+import { toast } from '@/hooks/use-toast';
+import MatrixBackground from '@/components/MatrixBackground';
+import logo from '@/assets/logo.png';
 
 const Hubs = () => {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isMobile = useIsMobile();
   
-  const [viewMode, setViewMode] = useState<'map' | 'list'>('map');
   const [showFilters, setShowFilters] = useState(!isMobile);
   const [showAIAssistant, setShowAIAssistant] = useState(false);
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
   const [showBookingModal, setShowBookingModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   
   const [filters, setFilters] = useState<WorkspaceFilters>({
     workspaceType: [],
@@ -39,7 +54,27 @@ const Hubs = () => {
     }
   }, [user, authLoading, navigate]);
 
-  const handleWorkspaceSelect = (workspace: Workspace) => {
+  // Handle booking success from Stripe redirect
+  useEffect(() => {
+    const bookingStatus = searchParams.get('booking');
+    if (bookingStatus === 'success') {
+      toast({
+        title: "Booking Confirmed!",
+        description: "Check your email for booking details",
+      });
+      // Clean up URL
+      window.history.replaceState({}, '', '/hubs');
+    } else if (bookingStatus === 'cancelled') {
+      toast({
+        title: "Booking Cancelled",
+        description: "Your booking was not completed",
+        variant: "destructive",
+      });
+      window.history.replaceState({}, '', '/hubs');
+    }
+  }, [searchParams]);
+
+  const handleWorkspaceSelect = (workspace: Workspace | null) => {
     setSelectedWorkspace(workspace);
   };
 
@@ -50,6 +85,11 @@ const Hubs = () => {
 
   const handleAISearch = (searchFilters: Partial<WorkspaceFilters>) => {
     setFilters(prev => ({ ...prev, ...searchFilters }));
+  };
+
+  const handleSearchChange = (search: string) => {
+    setSearchQuery(search);
+    setFilters(prev => ({ ...prev, search }));
   };
 
   if (authLoading) {
@@ -63,155 +103,114 @@ const Hubs = () => {
   if (!user) return null;
 
   return (
-    <div className="relative h-screen w-full overflow-hidden bg-background">
-      {/* Header */}
-      <div className="absolute top-0 left-0 right-0 z-20 bg-background/80 backdrop-blur-xl border-b border-border/50">
-        <div className="flex items-center justify-between px-4 py-3">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => navigate(-1)}
-              className="shrink-0"
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <div className="flex items-center gap-2">
-              <Building2 className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-purple-500 bg-clip-text text-transparent">
-                Startup Hubs
-              </h1>
-            </div>
-            {workspaces && (
-              <Badge variant="secondary" className="ml-2">
-                {workspaces.length} spaces
-              </Badge>
+    <div className="relative h-screen w-screen overflow-hidden">
+      {/* Matrix Background */}
+      <MatrixBackground />
+      
+      {/* Map View - Full viewport */}
+      <HubsMapView
+        workspaces={workspaces || []}
+        selectedWorkspace={selectedWorkspace}
+        onWorkspaceSelect={handleWorkspaceSelect}
+        onWorkspaceBook={handleBookWorkspace}
+      />
+
+      {/* Header - Centered Title/Logo */}
+      <div className="absolute top-0 left-0 right-0 z-20 p-4 pointer-events-none">
+        <div className="flex items-center justify-center pointer-events-auto">
+          <div 
+            className="flex items-center space-x-3 cursor-pointer"
+            onClick={() => navigate('/dashboard')}
+          >
+            <img src={logo} alt="Startup Factory Hub" className="w-10 h-10" />
+            <span className="text-lg font-bold text-white drop-shadow-lg">
+              Startup Hubs
+            </span>
+          </div>
+        </div>
+        
+        {/* AI Assistant Button - Top Right */}
+        <div className="absolute top-4 right-4 pointer-events-auto">
+          <Button
+            variant="ghost"
+            onClick={() => setShowAIAssistant(!showAIAssistant)}
+            className={cn(
+              "tech-card border-0 backdrop-blur-xl bg-white/10 dark:bg-black/20 rounded-xl hover:bg-white/20",
+              showAIAssistant && "bg-primary/90 hover:bg-primary"
             )}
-          </div>
-          
-          <div className="flex items-center gap-2">
-            {/* View Toggle */}
-            <div className="flex items-center bg-muted rounded-lg p-1">
-              <Button
-                variant={viewMode === 'map' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('map')}
-                className="h-8 px-3"
-              >
-                <Map className="h-4 w-4 mr-1" />
-                Map
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                className="h-8 px-3"
-              >
-                <List className="h-4 w-4 mr-1" />
-                List
-              </Button>
-            </div>
-            
-            {/* AI Assistant Toggle */}
-            <Button
-              variant={showAIAssistant ? 'default' : 'outline'}
-              size="sm"
-              onClick={() => setShowAIAssistant(!showAIAssistant)}
-              className="gap-2"
-            >
-              <Bot className="h-4 w-4" />
-              {!isMobile && 'AI Assistant'}
-            </Button>
-          </div>
+          >
+            <Bot className="w-4 h-4 mr-2" />
+            AI Assistant
+          </Button>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="absolute inset-0 pt-16 flex">
-        {/* Left Panel - Filters & Results */}
-        <div
-          className={cn(
-            "h-full bg-background/95 backdrop-blur-xl border-r border-border/50 transition-all duration-300 z-10",
-            showFilters ? (isMobile ? "w-full absolute inset-0 pt-0" : "w-80") : "w-0 overflow-hidden"
-          )}
-        >
-          {showFilters && (
-            <div className="h-full flex flex-col">
-              {isMobile && (
-                <div className="flex items-center justify-between p-4 border-b border-border/50">
-                  <h2 className="font-semibold">Filters & Results</h2>
-                  <Button variant="ghost" size="icon" onClick={() => setShowFilters(false)}>
-                    <X className="h-5 w-5" />
-                  </Button>
-                </div>
-              )}
-              
-              {/* Filters */}
-              <div className="p-4 border-b border-border/50">
-                <HubsSearchFilters
-                  filters={filters}
-                  onFiltersChange={setFilters}
-                />
-              </div>
-              
-              {/* Results List */}
-              <ScrollArea className="flex-1">
-                <div className="p-4 space-y-3">
-                  {isLoading ? (
-                    <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                    </div>
-                  ) : workspaces && workspaces.length > 0 ? (
-                    workspaces.map((workspace) => (
-                      <HubsWorkspaceCard
-                        key={workspace.id}
-                        workspace={workspace}
-                        isSelected={selectedWorkspace?.id === workspace.id}
-                        onSelect={() => handleWorkspaceSelect(workspace)}
-                        onBook={() => handleBookWorkspace(workspace)}
-                        compact
-                      />
-                    ))
-                  ) : (
-                    <div className="text-center py-12 text-muted-foreground">
-                      <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                      <p>No workspaces found</p>
-                      <p className="text-sm">Try adjusting your filters</p>
-                    </div>
-                  )}
-                </div>
-              </ScrollArea>
-            </div>
-          )}
-        </div>
-
-        {/* Toggle Filters Button (when collapsed) */}
-        {!showFilters && !isMobile && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowFilters(true)}
-            className="absolute left-4 top-20 z-10"
-          >
-            Show Filters
-          </Button>
+      {/* Left Panel Toggle Button */}
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => setShowFilters(!showFilters)}
+        className={cn(
+          "absolute top-20 z-20 tech-card border-0 backdrop-blur-xl bg-white/10 dark:bg-black/20 rounded-xl hover:bg-white/20 pointer-events-auto",
+          showFilters ? "left-[340px]" : "left-4"
         )}
+      >
+        {showFilters ? <ChevronLeft className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+      </Button>
 
-        {/* Map / List View */}
-        <div className="flex-1 relative">
-          {viewMode === 'map' ? (
-            <HubsMapView
-              workspaces={workspaces || []}
-              selectedWorkspace={selectedWorkspace}
-              onWorkspaceSelect={handleWorkspaceSelect}
-              onWorkspaceBook={handleBookWorkspace}
+      {/* Left Panel - Sliding Glassmorphism Panel */}
+      <div className={cn(
+        "absolute top-16 bottom-4 left-0 z-10 transition-all duration-300 pointer-events-auto",
+        showFilters ? "translate-x-0" : "-translate-x-full",
+        "w-80"
+      )}>
+        <div className="h-full flex flex-col tech-card border-0 !transition-none backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-r-3xl overflow-hidden ml-4">
+          {/* Header */}
+          <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
+            <h2 className="font-semibold text-lg flex items-center gap-2">
+              <Building2 className="w-5 h-5 text-primary" />
+              Workspaces
+            </h2>
+            <p className="text-xs text-muted-foreground mt-1">
+              Find and book professional workspaces
+            </p>
+          </div>
+
+          {/* Search */}
+          <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="Search workspaces..."
+                value={searchQuery}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="pl-10 bg-white/10 dark:bg-black/20 backdrop-blur-xl border-white/30 dark:border-white/20 focus:bg-white/20 dark:focus:bg-black/30 rounded-2xl"
+              />
+            </div>
+          </div>
+
+          {/* Filters */}
+          <div className="p-4 border-b border-white/30 dark:border-white/20 backdrop-blur flex-shrink-0">
+            <HubsSearchFilters
+              filters={filters}
+              onFiltersChange={setFilters}
             />
-          ) : (
-            <ScrollArea className="h-full">
-              <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          </div>
+          
+          {/* Results List */}
+          <div className="flex-1 flex flex-col overflow-hidden backdrop-blur">
+            <div className="p-4 pb-2 flex items-center justify-between flex-shrink-0">
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Results</h3>
+              <Badge variant="outline" className="text-xs bg-primary/20 border-primary/50 text-primary">
+                {workspaces?.length || 0} spaces
+              </Badge>
+            </div>
+            
+            <ScrollArea className="flex-1 overflow-hidden">
+              <div className="p-4 pt-2 space-y-3">
                 {isLoading ? (
-                  <div className="col-span-full flex items-center justify-center py-12">
-                    <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                  <div className="flex items-center justify-center py-12">
+                    <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
                   </div>
                 ) : workspaces && workspaces.length > 0 ? (
                   workspaces.map((workspace) => (
@@ -221,48 +220,56 @@ const Hubs = () => {
                       isSelected={selectedWorkspace?.id === workspace.id}
                       onSelect={() => handleWorkspaceSelect(workspace)}
                       onBook={() => handleBookWorkspace(workspace)}
+                      compact
                     />
                   ))
                 ) : (
-                  <div className="col-span-full text-center py-12 text-muted-foreground">
-                    <Building2 className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                    <p className="text-lg">No workspaces found</p>
-                    <p className="text-sm">Try adjusting your filters or search in a different location</p>
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Building2 className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p>No workspaces found</p>
+                    <p className="text-sm">Try adjusting your filters</p>
                   </div>
                 )}
               </div>
             </ScrollArea>
-          )}
+          </div>
         </div>
+      </div>
 
-        {/* AI Assistant Panel */}
-        {showAIAssistant && (
-          <div
-            className={cn(
-              "h-full bg-background/95 backdrop-blur-xl border-l border-border/50 transition-all duration-300",
-              isMobile ? "w-full absolute inset-0 pt-0 z-20" : "w-96"
-            )}
-          >
+      {/* Right Detail Panel - Slides in when workspace selected */}
+      <HubsDetailPanel
+        workspace={selectedWorkspace}
+        onClose={() => setSelectedWorkspace(null)}
+        onBook={handleBookWorkspace}
+      />
+
+      {/* AI Assistant Panel - Right Side */}
+      {showAIAssistant && (
+        <div className={cn(
+          "absolute top-16 bottom-4 right-4 z-10 transition-all duration-300 pointer-events-auto",
+          selectedWorkspace ? "right-[360px]" : "right-4",
+          "w-80"
+        )}>
+          <div className="h-full tech-card border-0 !transition-none backdrop-blur-3xl bg-white/10 dark:bg-black/20 rounded-3xl overflow-hidden">
             <HubsAIAssistant
               onClose={() => setShowAIAssistant(false)}
               onSearch={handleAISearch}
               workspaces={workspaces || []}
             />
           </div>
-        )}
-      </div>
-
-      {/* Mobile Filter Toggle */}
-      {isMobile && !showFilters && viewMode === 'map' && (
-        <Button
-          variant="default"
-          size="sm"
-          onClick={() => setShowFilters(true)}
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 shadow-lg"
-        >
-          Show Filters & Results
-        </Button>
+        </div>
       )}
+
+      {/* Workspaces Count Badge - Bottom Right */}
+      <div className="absolute bottom-4 right-4 z-10 pointer-events-auto">
+        <Badge 
+          variant="outline" 
+          className="tech-card border-0 backdrop-blur-xl bg-white/10 dark:bg-black/20 px-3 py-1.5 text-sm"
+        >
+          <Building2 className="w-4 h-4 mr-2" />
+          {workspaces?.length || 0} workspaces
+        </Badge>
+      </div>
 
       {/* Booking Modal */}
       <HubsBookingModal
