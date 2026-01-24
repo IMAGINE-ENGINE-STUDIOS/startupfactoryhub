@@ -1,186 +1,248 @@
 
-# Redesign /hubs to Match Resources Tab Design + Fix Icons & Stripe Integration
+# Redesign Hubs Page to Match GlobalResourcesMap Exactly
 
-## Summary
-Completely redesign the `/hubs` page to mirror the Resources tab's glassmorphism design system, fix map marker centering, enlarge workspace images, and integrate Stripe payments for booking.
+## Goal
+Rebuild `/hubs` to be an **exact replica** of the Resources tab (`GlobalResourcesMap.tsx`), ensuring seamless future integration. When users click "venue", "office", or "coworking" in the Resources tab categories, the workspace marketplace will appear fluently within the same interface.
 
 ---
 
-## 1. UI Redesign to Match GlobalResourcesMap
+## Current State Analysis
 
-### Layout Changes
-- **Full-viewport 3D globe** (no header bar at top - clean globe view)
-- **Left sliding panel** with glassmorphism styling (`backdrop-blur-3xl bg-white/10 dark:bg-black/20 border border-white/30 rounded-3xl`)
-- **Right detail panel** that slides in when a workspace is selected (same glassmorphism styling)
-- **Menu toggle button** with tech-card styling positioned at `top-4 left-4`
-- **Map controls** (rotation toggle, my location) positioned at `top-32 right-3` below Mapbox nav controls
+### GlobalResourcesMap Structure:
+1. **Full-viewport 3D globe** with custom Mapbox styling
+2. **Left sliding panel** with:
+   - Header: "Resources Map" with MapPin icon
+   - Search input with address autocomplete (Mapbox Geocoding)
+   - **Categories list** (scrollable buttons for each ResourceType)
+   - **Journey Stage filter** section
+   - "Add Resource" button at bottom
+3. **Right sliding panel** for selected resource/event details
+4. **Control buttons** positioned at `top-4 left-1/2 -translate-x-1/2` (desktop) or `bottom-52 right-4` (mobile):
+   - Rotation toggle (Pause/Play)
+   - My Location (Locate)
+   - Tracking Session (Radio)
+   - Accelerator HQ (Home) - conditional
+5. **Bottom collapsible sections**:
+   - Online Resources (bottom-36)
+   - Perks (bottom-20)
+6. **Menu toggle button** that moves with panel: `left-[348px]` when open, `left-4` when closed
 
-### Glassmorphism Styling
-Apply consistent tech-card styling across all UI elements:
-```css
-backdrop-blur-3xl bg-white/10 dark:bg-black/20 
-border border-white/30 dark:border-white/20 
-shadow-[0_8px_32px_0_rgba(0,0,0,0.37)] 
-rounded-3xl
+### Current Hubs Page Differences:
+- Different header layout (centered logo instead of in-panel)
+- Different left panel structure (Workspaces title, filters inline)
+- Separate AI Assistant panel (not in Resources)
+- Different control button positioning
+- Missing Categories-style navigation
+- Missing perks/online resources sections
+
+---
+
+## Implementation Plan
+
+### Phase 1: Restructure Hubs.tsx Layout
+
+Replace the current layout with the exact GlobalResourcesMap structure:
+
+```tsx
+// Layout structure to match GlobalResourcesMap exactly:
+<div className="relative w-full h-full bg-background overflow-hidden rounded-2xl">
+  {/* Full Viewport Map */}
+  <div ref={mapContainer} className="absolute inset-0 w-full h-full rounded-2xl" />
+  
+  {/* Control Buttons - matching GlobalResourcesMap positioning */}
+  {/* Menu Toggle Button - moves with panel */}
+  {/* Left Side Sliding Panel - identical structure */}
+  {/* Right Side Panel - Resource/Workspace Details */}
+</div>
 ```
+
+### Phase 2: Left Panel - Exact Category Match
+
+The left panel must have:
+
+1. **Header**: "Workspaces" with Building2 icon (matches "Resources Map" with MapPin)
+2. **Search**: Address autocomplete using Mapbox Geocoding API (same implementation)
+3. **Categories Section**:
+   - "All Workspaces" button (like "All Resources")
+   - Category buttons for each workspace type:
+     - Hot Desk (Users icon, teal color)
+     - Private Office (DoorOpen icon, blue color)  
+     - Meeting Room (Presentation icon, purple color)
+     - Coworking (Building2 icon, emerald color)
+     - Event Space (CalendarDays icon, rose color)
+   - Each button with left border highlight when selected
+4. **Amenities Filter** section (new, below categories)
+5. **Budget Slider** (collapsible)
+
+### Phase 3: Control Buttons - Exact Positioning
+
+Move controls to match GlobalResourcesMap:
+- **Desktop**: `top-4 left-1/2 -translate-x-1/2` (center-top)
+- **Mobile**: `bottom-52 right-4 flex-col`
+
+Buttons included:
+- Rotation toggle (Pause/Play)
+- My Location (Locate)
+- Tracking session could be optional for Hubs
+
+### Phase 4: Menu Toggle Button
+
+Exact positioning:
+```tsx
+<Button
+  className={cn(
+    "absolute top-4 z-20 backdrop-blur-2xl bg-white/10...",
+    isMobile ? "left-4" : (isLeftPanelOpen ? "left-[348px]" : "left-4")
+  )}
+>
+  {isLeftPanelOpen && !isMobile ? <X /> : <Menu />}
+</Button>
+```
+
+### Phase 5: Right Detail Panel - Match Resource Panel
+
+Current HubsDetailPanel needs adjustments:
+- Position: `right-2 top-2 bottom-2 w-96` (not `right-4 top-16 bottom-4 w-80`)
+- Transition: Same slide animation
+- Structure:
+  - Header with title and close button
+  - Image (h-32) or gradient fallback
+  - ScrollArea content
+  - Action buttons (Book Now, Get Directions, Visit Website, Bookmark, Share)
+
+### Phase 6: Map Markers - Match Resource Markers
+
+Update HubsMapView to use identical marker styling:
+- Same size (36px standard, 44px for featured)
+- Same gradient colors based on workspace type
+- Same hover effects and animations
+- Use `anchor: 'center'` (already done)
+
+### Phase 7: Future Integration Point
+
+The redesigned Hubs page will integrate with GlobalResourcesMap when users select:
+- `venue` → Show venues + workspaces
+- `office` → Show offices + private offices
+- `coworking` → Show coworking spaces
+
+This is achieved by:
+1. Making the Hubs components reusable
+2. Using the same data structure patterns
+3. Matching visual styling exactly
+
+---
+
+## Technical Implementation Details
 
 ### Files to Modify
-- `src/pages/Hubs.tsx` - Complete layout overhaul
-- `src/components/hubs/HubsMapView.tsx` - Fix markers, add controls matching Resources
-
----
-
-## 2. Fix Map Marker Centering
-
-### Current Issue
-Markers use custom HTML elements but may not be perfectly centered on coordinates.
-
-### Solution
-Update marker creation in `HubsMapView.tsx`:
-```typescript
-const marker = new mapboxgl.Marker({ 
-  element: el, 
-  anchor: 'center'  // Ensure center anchor
-})
-  .setLngLat([workspace.longitude, workspace.latitude])
-  .addTo(map.current!);
-```
-
-Also improve marker styling to match Resources globe markers:
-- Proper circular shape with gradient
-- Hover effects with scale transform
-- Building icon centered within marker
-
----
-
-## 3. Larger Workspace Images
-
-### Detail Panel Images
-Increase image size in the right detail panel:
-- Current: `w-20 h-20` (80px)
-- New: Full-width header image `w-full h-40` (like Resources panel uses `h-32`)
-
-### Workspace Cards
-Increase card image prominence:
-- Current compact: `w-16 h-16`
-- New compact: `w-20 h-20`
-- Detail view: Full-width `h-48` header image
-
-### Files to Modify
-- `src/components/hubs/HubsWorkspaceCard.tsx` - Larger images
-- New `HubsWorkspaceDetailPanel.tsx` - Right slide-in panel with large header image
-
----
-
-## 4. Stripe Payment Integration
-
-### Current State
-- Edge function `hub-book-workspace` already handles Stripe checkout
-- Frontend `HubsBookingModal` doesn't call the edge function
-
-### Required Changes
-
-#### A. Update `HubsBookingModal.tsx`
-Replace direct database insert with Stripe checkout flow:
-```typescript
-const handleSubmit = async () => {
-  const { data, error } = await supabase.functions.invoke('hub-book-workspace', {
-    body: {
-      workspaceId: workspace.id,
-      workspaceName: workspace.name,
-      date: format(selectedDate, 'yyyy-MM-dd'),
-      startTime: selectedTime,
-      endTime: calculateEndTime(),
-      pricePerHour: workspace.hourly_rate_min || 25,
-      notes
-    }
-  });
-
-  if (data?.url) {
-    window.open(data.url, '_blank'); // Opens Stripe Checkout
-  }
-};
-```
-
-#### B. Handle Success Callback
-Add query param detection in `Hubs.tsx` to show success message when returning from Stripe:
-```typescript
-const [searchParams] = useSearchParams();
-const bookingStatus = searchParams.get('booking');
-
-useEffect(() => {
-  if (bookingStatus === 'success') {
-    toast({ title: "Booking Confirmed!", description: "Check your email for details" });
-  }
-}, [bookingStatus]);
-```
-
----
-
-## 5. Component Structure
-
-### New/Modified Files
 
 | File | Changes |
 |------|---------|
-| `src/pages/Hubs.tsx` | Complete redesign - remove header, add sliding panels |
-| `src/components/hubs/HubsMapView.tsx` | Fix marker centering, add rotation/location controls |
-| `src/components/hubs/HubsWorkspaceCard.tsx` | Larger images, glassmorphism styling |
-| `src/components/hubs/HubsBookingModal.tsx` | Stripe checkout integration |
-| `src/components/hubs/HubsDetailPanel.tsx` | NEW - Right slide-in panel for workspace details |
-| `src/components/hubs/HubsSearchFilters.tsx` | Glassmorphism styling update |
+| `src/pages/Hubs.tsx` | Complete restructure to match GlobalResourcesMap layout |
+| `src/components/hubs/HubsMapView.tsx` | Match control positions, marker styling, globe config |
+| `src/components/hubs/HubsDetailPanel.tsx` | Match right panel structure from GlobalResourcesMap |
+| `src/components/hubs/HubsSearchFilters.tsx` | Convert to category buttons (like RESOURCE_CONFIG) |
 
----
+### Left Panel Structure (Exact Match)
 
-## 6. Technical Details
+```tsx
+// Header
+<div className="p-4 border-b border-white/30 backdrop-blur flex items-center justify-between">
+  <h2 className="text-lg font-semibold flex items-center gap-2">
+    <Building2 className="w-5 h-5" />
+    Workspaces
+  </h2>
+  {isMobile && <Button onClick={close}><X /></Button>}
+</div>
 
-### Map Controls Positioning
-```typescript
-// Rotation toggle and My Location buttons
-<div className="absolute top-32 right-3 z-10 flex flex-col gap-2">
-  <Button 
-    size="icon"
-    onClick={toggleRotation}
-    className="backdrop-blur-2xl bg-white/10 border border-white/30 rounded-2xl"
-  >
+// Search with Mapbox autocomplete
+<div className="p-4 border-b border-white/30 backdrop-blur">
+  <Input placeholder="Search workspaces or addresses..." />
+  {/* Address suggestions dropdown */}
+</div>
+
+// Categories (scrollable)
+<ScrollArea className="flex-1">
+  <div className="p-4">
+    <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase">Categories</h3>
+    <div className="space-y-1">
+      <Button variant={selected === null ? 'default' : 'ghost'}>
+        All Workspaces
+      </Button>
+      {WORKSPACE_TYPES.map(type => (
+        <Button
+          key={type.value}
+          className={cn(
+            "w-full justify-start gap-2 rounded-xl",
+            isSelected && "border-l-4"
+          )}
+          style={isSelected ? { borderLeftColor: type.color } : {}}
+        >
+          <type.icon className="w-4 h-4" />
+          {type.label}
+        </Button>
+      ))}
+    </div>
+  </div>
+</ScrollArea>
+```
+
+### Workspace Types Config (Like RESOURCE_CONFIG)
+
+```tsx
+const WORKSPACE_CONFIG = {
+  hot_desk: { icon: Users, color: '#14b8a6', label: 'Hot Desk' },
+  private_office: { icon: DoorOpen, color: '#3b82f6', label: 'Private Office' },
+  meeting_room: { icon: Presentation, color: '#8b5cf6', label: 'Meeting Room' },
+  coworking: { icon: Building2, color: '#10b981', label: 'Coworking' },
+  event_space: { icon: CalendarDays, color: '#f43f5e', label: 'Event Space' },
+};
+```
+
+### Control Buttons Positioning
+
+```tsx
+// Match GlobalResourcesMap exactly
+<div className={cn(
+  "absolute z-20 flex gap-2",
+  isMobile 
+    ? "bottom-52 right-4 flex-col" 
+    : "top-4 left-1/2 -translate-x-1/2"
+)}>
+  <Button onClick={toggleRotation}>
     {isRotating ? <Pause /> : <Play />}
   </Button>
-  <Button 
-    size="icon"
-    onClick={handleLocateUser}
-    className="backdrop-blur-2xl bg-white/10 border border-white/30 rounded-2xl"
-  >
-    <Locate />
+  <Button onClick={locateUser}>
+    {isLocating ? <Loader2 className="animate-spin" /> : <Locate />}
   </Button>
 </div>
 ```
 
-### Left Panel Structure
-- Header with title and close button
-- Search input with address autocomplete
-- Workspace type filters (All, Hot Desk, Private Office, Meeting Room, Coworking)
-- Amenity filters
-- Price range slider
+### Right Panel Positioning
 
-### Right Detail Panel
-- Slides in from right when workspace selected
-- Full-width header image (h-40)
-- Workspace name and location
-- Workspace types badges
-- Amenities list
-- Rating and pricing
-- "Book Now" button that triggers Stripe checkout
-- Close button (X) in header
+```tsx
+// Match GlobalResourcesMap right panel
+<div className={cn(
+  "absolute right-2 top-2 bottom-2 w-96 z-10 transition-all duration-300",
+  selectedWorkspace 
+    ? "translate-x-0 opacity-100" 
+    : "translate-x-full opacity-0 pointer-events-none"
+)}>
+```
 
 ---
 
-## 7. Implementation Order
+## Stripe Integration (Preserved)
 
-1. **HubsMapView.tsx** - Fix marker centering and add proper controls
-2. **Hubs.tsx** - Restructure layout to match Resources (remove header, add sliding panels)
-3. **HubsDetailPanel.tsx** - Create new right panel component with large images
-4. **HubsWorkspaceCard.tsx** - Update to glassmorphism styling
-5. **HubsBookingModal.tsx** - Integrate Stripe checkout
-6. **HubsSearchFilters.tsx** - Apply glassmorphism styling
+The booking flow remains intact:
+1. User clicks "Book Now" in detail panel
+2. `HubsBookingModal` opens with date/time selection
+3. On submit → calls `hub-book-workspace` Edge Function
+4. Edge Function creates Stripe Checkout Session
+5. User redirected to Stripe, then back to `/hubs?booking=success`
 
-This will result in a `/hubs` page that matches the premium look and feel of the Resources tab while enabling real Stripe payments for workspace bookings.
+---
+
+## Summary
+
+This plan ensures `/hubs` becomes an **exact visual and structural replica** of the Resources tab (`GlobalResourcesMap`), enabling seamless future integration. When users click venue/office/coworking categories in Resources, the workspace data will display using the same interface patterns.
