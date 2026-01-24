@@ -1,298 +1,174 @@
 
 
-# Enhance Booking Modal with Image Carousel & Video Support
+# Advanced GIS Test Environment
 
-## Summary
-Add the same image carousel functionality from `HubsDetailPanel` to `HubsBookingModal`, along with support for workspace tour videos. This gives users a rich media experience before confirming their booking.
+## Overview
+Create a sandboxed test page at `/hubs-lab` with a dedicated map component to safely develop and test advanced GIS features (satellite imagery, 3D models, external tracking APIs) without affecting the production `/hubs` page.
 
 ---
 
-## Changes Required
+## Implementation Approach
 
-### 1. Update Workspace Interface for Video Support
+The test environment will be a complete copy of the current Hubs infrastructure with the new GIS capabilities added. Once features are tested and approved, they can be merged into the original components.
 
-**File: `src/hooks/useHubsSearch.ts`**
+---
 
-Add `videos` array to the Workspace interface:
+## Files to Create
+
+### 1. Test Page: `src/pages/HubsLab.tsx`
+A copy of the current `Hubs.tsx` that uses the experimental map component instead:
+- Same layout and functionality as `/hubs`
+- Uses `HubsMapViewLab` instead of `HubsMapView`
+- Includes the GIS Control Panel for layer management
+- Accessible at route `/hubs-lab`
+
+### 2. Experimental Map: `src/components/hubs/HubsMapViewLab.tsx`
+Enhanced version of `HubsMapView.tsx` with new GIS capabilities:
+- **Satellite Layer Toggle** - Switch between default globe and satellite imagery
+- **3D Model Support** - glTF model loading with custom layer interface
+- **External Tracking Markers** - Real-time entity display from external APIs
+- **GIS Layer Management** - Add/remove custom GeoJSON data layers
+- All existing functionality preserved (rotation, markers, user location)
+
+### 3. GIS Control Panel: `src/components/hubs/GISControlPanel.tsx`
+UI component for managing advanced GIS features:
+- Base map style selector (Default / Satellite / Satellite Streets)
+- Data layers toggle panel (for future GeoJSON sources)
+- Live tracking provider toggles (placeholder for API integrations)
+- Collapsible panel design matching existing glassmorphism style
+
+### 4. GIS Layers Hook: `src/hooks/useGISLayers.ts`
+React hook for managing custom map layers:
+- `addLayer()` - Add GeoJSON/vector sources with custom styling
+- `removeLayer()` - Remove layers by ID
+- `toggleLayerVisibility()` - Show/hide layers
+- `updateLayerData()` - Update GeoJSON data in real-time
+
+### 5. External Tracking Hook: `src/hooks/useExternalTracking.ts`
+React hook for real-time entity tracking:
+- `TrackingProvider` interface for API configuration
+- Polling mechanism with configurable intervals
+- Entity normalization to standard format
+- Enable/disable individual providers
+
+### 6. Tracking Markers Component: `src/components/hubs/ExternalTrackingMarkers.tsx`
+Renders tracked entities on the map:
+- Animated markers with smooth position transitions
+- Entity-type-specific icons (vehicle, delivery, drone, asset)
+- Click handlers for entity details
+- Automatic cleanup of stale markers
+
+### 7. Route Registration in `src/App.tsx`
+Add lazy-loaded route for the test page:
 ```typescript
-export interface Workspace {
-  // ... existing fields
-  images?: string[];
-  videos?: string[];  // NEW: Array of workspace video URLs
-  // ...
-}
+const HubsLab = lazy(() => import("./pages/HubsLab"));
+// ...
+<Route path="/hubs-lab" element={<HubsLab />} />
 ```
 
-### 2. Update Mock Data with Videos
+---
 
-**File: `supabase/functions/hub-search-workspaces/index.ts`**
+## New GIS Features in Test Environment
 
-Add video URLs (using stock office tour videos from Pexels/Coverr):
+| Feature | Implementation |
+|---------|----------------|
+| **Satellite Imagery** | `map.setStyle()` toggle between 3 Mapbox styles |
+| **Custom Data Layers** | `map.addSource()` + `map.addLayer()` for GeoJSON |
+| **3D Models (glTF)** | Native Mapbox `model` layer type |
+| **3D Models (FBX)** | Three.js `CustomLayerInterface` bridge |
+| **Real-time Tracking** | Polling hook + animated marker updates |
+| **Heatmaps** | Mapbox `heatmap` layer type |
+| **Building Extrusions** | `fill-extrusion` layer for 3D buildings |
+
+---
+
+## Map Styles Available
+
 ```typescript
-{
-  id: "ws-sf-wework-1",
-  // ... existing fields
-  images: [...],
-  videos: [
-    "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4"
-  ],
-}
+const MAP_STYLES = {
+  default: 'mapbox://styles/imagineengine/cmhfkp1ie001d01qi2hyg82lp',
+  satellite: 'mapbox://styles/mapbox/satellite-v9',
+  satelliteStreets: 'mapbox://styles/mapbox/satellite-streets-v12',
+};
 ```
 
-### 3. Enhance Booking Modal with Carousel
+---
 
-**File: `src/components/hubs/HubsBookingModal.tsx`**
+## Testing Workflow
 
-#### A. Make Modal Wider for Better Media Display
-Change from `sm:max-w-lg` to `sm:max-w-2xl`:
-```tsx
-<DialogContent className="sm:max-w-2xl tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20">
+1. Navigate to `/hubs-lab` (requires authentication)
+2. Use GIS Control Panel to toggle features:
+   - Switch between map styles (globe/satellite)
+   - Enable/disable tracking providers
+   - Toggle data layers
+3. Test marker interactions and layer rendering
+4. Verify performance with multiple layers active
+5. Once approved, merge changes into production `/hubs`
+
+---
+
+## Technical Details
+
+### Satellite Layer Toggle
+```typescript
+const [mapStyle, setMapStyle] = useState<'default' | 'satellite' | 'satelliteStreets'>('default');
+
+const handleStyleChange = (style: keyof typeof MAP_STYLES) => {
+  setMapStyle(style);
+  map.current?.setStyle(MAP_STYLES[style]);
+  // Re-add markers after style change
+};
 ```
 
-#### B. Add Carousel Imports & State
-```tsx
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious,
-  type CarouselApi 
-} from '@/components/ui/carousel';
-import { useMemo, useEffect } from 'react';
-import { Play, Image as ImageIcon } from 'lucide-react';
-
-// State for carousel
-const [carouselApi, setCarouselApi] = useState<CarouselApi>();
-const [currentSlide, setCurrentSlide] = useState(0);
-const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
-
-// Combine all media
-const allImages = useMemo(() => {
-  const imgs: string[] = [];
-  if (workspace?.images?.length) {
-    imgs.push(...workspace.images);
-  } else if (workspace?.image_url) {
-    imgs.push(workspace.image_url);
+### 3D Model Loading (glTF)
+```typescript
+map.addSource('3d-model', {
+  type: 'model',
+  models: {
+    'building-model': {
+      uri: '/models/building.glb',
+      position: [-80, 20],
+      orientation: [0, 0, 0]
+    }
   }
-  return imgs;
-}, [workspace]);
+});
 
-const allVideos = useMemo(() => workspace?.videos || [], [workspace]);
+map.addLayer({
+  id: '3d-model-layer',
+  type: 'model',
+  source: '3d-model',
+  layout: { 'model-id': 'building-model' },
+  paint: { 'model-opacity': 1 }
+});
 ```
 
-#### C. Replace Static Image with Media Carousel
-Replace the current 20x20 image with a larger carousel section:
-```tsx
-{/* Media Carousel Section */}
-<div className="relative h-48 rounded-2xl overflow-hidden border border-white/30">
-  {mediaType === 'image' && allImages.length > 0 ? (
-    <Carousel 
-      className="w-full h-full" 
-      setApi={setCarouselApi}
-      opts={{ loop: true }}
-    >
-      <CarouselContent className="-ml-0">
-        {allImages.map((imageUrl, index) => (
-          <CarouselItem key={index} className="pl-0">
-            <img
-              src={imageUrl}
-              alt={`${workspace.name} - Image ${index + 1}`}
-              className="w-full h-48 object-cover"
-            />
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-      
-      {allImages.length > 1 && (
-        <>
-          <CarouselPrevious className="left-3 h-8 w-8 backdrop-blur-xl bg-black/30 border-0 text-white hover:bg-black/50" />
-          <CarouselNext className="right-3 h-8 w-8 backdrop-blur-xl bg-black/30 border-0 text-white hover:bg-black/50" />
-        </>
-      )}
-      
-      {allImages.length > 1 && (
-        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full backdrop-blur-xl bg-black/40 text-white text-xs font-medium">
-          {currentSlide + 1} / {allImages.length}
-        </div>
-      )}
-    </Carousel>
-  ) : mediaType === 'video' && allVideos.length > 0 ? (
-    <video
-      src={allVideos[0]}
-      controls
-      className="w-full h-48 object-cover"
-      poster={allImages[0]}
-    >
-      Your browser does not support video playback.
-    </video>
-  ) : (
-    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center">
-      <Building2 className="h-16 w-16 text-primary/50" />
-    </div>
-  )}
-</div>
-
-{/* Media Type Toggle (if videos available) */}
-{allVideos.length > 0 && (
-  <div className="flex gap-2">
-    <Button
-      variant={mediaType === 'image' ? 'default' : 'outline'}
-      size="sm"
-      onClick={() => setMediaType('image')}
-      className="flex-1 gap-2"
-    >
-      <ImageIcon className="h-4 w-4" />
-      Photos ({allImages.length})
-    </Button>
-    <Button
-      variant={mediaType === 'video' ? 'default' : 'outline'}
-      size="sm"
-      onClick={() => setMediaType('video')}
-      className="flex-1 gap-2"
-    >
-      <Play className="h-4 w-4" />
-      Video Tour
-    </Button>
-  </div>
-)}
-```
-
-#### D. Add Thumbnail Preview Row
-Below the main carousel:
-```tsx
-{allImages.length > 1 && mediaType === 'image' && (
-  <div className="flex gap-2 overflow-x-auto py-1">
-    {allImages.map((img, idx) => (
-      <button
-        key={idx}
-        onClick={() => carouselApi?.scrollTo(idx)}
-        className={cn(
-          "w-14 h-10 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all",
-          currentSlide === idx 
-            ? "border-primary ring-2 ring-primary/30" 
-            : "border-transparent opacity-70 hover:opacity-100"
-        )}
-      >
-        <img src={img} alt="" className="w-full h-full object-cover" />
-      </button>
-    ))}
-  </div>
-)}
-```
-
-#### E. Update Carousel Effect
-```tsx
-useEffect(() => {
-  if (!carouselApi) return;
-  
-  const onSelect = () => {
-    setCurrentSlide(carouselApi.selectedScrollSnap());
-  };
-  
-  carouselApi.on('select', onSelect);
-  return () => { carouselApi.off('select', onSelect); };
-}, [carouselApi]);
-
-// Reset when workspace changes
-useEffect(() => {
-  setCurrentSlide(0);
-  setMediaType('image');
-  carouselApi?.scrollTo(0);
-}, [workspace?.id, carouselApi]);
+### External Tracking Entity Interface
+```typescript
+interface TrackedEntity {
+  id: string;
+  type: 'vehicle' | 'delivery' | 'drone' | 'asset';
+  name: string;
+  latitude: number;
+  longitude: number;
+  heading?: number;
+  speed?: number;
+  icon?: string;
+  metadata?: Record<string, any>;
+  lastUpdated: string;
+}
 ```
 
 ---
 
-## Visual Layout
+## File Summary
 
-```text
-┌────────────────────────────────────────────────────────────────────┐
-│                    Book Workspace                                  │
-│                    WeWork Embarcadero Center                       │
-├────────────────────────────────────────────────────────────────────┤
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │                                                              │  │
-│  │              IMAGE CAROUSEL (h-48 = 192px)                   │  │
-│  │                                                              │  │
-│  │   ◀ ─────────────── Main Image ─────────────── ▶             │  │
-│  │                                                              │  │
-│  │                       [2 / 4]                                │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-│                                                                    │
-│  ┌────┐ ┌────┐ ┌────┐ ┌────┐   ← Thumbnail Preview                 │
-│  │ T1 │ │ T2 │ │ T3 │ │ T4 │                                       │
-│  └────┘ └────┘ └────┘ └────┘                                       │
-│                                                                    │
-│  ┌────────────────────┐ ┌────────────────────┐                     │
-│  │    📷 Photos (4)   │ │   ▶ Video Tour    │   ← Media Toggle     │
-│  └────────────────────┘ └────────────────────┘                     │
-│                                                                    │
-│  📍 Four Embarcadero Center, San Francisco                         │
-│                                                                    │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                   │
-│  │ Coworking   │ │ Private Off │ │ Meeting Rm  │                   │
-│  └─────────────┘ └─────────────┘ └─────────────┘                   │
-│                                                                    │
-│  ───────────────────────────────────────────────────────────────   │
-│                                                                    │
-│  📅 Select Date        ┌────────────────────┐                      │
-│                        │  January 24, 2025  │                      │
-│                        └────────────────────┘                      │
-│                                                                    │
-│  🕐 Start Time         ⏱ Duration                                  │
-│  ┌──────────┐          ┌──────────┐                                │
-│  │  09:00   │          │ 2 hours  │                                │
-│  └──────────┘          └──────────┘                                │
-│                                                                    │
-│  📝 Notes (optional)                                               │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │ Any special requirements...                                  │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-│                                                                    │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │  💳 Total (2 hours)                              $30         │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-│                                                                    │
-│  ┌─────────────────┐ ┌──────────────────────────────────────────┐  │
-│  │     Cancel      │ │          💳 Pay & Book                   │  │
-│  └─────────────────┘ └──────────────────────────────────────────┘  │
-│                                                                    │
-│               Secure payment powered by Stripe                     │
-└────────────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Files to Modify
-
-| File | Changes |
-|------|---------|
-| `src/hooks/useHubsSearch.ts` | Add `videos?: string[]` to Workspace interface |
-| `supabase/functions/hub-search-workspaces/index.ts` | Add `videos` array to mock workspaces |
-| `src/components/hubs/HubsBookingModal.tsx` | Add carousel, video player, thumbnails, wider modal |
-
----
-
-## Video Sources (Royalty-Free)
-
-Using high-quality office tour videos from Pexels:
-- `3129671` - Modern office space walkthrough
-- `3052296` - Coworking space aerial
-- `3129957` - Meeting room setup
-- `2795168` - Open plan office tour
-- `3130284` - Lobby and common area
-
-Each workspace will have 1 video (if appropriate), with images as poster frames.
-
----
-
-## Expected Result
-
-- **Wider booking modal**: Increased from 512px to 672px for better media viewing
-- **Image carousel**: Same functionality as detail panel with swipe/click navigation
-- **Thumbnail navigation**: Quick access to any image via preview strip
-- **Video support**: Toggle between photos and video tour when available
-- **Native video controls**: Play, pause, fullscreen, volume
-- **Consistent styling**: Matches glassmorphism design system throughout
+| File | Type | Purpose |
+|------|------|---------|
+| `src/pages/HubsLab.tsx` | Create | Test page at `/hubs-lab` |
+| `src/components/hubs/HubsMapViewLab.tsx` | Create | Enhanced map with GIS features |
+| `src/components/hubs/GISControlPanel.tsx` | Create | Layer/style management UI |
+| `src/hooks/useGISLayers.ts` | Create | Custom layer management hook |
+| `src/hooks/useExternalTracking.ts` | Create | External API tracking hook |
+| `src/components/hubs/ExternalTrackingMarkers.tsx` | Create | Tracking entity markers |
+| `src/App.tsx` | Modify | Add `/hubs-lab` route |
 
