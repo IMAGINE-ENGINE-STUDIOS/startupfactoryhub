@@ -53,7 +53,7 @@ export const HubsMapView = ({
       style: 'mapbox://styles/imagineengine/cmhfkp1ie001d01qi2hyg82lp',
       projection: { name: 'globe' },
       zoom: 2.5,
-      center: [-122.4, 37.8],
+      center: [-80, 20],
       pitch: 45,
       antialias: true,
     });
