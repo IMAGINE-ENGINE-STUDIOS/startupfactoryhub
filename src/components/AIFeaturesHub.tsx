@@ -133,6 +133,102 @@ export default function AIFeaturesHub() {
 
   return (
     <div className="space-y-6">
+      {/* Collapsible LightPaper Professional Workspace */}
+      <Collapsible open={isLightPaperOpen} onOpenChange={setIsLightPaperOpen}>
+        <Card className="tech-card border-0">
+          <CollapsibleTrigger asChild>
+            <CardHeader className="cursor-pointer hover:bg-muted/20 rounded-t-lg">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
+                    <FileText className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-lg sm:text-xl">LightPaper Workspace</CardTitle>
+                    <CardDescription className="text-sm">
+                      Documents, spreadsheets, and presentations
+                    </CardDescription>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="gap-2 hidden sm:flex"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsLightPaperFullscreen(true);
+                    }}
+                  >
+                    <Maximize2 className="h-4 w-4" />
+                    <span className="hidden md:inline">Fullscreen</span>
+                  </Button>
+                  <Button variant="ghost" size="sm" className="gap-2">
+                    {isLightPaperOpen ? (
+                      <>
+                        <span className="hidden sm:inline text-sm text-muted-foreground">Collapse</span>
+                        <ChevronUp className="h-4 w-4" />
+                      </>
+                    ) : (
+                      <>
+                        <span className="hidden sm:inline text-sm text-muted-foreground">Expand</span>
+                        <ChevronDown className="h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+          </CollapsibleTrigger>
+          <CollapsibleContent>
+            <CardContent className="pt-0">
+              <div className="flex justify-end mb-4">
+                <div className="flex border rounded-lg p-1 bg-muted/30">
+                  <Button 
+                    variant={lightPaperTab === "document" ? "secondary" : "ghost"} 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => setLightPaperTab("document")}
+                    title="Document"
+                  >
+                    <FileText className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant={lightPaperTab === "spreadsheet" ? "secondary" : "ghost"} 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => setLightPaperTab("spreadsheet")}
+                    title="Spreadsheet"
+                  >
+                    <Table className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant={lightPaperTab === "presentation" ? "secondary" : "ghost"} 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => setLightPaperTab("presentation")}
+                    title="Presentation"
+                  >
+                    <Presentation className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+              <Tabs value={lightPaperTab} onValueChange={setLightPaperTab} className="w-full">
+                <TabsContent value="document" className="mt-0">
+                  <LightPaperDocument selectedProject={selectedProject} />
+                </TabsContent>
+                <TabsContent value="spreadsheet" className="mt-0">
+                  <LightPaperSpreadsheet />
+                </TabsContent>
+                <TabsContent value="presentation" className="mt-0">
+                  <LightPaperPresentation />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </CollapsibleContent>
+        </Card>
+      </Collapsible>
+
       {/* Collapsible CRM Board Section */}
       <Collapsible open={isCRMOpen} onOpenChange={setIsCRMOpen}>
         <Card className="tech-card border-0">
@@ -242,102 +338,6 @@ export default function AIFeaturesHub() {
                   </Card>
                 ))}
               </div>
-            </CardContent>
-          </CollapsibleContent>
-        </Card>
-      </Collapsible>
-
-      {/* Collapsible LightPaper Professional Workspace */}
-      <Collapsible open={isLightPaperOpen} onOpenChange={setIsLightPaperOpen}>
-        <Card className="tech-card border-0">
-          <CollapsibleTrigger asChild>
-            <CardHeader className="cursor-pointer hover:bg-muted/20 rounded-t-lg">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                    <FileText className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <CardTitle className="text-lg sm:text-xl">LightPaper Workspace</CardTitle>
-                    <CardDescription className="text-sm">
-                      Documents, spreadsheets, and presentations
-                    </CardDescription>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="gap-2 hidden sm:flex"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsLightPaperFullscreen(true);
-                    }}
-                  >
-                    <Maximize2 className="h-4 w-4" />
-                    <span className="hidden md:inline">Fullscreen</span>
-                  </Button>
-                  <Button variant="ghost" size="sm" className="gap-2">
-                    {isLightPaperOpen ? (
-                      <>
-                        <span className="hidden sm:inline text-sm text-muted-foreground">Collapse</span>
-                        <ChevronUp className="h-4 w-4" />
-                      </>
-                    ) : (
-                      <>
-                        <span className="hidden sm:inline text-sm text-muted-foreground">Expand</span>
-                        <ChevronDown className="h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardHeader>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <CardContent className="pt-0">
-              <div className="flex justify-end mb-4">
-                <div className="flex border rounded-lg p-1 bg-muted/30">
-                  <Button 
-                    variant={lightPaperTab === "document" ? "secondary" : "ghost"} 
-                    size="sm" 
-                    className="h-8 w-8 p-0"
-                    onClick={() => setLightPaperTab("document")}
-                    title="Document"
-                  >
-                    <FileText className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant={lightPaperTab === "spreadsheet" ? "secondary" : "ghost"} 
-                    size="sm" 
-                    className="h-8 w-8 p-0"
-                    onClick={() => setLightPaperTab("spreadsheet")}
-                    title="Spreadsheet"
-                  >
-                    <Table className="h-4 w-4" />
-                  </Button>
-                  <Button 
-                    variant={lightPaperTab === "presentation" ? "secondary" : "ghost"} 
-                    size="sm" 
-                    className="h-8 w-8 p-0"
-                    onClick={() => setLightPaperTab("presentation")}
-                    title="Presentation"
-                  >
-                    <Presentation className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-              <Tabs value={lightPaperTab} onValueChange={setLightPaperTab} className="w-full">
-                <TabsContent value="document" className="mt-0">
-                  <LightPaperDocument selectedProject={selectedProject} />
-                </TabsContent>
-                <TabsContent value="spreadsheet" className="mt-0">
-                  <LightPaperSpreadsheet />
-                </TabsContent>
-                <TabsContent value="presentation" className="mt-0">
-                  <LightPaperPresentation />
-                </TabsContent>
-              </Tabs>
             </CardContent>
           </CollapsibleContent>
         </Card>

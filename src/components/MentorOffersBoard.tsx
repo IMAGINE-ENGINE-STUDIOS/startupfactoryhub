@@ -185,12 +185,12 @@ export default function MentorOffersBoard() {
             {startups.map((startup) => (
               <div 
                 key={startup.id} 
-                className="group relative overflow-hidden rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] transition-all duration-300 hover:scale-[1.02]"
+                className="group relative overflow-hidden rounded-xl border border-border/50 bg-card/50 backdrop-blur-sm hover:border-primary/50 hover:shadow-[0_0_30px_-5px_hsl(var(--primary)/0.3)] transition-all duration-300 hover:scale-[1.02] h-full flex flex-col"
               >
                 {/* Accent line */}
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-primary via-emerald-500 to-teal-500 opacity-60 group-hover:opacity-100 transition-opacity" />
                 
-                <div className="p-4 pl-5">
+                <div className="p-4 pl-5 flex flex-col flex-1">
                   <div className="flex items-start gap-3 mb-3">
                     <Avatar className="h-12 w-12 ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all">
                       {startup.logo_url && (
@@ -242,19 +242,21 @@ export default function MentorOffersBoard() {
                     </div>
                   )}
 
-                  <Button 
-                    onClick={() => {
-                      setProcessingStartupId(startup.id);
-                      setSelectedStartup(startup);
-                      setDialogOpen(true);
-                    }}
-                    disabled={processingStartupId === startup.id}
-                    className="w-full bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all"
-                    size="sm"
-                  >
-                    <Send className="h-4 w-4 mr-2" />
-                    {processingStartupId === startup.id ? 'Processing...' : 'Offer Mentorship'}
-                  </Button>
+                  <div className="mt-auto">
+                    <Button 
+                      onClick={() => {
+                        setProcessingStartupId(startup.id);
+                        setSelectedStartup(startup);
+                        setDialogOpen(true);
+                      }}
+                      disabled={processingStartupId === startup.id}
+                      className="w-full bg-gradient-to-r from-primary to-emerald-600 hover:from-primary/90 hover:to-emerald-600/90 shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all"
+                      size="sm"
+                    >
+                      <Send className="h-4 w-4 mr-2" />
+                      {processingStartupId === startup.id ? 'Processing...' : 'Offer Mentorship'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             ))}
