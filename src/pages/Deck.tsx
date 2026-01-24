@@ -260,10 +260,10 @@ export default function Deck() {
             {/* Global Presence Highlight */}
             <div className="flex items-center gap-2 mb-4">
               <Globe className="h-5 w-5 text-cyan-400" />
-              <span className="text-sm font-medium text-cyan-400">6 Global Hubs</span>
+              <span className="text-sm font-medium text-cyan-400">4 Global Hubs</span>
               <span className="text-slate-500 mx-2">•</span>
               <MapPin className="h-4 w-4 text-slate-400" />
-              <span className="text-xs text-slate-400">Orlando • NYC • Tokyo • Santiago • San Francisco • Miami</span>
+              <span className="text-xs text-slate-400">Orlando • Santiago • Tokyo • Sevilla</span>
             </div>
             
             <SectionDivider title="Built for Everyone" />
@@ -782,17 +782,15 @@ export default function Deck() {
               Unlike purely digital platforms, we combine software with physical hubs—creating real communities where founders work, meet, and scale together.
             </p>
             
-            {/* 6 Flagship Locations - Prominent */}
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-3 max-w-5xl w-full mb-6">
+            {/* 4 Flagship Locations - Prominent */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl w-full mb-6">
               {[
                 { city: "Orlando", country: "USA", flag: "🇺🇸", type: "HQ", color: "emerald" },
-                { city: "New York", country: "USA", flag: "🇺🇸", type: "Hub", color: "teal" },
-                { city: "San Francisco", country: "USA", flag: "🇺🇸", type: "Hub", color: "cyan" },
-                { city: "Miami", country: "USA", flag: "🇺🇸", type: "Hub", color: "purple" },
-                { city: "Tokyo", country: "Japan", flag: "🇯🇵", type: "APAC", color: "rose" },
                 { city: "Santiago", country: "Chile", flag: "🇨🇱", type: "LATAM", color: "amber" },
+                { city: "Tokyo", country: "Japan", flag: "🇯🇵", type: "APAC", color: "rose" },
+                { city: "Sevilla", country: "Spain", flag: "🇪🇸", type: "EMEA", color: "cyan" },
               ].map((location, i) => (
-                <div key={i} className={`relative bg-slate-900/80 border-2 rounded-xl p-3 backdrop-blur-sm text-center transition-all hover:scale-105 print:bg-gray-50 ${
+                <div key={i} className={`relative bg-slate-900/80 border-2 rounded-xl p-4 backdrop-blur-sm text-center transition-all hover:scale-105 print:bg-gray-50 ${
                   location.type === "HQ" 
                     ? "border-emerald-500/60 ring-2 ring-emerald-500/20" 
                     : `border-${location.color}-500/40 hover:border-${location.color}-500/60`
@@ -802,10 +800,10 @@ export default function Deck() {
                       HEADQUARTERS
                     </div>
                   )}
-                  <span className="text-2xl mb-2 block">{location.flag}</span>
-                  <h4 className={`text-sm font-bold text-${location.color}-400 print:text-${location.color}-700`}>{location.city}</h4>
-                  <p className="text-[10px] text-slate-500">{location.country}</p>
-                  <span className={`inline-block mt-1 px-1.5 py-0.5 text-[8px] font-medium bg-${location.color}-500/20 text-${location.color}-400 rounded`}>
+                  <span className="text-3xl mb-2 block">{location.flag}</span>
+                  <h4 className={`text-base font-bold text-${location.color}-400 print:text-${location.color}-700`}>{location.city}</h4>
+                  <p className="text-xs text-slate-500">{location.country}</p>
+                  <span className={`inline-block mt-2 px-2 py-0.5 text-[10px] font-medium bg-${location.color}-500/20 text-${location.color}-400 rounded`}>
                     {location.type}
                   </span>
                 </div>
@@ -836,7 +834,7 @@ export default function Deck() {
                   <h3 className="font-semibold text-sm text-cyan-400">Physical + Digital</h3>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Real workspaces in 6 cities. <span className="text-cyan-400">5,800+ partner locations</span> via IWG. Software that works anywhere, community that meets in person.
+                  Real workspaces in 4 cities across 3 continents. <span className="text-cyan-400">5,800+ partner locations</span> via IWG. Software that works anywhere, community that meets in person.
                 </p>
               </TechCard>
 
