@@ -1,81 +1,104 @@
 
 
-# Enhance Workspace Detail Panel with Larger Image Carousel
+# Enhance Booking Modal with Image Carousel & Video Support
 
 ## Summary
-Make the workspace booking element bigger with prominent image display, adding a carousel to showcase all available workspace photos so users can better visualize the office space before booking.
+Add the same image carousel functionality from `HubsDetailPanel` to `HubsBookingModal`, along with support for workspace tour videos. This gives users a rich media experience before confirming their booking.
 
 ---
 
 ## Changes Required
 
-### 1. Update Workspace Data Structure
+### 1. Update Workspace Interface for Video Support
 
 **File: `src/hooks/useHubsSearch.ts`**
 
-Add `images` array to the Workspace interface:
+Add `videos` array to the Workspace interface:
 ```typescript
 export interface Workspace {
   // ... existing fields
-  image_url: string | null;
-  images?: string[];  // NEW: Array of all workspace images
+  images?: string[];
+  videos?: string[];  // NEW: Array of workspace video URLs
   // ...
 }
 ```
 
-### 2. Update Mock Data with Multiple Images
+### 2. Update Mock Data with Videos
 
 **File: `supabase/functions/hub-search-workspaces/index.ts`**
 
-Add multiple images per workspace using relevant Unsplash office/coworking photos:
+Add video URLs (using stock office tour videos from Pexels/Coverr):
 ```typescript
 {
   id: "ws-sf-wework-1",
-  name: "WeWork Embarcadero Center",
   // ... existing fields
-  image_url: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
-  images: [
-    "https://images.unsplash.com/photo-1497366216548-37526070297c?w=800",
-    "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800",
-    "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
-    "https://images.unsplash.com/photo-1564069114553-7215e1ff1890?w=800"
+  images: [...],
+  videos: [
+    "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4"
   ],
-  // ...
 }
 ```
 
-### 3. Enhance Detail Panel with Image Carousel
+### 3. Enhance Booking Modal with Carousel
 
-**File: `src/components/hubs/HubsDetailPanel.tsx`**
+**File: `src/components/hubs/HubsBookingModal.tsx`**
 
-#### A. Increase Header Image Height
-Change from `h-32` to `h-56` for much larger image display:
+#### A. Make Modal Wider for Better Media Display
+Change from `sm:max-w-lg` to `sm:max-w-2xl`:
 ```tsx
-<div className="relative h-56 flex-shrink-0">
+<DialogContent className="sm:max-w-2xl tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20">
 ```
 
-#### B. Add Carousel Component
-Replace single image with Embla carousel:
+#### B. Add Carousel Imports & State
 ```tsx
 import { 
   Carousel, 
   CarouselContent, 
   CarouselItem, 
-  CarouselPrevious, 
-  CarouselNext 
+  CarouselNext, 
+  CarouselPrevious,
+  type CarouselApi 
 } from '@/components/ui/carousel';
+import { useMemo, useEffect } from 'react';
+import { Play, Image as ImageIcon } from 'lucide-react';
 
-// In the header section:
-<div className="relative h-56 flex-shrink-0">
-  {allImages.length > 0 ? (
-    <Carousel className="w-full h-full">
+// State for carousel
+const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+const [currentSlide, setCurrentSlide] = useState(0);
+const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
+
+// Combine all media
+const allImages = useMemo(() => {
+  const imgs: string[] = [];
+  if (workspace?.images?.length) {
+    imgs.push(...workspace.images);
+  } else if (workspace?.image_url) {
+    imgs.push(workspace.image_url);
+  }
+  return imgs;
+}, [workspace]);
+
+const allVideos = useMemo(() => workspace?.videos || [], [workspace]);
+```
+
+#### C. Replace Static Image with Media Carousel
+Replace the current 20x20 image with a larger carousel section:
+```tsx
+{/* Media Carousel Section */}
+<div className="relative h-48 rounded-2xl overflow-hidden border border-white/30">
+  {mediaType === 'image' && allImages.length > 0 ? (
+    <Carousel 
+      className="w-full h-full" 
+      setApi={setCarouselApi}
+      opts={{ loop: true }}
+    >
       <CarouselContent className="-ml-0">
         {allImages.map((imageUrl, index) => (
           <CarouselItem key={index} className="pl-0">
             <img
               src={imageUrl}
               alt={`${workspace.name} - Image ${index + 1}`}
-              className="w-full h-56 object-cover"
+              className="w-full h-48 object-cover"
             />
           </CarouselItem>
         ))}
@@ -88,59 +111,64 @@ import {
         </>
       )}
       
-      {/* Image Counter Indicator */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-2 py-1 rounded-full backdrop-blur-xl bg-black/40 text-white text-xs">
-        {currentSlide + 1} / {allImages.length}
-      </div>
+      {allImages.length > 1 && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full backdrop-blur-xl bg-black/40 text-white text-xs font-medium">
+          {currentSlide + 1} / {allImages.length}
+        </div>
+      )}
     </Carousel>
+  ) : mediaType === 'video' && allVideos.length > 0 ? (
+    <video
+      src={allVideos[0]}
+      controls
+      className="w-full h-48 object-cover"
+      poster={allImages[0]}
+    >
+      Your browser does not support video playback.
+    </video>
   ) : (
-    <div className="w-full h-full flex items-center justify-center" style={{ background: gradient }}>
-      <Icon className="h-20 w-20 text-white/60" />
+    <div className="w-full h-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center">
+      <Building2 className="h-16 w-16 text-primary/50" />
     </div>
   )}
 </div>
-```
 
-#### C. Add Image State Management
-Track current slide for the counter indicator:
-```tsx
-const [carouselApi, setCarouselApi] = useState<CarouselApi>();
-const [currentSlide, setCurrentSlide] = useState(0);
-
-// Combine image_url and images array for carousel
-const allImages = useMemo(() => {
-  const imgs: string[] = [];
-  if (workspace?.images?.length) {
-    imgs.push(...workspace.images);
-  } else if (workspace?.image_url) {
-    imgs.push(workspace.image_url);
-  }
-  return imgs;
-}, [workspace]);
-
-useEffect(() => {
-  if (!carouselApi) return;
-  
-  const onSelect = () => {
-    setCurrentSlide(carouselApi.selectedScrollSnap());
-  };
-  
-  carouselApi.on('select', onSelect);
-  return () => { carouselApi.off('select', onSelect); };
-}, [carouselApi]);
+{/* Media Type Toggle (if videos available) */}
+{allVideos.length > 0 && (
+  <div className="flex gap-2">
+    <Button
+      variant={mediaType === 'image' ? 'default' : 'outline'}
+      size="sm"
+      onClick={() => setMediaType('image')}
+      className="flex-1 gap-2"
+    >
+      <ImageIcon className="h-4 w-4" />
+      Photos ({allImages.length})
+    </Button>
+    <Button
+      variant={mediaType === 'video' ? 'default' : 'outline'}
+      size="sm"
+      onClick={() => setMediaType('video')}
+      className="flex-1 gap-2"
+    >
+      <Play className="h-4 w-4" />
+      Video Tour
+    </Button>
+  </div>
+)}
 ```
 
 #### D. Add Thumbnail Preview Row
-Below main carousel, show clickable thumbnails:
+Below the main carousel:
 ```tsx
-{allImages.length > 1 && (
-  <div className="flex gap-2 p-3 overflow-x-auto">
+{allImages.length > 1 && mediaType === 'image' && (
+  <div className="flex gap-2 overflow-x-auto py-1">
     {allImages.map((img, idx) => (
       <button
         key={idx}
         onClick={() => carouselApi?.scrollTo(idx)}
         className={cn(
-          "w-16 h-12 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all",
+          "w-14 h-10 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all",
           currentSlide === idx 
             ? "border-primary ring-2 ring-primary/30" 
             : "border-transparent opacity-70 hover:opacity-100"
@@ -153,15 +181,25 @@ Below main carousel, show clickable thumbnails:
 )}
 ```
 
-### 4. Widen the Detail Panel
-
-Increase panel width for larger image display:
+#### E. Update Carousel Effect
 ```tsx
-// Change from w-96 to w-[28rem] (448px)
-<div className={cn(
-  "absolute right-2 top-2 bottom-2 w-[28rem] z-10 transition-all duration-300",
-  // ...
-)}>
+useEffect(() => {
+  if (!carouselApi) return;
+  
+  const onSelect = () => {
+    setCurrentSlide(carouselApi.selectedScrollSnap());
+  };
+  
+  carouselApi.on('select', onSelect);
+  return () => { carouselApi.off('select', onSelect); };
+}, [carouselApi]);
+
+// Reset when workspace changes
+useEffect(() => {
+  setCurrentSlide(0);
+  setMediaType('image');
+  carouselApi?.scrollTo(0);
+}, [workspace?.id, carouselApi]);
 ```
 
 ---
@@ -169,43 +207,59 @@ Increase panel width for larger image display:
 ## Visual Layout
 
 ```text
-┌─────────────────────────────────────────────────────────────────────────────────────────┐
-│                              HubsDetailPanel (448px wide)                               │
-├─────────────────────────────────────────────────────────────────────────────────────────┤
-│  ┌───────────────────────────────────────────────────────────────────────────────────┐  │
-│  │                                                                                   │  │
-│  │                         IMAGE CAROUSEL (h-56 = 224px)                             │  │
-│  │                                                                                   │  │
-│  │   ◀ ─────────────────────── Main Image ──────────────────────── ▶                 │  │
-│  │                                                                                   │  │
-│  │                              [1 / 4]                                              │  │
-│  └───────────────────────────────────────────────────────────────────────────────────┘  │
-│                                                                                         │
-│  ┌────┐ ┌────┐ ┌────┐ ┌────┐   ← Thumbnail Preview Row                                  │
-│  │ T1 │ │ T2 │ │ T3 │ │ T4 │                                                            │
-│  └────┘ └────┘ └────┘ └────┘                                                            │
-│                                                                                         │
-│  WeWork Embarcadero Center                                                              │
-│  📍 Four Embarcadero Center, San Francisco                                              │
-│                                                                                         │
-│  ⭐ 4.7                                           $15/hr                                │
-│                                                                                         │
-│  WORKSPACE TYPES                                                                        │
-│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                                        │
-│  │ Coworking   │ │ Private Off │ │ Meeting Rm  │                                        │
-│  └─────────────┘ └─────────────┘ └─────────────┘                                        │
-│                                                                                         │
-│  AMENITIES                                                                              │
-│  📶 High-Speed WiFi                                                                     │
-│  ☕ Coffee & Beverages                                                                  │
-│  🅿️ Parking Available                                                                   │
-│                                                                                         │
-│  ┌────────────┐ ┌────────────┐                                                          │
-│  │ Directions │ │   Share    │                                                          │
-│  └────────────┘ └────────────┘                                                          │
-├─────────────────────────────────────────────────────────────────────────────────────────┤
-│                           [ 📅 Book Now ]                                               │
-└─────────────────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│                    Book Workspace                                  │
+│                    WeWork Embarcadero Center                       │
+├────────────────────────────────────────────────────────────────────┤
+│  ┌──────────────────────────────────────────────────────────────┐  │
+│  │                                                              │  │
+│  │              IMAGE CAROUSEL (h-48 = 192px)                   │  │
+│  │                                                              │  │
+│  │   ◀ ─────────────── Main Image ─────────────── ▶             │  │
+│  │                                                              │  │
+│  │                       [2 / 4]                                │  │
+│  └──────────────────────────────────────────────────────────────┘  │
+│                                                                    │
+│  ┌────┐ ┌────┐ ┌────┐ ┌────┐   ← Thumbnail Preview                 │
+│  │ T1 │ │ T2 │ │ T3 │ │ T4 │                                       │
+│  └────┘ └────┘ └────┘ └────┘                                       │
+│                                                                    │
+│  ┌────────────────────┐ ┌────────────────────┐                     │
+│  │    📷 Photos (4)   │ │   ▶ Video Tour    │   ← Media Toggle     │
+│  └────────────────────┘ └────────────────────┘                     │
+│                                                                    │
+│  📍 Four Embarcadero Center, San Francisco                         │
+│                                                                    │
+│  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐                   │
+│  │ Coworking   │ │ Private Off │ │ Meeting Rm  │                   │
+│  └─────────────┘ └─────────────┘ └─────────────┘                   │
+│                                                                    │
+│  ───────────────────────────────────────────────────────────────   │
+│                                                                    │
+│  📅 Select Date        ┌────────────────────┐                      │
+│                        │  January 24, 2025  │                      │
+│                        └────────────────────┘                      │
+│                                                                    │
+│  🕐 Start Time         ⏱ Duration                                  │
+│  ┌──────────┐          ┌──────────┐                                │
+│  │  09:00   │          │ 2 hours  │                                │
+│  └──────────┘          └──────────┘                                │
+│                                                                    │
+│  📝 Notes (optional)                                               │
+│  ┌──────────────────────────────────────────────────────────────┐  │
+│  │ Any special requirements...                                  │  │
+│  └──────────────────────────────────────────────────────────────┘  │
+│                                                                    │
+│  ┌──────────────────────────────────────────────────────────────┐  │
+│  │  💳 Total (2 hours)                              $30         │  │
+│  └──────────────────────────────────────────────────────────────┘  │
+│                                                                    │
+│  ┌─────────────────┐ ┌──────────────────────────────────────────┐  │
+│  │     Cancel      │ │          💳 Pay & Book                   │  │
+│  └─────────────────┘ └──────────────────────────────────────────┘  │
+│                                                                    │
+│               Secure payment powered by Stripe                     │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
@@ -214,40 +268,31 @@ Increase panel width for larger image display:
 
 | File | Changes |
 |------|---------|
-| `src/hooks/useHubsSearch.ts` | Add `images?: string[]` to Workspace interface |
-| `supabase/functions/hub-search-workspaces/index.ts` | Add `images` array to each mock workspace |
-| `src/components/hubs/HubsDetailPanel.tsx` | Add carousel, increase height, add thumbnails |
+| `src/hooks/useHubsSearch.ts` | Add `videos?: string[]` to Workspace interface |
+| `supabase/functions/hub-search-workspaces/index.ts` | Add `videos` array to mock workspaces |
+| `src/components/hubs/HubsBookingModal.tsx` | Add carousel, video player, thumbnails, wider modal |
 
 ---
 
-## Professional Office Images (Unsplash)
+## Video Sources (Royalty-Free)
 
-For each workspace, I'll use a curated set of professional office/coworking photos:
+Using high-quality office tour videos from Pexels:
+- `3129671` - Modern office space walkthrough
+- `3052296` - Coworking space aerial
+- `3129957` - Meeting room setup
+- `2795168` - Open plan office tour
+- `3130284` - Lobby and common area
 
-**General Office/Coworking:**
-- `photo-1497366216548-37526070297c` (Modern open office)
-- `photo-1497366754035-f200968a6e72` (Glass office interior)
-- `photo-1524758631624-e2822e304c36` (Designer workspace)
-- `photo-1556761175-4b46a572b786` (Collaborative space)
-- `photo-1519389950473-47ba0277781c` (Team working)
-- `photo-1504384308090-c894fdcc538d` (Creative office)
-- `photo-1517502884422-41eaead166d4` (Meeting room)
-- `photo-1462826303086-329426d1aef5` (Modern desk)
-- `photo-1527192491265-7e15c55b1ed2` (Open workspace)
-- `photo-1564069114553-7215e1ff1890` (Coworking lounge)
-- `photo-1572025442646-866d16c84a54` (Coffee area)
-- `photo-1568992687947-868a62a9f521` (Office lobby)
-
-Each workspace will have 3-4 varied images showing different areas (desks, meeting rooms, common areas, amenities).
+Each workspace will have 1 video (if appropriate), with images as poster frames.
 
 ---
 
 ## Expected Result
 
-- **Much larger images**: Header image increased from 128px to 224px height
-- **Interactive carousel**: Users can swipe/click through multiple office photos
+- **Wider booking modal**: Increased from 512px to 672px for better media viewing
+- **Image carousel**: Same functionality as detail panel with swipe/click navigation
 - **Thumbnail navigation**: Quick access to any image via preview strip
-- **Slide counter**: Shows current position (e.g., "2 / 4")
-- **Wider panel**: Panel width increased for better image viewing
-- **Glassmorphism navigation**: Previous/Next buttons match design system
+- **Video support**: Toggle between photos and video tour when available
+- **Native video controls**: Play, pause, fullscreen, volume
+- **Consistent styling**: Matches glassmorphism design system throughout
 
