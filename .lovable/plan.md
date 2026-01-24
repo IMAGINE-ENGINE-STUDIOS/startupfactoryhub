@@ -1,178 +1,70 @@
 
-# Fix Profile Real-Time Sync and Data Persistence Issues
+# Unify "New Mentorship Opportunities" UI Across Mentor and Advisor Dashboards
 
-## Problem Summary
-The investor profile (and other role-specific profiles) have several data persistence and sync issues:
-1. **Avatar doesn't save visually** - Image uploads succeed in database but UI doesn't update
-2. **Profile info doesn't persist** - Changes save to database but don't reflect in UI
-3. **Edit mode clears data** - Clicking "Edit Profile" shows empty fields instead of current values
-4. **No real-time sync** - Profile changes don't update across the app without refresh
+## Problem Identified
 
-## Root Causes
+The Mentor Dashboard and Advisor Dashboard display the "New Mentorship Opportunities" section differently:
 
-### Issue 1: Missing Real-Time Subscriptions
-- `InvestorProfileView` only fetches `investor_profiles` data once on mount
-- No Supabase real-time channel subscription for `investor_profiles` table
-- Same issue exists for `accelerator_profiles`, `mentor_profiles`, `student_profiles`
+| Dashboard | Current Implementation | Styling |
+|-----------|----------------------|---------|
+| **Mentor Dashboard** | Uses `<MentorOffersBoard />` component | Premium tech-card glassmorphism with gradient borders, hover effects, accent lines |
+| **Advisor Dashboard** | Inline custom implementation (lines 576-612) | Basic card list with simple borders, less visual polish |
 
-### Issue 2: Avatar Upload Not Refreshing Parent State
-- `AvatarUpload` component updates database correctly
-- But `InvestorProfileView` doesn't have an `onUploadComplete` callback to refresh its state
-- The profile from `useProfileWithRole` should update via real-time, but may have timing issues
+This creates an inconsistent user experience between the two dashboards.
 
-### Issue 3: Edit Mode State Initialization
-- When `startEditing()` is called, it reads from current state
-- If data fetch hasn't completed or state is stale, fields appear empty
-- Need to ensure data is loaded before allowing edit mode
+## Solution
 
-## Solution Plan
+Replace the inline "New Mentorship Opportunities" section in the Advisor Dashboard with the `MentorOffersBoard` component to ensure both dashboards share the same polished UI.
 
-### Phase 1: Fix InvestorProfileView (Primary Fix)
+## Changes Required
 
-**1.1 Add Real-Time Subscription for investor_profiles**
+### File: `src/pages/AdvisorDashboard.tsx`
+
+**Step 1: Add MentorOffersBoard Import**
+Add the import at the top of the file (around line 35):
 ```typescript
-// Add useEffect for real-time investor profile updates
-useEffect(() => {
-  if (!profile?.user_id) return;
-  
-  const channel = supabase
-    .channel(`investor-profile-${profile.user_id}`)
-    .on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: 'investor_profiles',
-      filter: `user_id=eq.${profile.user_id}`
-    }, (payload) => {
-      if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-        setInvestorProfile(payload.new);
-      }
-    })
-    .subscribe();
-    
-  return () => {
-    supabase.removeChannel(channel);
-  };
-}, [profile?.user_id]);
+import MentorOffersBoard from '@/components/MentorOffersBoard';
 ```
 
-**1.2 Add onUploadComplete Callback to AvatarUpload**
+**Step 2: Replace Inline Implementation**
+Replace lines 576-612 (the "New Mentorship Opportunities" section) with:
 ```typescript
-<AvatarUpload
-  currentAvatarUrl={profile?.avatar_url}
-  size="lg"
-  userRole="investor"
-  showGradientBorder
-  onUploadComplete={(url) => {
-    // Force profile refresh - the real-time subscription should handle this
-    // but we add explicit handling for immediate feedback
-  }}
-/>
+{/* New Opportunities - Using shared component */}
+<MentorOffersBoard />
 ```
 
-**1.3 Improve Data Loading Check Before Editing**
-```typescript
-const startEditing = () => {
-  // Ensure data is loaded before allowing edit
-  if (!profile) {
-    toast({ title: 'Profile not loaded yet', variant: 'destructive' });
-    return;
-  }
-  // ... existing initialization code
-};
-```
+**Step 3: Remove Unused Code**
+Since the Advisor Dashboard has its own `startups` state and `offerMentorship` function that are now handled by `MentorOffersBoard`, we can remove:
+- The `fetchStartups` function (lines 279-317)
+- The `startups` state (line 52)
+- The `offerMentorship` function (lines 222-278)
+- The related startup dialog state and handler code
 
-### Phase 2: Fix Other Profile Views
+## Visual Comparison
 
-**2.1 AcceleratorProfileView**
-- Add real-time subscription for `accelerator_profiles`
-- Add `onUploadComplete` callback to AvatarUpload
+**Current AdvisorDashboard (inline):**
+- Simple bordered cards in a vertical list
+- Basic hover state with border color change
+- No accent lines or gradient effects
 
-**2.2 AdvisorProfileView**  
-- Add real-time subscription for `mentor_profiles`
-- Add `onUploadComplete` callback to AvatarUpload
+**After Change (using MentorOffersBoard):**
+- 3-column responsive grid layout
+- Gradient accent line on left side of each card
+- Glassmorphism backdrop blur effect
+- Hover scale transform with glow shadow
+- Gradient buttons with shadow effects
+- "Looking for" badges display
+- Dialog for adding mentorship goals/notes
 
-**2.3 StudentProfileView**
-- Add real-time subscription for `student_profiles`
-- Ensure proper state sync after save
+## Technical Notes
 
-### Phase 3: Ensure Database Tables in Real-Time Publication
+1. `MentorOffersBoard` already handles:
+   - Fetching available startups
+   - Filtering out existing mentorship relationships
+   - Real-time subscription for updates
+   - Sending mentorship offers with goals and notes
+   - Toast notifications for success/error states
 
-**Critical Requirement**: Tables must be added to `supabase_realtime` publication:
-```sql
--- Ensure tables are in the realtime publication
-ALTER PUBLICATION supabase_realtime ADD TABLE investor_profiles;
-ALTER PUBLICATION supabase_realtime ADD TABLE accelerator_profiles;
-ALTER PUBLICATION supabase_realtime ADD TABLE mentor_profiles;
-ALTER PUBLICATION supabase_realtime ADD TABLE student_profiles;
+2. Both Mentor and Advisor roles share the same mentorship logic (advisor is essentially a mentor variant), so the component works identically for both.
 
--- Set REPLICA IDENTITY for these tables
-ALTER TABLE investor_profiles REPLICA IDENTITY FULL;
-ALTER TABLE accelerator_profiles REPLICA IDENTITY FULL;
-ALTER TABLE mentor_profiles REPLICA IDENTITY FULL;
-ALTER TABLE student_profiles REPLICA IDENTITY FULL;
-```
-
-## Files to Modify
-
-| File | Changes |
-|------|---------|
-| `src/components/InvestorProfileView.tsx` | Add real-time subscription, fix AvatarUpload callback, improve edit initialization |
-| `src/components/AcceleratorProfileView.tsx` | Add real-time subscription, fix AvatarUpload callback |
-| `src/components/AdvisorProfileView.tsx` | Add real-time subscription, fix AvatarUpload callback |
-| `src/components/StudentProfileView.tsx` | Add real-time subscription if missing |
-| New migration file | Add tables to supabase_realtime publication |
-
-## Technical Details
-
-### Real-Time Subscription Pattern
-Each profile view will follow this pattern:
-```typescript
-// Subscribe to role-specific profile changes
-useEffect(() => {
-  if (!profile?.user_id) return;
-  
-  const channel = supabase
-    .channel(`${roleType}-profile-${profile.user_id}`)
-    .on('postgres_changes', {
-      event: '*',
-      schema: 'public',
-      table: `${roleType}_profiles`,
-      filter: `user_id=eq.${profile.user_id}`
-    }, (payload) => {
-      if (payload.eventType !== 'DELETE') {
-        setRoleProfile(payload.new);
-      }
-    })
-    .subscribe();
-    
-  return () => supabase.removeChannel(channel);
-}, [profile?.user_id]);
-```
-
-### Avatar Sync Pattern
-The AvatarUpload component already updates the database. We need to ensure:
-1. The `profiles` table real-time subscription in `useProfileWithRole` is working
-2. Or add explicit refresh callback for immediate visual feedback
-
-### State Initialization Guard
-```typescript
-const startEditing = () => {
-  // Guard against editing before data loads
-  if (profileLoading || !profile) {
-    toast({ 
-      title: 'Please wait', 
-      description: 'Profile data is still loading...' 
-    });
-    return;
-  }
-  // ... initialization code
-};
-```
-
-## Expected Outcome
-After implementation:
-1. ✅ Avatar uploads reflect immediately in UI
-2. ✅ Profile changes sync in real-time across components
-3. ✅ Edit mode shows current data, not empty fields
-4. ✅ All role-specific profiles (investor, accelerator, advisor, student) work consistently
-5. ✅ No data loss when switching between view and edit modes
+3. The `MentorOffersBoard` component is already imported and used in `MentorDashboard.tsx` line 194, confirming it's the intended shared component.
