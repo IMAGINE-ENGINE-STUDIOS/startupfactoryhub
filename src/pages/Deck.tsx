@@ -246,15 +246,24 @@ export default function Deck() {
               Startup Factory Hub
             </h1>
             
-            <p className="text-xl md:text-2xl font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-6 print:text-teal-700">
-              The Central Operating Hub for Tech Startups
+            <p className="text-xl md:text-2xl font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-4 print:text-teal-700">
+              End-to-End Smart Platform for Consistent Workflow
             </p>
             
             {/* Key Value Proposition */}
-            <div className="max-w-3xl mb-6">
+            <div className="max-w-3xl mb-4">
               <p className="text-base md:text-lg text-slate-300 leading-relaxed print:text-gray-700">
-                An AI-powered hybrid technology platform that connects founders with partners, resources, and capital—guiding startups from idea to growth-stage scale.
+                A <span className="text-teal-400 font-semibold">hybrid digital-physical</span> execution platform with global locations, AI-driven workflows, and human expertise—enabling founders to build consistently from idea to scale.
               </p>
+            </div>
+            
+            {/* Global Presence Highlight */}
+            <div className="flex items-center gap-2 mb-4">
+              <Globe className="h-5 w-5 text-cyan-400" />
+              <span className="text-sm font-medium text-cyan-400">6 Global Hubs</span>
+              <span className="text-slate-500 mx-2">•</span>
+              <MapPin className="h-4 w-4 text-slate-400" />
+              <span className="text-xs text-slate-400">Orlando • NYC • Tokyo • Santiago • San Francisco • Miami</span>
             </div>
             
             <SectionDivider title="Built for Everyone" />
@@ -342,10 +351,10 @@ export default function Deck() {
               </div>
             </div>
             
-            {/* Differentiator */}
-            <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-teal-500/10 border border-teal-500/30 rounded-lg px-6 py-4 max-w-3xl print:bg-gray-50 print:border-gray-300">
-              <p className="text-sm md:text-base text-slate-300 print:text-gray-700">
-                <span className="text-teal-400 font-semibold print:text-teal-700">Unlike traditional accelerators:</span> A continuous execution environment supporting founders before, during, and after acceleration—with a global, hybrid-first model that scales alongside the startup.
+            {/* Differentiator - Hybrid Model */}
+            <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-teal-500/10 border border-teal-500/30 rounded-lg px-6 py-3 max-w-3xl print:bg-gray-50 print:border-gray-300">
+              <p className="text-sm text-slate-300 print:text-gray-700">
+                <span className="text-teal-400 font-semibold print:text-teal-700">Hybrid Philosophy:</span> Digital infrastructure meets physical presence. We don't just provide software—we provide <span className="text-cyan-400">workspaces, mentorship on-site, and community</span> across 6 global locations.
               </p>
             </div>
           </div>
@@ -367,42 +376,53 @@ export default function Deck() {
             <EnergyLines />
             <CornerAccents />
             <div className="relative z-10 w-full max-w-[90%] mx-auto">
-              <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center">
             {/* Header */}
             <div className="flex items-center gap-3 mb-2">
               <div className="w-3 h-3 bg-teal-500 rotate-45" />
-              <span className="text-sm font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">System Architecture</span>
+              <span className="text-sm font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">End-to-End Execution</span>
               <div className="w-3 h-3 bg-teal-500 rotate-45" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 print:text-black">Company Summary</h2>
-            <p className="text-lg text-slate-400 text-center mb-6 print:text-gray-600">The Execution Mechanism</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 print:text-black">How We're Different</h2>
+            <p className="text-lg text-slate-400 text-center mb-6 print:text-gray-600">Consistent Workflow, Global Scale</p>
             
-            {/* Company Description Text */}
-            <div className="max-w-4xl w-full mb-8 space-y-4">
-              <div className="bg-slate-900/60 border border-teal-500/30 rounded-lg p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
-                <p className="text-base text-slate-300 leading-relaxed text-center print:text-gray-700">
-                  <span className="text-teal-400 font-semibold print:text-teal-700">Startup Factory Hub</span> is an AI-powered hybrid technology platform designed to help tech startups succeed. The platform serves as a <span className="text-cyan-400 font-medium print:text-cyan-700">central operating hub</span> for the entire startup ecosystem, connecting founders with partners, resources, and capital while guiding startups from idea to growth-stage scale.
+            {/* Core Philosophy - Big Statement */}
+            <div className="max-w-4xl w-full mb-6">
+              <div className="bg-slate-900/60 border-2 border-teal-500/40 rounded-xl p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                <p className="text-lg text-center text-slate-200 leading-relaxed print:text-gray-700">
+                  <span className="text-teal-400 font-bold print:text-teal-700">We are not a 3-month program.</span> We are a <span className="text-cyan-400 font-semibold">permanent operating system</span> for your startup—combining AI-driven digital infrastructure with physical hubs, human expertise, and capital access in one unified platform.
                 </p>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="bg-slate-900/60 border border-cyan-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Cpu className="h-4 w-4 text-cyan-400 print:text-cyan-700" />
-                    <span className="text-sm font-semibold text-cyan-400 print:text-cyan-700">AI-Driven Execution</span>
-                  </div>
-                  <p className="text-sm text-slate-400 leading-relaxed print:text-gray-600">
-                    Integrates digital infrastructure, human expertise, corporate partnerships, and capital access to accelerate company building and reduce execution friction.
-                  </p>
+            </div>
+            
+            {/* What Makes Us Different - 3 Pillars */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl w-full mb-6">
+              <div className="bg-slate-900/60 border border-teal-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                <div className="flex items-center gap-2 mb-3">
+                  <Zap className="h-5 w-5 text-teal-400 print:text-teal-700" />
+                  <span className="text-sm font-bold text-teal-400 print:text-teal-700">Continuous Execution</span>
                 </div>
-                <div className="bg-slate-900/60 border border-purple-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Globe className="h-4 w-4 text-purple-400 print:text-purple-700" />
-                    <span className="text-sm font-semibold text-purple-400 print:text-purple-700">Global Hybrid Model</span>
-                  </div>
-                  <p className="text-sm text-slate-400 leading-relaxed print:text-gray-600">
-                    Unlike traditional accelerators, operates as a continuous execution environment supporting founders before, during, and after acceleration.
-                  </p>
+                <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">
+                  Support founders <span className="text-white">before, during, and after</span> acceleration. No graduation—just consistent growth alongside the startup.
+                </p>
+              </div>
+              <div className="bg-slate-900/60 border border-cyan-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                <div className="flex items-center gap-2 mb-3">
+                  <Globe className="h-5 w-5 text-cyan-400 print:text-cyan-700" />
+                  <span className="text-sm font-bold text-cyan-400 print:text-cyan-700">Hybrid Model</span>
                 </div>
+                <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">
+                  <span className="text-white">6 physical hub cities</span> + 5,800 partner locations worldwide. Digital platform meets real-world community.
+                </p>
+              </div>
+              <div className="bg-slate-900/60 border border-purple-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+                <div className="flex items-center gap-2 mb-3">
+                  <Network className="h-5 w-5 text-purple-400 print:text-purple-700" />
+                  <span className="text-sm font-bold text-purple-400 print:text-purple-700">Integrated Ecosystem</span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">
+                  <span className="text-white">AI + Mentors + Corporates + Capital</span> in one platform. No fragmented tools—one consistent workflow.
+                </p>
               </div>
             </div>
 
@@ -750,204 +770,165 @@ export default function Deck() {
           </div>
         </SlideContainer>
 
-        {/* SLIDE 5: User Types */}
+        {/* NEW SLIDE: Global Footprint & Hybrid Philosophy */}
         <SlideContainer>
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-3 mb-2">
-              <IconBadge icon={Users} color="teal" />
-              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Platform Users</h2>
+              <IconBadge icon={Globe} color="cyan" />
+              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Global Footprint</h2>
             </div>
-            <p className="text-base md:text-lg text-teal-400 font-semibold text-center mb-1 print:text-teal-700">A Unified Ecosystem for Every Stakeholder</p>
+            <p className="text-base md:text-lg text-cyan-400 font-semibold text-center mb-1 print:text-cyan-700">Hybrid Digital-Physical Presence</p>
             <p className="text-xs md:text-sm text-slate-400 text-center mb-6 max-w-3xl print:text-gray-600">
-              Each user type has a dedicated dashboard with role-specific tools, features, and workflows tailored to their unique needs.
+              Unlike purely digital platforms, we combine software with physical hubs—creating real communities where founders work, meet, and scale together.
             </p>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-5xl w-full">
-              {/* Startups */}
-              <TechCard glowColor="emerald" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-emerald-500/20 flex items-center justify-center">
-                    <Rocket className="h-3.5 w-3.5 text-emerald-400" />
-                  </div>
-                  <h3 className="font-semibold text-xs text-emerald-400 print:text-emerald-700">Startups</h3>
+            {/* 6 Flagship Locations - Prominent */}
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-3 max-w-5xl w-full mb-6">
+              {[
+                { city: "Orlando", country: "USA", flag: "🇺🇸", type: "HQ", color: "emerald" },
+                { city: "New York", country: "USA", flag: "🇺🇸", type: "Hub", color: "teal" },
+                { city: "San Francisco", country: "USA", flag: "🇺🇸", type: "Hub", color: "cyan" },
+                { city: "Miami", country: "USA", flag: "🇺🇸", type: "Hub", color: "purple" },
+                { city: "Tokyo", country: "Japan", flag: "🇯🇵", type: "APAC", color: "rose" },
+                { city: "Santiago", country: "Chile", flag: "🇨🇱", type: "LATAM", color: "amber" },
+              ].map((location, i) => (
+                <div key={i} className={`relative bg-slate-900/80 border-2 rounded-xl p-3 backdrop-blur-sm text-center transition-all hover:scale-105 print:bg-gray-50 ${
+                  location.type === "HQ" 
+                    ? "border-emerald-500/60 ring-2 ring-emerald-500/20" 
+                    : `border-${location.color}-500/40 hover:border-${location.color}-500/60`
+                }`}>
+                  {location.type === "HQ" && (
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-emerald-500 rounded text-[8px] font-bold text-white">
+                      HEADQUARTERS
+                    </div>
+                  )}
+                  <span className="text-2xl mb-2 block">{location.flag}</span>
+                  <h4 className={`text-sm font-bold text-${location.color}-400 print:text-${location.color}-700`}>{location.city}</h4>
+                  <p className="text-[10px] text-slate-500">{location.country}</p>
+                  <span className={`inline-block mt-1 px-1.5 py-0.5 text-[8px] font-medium bg-${location.color}-500/20 text-${location.color}-400 rounded`}>
+                    {location.type}
+                  </span>
                 </div>
-                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
-                  <li>• AI-guided journey roadmap</li>
-                  <li>• Mentor & investor matching</li>
-                  <li>• Pitch deck management</li>
-                  <li>• Valuation tracking</li>
-                  <li>• Resource & perk access</li>
-                </ul>
+              ))}
+            </div>
+
+            {/* Hybrid Philosophy Section */}
+            <SectionDivider title="Our Philosophy" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl w-full mb-4">
+              <TechCard glowColor="teal" className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center">
+                    <Zap className="h-4 w-4 text-teal-400" />
+                  </div>
+                  <h3 className="font-semibold text-sm text-teal-400">Continuous Execution</h3>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Not a 3-month program—a <span className="text-teal-400">permanent operating system</span> for your startup. We support founders before, during, and after acceleration phases.
+                </p>
               </TechCard>
 
-              {/* Investors */}
-              <TechCard glowColor="purple" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-purple-500/20 flex items-center justify-center">
-                    <Diamond className="h-3.5 w-3.5 text-purple-400" />
+              <TechCard glowColor="cyan" className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
+                    <Building2 className="h-4 w-4 text-cyan-400" />
                   </div>
-                  <h3 className="font-semibold text-xs text-purple-400 print:text-purple-700">Investors</h3>
+                  <h3 className="font-semibold text-sm text-cyan-400">Physical + Digital</h3>
                 </div>
-                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
-                  <li>• Curated deal flow pipeline</li>
-                  <li>• Portfolio management</li>
-                  <li>• Pitch meeting scheduling</li>
-                  <li>• Investment tracking</li>
-                  <li>• Due diligence tools</li>
-                </ul>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Real workspaces in 6 cities. <span className="text-cyan-400">5,800+ partner locations</span> via IWG. Software that works anywhere, community that meets in person.
+                </p>
               </TechCard>
 
-              {/* Mentors */}
-              <TechCard glowColor="cyan" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-cyan-500/20 flex items-center justify-center">
-                    <Lightbulb className="h-3.5 w-3.5 text-cyan-400" />
+              <TechCard glowColor="purple" className="p-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center">
+                    <Network className="h-4 w-4 text-purple-400" />
                   </div>
-                  <h3 className="font-semibold text-xs text-cyan-400 print:text-cyan-700">Mentors</h3>
+                  <h3 className="font-semibold text-sm text-purple-400">Ecosystem Integration</h3>
                 </div>
-                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
-                  <li>• Session scheduling & calendar</li>
-                  <li>• Active mentee management</li>
-                  <li>• Impact & progress tracking</li>
-                  <li>• Endorsement system</li>
-                  <li>• Video conferencing</li>
-                </ul>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Not isolated—<span className="text-purple-400">connected to accelerators, universities, corporates</span>, and investors globally. Your success network expands with us.
+                </p>
               </TechCard>
+            </div>
 
-              {/* Advisors */}
-              <TechCard glowColor="amber" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-amber-500/20 flex items-center justify-center">
-                    <Award className="h-3.5 w-3.5 text-amber-400" />
-                  </div>
-                  <h3 className="font-semibold text-xs text-amber-400 print:text-amber-700">Advisors</h3>
+            {/* IWG Partnership Callout */}
+            <div className="bg-gradient-to-r from-cyan-500/10 via-teal-500/10 to-cyan-500/10 border border-cyan-500/30 rounded-lg px-6 py-3 max-w-4xl">
+              <div className="flex items-center justify-center gap-4 flex-wrap">
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-cyan-400" />
+                  <span className="text-sm font-semibold text-cyan-400">Global Workspace Network:</span>
                 </div>
-                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
-                  <li>• Professional background showcase</li>
-                  <li>• Skills & expertise management</li>
-                  <li>• Advisory session booking</li>
-                  <li>• Achievement tracking</li>
-                  <li>• Task & job assignments</li>
-                </ul>
-              </TechCard>
-
-              {/* Students */}
-              <TechCard glowColor="rose" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-rose-500/20 flex items-center justify-center">
-                    <GraduationCap className="h-3.5 w-3.5 text-rose-400" />
-                  </div>
-                  <h3 className="font-semibold text-xs text-rose-400 print:text-rose-700">Students</h3>
-                </div>
-                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
-                  <li>• Internship opportunities</li>
-                  <li>• Educational courses</li>
-                  <li>• Job board access</li>
-                  <li>• Study groups & rooms</li>
-                  <li>• Certificate earning</li>
-                </ul>
-              </TechCard>
-
-              {/* Accelerators */}
-              <TechCard glowColor="teal" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-teal-500/20 flex items-center justify-center">
-                    <Building2 className="h-3.5 w-3.5 text-teal-400" />
-                  </div>
-                  <h3 className="font-semibold text-xs text-teal-400 print:text-teal-700">Accelerators</h3>
-                </div>
-                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
-                  <li>• Cohort management</li>
-                  <li>• Application review pipeline</li>
-                  <li>• Startup journey tracking</li>
-                  <li>• Alumni portfolio</li>
-                  <li>• Mentor/advisor assignment</li>
-                </ul>
-              </TechCard>
-
-              {/* Corporate Partners */}
-              <TechCard glowColor="indigo" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-indigo-500/20 flex items-center justify-center">
-                    <Handshake className="h-3.5 w-3.5 text-indigo-400" />
-                  </div>
-                  <h3 className="font-semibold text-xs text-indigo-400 print:text-indigo-700">Corporate Partners</h3>
-                </div>
-                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
-                  <li>• Innovation partnerships</li>
-                  <li>• Pilot program access</li>
-                  <li>• Startup discovery</li>
-                  <li>• Sponsorship visibility</li>
-                  <li>• Talent pipeline access</li>
-                </ul>
-              </TechCard>
-
-              {/* Admins */}
-              <TechCard glowColor="slate" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-slate-500/20 flex items-center justify-center">
-                    <Network className="h-3.5 w-3.5 text-slate-400" />
-                  </div>
-                  <h3 className="font-semibold text-xs text-slate-300 print:text-slate-700">Platform Admins</h3>
-                </div>
-                <ul className="text-[9px] leading-relaxed text-slate-400 space-y-0.5 print:text-gray-600">
-                  <li>• User & role management</li>
-                  <li>• Content moderation</li>
-                  <li>• Analytics dashboard</li>
-                  <li>• Resource approval</li>
-                  <li>• API usage tracking</li>
-                </ul>
-              </TechCard>
+                <span className="text-sm text-slate-300">
+                  <span className="text-white font-bold">5,800+</span> locations • 
+                  <span className="text-white font-bold"> 130</span> countries • 
+                  <span className="text-white font-bold"> IWG</span> partnership
+                </span>
+              </div>
             </div>
           </div>
         </SlideContainer>
 
+        {/* SLIDE 5: Ecosystem Overview - Consolidated Users + Key Value */}
         <SlideContainer>
           <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-4">
-              <IconBadge icon={Cpu} color="teal" />
-              <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">Key Features</h2>
+            <div className="flex items-center gap-3 mb-2">
+              <IconBadge icon={Users} color="teal" />
+              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Ecosystem Overview</h2>
             </div>
-            <p className="text-xl text-slate-400 text-center mb-12 print:text-gray-600">Powered by Innovation</p>
+            <p className="text-base text-slate-400 text-center mb-6 max-w-3xl print:text-gray-600">
+              A unified platform serving 8 stakeholder types with role-specific dashboards and AI-powered workflow automation.
+            </p>
             
-            <div className="grid md:grid-cols-3 gap-4 max-w-5xl w-full">
-              {[{
-              icon: Cpu,
-              title: "AI Recommendations",
-              desc: "Smart matching algorithms for optimal connections",
-              color: "teal"
-            }, {
-              icon: Video,
-              title: "Video Conferencing",
-              desc: "Integrated virtual meetings and pitch sessions",
-              color: "cyan"
-            }, {
-              icon: FileText,
-              title: "Document Suite",
-              desc: "LightPaper productivity and collaboration tools",
-              color: "purple"
-            }, {
-              icon: Calendar,
-              title: "Global Events",
-              desc: "Networking opportunities and demo days",
-              color: "emerald"
-            }, {
-              icon: Briefcase,
-              title: "Job Board",
-              desc: "Talent acquisition and career opportunities",
-              color: "amber"
-            }, {
-              icon: BarChart3,
-              title: "Market Intelligence",
-              desc: "Real-time insights and analytics",
-              color: "rose"
-            }].map((feature, i) => <TechCard key={i} glowColor={feature.color} className="text-center">
-                  <div className="flex justify-center mb-3">
-                    <IconBadge icon={feature.icon} color={feature.color} />
+            {/* Compact User Grid - 8 columns */}
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-2 max-w-5xl w-full mb-6">
+              {[
+                { icon: Rocket, label: "Startups", color: "emerald" },
+                { icon: Diamond, label: "Investors", color: "purple" },
+                { icon: Lightbulb, label: "Mentors", color: "cyan" },
+                { icon: Award, label: "Advisors", color: "amber" },
+                { icon: GraduationCap, label: "Students", color: "rose" },
+                { icon: Building2, label: "Accelerators", color: "teal" },
+                { icon: Handshake, label: "Corporates", color: "indigo" },
+                { icon: Network, label: "Admins", color: "slate" },
+              ].map((user, i) => (
+                <div key={i} className={`bg-slate-900/60 border border-${user.color}-500/30 rounded-lg p-2 text-center hover:border-${user.color}-500/60 transition-all print:bg-gray-50`}>
+                  <div className={`w-8 h-8 rounded-lg bg-${user.color}-500/20 flex items-center justify-center mx-auto mb-1`}>
+                    <user.icon className={`h-4 w-4 text-${user.color}-400`} />
                   </div>
-                  <h4 className={`font-semibold text-${feature.color}-400 mb-2 print:text-gray-700`}>{feature.title}</h4>
-                  <p className="text-sm text-slate-400 print:text-gray-600">{feature.desc}</p>
-                </TechCard>)}
+                  <span className={`text-[9px] font-medium text-${user.color}-400`}>{user.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <SectionDivider title="Core Value Drivers" />
+            
+            {/* Key Value Props - What We Deliver */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-5xl w-full">
+              <TechCard glowColor="teal" className="p-3 text-center">
+                <div className="text-2xl font-bold text-teal-400 mb-1">24/7</div>
+                <p className="text-xs text-slate-400">AI-Powered Guidance</p>
+                <p className="text-[9px] text-slate-500 mt-1">Automated roadmaps & recommendations</p>
+              </TechCard>
+
+              <TechCard glowColor="cyan" className="p-3 text-center">
+                <div className="text-2xl font-bold text-cyan-400 mb-1">6</div>
+                <p className="text-xs text-slate-400">Physical Hub Cities</p>
+                <p className="text-[9px] text-slate-500 mt-1">Real workspaces & community events</p>
+              </TechCard>
+
+              <TechCard glowColor="purple" className="p-3 text-center">
+                <div className="text-2xl font-bold text-purple-400 mb-1">100+</div>
+                <p className="text-xs text-slate-400">Partner Network</p>
+                <p className="text-[9px] text-slate-500 mt-1">Investors, corporates & accelerators</p>
+              </TechCard>
+
+              <TechCard glowColor="emerald" className="p-3 text-center">
+                <div className="text-2xl font-bold text-emerald-400 mb-1">∞</div>
+                <p className="text-xs text-slate-400">Continuous Support</p>
+                <p className="text-[9px] text-slate-500 mt-1">Before, during & after acceleration</p>
+              </TechCard>
             </div>
           </div>
         </SlideContainer>
