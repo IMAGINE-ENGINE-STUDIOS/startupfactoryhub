@@ -83,8 +83,8 @@ const PublicResources = () => {
   const [isLeftPanelOpen, setIsLeftPanelOpen] = useState(!isMobile);
   const [userLocation, setUserLocation] = useState<{lat: number; lng: number} | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [isRotating, setIsRotating] = useState(true);
-  const isRotatingRef = useRef(true);
+  const [isRotating, setIsRotating] = useState(false);
+  const isRotatingRef = useRef(false);
   const [isPerksExpanded, setIsPerksExpanded] = useState(true);
   const [isOnlineResourcesExpanded, setIsOnlineResourcesExpanded] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
