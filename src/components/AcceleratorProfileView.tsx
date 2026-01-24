@@ -100,6 +100,29 @@ export default function AcceleratorProfileView() {
     fetchAcceleratorData();
   }, [profile?.user_id]);
 
+  // Real-time subscription for accelerator profile changes
+  useEffect(() => {
+    if (!profile?.user_id) return;
+    
+    const channel = supabase
+      .channel(`accelerator-profile-${profile.user_id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'accelerator_profiles',
+        filter: `user_id=eq.${profile.user_id}`
+      }, (payload) => {
+        if (payload.eventType !== 'DELETE') {
+          setAcceleratorProfile(payload.new);
+        }
+      })
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [profile?.user_id]);
+
   // Fetch alumni when accelerator profile is loaded
   useEffect(() => {
     const fetchAlumni = async () => {
@@ -154,6 +177,14 @@ export default function AcceleratorProfileView() {
   }, [acceleratorProfile?.id]);
 
   const startEditing = () => {
+    // Guard against editing before data loads
+    if (profileLoading || !profile) {
+      toast({ 
+        title: 'Please wait', 
+        description: 'Profile data is still loading...' 
+      });
+      return;
+    }
     if (profile) {
       setEditedFullName(profile.full_name || '');
       setEditedBio(profile.bio || '');
@@ -380,6 +411,9 @@ export default function AcceleratorProfileView() {
                 size="lg"
                 userRole="accelerator"
                 showGradientBorder
+                onUploadComplete={(url) => {
+                  toast({ title: 'Logo updated successfully' });
+                }}
               />
             ) : (
               <Avatar className="h-20 w-20">
