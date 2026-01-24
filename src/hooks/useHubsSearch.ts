@@ -20,6 +20,7 @@ export interface Workspace {
   rating: number | null;
   image_url: string | null;
   images?: string[];
+  videos?: string[];
   provider: 'internal' | 'liquidspace' | 'mock';
   external_venue_id?: string;
 }
