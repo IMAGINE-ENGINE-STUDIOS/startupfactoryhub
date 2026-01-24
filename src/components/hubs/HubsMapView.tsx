@@ -127,14 +127,19 @@ export const HubsMapView = ({
         width: ${markerSize}px;
         height: ${markerSize}px;
         cursor: pointer;
-        position: relative;
+        position: absolute;
+        transform: translate(-50%, -50%);
       `;
       
-      // Main marker element with gradient
+      // Main marker element with gradient - fixed sizing for zoom persistence
       const markerEl = document.createElement('div');
       markerEl.style.cssText = `
-        width: 100%;
-        height: 100%;
+        width: ${markerSize}px;
+        height: ${markerSize}px;
+        min-width: ${markerSize}px;
+        min-height: ${markerSize}px;
+        max-width: ${markerSize}px;
+        max-height: ${markerSize}px;
         background: ${workspace.image_url ? `url(${workspace.image_url}) center/cover,` : ''} linear-gradient(135deg, ${color}, ${color}dd);
         border: 3px solid white;
         border-radius: 50%;
@@ -176,10 +181,11 @@ export const HubsMapView = ({
         markerEl.style.boxShadow = `0 4px 12px ${color}80, 0 2px 8px rgba(0,0,0,0.3)`;
       });
 
-      // Use anchor: 'center' to ensure marker is centered on coordinates
+      // Use anchor: 'center' with offset: [0,0] to ensure marker stays centered on coordinates during zoom
       const marker = new mapboxgl.Marker({ 
         element: el, 
-        anchor: 'center' 
+        anchor: 'center',
+        offset: [0, 0]
       })
         .setLngLat([workspace.longitude, workspace.latitude])
         .addTo(map.current!);
@@ -244,7 +250,7 @@ export const HubsMapView = ({
           </div>
         `;
         
-        userMarker.current = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        userMarker.current = new mapboxgl.Marker({ element: el, anchor: 'center', offset: [0, 0] })
           .setLngLat([coords.lng, coords.lat])
           .addTo(map.current!);
         
