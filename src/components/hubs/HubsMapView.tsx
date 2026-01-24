@@ -41,8 +41,8 @@ export const HubsMapView = ({
   const isMobile = useIsMobile();
   
   const [isLocating, setIsLocating] = useState(false);
-  const [isRotating, setIsRotating] = useState(true);
-  const isRotatingRef = useRef(true);
+  const [isRotating, setIsRotating] = useState(false);
+  const isRotatingRef = useRef(false);
 
   // Initialize map - matching GlobalResourcesMap exactly
   useEffect(() => {
