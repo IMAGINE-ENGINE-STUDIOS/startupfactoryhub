@@ -39,17 +39,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import VideoConferencing from '@/components/VideoConferencing';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
-interface Startup {
-  id: string;
-  name: string;
-  description: string;
-  stage: string;
-  industry: string;
-  user_id: string;
-  logo_url?: string | null;
-}
+import MentorOffersBoard from '@/components/MentorOffersBoard';
+
 export default function AdvisorDashboard() {
-  const [startups, setStartups] = useState<Startup[]>([]);
+  
   const [mentorProfile, setMentorProfile] = useState<any>(null);
   const [selectedStartup, setSelectedStartup] = useState<any>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -105,7 +98,6 @@ export default function AdvisorDashboard() {
   useEffect(() => {
     if (user) {
       fetchMentorProfile();
-      fetchStartups();
       fetchMentorStats();
     }
   }, [user]);
@@ -216,104 +208,7 @@ export default function AdvisorDashboard() {
       description: action === 'accept' ? "You can now schedule sessions with your new mentee." : "The mentorship request has been declined."
     });
     refetch();
-    fetchStartups();
     fetchMentorStats();
-  };
-  const offerMentorship = async (companyId: string, menteeUserId: string, startupName: string) => {
-    if (!user) return;
-    try {
-      const {
-        error
-      } = await supabase.from('mentorship_relationships').insert({
-        mentor_id: user.id,
-        mentee_id: menteeUserId,
-        status: 'pending',
-        goals: `Mentorship offer for ${startupName}`
-      });
-      if (error) {
-        if (error.code === '23505') {
-          toast({
-            title: "Already Offered",
-            description: "You've already offered mentorship to this startup.",
-            variant: "destructive"
-          });
-        } else {
-          throw error;
-        }
-        return;
-      }
-
-      // Get advisor profile for notification
-      const {
-        data: profile
-      } = await supabase.from('profiles').select('full_name').eq('user_id', user.id).single();
-      const advisorName = profile?.full_name || 'An advisor';
-
-      // Send notification to startup
-      await supabase.from('notifications').insert({
-        user_id: menteeUserId,
-        type: 'connection',
-        title: 'New Mentorship Offer',
-        message: `${advisorName} has offered to mentor your startup!`,
-        data: {
-          mentor_id: user.id,
-          startup_name: startupName
-        }
-      });
-      toast({
-        title: "Mentorship Offered!",
-        description: `Your mentorship offer to ${startupName} has been sent.`
-      });
-
-      // Remove the startup from the list immediately
-      setStartups(prevStartups => prevStartups.filter(s => s.id !== companyId));
-    } catch (error) {
-      console.error('Error offering mentorship:', error);
-      toast({
-        title: "Error",
-        description: "Failed to offer mentorship. Please try again.",
-        variant: "destructive"
-      });
-    }
-  };
-  const fetchStartups = async () => {
-    if (!user) return;
-
-    // Fetch all companies
-    const {
-      data: allCompanies,
-      error
-    } = await supabase.from('companies').select(`
-        id,
-        name,
-        description,
-        stage,
-        industry,
-        user_id,
-        logo_url,
-        pitch_deck_url,
-        website,
-        location,
-        team_size,
-        funding_amount,
-        looking_for
-      `).order('created_at', {
-      ascending: false
-    });
-    if (error) {
-      console.error('Error fetching startups:', error);
-      return;
-    }
-
-    // Fetch existing mentorship relationships for this advisor
-    const {
-      data: existingRelationships
-    } = await supabase.from('mentorship_relationships').select('mentee_id').eq('mentor_id', user.id);
-
-    // Filter out companies where mentorship already exists
-    const existingMenteeIds = new Set((existingRelationships || []).map(r => r.mentee_id));
-    const availableStartups = (allCompanies || []).filter(company => !existingMenteeIds.has(company.user_id));
-    setStartups(availableStartups);
   };
   const stats = [{
     title: 'Active Mentees',
@@ -573,43 +468,8 @@ export default function AdvisorDashboard() {
                 </CardContent>
               </Card>}
 
-            {/* New Opportunities */}
-            {startups.length > 0 && <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center space-x-2">
-                    <TrendingUp className="h-5 w-5 text-primary" />
-                    <span>New Mentorship Opportunities</span>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {startups.map(startup => <div key={startup.id} className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 p-4 rounded-lg border border-border/50 hover:border-primary/50 transition-colors">
-                        <div className="flex items-center space-x-4">
-                          <RoleBasedAvatar avatarUrl={startup.logo_url} role="startup" fallbackText={startup.name} className="h-12 w-12" />
-                          <div>
-                            <h3 className="font-semibold text-foreground">{startup.name}</h3>
-                            <p className="text-sm text-muted-foreground line-clamp-2">{startup.description}</p>
-                            <div className="flex space-x-2 mt-2">
-                              <Badge variant="secondary" className="text-xs">{startup.stage}</Badge>
-                              <Badge variant="outline" className="text-xs">{startup.industry}</Badge>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex space-x-2 w-full md:w-auto">
-                          <Button variant="outline" size="sm" className="flex-1 md:flex-initial" onClick={() => {
-                      setSelectedStartup(startup);
-                      setDialogOpen(true);
-                    }}>
-                            View Details
-                          </Button>
-                          <Button size="sm" className="flex-1 md:flex-initial" onClick={() => offerMentorship(startup.id, startup.user_id, startup.name)}>
-                            Offer Mentorship
-                          </Button>
-                        </div>
-                      </div>)}
-                  </div>
-                </CardContent>
-              </Card>}
+            {/* New Mentorship Opportunities - Using shared component */}
+            <MentorOffersBoard />
           </TabsContent>
 
           <TabsContent value="calendar" className="space-y-4">
