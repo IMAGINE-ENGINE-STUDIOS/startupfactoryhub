@@ -32,6 +32,9 @@ const MOCK_WORKSPACES = [
       "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
       "https://images.unsplash.com/photo-1564069114553-7215e1ff1890?w=800"
     ],
+    videos: [
+      "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-sf-1"
   },
@@ -81,6 +84,9 @@ const MOCK_WORKSPACES = [
       "https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800",
       "https://images.unsplash.com/photo-1572025442646-866d16c84a54?w=800",
       "https://images.unsplash.com/photo-1568992687947-868a62a9f521?w=800"
+    ],
+    videos: [
+      "https://videos.pexels.com/video-files/3052296/3052296-hd_1920_1080_30fps.mp4"
     ],
     provider: "mock",
     external_venue_id: "liquidspace-nyc-1"
@@ -132,6 +138,9 @@ const MOCK_WORKSPACES = [
       "https://images.unsplash.com/photo-1564069114553-7215e1ff1890?w=800",
       "https://images.unsplash.com/photo-1572025442646-866d16c84a54?w=800"
     ],
+    videos: [
+      "https://videos.pexels.com/video-files/3129957/3129957-hd_1920_1080_30fps.mp4"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-london-1"
   },
@@ -181,6 +190,9 @@ const MOCK_WORKSPACES = [
       "https://images.unsplash.com/photo-1462826303086-329426d1aef5?w=800",
       "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800",
       "https://images.unsplash.com/photo-1556761175-4b46a572b786?w=800"
+    ],
+    videos: [
+      "https://videos.pexels.com/video-files/2795168/2795168-hd_1920_1080_30fps.mp4"
     ],
     provider: "mock",
     external_venue_id: "liquidspace-tokyo-1"
@@ -232,6 +244,9 @@ const MOCK_WORKSPACES = [
       "https://images.unsplash.com/photo-1564069114553-7215e1ff1890?w=800",
       "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800"
     ],
+    videos: [
+      "https://videos.pexels.com/video-files/3130284/3130284-hd_1920_1080_30fps.mp4"
+    ],
     provider: "mock",
     external_venue_id: "liquidspace-singapore-1"
   },
@@ -281,6 +296,9 @@ const MOCK_WORKSPACES = [
       "https://images.unsplash.com/photo-1497366754035-f200968a6e72?w=800",
       "https://images.unsplash.com/photo-1517502884422-41eaead166d4?w=800",
       "https://images.unsplash.com/photo-1524758631624-e2822e304c36?w=800"
+    ],
+    videos: [
+      "https://videos.pexels.com/video-files/3129671/3129671-hd_1920_1080_30fps.mp4"
     ],
     provider: "mock",
     external_venue_id: "liquidspace-dubai-1"

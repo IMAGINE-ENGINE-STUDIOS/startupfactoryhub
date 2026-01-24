@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Workspace } from '@/hooks/useHubsSearch';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -9,7 +9,15 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { format, addHours, setHours, setMinutes } from 'date-fns';
+import { 
+  Carousel, 
+  CarouselContent, 
+  CarouselItem, 
+  CarouselNext, 
+  CarouselPrevious,
+  type CarouselApi 
+} from '@/components/ui/carousel';
+import { format } from 'date-fns';
 import { 
   CalendarIcon, 
   Clock, 
@@ -18,7 +26,8 @@ import {
   DollarSign,
   Loader2,
   CreditCard,
-  ExternalLink
+  Play,
+  Image as ImageIcon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
@@ -50,6 +59,43 @@ export const HubsBookingModal = ({ workspace, open, onOpenChange }: HubsBookingM
   const [selectedTime, setSelectedTime] = useState<string>('09:00');
   const [duration, setDuration] = useState<string>('2');
   const [notes, setNotes] = useState('');
+
+  // Carousel state
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>();
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
+
+  // Combine all images
+  const allImages = useMemo(() => {
+    const imgs: string[] = [];
+    if (workspace?.images?.length) {
+      imgs.push(...workspace.images);
+    } else if (workspace?.image_url) {
+      imgs.push(workspace.image_url);
+    }
+    return imgs;
+  }, [workspace]);
+
+  const allVideos = useMemo(() => workspace?.videos || [], [workspace]);
+
+  // Track carousel slide changes
+  useEffect(() => {
+    if (!carouselApi) return;
+    
+    const onSelect = () => {
+      setCurrentSlide(carouselApi.selectedScrollSnap());
+    };
+    
+    carouselApi.on('select', onSelect);
+    return () => { carouselApi.off('select', onSelect); };
+  }, [carouselApi]);
+
+  // Reset when workspace changes
+  useEffect(() => {
+    setCurrentSlide(0);
+    setMediaType('image');
+    carouselApi?.scrollTo(0);
+  }, [workspace?.id, carouselApi]);
 
   if (!workspace) return null;
 
@@ -128,7 +174,7 @@ export const HubsBookingModal = ({ workspace, open, onOpenChange }: HubsBookingM
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-lg tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20">
+      <DialogContent className="sm:max-w-2xl tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/20 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Building2 className="h-5 w-5 text-primary" />
@@ -139,25 +185,113 @@ export const HubsBookingModal = ({ workspace, open, onOpenChange }: HubsBookingM
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Workspace Info */}
-          <div className="flex items-start gap-4 p-4 rounded-2xl backdrop-blur-xl bg-white/10 dark:bg-black/20 border border-white/30">
-            {workspace.image_url ? (
-              <img
-                src={workspace.image_url}
-                alt={workspace.name}
-                className="w-20 h-20 rounded-xl object-cover"
-              />
+        <div className="space-y-5">
+          {/* Media Carousel Section */}
+          <div className="relative h-48 rounded-2xl overflow-hidden border border-white/30">
+            {mediaType === 'image' && allImages.length > 0 ? (
+              <Carousel 
+                className="w-full h-full" 
+                setApi={setCarouselApi}
+                opts={{ loop: true }}
+              >
+                <CarouselContent className="-ml-0">
+                  {allImages.map((imageUrl, index) => (
+                    <CarouselItem key={index} className="pl-0">
+                      <img
+                        src={imageUrl}
+                        alt={`${workspace.name} - Image ${index + 1}`}
+                        className="w-full h-48 object-cover"
+                      />
+                    </CarouselItem>
+                  ))}
+                </CarouselContent>
+                
+                {allImages.length > 1 && (
+                  <>
+                    <CarouselPrevious className="left-3 h-8 w-8 backdrop-blur-xl bg-black/30 border-0 text-white hover:bg-black/50" />
+                    <CarouselNext className="right-3 h-8 w-8 backdrop-blur-xl bg-black/30 border-0 text-white hover:bg-black/50" />
+                  </>
+                )}
+                
+                {allImages.length > 1 && (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full backdrop-blur-xl bg-black/40 text-white text-xs font-medium">
+                    {currentSlide + 1} / {allImages.length}
+                  </div>
+                )}
+              </Carousel>
+            ) : mediaType === 'video' && allVideos.length > 0 ? (
+              <video
+                src={allVideos[0]}
+                controls
+                className="w-full h-48 object-cover"
+                poster={allImages[0]}
+              >
+                Your browser does not support video playback.
+              </video>
             ) : (
-              <div className="w-20 h-20 rounded-xl bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center">
-                <Building2 className="h-8 w-8 text-primary" />
+              <div className="w-full h-full bg-gradient-to-br from-primary/20 to-purple-500/20 flex items-center justify-center">
+                <Building2 className="h-16 w-16 text-primary/50" />
               </div>
             )}
+          </div>
+
+          {/* Thumbnail Preview Row */}
+          {allImages.length > 1 && mediaType === 'image' && (
+            <div className="flex gap-2 overflow-x-auto py-1">
+              {allImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => carouselApi?.scrollTo(idx)}
+                  className={cn(
+                    "w-14 h-10 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all",
+                    currentSlide === idx 
+                      ? "border-primary ring-2 ring-primary/30" 
+                      : "border-transparent opacity-70 hover:opacity-100"
+                  )}
+                >
+                  <img src={img} alt="" className="w-full h-full object-cover" />
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Media Type Toggle (if videos available) */}
+          {allVideos.length > 0 && (
+            <div className="flex gap-2">
+              <Button
+                variant={mediaType === 'image' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMediaType('image')}
+                className={cn(
+                  "flex-1 gap-2",
+                  mediaType !== 'image' && "backdrop-blur-xl bg-white/10 border-white/30"
+                )}
+              >
+                <ImageIcon className="h-4 w-4" />
+                Photos ({allImages.length})
+              </Button>
+              <Button
+                variant={mediaType === 'video' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setMediaType('video')}
+                className={cn(
+                  "flex-1 gap-2",
+                  mediaType !== 'video' && "backdrop-blur-xl bg-white/10 border-white/30"
+                )}
+              >
+                <Play className="h-4 w-4" />
+                Video Tour
+              </Button>
+            </div>
+          )}
+
+          {/* Workspace Info */}
+          <div className="flex items-start gap-4 p-4 rounded-2xl backdrop-blur-xl bg-white/10 dark:bg-black/20 border border-white/30">
             <div className="flex-1">
               <h4 className="font-medium">{workspace.name}</h4>
               <div className="flex items-center gap-1 text-sm text-muted-foreground mt-0.5">
                 <MapPin className="h-3 w-3" />
-                {workspace.city}, {workspace.country}
+                {workspace.address}, {workspace.city}
               </div>
               <div className="flex flex-wrap gap-1 mt-2">
                 {workspace.workspace_types.map((type) => (
