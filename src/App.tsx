@@ -39,6 +39,7 @@ const PublicEventRegistration = lazy(() => import("./pages/PublicEventRegistrati
 const PublicResources = lazy(() => import("./pages/PublicResources"));
 const Deck = lazy(() => import("./pages/Deck"));
 const Hubs = lazy(() => import("./pages/Hubs"));
+const HubsLab = lazy(() => import("./pages/HubsLab"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -100,6 +101,7 @@ const App = () => (
                     <Route path="/resources" element={<PublicResources />} />
                     <Route path="/deck" element={<Deck />} />
                     <Route path="/hubs" element={<Hubs />} />
+                    <Route path="/hubs-lab" element={<HubsLab />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
