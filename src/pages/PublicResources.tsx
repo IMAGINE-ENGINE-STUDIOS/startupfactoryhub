@@ -88,6 +88,7 @@ const PublicResources = () => {
   const [isPerksExpanded, setIsPerksExpanded] = useState(true);
   const [isOnlineResourcesExpanded, setIsOnlineResourcesExpanded] = useState(false);
   const [showAddDialog, setShowAddDialog] = useState(false);
+  const [webglError, setWebglError] = useState(false);
   
   const resourcesRef = useRef<Resource[] | undefined>(undefined);
 
@@ -141,56 +142,78 @@ const PublicResources = () => {
     }
   }, [searchParams, resources]);
 
-  // Initialize map
+  // Initialize map with WebGL error handling
   useEffect(() => {
     if (!mapContainer.current || map.current) return;
 
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: 'mapbox://styles/imagineengine/cmhfkp1ie001d01qi2hyg82lp',
-      projection: { name: 'globe' },
-      zoom: 2.5,
-      center: [-122.4, 37.8],
-      pitch: 45,
-      antialias: true,
-    });
+    try {
+      // Check WebGL support first
+      const canvas = document.createElement('canvas');
+      const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+      if (!gl) {
+        console.warn('WebGL not supported');
+        setWebglError(true);
+        return;
+      }
 
-    map.current.addControl(
-      new mapboxgl.NavigationControl({ visualizePitch: true }),
-      'top-right'
-    );
-
-    map.current.on('style.load', () => {
-      if (!map.current) return;
-      
-      map.current.setFog({
-        color: '#0f172a',
-        'high-color': '#1e293b',
-        'horizon-blend': 0.02,
-        'space-color': '#020617',
-        'star-intensity': 0.15
+      map.current = new mapboxgl.Map({
+        container: mapContainer.current,
+        style: 'mapbox://styles/imagineengine/cmhfkp1ie001d01qi2hyg82lp',
+        projection: { name: 'globe' },
+        zoom: 2.5,
+        center: [-122.4, 37.8],
+        pitch: 45,
+        antialias: true,
+        failIfMajorPerformanceCaveat: false,
       });
-    });
 
-    // Globe rotation
-    const rotateGlobe = () => {
-      if (!map.current || !isRotatingRef.current) return;
-      const center = map.current.getCenter();
-      center.lng += 0.01;
-      map.current.setCenter(center);
-      requestAnimationFrame(rotateGlobe);
-    };
-    rotateGlobe();
+      map.current.on('error', (e) => {
+        console.error('Mapbox error:', e);
+        if (e.error?.message?.includes('WebGL')) {
+          setWebglError(true);
+        }
+      });
 
-    // Stop rotation on user interaction
-    map.current.on('mousedown', () => {
-      isRotatingRef.current = false;
-      setIsRotating(false);
-    });
-    map.current.on('touchstart', () => {
-      isRotatingRef.current = false;
-      setIsRotating(false);
-    });
+      map.current.addControl(
+        new mapboxgl.NavigationControl({ visualizePitch: true }),
+        'top-right'
+      );
+
+      map.current.on('style.load', () => {
+        if (!map.current) return;
+        
+        map.current.setFog({
+          color: '#0f172a',
+          'high-color': '#1e293b',
+          'horizon-blend': 0.02,
+          'space-color': '#020617',
+          'star-intensity': 0.15
+        });
+      });
+
+      // Globe rotation
+      const rotateGlobe = () => {
+        if (!map.current || !isRotatingRef.current) return;
+        const center = map.current.getCenter();
+        center.lng += 0.01;
+        map.current.setCenter(center);
+        requestAnimationFrame(rotateGlobe);
+      };
+      rotateGlobe();
+
+      // Stop rotation on user interaction
+      map.current.on('mousedown', () => {
+        isRotatingRef.current = false;
+        setIsRotating(false);
+      });
+      map.current.on('touchstart', () => {
+        isRotatingRef.current = false;
+        setIsRotating(false);
+      });
+    } catch (error) {
+      console.error('Failed to initialize map:', error);
+      setWebglError(true);
+    }
 
     return () => {
       map.current?.remove();
@@ -296,6 +319,33 @@ const PublicResources = () => {
     acc[type].push(resource);
     return acc;
   }, {} as Record<ResourceType, Resource[]>);
+
+  // WebGL error fallback
+  if (webglError) {
+    return (
+      <div className="relative h-screen w-screen overflow-hidden bg-background">
+        <MatrixBackground />
+        <div className="absolute inset-0 flex items-center justify-center z-10">
+          <Card className="max-w-md mx-4 p-6 text-center">
+            <Globe2 className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-xl font-bold mb-2">3D Map Unavailable</h2>
+            <p className="text-muted-foreground mb-4">
+              Your browser or device doesn't support WebGL, which is required for the 3D globe map. 
+              You can still browse resources below.
+            </p>
+            <div className="flex gap-2 justify-center">
+              <Button onClick={() => navigate('/auth')}>
+                Join Platform
+              </Button>
+              <Button variant="outline" onClick={() => window.location.reload()}>
+                Retry
+              </Button>
+            </div>
+          </Card>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative h-screen w-screen overflow-hidden">
