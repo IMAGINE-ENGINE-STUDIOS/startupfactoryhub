@@ -19,6 +19,7 @@ export interface Workspace {
   daily_rate_max: number | null;
   rating: number | null;
   image_url: string | null;
+  images?: string[];
   provider: 'internal' | 'liquidspace' | 'mock';
   external_venue_id?: string;
 }
