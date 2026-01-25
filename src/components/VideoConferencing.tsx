@@ -5,32 +5,49 @@ import { Video, Loader2 } from 'lucide-react';
 
 interface VideoConferencingProps {
   roomUrl?: string;
+  persistentRoomUrl?: string;  // Stored room URL from database
   userId?: string;
   hostId?: string;
   userName?: string;
   meetingTitle?: string;
   onLeave?: () => void;
+  onRoomCreated?: (url: string) => void;  // Callback when new room is created
   autoJoin?: boolean;
   eventId?: string;
 }
 
+// Check if URL is a valid Whereby room URL
+const isValidWherebyUrl = (url?: string): boolean => {
+  if (!url) return false;
+  return url.includes('whereby.com');
+};
+
 export default function VideoConferencing({
   roomUrl,
+  persistentRoomUrl,
   userName = 'User',
   meetingTitle,
   onLeave,
+  onRoomCreated,
   autoJoin = false,
   eventId,
 }: VideoConferencingProps) {
   const [isCallActive, setIsCallActive] = useState(autoJoin);
   const [isLoading, setIsLoading] = useState(false);
-  const [activeRoomUrl, setActiveRoomUrl] = useState(roomUrl);
+  const [activeRoomUrl, setActiveRoomUrl] = useState(persistentRoomUrl || roomUrl);
 
   const handleJoin = async () => {
     setIsLoading(true);
     
-    // Always create a fresh room to avoid expired room issues
-    // Whereby rooms can expire, so we generate a new one each time
+    // Check if we already have a valid persistent room URL
+    if (isValidWherebyUrl(persistentRoomUrl)) {
+      setActiveRoomUrl(persistentRoomUrl);
+      setIsCallActive(true);
+      setIsLoading(false);
+      return;
+    }
+    
+    // Create a new persistent room (10-year expiration handled by edge function)
     try {
       const response = await fetch(
         'https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/create-whereby-room',
@@ -53,6 +70,11 @@ export default function VideoConferencing({
       const data = await response.json();
       setActiveRoomUrl(data.roomUrl);
       setIsCallActive(true);
+      
+      // Notify parent to save the new room URL to database
+      if (onRoomCreated && data.roomUrl) {
+        onRoomCreated(data.roomUrl);
+      }
     } catch (error) {
       console.error('Error creating room:', error);
       alert('Failed to create meeting room. Please try again.');

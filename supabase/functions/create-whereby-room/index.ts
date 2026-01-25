@@ -58,6 +58,11 @@ serve(async (req) => {
     // Sanitize room name for Whereby API (only alphanumeric and dashes allowed)
     const shortRoomName = roomName ? sanitizeRoomNamePrefix(roomName) : generateShortId();
 
+    // Default to 10 years expiration for persistent rooms (works with paid Whereby)
+    const tenYearsFromNow = new Date();
+    tenYearsFromNow.setFullYear(tenYearsFromNow.getFullYear() + 10);
+    const defaultEndDate = endDate || tenYearsFromNow.toISOString();
+
     // Create a Whereby room using their API
     const response = await fetch("https://api.whereby.dev/v1/meetings", {
       method: "POST",
@@ -66,7 +71,7 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        endDate: endDate || new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(), // Default 24 hours
+        endDate: defaultEndDate,
         fields: ["hostRoomUrl"],
         roomNamePrefix: shortRoomName,
         roomMode: "normal",

@@ -9,8 +9,10 @@ interface Event {
   start_date: string;
   end_date: string;
   location: string | null;
+  meeting_room_url?: string | null;  // Persistent Whereby room URL
   organizer_id: string;
   max_attendees: number | null;
+  external_registration_url?: string | null;
   profiles?: {
     full_name: string;
   };

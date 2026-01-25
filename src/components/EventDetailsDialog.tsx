@@ -22,6 +22,7 @@ interface Event {
   start_date: string;
   end_date: string;
   location: string | null;
+  meeting_room_url?: string | null;  // Persistent Whereby room URL
   organizer_id: string;
   max_attendees: number | null;
   external_registration_url?: string | null;
@@ -46,6 +47,7 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const [showVideo, setShowVideo] = useState(false);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [persistentRoomUrl, setPersistentRoomUrl] = useState<string | null>(event.meeting_room_url || null);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -54,11 +56,40 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
       fetchUserStatus();
       fetchAttendees();
       fetchUserProfile();
+      fetchEventRoomUrl();
       if (user?.id === event.organizer_id) {
         fetchAllUsers();
       }
     }
   }, [open, event.id]);
+
+  // Fetch the persistent room URL from database
+  const fetchEventRoomUrl = async () => {
+    const { data } = await supabase
+      .from('events')
+      .select('meeting_room_url')
+      .eq('id', event.id)
+      .single();
+    
+    if (data?.meeting_room_url) {
+      setPersistentRoomUrl(data.meeting_room_url);
+    }
+  };
+
+  // Save new room URL to database when first person creates it
+  const saveRoomUrl = async (roomUrl: string) => {
+    const { error } = await supabase
+      .from('events')
+      .update({ meeting_room_url: roomUrl } as any)
+      .eq('id', event.id);
+    
+    if (!error) {
+      setPersistentRoomUrl(roomUrl);
+      console.log('Saved persistent room URL to database:', roomUrl);
+    } else {
+      console.error('Failed to save room URL:', error);
+    }
+  };
 
   const fetchUserProfile = async () => {
     if (!user) return;
@@ -190,12 +221,14 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
         <DialogContent className="max-w-5xl h-[90vh] p-0">
           <VideoConferencing
             roomUrl={event.location}
+            persistentRoomUrl={persistentRoomUrl || undefined}
             userId={user?.id}
             hostId={event.organizer_id}
             userName={userProfile?.full_name || 'User'}
             meetingTitle={event.title}
             autoJoin={true}
             eventId={event.id}
+            onRoomCreated={saveRoomUrl}
             onLeave={() => {
               setShowVideo(false);
               onOpenChange(false);

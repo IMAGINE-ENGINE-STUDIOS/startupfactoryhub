@@ -198,6 +198,7 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         title: formData.title,
         description: formData.description,
         location: meetingLocation || null,
+        meeting_room_url: isOnlineEvent && meetingLocation ? meetingLocation : null,  // Store persistent room URL
         start_date: startDateTime.toISOString(),
         end_date: endDateTime.toISOString(),
         max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
