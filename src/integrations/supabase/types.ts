@@ -2109,6 +2109,7 @@ export type Database = {
           location: string | null
           longitude: number | null
           max_attendees: number | null
+          meeting_room_url: string | null
           organizer_id: string
           start_date: string
           title: string
@@ -2130,6 +2131,7 @@ export type Database = {
           location?: string | null
           longitude?: number | null
           max_attendees?: number | null
+          meeting_room_url?: string | null
           organizer_id: string
           start_date: string
           title: string
@@ -2151,6 +2153,7 @@ export type Database = {
           location?: string | null
           longitude?: number | null
           max_attendees?: number | null
+          meeting_room_url?: string | null
           organizer_id?: string
           start_date?: string
           title?: string
