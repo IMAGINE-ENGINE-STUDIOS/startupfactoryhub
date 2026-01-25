@@ -80,6 +80,28 @@ export function StartupPerksButton() {
           </p>
         </div>
 
+        {/* Featured Partner Perks */}
+        <div className="px-4 pt-4">
+          <p className="text-sm font-medium mb-3">🌟 Featured Partner Perks:</p>
+          <a 
+            href="https://www.tradingview.com/?aff_id=162505" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 p-3 rounded-lg bg-gradient-to-r from-blue-500/10 to-blue-600/10 border border-blue-500/20 hover:border-blue-500/40 transition-all group"
+          >
+            <img 
+              src="/partners/tradingview-logo.png" 
+              alt="TradingView" 
+              className="h-10 w-10 rounded-full object-cover"
+            />
+            <div className="flex-1">
+              <p className="font-semibold text-sm group-hover:text-blue-500 transition-colors">TradingView</p>
+              <p className="text-xs text-muted-foreground">Track markets & analyze charts</p>
+            </div>
+            <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-blue-500" />
+          </a>
+        </div>
+
         {/* Benefits Grid */}
         <div className="p-4">
           <p className="text-sm font-medium mb-3">Available Benefits:</p>
