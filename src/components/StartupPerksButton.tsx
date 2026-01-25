@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Badge } from "@/components/ui/badge";
 import { useUserRole } from "@/hooks/useUserRole";
+import tradingViewBanner from "@/assets/tradingview-banner.jpg";
 const perksCategories = [{
   name: "Electronics",
   icon: "📱"
@@ -88,6 +89,25 @@ export function StartupPerksButton() {
                 <span>{perk.name}</span>
               </div>)}
           </div>
+        </div>
+
+        {/* TradingView Partner Banner */}
+        <div className="px-4 pb-3">
+          <a 
+            href="https://www.tradingview.com/?aff_id=162505" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="block rounded-lg overflow-hidden hover:opacity-90 transition-opacity border border-border"
+          >
+            <img 
+              src={tradingViewBanner} 
+              alt="TradingView - The fastest way to follow markets" 
+              className="w-full h-auto"
+            />
+          </a>
+          <p className="text-xs text-center text-muted-foreground mt-1">
+            Official Partner
+          </p>
         </div>
 
         {/* Coming Soon Badge */}
