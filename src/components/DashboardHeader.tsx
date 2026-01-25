@@ -28,7 +28,7 @@ export function DashboardHeader() {
 
   return (
     <>
-      <div className="absolute sm:fixed top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-0.5 sm:gap-1 md:gap-2 z-40 max-w-[55%] sm:max-w-[70%] md:max-w-none justify-end">
+      <div className="absolute sm:fixed top-2 sm:top-4 right-2 sm:right-4 flex items-center gap-1 sm:gap-2 z-40 max-w-[60%] sm:max-w-none flex-wrap justify-end">
         <GlobalClock />
         
         <Button
