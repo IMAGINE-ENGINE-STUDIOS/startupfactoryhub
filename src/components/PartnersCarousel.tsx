@@ -7,6 +7,8 @@ const PARTNERS = [
   { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png", tier: "Cloud" },
   { name: "Nasdaq", logo: "/nasdaq-logo.png", tier: "Entrepreneurship" },
   { name: "F6S", logo: "/partners/f6s-logo.png", tier: "Startup" },
+  { name: "TradingView", logo: "/partners/tradingview-logo.png", tier: "Finance" },
+  { name: "IWG", logo: "/partners/iwg-logo.png", tier: "Workspace" },
   { name: "Advantary Capital Partners", logo: "/partners/advantary-logo.jpg", tier: "Investment" },
   { name: "Lehigh University", logo: "/lehigh-university-logo.png", tier: "Academic" },
   { name: "HubSpot", logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png", tier: "Marketing" },
