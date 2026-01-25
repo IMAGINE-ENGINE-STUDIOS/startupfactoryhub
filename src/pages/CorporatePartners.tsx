@@ -92,6 +92,16 @@ const FEATURED_PARTNERS = [
     tier: "Startup Partner"
   },
   {
+    name: "TradingView",
+    logo: "/partners/tradingview-logo.png",
+    tier: "Finance Partner"
+  },
+  {
+    name: "IWG International Workplace Group",
+    logo: "/partners/iwg-logo.png",
+    tier: "Workspace Partner"
+  },
+  {
     name: "NASA",
     logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/200px-NASA_logo.svg.png",
     tier: "Technology Partner"
