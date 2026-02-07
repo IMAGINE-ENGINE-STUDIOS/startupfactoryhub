@@ -223,10 +223,7 @@ const LocalHubBanner = () => {
     // ============================================================
     // RIGHT SIDE — "Who We're Looking For" cards
     // ============================================================
-    const rightX = 560;
-    const cardW = 280;
-    const cardH = 60;
-    const cardGapY = 12;
+    const rightX = 550;
 
     // Section label
     ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
@@ -237,49 +234,56 @@ const LocalHubBanner = () => {
     // Accent line
     ctx.strokeStyle = 'rgba(20, 184, 166, 0.3)';
     ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(rightX, 60); ctx.lineTo(rightX + cardW, 60); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(rightX, 60); ctx.lineTo(rightX + 295, 60); ctx.stroke();
 
     const personas = [
       { title: 'Visionary Ecosystem Builders', desc: 'Leaders ready to shape regional innovation', color: '#10b981' },
-      { title: 'University & Industry Partners', desc: 'Connected to academic and public institutions', color: '#06b6d4' },
+      { title: 'University & Industry Partners', desc: 'Connected to academic & public institutions', color: '#06b6d4' },
       { title: 'Startup Operators', desc: 'Ready to support and scale founders locally', color: '#8b5cf6' },
       { title: 'Global Connectors', desc: 'Believe innovation should be borderless', color: '#f59e0b' },
     ];
 
+    const cardW2 = 295;
+    const cardH2 = 68;
+    const cardGapY2 = 10;
+
     personas.forEach((p, i) => {
-      const y = 74 + i * (cardH + cardGapY);
+      const y = 74 + i * (cardH2 + cardGapY2);
 
       // Card bg
-      ctx.fillStyle = 'rgba(0, 20, 40, 0.7)';
-      ctx.beginPath(); ctx.roundRect(rightX, y, cardW, cardH, 10); ctx.fill();
+      ctx.fillStyle = 'rgba(0, 20, 40, 0.65)';
+      ctx.beginPath(); ctx.roundRect(rightX, y, cardW2, cardH2, 12); ctx.fill();
 
       // Card border
-      const border = ctx.createLinearGradient(rightX, y, rightX + cardW, y + cardH);
-      border.addColorStop(0, `${p.color}66`);
-      border.addColorStop(1, 'rgba(255,255,255,0.05)');
+      const border = ctx.createLinearGradient(rightX, y, rightX + cardW2, y + cardH2);
+      border.addColorStop(0, `${p.color}55`);
+      border.addColorStop(0.5, 'rgba(255,255,255,0.08)');
+      border.addColorStop(1, `${p.color}55`);
       ctx.strokeStyle = border;
       ctx.lineWidth = 1.2;
-      ctx.beginPath(); ctx.roundRect(rightX, y, cardW, cardH, 10); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(rightX, y, cardW2, cardH2, 12); ctx.stroke();
 
-      // Top accent line
-      ctx.strokeStyle = `${p.color}88`;
-      ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(rightX + 20, y); ctx.lineTo(rightX + cardW - 20, y); ctx.stroke();
-
-      // Color indicator
+      // Left accent bar
       ctx.fillStyle = p.color;
-      ctx.beginPath(); ctx.arc(rightX + 18, y + cardH / 2, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(rightX, y + 12, 3, cardH2 - 24, 2); ctx.fill();
+
+      // Color indicator dot
+      ctx.fillStyle = p.color;
+      ctx.shadowColor = `${p.color}88`;
+      ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(rightX + 22, y + cardH2 / 2, 5, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
 
       // Title
-      ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
+      ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'left';
-      ctx.fillText(p.title, rightX + 32, y + 24);
+      ctx.fillText(p.title, rightX + 38, y + 28);
 
       // Desc
-      ctx.font = '400 11px "Segoe UI", system-ui, sans-serif';
+      ctx.font = '400 11.5px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
-      ctx.fillText(p.desc, rightX + 32, y + 42);
+      ctx.fillText(p.desc, rightX + 38, y + 48);
     });
 
     // ============================================================
