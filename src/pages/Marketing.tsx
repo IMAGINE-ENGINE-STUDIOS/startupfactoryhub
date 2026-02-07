@@ -11,6 +11,7 @@ import moonEarthBg from '@/assets/moon-earth.jpg';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
 import sfhQrCode from '@/assets/sfh-qr-code.png';
 import GIF from 'gif.js';
+import LocalHubBanner from '@/components/marketing/LocalHubBanner';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -3070,6 +3071,9 @@ const Marketing = () => {
               </div>
             </div>
           </div>
+
+          {/* Banner 6 - Local Hub Owner CTA */}
+          <LocalHubBanner />
 
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
