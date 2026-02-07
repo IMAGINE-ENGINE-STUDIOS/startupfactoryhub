@@ -337,8 +337,8 @@ const LocalHubBanner = () => {
       { title: 'Global Connectors & Investors', desc: 'Believe innovation should be borderless', color: '#f59e0b', glowColor: 'rgba(245, 158, 11, 0.25)', icon: 'diamond' },
     ];
 
-    const cardH2 = 88;
-    const cardGapY2 = 8;
+    const cardH2 = 78;
+    const cardGapY2 = 6;
 
     // Helper: draw styled icon
     const drawIcon = (iconType: string, ix: number, iy: number, sz: number) => {
