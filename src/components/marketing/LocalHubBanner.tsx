@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Download, Image } from 'lucide-react';
 import { toast } from 'sonner';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
-import sfhQrCode from '@/assets/sfh-qr-code.png';
+
 
 const LocalHubBanner = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -29,25 +29,22 @@ const LocalHubBanner = () => {
 
     const galaxyImage = new window.Image();
     const logoImage = new window.Image();
-    const qrImage = new window.Image();
 
     let loadedCount = 0;
 
     const tryDraw = () => {
       loadedCount++;
-      if (loadedCount === 3) {
-        drawBanner(ctx, displayWidth, displayHeight, galaxyImage, logoImage, qrImage);
+      if (loadedCount === 2) {
+        drawBanner(ctx, displayWidth, displayHeight, galaxyImage, logoImage);
         setIsRendering(false);
       }
     };
 
     galaxyImage.onload = tryDraw;
     logoImage.onload = tryDraw;
-    qrImage.onload = tryDraw;
 
     galaxyImage.src = '/images/galaxy-hub-bg.webp';
     logoImage.src = sfhLogo;
-    qrImage.src = sfhQrCode;
   }, []);
 
   const drawBanner = (
@@ -56,7 +53,6 @@ const LocalHubBanner = () => {
     height: number,
     bgImage: HTMLImageElement,
     logoImage: HTMLImageElement,
-    qrImage: HTMLImageElement
   ) => {
     // === BACKGROUND ===
     const bgRatio = bgImage.width / bgImage.height;
@@ -174,7 +170,7 @@ const LocalHubBanner = () => {
     // "CREATE YOUR OWN"
     ctx.font = '300 28px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.fillText('🌍  CREATE YOUR OWN', width / 2, 128);
+    ctx.fillText('CREATE YOUR OWN', width / 2, 128);
 
     // "LOCAL HUB" - big gradient text
     ctx.font = '900 56px "Segoe UI", system-ui, sans-serif';
@@ -231,12 +227,12 @@ const LocalHubBanner = () => {
 
     // === BENEFIT CARDS - 2 rows x 3 columns, centered ===
     const benefits = [
-      { icon: '🚀', label: 'AI Platform', desc: 'Global startup-building tools', color: '#10b981' },
-      { icon: '🏛️', label: 'Proven Model', desc: 'Idea-to-scale program', color: '#06b6d4' },
-      { icon: '🌐', label: 'Global Network', desc: 'Founders & investors', color: '#8b5cf6' },
-      { icon: '💡', label: 'Activate Innovation', desc: 'University & industry', color: '#f59e0b' },
-      { icon: '🎯', label: 'Lead Ecosystem', desc: 'Shape your region', color: '#ec4899' },
-      { icon: '🔑', label: 'Full Ownership', desc: 'Your hub, your vision', color: '#14b8a6' },
+      { label: 'AI Platform', desc: 'Global startup-building tools', color: '#10b981' },
+      { label: 'Proven Model', desc: 'Idea-to-scale program', color: '#06b6d4' },
+      { label: 'Global Network', desc: 'Founders & investors', color: '#8b5cf6' },
+      { label: 'Activate Innovation', desc: 'University & industry', color: '#f59e0b' },
+      { label: 'Lead Ecosystem', desc: 'Shape your region', color: '#ec4899' },
+      { label: 'Full Ownership', desc: 'Your hub, your vision', color: '#14b8a6' },
     ];
 
     const cardW = 170;
@@ -279,21 +275,20 @@ const LocalHubBanner = () => {
       ctx.lineWidth = 2;
       ctx.beginPath(); ctx.moveTo(x + 30, y); ctx.lineTo(x + cardW - 30, y); ctx.stroke();
 
-      // Icon
-      ctx.font = '22px "Segoe UI", system-ui, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(b.icon, x + 28, y + 32);
+      // Color dot indicator
+      ctx.fillStyle = b.color;
+      ctx.beginPath(); ctx.arc(x + 18, y + cardH / 2, 5, 0, Math.PI * 2); ctx.fill();
 
       // Label
       ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'left';
-      ctx.fillText(b.label, x + 50, y + 28);
+      ctx.fillText(b.label, x + 32, y + 28);
 
       // Desc
       ctx.font = '400 11px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.fillText(b.desc, x + 50, y + 46);
+      ctx.fillText(b.desc, x + 32, y + 46);
     });
 
     // === EXISTING HUBS ROW - centered ===
@@ -306,10 +301,10 @@ const LocalHubBanner = () => {
     ctx.fillText('ACTIVE HUBS', width / 2 - 130, hubsY + 12);
 
     const hubs = [
-      { name: 'Orlando', flag: '🇺🇸', label: 'HQ' },
-      { name: 'Santiago', flag: '🇨🇱', label: 'LATAM' },
-      { name: 'Tokyo', flag: '🇯🇵', label: 'APAC' },
-      { name: 'Sevilla', flag: '🇪🇸', label: 'EMEA' },
+      { name: 'Orlando', label: 'HQ' },
+      { name: 'Santiago', label: 'LATAM' },
+      { name: 'Tokyo', label: 'APAC' },
+      { name: 'Sevilla', label: 'EMEA' },
     ];
 
     const hubChipW = 95;
@@ -331,11 +326,11 @@ const LocalHubBanner = () => {
       ctx.lineWidth = 1;
       ctx.beginPath(); ctx.roundRect(x, y, hubChipW, hubChipH, 15); ctx.stroke();
 
-      // Flag + name
+      // Name
       ctx.textAlign = 'center';
       ctx.font = '12px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.fillText(`${hub.flag} ${hub.name}`, x + hubChipW / 2, y + hubChipH / 2 + 4);
+      ctx.fillText(`${hub.label} · ${hub.name}`, x + hubChipW / 2, y + hubChipH / 2 + 4);
     });
 
     // === "YOUR CITY?" highlight - centered ===
@@ -368,7 +363,7 @@ const LocalHubBanner = () => {
     ctx.textAlign = 'center';
     ctx.shadowColor = 'rgba(20, 184, 166, 0.4)';
     ctx.shadowBlur = 12;
-    ctx.fillText('YOUR CITY COULD BE NEXT 🌎', yourX + yourW / 2, yourY + yourH / 2 + 7);
+    ctx.fillText('YOUR CITY COULD BE NEXT', yourX + yourW / 2, yourY + yourH / 2 + 7);
     ctx.shadowBlur = 0;
 
     // === CTA BUTTON - centered ===
@@ -408,29 +403,7 @@ const LocalHubBanner = () => {
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.fillText('startupfactoryhub.com', width / 2, btnY + btnH + 22);
 
-    // === QR CODE - bottom right ===
-    const qrSize = 85;
-    const qrX = width - qrSize - 35;
-    const qrY = height - qrSize - 35;
-
-    ctx.font = 'bold 10px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.8)';
-    ctx.textAlign = 'center';
-    ctx.fillText('SCAN TO APPLY', qrX + qrSize / 2, qrY - 10);
-
-    // QR bg
-    ctx.fillStyle = 'rgba(0, 20, 35, 0.8)';
-    ctx.beginPath(); ctx.roundRect(qrX - 6, qrY - 6, qrSize + 12, qrSize + 12, 8); ctx.fill();
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.4)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.roundRect(qrX - 6, qrY - 6, qrSize + 12, qrSize + 12, 8); ctx.stroke();
-
-    ctx.save();
-    ctx.beginPath(); ctx.roundRect(qrX, qrY, qrSize, qrSize, 5); ctx.clip();
-    ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
-    ctx.restore();
-
-    // === HASHTAGS - bottom left ===
+    // === HASHTAGS - bottom ===
     ctx.textAlign = 'left';
     ctx.font = '400 9px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(20, 184, 166, 0.4)';
