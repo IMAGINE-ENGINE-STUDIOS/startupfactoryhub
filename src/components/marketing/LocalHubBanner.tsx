@@ -281,7 +281,7 @@ const LocalHubBanner = () => {
       'International founder & investor network',
       'University & industry activation tools',
       'Lead your region\'s startup ecosystem',
-      'Full ownership of your local hub',
+      'Hybrid operational model',
     ];
 
     const benefitStartY = 238;
@@ -376,43 +376,6 @@ const LocalHubBanner = () => {
       ctx.fillText(p.desc, rightX + 38, y + 48);
     });
 
-    // ============================================================
-    // RIGHT SIDE — Active Hubs row
-    // ============================================================
-    const hubsY = 370;
-
-    ctx.font = 'bold 11px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.7)';
-    ctx.textAlign = 'left';
-    ctx.fillText('ACTIVE HUBS', rightX, hubsY);
-
-    const hubs = [
-      { name: 'Orlando', label: 'HQ' },
-      { name: 'Santiago', label: 'LATAM' },
-      { name: 'Tokyo', label: 'APAC' },
-      { name: 'Sevilla', label: 'EMEA' },
-    ];
-
-    const hubChipW = 62;
-    const hubChipH = 24;
-    const hubGap = 8;
-
-    hubs.forEach((hub, i) => {
-      const x = rightX + i * (hubChipW + hubGap);
-      const y = hubsY + 10;
-
-      ctx.fillStyle = 'rgba(0, 20, 40, 0.6)';
-      ctx.beginPath(); ctx.roundRect(x, y, hubChipW, hubChipH, 12); ctx.fill();
-
-      ctx.strokeStyle = 'rgba(20, 184, 166, 0.25)';
-      ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.roundRect(x, y, hubChipW, hubChipH, 12); ctx.stroke();
-
-      ctx.textAlign = 'center';
-      ctx.font = '10px "Segoe UI", system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-      ctx.fillText(hub.name, x + hubChipW / 2, y + hubChipH / 2 + 3.5);
-    });
 
     // ============================================================
     // BOTTOM — "Your City Could Be Next" + CTA spread across full width
