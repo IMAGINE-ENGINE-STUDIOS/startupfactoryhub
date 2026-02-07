@@ -80,12 +80,24 @@ const LocalHubBanner = () => {
       ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
     }
 
-    // === FLOATING HEXAGONS ===
+    // === GRID INTERSECTION DOTS ===
+    for (let x = 60; x < width; x += 120) {
+      for (let y = 60; y < height; y += 120) {
+        ctx.fillStyle = 'rgba(20, 184, 166, 0.08)';
+        ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    // === FLOATING HEXAGONS (more of them, varied sizes) ===
     const hexagons = [
-      { x: 60, y: 60, size: 22, opacity: 0.07 },
-      { x: 1140, y: 80, size: 25, opacity: 0.08 },
-      { x: 1100, y: 560, size: 20, opacity: 0.06 },
-      { x: 100, y: 550, size: 18, opacity: 0.05 },
+      { x: 50, y: 55, size: 24, opacity: 0.09 },
+      { x: 480, y: 40, size: 16, opacity: 0.05 },
+      { x: 1150, y: 70, size: 28, opacity: 0.10 },
+      { x: 1100, y: 560, size: 22, opacity: 0.07 },
+      { x: 80, y: 560, size: 20, opacity: 0.06 },
+      { x: 520, y: 590, size: 14, opacity: 0.04 },
+      { x: 950, y: 30, size: 18, opacity: 0.06 },
+      { x: 300, y: 600, size: 12, opacity: 0.04 },
     ];
     hexagons.forEach(hex => {
       ctx.strokeStyle = `rgba(20, 184, 166, ${hex.opacity})`;
@@ -99,6 +111,77 @@ const LocalHubBanner = () => {
       }
       ctx.closePath();
       ctx.stroke();
+      // Inner glow fill
+      ctx.fillStyle = `rgba(20, 184, 166, ${hex.opacity * 0.3})`;
+      ctx.fill();
+    });
+
+    // === ENERGY ARCS ===
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.07)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(-100, height / 2, 380, -Math.PI / 3, Math.PI / 3);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(width + 100, height / 2, 380, Math.PI * 0.67, Math.PI * 1.33);
+    ctx.stroke();
+    // Top arc
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.05)';
+    ctx.beginPath();
+    ctx.arc(width / 2, -200, 400, Math.PI * 0.15, Math.PI * 0.85);
+    ctx.stroke();
+
+    // === DIAGONAL CONNECTION LINES ===
+    const drawConnectionLine = (x1: number, y1: number, x2: number, y2: number, opacity: number) => {
+      const grad = ctx.createLinearGradient(x1, y1, x2, y2);
+      grad.addColorStop(0, `rgba(20, 184, 166, 0)`);
+      grad.addColorStop(0.3, `rgba(20, 184, 166, ${opacity})`);
+      grad.addColorStop(0.7, `rgba(20, 184, 166, ${opacity})`);
+      grad.addColorStop(1, `rgba(20, 184, 166, 0)`);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 8]);
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      ctx.setLineDash([]);
+    };
+    drawConnectionLine(0, 120, 520, 440, 0.06);
+    drawConnectionLine(width, 100, 540, 440, 0.06);
+    drawConnectionLine(200, 0, 600, 630, 0.04);
+    drawConnectionLine(1000, 0, 600, 630, 0.04);
+
+    // === FLOATING DIAMONDS ===
+    const diamonds = [
+      { x: 530, y: 315, size: 6, opacity: 0.15 },
+      { x: 540, y: 200, size: 4, opacity: 0.10 },
+      { x: 1050, y: 450, size: 5, opacity: 0.12 },
+      { x: 150, y: 470, size: 4, opacity: 0.08 },
+    ];
+    diamonds.forEach(d => {
+      ctx.save();
+      ctx.translate(d.x, d.y);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = `rgba(20, 184, 166, ${d.opacity})`;
+      ctx.fillRect(-d.size, -d.size, d.size * 2, d.size * 2);
+      ctx.strokeStyle = `rgba(20, 184, 166, ${d.opacity * 2})`;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-d.size, -d.size, d.size * 2, d.size * 2);
+      ctx.restore();
+    });
+
+    // === PARTICLE SCATTER (small glowing dots) ===
+    const particles = [
+      { x: 420, y: 80, r: 2 }, { x: 750, y: 50, r: 1.5 }, { x: 900, y: 580, r: 2 },
+      { x: 350, y: 520, r: 1.5 }, { x: 680, y: 600, r: 1 }, { x: 1050, y: 150, r: 2 },
+      { x: 200, y: 300, r: 1 }, { x: 850, y: 300, r: 1.5 }, { x: 480, y: 500, r: 1 },
+    ];
+    particles.forEach(p => {
+      const pGlow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
+      pGlow.addColorStop(0, 'rgba(20, 184, 166, 0.25)');
+      pGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+      ctx.fillStyle = pGlow;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = 'rgba(20, 184, 166, 0.6)';
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2); ctx.fill();
     });
 
     // === CORNER ACCENTS ===
@@ -116,6 +199,13 @@ const LocalHubBanner = () => {
       ctx.beginPath(); ctx.arc(c.x, c.y, 14, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#14b8a6';
       ctx.beginPath(); ctx.arc(c.x, c.y, 3.5, 0, Math.PI * 2); ctx.fill();
+      // Corner bracket lines
+      const len = 20;
+      ctx.strokeStyle = 'rgba(20, 184, 166, 0.3)';
+      ctx.lineWidth = 1.5;
+      const dx = c.x < width / 2 ? 1 : -1;
+      const dy = c.y < height / 2 ? 1 : -1;
+      ctx.beginPath(); ctx.moveTo(c.x, c.y + dy * len); ctx.lineTo(c.x, c.y); ctx.lineTo(c.x + dx * len, c.y); ctx.stroke();
     });
 
     // ============================================================
