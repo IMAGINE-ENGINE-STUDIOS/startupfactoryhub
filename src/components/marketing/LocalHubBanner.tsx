@@ -36,7 +36,7 @@ const LocalHubBanner = () => {
     const tryDraw = () => {
       loadedCount++;
       if (loadedCount === 3) {
-        drawLocalHubBanner(ctx, displayWidth, displayHeight, galaxyImage, logoImage, qrImage);
+        drawBanner(ctx, displayWidth, displayHeight, galaxyImage, logoImage, qrImage);
         setIsRendering(false);
       }
     };
@@ -50,7 +50,7 @@ const LocalHubBanner = () => {
     qrImage.src = sfhQrCode;
   }, []);
 
-  const drawLocalHubBanner = (
+  const drawBanner = (
     ctx: CanvasRenderingContext2D,
     width: number,
     height: number,
@@ -58,418 +58,394 @@ const LocalHubBanner = () => {
     logoImage: HTMLImageElement,
     qrImage: HTMLImageElement
   ) => {
-    // Draw galaxy background - cover
+    // === BACKGROUND ===
     const bgRatio = bgImage.width / bgImage.height;
     const canvasRatio = width / height;
-    let drawWidth = width;
-    let drawHeight = height;
-    let offsetX = 0;
-    let offsetY = 0;
+    let dw = width, dh = height, ox = 0, oy = 0;
+    if (bgRatio > canvasRatio) { dw = height * bgRatio; ox = -(dw - width) / 2; }
+    else { dh = width / bgRatio; oy = -(dh - height) / 2; }
+    ctx.drawImage(bgImage, ox, oy, dw, dh);
 
-    if (bgRatio > canvasRatio) {
-      drawWidth = height * bgRatio;
-      offsetX = -(drawWidth - width) / 2;
-    } else {
-      drawHeight = width / bgRatio;
-      offsetY = -(drawHeight - height) / 2;
-    }
-
-    ctx.drawImage(bgImage, offsetX, offsetY, drawWidth, drawHeight);
-
-    // Dark overlay gradient - left side heavier for text legibility
-    const overlayGradient = ctx.createLinearGradient(0, 0, width, 0);
-    overlayGradient.addColorStop(0, 'rgba(0, 8, 20, 0.92)');
-    overlayGradient.addColorStop(0.55, 'rgba(0, 12, 25, 0.78)');
-    overlayGradient.addColorStop(1, 'rgba(0, 15, 30, 0.55)');
-    ctx.fillStyle = overlayGradient;
+    // Dark cinematic overlay (matching first banner)
+    const overlay = ctx.createLinearGradient(0, 0, width, height);
+    overlay.addColorStop(0, 'rgba(0, 15, 25, 0.88)');
+    overlay.addColorStop(0.5, 'rgba(0, 18, 30, 0.82)');
+    overlay.addColorStop(1, 'rgba(0, 12, 22, 0.90)');
+    ctx.fillStyle = overlay;
     ctx.fillRect(0, 0, width, height);
 
-    // Subtle scan lines
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.02)';
+    // === TECH GRID (scaled for 1200x630) ===
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.04)';
     ctx.lineWidth = 1;
-    for (let y = 0; y < height; y += 4) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(width, y);
-      ctx.stroke();
+    for (let x = 0; x < width; x += 60) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+    }
+    for (let y = 0; y < height; y += 60) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
     }
 
-    // Left content container subtle bg
-    const contentGrad = ctx.createLinearGradient(0, 0, 620, 0);
-    contentGrad.addColorStop(0, 'rgba(0, 15, 30, 0.85)');
-    contentGrad.addColorStop(0.75, 'rgba(0, 15, 30, 0.4)');
-    contentGrad.addColorStop(1, 'rgba(0, 15, 30, 0)');
-    ctx.fillStyle = contentGrad;
-    ctx.fillRect(0, 0, 620, height);
-
-    // Vertical accent line
-    ctx.strokeStyle = '#14b8a6';
-    ctx.lineWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(40, 50);
-    ctx.lineTo(40, height - 50);
-    ctx.stroke();
-
-    // Glowing dots on accent line
-    const dotPositions = [70, 160, 300, 450, 560];
-    dotPositions.forEach(y => {
-      const glow = ctx.createRadialGradient(40, y, 0, 40, y, 18);
-      glow.addColorStop(0, 'rgba(20, 184, 166, 0.7)');
-      glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
-      ctx.fillStyle = glow;
-      ctx.beginPath();
-      ctx.arc(40, y, 18, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#14b8a6';
-      ctx.beginPath();
-      ctx.arc(40, y, 4, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    // Logo - top left, small
-    const logoSize = 65;
-    const logoX = 70;
-    const logoY = 35;
-
-    // Logo glow
-    const logoGlow = ctx.createRadialGradient(logoX + logoSize / 2, logoY + logoSize / 2, 0, logoX + logoSize / 2, logoY + logoSize / 2, logoSize);
-    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.3)');
-    logoGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
-    ctx.fillStyle = logoGlow;
-    ctx.beginPath();
-    ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2, 0, Math.PI * 2);
-    ctx.clip();
-    ctx.drawImage(logoImage, logoX, logoY, logoSize, logoSize);
-    ctx.restore();
-
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.6)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(logoX + logoSize / 2, logoY + logoSize / 2, logoSize / 2 + 4, 0, Math.PI * 2);
-    ctx.stroke();
-
-    // Brand name next to logo
-    ctx.textAlign = 'left';
-    ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
-    ctx.fillText('STARTUP FACTORY HUB', logoX + logoSize + 15, logoY + logoSize / 2 + 5);
-
-    // Main headline - "CREATE YOUR OWN"
-    ctx.font = '300 36px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.fillText('🌍 CREATE YOUR OWN', 70, 155);
-
-    // "LOCAL HUB" with gradient glow
-    ctx.font = '900 62px "Segoe UI", system-ui, sans-serif';
-    const hubGrad = ctx.createLinearGradient(70, 215, 450, 215);
-    hubGrad.addColorStop(0, '#14b8a6');
-    hubGrad.addColorStop(0.5, '#22d3ee');
-    hubGrad.addColorStop(1, '#14b8a6');
-    ctx.fillStyle = hubGrad;
-    ctx.shadowColor = 'rgba(20, 184, 166, 0.5)';
-    ctx.shadowBlur = 30;
-    ctx.fillText('LOCAL HUB', 70, 220);
-    ctx.shadowBlur = 0;
-
-    // Subheadline
-    ctx.font = '400 16px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-    ctx.fillText('Build the innovation hub your city deserves.', 70, 260);
-    ctx.fillText('Launch SFH in your region — we provide the platform.', 70, 282);
-
-    // Divider line
-    const divGrad = ctx.createLinearGradient(70, 302, 500, 302);
-    divGrad.addColorStop(0, 'rgba(20, 184, 166, 0.6)');
-    divGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
-    ctx.strokeStyle = divGrad;
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(70, 302);
-    ctx.lineTo(500, 302);
-    ctx.stroke();
-
-    // Benefits list with icons
-    const benefits = [
-      { icon: '🚀', text: 'Global AI startup-building platform' },
-      { icon: '🏛️', text: 'Proven acceleration program model' },
-      { icon: '🌐', text: 'International founder & investor network' },
-      { icon: '💡', text: 'University, industry & gov activation tools' },
-      { icon: '🎯', text: 'Lead & shape your regional ecosystem' },
-    ];
-
-    ctx.font = '400 15px "Segoe UI", system-ui, sans-serif';
-    benefits.forEach((b, i) => {
-      const y = 328 + i * 28;
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.fillText(`${b.icon}  ${b.text}`, 75, y);
-    });
-
-    // "We're looking for" section
-    ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = '#14b8a6';
-    ctx.fillText('WE\'RE LOOKING FOR:', 75, 488);
-
-    const profiles = [
-      'Visionary ecosystem builders',
-      'University & industry leaders',
-      'Startup operators & accelerator managers',
-    ];
-
-    ctx.font = '400 13px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    profiles.forEach((p, i) => {
-      ctx.fillText(`▸  ${p}`, 85, 510 + i * 22);
-    });
-
-    // CTA Button
-    const btnX = 75;
-    const btnY = 575;
-    const btnWidth = 240;
-    const btnHeight = 44;
-
-    // Button glow
-    const btnGlow = ctx.createRadialGradient(btnX + btnWidth / 2, btnY + btnHeight / 2, 0, btnX + btnWidth / 2, btnY + btnHeight / 2, 140);
-    btnGlow.addColorStop(0, 'rgba(20, 184, 166, 0.3)');
-    btnGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
-    ctx.fillStyle = btnGlow;
-    ctx.beginPath();
-    ctx.arc(btnX + btnWidth / 2, btnY + btnHeight / 2, 140, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Button bg
-    const btnGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnWidth, btnY);
-    btnGrad.addColorStop(0, '#0d9488');
-    btnGrad.addColorStop(0.5, '#14b8a6');
-    btnGrad.addColorStop(1, '#0d9488');
-    ctx.fillStyle = btnGrad;
-    ctx.beginPath();
-    ctx.roundRect(btnX, btnY, btnWidth, btnHeight, 22);
-    ctx.fill();
-
-    // Button border
-    ctx.strokeStyle = 'rgba(34, 211, 238, 0.5)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(btnX, btnY, btnWidth, btnHeight, 22);
-    ctx.stroke();
-
-    // Button text
-    ctx.font = 'bold 15px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.fillText('APPLY TO LEAD A HUB →', btnX + btnWidth / 2, btnY + btnHeight / 2 + 5);
-
-    // Right side decorative elements
-
-    // Floating hexagons on right side
+    // === FLOATING HEXAGONS ===
     const hexagons = [
-      { x: 750, y: 120, size: 30, opacity: 0.12 },
-      { x: 900, y: 80, size: 20, opacity: 0.08 },
-      { x: 1050, y: 180, size: 25, opacity: 0.1 },
-      { x: 850, y: 450, size: 22, opacity: 0.09 },
-      { x: 1100, y: 400, size: 28, opacity: 0.11 },
-      { x: 700, y: 520, size: 18, opacity: 0.07 },
+      { x: 80, y: 80, size: 25, opacity: 0.08 },
+      { x: 200, y: 560, size: 20, opacity: 0.06 },
+      { x: 1050, y: 100, size: 22, opacity: 0.07 },
+      { x: 1120, y: 520, size: 28, opacity: 0.09 },
+      { x: 950, y: 550, size: 18, opacity: 0.05 },
+      { x: 150, y: 350, size: 15, opacity: 0.05 },
     ];
-
     hexagons.forEach(hex => {
       ctx.strokeStyle = `rgba(20, 184, 166, ${hex.opacity})`;
-      ctx.lineWidth = 2;
+      ctx.lineWidth = 1.5;
       ctx.beginPath();
       for (let i = 0; i < 6; i++) {
         const angle = (Math.PI / 3) * i - Math.PI / 2;
         const px = hex.x + hex.size * Math.cos(angle);
         const py = hex.y + hex.size * Math.sin(angle);
-        if (i === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
       }
       ctx.closePath();
       ctx.stroke();
     });
 
-    // Right side - hub city cards
-    const cities = [
-      { name: 'Orlando, FL', label: 'HQ', color: '#14b8a6' },
-      { name: 'Santiago, CL', label: 'LATAM', color: '#22d3ee' },
-      { name: 'Tokyo, JP', label: 'APAC', color: '#8b5cf6' },
-      { name: 'Sevilla, ES', label: 'EMEA', color: '#f59e0b' },
+    // === ENERGY ARCS ===
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.08)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(-80, height / 2, 350, -Math.PI / 3, Math.PI / 3);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(width + 80, height / 2, 350, Math.PI * 0.67, Math.PI * 1.33);
+    ctx.stroke();
+
+    // === CORNER ACCENTS ===
+    const corners = [
+      { x: 18, y: 18, dx: 1, dy: 1 },
+      { x: width - 18, y: 18, dx: -1, dy: 1 },
+      { x: 18, y: height - 18, dx: 1, dy: -1 },
     ];
-
-    const cardStartX = 680;
-    const cardStartY = 240;
-    const cardW = 130;
-    const cardH = 55;
-    const cardGap = 12;
-
-    cities.forEach((city, i) => {
-      const row = Math.floor(i / 2);
-      const col = i % 2;
-      const x = cardStartX + col * (cardW + cardGap);
-      const y = cardStartY + row * (cardH + cardGap);
-
-      // Card bg
-      ctx.fillStyle = 'rgba(0, 20, 40, 0.75)';
-      ctx.beginPath();
-      ctx.roundRect(x, y, cardW, cardH, 10);
-      ctx.fill();
-
-      // Card border
-      const cBorder = ctx.createLinearGradient(x, y, x + cardW, y + cardH);
-      cBorder.addColorStop(0, city.color);
-      cBorder.addColorStop(0.5, 'rgba(255,255,255,0.1)');
-      cBorder.addColorStop(1, city.color);
-      ctx.strokeStyle = cBorder;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.roundRect(x, y, cardW, cardH, 10);
-      ctx.stroke();
-
-      // Top glow line
-      ctx.strokeStyle = `${city.color}99`;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(x + 25, y);
-      ctx.lineTo(x + cardW - 25, y);
-      ctx.stroke();
-
-      // Label badge
-      ctx.fillStyle = city.color;
-      ctx.font = 'bold 9px "Segoe UI", system-ui, sans-serif';
-      ctx.textAlign = 'center';
-      ctx.fillText(city.label, x + cardW / 2, y + 20);
-
-      // City name
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.font = '400 12px "Segoe UI", system-ui, sans-serif';
-      ctx.fillText(city.name, x + cardW / 2, y + 38);
+    corners.forEach(c => {
+      const glow = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, 14);
+      glow.addColorStop(0, 'rgba(20, 184, 166, 0.5)');
+      glow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(c.x, c.y, 14, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#14b8a6';
+      ctx.beginPath(); ctx.arc(c.x, c.y, 3.5, 0, Math.PI * 2); ctx.fill();
     });
 
-    // "YOUR CITY?" card - bigger, highlighted
-    const yourX = cardStartX + 30;
-    const yourY = cardStartY + 2 * (cardH + cardGap) + 10;
-    const yourW = cardW * 2 + cardGap;
-    const yourH = 60;
+    // === CENTERED LOGO ===
+    const logoSize = 75;
+    const logoX = width / 2;
+    const logoY = 55;
 
-    // Glow behind
-    const yourGlow = ctx.createRadialGradient(yourX + yourW / 2, yourY + yourH / 2, 0, yourX + yourW / 2, yourY + yourH / 2, 120);
-    yourGlow.addColorStop(0, 'rgba(20, 184, 166, 0.2)');
-    yourGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
-    ctx.fillStyle = yourGlow;
-    ctx.beginPath();
-    ctx.arc(yourX + yourW / 2, yourY + yourH / 2, 120, 0, Math.PI * 2);
-    ctx.fill();
+    // Logo glow
+    const logoGlow = ctx.createRadialGradient(logoX, logoY, 0, logoX, logoY, logoSize);
+    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.35)');
+    logoGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.fillStyle = logoGlow;
+    ctx.beginPath(); ctx.arc(logoX, logoY, logoSize, 0, Math.PI * 2); ctx.fill();
 
-    // Dashed border card
-    ctx.setLineDash([8, 6]);
-    ctx.strokeStyle = '#14b8a6';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(yourX, yourY, yourW, yourH, 12);
-    ctx.stroke();
+    // Orbit rings
+    ctx.setLineDash([8, 8]);
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(logoX, logoY, logoSize / 2 + 14, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([5, 12]);
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.15)';
+    ctx.beginPath(); ctx.arc(logoX, logoY, logoSize / 2 + 26, 0, Math.PI * 2); ctx.stroke();
     ctx.setLineDash([]);
 
-    // "YOUR CITY?" text
-    ctx.font = '900 22px "Segoe UI", system-ui, sans-serif';
-    const yourGrad = ctx.createLinearGradient(yourX, yourY + 35, yourX + yourW, yourY + 35);
-    yourGrad.addColorStop(0, '#14b8a6');
-    yourGrad.addColorStop(0.5, '#22d3ee');
-    yourGrad.addColorStop(1, '#14b8a6');
-    ctx.fillStyle = yourGrad;
-    ctx.textAlign = 'center';
-    ctx.shadowColor = 'rgba(20, 184, 166, 0.4)';
-    ctx.shadowBlur = 15;
-    ctx.fillText('YOUR CITY NEXT? 🌎', yourX + yourW / 2, yourY + yourH / 2 + 8);
-    ctx.shadowBlur = 0;
-
-    // QR Code - bottom right
-    const qrSize = 90;
-    const qrX = width - qrSize - 40;
-    const qrY = height - qrSize - 40;
-
-    ctx.font = '400 11px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.textAlign = 'center';
-    ctx.fillText('startupfactoryhub.com', qrX + qrSize / 2, qrY - 30);
-
-    ctx.font = 'bold 11px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
-    ctx.fillText('SCAN TO APPLY', qrX + qrSize / 2, qrY - 16);
-
-    // QR background
-    ctx.fillStyle = 'rgba(0, 20, 35, 0.8)';
-    ctx.beginPath();
-    ctx.roundRect(qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 10);
-    ctx.fill();
-
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.5)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.roundRect(qrX - 8, qrY - 8, qrSize + 16, qrSize + 16, 10);
-    ctx.stroke();
-
+    // Logo image
     ctx.save();
     ctx.beginPath();
-    ctx.roundRect(qrX, qrY, qrSize, qrSize, 6);
+    ctx.arc(logoX, logoY, logoSize / 2 - 2, 0, Math.PI * 2);
     ctx.clip();
+    ctx.drawImage(logoImage, logoX - logoSize / 2 + 2, logoY - logoSize / 2 + 2, logoSize - 4, logoSize - 4);
+    ctx.restore();
+
+    // Logo ring
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.7)';
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(logoX, logoY, logoSize / 2, 0, Math.PI * 2); ctx.stroke();
+
+    // === HEADLINE - Centered ===
+    ctx.textAlign = 'center';
+
+    // "CREATE YOUR OWN"
+    ctx.font = '300 28px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.fillText('🌍  CREATE YOUR OWN', width / 2, 128);
+
+    // "LOCAL HUB" - big gradient text
+    ctx.font = '900 56px "Segoe UI", system-ui, sans-serif';
+    const hubGrad = ctx.createLinearGradient(width / 2 - 200, 175, width / 2 + 200, 175);
+    hubGrad.addColorStop(0, '#14b8a6');
+    hubGrad.addColorStop(0.5, '#22d3ee');
+    hubGrad.addColorStop(1, '#14b8a6');
+    ctx.fillStyle = hubGrad;
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.5)';
+    ctx.shadowBlur = 25;
+    ctx.fillText('LOCAL HUB', width / 2, 180);
+    ctx.shadowBlur = 0;
+
+    // Tagline
+    ctx.font = '400 16px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.fillText('Build the innovation hub your city or country deserves', width / 2, 212);
+
+    // === SECTION DIVIDER ===
+    const divY = 238;
+    const divLineLen = 100;
+    const divDiamondOff = 130;
+
+    // Left line
+    const leftGrad = ctx.createLinearGradient(width / 2 - divLineLen - divDiamondOff, divY, width / 2 - divDiamondOff, divY);
+    leftGrad.addColorStop(0, 'rgba(20, 184, 166, 0)');
+    leftGrad.addColorStop(1, 'rgba(20, 184, 166, 0.6)');
+    ctx.strokeStyle = leftGrad;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(width / 2 - divLineLen - divDiamondOff, divY); ctx.lineTo(width / 2 - divDiamondOff, divY); ctx.stroke();
+
+    // Left diamond
+    ctx.fillStyle = '#14b8a6';
+    ctx.save(); ctx.translate(width / 2 - divDiamondOff + 5, divY); ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-3.5, -3.5, 7, 7); ctx.restore();
+
+    // Center text
+    ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText('Hub Owner Program', width / 2, divY + 5);
+
+    // Right diamond
+    ctx.fillStyle = '#14b8a6';
+    ctx.save(); ctx.translate(width / 2 + divDiamondOff - 5, divY); ctx.rotate(Math.PI / 4);
+    ctx.fillRect(-3.5, -3.5, 7, 7); ctx.restore();
+
+    // Right line
+    const rightGrad = ctx.createLinearGradient(width / 2 + divDiamondOff, divY, width / 2 + divLineLen + divDiamondOff, divY);
+    rightGrad.addColorStop(0, 'rgba(20, 184, 166, 0.6)');
+    rightGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.strokeStyle = rightGrad;
+    ctx.beginPath(); ctx.moveTo(width / 2 + divDiamondOff, divY); ctx.lineTo(width / 2 + divLineLen + divDiamondOff, divY); ctx.stroke();
+
+    // === BENEFIT CARDS - 2 rows x 3 columns, centered ===
+    const benefits = [
+      { icon: '🚀', label: 'AI Platform', desc: 'Global startup-building tools', color: '#10b981' },
+      { icon: '🏛️', label: 'Proven Model', desc: 'Idea-to-scale program', color: '#06b6d4' },
+      { icon: '🌐', label: 'Global Network', desc: 'Founders & investors', color: '#8b5cf6' },
+      { icon: '💡', label: 'Activate Innovation', desc: 'University & industry', color: '#f59e0b' },
+      { icon: '🎯', label: 'Lead Ecosystem', desc: 'Shape your region', color: '#ec4899' },
+      { icon: '🔑', label: 'Full Ownership', desc: 'Your hub, your vision', color: '#14b8a6' },
+    ];
+
+    const cardW = 170;
+    const cardH = 72;
+    const cardGap = 14;
+    const cols = 3;
+    const totalW = cols * cardW + (cols - 1) * cardGap;
+    const cardsStartX = (width - totalW) / 2;
+    const cardsStartY = 262;
+
+    benefits.forEach((b, i) => {
+      const row = Math.floor(i / cols);
+      const col = i % cols;
+      const x = cardsStartX + col * (cardW + cardGap);
+      const y = cardsStartY + row * (cardH + 10);
+      const cx = x + cardW / 2;
+
+      // Card bg glow
+      const bgGlow = ctx.createRadialGradient(cx, y + cardH / 2, 0, cx, y + cardH / 2, cardW * 0.7);
+      bgGlow.addColorStop(0, `${b.color}15`);
+      bgGlow.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = bgGlow;
+      ctx.beginPath(); ctx.arc(cx, y + cardH / 2, cardW * 0.6, 0, Math.PI * 2); ctx.fill();
+
+      // Card bg
+      ctx.fillStyle = 'rgba(0, 20, 40, 0.7)';
+      ctx.beginPath(); ctx.roundRect(x, y, cardW, cardH, 12); ctx.fill();
+
+      // Card border gradient
+      const border = ctx.createLinearGradient(x, y, x + cardW, y + cardH);
+      border.addColorStop(0, b.color);
+      border.addColorStop(0.5, 'rgba(255,255,255,0.1)');
+      border.addColorStop(1, b.color);
+      ctx.strokeStyle = border;
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(x, y, cardW, cardH, 12); ctx.stroke();
+
+      // Top glow line
+      ctx.strokeStyle = `${b.color}88`;
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(x + 30, y); ctx.lineTo(x + cardW - 30, y); ctx.stroke();
+
+      // Icon
+      ctx.font = '22px "Segoe UI", system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(b.icon, x + 28, y + 32);
+
+      // Label
+      ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'left';
+      ctx.fillText(b.label, x + 50, y + 28);
+
+      // Desc
+      ctx.font = '400 11px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fillText(b.desc, x + 50, y + 46);
+    });
+
+    // === EXISTING HUBS ROW - centered ===
+    const hubsY = 430;
+
+    // "Active Hubs" label
+    ctx.textAlign = 'center';
+    ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.8)';
+    ctx.fillText('ACTIVE HUBS', width / 2 - 130, hubsY + 12);
+
+    const hubs = [
+      { name: 'Orlando', flag: '🇺🇸', label: 'HQ' },
+      { name: 'Santiago', flag: '🇨🇱', label: 'LATAM' },
+      { name: 'Tokyo', flag: '🇯🇵', label: 'APAC' },
+      { name: 'Sevilla', flag: '🇪🇸', label: 'EMEA' },
+    ];
+
+    const hubChipW = 95;
+    const hubChipH = 30;
+    const hubGap = 10;
+    const hubTotalW = hubs.length * hubChipW + (hubs.length - 1) * hubGap;
+    const hubStartX = (width - hubTotalW) / 2 + 50;
+
+    hubs.forEach((hub, i) => {
+      const x = hubStartX + i * (hubChipW + hubGap);
+      const y = hubsY;
+
+      // Chip bg
+      ctx.fillStyle = 'rgba(0, 20, 40, 0.6)';
+      ctx.beginPath(); ctx.roundRect(x, y, hubChipW, hubChipH, 15); ctx.fill();
+
+      // Chip border
+      ctx.strokeStyle = 'rgba(20, 184, 166, 0.3)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(x, y, hubChipW, hubChipH, 15); ctx.stroke();
+
+      // Flag + name
+      ctx.textAlign = 'center';
+      ctx.font = '12px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      ctx.fillText(`${hub.flag} ${hub.name}`, x + hubChipW / 2, y + hubChipH / 2 + 4);
+    });
+
+    // === "YOUR CITY?" highlight - centered ===
+    const yourY = hubsY + 48;
+    const yourW = 260;
+    const yourX = (width - yourW) / 2;
+    const yourH = 42;
+
+    // Glow
+    const yourGlow = ctx.createRadialGradient(yourX + yourW / 2, yourY + yourH / 2, 0, yourX + yourW / 2, yourY + yourH / 2, 130);
+    yourGlow.addColorStop(0, 'rgba(20, 184, 166, 0.15)');
+    yourGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.fillStyle = yourGlow;
+    ctx.beginPath(); ctx.arc(yourX + yourW / 2, yourY + yourH / 2, 130, 0, Math.PI * 2); ctx.fill();
+
+    // Dashed box
+    ctx.setLineDash([8, 5]);
+    ctx.strokeStyle = '#14b8a6';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(yourX, yourY, yourW, yourH, 12); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Text
+    ctx.font = '900 20px "Segoe UI", system-ui, sans-serif';
+    const yourTextGrad = ctx.createLinearGradient(yourX, yourY + 24, yourX + yourW, yourY + 24);
+    yourTextGrad.addColorStop(0, '#14b8a6');
+    yourTextGrad.addColorStop(0.5, '#22d3ee');
+    yourTextGrad.addColorStop(1, '#14b8a6');
+    ctx.fillStyle = yourTextGrad;
+    ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.4)';
+    ctx.shadowBlur = 12;
+    ctx.fillText('YOUR CITY COULD BE NEXT 🌎', yourX + yourW / 2, yourY + yourH / 2 + 7);
+    ctx.shadowBlur = 0;
+
+    // === CTA BUTTON - centered ===
+    const btnW = 260;
+    const btnH = 44;
+    const btnX = (width - btnW) / 2;
+    const btnY = 548;
+
+    // Button glow
+    const btnGlow = ctx.createRadialGradient(btnX + btnW / 2, btnY + btnH / 2, 0, btnX + btnW / 2, btnY + btnH / 2, 130);
+    btnGlow.addColorStop(0, 'rgba(20, 184, 166, 0.3)');
+    btnGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.fillStyle = btnGlow;
+    ctx.beginPath(); ctx.arc(btnX + btnW / 2, btnY + btnH / 2, 130, 0, Math.PI * 2); ctx.fill();
+
+    // Button bg
+    const btnGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnW, btnY);
+    btnGrad.addColorStop(0, '#0d9488');
+    btnGrad.addColorStop(0.5, '#14b8a6');
+    btnGrad.addColorStop(1, '#0d9488');
+    ctx.fillStyle = btnGrad;
+    ctx.beginPath(); ctx.roundRect(btnX, btnY, btnW, btnH, 22); ctx.fill();
+
+    // Button border
+    ctx.strokeStyle = 'rgba(34, 211, 238, 0.5)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.roundRect(btnX, btnY, btnW, btnH, 22); ctx.stroke();
+
+    // Button text
+    ctx.font = 'bold 15px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText('APPLY TO LEAD A HUB →', btnX + btnW / 2, btnY + btnH / 2 + 5);
+
+    // Website below button
+    ctx.font = '400 12px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+    ctx.fillText('startupfactoryhub.com', width / 2, btnY + btnH + 22);
+
+    // === QR CODE - bottom right ===
+    const qrSize = 85;
+    const qrX = width - qrSize - 35;
+    const qrY = height - qrSize - 35;
+
+    ctx.font = 'bold 10px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.8)';
+    ctx.textAlign = 'center';
+    ctx.fillText('SCAN TO APPLY', qrX + qrSize / 2, qrY - 10);
+
+    // QR bg
+    ctx.fillStyle = 'rgba(0, 20, 35, 0.8)';
+    ctx.beginPath(); ctx.roundRect(qrX - 6, qrY - 6, qrSize + 12, qrSize + 12, 8); ctx.fill();
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.4)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.roundRect(qrX - 6, qrY - 6, qrSize + 12, qrSize + 12, 8); ctx.stroke();
+
+    ctx.save();
+    ctx.beginPath(); ctx.roundRect(qrX, qrY, qrSize, qrSize, 5); ctx.clip();
     ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize);
     ctx.restore();
 
-    // Top right corner brackets
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.4)';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(width - 20, 20);
-    ctx.lineTo(width - 20, 70);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(width - 70, 20);
-    ctx.lineTo(width - 20, 20);
-    ctx.stroke();
-
-    // Bottom left corner
-    ctx.beginPath();
-    ctx.moveTo(20, height - 20);
-    ctx.lineTo(20, height - 70);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(20, height - 20);
-    ctx.lineTo(70, height - 20);
-    ctx.stroke();
-
-    // Top right label
-    ctx.textAlign = 'right';
-    ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.7)';
-    ctx.fillText('HUB OWNER PROGRAM', width - 35, 45);
-
-    ctx.font = '400 10px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-    ctx.fillText('APPLICATIONS OPEN', width - 35, 60);
-
-    // Hashtags at bottom
+    // === HASHTAGS - bottom left ===
     ctx.textAlign = 'left';
-    ctx.font = '400 10px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.5)';
-    ctx.fillText('#StartupFactoryHub  #InnovationHubs  #GlobalInnovation  #ChapterLeaders', 70, height - 15);
+    ctx.font = '400 9px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.4)';
+    ctx.fillText('#StartupFactoryHub  #InnovationHubs  #ChapterLeaders  #GlobalInnovation', 30, height - 15);
   };
 
   const downloadBanner = (format: 'png' | 'jpg') => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-
     const link = document.createElement('a');
     const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
     const quality = format === 'jpg' ? 0.95 : undefined;
-
     link.download = `startup-factory-hub-local-hub.${format}`;
     link.href = canvas.toDataURL(mimeType, quality);
     link.click();
-
     toast.success(`Downloaded as ${format.toUpperCase()}`);
   };
 
@@ -480,7 +456,7 @@ const LocalHubBanner = () => {
           <div>
             <h2 className="text-xl font-semibold text-foreground mb-2">Create Your Own Local Hub (1200×630)</h2>
             <p className="text-muted-foreground text-sm">
-              Call to action for Hub Owners & Chapter Leaders. Galaxy-themed with global hub network.
+              Call to action for Hub Owners & Chapter Leaders to launch SFH in new regions.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -495,7 +471,6 @@ const LocalHubBanner = () => {
           </div>
         </div>
       </div>
-
       <div className="tech-card border-0 p-4 overflow-hidden">
         <div className="relative w-full" style={{ aspectRatio: '1200/630' }}>
           <canvas ref={canvasRef} className="w-full h-full object-contain rounded-lg" style={{ maxWidth: '100%', height: 'auto' }} />
