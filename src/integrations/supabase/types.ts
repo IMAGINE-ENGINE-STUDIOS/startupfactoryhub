@@ -2260,6 +2260,93 @@ export type Database = {
         }
         Relationships: []
       }
+      hub_applications: {
+        Row: {
+          admin_notes: string | null
+          city: string
+          country: string
+          created_at: string
+          digital_signature: string
+          ecosystem_strength: string
+          email: string
+          estimated_startups: string
+          full_name: string
+          global_framework_readiness: string
+          greatest_strength: string
+          id: string
+          launch_timeline: string
+          leadership_style: string
+          linkedin_url: string
+          long_term_ambition: string
+          onboarding_timeline: string
+          phone: string
+          primary_motivation: string
+          primary_role: string
+          stakeholders: string[] | null
+          status: string
+          team_status: string
+          three_year_commitment: string
+          updated_at: string
+          years_experience: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          city: string
+          country: string
+          created_at?: string
+          digital_signature: string
+          ecosystem_strength: string
+          email: string
+          estimated_startups: string
+          full_name: string
+          global_framework_readiness: string
+          greatest_strength: string
+          id?: string
+          launch_timeline: string
+          leadership_style: string
+          linkedin_url: string
+          long_term_ambition: string
+          onboarding_timeline: string
+          phone: string
+          primary_motivation: string
+          primary_role: string
+          stakeholders?: string[] | null
+          status?: string
+          team_status: string
+          three_year_commitment: string
+          updated_at?: string
+          years_experience: string
+        }
+        Update: {
+          admin_notes?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          digital_signature?: string
+          ecosystem_strength?: string
+          email?: string
+          estimated_startups?: string
+          full_name?: string
+          global_framework_readiness?: string
+          greatest_strength?: string
+          id?: string
+          launch_timeline?: string
+          leadership_style?: string
+          linkedin_url?: string
+          long_term_ambition?: string
+          onboarding_timeline?: string
+          phone?: string
+          primary_motivation?: string
+          primary_role?: string
+          stakeholders?: string[] | null
+          status?: string
+          team_status?: string
+          three_year_commitment?: string
+          updated_at?: string
+          years_experience?: string
+        }
+        Relationships: []
+      }
       hub_bookings: {
         Row: {
           created_at: string

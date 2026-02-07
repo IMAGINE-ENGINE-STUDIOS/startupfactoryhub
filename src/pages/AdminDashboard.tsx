@@ -36,6 +36,7 @@ import ApiUsageTracker from '@/components/admin/ApiUsageTracker';
 import AdminSettings from '@/components/admin/AdminSettings';
 import { InvestorsManagement } from '@/components/admin/InvestorsManagement';
 import CorporatePartnersManagement from '@/components/admin/CorporatePartnersManagement';
+import HubApplicationsManagement from '@/components/admin/HubApplicationsManagement';
 
 const AdminDashboard = () => {
   const { user, loading: authLoading } = useAuth();
@@ -138,6 +139,10 @@ const AdminDashboard = () => {
               <Handshake className="h-4 w-4" />
               <span className="hidden lg:inline">Partners</span>
             </TabsTrigger>
+            <TabsTrigger value="hub-leads" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <Globe className="h-4 w-4" />
+              <span className="hidden lg:inline">Hub Leads</span>
+            </TabsTrigger>
             <TabsTrigger value="resources" className="flex items-center gap-1 py-2 px-2 text-xs">
               <Globe className="h-4 w-4" />
               <span className="hidden lg:inline">Resources</span>
@@ -174,6 +179,7 @@ const AdminDashboard = () => {
           <TabsContent value="startups"><StartupsManagement /></TabsContent>
           <TabsContent value="accelerators"><AcceleratorsManagement /></TabsContent>
           <TabsContent value="partners"><CorporatePartnersManagement /></TabsContent>
+          <TabsContent value="hub-leads"><HubApplicationsManagement /></TabsContent>
           <TabsContent value="resources"><ResourcesManagement /></TabsContent>
           <TabsContent value="events"><EventsManagement /></TabsContent>
           <TabsContent value="jobs"><JobsManagement /></TabsContent>
