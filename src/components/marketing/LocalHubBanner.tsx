@@ -62,15 +62,15 @@ const LocalHubBanner = () => {
     else { dh = width / bgRatio; oy = -(dh - height) / 2; }
     ctx.drawImage(bgImage, ox, oy, dw, dh);
 
-    // Dark cinematic overlay (matching first banner)
+    // Dark overlay
     const overlay = ctx.createLinearGradient(0, 0, width, height);
-    overlay.addColorStop(0, 'rgba(0, 15, 25, 0.88)');
-    overlay.addColorStop(0.5, 'rgba(0, 18, 30, 0.82)');
-    overlay.addColorStop(1, 'rgba(0, 12, 22, 0.90)');
+    overlay.addColorStop(0, 'rgba(0, 15, 25, 0.90)');
+    overlay.addColorStop(0.5, 'rgba(0, 18, 30, 0.85)');
+    overlay.addColorStop(1, 'rgba(0, 12, 22, 0.92)');
     ctx.fillStyle = overlay;
     ctx.fillRect(0, 0, width, height);
 
-    // === TECH GRID (scaled for 1200x630) ===
+    // === TECH GRID ===
     ctx.strokeStyle = 'rgba(20, 184, 166, 0.04)';
     ctx.lineWidth = 1;
     for (let x = 0; x < width; x += 60) {
@@ -82,12 +82,10 @@ const LocalHubBanner = () => {
 
     // === FLOATING HEXAGONS ===
     const hexagons = [
-      { x: 80, y: 80, size: 25, opacity: 0.08 },
-      { x: 200, y: 560, size: 20, opacity: 0.06 },
-      { x: 1050, y: 100, size: 22, opacity: 0.07 },
-      { x: 1120, y: 520, size: 28, opacity: 0.09 },
-      { x: 950, y: 550, size: 18, opacity: 0.05 },
-      { x: 150, y: 350, size: 15, opacity: 0.05 },
+      { x: 60, y: 60, size: 22, opacity: 0.07 },
+      { x: 1140, y: 80, size: 25, opacity: 0.08 },
+      { x: 1100, y: 560, size: 20, opacity: 0.06 },
+      { x: 100, y: 550, size: 18, opacity: 0.05 },
     ];
     hexagons.forEach(hex => {
       ctx.strokeStyle = `rgba(20, 184, 166, ${hex.opacity})`;
@@ -103,21 +101,12 @@ const LocalHubBanner = () => {
       ctx.stroke();
     });
 
-    // === ENERGY ARCS ===
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.08)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.arc(-80, height / 2, 350, -Math.PI / 3, Math.PI / 3);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.arc(width + 80, height / 2, 350, Math.PI * 0.67, Math.PI * 1.33);
-    ctx.stroke();
-
     // === CORNER ACCENTS ===
     const corners = [
-      { x: 18, y: 18, dx: 1, dy: 1 },
-      { x: width - 18, y: 18, dx: -1, dy: 1 },
-      { x: 18, y: height - 18, dx: 1, dy: -1 },
+      { x: 18, y: 18 },
+      { x: width - 18, y: 18 },
+      { x: 18, y: height - 18 },
+      { x: width - 18, y: height - 18 },
     ];
     corners.forEach(c => {
       const glow = ctx.createRadialGradient(c.x, c.y, 0, c.x, c.y, 14);
@@ -129,176 +118,179 @@ const LocalHubBanner = () => {
       ctx.beginPath(); ctx.arc(c.x, c.y, 3.5, 0, Math.PI * 2); ctx.fill();
     });
 
-    // === CENTERED LOGO ===
-    const logoSize = 75;
-    const logoX = width / 2;
-    const logoY = 55;
+    // ============================================================
+    // LEFT SIDE — Logo + Headline + Tagline
+    // ============================================================
+    const leftX = 60;
 
-    // Logo glow
-    const logoGlow = ctx.createRadialGradient(logoX, logoY, 0, logoX, logoY, logoSize);
-    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.35)');
+    // Logo
+    const logoSize = 65;
+    const logoY = 52;
+
+    const logoGlow = ctx.createRadialGradient(leftX + logoSize / 2, logoY, 0, leftX + logoSize / 2, logoY, logoSize);
+    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.3)');
     logoGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
     ctx.fillStyle = logoGlow;
-    ctx.beginPath(); ctx.arc(logoX, logoY, logoSize, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(leftX + logoSize / 2, logoY, logoSize, 0, Math.PI * 2); ctx.fill();
 
-    // Orbit rings
-    ctx.setLineDash([8, 8]);
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.25)';
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.arc(logoX, logoY, logoSize / 2 + 14, 0, Math.PI * 2); ctx.stroke();
-    ctx.setLineDash([5, 12]);
-    ctx.strokeStyle = 'rgba(20, 184, 166, 0.15)';
-    ctx.beginPath(); ctx.arc(logoX, logoY, logoSize / 2 + 26, 0, Math.PI * 2); ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Logo image
     ctx.save();
     ctx.beginPath();
-    ctx.arc(logoX, logoY, logoSize / 2 - 2, 0, Math.PI * 2);
+    ctx.arc(leftX + logoSize / 2, logoY, logoSize / 2 - 2, 0, Math.PI * 2);
     ctx.clip();
-    ctx.drawImage(logoImage, logoX - logoSize / 2 + 2, logoY - logoSize / 2 + 2, logoSize - 4, logoSize - 4);
+    ctx.drawImage(logoImage, leftX + 2, logoY - logoSize / 2 + 2, logoSize - 4, logoSize - 4);
     ctx.restore();
 
-    // Logo ring
     ctx.strokeStyle = 'rgba(20, 184, 166, 0.7)';
-    ctx.lineWidth = 2.5;
-    ctx.beginPath(); ctx.arc(logoX, logoY, logoSize / 2, 0, Math.PI * 2); ctx.stroke();
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(leftX + logoSize / 2, logoY, logoSize / 2, 0, Math.PI * 2); ctx.stroke();
 
-    // === HEADLINE - Centered ===
-    ctx.textAlign = 'center';
+    // Orbit ring
+    ctx.setLineDash([6, 6]);
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.2)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(leftX + logoSize / 2, logoY, logoSize / 2 + 12, 0, Math.PI * 2); ctx.stroke();
+    ctx.setLineDash([]);
 
     // "CREATE YOUR OWN"
-    ctx.font = '300 28px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.fillText('CREATE YOUR OWN', width / 2, 128);
+    ctx.textAlign = 'left';
+    ctx.font = '300 22px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+    ctx.fillText('CREATE YOUR OWN', leftX, 120);
 
-    // "LOCAL HUB" - big gradient text
-    ctx.font = '900 56px "Segoe UI", system-ui, sans-serif';
-    const hubGrad = ctx.createLinearGradient(width / 2 - 200, 175, width / 2 + 200, 175);
+    // "LOCAL HUB"
+    ctx.font = '900 52px "Segoe UI", system-ui, sans-serif';
+    const hubGrad = ctx.createLinearGradient(leftX, 165, leftX + 300, 165);
     hubGrad.addColorStop(0, '#14b8a6');
     hubGrad.addColorStop(0.5, '#22d3ee');
     hubGrad.addColorStop(1, '#14b8a6');
     ctx.fillStyle = hubGrad;
     ctx.shadowColor = 'rgba(20, 184, 166, 0.5)';
-    ctx.shadowBlur = 25;
-    ctx.fillText('LOCAL HUB', width / 2, 180);
+    ctx.shadowBlur = 20;
+    ctx.fillText('LOCAL HUB', leftX, 168);
     ctx.shadowBlur = 0;
 
     // Tagline
-    ctx.font = '400 16px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.fillText('Build the innovation hub your city or country deserves', width / 2, 212);
+    ctx.font = '400 14px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
+    ctx.fillText('Build the innovation hub your city deserves', leftX, 196);
 
-    // === SECTION DIVIDER ===
-    const divY = 238;
-    const divLineLen = 100;
-    const divDiamondOff = 130;
+    // Accent line under tagline
+    const lineGrad = ctx.createLinearGradient(leftX, 210, leftX + 280, 210);
+    lineGrad.addColorStop(0, '#14b8a6');
+    lineGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.strokeStyle = lineGrad;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(leftX, 210); ctx.lineTo(leftX + 280, 210); ctx.stroke();
 
-    // Left line
-    const leftGrad = ctx.createLinearGradient(width / 2 - divLineLen - divDiamondOff, divY, width / 2 - divDiamondOff, divY);
-    leftGrad.addColorStop(0, 'rgba(20, 184, 166, 0)');
-    leftGrad.addColorStop(1, 'rgba(20, 184, 166, 0.6)');
-    ctx.strokeStyle = leftGrad;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(width / 2 - divLineLen - divDiamondOff, divY); ctx.lineTo(width / 2 - divDiamondOff, divY); ctx.stroke();
-
-    // Left diamond
-    ctx.fillStyle = '#14b8a6';
-    ctx.save(); ctx.translate(width / 2 - divDiamondOff + 5, divY); ctx.rotate(Math.PI / 4);
-    ctx.fillRect(-3.5, -3.5, 7, 7); ctx.restore();
-
-    // Center text
-    ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.fillText('Hub Owner Program', width / 2, divY + 5);
-
-    // Right diamond
-    ctx.fillStyle = '#14b8a6';
-    ctx.save(); ctx.translate(width / 2 + divDiamondOff - 5, divY); ctx.rotate(Math.PI / 4);
-    ctx.fillRect(-3.5, -3.5, 7, 7); ctx.restore();
-
-    // Right line
-    const rightGrad = ctx.createLinearGradient(width / 2 + divDiamondOff, divY, width / 2 + divLineLen + divDiamondOff, divY);
-    rightGrad.addColorStop(0, 'rgba(20, 184, 166, 0.6)');
-    rightGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
-    ctx.strokeStyle = rightGrad;
-    ctx.beginPath(); ctx.moveTo(width / 2 + divDiamondOff, divY); ctx.lineTo(width / 2 + divLineLen + divDiamondOff, divY); ctx.stroke();
-
-    // === BENEFIT CARDS - 2 rows x 3 columns, centered ===
-    const benefits = [
-      { label: 'AI Platform', desc: 'Global startup-building tools', color: '#10b981' },
-      { label: 'Proven Model', desc: 'Idea-to-scale program', color: '#06b6d4' },
-      { label: 'Global Network', desc: 'Founders & investors', color: '#8b5cf6' },
-      { label: 'Activate Innovation', desc: 'University & industry', color: '#f59e0b' },
-      { label: 'Lead Ecosystem', desc: 'Shape your region', color: '#ec4899' },
-      { label: 'Full Ownership', desc: 'Your hub, your vision', color: '#14b8a6' },
+    // ============================================================
+    // LEFT SIDE — Benefits list (below headline)
+    // ============================================================
+    const benefitItems = [
+      'Global AI startup-building platform',
+      'Proven idea-to-scale program model',
+      'International founder & investor network',
+      'University & industry activation tools',
+      'Lead your region\'s startup ecosystem',
+      'Full ownership of your local hub',
     ];
 
-    const cardW = 170;
-    const cardH = 72;
-    const cardGap = 14;
-    const cols = 3;
-    const totalW = cols * cardW + (cols - 1) * cardGap;
-    const cardsStartX = (width - totalW) / 2;
-    const cardsStartY = 262;
+    const benefitStartY = 238;
+    const benefitSpacing = 28;
 
-    benefits.forEach((b, i) => {
-      const row = Math.floor(i / cols);
-      const col = i % cols;
-      const x = cardsStartX + col * (cardW + cardGap);
-      const y = cardsStartY + row * (cardH + 10);
-      const cx = x + cardW / 2;
+    benefitItems.forEach((item, i) => {
+      const y = benefitStartY + i * benefitSpacing;
 
-      // Card bg glow
-      const bgGlow = ctx.createRadialGradient(cx, y + cardH / 2, 0, cx, y + cardH / 2, cardW * 0.7);
-      bgGlow.addColorStop(0, `${b.color}15`);
-      bgGlow.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = bgGlow;
-      ctx.beginPath(); ctx.arc(cx, y + cardH / 2, cardW * 0.6, 0, Math.PI * 2); ctx.fill();
+      // Checkmark dot
+      ctx.fillStyle = '#14b8a6';
+      ctx.beginPath(); ctx.arc(leftX + 6, y - 4, 4, 0, Math.PI * 2); ctx.fill();
+
+      // Inner check
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(leftX + 3.5, y - 4);
+      ctx.lineTo(leftX + 5.5, y - 2);
+      ctx.lineTo(leftX + 9, y - 6.5);
+      ctx.stroke();
+
+      // Text
+      ctx.font = '400 13px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.textAlign = 'left';
+      ctx.fillText(item, leftX + 22, y);
+    });
+
+    // ============================================================
+    // RIGHT SIDE — "Who We're Looking For" cards
+    // ============================================================
+    const rightX = 560;
+    const cardW = 280;
+    const cardH = 60;
+    const cardGapY = 12;
+
+    // Section label
+    ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
+    ctx.textAlign = 'left';
+    ctx.fillText('WHO WE\'RE LOOKING FOR', rightX, 52);
+
+    // Accent line
+    ctx.strokeStyle = 'rgba(20, 184, 166, 0.3)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(rightX, 60); ctx.lineTo(rightX + cardW, 60); ctx.stroke();
+
+    const personas = [
+      { title: 'Visionary Ecosystem Builders', desc: 'Leaders ready to shape regional innovation', color: '#10b981' },
+      { title: 'University & Industry Partners', desc: 'Connected to academic and public institutions', color: '#06b6d4' },
+      { title: 'Startup Operators', desc: 'Ready to support and scale founders locally', color: '#8b5cf6' },
+      { title: 'Global Connectors', desc: 'Believe innovation should be borderless', color: '#f59e0b' },
+    ];
+
+    personas.forEach((p, i) => {
+      const y = 74 + i * (cardH + cardGapY);
 
       // Card bg
       ctx.fillStyle = 'rgba(0, 20, 40, 0.7)';
-      ctx.beginPath(); ctx.roundRect(x, y, cardW, cardH, 12); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(rightX, y, cardW, cardH, 10); ctx.fill();
 
-      // Card border gradient
-      const border = ctx.createLinearGradient(x, y, x + cardW, y + cardH);
-      border.addColorStop(0, b.color);
-      border.addColorStop(0.5, 'rgba(255,255,255,0.1)');
-      border.addColorStop(1, b.color);
+      // Card border
+      const border = ctx.createLinearGradient(rightX, y, rightX + cardW, y + cardH);
+      border.addColorStop(0, `${p.color}66`);
+      border.addColorStop(1, 'rgba(255,255,255,0.05)');
       ctx.strokeStyle = border;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.roundRect(x, y, cardW, cardH, 12); ctx.stroke();
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.roundRect(rightX, y, cardW, cardH, 10); ctx.stroke();
 
-      // Top glow line
-      ctx.strokeStyle = `${b.color}88`;
+      // Top accent line
+      ctx.strokeStyle = `${p.color}88`;
       ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.moveTo(x + 30, y); ctx.lineTo(x + cardW - 30, y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(rightX + 20, y); ctx.lineTo(rightX + cardW - 20, y); ctx.stroke();
 
-      // Color dot indicator
-      ctx.fillStyle = b.color;
-      ctx.beginPath(); ctx.arc(x + 18, y + cardH / 2, 5, 0, Math.PI * 2); ctx.fill();
+      // Color indicator
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(rightX + 18, y + cardH / 2, 5, 0, Math.PI * 2); ctx.fill();
 
-      // Label
+      // Title
       ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'left';
-      ctx.fillText(b.label, x + 32, y + 28);
+      ctx.fillText(p.title, rightX + 32, y + 24);
 
       // Desc
       ctx.font = '400 11px "Segoe UI", system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-      ctx.fillText(b.desc, x + 32, y + 46);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+      ctx.fillText(p.desc, rightX + 32, y + 42);
     });
 
-    // === EXISTING HUBS ROW - centered ===
-    const hubsY = 430;
+    // ============================================================
+    // RIGHT SIDE — Active Hubs row
+    // ============================================================
+    const hubsY = 370;
 
-    // "Active Hubs" label
-    ctx.textAlign = 'center';
-    ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.8)';
-    ctx.fillText('ACTIVE HUBS', width / 2 - 130, hubsY + 12);
+    ctx.font = 'bold 11px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.7)';
+    ctx.textAlign = 'left';
+    ctx.fillText('ACTIVE HUBS', rightX, hubsY);
 
     const hubs = [
       { name: 'Orlando', label: 'HQ' },
@@ -307,77 +299,72 @@ const LocalHubBanner = () => {
       { name: 'Sevilla', label: 'EMEA' },
     ];
 
-    const hubChipW = 95;
-    const hubChipH = 30;
-    const hubGap = 10;
-    const hubTotalW = hubs.length * hubChipW + (hubs.length - 1) * hubGap;
-    const hubStartX = (width - hubTotalW) / 2 + 50;
+    const hubChipW = 62;
+    const hubChipH = 24;
+    const hubGap = 8;
 
     hubs.forEach((hub, i) => {
-      const x = hubStartX + i * (hubChipW + hubGap);
-      const y = hubsY;
+      const x = rightX + i * (hubChipW + hubGap);
+      const y = hubsY + 10;
 
-      // Chip bg
       ctx.fillStyle = 'rgba(0, 20, 40, 0.6)';
-      ctx.beginPath(); ctx.roundRect(x, y, hubChipW, hubChipH, 15); ctx.fill();
+      ctx.beginPath(); ctx.roundRect(x, y, hubChipW, hubChipH, 12); ctx.fill();
 
-      // Chip border
-      ctx.strokeStyle = 'rgba(20, 184, 166, 0.3)';
+      ctx.strokeStyle = 'rgba(20, 184, 166, 0.25)';
       ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.roundRect(x, y, hubChipW, hubChipH, 15); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(x, y, hubChipW, hubChipH, 12); ctx.stroke();
 
-      // Name
       ctx.textAlign = 'center';
-      ctx.font = '12px "Segoe UI", system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
-      ctx.fillText(`${hub.label} · ${hub.name}`, x + hubChipW / 2, y + hubChipH / 2 + 4);
+      ctx.font = '10px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+      ctx.fillText(hub.name, x + hubChipW / 2, y + hubChipH / 2 + 3.5);
     });
 
-    // === "YOUR CITY?" highlight - centered ===
-    const yourY = hubsY + 48;
-    const yourW = 260;
-    const yourX = (width - yourW) / 2;
-    const yourH = 42;
+    // ============================================================
+    // BOTTOM — "Your City Could Be Next" + CTA spread across full width
+    // ============================================================
 
-    // Glow
-    const yourGlow = ctx.createRadialGradient(yourX + yourW / 2, yourY + yourH / 2, 0, yourX + yourW / 2, yourY + yourH / 2, 130);
-    yourGlow.addColorStop(0, 'rgba(20, 184, 166, 0.15)');
-    yourGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
-    ctx.fillStyle = yourGlow;
-    ctx.beginPath(); ctx.arc(yourX + yourW / 2, yourY + yourH / 2, 130, 0, Math.PI * 2); ctx.fill();
+    // Separator line
+    const sepY = 440;
+    const sepGrad = ctx.createLinearGradient(60, sepY, width - 60, sepY);
+    sepGrad.addColorStop(0, 'rgba(20, 184, 166, 0)');
+    sepGrad.addColorStop(0.3, 'rgba(20, 184, 166, 0.3)');
+    sepGrad.addColorStop(0.7, 'rgba(20, 184, 166, 0.3)');
+    sepGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
+    ctx.strokeStyle = sepGrad;
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(60, sepY); ctx.lineTo(width - 60, sepY); ctx.stroke();
 
-    // Dashed box
-    ctx.setLineDash([8, 5]);
-    ctx.strokeStyle = '#14b8a6';
-    ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.roundRect(yourX, yourY, yourW, yourH, 12); ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Text
-    ctx.font = '900 20px "Segoe UI", system-ui, sans-serif';
-    const yourTextGrad = ctx.createLinearGradient(yourX, yourY + 24, yourX + yourW, yourY + 24);
-    yourTextGrad.addColorStop(0, '#14b8a6');
-    yourTextGrad.addColorStop(0.5, '#22d3ee');
-    yourTextGrad.addColorStop(1, '#14b8a6');
-    ctx.fillStyle = yourTextGrad;
-    ctx.textAlign = 'center';
+    // "YOUR CITY COULD BE NEXT" — left aligned
+    ctx.font = '900 28px "Segoe UI", system-ui, sans-serif';
+    const nextGrad = ctx.createLinearGradient(leftX, 490, leftX + 500, 490);
+    nextGrad.addColorStop(0, '#14b8a6');
+    nextGrad.addColorStop(0.5, '#22d3ee');
+    nextGrad.addColorStop(1, '#14b8a6');
+    ctx.fillStyle = nextGrad;
+    ctx.textAlign = 'left';
     ctx.shadowColor = 'rgba(20, 184, 166, 0.4)';
-    ctx.shadowBlur = 12;
-    ctx.fillText('YOUR CITY COULD BE NEXT', yourX + yourW / 2, yourY + yourH / 2 + 7);
+    ctx.shadowBlur = 15;
+    ctx.fillText('YOUR CITY COULD BE NEXT', leftX, 490);
     ctx.shadowBlur = 0;
 
-    // === CTA BUTTON - centered ===
-    const btnW = 260;
+    // Subtitle
+    ctx.font = '400 13px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+    ctx.fillText('Drive real economic growth, empower founders, and put your region on the global innovation map.', leftX, 515);
+
+    // CTA button — right side
+    const btnW = 240;
     const btnH = 44;
-    const btnX = (width - btnW) / 2;
-    const btnY = 548;
+    const btnX = width - 60 - btnW;
+    const btnY = 472;
 
     // Button glow
-    const btnGlow = ctx.createRadialGradient(btnX + btnW / 2, btnY + btnH / 2, 0, btnX + btnW / 2, btnY + btnH / 2, 130);
-    btnGlow.addColorStop(0, 'rgba(20, 184, 166, 0.3)');
+    const btnGlow = ctx.createRadialGradient(btnX + btnW / 2, btnY + btnH / 2, 0, btnX + btnW / 2, btnY + btnH / 2, 120);
+    btnGlow.addColorStop(0, 'rgba(20, 184, 166, 0.25)');
     btnGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
     ctx.fillStyle = btnGlow;
-    ctx.beginPath(); ctx.arc(btnX + btnW / 2, btnY + btnH / 2, 130, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(btnX + btnW / 2, btnY + btnH / 2, 120, 0, Math.PI * 2); ctx.fill();
 
     // Button bg
     const btnGrad = ctx.createLinearGradient(btnX, btnY, btnX + btnW, btnY);
@@ -393,21 +380,23 @@ const LocalHubBanner = () => {
     ctx.beginPath(); ctx.roundRect(btnX, btnY, btnW, btnH, 22); ctx.stroke();
 
     // Button text
-    ctx.font = 'bold 15px "Segoe UI", system-ui, sans-serif';
+    ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
-    ctx.fillText('APPLY TO LEAD A HUB →', btnX + btnW / 2, btnY + btnH / 2 + 5);
+    ctx.fillText('APPLY TO LEAD A HUB', btnX + btnW / 2, btnY + btnH / 2 + 5);
 
-    // Website below button
-    ctx.font = '400 12px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-    ctx.fillText('startupfactoryhub.com', width / 2, btnY + btnH + 22);
-
-    // === HASHTAGS - bottom ===
+    // === BOTTOM BAR ===
+    // Website
     ctx.textAlign = 'left';
+    ctx.font = '400 11px "Segoe UI", system-ui, sans-serif';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
+    ctx.fillText('startupfactoryhub.com', leftX, height - 22);
+
+    // Hashtags — right aligned
+    ctx.textAlign = 'right';
     ctx.font = '400 9px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.4)';
-    ctx.fillText('#StartupFactoryHub  #InnovationHubs  #ChapterLeaders  #GlobalInnovation', 30, height - 15);
+    ctx.fillStyle = 'rgba(20, 184, 166, 0.35)';
+    ctx.fillText('#StartupFactoryHub  #InnovationHubs  #ChapterLeaders  #GlobalInnovation', width - 60, height - 22);
   };
 
   const downloadBanner = (format: 'png' | 'jpg') => {
