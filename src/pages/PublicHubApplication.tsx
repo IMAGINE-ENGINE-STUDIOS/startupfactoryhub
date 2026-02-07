@@ -8,6 +8,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Globe, Building2, Rocket, Users, Shield, Award, CheckCircle2 } from 'lucide-react';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
+import MatrixBackground from '@/components/MatrixBackground';
 
 const ROLE_OPTIONS = [
   'Founder / Entrepreneur',
@@ -188,7 +189,8 @@ export default function PublicHubApplication() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 relative overflow-hidden">
+        <MatrixBackground />
         <div className="max-w-lg text-center space-y-6">
           <div className="h-20 w-20 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto">
             <CheckCircle2 className="h-10 w-10 text-emerald-500" />
@@ -206,7 +208,8 @@ export default function PublicHubApplication() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <MatrixBackground />
       {/* Hero */}
       <div className="relative overflow-hidden bg-gradient-to-br from-background via-primary/5 to-background border-b border-border">
         <div className="absolute inset-0 opacity-5">
