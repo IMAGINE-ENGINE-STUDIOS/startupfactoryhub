@@ -5,6 +5,7 @@ import sfhLogo from '@/assets/sfh-logo-sphere.png';
 import rocketLaunchBg from '@/assets/rocket-launch-bg.jpg';
 import astronautBg from '@/assets/astronaut-bg.jpg';
 import moonEarthBg from '@/assets/moon-earth.jpg';
+import galaxyBg from '@/assets/galaxy-bg.webp';
 
 // Enhanced Geometric Pattern Components (matching marketing banners)
 const TechGrid = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
@@ -677,7 +678,16 @@ export default function Deck() {
         </SlideWrapper>
 
         {/* SLIDE 4: Solution */}
-        <SlideContainer>
+        <SlideWrapper>
+          <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+            {/* Galaxy background */}
+            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${galaxyBg})` }} />
+            <div className="absolute inset-0 bg-slate-950/70 print:hidden" />
+            {/* Border frame */}
+            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
+            <TechGrid />
+            <CornerAccents />
+            <div className="relative z-10 w-full max-w-[90%] mx-auto">
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-3 mb-2">
               <IconBadge icon={Lightbulb} color="teal" />
@@ -768,7 +778,9 @@ export default function Deck() {
               </TechCard>
             </div>
           </div>
-        </SlideContainer>
+            </div>
+          </section>
+        </SlideWrapper>
 
         {/* NEW SLIDE: Global Footprint & Hybrid Philosophy */}
         <SlideContainer>
