@@ -725,6 +725,15 @@ export function LightPaperDocument({
     // Switch to new page
     setCurrentPage(newPage);
     
+    // In view mode, scroll to the target page
+    if (viewMode && viewModeImages.length > 0) {
+      const pageEl = document.getElementById(`page-${newPage}`);
+      if (pageEl) {
+        pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      return;
+    }
+    
     // Load new page content into editor
     if (editorRef.current && pages[newPage - 1]) {
       editorRef.current.innerHTML = pages[newPage - 1];
@@ -2829,7 +2838,7 @@ export function LightPaperDocument({
                     position: 'relative',
                     height: 'auto',
                     overflow: 'visible',
-                    marginBottom: '20px'
+                    marginBottom: '0px'
                   }}
                   onClick={handleCanvasClick}
                 >
