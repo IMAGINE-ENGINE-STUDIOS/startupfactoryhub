@@ -578,51 +578,56 @@ export function LightPaperDocument({
     const editor = editorRef.current;
     if (!editor || viewMode) return;
 
-    const pageContent = editor.closest('.page-content') as HTMLElement | null;
-    if (!pageContent) return;
+    // Calculate max content height from page format (in px)
+    const dims = getPageDimensions();
+    const maxContentHeightCm = dims.height - (MARGIN_CM * 2);
+    const maxContentHeightPx = maxContentHeightCm * CM_TO_PX;
 
-    const maxHeight = pageContent.clientHeight;
-    const contentHeight = editor.scrollHeight;
+    // Check if editor content exceeds allowable area
+    if (editor.scrollHeight <= maxContentHeightPx + 5) return;
 
-    // If content exceeds page, split overflow into a new page
-    if (contentHeight > maxHeight + 10) {
-      const children = Array.from(editor.childNodes);
-      let splitIndex = -1;
+    const children = Array.from(editor.childNodes);
+    let splitIndex = -1;
 
-      for (let i = 0; i < children.length; i++) {
-        const child = children[i] as HTMLElement;
-        if (child.getBoundingClientRect) {
-          const rect = child.getBoundingClientRect();
-          const editorRect = editor.getBoundingClientRect();
-          const relativeBottom = rect.bottom - editorRect.top;
-          if (relativeBottom > maxHeight) {
-            splitIndex = i;
-            break;
-          }
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i] as HTMLElement;
+      if (child.getBoundingClientRect) {
+        const rect = child.getBoundingClientRect();
+        const editorRect = editor.getBoundingClientRect();
+        const relativeBottom = rect.bottom - editorRect.top;
+        if (relativeBottom > maxContentHeightPx) {
+          splitIndex = i;
+          break;
         }
       }
-
-      if (splitIndex > 0) {
-        const overflowNodes = children.slice(splitIndex);
-        const overflowHtml = overflowNodes.map(n => {
-          if (n instanceof HTMLElement) return n.outerHTML;
-          return n.textContent || '';
-        }).join('');
-
-        overflowNodes.forEach(n => editor.removeChild(n));
-
-        const currentHtml = editor.innerHTML;
-        setPages(prevPages => {
-          const newPages = [...prevPages];
-          newPages[currentPage - 1] = currentHtml;
-          newPages.splice(currentPage, 0, overflowHtml);
-          return newPages;
-        });
-        setTotalPages(prev => prev + 1);
-        toast.info(`Page ${currentPage + 1} created automatically`);
-      }
     }
-  }, [currentPage, viewMode]);
+
+    if (splitIndex > 0) {
+      const overflowNodes = children.slice(splitIndex);
+      const overflowHtml = overflowNodes.map(n => {
+        if (n instanceof HTMLElement) return n.outerHTML;
+        return n.textContent || '';
+      }).join('');
+
+      overflowNodes.forEach(n => editor.removeChild(n));
+
+      const currentHtml = editor.innerHTML;
+      setPages(prevPages => {
+        const newPages = [...prevPages];
+        newPages[currentPage - 1] = currentHtml;
+        newPages.splice(currentPage, 0, overflowHtml);
+        return newPages;
+      });
+      setTotalPages(prev => prev + 1);
+
+      // Recursively check the overflow page too
+      setTimeout(() => {
+        // Navigate to the new page and check again
+        handlePageSelect(currentPage + 1);
+        setTimeout(checkAndHandleOverflow, 200);
+      }, 100);
+    }
+  }, [currentPage, viewMode, pageFormat, orientation]);
 
   // Handle content changes and auto-save
   useEffect(() => {
@@ -2208,12 +2213,12 @@ export function LightPaperDocument({
         <style>{`
           .page {
             width: ${getPageDimensions().width}cm;
-            min-height: ${getPageDimensions().height}cm;
+            height: ${getPageDimensions().height}cm;
             max-width: ${getPageDimensions().width}cm;
             padding: 0;
             background: ${isDarkMode ? 'black' : 'white'};
             box-shadow: 0 0 20px rgba(0,0,0,0.2);
-            overflow: visible;
+            overflow: hidden;
             position: relative;
             box-sizing: border-box;
             transform: scale(${zoomLevel});
@@ -2225,10 +2230,10 @@ export function LightPaperDocument({
           
           .page-content {
             width: 100%;
-            min-height: 100%;
+            height: ${getPageDimensions().height}cm;
             padding: ${MARGIN_CM}cm;
             box-sizing: border-box;
-            overflow: visible;
+            overflow: hidden;
             position: relative;
             display: block;
           }
@@ -2658,7 +2663,22 @@ export function LightPaperDocument({
                   onDismiss={() => setGeniusBubblePos(null)}
                   onInsertText={(html) => {
                     if (!editorRef.current || viewMode) return;
-                    editorRef.current.innerHTML += html;
+                    
+                    // Split HTML into block-level chunks for page distribution
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = html;
+                    const blocks = Array.from(tempDiv.children);
+                    
+                    if (blocks.length === 0) {
+                      // Plain text, just append
+                      editorRef.current.innerHTML += html;
+                    } else {
+                      // Append blocks one by one, checking overflow after each
+                      for (const block of blocks) {
+                        editorRef.current.appendChild(block.cloneNode(true));
+                      }
+                    }
+                    
                     setDocumentContent(editorRef.current.innerHTML);
                     setPages(prevPages => {
                       const newPages = [...prevPages];
@@ -2666,8 +2686,22 @@ export function LightPaperDocument({
                       return newPages;
                     });
                     setGeniusBubblePos(null);
-                    // Check overflow after AI content insertion
-                    setTimeout(checkAndHandleOverflow, 500);
+                    
+                    // Check overflow repeatedly to create as many pages as needed
+                    const recursiveOverflowCheck = (iteration: number) => {
+                      if (iteration > 100) return; // safety limit
+                      setTimeout(() => {
+                        const editor = editorRef.current;
+                        if (!editor) return;
+                        const dims = getPageDimensions();
+                        const maxH = (dims.height - MARGIN_CM * 2) * CM_TO_PX;
+                        if (editor.scrollHeight > maxH + 5) {
+                          checkAndHandleOverflow();
+                          recursiveOverflowCheck(iteration + 1);
+                        }
+                      }, 300);
+                    };
+                    recursiveOverflowCheck(0);
                   }}
                 />
               </div>
