@@ -28,6 +28,7 @@ import { FileUploadDialog } from "./FileUploadDialog";
 import { OverlayTextBox } from "./OverlayTextBox";
 import { AIToolbar } from "./AIToolbar";
 import { PageManagementPanel } from "./PageManagementPanel";
+import GeniusAIBubble from "./GeniusAIBubble";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -150,6 +151,7 @@ export function LightPaperDocument({
   const [isEditingText, setIsEditingText] = useState(false);
   const [pages, setPages] = useState<string[]>(['']);
   const [showPagePanel, setShowPagePanel] = useState(false);
+  const [geniusBubblePos, setGeniusBubblePos] = useState<{ x: number; y: number } | null>(null);
   const {
     saveProject
   } = useLightPaperProjects("document");
@@ -2529,6 +2531,15 @@ export function LightPaperDocument({
                     if (currentProjectId && !viewMode) {
                       updateCursor(e.clientX, e.clientY);
                     }
+                    // Trigger Genius AI bubble on canvas click (only if not already showing)
+                    if (!viewMode && !geniusBubblePos) {
+                      const rect = (e.currentTarget as HTMLElement).closest('.page')?.getBoundingClientRect();
+                      if (rect) {
+                        const x = ((e.clientX - rect.left) / rect.width) * 100;
+                        const y = ((e.clientY - rect.top) / rect.height) * 100;
+                        setGeniusBubblePos({ x, y });
+                      }
+                    }
                   }}
                 />
               )}
@@ -2550,6 +2561,18 @@ export function LightPaperDocument({
               }}
               isDarkMode={isDarkMode}
               isEditMode={isEditingText && !viewMode}
+            />
+            
+            {/* Genius AI Bubble - inline on canvas */}
+            <GeniusAIBubble
+              triggerPosition={geniusBubblePos}
+              isDarkMode={isDarkMode}
+              onDismiss={() => setGeniusBubblePos(null)}
+              onInsertText={(html) => {
+                if (!editorRef.current || viewMode) return;
+                editorRef.current.innerHTML += html;
+                setGeniusBubblePos(null);
+              }}
             />
             
             {/* Overlay Text Boxes in View Mode */}
