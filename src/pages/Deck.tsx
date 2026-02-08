@@ -895,79 +895,81 @@ export default function Deck() {
 
         {/* NEW SLIDE: The Product */}
         <SlideWrapper>
-          <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+          <section className="absolute inset-0 flex flex-col items-center justify-start p-[3%] pt-[2%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 print:hidden" />
             <div className="absolute inset-[2%] border-2 border-emerald-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
             <CornerAccents />
-            <div className="relative z-10 w-full max-w-[92%] mx-auto">
-              <div className="flex flex-col items-center">
-                <div className="flex items-center gap-3 mb-2">
-                  <IconBadge icon={Cpu} color="emerald" />
-                  <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">The Product</h2>
+            <div className="relative z-10 w-full max-w-[90%] mx-auto flex flex-col items-center h-full">
+              {/* Title */}
+              <div className="flex items-center gap-3 mb-1">
+                <IconBadge icon={Cpu} color="emerald" />
+                <h2 className="text-xl md:text-2xl font-bold text-white print:text-black">The Product</h2>
+              </div>
+              <p className="text-sm text-emerald-400 font-semibold text-center mb-0.5 print:text-emerald-700">All-in-One Startup Operating System</p>
+              <p className="text-[10px] md:text-xs text-slate-400 text-center mb-3 max-w-2xl print:text-gray-600">
+                A unified platform combining AI-powered tools, global resources, mentorship, and structured startup journeys.
+              </p>
+
+              {/* Mockups grid - all three side by side to fit in slide */}
+              <div className="grid grid-cols-3 gap-3 w-full flex-1 min-h-0">
+                {/* Dashboard mockup */}
+                <div className="relative rounded-lg overflow-hidden border-2 border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.15)] flex flex-col">
+                  <div className="bg-slate-800/90 px-3 py-1 flex items-center gap-1.5 border-b border-slate-700/50 shrink-0">
+                    <div className="flex gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500/80" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/80" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500/80" />
+                    </div>
+                    <div className="flex-1 mx-2">
+                      <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[7px] text-slate-400 text-center">Dashboard</div>
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-hidden">
+                    <img src={mockupDashboard} alt="Dashboard" className="w-full h-full object-cover object-top" />
+                  </div>
+                  <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/40 rounded-full text-[7px] text-emerald-400 font-semibold backdrop-blur-sm whitespace-nowrap">
+                    🌍 AI Dashboard & Globe
+                  </div>
                 </div>
-                <p className="text-base md:text-lg text-emerald-400 font-semibold text-center mb-1 print:text-emerald-700">All-in-One Startup Operating System</p>
-                <p className="text-xs md:text-sm text-slate-400 text-center mb-6 max-w-3xl print:text-gray-600">
-                  A unified platform combining AI-powered tools, global resources, mentorship, and structured startup journeys—all in one dashboard.
-                </p>
 
-                {/* Main mockup - Dashboard */}
-                <div className="relative w-full max-w-5xl mb-6">
-                  <div className="relative rounded-xl overflow-hidden border-2 border-emerald-500/30 shadow-[0_0_40px_rgba(16,185,129,0.15)]">
-                    {/* Browser chrome */}
-                    <div className="bg-slate-800/90 px-4 py-2 flex items-center gap-2 border-b border-slate-700/50">
-                      <div className="flex gap-1.5">
-                        <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                        <div className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                      </div>
-                      <div className="flex-1 mx-4">
-                        <div className="bg-slate-700/60 rounded-md px-3 py-1 text-[10px] text-slate-400 text-center">startupfactoryhub.com/dashboard</div>
-                      </div>
+                {/* Resources mockup */}
+                <div className="relative rounded-lg overflow-hidden border-2 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.1)] flex flex-col">
+                  <div className="bg-slate-800/90 px-3 py-1 flex items-center gap-1.5 border-b border-slate-700/50 shrink-0">
+                    <div className="flex gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500/80" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/80" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500/80" />
                     </div>
-                    <img src={mockupDashboard} alt="Startup Factory Hub Dashboard" className="w-full h-auto" />
+                    <div className="flex-1 mx-2">
+                      <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[7px] text-slate-400 text-center">Resources Map</div>
+                    </div>
                   </div>
-                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-4 py-1 bg-emerald-500/20 border border-emerald-500/40 rounded-full text-[10px] text-emerald-400 font-semibold backdrop-blur-sm">
-                    🌍 AI-Powered Dashboard with Global Resource Map
+                  <div className="flex-1 overflow-hidden">
+                    <img src={mockupResources} alt="Resources Map" className="w-full h-full object-cover object-top" />
+                  </div>
+                  <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-[7px] text-cyan-400 font-semibold backdrop-blur-sm whitespace-nowrap">
+                    📍 Resources & Partners
                   </div>
                 </div>
 
-                {/* Two smaller mockups side by side */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-5xl mt-4">
-                  {/* Resources Map mockup */}
-                  <div className="relative rounded-xl overflow-hidden border-2 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.1)]">
-                    <div className="bg-slate-800/90 px-3 py-1.5 flex items-center gap-2 border-b border-slate-700/50">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 rounded-full bg-red-500/80" />
-                        <div className="w-2 h-2 rounded-full bg-yellow-500/80" />
-                        <div className="w-2 h-2 rounded-full bg-green-500/80" />
-                      </div>
-                      <div className="flex-1 mx-2">
-                        <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[8px] text-slate-400 text-center">Resources Map</div>
-                      </div>
+                {/* Journey mockup */}
+                <div className="relative rounded-lg overflow-hidden border-2 border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.1)] flex flex-col">
+                  <div className="bg-slate-800/90 px-3 py-1 flex items-center gap-1.5 border-b border-slate-700/50 shrink-0">
+                    <div className="flex gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500/80" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/80" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500/80" />
                     </div>
-                    <img src={mockupResources} alt="Resources Map" className="w-full h-auto" />
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-[9px] text-cyan-400 font-semibold backdrop-blur-sm">
-                      📍 Interactive Resources & Partner Network
+                    <div className="flex-1 mx-2">
+                      <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[7px] text-slate-400 text-center">Startup Journey</div>
                     </div>
                   </div>
-
-                  {/* Journey mockup */}
-                  <div className="relative rounded-xl overflow-hidden border-2 border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.1)]">
-                    <div className="bg-slate-800/90 px-3 py-1.5 flex items-center gap-2 border-b border-slate-700/50">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 rounded-full bg-red-500/80" />
-                        <div className="w-2 h-2 rounded-full bg-yellow-500/80" />
-                        <div className="w-2 h-2 rounded-full bg-green-500/80" />
-                      </div>
-                      <div className="flex-1 mx-2">
-                        <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[8px] text-slate-400 text-center">Startup Journey</div>
-                      </div>
-                    </div>
-                    <img src={mockupJourney} alt="Startup Journey Tracker" className="w-full h-auto" />
-                    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-teal-500/20 border border-teal-500/40 rounded-full text-[9px] text-teal-400 font-semibold backdrop-blur-sm">
-                      🚀 Guided Startup Journey with Checklists
-                    </div>
+                  <div className="flex-1 overflow-hidden">
+                    <img src={mockupJourney} alt="Startup Journey" className="w-full h-full object-cover object-top" />
+                  </div>
+                  <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-teal-500/20 border border-teal-500/40 rounded-full text-[7px] text-teal-400 font-semibold backdrop-blur-sm whitespace-nowrap">
+                    🚀 Guided Journey & Checklists
                   </div>
                 </div>
               </div>
