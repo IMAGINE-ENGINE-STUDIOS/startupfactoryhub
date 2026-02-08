@@ -214,11 +214,8 @@ export default function GeniusAIBubble({
 
   return (
     <div
-      className="absolute z-[100] no-print"
+      className="z-[100] no-print"
       style={{
-        left: `${triggerPosition.x}%`,
-        top: `${triggerPosition.y}%`,
-        transform: "translate(-50%, -50%)",
         opacity,
         transition: "opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1)",
         pointerEvents: opacity === 0 ? "none" : "auto",
