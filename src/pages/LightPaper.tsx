@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, Command, HelpCircle, Upload, Plus, Bot, Languages, TrendingUp } from "lucide-react";
+import { FileText, Table, Presentation, Command, HelpCircle, Upload, Plus, Languages, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FolderOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -9,7 +9,7 @@ import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreads
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
 
 import AIAssistant from "@/components/AIAssistant";
-import GeniusAIChat from "@/components/lightpaper/GeniusAIChat";
+
 import { ScientificCalculator } from "@/components/ScientificCalculator";
 import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
@@ -42,7 +42,7 @@ export default function LightPaper() {
   const [showSentiment, setShowSentiment] = useState(false);
   const [showDocAnalyzer, setShowDocAnalyzer] = useState(false);
   const [showTaskAutomation, setShowTaskAutomation] = useState(false);
-  const [showGeniusAI, setShowGeniusAI] = useState(false);
+  
 
   // Keyboard shortcut for quick navigation (Ctrl+K or Cmd+K)
   useEffect(() => {
@@ -140,7 +140,7 @@ export default function LightPaper() {
       </div>
 
       <div className="flex-1 overflow-hidden flex">
-        <div className={`flex-1 overflow-auto transition-all duration-300 ${showGeniusAI ? 'mr-0' : ''}`}>
+        <div className="flex-1 overflow-auto transition-all duration-300">
           <Tabs 
             value={activeTab} 
             onValueChange={(value) => {
@@ -180,19 +180,6 @@ export default function LightPaper() {
           </Tabs>
         </div>
 
-        {/* Genius AI Side Panel */}
-        {showGeniusAI && (
-          <div className="w-[380px] flex-shrink-0 h-full">
-            <GeniusAIChat
-              isOpen={showGeniusAI}
-              onClose={() => setShowGeniusAI(false)}
-              onInsertText={(text) => {
-                // Copy to clipboard as a universal insert method
-                navigator.clipboard.writeText(text);
-              }}
-            />
-          </div>
-        )}
       </div>
 
       <AIAssistant isOpen={showAI} onClose={() => setShowAI(false)} />
@@ -247,17 +234,6 @@ export default function LightPaper() {
         
         {showAIFeaturesMenu && (
           <div className="absolute bottom-16 right-0 tech-card border-0 rounded-lg shadow-2xl p-3 space-y-2 min-w-[200px]">
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start gap-2" 
-              onClick={() => {
-                setShowGeniusAI(true);
-                setShowAIFeaturesMenu(false);
-              }}
-            >
-              <Bot className="h-4 w-4" />
-              Genius AI
-            </Button>
             <Button 
               variant="ghost" 
               className="w-full justify-start gap-2" 
