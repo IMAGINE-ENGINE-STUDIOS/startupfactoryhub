@@ -1693,19 +1693,38 @@ export function LightPaperDocument({
           for (let i = 0; i < pageContainers.length; i++) {
             const container = pageContainers[i] as HTMLElement;
             
-            await new Promise(resolve => setTimeout(resolve, 100));
+            // Scroll the container into view for accurate capture
+            container.scrollIntoView({ behavior: 'instant' as any });
+            await new Promise(resolve => setTimeout(resolve, 200));
             
             const canvas = await html2canvas(container, {
               scale: 2,
               useCORS: true,
               allowTaint: true,
-              backgroundColor: '#ffffff',
+              backgroundColor: null, // Preserve original backgrounds (dark pages, images, etc.)
               logging: false
             });
             
             const imgData = canvas.toDataURL('image/png');
             if (i > 0) pdf.addPage();
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            
+            // Maintain aspect ratio - fit image within the PDF page
+            const imgAspect = canvas.width / canvas.height;
+            const pageAspect = pdfWidth / pdfHeight;
+            let drawWidth = pdfWidth;
+            let drawHeight = pdfHeight;
+            let drawX = 0;
+            let drawY = 0;
+            
+            if (imgAspect > pageAspect) {
+              drawHeight = pdfWidth / imgAspect;
+              drawY = (pdfHeight - drawHeight) / 2;
+            } else {
+              drawWidth = pdfHeight * imgAspect;
+              drawX = (pdfWidth - drawWidth) / 2;
+            }
+            
+            pdf.addImage(imgData, 'PNG', drawX, drawY, drawWidth, drawHeight);
           }
           
           // Restore zoom
@@ -1719,14 +1738,27 @@ export function LightPaperDocument({
             scale: 2,
             useCORS: true,
             allowTaint: true,
-            backgroundColor: '#ffffff',
+            backgroundColor: null,
             logging: false
           });
           
           pageElement.style.transform = originalTransform;
           
           const imgData = canvas.toDataURL('image/png');
-          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+          const imgAspect = canvas.width / canvas.height;
+          const pageAspect = pdfWidth / pdfHeight;
+          let drawWidth = pdfWidth;
+          let drawHeight = pdfHeight;
+          let drawX = 0;
+          let drawY = 0;
+          if (imgAspect > pageAspect) {
+            drawHeight = pdfWidth / imgAspect;
+            drawY = (pdfHeight - drawHeight) / 2;
+          } else {
+            drawWidth = pdfHeight * imgAspect;
+            drawX = (pdfWidth - drawWidth) / 2;
+          }
+          pdf.addImage(imgData, 'PNG', drawX, drawY, drawWidth, drawHeight);
         }
         
         // Also capture any signatures placed on the page
