@@ -920,14 +920,14 @@ export default function Deck() {
               <p className="text-xs text-emerald-400 font-semibold mb-3">All-in-One Startup Operating System</p>
 
               {/* Main content: Left description + Right mockups */}
-              <div className="flex flex-1 min-h-0 gap-4">
+              <div className="flex flex-1 min-h-0 gap-3">
                 
                 {/* Left side - Description */}
-                <div className="w-[30%] flex flex-col justify-center gap-3">
-                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                <div className="w-[22%] flex flex-col justify-center gap-2.5">
+                  <p className="text-[10px] text-slate-300 leading-relaxed">
                     Startup Factory Hub unifies every tool a startup needs into a single, AI-powered platform — from founding to funding.
                   </p>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5">
                     {[
                       { emoji: '🤖', label: 'AI-Powered Dashboard', desc: 'Smart insights, analytics & 3D globe' },
                       { emoji: '📍', label: 'Global Resources Map', desc: 'Partners, perks & coworking worldwide' },
@@ -936,11 +936,11 @@ export default function Deck() {
                       { emoji: '💰', label: 'Investor Matching', desc: 'Pitch, connect & raise capital' },
                       { emoji: '📱', label: 'Mobile Optimized', desc: 'Full experience on any device' },
                     ].map((item, i) => (
-                      <div key={i} className="flex items-start gap-2">
-                        <span className="text-[10px] mt-0.5">{item.emoji}</span>
+                      <div key={i} className="flex items-start gap-1.5">
+                        <span className="text-[9px] mt-0.5">{item.emoji}</span>
                         <div>
-                          <div className="text-[9px] font-semibold text-emerald-400">{item.label}</div>
-                          <div className="text-[8px] text-slate-400">{item.desc}</div>
+                          <div className="text-[8px] font-semibold text-emerald-400">{item.label}</div>
+                          <div className="text-[7px] text-slate-400">{item.desc}</div>
                         </div>
                       </div>
                     ))}
@@ -954,8 +954,8 @@ export default function Deck() {
                   <div 
                     className="absolute bg-white rounded shadow-[0_8px_40px_rgba(0,0,0,0.3)] overflow-hidden"
                     style={{ 
-                      width: '30%', aspectRatio: '16/10',
-                      left: '0%', top: '2%',
+                      width: '34%', aspectRatio: '16/10',
+                      left: '0%', top: '0%',
                       transform: 'rotateY(8deg) rotateZ(-2deg)',
                       zIndex: 1
                     }}
@@ -967,8 +967,8 @@ export default function Deck() {
                   <div 
                     className="absolute bg-white rounded shadow-[0_10px_45px_rgba(0,0,0,0.3)] overflow-hidden"
                     style={{ 
-                      width: '32%', aspectRatio: '16/10',
-                      left: '14%', top: '-3%',
+                      width: '36%', aspectRatio: '16/10',
+                      left: '12%', top: '-5%',
                       transform: 'rotateY(4deg) rotateZ(-1deg)',
                       zIndex: 2
                     }}
@@ -980,8 +980,8 @@ export default function Deck() {
                   <div 
                     className="absolute bg-white rounded shadow-[0_12px_50px_rgba(0,0,0,0.3)] overflow-hidden"
                     style={{ 
-                      width: '30%', aspectRatio: '16/10',
-                      left: '30%', top: '8%',
+                      width: '34%', aspectRatio: '16/10',
+                      left: '28%', top: '8%',
                       transform: 'rotateY(-2deg) rotateZ(1deg)',
                       zIndex: 3
                     }}
@@ -990,7 +990,7 @@ export default function Deck() {
                   </div>
 
                   {/* Main monitor - right */}
-                  <div className="absolute" style={{ right: '5%', bottom: '8%', width: '48%', zIndex: 4 }}>
+                  <div className="absolute" style={{ right: '2%', bottom: '5%', width: '55%', zIndex: 4 }}>
                     <div className="rounded-lg overflow-hidden bg-black p-[3px] shadow-[0_20px_70px_rgba(0,0,0,0.4)]">
                       <div className="bg-black flex justify-center py-[2px]">
                         <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
@@ -1008,19 +1008,15 @@ export default function Deck() {
                   {/* Phone mockup - bottom right, overlapping monitor */}
                   <div 
                     className="absolute"
-                    style={{ right: '0%', bottom: '5%', width: '14%', zIndex: 5 }}
+                    style={{ right: '-2%', bottom: '3%', width: '16%', zIndex: 5 }}
                   >
-                    {/* Phone frame */}
                     <div className="rounded-[12px] overflow-hidden bg-black p-[2px] shadow-[0_15px_50px_rgba(0,0,0,0.4)]">
-                      {/* Notch */}
                       <div className="bg-black flex justify-center pt-[3px] pb-[1px] rounded-t-[10px]">
                         <div className="w-6 h-1 bg-slate-800 rounded-full" />
                       </div>
-                      {/* Screen */}
                       <div className="bg-white overflow-hidden">
                         <img src={mockupMobile} alt="Mobile App" className="w-full h-auto block" />
                       </div>
-                      {/* Bottom bar */}
                       <div className="bg-black flex justify-center py-[2px]">
                         <div className="w-4 h-0.5 bg-slate-700 rounded-full" />
                       </div>
