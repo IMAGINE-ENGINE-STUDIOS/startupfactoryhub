@@ -899,25 +899,51 @@ export default function Deck() {
           <section className="absolute inset-0 flex items-center justify-center overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
             {/* Dark geometric background */}
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 print:hidden" />
-            <div className="absolute inset-[2%] border-2 border-emerald-500/20 rounded-lg print:border-gray-300" />
+            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
+            <FloatingHexagons />
+            <EnergyLines />
             <CornerAccents />
 
-            {/* Geometric decorative shapes */}
-            <div className="absolute top-[8%] left-[5%] w-20 h-20 border border-emerald-500/15 rounded-full print:hidden" />
-            <div className="absolute bottom-[12%] left-[8%] w-12 h-12 border border-cyan-500/10 rotate-45 print:hidden" />
-            <div className="absolute top-[15%] right-[6%] w-16 h-16 border border-teal-500/10 rounded-full print:hidden" />
-            <div className="absolute bottom-[20%] right-[10%] w-8 h-8 border border-emerald-500/15 rotate-12 print:hidden" />
-            <div className="absolute top-[40%] left-[3%] w-6 h-6 bg-emerald-500/5 rounded-full print:hidden" />
-            <div className="absolute bottom-[35%] right-[4%] w-10 h-10 bg-cyan-500/5 rounded-full print:hidden" />
+            {/* Tron-style glowing circuit lines */}
+            <div className="absolute top-[30%] left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent shadow-[0_0_15px_rgba(16,185,129,0.3)] print:hidden" />
+            <div className="absolute top-[70%] left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent shadow-[0_0_10px_rgba(6,182,212,0.2)] print:hidden" />
+            <div className="absolute top-0 left-[25%] w-px h-full bg-gradient-to-b from-transparent via-emerald-500/15 to-transparent print:hidden" />
+            <div className="absolute top-0 right-[20%] w-px h-full bg-gradient-to-b from-transparent via-teal-500/15 to-transparent print:hidden" />
+
+            {/* Diagonal light beams */}
+            <div className="absolute top-0 right-[30%] w-[1px] h-[60%] bg-gradient-to-b from-emerald-500/20 via-emerald-500/5 to-transparent origin-top rotate-[15deg] print:hidden" />
+            <div className="absolute top-0 right-[50%] w-[1px] h-[50%] bg-gradient-to-b from-cyan-500/15 via-cyan-500/5 to-transparent origin-top rotate-[-10deg] print:hidden" />
+
+            {/* Neon ring accents */}
+            <div className="absolute top-[12%] left-[6%] w-16 h-16 rounded-full border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.15)] print:hidden" />
+            <div className="absolute top-[14%] left-[7%] w-12 h-12 rounded-full border border-emerald-500/10 print:hidden" />
+            <div className="absolute bottom-[15%] right-[5%] w-20 h-20 rounded-full border border-cyan-500/15 shadow-[0_0_25px_rgba(6,182,212,0.12)] print:hidden" />
+            <div className="absolute bottom-[17%] right-[6%] w-14 h-14 rounded-full border border-cyan-500/10 print:hidden" />
+
+            {/* Glowing particle dots */}
+            <div className="absolute top-[18%] left-[20%] w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.6)] print:hidden" />
+            <div className="absolute top-[45%] left-[4%] w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.5)] print:hidden" />
+            <div className="absolute bottom-[22%] left-[15%] w-1.5 h-1.5 bg-teal-400 rounded-full shadow-[0_0_8px_rgba(45,212,191,0.5)] print:hidden" />
+            <div className="absolute top-[55%] right-[3%] w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_12px_rgba(52,211,153,0.6)] print:hidden" />
+            <div className="absolute top-[75%] right-[18%] w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.5)] print:hidden" />
+            <div className="absolute bottom-[40%] left-[30%] w-1.5 h-1.5 bg-teal-400 rounded-full shadow-[0_0_8px_rgba(45,212,191,0.5)] print:hidden" />
+
+            {/* Pulsing corner nodes */}
+            <div className="absolute top-[16%] left-[16%] w-1.5 h-1.5 bg-emerald-500/40 shadow-[0_0_6px_rgba(16,185,129,0.4)] print:hidden" />
+            <div className="absolute top-[32%] left-[48%] w-1.5 h-1.5 bg-teal-500/40 shadow-[0_0_6px_rgba(20,184,166,0.4)] print:hidden" />
+            <div className="absolute bottom-[32%] right-[32%] w-1.5 h-1.5 bg-cyan-500/40 shadow-[0_0_6px_rgba(6,182,212,0.4)] print:hidden" />
+            <div className="absolute top-[48%] right-[16%] w-1.5 h-1.5 bg-emerald-500/40 shadow-[0_0_6px_rgba(16,185,129,0.4)] print:hidden" />
 
             <div className="relative z-10 w-full h-full flex flex-col px-[4%] pt-[3%] pb-[2%]">
-              {/* Title */}
-              <div className="flex items-center gap-3 mb-0.5">
-                <IconBadge icon={Cpu} color="emerald" />
-                <h2 className="text-xl md:text-2xl font-bold text-white print:text-black">The Product</h2>
+              {/* Centered Title - matching other slides */}
+              <div className="flex flex-col items-center mb-3">
+                <div className="flex items-center gap-3 mb-1">
+                  <IconBadge icon={Cpu} color="emerald" />
+                  <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">The Product</h2>
+                </div>
+                <p className="text-sm text-emerald-400 font-semibold">All-in-One Startup Operating System</p>
               </div>
-              <p className="text-xs text-emerald-400 font-semibold mb-3">All-in-One Startup Operating System</p>
 
               {/* Main content: Left description + Right mockups */}
               <div className="flex flex-1 min-h-0 gap-3">
@@ -952,7 +978,7 @@ export default function Deck() {
 
                   {/* Floating page 1 - upper left */}
                   <div 
-                    className="absolute bg-white rounded shadow-[0_8px_40px_rgba(0,0,0,0.3)] overflow-hidden"
+                    className="absolute bg-white rounded overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.3),0_0_20px_rgba(6,182,212,0.2)]"
                     style={{ 
                       width: '34%', aspectRatio: '16/10',
                       left: '0%', top: '0%',
@@ -965,7 +991,7 @@ export default function Deck() {
 
                   {/* Floating page 2 */}
                   <div 
-                    className="absolute bg-white rounded shadow-[0_10px_45px_rgba(0,0,0,0.3)] overflow-hidden"
+                    className="absolute bg-white rounded overflow-hidden shadow-[0_10px_45px_rgba(0,0,0,0.3),0_0_20px_rgba(6,182,212,0.2)]"
                     style={{ 
                       width: '36%', aspectRatio: '16/10',
                       left: '12%', top: '-5%',
@@ -978,7 +1004,7 @@ export default function Deck() {
 
                   {/* Floating page 3 */}
                   <div 
-                    className="absolute bg-white rounded shadow-[0_12px_50px_rgba(0,0,0,0.3)] overflow-hidden"
+                    className="absolute bg-white rounded overflow-hidden shadow-[0_12px_50px_rgba(0,0,0,0.3),0_0_20px_rgba(6,182,212,0.2)]"
                     style={{ 
                       width: '34%', aspectRatio: '16/10',
                       left: '28%', top: '8%',
@@ -991,7 +1017,7 @@ export default function Deck() {
 
                   {/* Main monitor - right */}
                   <div className="absolute" style={{ right: '2%', bottom: '5%', width: '55%', zIndex: 4 }}>
-                    <div className="rounded-lg overflow-hidden bg-black p-[3px] shadow-[0_20px_70px_rgba(0,0,0,0.4)]">
+                    <div className="rounded-lg overflow-hidden bg-black p-[3px] shadow-[0_20px_70px_rgba(0,0,0,0.4),0_0_30px_rgba(16,185,129,0.3)]">
                       <div className="bg-black flex justify-center py-[2px]">
                         <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
                       </div>
@@ -1010,7 +1036,7 @@ export default function Deck() {
                     className="absolute"
                     style={{ right: '-2%', bottom: '3%', width: '16%', zIndex: 5 }}
                   >
-                    <div className="rounded-[12px] overflow-hidden bg-black p-[2px] shadow-[0_15px_50px_rgba(0,0,0,0.4)]">
+                    <div className="rounded-[12px] overflow-hidden bg-black p-[2px] shadow-[0_15px_50px_rgba(0,0,0,0.4),0_0_25px_rgba(16,185,129,0.25)]">
                       <div className="bg-black flex justify-center pt-[3px] pb-[1px] rounded-t-[10px]">
                         <div className="w-6 h-1 bg-slate-800 rounded-full" />
                       </div>
@@ -1024,6 +1050,9 @@ export default function Deck() {
                   </div>
                 </div>
               </div>
+
+              {/* Bottom accent bar - glowing line */}
+              <div className="mt-2 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent shadow-[0_0_15px_rgba(16,185,129,0.3)] print:hidden" />
             </div>
           </section>
         </SlideWrapper>
