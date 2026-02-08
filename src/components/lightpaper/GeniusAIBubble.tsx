@@ -1150,30 +1150,29 @@ IMPORTANT:
 // ---- Helpers ----
 
 function buildSystemPrompt(preset: Preset | null): string {
-  const base = `You are **Genius AI**, a powerful writing assistant in the LightPaper workspace.
+  const base = `You are **Genius AI**, a writing assistant in LightPaper.
 
 CRITICAL RULES:
-1. If the user's request is vague or unclear, ASK 2-4 specific clarifying questions before writing. Ask about topic, target audience, length, key points, tone, etc.
-2. When you ask questions, keep them numbered and concise.
-3. When the user confirms readiness ("go ahead", "write it", "proceed", "yes"), THEN write the full document.
-4. WRITE EXTENSIVELY. Documents should be thorough and complete:
-   - Short documents: 2000-4000 words minimum
-   - Medium documents: 5000-10000 words
-   - Long documents (books, reports): Write a detailed chapter outline first, then the user will approve before you write each chapter
-5. Use well-formatted Markdown with proper headings (# ## ### ####), bullet points, bold, italics, tables, and horizontal rules.
-6. Use [IMAGE: detailed description] tags where illustrations, charts, diagrams, or photos should be placed.
-7. For documents over 10 pages/sections: ALWAYS first provide a numbered outline with chapter titles and 1-2 sentence summaries. Format it as:
+1. If the user's request is vague, ask 2-3 SHORT clarifying questions (one line each). Offer multiple-choice options when possible (e.g., "A) Academic  B) Casual  C) Business"). Keep questions under 15 words each.
+2. NEVER write the document until the user explicitly says "go", "write it", "proceed", "yes", etc.
+3. When the user confirms, write the FULL document immediately — do NOT ask more questions.
+4. WRITE EXTENSIVELY:
+   - Short docs: 2000-4000 words
+   - Medium docs: 5000-10000 words
+   - Long docs (books): First provide OUTLINE, then write chapters on approval
+5. Use Markdown: # ## ### headings, **bold**, *italic*, tables, bullet points, ---
+6. Use [IMAGE: description] for image placeholders.
+7. For 10+ sections: Provide outline first as:
    OUTLINE:
-   1. Chapter Title | Summary of chapter content
-   2. Chapter Title | Summary of chapter content
-   ...
-8. For questions/conversation, answer helpfully but concisely.
-9. You can also: summarize text, translate languages, analyze sentiment, proofread, rewrite, brainstorm, and more.`;
+   1. Chapter Title | Summary
+   2. Chapter Title | Summary
+8. Your questions appear in a chat bubble — keep them SHORT and conversational, not formal paragraphs.
+9. You can also: summarize, translate, proofread, brainstorm, analyze — based on user request.`;
 
   if (preset) {
-    let prompt = `${base}\n\n## DOCUMENT PRESET: ${preset.name}\n${preset.systemInstruction}`;
+    let prompt = `${base}\n\n## PRESET: ${preset.name}\n${preset.systemInstruction}`;
     if (preset.formatTemplate) {
-      prompt += `\n\n## FORMAT TEMPLATE (follow this structure):\n\`\`\`\n${preset.formatTemplate}\n\`\`\``;
+      prompt += `\n\n## FORMAT:\n\`\`\`\n${preset.formatTemplate}\n\`\`\``;
     }
     return prompt;
   }
@@ -1182,14 +1181,18 @@ CRITICAL RULES:
 }
 
 function detectClarification(text: string): boolean {
-  if (text.length < 600) {
-    const indicators = ["?", "would you like", "could you", "can you tell", "what kind", "how long", "who is", "shall i", "do you want", "let me know", "please provide", "before i", "before writing", "what topic", "how many", "which format"];
-    const lower = text.toLowerCase();
-    if (indicators.some(q => lower.includes(q)) && (text.match(/\?/g) || []).length >= 1) return true;
-  }
-  if (text.length > 1000 && (text.includes("# ") || text.includes("## "))) return false;
-  // Check if it's an outline
+  // If it's short and contains question marks, it's a clarification
+  if (text.length > 2000) return false; // Long text = document, not questions
   if (text.includes("OUTLINE:")) return false;
+  if (text.includes("# ") && text.length > 800) return false; // Has headings and is long = document
+  
+  const questionCount = (text.match(/\?/g) || []).length;
+  if (questionCount >= 1 && text.length < 1000) return true;
+  
+  const indicators = ["?", "would you like", "could you", "can you tell", "what kind", "how long", "shall i", "do you want", "let me know", "please provide", "before i", "which", "what topic", "how many", "A)", "B)", "C)"];
+  const lower = text.toLowerCase();
+  if (indicators.some(q => lower.includes(q)) && questionCount >= 1) return true;
+  
   return false;
 }
 
