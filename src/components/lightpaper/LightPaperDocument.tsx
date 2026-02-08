@@ -38,18 +38,31 @@ const FONT_SIZES = ["12", "14", "16", "18", "20", "24", "28", "32", "36"];
 const HIGHLIGHT_COLORS = ["#FFFF00", "#00FF00", "#00FFFF", "#FF00FF", "#FFA500", "transparent"];
 const TEXT_COLORS = ["#000000", "#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF", "#00FFFF", "#FFA500", "#800080", "#FFFFFF"];
 
-// Page format configurations (dimensions in cm) - EXPANDED
+// Page format configurations (dimensions in cm) - All MS Word & Google Docs formats
 const PAGE_FORMATS = {
-  letter: { width: 21.59, height: 27.94, name: "Letter (8.5\" × 11\")" },
-  legal: { width: 21.59, height: 35.56, name: "Legal (8.5\" × 14\")" },
-  tabloid: { width: 27.94, height: 43.18, name: "Tabloid (11\" × 17\")" },
-  a3: { width: 29.7, height: 42.0, name: "A3" },
-  a4: { width: 21.0, height: 29.7, name: "A4" },
-  a5: { width: 14.8, height: 21.0, name: "A5" },
-  b4: { width: 25.0, height: 35.3, name: "B4" },
-  b5: { width: 17.6, height: 25.0, name: "B5" },
-  executive: { width: 18.4, height: 26.7, name: "Executive (7.25\" × 10.5\")" },
-  folio: { width: 21.0, height: 33.0, name: "Folio (8.27\" × 13\")" }
+  // US Standard Formats (Microsoft Word)
+  letter: { width: 21.59, height: 27.94, name: 'Letter (8.5" × 11")' },
+  legal: { width: 21.59, height: 35.56, name: 'Legal (8.5" × 14")' },
+  tabloid: { width: 27.94, height: 43.18, name: 'Tabloid (11" × 17")' },
+  ledger: { width: 43.18, height: 27.94, name: 'Ledger (17" × 11")' },
+  statement: { width: 13.97, height: 21.59, name: 'Statement (5.5" × 8.5")' },
+  executive: { width: 18.415, height: 26.67, name: 'Executive (7.25" × 10.5")' },
+  folio: { width: 21.0, height: 33.0, name: 'Folio (8.27" × 13")' },
+  quarto: { width: 21.59, height: 27.5, name: 'Quarto (8.5" × 10.83")' },
+  // ISO A Series
+  a3: { width: 29.7, height: 42.0, name: "A3 (297 × 420 mm)" },
+  a4: { width: 21.0, height: 29.7, name: "A4 (210 × 297 mm)" },
+  a5: { width: 14.8, height: 21.0, name: "A5 (148 × 210 mm)" },
+  a6: { width: 10.5, height: 14.8, name: "A6 (105 × 148 mm)" },
+  // ISO B Series
+  b4: { width: 25.0, height: 35.3, name: "B4 (250 × 353 mm)" },
+  b5: { width: 17.6, height: 25.0, name: "B5 (176 × 250 mm)" },
+  // JIS B Series (Japan - Google Docs)
+  jisb4: { width: 25.7, height: 36.4, name: "JIS B4 (257 × 364 mm)" },
+  jisb5: { width: 18.2, height: 25.7, name: "JIS B5 (182 × 257 mm)" },
+  // Google Docs specific
+  "10x15": { width: 25.4, height: 38.1, name: '10" × 15"' },
+  "8x13": { width: 20.32, height: 33.02, name: '8" × 13"' },
 };
 
 const MARGIN_CM = 2.54; // 1 inch standard margin
@@ -309,12 +322,10 @@ export function LightPaperDocument({
         setVisiblePage(1);
         
         // Set format if detected
-        if (parsed.metadata?.detectedFormat) {
-          setPageFormat(parsed.metadata.detectedFormat);
-          toast.info(`Format: ${parsed.metadata.detectedFormat.toUpperCase()}`);
-        } else if (parsed.detectedFormat) {
-          setPageFormat(parsed.detectedFormat);
-          toast.info(`Format: ${parsed.detectedFormat.toUpperCase()}`);
+        const detFormat = parsed.metadata?.detectedFormat || parsed.detectedFormat;
+        if (detFormat && detFormat in PAGE_FORMATS) {
+          setPageFormat(detFormat as PageFormat);
+          toast.info(`Format: ${PAGE_FORMATS[detFormat as PageFormat]?.name || detFormat.toUpperCase()}`);
         }
         
         // Clear editor to prevent JSON from showing
@@ -419,7 +430,7 @@ export function LightPaperDocument({
             for (const [name, dims] of Object.entries(formats)) {
               if ((Math.abs(pdfWidthMm - dims.w) < tolerance && Math.abs(pdfHeightMm - dims.h) < tolerance) ||
                   (Math.abs(pdfWidthMm - dims.h) < tolerance && Math.abs(pdfHeightMm - dims.w) < tolerance)) {
-                setPageFormat(name as PageFormat);
+                setPageFormat(name in PAGE_FORMATS ? name as PageFormat : 'letter');
                 setOrientation(pdfWidthMm > pdfHeightMm ? 'landscape' : 'portrait');
                 break;
               }
@@ -2805,21 +2816,7 @@ export function LightPaperDocument({
                   }}
                   onClick={handleCanvasClick}
                 >
-                  {/* Page number overlay */}
-                  <div style={{
-                    position: 'absolute',
-                    top: '10px',
-                    right: '10px',
-                    background: 'rgba(0,0,0,0.7)',
-                    color: '#fff',
-                    padding: '4px 12px',
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    zIndex: 10
-                  }}>
-                    Page {index + 1} of {viewModeImages.length}
-                  </div>
+                  {/* Page number removed - navigation bar shows current page */}
                   
                   <img 
                     src={imageSrc}
