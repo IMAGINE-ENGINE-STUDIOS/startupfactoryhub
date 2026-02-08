@@ -895,82 +895,113 @@ export default function Deck() {
 
         {/* NEW SLIDE: The Product */}
         <SlideWrapper>
-          <section className="absolute inset-0 flex flex-col items-center justify-start p-[3%] pt-[2%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+          <section className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 print:hidden" />
             <div className="absolute inset-[2%] border-2 border-emerald-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
             <CornerAccents />
-            <div className="relative z-10 w-full max-w-[90%] mx-auto flex flex-col items-center h-full">
+            <div className="relative z-10 w-full max-w-[90%] mx-auto flex flex-col items-center">
               {/* Title */}
               <div className="flex items-center gap-3 mb-1">
                 <IconBadge icon={Cpu} color="emerald" />
                 <h2 className="text-xl md:text-2xl font-bold text-white print:text-black">The Product</h2>
               </div>
-              <p className="text-sm text-emerald-400 font-semibold text-center mb-0.5 print:text-emerald-700">All-in-One Startup Operating System</p>
-              <p className="text-[10px] md:text-xs text-slate-400 text-center mb-3 max-w-2xl print:text-gray-600">
+              <p className="text-sm text-emerald-400 font-semibold text-center mb-1 print:text-emerald-700">All-in-One Startup Operating System</p>
+              <p className="text-[10px] text-slate-400 text-center mb-4 max-w-2xl print:text-gray-600">
                 A unified platform combining AI-powered tools, global resources, mentorship, and structured startup journeys.
               </p>
 
-              {/* Featured Dashboard mockup - large */}
-              <div className="relative rounded-lg overflow-hidden border-2 border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.15)] w-full mb-2" style={{ maxHeight: '55%' }}>
-                <div className="bg-slate-800/90 px-3 py-1 flex items-center gap-1.5 border-b border-slate-700/50">
-                  <div className="flex gap-1">
-                    <div className="w-2 h-2 rounded-full bg-red-500/80" />
-                    <div className="w-2 h-2 rounded-full bg-yellow-500/80" />
-                    <div className="w-2 h-2 rounded-full bg-green-500/80" />
+              {/* Floating mockup display - perspective scene */}
+              <div className="relative w-full flex items-center justify-center" style={{ height: '340px', perspective: '1200px' }}>
+                
+                {/* Floating page 1 - Dashboard (back left) */}
+                <div 
+                  className="absolute rounded-lg overflow-hidden border border-emerald-500/40 shadow-[0_20px_60px_rgba(16,185,129,0.2)]"
+                  style={{ 
+                    width: '280px', 
+                    left: '5%', 
+                    top: '0%',
+                    transform: 'rotateY(15deg) rotateX(-3deg) rotateZ(-2deg)',
+                    transformOrigin: 'center center',
+                    zIndex: 1
+                  }}
+                >
+                  <div className="bg-slate-800/90 px-2 py-0.5 flex items-center gap-1 border-b border-slate-700/50">
+                    <div className="flex gap-0.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-red-500/80" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/80" />
+                      <div className="w-1.5 h-1.5 rounded-full bg-green-500/80" />
+                    </div>
+                    <div className="flex-1 mx-1">
+                      <div className="bg-slate-700/60 rounded px-1.5 py-0.5 text-[6px] text-slate-400 text-center">Dashboard</div>
+                    </div>
                   </div>
-                  <div className="flex-1 mx-2">
-                    <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[8px] text-slate-400 text-center">startupfactoryhub.lovable.app/dashboard</div>
-                  </div>
-                </div>
-                <div className="overflow-hidden">
                   <img src={mockupDashboard} alt="Dashboard" className="w-full h-auto block" />
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/40 rounded-full text-[7px] text-emerald-400 font-semibold backdrop-blur-sm whitespace-nowrap">
+                    🌍 AI Dashboard
+                  </div>
                 </div>
-                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500/20 border border-emerald-500/40 rounded-full text-[9px] text-emerald-400 font-semibold backdrop-blur-sm whitespace-nowrap">
-                  🌍 AI-Powered Dashboard with Interactive 3D Globe
-                </div>
-              </div>
 
-              {/* Two smaller mockups side by side */}
-              <div className="grid grid-cols-2 gap-3 w-full flex-1 min-h-0">
-                {/* Resources mockup */}
-                <div className="relative rounded-lg overflow-hidden border-2 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.1)]">
-                  <div className="bg-slate-800/90 px-3 py-1 flex items-center gap-1.5 border-b border-slate-700/50">
-                    <div className="flex gap-1">
+                {/* Floating page 2 - Resources (back right, higher) */}
+                <div 
+                  className="absolute rounded-lg overflow-hidden border border-cyan-500/40 shadow-[0_20px_60px_rgba(6,182,212,0.2)]"
+                  style={{ 
+                    width: '260px', 
+                    right: '12%', 
+                    top: '-5%',
+                    transform: 'rotateY(-12deg) rotateX(-2deg) rotateZ(2deg)',
+                    transformOrigin: 'center center',
+                    zIndex: 2
+                  }}
+                >
+                  <div className="bg-slate-800/90 px-2 py-0.5 flex items-center gap-1 border-b border-slate-700/50">
+                    <div className="flex gap-0.5">
                       <div className="w-1.5 h-1.5 rounded-full bg-red-500/80" />
                       <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/80" />
                       <div className="w-1.5 h-1.5 rounded-full bg-green-500/80" />
                     </div>
-                    <div className="flex-1 mx-2">
-                      <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[7px] text-slate-400 text-center">Resources Map</div>
+                    <div className="flex-1 mx-1">
+                      <div className="bg-slate-700/60 rounded px-1.5 py-0.5 text-[6px] text-slate-400 text-center">Resources</div>
                     </div>
                   </div>
-                  <div className="overflow-hidden">
-                    <img src={mockupResources} alt="Resources Map" className="w-full h-auto block" />
-                  </div>
-                  <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-[7px] text-cyan-400 font-semibold backdrop-blur-sm whitespace-nowrap">
-                    📍 Global Resources & Partners
+                  <img src={mockupResources} alt="Resources Map" className="w-full h-auto block" />
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-[7px] text-cyan-400 font-semibold backdrop-blur-sm whitespace-nowrap">
+                    📍 Global Resources
                   </div>
                 </div>
 
-                {/* Journey mockup */}
-                <div className="relative rounded-lg overflow-hidden border-2 border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.1)]">
-                  <div className="bg-slate-800/90 px-3 py-1 flex items-center gap-1.5 border-b border-slate-700/50">
-                    <div className="flex gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-red-500/80" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/80" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500/80" />
+                {/* Main monitor - Journey (center front, largest) */}
+                <div 
+                  className="absolute rounded-lg overflow-hidden border-2 border-teal-500/40 shadow-[0_30px_80px_rgba(20,184,166,0.25)]"
+                  style={{ 
+                    width: '360px', 
+                    left: '50%', 
+                    bottom: '0%',
+                    transform: 'translateX(-50%) rotateY(-2deg)',
+                    transformOrigin: 'center bottom',
+                    zIndex: 3
+                  }}
+                >
+                  <div className="bg-slate-800/95 px-2.5 py-1 flex items-center gap-1 border-b border-slate-700/50">
+                    <div className="flex gap-0.5">
+                      <div className="w-2 h-2 rounded-full bg-red-500/80" />
+                      <div className="w-2 h-2 rounded-full bg-yellow-500/80" />
+                      <div className="w-2 h-2 rounded-full bg-green-500/80" />
                     </div>
                     <div className="flex-1 mx-2">
-                      <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[7px] text-slate-400 text-center">Startup Journey</div>
+                      <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[7px] text-slate-400 text-center">startupfactoryhub.lovable.app</div>
                     </div>
                   </div>
-                  <div className="overflow-hidden">
-                    <img src={mockupJourney} alt="Startup Journey" className="w-full h-auto block" />
+                  <img src={mockupJourney} alt="Startup Journey" className="w-full h-auto block" />
+                  <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-teal-500/20 border border-teal-500/40 rounded-full text-[8px] text-teal-400 font-semibold backdrop-blur-sm whitespace-nowrap">
+                    🚀 Startup Journey
                   </div>
-                  <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-teal-500/20 border border-teal-500/40 rounded-full text-[7px] text-teal-400 font-semibold backdrop-blur-sm whitespace-nowrap">
-                    🚀 Guided Journey & Checklists
-                  </div>
+                </div>
+
+                {/* Monitor stand (decorative) */}
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 z-[2]">
+                  <div className="w-16 h-3 bg-slate-700/50 rounded-b-lg mx-auto" />
+                  <div className="w-24 h-1 bg-slate-600/30 rounded-full mx-auto" />
                 </div>
               </div>
             </div>
