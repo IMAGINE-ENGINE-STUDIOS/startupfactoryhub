@@ -458,6 +458,7 @@ export function LightPaperDocument({
     // Fallback: plain HTML content (non-PDF, typed content, etc.)
     setViewMode(false);
     setViewModeImages([]);
+    setEditMode(true); // Auto-select edit mode for uploaded files
     setDocumentContent(htmlContent);
     setTotalPages(1);
     setCurrentPage(1);
