@@ -1216,19 +1216,19 @@ export default function Deck() {
                       <div key={p} className="absolute w-full border-t border-dashed border-slate-700/20" style={{ bottom: `${p}%` }} />
                     ))}
                     {/* Bars container */}
-                    <div className="absolute inset-0 flex items-end justify-around px-4">
+                    <div className="absolute inset-0 flex items-end px-4 gap-2">
                       {[
-                        { year: "Y1", revenue: "$5.34M", value: 5.34, color: "bg-gradient-to-t from-teal-700 to-teal-400" },
-                        { year: "Y2", revenue: "$9.65M", value: 9.65, color: "bg-gradient-to-t from-teal-600 to-cyan-400" },
-                        { year: "Y3", revenue: "$16.50M", value: 16.50, color: "bg-gradient-to-t from-cyan-600 to-cyan-400" },
-                        { year: "Y4", revenue: "$27.30M", value: 27.30, color: "bg-gradient-to-t from-cyan-600 to-emerald-400" },
-                        { year: "Y5", revenue: "$46.00M", value: 46.00, color: "bg-gradient-to-t from-emerald-600 to-emerald-400" },
+                        { revenue: "$5.34M", value: 5.34, color: "bg-gradient-to-t from-teal-700 to-teal-400" },
+                        { revenue: "$9.65M", value: 9.65, color: "bg-gradient-to-t from-teal-600 to-cyan-400" },
+                        { revenue: "$16.50M", value: 16.50, color: "bg-gradient-to-t from-cyan-600 to-cyan-400" },
+                        { revenue: "$27.30M", value: 27.30, color: "bg-gradient-to-t from-cyan-600 to-emerald-400" },
+                        { revenue: "$46.00M", value: 46.00, color: "bg-gradient-to-t from-emerald-600 to-emerald-400" },
                       ].map((item, i) => (
-                        <div key={i} className="flex flex-col items-center flex-1">
-                          <span className="text-[10px] md:text-xs font-bold text-emerald-400 mb-1">{item.revenue}</span>
+                        <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
+                          <span className="text-[10px] md:text-xs font-bold text-emerald-400 mb-1 shrink-0">{item.revenue}</span>
                           <div
-                            className={`w-12 md:w-16 ${item.color} rounded-t-md relative overflow-hidden shadow-lg shadow-emerald-500/10`}
-                            style={{ height: `${(item.value / 50) * 100}%`, minHeight: 8 }}
+                            className={`w-12 md:w-16 ${item.color} rounded-t-md relative overflow-hidden shadow-lg shadow-emerald-500/10 shrink-0`}
+                            style={{ height: `${(item.value / 50) * 192}px` }}
                           >
                             <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0" />
                             <div className="absolute top-0 left-0 right-0 h-px bg-white/30" />
