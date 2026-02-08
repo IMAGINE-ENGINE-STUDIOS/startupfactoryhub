@@ -911,31 +911,31 @@ export default function Deck() {
                 A unified platform combining AI-powered tools, global resources, mentorship, and structured startup journeys.
               </p>
 
-              {/* Mockups grid - all three side by side to fit in slide */}
-              <div className="grid grid-cols-3 gap-3 w-full flex-1 min-h-0">
-                {/* Dashboard mockup */}
-                <div className="relative rounded-lg overflow-hidden border-2 border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.15)] flex flex-col">
-                  <div className="bg-slate-800/90 px-3 py-1 flex items-center gap-1.5 border-b border-slate-700/50 shrink-0">
-                    <div className="flex gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-red-500/80" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/80" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-green-500/80" />
-                    </div>
-                    <div className="flex-1 mx-2">
-                      <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[7px] text-slate-400 text-center">Dashboard</div>
-                    </div>
+              {/* Featured Dashboard mockup - large */}
+              <div className="relative rounded-lg overflow-hidden border-2 border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.15)] w-full mb-2" style={{ maxHeight: '55%' }}>
+                <div className="bg-slate-800/90 px-3 py-1 flex items-center gap-1.5 border-b border-slate-700/50">
+                  <div className="flex gap-1">
+                    <div className="w-2 h-2 rounded-full bg-red-500/80" />
+                    <div className="w-2 h-2 rounded-full bg-yellow-500/80" />
+                    <div className="w-2 h-2 rounded-full bg-green-500/80" />
                   </div>
-                  <div className="flex-1 overflow-hidden">
-                    <img src={mockupDashboard} alt="Dashboard" className="w-full h-full object-cover object-top" />
-                  </div>
-                  <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/40 rounded-full text-[7px] text-emerald-400 font-semibold backdrop-blur-sm whitespace-nowrap">
-                    🌍 AI Dashboard & Globe
+                  <div className="flex-1 mx-2">
+                    <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[8px] text-slate-400 text-center">startupfactoryhub.lovable.app/dashboard</div>
                   </div>
                 </div>
+                <div className="overflow-hidden">
+                  <img src={mockupDashboard} alt="Dashboard" className="w-full h-auto block" />
+                </div>
+                <div className="absolute bottom-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-emerald-500/20 border border-emerald-500/40 rounded-full text-[9px] text-emerald-400 font-semibold backdrop-blur-sm whitespace-nowrap">
+                  🌍 AI-Powered Dashboard with Interactive 3D Globe
+                </div>
+              </div>
 
+              {/* Two smaller mockups side by side */}
+              <div className="grid grid-cols-2 gap-3 w-full flex-1 min-h-0">
                 {/* Resources mockup */}
-                <div className="relative rounded-lg overflow-hidden border-2 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.1)] flex flex-col">
-                  <div className="bg-slate-800/90 px-3 py-1 flex items-center gap-1.5 border-b border-slate-700/50 shrink-0">
+                <div className="relative rounded-lg overflow-hidden border-2 border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.1)]">
+                  <div className="bg-slate-800/90 px-3 py-1 flex items-center gap-1.5 border-b border-slate-700/50">
                     <div className="flex gap-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-red-500/80" />
                       <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/80" />
@@ -945,17 +945,17 @@ export default function Deck() {
                       <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[7px] text-slate-400 text-center">Resources Map</div>
                     </div>
                   </div>
-                  <div className="flex-1 overflow-hidden">
-                    <img src={mockupResources} alt="Resources Map" className="w-full h-full object-cover object-top" />
+                  <div className="overflow-hidden">
+                    <img src={mockupResources} alt="Resources Map" className="w-full h-auto block" />
                   </div>
                   <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-[7px] text-cyan-400 font-semibold backdrop-blur-sm whitespace-nowrap">
-                    📍 Resources & Partners
+                    📍 Global Resources & Partners
                   </div>
                 </div>
 
                 {/* Journey mockup */}
-                <div className="relative rounded-lg overflow-hidden border-2 border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.1)] flex flex-col">
-                  <div className="bg-slate-800/90 px-3 py-1 flex items-center gap-1.5 border-b border-slate-700/50 shrink-0">
+                <div className="relative rounded-lg overflow-hidden border-2 border-teal-500/30 shadow-[0_0_20px_rgba(20,184,166,0.1)]">
+                  <div className="bg-slate-800/90 px-3 py-1 flex items-center gap-1.5 border-b border-slate-700/50">
                     <div className="flex gap-1">
                       <div className="w-1.5 h-1.5 rounded-full bg-red-500/80" />
                       <div className="w-1.5 h-1.5 rounded-full bg-yellow-500/80" />
@@ -965,8 +965,8 @@ export default function Deck() {
                       <div className="bg-slate-700/60 rounded px-2 py-0.5 text-[7px] text-slate-400 text-center">Startup Journey</div>
                     </div>
                   </div>
-                  <div className="flex-1 overflow-hidden">
-                    <img src={mockupJourney} alt="Startup Journey" className="w-full h-full object-cover object-top" />
+                  <div className="overflow-hidden">
+                    <img src={mockupJourney} alt="Startup Journey" className="w-full h-auto block" />
                   </div>
                   <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-teal-500/20 border border-teal-500/40 rounded-full text-[7px] text-teal-400 font-semibold backdrop-blur-sm whitespace-nowrap">
                     🚀 Guided Journey & Checklists
