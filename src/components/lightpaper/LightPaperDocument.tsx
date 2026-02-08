@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -573,6 +573,57 @@ export function LightPaperDocument({
     }, 2000); // Save after 2 seconds of inactivity
   };
 
+  // Auto-page creation: detect when content overflows the page
+  const checkAndHandleOverflow = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor || viewMode) return;
+
+    const pageContent = editor.closest('.page-content') as HTMLElement | null;
+    if (!pageContent) return;
+
+    const maxHeight = pageContent.clientHeight;
+    const contentHeight = editor.scrollHeight;
+
+    // If content exceeds page, split overflow into a new page
+    if (contentHeight > maxHeight + 10) {
+      const children = Array.from(editor.childNodes);
+      let splitIndex = -1;
+
+      for (let i = 0; i < children.length; i++) {
+        const child = children[i] as HTMLElement;
+        if (child.getBoundingClientRect) {
+          const rect = child.getBoundingClientRect();
+          const editorRect = editor.getBoundingClientRect();
+          const relativeBottom = rect.bottom - editorRect.top;
+          if (relativeBottom > maxHeight) {
+            splitIndex = i;
+            break;
+          }
+        }
+      }
+
+      if (splitIndex > 0) {
+        const overflowNodes = children.slice(splitIndex);
+        const overflowHtml = overflowNodes.map(n => {
+          if (n instanceof HTMLElement) return n.outerHTML;
+          return n.textContent || '';
+        }).join('');
+
+        overflowNodes.forEach(n => editor.removeChild(n));
+
+        const currentHtml = editor.innerHTML;
+        setPages(prevPages => {
+          const newPages = [...prevPages];
+          newPages[currentPage - 1] = currentHtml;
+          newPages.splice(currentPage, 0, overflowHtml);
+          return newPages;
+        });
+        setTotalPages(prev => prev + 1);
+        toast.info(`Page ${currentPage + 1} created automatically`);
+      }
+    }
+  }, [currentPage, viewMode]);
+
   // Handle content changes and auto-save
   useEffect(() => {
     const editor = editorRef.current;
@@ -580,9 +631,8 @@ export function LightPaperDocument({
     const handleInput = () => {
       isUserTyping.current = true;
       const html = editor.innerHTML;
-      setDocumentContent(html); // Update state
+      setDocumentContent(html);
       
-      // Also update the current page in pages array
       setPages(prevPages => {
         const newPages = [...prevPages];
         newPages[currentPage - 1] = html;
@@ -590,6 +640,10 @@ export function LightPaperDocument({
       });
       
       autoSaveVersion(html);
+
+      // Check for overflow after DOM settles
+      setTimeout(checkAndHandleOverflow, 300);
+
       setTimeout(() => {
         isUserTyping.current = false;
       }, 100);
@@ -598,6 +652,7 @@ export function LightPaperDocument({
       e.preventDefault();
       const text = e.clipboardData?.getData('text/plain') || '';
       document.execCommand('insertText', false, text);
+      setTimeout(checkAndHandleOverflow, 500);
     };
     const handleMouseUp = () => {
       if (isHighlighterActive) {
@@ -618,7 +673,7 @@ export function LightPaperDocument({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [isHighlighterActive, selectedHighlight]);
+  }, [isHighlighterActive, selectedHighlight, checkAndHandleOverflow]);
 
   // Navigate version history from database
   const goToPreviousVersion = async () => {
@@ -2607,7 +2662,15 @@ export function LightPaperDocument({
                   onInsertText={(html) => {
                     if (!editorRef.current || viewMode) return;
                     editorRef.current.innerHTML += html;
+                    setDocumentContent(editorRef.current.innerHTML);
+                    setPages(prevPages => {
+                      const newPages = [...prevPages];
+                      newPages[currentPage - 1] = editorRef.current!.innerHTML;
+                      return newPages;
+                    });
                     setGeniusBubblePos(null);
+                    // Check overflow after AI content insertion
+                    setTimeout(checkAndHandleOverflow, 500);
                   }}
                 />
               </div>
