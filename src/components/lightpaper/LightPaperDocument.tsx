@@ -335,18 +335,17 @@ export function LightPaperDocument({
     }
     
     // EDIT MODE LOGIC (only runs if JSON parse failed or not view mode)
-    // For PDFs in edit mode, re-parse as images to preserve exact layout
-    // This prevents distortion from text reconstruction
+    // For reconstructed PDF/DOCX pages, switch to View Mode for pixel-perfect display
+    // This avoids the fragile html2canvas-on-cloned-HTML approach
     const htmlContent = uploadedContent.content;
     const parser = new DOMParser();
     const doc = parser.parseFromString(htmlContent, 'text/html');
     const reconstructedPages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
     
     if (reconstructedPages.length > 0) {
-      // PDF/DOCX with reconstructed pages - convert to images for perfect fidelity
+      // Render each reconstructed page to a canvas image using html2canvas in a hidden container
       const pageImages: string[] = [];
       
-      // Create hidden container for rendering
       const hiddenContainer = document.createElement('div');
       hiddenContainer.style.position = 'absolute';
       hiddenContainer.style.left = '-9999px';
@@ -357,9 +356,8 @@ export function LightPaperDocument({
         const pageEl = reconstructedPages[i] as HTMLElement;
         const clone = pageEl.cloneNode(true) as HTMLElement;
         
-        // Get viewport dimensions from inner content
         const innerContent = clone.querySelector('.pdf-inner-content') as HTMLElement;
-        let renderWidth = 816; // default letter width
+        let renderWidth = 816;
         let renderHeight = 1056;
         
         if (innerContent) {
@@ -368,7 +366,6 @@ export function LightPaperDocument({
           if (vpW > 0 && vpH > 0) {
             renderWidth = vpW;
             renderHeight = vpH;
-            // Remove CSS transform - render at native size
             innerContent.style.transform = 'none';
           }
         }
@@ -382,7 +379,7 @@ export function LightPaperDocument({
         hiddenContainer.innerHTML = '';
         hiddenContainer.appendChild(clone);
         
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 150));
         
         try {
           const canvas = await html2canvas(clone, {
@@ -430,7 +427,6 @@ export function LightPaperDocument({
           }
         }
         
-        // Use View Mode rendering for perfect layout preservation
         setViewMode(true);
         setViewModeImages(pageImages);
         setTotalPages(pageImages.length);
