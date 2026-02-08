@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Sparkles, Send, X, Loader2, ChevronDown, Plus, Save, Trash2 } from "lucide-react";
+import { Sparkles, Send, X, Loader2, ChevronDown, Plus, Save, Trash2, BookOpen, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface GeniusAIBubbleProps {
@@ -9,19 +9,26 @@ interface GeniusAIBubbleProps {
   onDismiss: () => void;
 }
 
-type Phase = "idle" | "greeting" | "input" | "conversation" | "loading" | "done";
+type Phase = "idle" | "greeting" | "input" | "conversation" | "loading" | "outline-review" | "generating-chapters" | "done";
 
 interface Preset {
   id: string;
   name: string;
   icon: string;
   systemInstruction: string;
+  formatTemplate: string;
   isCustom?: boolean;
 }
 
 interface ConversationMessage {
   role: "user" | "assistant";
   content: string;
+}
+
+interface ChapterOutline {
+  title: string;
+  summary: string;
+  estimatedPages: number;
 }
 
 const GREETINGS = [
@@ -47,78 +54,501 @@ const DEFAULT_PRESETS: Preset[] = [
     id: "research",
     name: "Research Paper",
     icon: "🔬",
-    systemInstruction: "Write a formal academic research paper with Abstract, Introduction, Literature Review, Methodology, Results, Discussion, and Conclusion sections. Use formal academic tone, cite sources where relevant, and follow APA/IEEE style. Include proper headings and subheadings.",
+    systemInstruction: "Write a formal academic research paper. Use formal academic tone, cite sources where relevant (use placeholder citations like [Author, Year]), and follow APA style. Be thorough and comprehensive. Write EXTENSIVELY with deep analysis.",
+    formatTemplate: `# [Title]
+
+## Abstract
+[200-300 word summary]
+
+## 1. Introduction
+### 1.1 Background
+### 1.2 Problem Statement
+### 1.3 Research Objectives
+### 1.4 Significance of the Study
+
+## 2. Literature Review
+### 2.1 Theoretical Framework
+### 2.2 Previous Studies
+### 2.3 Research Gap
+
+## 3. Methodology
+### 3.1 Research Design
+### 3.2 Data Collection
+### 3.3 Data Analysis Methods
+### 3.4 Limitations
+
+## 4. Results
+### 4.1 Key Findings
+### 4.2 Statistical Analysis
+### 4.3 Data Visualization Descriptions
+
+## 5. Discussion
+### 5.1 Interpretation of Results
+### 5.2 Comparison with Previous Studies
+### 5.3 Implications
+
+## 6. Conclusion
+### 6.1 Summary
+### 6.2 Recommendations
+### 6.3 Future Research
+
+## References
+[List references in APA format]
+
+## Appendices`,
   },
   {
     id: "executive-summary",
     name: "Executive Summary",
     icon: "📊",
-    systemInstruction: "Write a concise, high-impact executive summary. Start with the key finding or recommendation, then provide context, analysis highlights, and clear next steps. Use bullet points for key metrics. Keep it under 2 pages. Professional business tone.",
+    systemInstruction: "Write a concise, high-impact executive summary. Start with the key finding or recommendation, then provide context, analysis highlights, and clear next steps. Use bullet points for key metrics. Professional business tone. Include data-driven insights.",
+    formatTemplate: `# Executive Summary: [Title]
+
+## Key Recommendation
+[Bold opening statement with the primary recommendation]
+
+## Situation Overview
+[Context and background - 2-3 paragraphs]
+
+## Key Findings
+- **Finding 1**: [Description with metric]
+- **Finding 2**: [Description with metric]
+- **Finding 3**: [Description with metric]
+
+## Analysis Highlights
+### Market/Financial Impact
+### Risk Assessment
+### Opportunity Assessment
+
+## Recommended Actions
+1. **Immediate (0-30 days)**: [Action items]
+2. **Short-term (1-3 months)**: [Action items]
+3. **Long-term (3-12 months)**: [Action items]
+
+## Resource Requirements
+| Resource | Estimated Cost | Timeline |
+|----------|---------------|----------|
+| [Item]   | [Cost]        | [Time]   |
+
+## Next Steps
+[Clear, actionable next steps with owners and deadlines]`,
   },
   {
     id: "pitch",
     name: "Pitch Deck Script",
     icon: "🎯",
-    systemInstruction: "Write a compelling startup pitch narrative covering: Problem, Solution, Market Size, Business Model, Traction, Team, and Ask. Use persuasive language, include data points, and structure for a 10-minute presentation. Make it investor-ready.",
+    systemInstruction: "Write a compelling startup pitch narrative. Use persuasive language, include data points and market statistics, and structure for a 10-15 minute presentation. Make it investor-ready with strong hooks and clear value proposition. Write speaker notes for each slide.",
+    formatTemplate: `# [Company Name] - Pitch Deck
+
+## Slide 1: Title
+**[Company Name]** — [One-liner tagline]
+*Speaker Notes: [Opening hook, personal story or shocking statistic]*
+
+## Slide 2: The Problem
+**[Problem Statement]**
+- Pain point 1 with market data
+- Pain point 2 with customer quote
+- Current solutions and why they fail
+*Speaker Notes: [Make the audience feel the pain]*
+
+## Slide 3: The Solution
+**[Product/Service Description]**
+- Key feature 1 → Benefit
+- Key feature 2 → Benefit
+- Key feature 3 → Benefit
+*[Include image reference: product screenshot or demo]*
+
+## Slide 4: Market Size
+- **TAM**: $[X]B — [Description]
+- **SAM**: $[X]B — [Description]
+- **SOM**: $[X]M — [Description]
+
+## Slide 5: Business Model
+**Revenue Streams:**
+| Stream | Pricing | Target Customers |
+|--------|---------|-----------------|
+
+## Slide 6: Traction
+- [Metric 1]: [Number] — [Growth %]
+- [Metric 2]: [Number] — [Growth %]
+- Key milestones achieved
+
+## Slide 7: Competition
+| Feature | Us | Competitor A | Competitor B |
+|---------|-----|-------------|-------------|
+
+## Slide 8: Team
+- **[CEO]**: [Background]
+- **[CTO]**: [Background]
+- **[Key Hire]**: [Background]
+
+## Slide 9: Financial Projections
+| Year | Revenue | Users | Burn Rate |
+|------|---------|-------|-----------|
+
+## Slide 10: The Ask
+**Raising: $[Amount]**
+- [X]% → Product Development
+- [X]% → Sales & Marketing
+- [X]% → Operations
+**Target milestones with this round**`,
   },
   {
     id: "business-plan",
     name: "Business Plan",
     icon: "💼",
-    systemInstruction: "Write a comprehensive business plan with: Executive Summary, Company Description, Market Analysis, Organization & Management, Product/Service Line, Marketing & Sales Strategy, Financial Projections, and Funding Requirements. Professional and detailed.",
+    systemInstruction: "Write a comprehensive, investor-ready business plan. Be detailed with market analysis, financial projections, and operational strategy. Use professional business language. Include realistic data and projections. This should be a thorough 20-40 page document.",
+    formatTemplate: `# Business Plan: [Company Name]
+
+## Table of Contents
+
+## 1. Executive Summary
+### Company Overview
+### Mission & Vision
+### Products/Services
+### Financial Highlights
+### Funding Requirements
+
+## 2. Company Description
+### Legal Structure
+### History & Background
+### Location & Facilities
+### Intellectual Property
+
+## 3. Market Analysis
+### Industry Overview
+### Target Market Segmentation
+### Market Size & Growth
+### Market Trends
+### Customer Personas
+
+## 4. Competitive Analysis
+### Direct Competitors
+### Indirect Competitors
+### Competitive Advantages
+### SWOT Analysis
+
+## 5. Organization & Management
+### Organizational Structure
+### Management Team
+### Board of Directors/Advisors
+### Hiring Plan
+
+## 6. Products & Services
+### Product/Service Description
+### Development Roadmap
+### Pricing Strategy
+### Intellectual Property
+
+## 7. Marketing & Sales Strategy
+### Marketing Channels
+### Sales Process
+### Customer Acquisition Cost
+### Retention Strategy
+
+## 8. Operations Plan
+### Production/Service Delivery
+### Technology Infrastructure
+### Supply Chain
+### Quality Control
+
+## 9. Financial Plan
+### Revenue Model
+### Financial Projections (3-5 years)
+### Break-even Analysis
+### Funding Requirements & Use of Funds
+### Exit Strategy
+
+## Appendices`,
   },
   {
     id: "book",
     name: "Book / Chapter",
     icon: "📖",
-    systemInstruction: "Write a book chapter or complete book section. Use engaging narrative style, proper chapter structure with sections, vivid descriptions, and compelling storytelling. Include chapter title, opening hook, body sections, and closing that leads to the next chapter.",
+    systemInstruction: "Write a book chapter or complete book. Use engaging narrative style, proper chapter structure with sections, vivid descriptions, and compelling storytelling. Include opening hook, body sections, and closing. Write EXTENSIVELY — each chapter should be 3000-5000 words minimum. For image references, describe where illustrations, diagrams, or photos should be placed using [IMAGE: description].",
+    formatTemplate: `# [Book Title]
+## By [Author Name]
+
+---
+
+### Chapter [N]: [Chapter Title]
+
+*[Opening epigraph or quote]*
+
+[Opening hook paragraph — grab the reader immediately]
+
+#### [Section 1 Title]
+[Extended narrative content — 800-1500 words per section]
+[IMAGE: Description of relevant illustration or photo]
+
+#### [Section 2 Title]
+[Extended narrative content]
+
+#### [Section 3 Title]
+[Extended narrative content]
+
+---
+*[Chapter closing — transition to next chapter]*`,
   },
   {
     id: "novel",
     name: "Novel / Fiction",
     icon: "✍️",
-    systemInstruction: "Write creative fiction with rich character development, vivid scene descriptions, natural dialogue, and compelling plot progression. Use literary techniques like foreshadowing, metaphor, and varied sentence structure. Show don't tell.",
+    systemInstruction: "Write creative fiction with rich character development, vivid scene descriptions, natural dialogue, and compelling plot progression. Use literary techniques like foreshadowing, metaphor, and varied sentence structure. Show don't tell. Write EXTENSIVELY — each chapter should be 4000-6000 words. Use [IMAGE: description] for scene illustrations.",
+    formatTemplate: `# [Novel Title]
+### [Genre] — By [Author]
+
+---
+
+## Part [N]: [Part Title]
+
+### Chapter [N]: [Chapter Title]
+
+[Atmospheric opening — set the scene with sensory details]
+
+[Dialogue and character interaction]
+
+[Action/tension building]
+
+[Internal character reflection]
+
+[Scene transition]
+
+[Climactic moment or revelation]
+
+[Chapter closing hook]
+
+---`,
   },
   {
     id: "movie-script",
     name: "Movie Script",
     icon: "🎬",
-    systemInstruction: "Write in proper screenplay format with scene headings (INT./EXT.), action lines, character names in caps before dialogue, parentheticals for delivery notes, and transitions. Follow industry-standard formatting.",
+    systemInstruction: "Write in proper screenplay format with scene headings (INT./EXT.), action lines, character names in caps before dialogue, parentheticals for delivery notes, and transitions (CUT TO:, FADE IN:, etc.). Follow industry-standard formatting. Write complete scenes with rich action descriptions.",
+    formatTemplate: `FADE IN:
+
+INT. [LOCATION] - [TIME OF DAY]
+
+[Action description — what we see on screen]
+
+                    CHARACTER NAME
+              (parenthetical)
+          Dialogue line here.
+
+                    CHARACTER NAME 2
+          Response dialogue.
+
+[More action description]
+
+                                          CUT TO:
+
+EXT. [LOCATION] - [TIME OF DAY]
+
+[Action description]
+
+                    CHARACTER NAME
+          Dialogue.
+
+                                          FADE OUT.
+
+THE END`,
   },
   {
     id: "legal",
     name: "Legal Document",
     icon: "⚖️",
-    systemInstruction: "Write a formal legal document with proper legal terminology, numbered clauses, definitions section, and standard legal formatting. Use precise language. Include relevant disclaimers and standard provisions.",
+    systemInstruction: "Write a formal legal document with proper legal terminology, numbered clauses and sub-clauses, definitions section, recitals, and standard legal formatting. Use precise language. Include relevant disclaimers, standard provisions, governing law clauses, and signature blocks.",
+    formatTemplate: `# [DOCUMENT TYPE]
+
+**Date:** [Date]
+**Parties:** [Party A] and [Party B]
+
+## RECITALS
+
+WHEREAS, [background statement];
+WHEREAS, [background statement];
+
+NOW, THEREFORE, the parties agree as follows:
+
+## ARTICLE I — DEFINITIONS
+
+1.1 "[Term]" means [definition].
+1.2 "[Term]" means [definition].
+
+## ARTICLE II — [SUBJECT]
+
+2.1 [Clause with sub-clauses]
+  (a) [Sub-clause]
+  (b) [Sub-clause]
+
+## ARTICLE III — [SUBJECT]
+
+## ARTICLE IV — REPRESENTATIONS AND WARRANTIES
+
+## ARTICLE V — INDEMNIFICATION
+
+## ARTICLE VI — TERM AND TERMINATION
+
+## ARTICLE VII — GOVERNING LAW
+
+## ARTICLE VIII — MISCELLANEOUS
+
+**IN WITNESS WHEREOF**, the parties have executed this Agreement as of the date first written above.
+
+___________________________
+[Party A Name & Title]
+
+___________________________
+[Party B Name & Title]`,
   },
   {
     id: "blog",
     name: "Blog / Article",
     icon: "📝",
-    systemInstruction: "Write an engaging blog post or article with a compelling headline, hook introduction, well-structured body with subheadings, practical examples, and a strong conclusion with call-to-action. SEO-friendly and reader-focused.",
+    systemInstruction: "Write an engaging blog post or article with a compelling headline, hook introduction, well-structured body with subheadings, practical examples, statistics, quotes, and a strong conclusion with call-to-action. SEO-friendly and reader-focused. Write at least 2000 words.",
+    formatTemplate: `# [Compelling Headline with Keywords]
+
+*[Author] | [Date] | [Reading time] min read*
+
+**[Hook — opening paragraph that grabs attention with a story, question, or shocking statistic]**
+
+---
+
+## [Section 1: Context/Problem]
+[2-3 detailed paragraphs with examples]
+
+## [Section 2: Deep Dive]
+[Detailed analysis with data points]
+[IMAGE: Relevant infographic or chart]
+
+### [Subsection]
+[Practical tips or examples]
+
+## [Section 3: Solution/How-To]
+1. **Step 1**: [Detailed explanation]
+2. **Step 2**: [Detailed explanation]
+3. **Step 3**: [Detailed explanation]
+
+## [Section 4: Case Study/Example]
+> "[Expert quote]" — [Source]
+
+## Key Takeaways
+- [Takeaway 1]
+- [Takeaway 2]
+- [Takeaway 3]
+
+## Conclusion
+[Call to action]
+
+---
+*[Author bio]*`,
   },
   {
     id: "report",
     name: "Technical Report",
     icon: "📋",
-    systemInstruction: "Write a detailed technical report with: Title Page info, Table of Contents outline, Introduction, Technical Analysis, Findings, Recommendations, and Appendices notes. Use precise technical language, include data tables and figures descriptions.",
+    systemInstruction: "Write a detailed technical report with precise technical language, data tables, findings, and actionable recommendations. Include figures descriptions and appendices notes. Be thorough and data-driven. Write at minimum 15-20 pages of content.",
+    formatTemplate: `# Technical Report: [Title]
+
+**Prepared by:** [Author/Team]
+**Date:** [Date]
+**Document ID:** [ID]
+**Classification:** [Level]
+
+---
+
+## Table of Contents
+
+## 1. Introduction
+### 1.1 Purpose
+### 1.2 Scope
+### 1.3 Definitions & Acronyms
+
+## 2. Background
+### 2.1 Context
+### 2.2 Previous Work
+### 2.3 Requirements
+
+## 3. Technical Analysis
+### 3.1 Methodology
+### 3.2 Tools & Technologies
+### 3.3 Test Environment
+### 3.4 Data Collection
+
+## 4. Findings
+### 4.1 Results Summary
+| Metric | Value | Benchmark | Status |
+|--------|-------|-----------|--------|
+### 4.2 Detailed Analysis
+### 4.3 Performance Metrics
+[IMAGE: Performance chart or graph]
+
+## 5. Risk Assessment
+### 5.1 Identified Risks
+### 5.2 Mitigation Strategies
+
+## 6. Recommendations
+
+## 7. Implementation Plan
+
+## 8. Conclusion
+
+## Appendices
+### A. Raw Data
+### B. Test Configurations
+### C. Glossary`,
   },
   {
     id: "letter",
     name: "Formal Letter",
     icon: "✉️",
     systemInstruction: "Write a formal letter with proper letterhead placement, date, recipient address, salutation, body paragraphs, closing, and signature block. Maintain professional tone appropriate to the context.",
+    formatTemplate: `[Your Name]
+[Your Title]
+[Your Organization]
+[Your Address]
+[City, State ZIP]
+[Email] | [Phone]
+
+[Date]
+
+[Recipient Name]
+[Recipient Title]
+[Organization]
+[Address]
+[City, State ZIP]
+
+**Re: [Subject Line]**
+
+Dear [Mr./Ms./Dr. Last Name],
+
+[Opening paragraph — state the purpose]
+
+[Body paragraph — details and supporting information]
+
+[Body paragraph — additional context]
+
+[Closing paragraph — next steps and call to action]
+
+Sincerely,
+
+___________________________
+[Your Name]
+[Your Title]
+
+**Enclosures:** [List if applicable]
+**CC:** [Names if applicable]`,
   },
   {
     id: "free",
     name: "Free Writing",
     icon: "🌟",
-    systemInstruction: "Write freely based on the user's request. Adapt tone, style, and format to match what they need. Be creative and thorough.",
+    systemInstruction: "Write freely based on the user's request. Adapt tone, style, and format to match what they need. Be creative, thorough, and extensive. Write as much content as needed to fully address the topic.",
+    formatTemplate: "",
   },
 ];
 
 const CUSTOM_PRESETS_KEY = "lightpaper-genius-custom-presets";
-
 const getRandomGreeting = () => GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
 
 function loadCustomPresets(): Preset[] {
@@ -127,7 +557,6 @@ function loadCustomPresets(): Preset[] {
     return stored ? JSON.parse(stored) : [];
   } catch { return []; }
 }
-
 function saveCustomPresets(presets: Preset[]) {
   localStorage.setItem(CUSTOM_PRESETS_KEY, JSON.stringify(presets));
 }
@@ -149,7 +578,11 @@ export default function GeniusAIBubble({
   const [showNewPreset, setShowNewPreset] = useState(false);
   const [newPresetName, setNewPresetName] = useState("");
   const [newPresetInstruction, setNewPresetInstruction] = useState("");
+  const [newPresetFormat, setNewPresetFormat] = useState("");
   const [customPresets, setCustomPresets] = useState<Preset[]>(loadCustomPresets);
+  const [chapterOutlines, setChapterOutlines] = useState<ChapterOutline[]>([]);
+  const [generatingChapter, setGeneratingChapter] = useState(0);
+  const [totalChapters, setTotalChapters] = useState(0);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const conversationRef = useRef<HTMLDivElement>(null);
   const fadeTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -157,6 +590,7 @@ export default function GeniusAIBubble({
 
   const allPresets = [...DEFAULT_PRESETS, ...customPresets];
 
+  // Reset on trigger change
   useEffect(() => {
     if (!triggerPosition) {
       setPhase("idle");
@@ -167,6 +601,9 @@ export default function GeniusAIBubble({
       setSelectedPreset(null);
       setShowPresets(false);
       setShowNewPreset(false);
+      setChapterOutlines([]);
+      setGeneratingChapter(0);
+      setTotalChapters(0);
       return;
     }
 
@@ -204,9 +641,7 @@ export default function GeniusAIBubble({
 
   // Auto-scroll conversation
   useEffect(() => {
-    if (conversationRef.current) {
-      conversationRef.current.scrollTop = conversationRef.current.scrollHeight;
-    }
+    conversationRef.current?.scrollTo({ top: conversationRef.current.scrollHeight, behavior: "smooth" });
   }, [conversation]);
 
   const handleBubbleClick = useCallback(() => {
@@ -218,132 +653,167 @@ export default function GeniusAIBubble({
     }
   }, [phase]);
 
+  /** Call the AI and return the full streamed text */
+  const callAI = async (messages: { role: string; content: string }[], systemOverride: string): Promise<string> => {
+    const resp = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+        },
+        body: JSON.stringify({ messages, systemOverride }),
+      }
+    );
+
+    if (resp.status === 429) { toast.error("Rate limit exceeded. Please wait."); throw new Error("rate-limit"); }
+    if (resp.status === 402) { toast.error("AI credits exhausted."); throw new Error("credits"); }
+    if (!resp.ok || !resp.body) throw new Error("Stream failed");
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let textBuffer = "";
+    let fullText = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      textBuffer += decoder.decode(value, { stream: true });
+
+      let newlineIndex: number;
+      while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+        let line = textBuffer.slice(0, newlineIndex);
+        textBuffer = textBuffer.slice(newlineIndex + 1);
+        if (line.endsWith("\r")) line = line.slice(0, -1);
+        if (line.startsWith(":") || line.trim() === "") continue;
+        if (!line.startsWith("data: ")) continue;
+        const jsonStr = line.slice(6).trim();
+        if (jsonStr === "[DONE]") return fullText;
+        try {
+          const parsed = JSON.parse(jsonStr);
+          const c = parsed.choices?.[0]?.delta?.content;
+          if (c) fullText += c;
+        } catch {
+          textBuffer = line + "\n" + textBuffer;
+          break;
+        }
+      }
+    }
+
+    // Flush
+    for (const raw of textBuffer.split("\n")) {
+      if (!raw || raw.startsWith(":") || raw.trim() === "") continue;
+      if (!raw.startsWith("data: ")) continue;
+      const jsonStr = raw.slice(6).trim();
+      if (jsonStr === "[DONE]") continue;
+      try {
+        const c = JSON.parse(jsonStr).choices?.[0]?.delta?.content;
+        if (c) fullText += c;
+      } catch {}
+    }
+
+    return fullText;
+  };
+
   const handleSubmit = async () => {
     const text = input.trim();
     if (!text || isStreaming) return;
 
-    // Determine if AI needs to clarify or should write directly
-    const isDocumentRequest = selectedPreset || text.length > 30;
-    const hasPreset = !!selectedPreset;
-
-    // Add user message to conversation
     const userMsg: ConversationMessage = { role: "user", content: text };
     const newConversation = [...conversation, userMsg];
     setConversation(newConversation);
     setInput("");
-
-    // Build messages for the AI
-    const systemContent = buildSystemPrompt(hasPreset, selectedPreset);
-    const messages = [
-      ...newConversation.map(m => ({ role: m.role, content: m.content })),
-    ];
-
     setPhase("loading");
     setIsStreaming(true);
 
     try {
-      const resp = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({
-            messages,
-            systemOverride: systemContent,
-            preset: selectedPreset?.id,
-          }),
-        }
-      );
-
-      if (resp.status === 429) {
-        toast.error("Rate limit exceeded. Please wait a moment.");
-        setPhase("conversation");
-        setIsStreaming(false);
-        return;
-      }
-      if (resp.status === 402) {
-        toast.error("AI credits exhausted.");
-        setPhase("conversation");
-        setIsStreaming(false);
-        return;
-      }
-      if (!resp.ok || !resp.body) throw new Error("Stream failed");
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let textBuffer = "";
-      let fullText = "";
-      let streamDone = false;
-
-      while (!streamDone) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        textBuffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (line.startsWith(":") || line.trim() === "") continue;
-          if (!line.startsWith("data: ")) continue;
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === "[DONE]") { streamDone = true; break; }
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-            if (content) fullText += content;
-          } catch {
-            textBuffer = line + "\n" + textBuffer;
-            break;
-          }
-        }
-      }
-
-      // Flush remaining
-      if (textBuffer.trim()) {
-        for (let raw of textBuffer.split("\n")) {
-          if (!raw) continue;
-          if (raw.endsWith("\r")) raw = raw.slice(0, -1);
-          if (raw.startsWith(":") || raw.trim() === "") continue;
-          if (!raw.startsWith("data: ")) continue;
-          const jsonStr = raw.slice(6).trim();
-          if (jsonStr === "[DONE]") continue;
-          try {
-            const parsed = JSON.parse(jsonStr);
-            const content = parsed.choices?.[0]?.delta?.content as string | undefined;
-            if (content) fullText += content;
-          } catch {}
-        }
-      }
-
-      // Check if AI is asking clarifying questions (not writing document yet)
+      const systemContent = buildSystemPrompt(selectedPreset);
+      const messages = newConversation.map(m => ({ role: m.role, content: m.content }));
+      const fullText = await callAI(messages, systemContent);
       const isQuestion = detectClarification(fullText);
 
       if (isQuestion) {
-        // AI is asking questions — keep in conversation mode
         setConversation(prev => [...prev, { role: "assistant", content: fullText }]);
         setPhase("conversation");
       } else {
-        // AI wrote a document — insert into canvas
-        const html = markdownToHtml(fullText);
-        onInsertText(html);
-        toast.success("Document written by Genius AI");
-        setConversation(prev => [...prev, { role: "assistant", content: "✅ Document written to canvas." }]);
-        setPhase("done");
-        setOpacity(0);
-        setTimeout(onDismiss, 800);
+        // Check if it looks like an outline for a long document (10+ chapters/sections)
+        const outlines = tryParseOutline(fullText);
+        if (outlines && outlines.length >= 10) {
+          setChapterOutlines(outlines);
+          setTotalChapters(outlines.length);
+          setConversation(prev => [...prev, { role: "assistant", content: `I've prepared an outline with ${outlines.length} chapters/sections. Please review the summary below and approve to start writing.` }]);
+          setPhase("outline-review");
+        } else {
+          // Direct insert
+          const html = markdownToHtml(fullText);
+          onInsertText(html);
+          toast.success("Document written by Genius AI");
+          setPhase("done");
+          setOpacity(0);
+          setTimeout(onDismiss, 800);
+        }
       }
-    } catch (err) {
-      console.error("Genius AI Bubble error:", err);
-      toast.error("Failed to get AI response.");
+    } catch (err: any) {
+      if (err.message !== "rate-limit" && err.message !== "credits") {
+        console.error("Genius AI error:", err);
+        toast.error("Failed to get AI response.");
+      }
       setPhase("conversation");
     } finally {
       setIsStreaming(false);
     }
+  };
+
+  /** Generate chapters one by one after outline approval */
+  const handleApproveOutline = async () => {
+    setPhase("generating-chapters");
+    setIsStreaming(true);
+
+    const systemContent = buildSystemPrompt(selectedPreset);
+    let allHtml = "";
+
+    for (let i = 0; i < chapterOutlines.length; i++) {
+      setGeneratingChapter(i + 1);
+      const chapter = chapterOutlines[i];
+
+      try {
+        const chapterPrompt = `Write Chapter ${i + 1}: "${chapter.title}" in full detail.
+
+Summary to expand: ${chapter.summary}
+
+IMPORTANT:
+- Write at least 3000-5000 words for this chapter
+- Use the format template provided
+- Include [IMAGE: description] tags where illustrations would enhance the content
+- Be thorough, detailed, and professional
+- This is chapter ${i + 1} of ${chapterOutlines.length}
+- Do NOT include other chapters, only this one`;
+
+        const messages = [
+          ...conversation.map(m => ({ role: m.role, content: m.content })),
+          { role: "user" as const, content: chapterPrompt },
+        ];
+
+        const chapterText = await callAI(messages, systemContent);
+        const chapterHtml = markdownToHtml(chapterText);
+        allHtml += `<div class="chapter-break" style="page-break-before: always;"></div>${chapterHtml}`;
+
+        // Insert progressively
+        onInsertText(chapterHtml);
+        toast.success(`Chapter ${i + 1}/${chapterOutlines.length} written`);
+      } catch (err) {
+        console.error(`Error generating chapter ${i + 1}:`, err);
+        toast.error(`Failed on chapter ${i + 1}. Stopping.`);
+        break;
+      }
+    }
+
+    setPhase("done");
+    setIsStreaming(false);
+    toast.success(`✅ All ${chapterOutlines.length} chapters written!`);
+    setOpacity(0);
+    setTimeout(onDismiss, 1500);
   };
 
   const handleClose = () => {
@@ -363,6 +833,7 @@ export default function GeniusAIBubble({
       name: newPresetName.trim(),
       icon: "📌",
       systemInstruction: newPresetInstruction.trim(),
+      formatTemplate: newPresetFormat.trim(),
       isCustom: true,
     };
     const updated = [...customPresets, preset];
@@ -370,6 +841,7 @@ export default function GeniusAIBubble({
     saveCustomPresets(updated);
     setNewPresetName("");
     setNewPresetInstruction("");
+    setNewPresetFormat("");
     setShowNewPreset(false);
     setSelectedPreset(preset);
     toast.success(`Preset "${preset.name}" saved`);
@@ -421,26 +893,31 @@ export default function GeniusAIBubble({
         </div>
       )}
 
-      {/* Input / Conversation mode */}
-      {(phase === "input" || phase === "loading" || phase === "conversation") && (
+      {/* Main interactive panel */}
+      {(phase === "input" || phase === "loading" || phase === "conversation" || phase === "outline-review" || phase === "generating-chapters") && (
         <div
           className={`${bg} backdrop-blur-xl ${border} border rounded-2xl shadow-2xl shadow-emerald-500/10`}
           style={{
             animation: "geniusFadeIn 0.4s ease-out",
-            width: "400px",
-            maxWidth: "90vw",
-            maxHeight: "80vh",
+            width: "420px",
+            maxWidth: "92vw",
+            maxHeight: "85vh",
             display: "flex",
             flexDirection: "column",
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 pt-3 pb-1">
+          <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0">
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
                 <Sparkles className="h-3 w-3 text-white" />
               </div>
               <span className={`text-xs font-semibold ${fg} opacity-70`}>Genius AI</span>
+              {phase === "generating-chapters" && (
+                <span className="text-[10px] text-emerald-500 font-mono">
+                  Chapter {generatingChapter}/{totalChapters}
+                </span>
+              )}
             </div>
             <button onClick={handleClose} className={`${fg} opacity-50 hover:opacity-100 transition-opacity`}>
               <X className="h-4 w-4" />
@@ -448,7 +925,7 @@ export default function GeniusAIBubble({
           </div>
 
           {/* Preset selector */}
-          <div className="px-4 pt-1 pb-2">
+          <div className="px-4 pt-1 pb-2 flex-shrink-0">
             <button
               onClick={() => setShowPresets(!showPresets)}
               className={`w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs ${isDarkMode ? "bg-white/10 hover:bg-white/15" : "bg-black/5 hover:bg-black/10"} transition-colors ${fg}`}
@@ -456,7 +933,7 @@ export default function GeniusAIBubble({
               <span>{selectedPreset ? `${selectedPreset.icon} ${selectedPreset.name}` : "📄 Select document type..."}</span>
               <ChevronDown className={`h-3 w-3 transition-transform ${showPresets ? "rotate-180" : ""}`} />
             </button>
-            
+
             {showPresets && (
               <div className={`mt-1 rounded-lg ${isDarkMode ? "bg-black/80" : "bg-white/95"} border ${border} max-h-[200px] overflow-auto`}>
                 {allPresets.map(preset => (
@@ -467,10 +944,7 @@ export default function GeniusAIBubble({
                   >
                     <span>{preset.icon} {preset.name}</span>
                     {preset.isCustom && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); handleDeleteCustomPreset(preset.id); }}
-                        className="opacity-40 hover:opacity-100"
-                      >
+                      <button onClick={(e) => { e.stopPropagation(); handleDeleteCustomPreset(preset.id); }} className="opacity-40 hover:opacity-100">
                         <Trash2 className="h-3 w-3" />
                       </button>
                     )}
@@ -491,26 +965,27 @@ export default function GeniusAIBubble({
                 <input
                   value={newPresetName}
                   onChange={(e) => setNewPresetName(e.target.value)}
-                  placeholder="Preset name..."
+                  placeholder="Preset name (e.g., Thesis, Proposal)..."
                   className={`w-full bg-transparent ${fg} text-xs outline-none border-b ${border} pb-1`}
                 />
                 <textarea
                   value={newPresetInstruction}
                   onChange={(e) => setNewPresetInstruction(e.target.value)}
-                  placeholder="Instructions for the AI (tone, format, structure...)"
+                  placeholder="AI instructions (tone, style, rules, length requirements...)"
                   className={`w-full bg-transparent ${fg} text-xs outline-none resize-none`}
                   rows={3}
                 />
+                <textarea
+                  value={newPresetFormat}
+                  onChange={(e) => setNewPresetFormat(e.target.value)}
+                  placeholder="Format template (optional — headings, sections structure in Markdown)..."
+                  className={`w-full bg-transparent ${fg} text-[10px] outline-none resize-none font-mono`}
+                  rows={4}
+                />
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => setShowNewPreset(false)}
-                    className={`text-[10px] ${fg} opacity-50 hover:opacity-100`}
-                  >Cancel</button>
-                  <button
-                    onClick={handleSaveCustomPreset}
-                    className="text-[10px] text-emerald-500 font-semibold flex items-center gap-1"
-                  >
-                    <Save className="h-3 w-3" /> Save
+                  <button onClick={() => setShowNewPreset(false)} className={`text-[10px] ${fg} opacity-50 hover:opacity-100`}>Cancel</button>
+                  <button onClick={handleSaveCustomPreset} className="text-[10px] text-emerald-500 font-semibold flex items-center gap-1">
+                    <Save className="h-3 w-3" /> Save Preset
                   </button>
                 </div>
               </div>
@@ -519,10 +994,7 @@ export default function GeniusAIBubble({
 
           {/* Conversation history */}
           {conversation.length > 0 && (
-            <div
-              ref={conversationRef}
-              className="px-4 max-h-[200px] overflow-auto space-y-2 mb-2"
-            >
+            <div ref={conversationRef} className="px-4 max-h-[200px] overflow-auto space-y-2 mb-2 flex-shrink-0">
               {conversation.map((msg, i) => (
                 <div key={i} className={`text-xs ${fg} ${msg.role === "assistant" ? "opacity-80 pl-2 border-l-2 border-emerald-500/40" : "opacity-60"}`}>
                   <span className="font-semibold">{msg.role === "user" ? "You" : "Genius"}:</span>{" "}
@@ -537,50 +1009,123 @@ export default function GeniusAIBubble({
             </div>
           )}
 
-          {/* Input area */}
-          <div className="px-4 pb-3 pt-1">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSubmit();
-                }
-              }}
-              placeholder={
-                selectedPreset
-                  ? `Describe your ${selectedPreset.name.toLowerCase()}...`
-                  : "Ask a question or describe what to write..."
-              }
-              disabled={phase === "loading"}
-              className={`w-full bg-transparent ${fg} text-sm placeholder:opacity-40 resize-none outline-none border-none`}
-              rows={3}
-              style={{ caretColor: "#10b981" }}
-            />
-
-            <div className="flex items-center justify-between mt-2">
-              <span className={`text-[10px] ${fg} opacity-30`}>
-                Shift+Enter for new line
-              </span>
-              <button
-                onClick={handleSubmit}
-                disabled={phase === "loading" || !input.trim()}
-                className="h-8 w-8 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 flex items-center justify-center disabled:opacity-40 transition-all"
-              >
-                {phase === "loading" ? (
-                  <Loader2 className="h-4 w-4 text-white animate-spin" />
-                ) : (
-                  <Send className="h-3.5 w-3.5 text-white" />
-                )}
-              </button>
+          {/* Outline review panel */}
+          {phase === "outline-review" && chapterOutlines.length > 0 && (
+            <div className="px-4 mb-2 flex-1 overflow-auto">
+              <div className={`rounded-lg p-3 ${isDarkMode ? "bg-white/5" : "bg-black/5"} space-y-2`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <BookOpen className="h-4 w-4 text-emerald-500" />
+                  <span className={`text-xs font-semibold ${fg}`}>
+                    Chapter Outline ({chapterOutlines.length} chapters)
+                  </span>
+                </div>
+                <div className="max-h-[250px] overflow-auto space-y-1.5">
+                  {chapterOutlines.map((ch, i) => (
+                    <div key={i} className={`text-[11px] ${fg} opacity-80 flex gap-2`}>
+                      <span className="text-emerald-500 font-mono flex-shrink-0">{i + 1}.</span>
+                      <div>
+                        <span className="font-semibold">{ch.title}</span>
+                        <span className="opacity-60 block">{ch.summary}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-2 pt-2 border-t border-emerald-500/20">
+                  <button
+                    onClick={handleApproveOutline}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-cyan-500 text-white text-xs font-semibold hover:from-emerald-600 hover:to-cyan-600 transition-all"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5" /> Approve & Write All Chapters
+                  </button>
+                  <button
+                    onClick={() => { setPhase("conversation"); setChapterOutlines([]); }}
+                    className={`px-3 py-2 rounded-lg text-xs ${fg} opacity-60 hover:opacity-100`}
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
             </div>
-          </div>
+          )}
+
+          {/* Chapter generation progress */}
+          {phase === "generating-chapters" && (
+            <div className="px-4 mb-2">
+              <div className={`rounded-lg p-3 ${isDarkMode ? "bg-white/5" : "bg-black/5"}`}>
+                <div className="flex items-center gap-2 mb-2">
+                  <Loader2 className="h-4 w-4 text-emerald-500 animate-spin" />
+                  <span className={`text-xs font-semibold ${fg}`}>
+                    Writing chapter {generatingChapter} of {totalChapters}...
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-emerald-500/20 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full transition-all duration-500"
+                    style={{ width: `${(generatingChapter / totalChapters) * 100}%` }}
+                  />
+                </div>
+                <div className="mt-2 space-y-0.5">
+                  {chapterOutlines.map((ch, i) => (
+                    <div key={i} className={`text-[10px] ${fg} flex items-center gap-1.5 ${i + 1 < generatingChapter ? "opacity-40" : i + 1 === generatingChapter ? "opacity-100" : "opacity-25"}`}>
+                      {i + 1 < generatingChapter ? (
+                        <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                      ) : i + 1 === generatingChapter ? (
+                        <Loader2 className="h-3 w-3 animate-spin text-emerald-500" />
+                      ) : (
+                        <span className="w-3 h-3 rounded-full border border-current flex-shrink-0" />
+                      )}
+                      {ch.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Input area — hidden during generation */}
+          {phase !== "outline-review" && phase !== "generating-chapters" && (
+            <div className="px-4 pb-3 pt-1 flex-shrink-0">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSubmit();
+                  }
+                }}
+                placeholder={
+                  selectedPreset
+                    ? `Describe your ${selectedPreset.name.toLowerCase()}... (mention page count for long docs)`
+                    : "Ask anything, or describe a document to write..."
+                }
+                disabled={phase === "loading"}
+                className={`w-full bg-transparent ${fg} text-sm placeholder:opacity-40 resize-none outline-none border-none`}
+                rows={3}
+                style={{ caretColor: "#10b981" }}
+              />
+              <div className="flex items-center justify-between mt-2">
+                <span className={`text-[10px] ${fg} opacity-30`}>
+                  {selectedPreset ? `${selectedPreset.icon} ${selectedPreset.name}` : "Shift+Enter for new line"}
+                </span>
+                <button
+                  onClick={handleSubmit}
+                  disabled={phase === "loading" || !input.trim()}
+                  className="h-8 w-8 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 flex items-center justify-center disabled:opacity-40 transition-all"
+                >
+                  {phase === "loading" ? (
+                    <Loader2 className="h-4 w-4 text-white animate-spin" />
+                  ) : (
+                    <Send className="h-3.5 w-3.5 text-white" />
+                  )}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Animations */}
       <style>{`
         @keyframes geniusWobble {
           0%, 100% { transform: rotate(0deg) scale(1); }
@@ -602,41 +1147,84 @@ export default function GeniusAIBubble({
   );
 }
 
-/** Build system prompt based on preset and conversation state */
-function buildSystemPrompt(hasPreset: boolean, preset: Preset | null): string {
-  const base = `You are **Genius AI**, a powerful writing assistant built into the LightPaper workspace.
+// ---- Helpers ----
 
-IMPORTANT RULES:
-1. If the user's request is vague or unclear, ASK CLARIFYING QUESTIONS before writing. For example, ask about target audience, desired length, specific topics, key points to cover, etc.
-2. When you ask questions, keep them concise and numbered.
-3. When the user confirms they're ready (e.g., "go ahead", "write it", "proceed", "yes", "looks good"), THEN write the full document.
-4. When writing the final document, use well-formatted Markdown with headings, bullet points, and emphasis.
-5. Write complete, professional, ready-to-use content.
-6. If the user asks a general question (not a document request), answer it conversationally.`;
+function buildSystemPrompt(preset: Preset | null): string {
+  const base = `You are **Genius AI**, a powerful writing assistant in the LightPaper workspace.
 
-  if (hasPreset && preset) {
-    return `${base}\n\nDOCUMENT PRESET: ${preset.name}\n${preset.systemInstruction}`;
+CRITICAL RULES:
+1. If the user's request is vague or unclear, ASK 2-4 specific clarifying questions before writing. Ask about topic, target audience, length, key points, tone, etc.
+2. When you ask questions, keep them numbered and concise.
+3. When the user confirms readiness ("go ahead", "write it", "proceed", "yes"), THEN write the full document.
+4. WRITE EXTENSIVELY. Documents should be thorough and complete:
+   - Short documents: 2000-4000 words minimum
+   - Medium documents: 5000-10000 words
+   - Long documents (books, reports): Write a detailed chapter outline first, then the user will approve before you write each chapter
+5. Use well-formatted Markdown with proper headings (# ## ### ####), bullet points, bold, italics, tables, and horizontal rules.
+6. Use [IMAGE: detailed description] tags where illustrations, charts, diagrams, or photos should be placed.
+7. For documents over 10 pages/sections: ALWAYS first provide a numbered outline with chapter titles and 1-2 sentence summaries. Format it as:
+   OUTLINE:
+   1. Chapter Title | Summary of chapter content
+   2. Chapter Title | Summary of chapter content
+   ...
+8. For questions/conversation, answer helpfully but concisely.
+9. You can also: summarize text, translate languages, analyze sentiment, proofread, rewrite, brainstorm, and more.`;
+
+  if (preset) {
+    let prompt = `${base}\n\n## DOCUMENT PRESET: ${preset.name}\n${preset.systemInstruction}`;
+    if (preset.formatTemplate) {
+      prompt += `\n\n## FORMAT TEMPLATE (follow this structure):\n\`\`\`\n${preset.formatTemplate}\n\`\`\``;
+    }
+    return prompt;
   }
 
   return base;
 }
 
-/** Detect if AI response is asking clarifying questions vs writing a document */
 function detectClarification(text: string): boolean {
-  // Short responses are likely questions/conversation
-  if (text.length < 500) {
-    const questionIndicators = ["?", "would you like", "could you", "can you tell", "what kind", "how long", "who is", "shall i", "do you want", "let me know", "please provide", "before i", "before writing"];
-    const lowerText = text.toLowerCase();
-    const hasQuestions = questionIndicators.some(q => lowerText.includes(q));
-    // If it has question marks and is short, it's likely clarification
-    if (hasQuestions && (text.match(/\?/g) || []).length >= 1) return true;
+  if (text.length < 600) {
+    const indicators = ["?", "would you like", "could you", "can you tell", "what kind", "how long", "who is", "shall i", "do you want", "let me know", "please provide", "before i", "before writing", "what topic", "how many", "which format"];
+    const lower = text.toLowerCase();
+    if (indicators.some(q => lower.includes(q)) && (text.match(/\?/g) || []).length >= 1) return true;
   }
-  // Long responses with headers are likely documents
-  if (text.length > 800 && (text.includes("# ") || text.includes("## "))) return false;
+  if (text.length > 1000 && (text.includes("# ") || text.includes("## "))) return false;
+  // Check if it's an outline
+  if (text.includes("OUTLINE:")) return false;
   return false;
 }
 
-/** Simple markdown → HTML converter for AI output */
+function tryParseOutline(text: string): ChapterOutline[] | null {
+  if (!text.includes("OUTLINE:")) return null;
+  const outlineSection = text.split("OUTLINE:")[1]?.trim();
+  if (!outlineSection) return null;
+
+  const lines = outlineSection.split("\n").filter(l => l.trim());
+  const chapters: ChapterOutline[] = [];
+
+  for (const line of lines) {
+    const match = line.match(/^\d+\.\s*(.+?)\s*\|\s*(.+)$/);
+    if (match) {
+      chapters.push({
+        title: match[1].trim(),
+        summary: match[2].trim(),
+        estimatedPages: 3,
+      });
+    } else {
+      // Try simpler format: "1. Chapter Title"
+      const simpleMatch = line.match(/^\d+\.\s*(.+)$/);
+      if (simpleMatch) {
+        chapters.push({
+          title: simpleMatch[1].trim(),
+          summary: "",
+          estimatedPages: 3,
+        });
+      }
+    }
+  }
+
+  return chapters.length >= 3 ? chapters : null;
+}
+
 function markdownToHtml(md: string): string {
   let html = md
     .replace(/^#### (.+)$/gm, "<h4>$1</h4>")
@@ -646,15 +1234,30 @@ function markdownToHtml(md: string): string {
     .replace(/\*\*\*(.+?)\*\*\*/g, "<strong><em>$1</em></strong>")
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    // Image references
+    .replace(/\[IMAGE:\s*(.+?)\]/g, '<div style="border:2px dashed #ccc;padding:20px;margin:16px 0;text-align:center;border-radius:8px;background:#f9f9f9;color:#666;font-style:italic;">📷 Image: $1</div>')
+    // Tables
+    .replace(/\|(.+)\|/g, (match) => {
+      const cells = match.split("|").filter(c => c.trim());
+      if (cells.every(c => /^[\s\-:]+$/.test(c))) return ""; // separator row
+      const isHeader = cells.some(c => c.includes("---"));
+      if (isHeader) return "";
+      const tag = "td";
+      return `<tr>${cells.map(c => `<${tag}>${c.trim()}</${tag}>`).join("")}</tr>`;
+    })
     .replace(/^[\-\*] (.+)$/gm, "<li>$1</li>")
     .replace(/^\d+\. (.+)$/gm, "<li>$1</li>")
     .replace(/^---$/gm, "<hr/>")
+    .replace(/^> (.+)$/gm, '<blockquote style="border-left:3px solid #ccc;padding-left:12px;margin:12px 0;font-style:italic;color:#666;">$1</blockquote>')
     .replace(/\n\n/g, "</p><p>")
     .replace(/\n/g, "<br/>");
 
+  // Wrap tables
+  html = html.replace(/(<tr>.*?<\/tr>)+/gs, (match) => `<table style="width:100%;border-collapse:collapse;margin:16px 0;" border="1" cellpadding="8">${match}</table>`);
+  // Wrap lists
   html = html.replace(/(<li>.*?<\/li>)+/gs, (match) => `<ul>${match}</ul>`);
 
-  if (!html.startsWith("<h") && !html.startsWith("<ul") && !html.startsWith("<ol") && !html.startsWith("<hr")) {
+  if (!html.startsWith("<h") && !html.startsWith("<ul") && !html.startsWith("<ol") && !html.startsWith("<hr") && !html.startsWith("<table") && !html.startsWith("<div") && !html.startsWith("<blockquote")) {
     html = `<p>${html}</p>`;
   }
 
