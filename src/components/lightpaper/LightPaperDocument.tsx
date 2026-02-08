@@ -172,6 +172,7 @@ export function LightPaperDocument({
   const [isEditingText, setIsEditingText] = useState(false);
   const [pages, setPages] = useState<string[]>(['']);
   const [showPagePanel, setShowPagePanel] = useState(false);
+  const [editTextLayers, setEditTextLayers] = useState<any[][]>([]); // Per-page text layer items for hybrid editing
 
   // Scale PDF reconstructed content to fit within the editor container
   const scalePdfContentToFit = useCallback((container: HTMLDivElement | null) => {
@@ -293,11 +294,11 @@ export function LightPaperDocument({
     console.log('Loading uploaded content', uploadedContent.content.substring(0, 100));
     
     try {
-      // TRY TO PARSE AS JSON (View Mode)
+      // TRY TO PARSE AS JSON (View Mode or Hybrid Mode)
       const parsed = JSON.parse(uploadedContent.content);
       
-      if (parsed.mode === 'view' && parsed.images && Array.isArray(parsed.images)) {
-        console.log(`✓ View Mode: ${parsed.images.length} pages with images`);
+      if ((parsed.mode === 'view' || parsed.mode === 'hybrid') && parsed.images && Array.isArray(parsed.images)) {
+        console.log(`✓ ${parsed.mode === 'hybrid' ? 'Hybrid' : 'View'} Mode: ${parsed.images.length} pages with images`);
         
         // Validate that images array contains valid base64 data
         const validImages = parsed.images.filter((img: string) => {
@@ -307,9 +308,9 @@ export function LightPaperDocument({
         });
         
         if (validImages.length === 0) {
-          console.error('✗ No valid images found in View Mode data');
+          console.error('✗ No valid images found in data');
           toast.error('No valid images found in document');
-          throw new Error('No valid images found in View Mode data');
+          throw new Error('No valid images found');
         }
         
         console.log(`✓ Validated ${validImages.length} images`);
@@ -320,6 +321,15 @@ export function LightPaperDocument({
         setTotalPages(validImages.length);
         setCurrentPage(1);
         setVisiblePage(1);
+        
+        // Handle hybrid mode text layers
+        if (parsed.mode === 'hybrid' && parsed.textLayers && Array.isArray(parsed.textLayers)) {
+          setEditTextLayers(parsed.textLayers);
+          setEditMode(true); // Auto-enable edit mode for hybrid
+          console.log(`✓ Loaded text layers for ${parsed.textLayers.length} pages`);
+        } else {
+          setEditTextLayers([]);
+        }
         
         // Set format if detected (from JSON metadata or upload metadata)
         const detFormat = parsed.metadata?.detectedFormat || parsed.detectedFormat || uploadedContent.metadata?.detectedFormat;
@@ -334,7 +344,8 @@ export function LightPaperDocument({
         }
         setDocumentContent('');
         
-        toast.success(`View Mode: ${validImages.length} pages loaded`);
+        const modeLabel = parsed.mode === 'hybrid' ? 'Edit Mode (hybrid)' : 'View Mode';
+        toast.success(`${modeLabel}: ${validImages.length} pages loaded`);
         setProjectTitle(uploadedContent.title);
         setCurrentProjectId(null);
         onContentLoaded?.();
@@ -2966,6 +2977,99 @@ export function LightPaperDocument({
                       display: 'block'
                     }}
                   />
+                  
+                  {/* Hybrid Edit Mode: Editable text layer over the image */}
+                  {editMode && editTextLayers[index] && editTextLayers[index].length > 0 && (
+                    <div 
+                      className="absolute inset-0" 
+                      style={{ 
+                        pointerEvents: 'none',
+                      }}
+                    >
+                      {editTextLayers[index].map((item: any, textIdx: number) => {
+                        // Scale positions relative to the displayed image
+                        // Text layer coords are at scale=1 (viewport coords)
+                        // The image is rendered at the page container width
+                        const pageEl = document.getElementById(`page-${index + 1}`);
+                        const imgEl = pageEl?.querySelector('img');
+                        const imgWidth = imgEl?.naturalWidth || 1;
+                        const viewportWidth = editTextLayers[index]?.[0]?.x !== undefined 
+                          ? (imgWidth / 2) // renderScale was 2
+                          : 816;
+                        
+                        // We need the actual viewport dimensions from the first page metadata
+                        // For now, use the image natural dimensions / renderScale(2)
+                        const naturalW = imgEl?.naturalWidth || 1632;
+                        const displayW = imgEl?.clientWidth || 816;
+                        const scaleFactor = displayW / (naturalW / 2);
+                        
+                        return (
+                          <span
+                            key={`text-${index}-${textIdx}`}
+                            contentEditable
+                            suppressContentEditableWarning
+                            className="pdf-text-span"
+                            data-original-text={item.text}
+                            style={{
+                              position: 'absolute',
+                              left: `${item.x * scaleFactor}px`,
+                              top: `${item.y * scaleFactor}px`,
+                              width: `${item.width * scaleFactor}px`,
+                              height: `${item.height * scaleFactor}px`,
+                              fontSize: `${item.fontSize * scaleFactor}px`,
+                              fontFamily: item.fontFamily,
+                              fontWeight: item.fontWeight,
+                              fontStyle: item.fontStyle,
+                              color: 'transparent',
+                              lineHeight: `${item.height * scaleFactor}px`,
+                              whiteSpace: 'nowrap',
+                              cursor: 'text',
+                              background: 'transparent',
+                              border: 'none',
+                              outline: 'none',
+                              pointerEvents: 'auto',
+                              padding: 0,
+                              margin: 0,
+                              zIndex: 10,
+                            }}
+                            onFocus={(e) => {
+                              // Show text with sampled background for seamless editing
+                              e.currentTarget.style.color = item.color;
+                              e.currentTarget.style.backgroundColor = item.backgroundColor;
+                              e.currentTarget.style.outline = '1px solid rgba(66, 153, 225, 0.4)';
+                            }}
+                            onBlur={(e) => {
+                              const hasChanged = e.currentTarget.textContent !== item.text;
+                              if (hasChanged) {
+                                // Keep text visible if edited
+                                e.currentTarget.style.color = item.color;
+                                e.currentTarget.style.backgroundColor = item.backgroundColor;
+                                e.currentTarget.style.outline = 'none';
+                              } else {
+                                // Revert to transparent if unchanged
+                                e.currentTarget.style.color = 'transparent';
+                                e.currentTarget.style.backgroundColor = 'transparent';
+                                e.currentTarget.style.outline = 'none';
+                              }
+                            }}
+                            onMouseEnter={(e) => {
+                              if (document.activeElement !== e.currentTarget) {
+                                e.currentTarget.style.textDecoration = 'underline';
+                                e.currentTarget.style.textDecorationColor = 'rgba(66, 153, 225, 0.4)';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (document.activeElement !== e.currentTarget) {
+                                e.currentTarget.style.textDecoration = 'none';
+                              }
+                            }}
+                          >
+                            {item.text}
+                          </span>
+                        );
+                      })}
+                    </div>
+                  )}
                   
                   {/* Overlay Text Boxes for this page */}
                   {overlayTextBoxes

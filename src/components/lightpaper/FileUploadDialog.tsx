@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from "@/components/ui/button";
 import { Upload, FileText, Loader2, CheckCircle, AlertCircle, Eye } from "lucide-react";
 import { toast } from "sonner";
-import { parseDocument, parseDocumentAsImages } from "./AdvancedDocumentParser";
+import { parseDocument, parseDocumentAsImages, parseDocumentForEditing } from "./AdvancedDocumentParser";
 import { Progress } from "@/components/ui/progress";
 
 interface FileUploadDialogProps {
@@ -79,8 +79,8 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
           }
         });
       } else {
-        // Edit mode - use advanced parser with progress callback
-        result = await parseDocument(file, (message, current, total) => {
+        // Edit mode - use hybrid parser with background color sampling
+        result = await parseDocumentForEditing(file, (message, current, total) => {
           if (cancelRef.current) {
             throw new Error('Upload cancelled by user');
           }
@@ -104,12 +104,16 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
       
       // Pass the content to parent based on mode
       if (result.images && result.images.length > 0) {
-        // Image-based rendering (View Mode or PDF edit mode)
-        onFileLoaded(JSON.stringify({
-          mode: 'view',
+        // Image-based rendering (View Mode or hybrid edit mode with text layers)
+        const payload: any = {
+          mode: result.textLayers ? 'hybrid' : 'view',
           images: result.images,
-          metadata: result.metadata
-        }), title, { detectedFormat: result.metadata.detectedFormat, fileType: result.metadata.fileType });
+          metadata: result.metadata,
+        };
+        if (result.textLayers) {
+          payload.textLayers = result.textLayers;
+        }
+        onFileLoaded(JSON.stringify(payload), title, { detectedFormat: result.metadata.detectedFormat, fileType: result.metadata.fileType });
       } else {
         // Edit Mode: Pass HTML content with format metadata
         onFileLoaded(result.html, title, { detectedFormat: result.metadata.detectedFormat, fileType: result.metadata.fileType });

@@ -340,6 +340,20 @@ async function parseDocxAsImages(
   }
 }
 
+export interface TextLayerItem {
+  text: string;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  fontSize: number;
+  fontFamily: string;
+  fontWeight: string;
+  fontStyle: string;
+  color: string;
+  backgroundColor: string; // Sampled from the page image
+}
+
 export interface ParsedContent {
   html: string;
   metadata: {
@@ -352,6 +366,7 @@ export interface ParsedContent {
   };
   pages?: string[]; // Multiple page HTML strings
   images?: string[]; // For View Mode - array of page images
+  textLayers?: TextLayerItem[][]; // Per-page text layer items for hybrid editing
 }
 
 /**
@@ -1072,6 +1087,189 @@ function escapeHtml(text: string): string {
 }
 
 /**
+ * Sample background color from a canvas at a specific region around a text item.
+ * Returns the dominant background color behind the text.
+ */
+function sampleBackgroundColor(
+  canvas: HTMLCanvasElement,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  scale: number
+): string {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return 'rgb(255, 255, 255)';
+
+  // Sample a small region around the text (slightly expanded)
+  const sx = Math.max(0, Math.floor((x - 2) * scale));
+  const sy = Math.max(0, Math.floor((y - 2) * scale));
+  const sw = Math.min(canvas.width - sx, Math.ceil((width + 4) * scale));
+  const sh = Math.min(canvas.height - sy, Math.ceil((height + 4) * scale));
+
+  if (sw <= 0 || sh <= 0) return 'rgb(255, 255, 255)';
+
+  try {
+    const imageData = ctx.getImageData(sx, sy, sw, sh);
+    const data = imageData.data;
+
+    // Sample edges of the region (not center where text is)
+    // Take pixels from top-left corner, top-right corner, and left edge
+    const samplePixels: number[][] = [];
+    const addSample = (px: number, py: number) => {
+      const idx = (py * sw + px) * 4;
+      if (idx >= 0 && idx + 2 < data.length) {
+        samplePixels.push([data[idx], data[idx + 1], data[idx + 2]]);
+      }
+    };
+
+    // Sample corners and edges (where background is likely visible)
+    addSample(0, 0);
+    addSample(sw - 1, 0);
+    addSample(0, sh - 1);
+    addSample(sw - 1, sh - 1);
+    addSample(Math.floor(sw / 2), 0);
+    addSample(0, Math.floor(sh / 2));
+
+    if (samplePixels.length === 0) return 'rgb(255, 255, 255)';
+
+    // Average the sampled colors
+    let r = 0, g = 0, b = 0;
+    for (const [pr, pg, pb] of samplePixels) {
+      r += pr; g += pg; b += pb;
+    }
+    r = Math.round(r / samplePixels.length);
+    g = Math.round(g / samplePixels.length);
+    b = Math.round(b / samplePixels.length);
+
+    return `rgb(${r}, ${g}, ${b})`;
+  } catch {
+    return 'rgb(255, 255, 255)';
+  }
+}
+
+/**
+ * Parse document for hybrid editing: returns both page images AND positioned text layers
+ * with background color sampling for seamless text editing.
+ */
+export async function parseDocumentForEditing(
+  file: File,
+  onProgress?: (message: string, current?: number, total?: number) => void
+): Promise<ParsedContent> {
+  const fileType = await detectFileType(file);
+
+  if (fileType === 'pdf') {
+    const arrayBuffer = await file.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    const pageCount = pdf.numPages;
+    const images: string[] = [];
+    const textLayers: TextLayerItem[][] = [];
+    const renderScale = 2.0;
+
+    const firstPage = await pdf.getPage(1);
+    const firstViewport = firstPage.getViewport({ scale: 1.0 });
+    const detectedFormat = detectPageFormat(firstViewport.width, firstViewport.height);
+
+    onProgress?.(`Preparing ${pageCount} pages for editing...`, 0, pageCount);
+
+    for (let i = 1; i <= pageCount; i++) {
+      onProgress?.(`Processing page ${i}/${pageCount}...`, i, pageCount);
+
+      const page = await pdf.getPage(i);
+      const viewport = page.getViewport({ scale: 1.0 });
+      const renderViewport = page.getViewport({ scale: renderScale });
+
+      // 1. Render page image
+      const canvas = document.createElement('canvas');
+      canvas.width = renderViewport.width;
+      canvas.height = renderViewport.height;
+      const ctx = canvas.getContext('2d')!;
+      ctx.fillStyle = 'white';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      await page.render({
+        canvasContext: ctx,
+        viewport: renderViewport,
+        canvas: canvas
+      }).promise;
+
+      images.push(canvas.toDataURL('image/png'));
+
+      // 2. Extract text items with positions at scale=1
+      const textContent = await page.getTextContent();
+      const pageTextLayer: TextLayerItem[] = [];
+
+      const measureCanvas = document.createElement('canvas');
+      const measureCtx = measureCanvas.getContext('2d')!;
+
+      for (const item of textContent.items as any[]) {
+        if (!item.str || item.str.trim() === '') continue;
+
+        const tx = item.transform;
+        const fontHeight = Math.sqrt(tx[2] * tx[2] + tx[3] * tx[3]);
+        const x = tx[4];
+        const y = viewport.height - tx[5];
+
+        const { fontFamily, fontWeight, fontStyle } = recognizeFont(item.fontName || '');
+        measureCtx.font = `${fontWeight} ${fontStyle} ${fontHeight}px ${fontFamily}`;
+        const textWidth = measureCtx.measureText(item.str).width;
+
+        let color = 'rgb(0, 0, 0)';
+        if (item.color && Array.isArray(item.color)) {
+          const r = Math.round(item.color[0] * 255);
+          const g = Math.round(item.color[1] * 255);
+          const b = Math.round(item.color[2] * 255);
+          color = `rgb(${r}, ${g}, ${b})`;
+        }
+
+        // 3. Sample background color from the rendered canvas
+        const bgColor = sampleBackgroundColor(
+          canvas,
+          x, y - fontHeight,
+          textWidth, fontHeight,
+          renderScale
+        );
+
+        pageTextLayer.push({
+          text: item.str,
+          x,
+          y: y - fontHeight,
+          width: textWidth,
+          height: fontHeight,
+          fontSize: fontHeight,
+          fontFamily,
+          fontWeight,
+          fontStyle,
+          color,
+          backgroundColor: bgColor,
+        });
+      }
+
+      textLayers.push(pageTextLayer);
+    }
+
+    onProgress?.('Hybrid editing ready!', pageCount, pageCount);
+
+    return {
+      html: '',
+      metadata: {
+        pageCount,
+        hasEditableText: true,
+        hasImages: true,
+        fileType: 'pdf',
+        detectedFormat,
+        dimensions: { width: firstViewport.width, height: firstViewport.height },
+      },
+      images,
+      textLayers,
+    };
+  }
+
+  // For DOCX, fall back to image-based view mode (text extraction from DOCX is lossy)
+  return parseDocumentAsImages(file, onProgress);
+}
+
+/**
  * Main parser function - detects type and routes to appropriate parser
  */
 export async function parseDocument(
@@ -1099,7 +1297,6 @@ export async function parseDocument(
   // Route to appropriate parser
   if (detectedType === 'pdf') {
     // For PDFs, always use image-based rendering for reliability
-    // PDF text reconstruction via absolute positioning is fragile and breaks easily
     return parseDocumentAsImages(file, onProgress);
   } else {
     return parseDOCX(file, (msg) => onProgress?.(msg));
