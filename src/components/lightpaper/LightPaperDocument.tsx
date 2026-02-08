@@ -1574,28 +1574,25 @@ export function LightPaperDocument({
 
   // Color picker function
   const handleCanvasClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isColorPickerActive || !editorRef.current || !selectedTextBoxId) return;
-
-    // Create a temporary canvas to capture the color
-    const target = e.target as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-
-    // Use html2canvas or similar approach - for now, we'll use a simple approach
-    // In a real implementation, you'd want to use html2canvas to capture the exact pixel
-    const tempCanvas = document.createElement('canvas');
-    const ctx = tempCanvas.getContext('2d');
-    
-    if (ctx) {
-      // Get computed background color of clicked element
+    // Color picker logic
+    if (isColorPickerActive && editorRef.current && selectedTextBoxId) {
+      const target = e.target as HTMLElement;
       const computedStyle = window.getComputedStyle(target);
       const bgColor = computedStyle.backgroundColor;
-      
       updateTextBox(selectedTextBoxId, { backgroundColor: bgColor });
       toast.success(`Color picked: ${bgColor}`);
       setIsColorPickerActive(false);
       setSelectedTextBoxId(null);
+      return;
+    }
+
+    // Genius AI bubble trigger — only in edit mode, and only if bubble not already showing
+    if (!viewMode && !geniusBubblePos) {
+      const pageEl = (e.currentTarget as HTMLElement);
+      const rect = pageEl.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      setGeniusBubblePos({ x, y });
     }
   };
   
@@ -2531,15 +2528,6 @@ export function LightPaperDocument({
                     if (currentProjectId && !viewMode) {
                       updateCursor(e.clientX, e.clientY);
                     }
-                    // Trigger Genius AI bubble on canvas click (only if not already showing)
-                    if (!viewMode && !geniusBubblePos) {
-                      const rect = (e.currentTarget as HTMLElement).closest('.page')?.getBoundingClientRect();
-                      if (rect) {
-                        const x = ((e.clientX - rect.left) / rect.width) * 100;
-                        const y = ((e.clientY - rect.top) / rect.height) * 100;
-                        setGeniusBubblePos({ x, y });
-                      }
-                    }
                   }}
                 />
               )}
@@ -2563,17 +2551,6 @@ export function LightPaperDocument({
               isEditMode={isEditingText && !viewMode}
             />
             
-            {/* Genius AI Bubble - inline on canvas */}
-            <GeniusAIBubble
-              triggerPosition={geniusBubblePos}
-              isDarkMode={isDarkMode}
-              onDismiss={() => setGeniusBubblePos(null)}
-              onInsertText={(html) => {
-                if (!editorRef.current || viewMode) return;
-                editorRef.current.innerHTML += html;
-                setGeniusBubblePos(null);
-              }}
-            />
             
             {/* Overlay Text Boxes in View Mode */}
             {viewMode && overlayTextBoxes.map(box => (
@@ -2613,6 +2590,29 @@ export function LightPaperDocument({
               </div>
             )}
           </div>
+          
+          {/* Genius AI Bubble - rendered outside page to avoid overflow:hidden clipping */}
+          {geniusBubblePos && (
+            <div className="fixed z-[200] no-print" style={{
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%, -50%)',
+              pointerEvents: 'none',
+            }}>
+              <div style={{ pointerEvents: 'auto' }}>
+                <GeniusAIBubble
+                  triggerPosition={geniusBubblePos}
+                  isDarkMode={isDarkMode}
+                  onDismiss={() => setGeniusBubblePos(null)}
+                  onInsertText={(html) => {
+                    if (!editorRef.current || viewMode) return;
+                    editorRef.current.innerHTML += html;
+                    setGeniusBubblePos(null);
+                  }}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Comments Sidebar */}
