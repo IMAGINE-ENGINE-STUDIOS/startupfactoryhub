@@ -158,6 +158,31 @@ export function LightPaperDocument({
   const [isEditingText, setIsEditingText] = useState(false);
   const [pages, setPages] = useState<string[]>(['']);
   const [showPagePanel, setShowPagePanel] = useState(false);
+
+  // Scale PDF reconstructed content to fit within the editor container
+  const scalePdfContentToFit = useCallback((container: HTMLDivElement | null) => {
+    if (!container) return;
+    const innerContent = container.querySelector('.pdf-inner-content') as HTMLElement;
+    if (!innerContent) return;
+    
+    const pageContentEl = container.closest('.page-content') as HTMLElement;
+    if (!pageContentEl) return;
+    
+    const availableWidth = pageContentEl.clientWidth;
+    const availableHeight = pageContentEl.clientHeight;
+    
+    const vpWidth = parseFloat(innerContent.getAttribute('data-viewport-width') || '0');
+    const vpHeight = parseFloat(innerContent.getAttribute('data-viewport-height') || '0');
+    
+    if (vpWidth <= 0 || vpHeight <= 0) return;
+    
+    const scaleX = availableWidth / vpWidth;
+    const scaleY = availableHeight / vpHeight;
+    const scale = Math.min(scaleX, scaleY, 1.0);
+    
+    innerContent.style.transform = `scale(${scale})`;
+    innerContent.style.transformOrigin = 'top left';
+  }, []);
   const [geniusBubblePos, setGeniusBubblePos] = useState<{ x: number; y: number } | null>(null);
   const {
     saveProject
@@ -316,13 +341,59 @@ export function LightPaperDocument({
     const pages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
     const pageCount = pages.length > 0 ? pages.length : 1;
     
+    // Try to detect and set page format from the content metadata
+    // Check if the HTML contains data attributes with format info
+    const firstPage = doc.querySelector('.pdf-page-reconstructed');
+    if (firstPage) {
+      const innerContent = firstPage.querySelector('.pdf-inner-content');
+      if (innerContent) {
+        const vpWidth = parseFloat(innerContent.getAttribute('data-viewport-width') || '0');
+        const vpHeight = parseFloat(innerContent.getAttribute('data-viewport-height') || '0');
+        if (vpWidth > 0 && vpHeight > 0) {
+          // Viewport is at scale 1.5, so original PDF dimensions at 72dpi
+          const pdfWidthPt = vpWidth / 1.5;
+          const pdfHeightPt = vpHeight / 1.5;
+          const pdfWidthMm = (pdfWidthPt / 72) * 25.4;
+          const pdfHeightMm = (pdfHeightPt / 72) * 25.4;
+          
+          // Match to closest page format
+          const tolerance = 10;
+          const formats: Record<string, { w: number; h: number }> = {
+            letter: { w: 215.9, h: 279.4 },
+            legal: { w: 215.9, h: 355.6 },
+            a4: { w: 210, h: 297 },
+            a3: { w: 297, h: 420 },
+            a5: { w: 148, h: 210 },
+            tabloid: { w: 279.4, h: 431.8 },
+          };
+          
+          for (const [name, dims] of Object.entries(formats)) {
+            if ((Math.abs(pdfWidthMm - dims.w) < tolerance && Math.abs(pdfHeightMm - dims.h) < tolerance) ||
+                (Math.abs(pdfWidthMm - dims.h) < tolerance && Math.abs(pdfHeightMm - dims.w) < tolerance)) {
+              setPageFormat(name as PageFormat);
+              if (pdfWidthMm > pdfHeightMm) {
+                setOrientation('landscape');
+              } else {
+                setOrientation('portrait');
+              }
+              break;
+            }
+          }
+        }
+      }
+    }
+    
     setDocumentContent(uploadedContent.content);
     setTotalPages(pageCount);
     setCurrentPage(1);
     
-    // Load first page or full content
+    // Load first page - apply CSS scaling to fit the page container
     if (pages.length > 0) {
       editorRef.current.innerHTML = pages[0].outerHTML;
+      // Apply scaling after DOM update
+      requestAnimationFrame(() => {
+        scalePdfContentToFit(editorRef.current);
+      });
     } else {
       editorRef.current.innerHTML = uploadedContent.content;
     }
@@ -383,13 +454,17 @@ export function LightPaperDocument({
         const currentPageElement = pages[currentPage - 1];
         if (currentPageElement) {
           editorRef.current.innerHTML = currentPageElement.outerHTML;
+          // Apply CSS scaling for PDF pages
+          requestAnimationFrame(() => {
+            scalePdfContentToFit(editorRef.current);
+          });
         }
       } else {
         // No structured pages, display all content
         editorRef.current.innerHTML = documentContent;
       }
     }
-  }, [documentContent, currentPage]);
+  }, [documentContent, currentPage, scalePdfContentToFit]);
 
   // Load project and versions when selectedProject changes
   useEffect(() => {

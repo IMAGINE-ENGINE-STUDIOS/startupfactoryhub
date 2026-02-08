@@ -293,26 +293,18 @@ export async function parsePDF(
   
   const pdf = await loadingTask.promise;
   const totalPages = pdf.numPages;
-  
-  // Process all pages
   const maxPages = totalPages;
   
   onProgress?.(`PDF has ${totalPages} pages. Processing all pages...`);
   
-  // Get first page to calculate optimal scale
+  // Get first page to detect format and calculate scale
   const firstPage = await pdf.getPage(1);
   const firstViewport = firstPage.getViewport({ scale: 1.0 });
   
-  // Calculate scale to fit within canvas (with padding)
-  const availableWidth = CANVAS_WIDTH_PX - (2 * PADDING_PX);
-  const availableHeight = CANVAS_HEIGHT_PX - (2 * PADDING_PX);
+  // Use a fixed render scale for quality, then CSS will fit it to the container
+  const renderScale = 1.5;
   
-  // Calculate scale to fit within container (not fixed canvas)
-  const scaleX = availableWidth / firstViewport.width;
-  const scaleY = availableHeight / firstViewport.height;
-  const optimalScale = Math.min(scaleX, scaleY, 2.5); // Reduce from 6.0 to 2.5 for better fit
-  
-  onProgress?.(`Rendering at scale ${optimalScale.toFixed(2)}...`, 0, maxPages);
+  onProgress?.(`Rendering at scale ${renderScale.toFixed(2)}...`, 0, maxPages);
   
   let htmlPages: string[] = [];
   let hasImages = false;
@@ -330,20 +322,17 @@ export async function parsePDF(
       
       onProgress?.(`Rendering page ${pageNum}/${maxPages}...`, pageNum, maxPages);
       
-      batchPromises.push(renderPDFPageWithText(pdf, pageNum, optimalScale));
+      batchPromises.push(renderPDFPageWithText(pdf, pageNum, renderScale));
     }
     
     const batchResults = await Promise.all(batchPromises);
     htmlPages.push(...batchResults);
     
-    // Check if any page has images
     batchResults.forEach(pageHtml => {
       if (pageHtml.includes('<img') || pageHtml.includes('<svg')) {
         hasImages = true;
       }
     });
-    
-    // No delay needed - modern browsers handle this efficiently
   }
   
   // Extract text from all pages for search
@@ -368,7 +357,7 @@ export async function parsePDF(
       detectedFormat,
       dimensions: { width: firstViewport.width, height: firstViewport.height }
     },
-    pages: htmlPages, // Individual page HTML strings
+    pages: htmlPages,
   };
 }
 
@@ -606,14 +595,6 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
   const page = await pdf.getPage(pageNum);
   const viewport = page.getViewport({ scale });
   
-  // Calculate scale to fit US Letter (21.59cm x 27.94cm)
-  const targetWidth = CANVAS_WIDTH_PX - (2 * PADDING_PX); // Available width with padding
-  const targetHeight = CANVAS_HEIGHT_PX - (2 * PADDING_PX); // Available height with padding
-  
-  const scaleX = targetWidth / viewport.width;
-  const scaleY = targetHeight / viewport.height;
-  const contentScale = Math.min(scaleX, scaleY, 1.0); // Don't upscale
-  
   // Extract ALL components in parallel for efficiency
   const [
     textContent,
@@ -642,22 +623,22 @@ async function renderPDFPageWithText(pdf: pdfjsLib.PDFDocumentProxy, pageNum: nu
     renderTableAsHTML(table, scale, 10 + index)
   ).join('');
   
-  // Return fully reconstructed page scaled to fit Letter size
+  // Return fully reconstructed page using percentage-based scaling
+  // The outer div fills the page container, the inner div preserves aspect ratio
   return `
-    <div class="pdf-page-reconstructed" style="
+    <div class="pdf-page-reconstructed" contenteditable="false" style="
       position: relative;
       width: 100%;
       height: 100%;
       background: white;
       overflow: hidden;
     ">
-      <div style="
-        transform: scale(${contentScale});
-        transform-origin: top left;
+      <div class="pdf-inner-content" style="
         width: ${viewport.width}px;
         height: ${viewport.height}px;
         position: relative;
-      ">
+        transform-origin: top left;
+      " data-viewport-width="${viewport.width}" data-viewport-height="${viewport.height}">
         <!-- Shapes layer: Vector graphics with colors, fills, strokes -->
         ${shapesHTML}
         
