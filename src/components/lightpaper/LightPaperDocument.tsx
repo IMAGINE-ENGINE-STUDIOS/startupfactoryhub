@@ -2266,10 +2266,22 @@ export function LightPaperDocument({
                 variant={viewMode ? "secondary" : "ghost"}
                 size="sm" 
                 className="h-8 w-8 p-0" 
-                onClick={() => setViewMode(!viewMode)}
-                title={viewMode ? "Switch to Edit Mode" : "Switch to View Mode"}
+                onClick={() => {
+                  if (viewMode && viewModeImages.length > 0) {
+                    // For uploaded files: toggle edit overlay instead of destroying view
+                    setEditMode(!editMode);
+                  } else {
+                    setViewMode(!viewMode);
+                  }
+                }}
+                title={viewMode && viewModeImages.length > 0 
+                  ? (editMode ? "Switch to View Mode" : "Switch to Edit Mode") 
+                  : (viewMode ? "Switch to Edit Mode" : "Switch to View Mode")}
               >
-                {viewMode ? <Edit3 className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {viewMode && viewModeImages.length > 0
+                  ? (editMode ? <Eye className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />)
+                  : (viewMode ? <Edit3 className="h-4 w-4" /> : <Eye className="h-4 w-4" />)
+                }
               </Button>
               {viewMode && (
                 <>
@@ -2444,7 +2456,13 @@ export function LightPaperDocument({
                   setPageFormat(formats[(currentIndex + 1) % formats.length]);
                 }, priority: "low" },
                 { icon: FlipHorizontal, label: "Rotate", onClick: () => setOrientation(orientation === "portrait" ? "landscape" : "portrait"), priority: "low" },
-                { icon: viewMode ? Edit3 : Eye, label: viewMode ? "Edit" : "View", onClick: () => setViewMode(!viewMode), priority: "medium" },
+                { icon: viewMode ? Edit3 : Eye, label: viewMode ? "Edit" : "View", onClick: () => {
+                  if (viewMode && viewModeImages.length > 0) {
+                    setEditMode(!editMode);
+                  } else {
+                    setViewMode(!viewMode);
+                  }
+                }, priority: "medium" },
               ]
             },
             {
