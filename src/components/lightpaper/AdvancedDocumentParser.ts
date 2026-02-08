@@ -168,16 +168,21 @@ async function parseDocxAsImages(
 ): Promise<ParsedContent> {
   onProgress?.('Rendering DOCX document...', 0, 1);
   
-  // Create hidden container - let docx-preview control the width
+  // US Letter dimensions at 96 DPI
+  const PAGE_WIDTH_PX = 816;  // 8.5" * 96dpi
+  const PAGE_HEIGHT_PX = 1056; // 11" * 96dpi
+  
+  // Create hidden container with explicit page width for proper layout
   const container = document.createElement('div');
   container.style.position = 'absolute';
   container.style.left = '-9999px';
   container.style.top = '0';
+  container.style.width = `${PAGE_WIDTH_PX}px`;
   container.style.zIndex = '-1';
   document.body.appendChild(container);
 
   try {
-    // Render DOCX with page breaks enabled and wrapper
+    // Render DOCX with page breaks enabled
     await renderAsync(file, container, undefined, {
       className: 'docx',
       inWrapper: true,
@@ -198,68 +203,100 @@ async function parseDocxAsImages(
 
     onProgress?.('Detecting pages...', 0, 1);
 
-    // docx-preview with breakPages:true and inWrapper:true creates:
-    // <div class="docx-wrapper"> containing <section class="docx"> elements per page
-    // Try multiple selectors to find page sections
+    // Try to find page sections from docx-preview
     let pageDivs: HTMLElement[] = [];
     
-    // Try section.docx first (standard docx-preview output)
     const sections = container.querySelectorAll('section.docx');
-    if (sections.length > 0) {
+    if (sections.length > 1) {
       pageDivs = Array.from(sections) as HTMLElement[];
+      console.log(`[DOCX Parser] Found ${pageDivs.length} section.docx elements`);
     }
     
-    // Fallback: try any section inside the wrapper
-    if (pageDivs.length === 0) {
+    if (pageDivs.length <= 1) {
       const wrapperSections = container.querySelectorAll('.docx-wrapper > section');
-      if (wrapperSections.length > 0) {
+      if (wrapperSections.length > 1) {
         pageDivs = Array.from(wrapperSections) as HTMLElement[];
+        console.log(`[DOCX Parser] Found ${pageDivs.length} wrapper sections`);
       }
     }
-    
-    // Fallback: try the wrapper itself as a single page
-    if (pageDivs.length === 0) {
-      const wrapper = container.querySelector('.docx-wrapper') as HTMLElement;
-      if (wrapper) {
-        pageDivs = [wrapper];
-      }
-    }
-    
-    // Final fallback: use the container
-    if (pageDivs.length === 0) {
-      pageDivs = [container];
-    }
-    
-    const totalPages = pageDivs.length;
-    onProgress?.(`Capturing ${totalPages} pages as images...`, 0, totalPages);
 
-    const images: string[] = [];
     const html2canvasModule = (await import('html2canvas')).default;
+    const images: string[] = [];
 
-    for (let i = 0; i < pageDivs.length; i++) {
-      onProgress?.(`Capturing page ${i + 1}/${totalPages}...`, i + 1, totalPages);
-      
-      const pageEl = pageDivs[i] as HTMLElement;
-      
-      // Don't force white background - preserve the document's actual backgrounds
-      pageEl.style.display = 'block';
-      
-      await new Promise(resolve => setTimeout(resolve, 200));
-      
-      try {
-        const canvas = await html2canvasModule(pageEl, {
-          scale: 2,
-          useCORS: true,
-          allowTaint: true,
-          backgroundColor: null, // CRITICAL: null preserves original backgrounds (black, images, etc.)
-          logging: false,
-          width: pageEl.scrollWidth || 816,
-          height: pageEl.scrollHeight || 1056,
-        });
+    if (pageDivs.length > 1) {
+      // Multiple sections found - capture each as a page
+      const totalPages = pageDivs.length;
+      onProgress?.(`Capturing ${totalPages} pages as images...`, 0, totalPages);
+
+      for (let i = 0; i < pageDivs.length; i++) {
+        onProgress?.(`Capturing page ${i + 1}/${totalPages}...`, i + 1, totalPages);
+        const pageEl = pageDivs[i];
+        pageEl.style.display = 'block';
+        await new Promise(resolve => setTimeout(resolve, 200));
         
-        images.push(canvas.toDataURL('image/png'));
-      } catch (err) {
-        console.error(`Failed to capture DOCX page ${i + 1}:`, err);
+        try {
+          const canvas = await html2canvasModule(pageEl, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: null,
+            logging: false,
+            width: pageEl.scrollWidth || PAGE_WIDTH_PX,
+            height: pageEl.scrollHeight || PAGE_HEIGHT_PX,
+          });
+          images.push(canvas.toDataURL('image/png'));
+        } catch (err) {
+          console.error(`Failed to capture DOCX page ${i + 1}:`, err);
+        }
+      }
+    } else {
+      // Single section or no sections - manually slice into page-sized chunks
+      const renderTarget = container.querySelector('.docx-wrapper') as HTMLElement || container;
+      const totalHeight = renderTarget.scrollHeight;
+      const totalWidth = renderTarget.scrollWidth || PAGE_WIDTH_PX;
+      const numPages = Math.max(1, Math.ceil(totalHeight / PAGE_HEIGHT_PX));
+      
+      console.log(`[DOCX Parser] Manual page split: ${totalHeight}px total height -> ${numPages} pages at ${PAGE_HEIGHT_PX}px each`);
+      onProgress?.(`Splitting into ${numPages} pages...`, 0, numPages);
+
+      // Capture the full content as one large canvas, then slice it
+      const fullCanvas = await html2canvasModule(renderTarget, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: totalWidth,
+        height: totalHeight,
+        windowWidth: totalWidth,
+        windowHeight: totalHeight,
+      });
+
+      // Slice the full canvas into page-sized chunks
+      const scaleFactor = 2; // matches html2canvas scale
+      const sliceWidth = totalWidth * scaleFactor;
+      const sliceHeight = PAGE_HEIGHT_PX * scaleFactor;
+
+      for (let i = 0; i < numPages; i++) {
+        onProgress?.(`Capturing page ${i + 1}/${numPages}...`, i + 1, numPages);
+        
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = sliceWidth;
+        const remainingHeight = fullCanvas.height - (i * sliceHeight);
+        pageCanvas.height = Math.min(sliceHeight, remainingHeight);
+        
+        const ctx = pageCanvas.getContext('2d')!;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+        ctx.drawImage(
+          fullCanvas,
+          0, i * sliceHeight,
+          sliceWidth, pageCanvas.height,
+          0, 0,
+          pageCanvas.width, pageCanvas.height
+        );
+        
+        images.push(pageCanvas.toDataURL('image/png'));
       }
     }
 
@@ -270,7 +307,7 @@ async function parseDocxAsImages(
       throw new Error('Failed to render DOCX pages as images');
     }
 
-    onProgress?.('View Mode rendering complete!', totalPages, totalPages);
+    onProgress?.('View Mode rendering complete!', images.length, images.length);
 
     return {
       html: '',
