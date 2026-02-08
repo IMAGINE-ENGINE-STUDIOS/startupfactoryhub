@@ -2538,20 +2538,21 @@ export function LightPaperDocument({
             overflow: hidden;
             position: relative;
             box-sizing: border-box;
-            transform: scale(${zoomLevel});
-            transform-origin: top center;
-            transition: transform 0.2s ease;
             margin: 0 auto;
             flex-shrink: 0;
           }
           
           .page:not(.view-mode-page) {
+            transform: scale(${zoomLevel});
+            transform-origin: top center;
+            transition: transform 0.2s ease;
             height: ${getPageDimensions().height}cm;
           }
           
           .page.view-mode-page {
             height: auto;
             overflow: visible;
+            margin-bottom: 0 !important;
           }
           
           .page-content {
@@ -2824,7 +2825,12 @@ export function LightPaperDocument({
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
-          overflow: 'visible'
+          overflow: 'visible',
+          ...(viewMode && viewModeImages.length > 0 ? {
+            transform: `scale(${zoomLevel})`,
+            transformOrigin: 'top center',
+            transition: 'transform 0.2s ease',
+          } : {})
         }}>
           {viewMode && viewModeImages.length > 0 ? (
             // VIEW MODE: Each image gets its own page container for proper sizing
