@@ -130,6 +130,7 @@ export function LightPaperDocument({
   const [signaturePreviewPosition, setSignaturePreviewPosition] = useState<{x: number, y: number} | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const autoSaveProjectRef = useRef<NodeJS.Timeout>();
   const [showSearchDialog, setShowSearchDialog] = useState(false);
   const [showTextReader, setShowTextReader] = useState(false);
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
@@ -717,6 +718,38 @@ export function LightPaperDocument({
     }, 2000); // Save after 2 seconds of inactivity
   };
 
+  // Auto-save project to database (overwrites existing file)
+  const autoSaveProject = useCallback(() => {
+    if (!currentProjectId || !user) return;
+    if (autoSaveProjectRef.current) {
+      clearTimeout(autoSaveProjectRef.current);
+    }
+    autoSaveProjectRef.current = setTimeout(async () => {
+      try {
+        setIsSaving(true);
+        const content = {
+          html: editorRef.current?.innerHTML || documentContent || "",
+          pages,
+          font: selectedFont,
+          size: selectedSize,
+          darkMode: isDarkMode,
+          currentPage,
+          totalPages: pages.length,
+          pageFormat,
+          orientation,
+          viewMode,
+          overlayTextBoxes
+        };
+        await saveProject(projectTitle, "document", content, currentProjectId);
+        setLastSaved(new Date());
+      } catch (err) {
+        console.error('Auto-save failed:', err);
+      } finally {
+        setIsSaving(false);
+      }
+    }, 3000); // Auto-save after 3s of inactivity
+  }, [currentProjectId, user, documentContent, pages, selectedFont, selectedSize, isDarkMode, currentPage, pageFormat, orientation, viewMode, overlayTextBoxes, projectTitle, saveProject]);
+
   // Auto-page creation: detect when content overflows the page
   const checkAndHandleOverflow = useCallback(() => {
     const editor = editorRef.current;
@@ -815,6 +848,7 @@ export function LightPaperDocument({
       });
       
       autoSaveVersion(html);
+      autoSaveProject();
 
       // Check for overflow after DOM settles
       setTimeout(checkAndHandleOverflow, 300);
@@ -847,8 +881,11 @@ export function LightPaperDocument({
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
+      if (autoSaveProjectRef.current) {
+        clearTimeout(autoSaveProjectRef.current);
+      }
     };
-  }, [isHighlighterActive, selectedHighlight, checkAndHandleOverflow]);
+  }, [isHighlighterActive, selectedHighlight, checkAndHandleOverflow, autoSaveProject]);
 
   // Navigate version history from database
   const goToPreviousVersion = async () => {
@@ -909,7 +946,7 @@ export function LightPaperDocument({
     { key: 'b', ctrl: true, handler: () => execCommand('bold'), description: 'Bold' },
     { key: 'i', ctrl: true, handler: () => execCommand('italic'), description: 'Italic' },
     { key: 'u', ctrl: true, handler: () => execCommand('underline'), description: 'Underline' },
-    { key: 's', ctrl: true, handler: (e) => { e.preventDefault(); setShowSaveDialog(true); }, description: 'Save' },
+    { key: 's', ctrl: true, handler: (e) => { e.preventDefault(); handleQuickSave(); }, description: 'Save' },
     { key: 'z', ctrl: true, handler: () => goToPreviousVersion(), description: 'Undo' },
     { key: 'y', ctrl: true, handler: () => goToNextVersion(), description: 'Redo' },
     { key: 'f', ctrl: true, handler: (e) => { e.preventDefault(); setShowSearchDialog(true); }, description: 'Find' },
@@ -1393,6 +1430,41 @@ export function LightPaperDocument({
       setShowCalculator(false);
     }
   };
+  // Build content object for saving
+  const buildSaveContent = () => ({
+    html: editorRef.current?.innerHTML || documentContent || "",
+    pages,
+    font: selectedFont,
+    size: selectedSize,
+    darkMode: isDarkMode,
+    currentPage,
+    totalPages: pages.length,
+    pageFormat,
+    orientation,
+    viewMode,
+    overlayTextBoxes
+  });
+
+  // Quick save: overwrite existing or show dialog for new
+  const handleQuickSave = async () => {
+    if (currentProjectId) {
+      try {
+        setIsSaving(true);
+        const content = buildSaveContent();
+        await saveProject(projectTitle, "document", content, currentProjectId);
+        setLastSaved(new Date());
+        toast.success("Document saved");
+      } catch (error) {
+        toast.error("Failed to save document");
+      } finally {
+        setIsSaving(false);
+      }
+    } else {
+      setShowSaveDialog(true);
+    }
+  };
+
+  // Save (overwrite or create new)
   const handleSaveToAccount = async () => {
     if (!projectTitle.trim()) {
       toast.error("Please enter a document title");
@@ -1401,20 +1473,7 @@ export function LightPaperDocument({
 
     try {
       setIsSaving(true);
-      // Save full document content including all pages
-      const content = {
-        html: documentContent || editorRef.current?.innerHTML || "",
-        pages: pages,
-        font: selectedFont,
-        size: selectedSize,
-        darkMode: isDarkMode,
-        currentPage,
-        totalPages: pages.length,
-        pageFormat,
-        orientation,
-        viewMode,
-        overlayTextBoxes
-      };
+      const content = buildSaveContent();
       const result = await saveProject(projectTitle, "document", content, currentProjectId || undefined);
       if (result) {
         setCurrentProjectId(result.id);
@@ -1428,14 +1487,41 @@ export function LightPaperDocument({
             await supabase.from('document_versions').delete().eq('user_id', user.id).eq('session_id', sessionId).eq('is_temporary', true);
             setVersions([]);
             setCurrentVersionIndex(-1);
-            toast.success("Document saved and temporary versions cleared");
           }
         } catch (error) {
           console.error('Error cleaning up versions:', error);
         }
+        toast.success("Document saved");
       }
     } catch (error) {
       toast.error("Failed to save document");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Save as new file (creates a copy)
+  const handleSaveAsNew = async () => {
+    if (!projectTitle.trim()) {
+      toast.error("Please enter a document title");
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      const copyTitle = `Copy - ${projectTitle}`;
+      const content = buildSaveContent();
+      // Pass undefined as projectId to force creating a new record
+      const result = await saveProject(copyTitle, "document", content, undefined);
+      if (result) {
+        setCurrentProjectId(result.id);
+        setProjectTitle(copyTitle);
+        setLastSaved(new Date());
+        setShowSaveDialog(false);
+        toast.success(`Saved as "${copyTitle}"`);
+      }
+    } catch (error) {
+      toast.error("Failed to save copy");
     } finally {
       setIsSaving(false);
     }
@@ -2269,7 +2355,7 @@ export function LightPaperDocument({
             },
           ]}
           rightActions={[
-            { icon: Download, label: "Save", onClick: handleExportPDF, priority: "high" as const, variant: "default" as const, disabled: isSaving },
+            { icon: Save, label: currentProjectId ? (isSaving ? "Saving..." : "Save") : "Save", onClick: handleQuickSave, priority: "high" as const, variant: "default" as const, disabled: isSaving },
             { icon: MessageSquare, label: "Comments", onClick: () => setShowComments(!showComments), priority: "high" as const, variant: showComments ? ("default" as const) : ("outline" as const) },
             ...(viewMode ? [
               { icon: Plus, label: "Add Box", onClick: addTextBox, priority: "high" as const },
@@ -2298,6 +2384,18 @@ export function LightPaperDocument({
             <span className="flex items-center gap-1 text-accent font-medium animate-pulse">
               <Pipette className="h-3 w-3" />
               Click element to pick color
+            </span>
+          )}
+          {lastSaved && (
+            <span className="flex items-center gap-1 text-muted-foreground">
+              <Save className="h-3 w-3" />
+              {isSaving ? "Saving..." : `Saved ${lastSaved.toLocaleTimeString()}`}
+            </span>
+          )}
+          {currentProjectId && !lastSaved && (
+            <span className="flex items-center gap-1 text-muted-foreground">
+              <Save className="h-3 w-3" />
+              Auto-save on
             </span>
           )}
         </div>
@@ -2947,16 +3045,30 @@ export function LightPaperDocument({
       <Dialog open={showSaveDialog} onOpenChange={setShowSaveDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Save Document</DialogTitle>
+            <DialogTitle>{currentProjectId ? "Save Document" : "Save New Document"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="title">Document Title</Label>
               <Input id="title" value={projectTitle} onChange={e => setProjectTitle(e.target.value)} placeholder="Enter document title" />
             </div>
+            {lastSaved && (
+              <p className="text-xs text-muted-foreground">
+                Last saved: {lastSaved.toLocaleTimeString()}
+              </p>
+            )}
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={() => setShowSaveDialog(false)}>Cancel</Button>
-              <Button onClick={handleSaveToAccount}>Save</Button>
+              {currentProjectId && (
+                <Button variant="secondary" onClick={handleSaveAsNew}>
+                  <Save className="h-4 w-4 mr-1" />
+                  Save as New File
+                </Button>
+              )}
+              <Button onClick={handleSaveToAccount}>
+                <Save className="h-4 w-4 mr-1" />
+                {currentProjectId ? "Save" : "Save"}
+              </Button>
             </div>
           </div>
         </DialogContent>
