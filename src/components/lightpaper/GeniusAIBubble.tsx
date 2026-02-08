@@ -12,7 +12,25 @@ interface GeniusAIBubbleProps {
 
 type Phase = "idle" | "greeting" | "input" | "loading" | "done";
 
-const GREETING = "How can I help you?";
+const GREETINGS = [
+  "How can I help you?",
+  "What shall we write today?",
+  "Need a hand with something?",
+  "Ready when you are ✨",
+  "Got an idea? Let's go!",
+  "What's on your mind?",
+  "Let's create something great!",
+  "I'm here if you need me!",
+  "Want me to draft something?",
+  "Shall I write or edit?",
+  "Let's get creative!",
+  "What would you like to work on?",
+  "I can help with that!",
+  "Tell me what you need 📝",
+  "Let's make it happen!",
+];
+
+const getRandomGreeting = () => GREETINGS[Math.floor(Math.random() * GREETINGS.length)];
 
 export default function GeniusAIBubble({
   onInsertText,
@@ -40,6 +58,7 @@ export default function GeniusAIBubble({
     }
 
     // Reset and start greeting
+    const greeting = getRandomGreeting();
     setPhase("greeting");
     setOpacity(1);
     setDisplayedGreeting("");
@@ -47,24 +66,24 @@ export default function GeniusAIBubble({
     // Typing animation for greeting
     let i = 0;
     const type = () => {
-      if (i < GREETING.length) {
-        setDisplayedGreeting(GREETING.slice(0, i + 1));
+      if (i < greeting.length) {
+        setDisplayedGreeting(greeting.slice(0, i + 1));
         i++;
         greetingTimerRef.current = setTimeout(type, 50 + Math.random() * 30);
       } else {
-        // After greeting finishes, wait then start fading
+        // After greeting finishes, wait 8 seconds before fading
         fadeTimerRef.current = setTimeout(() => {
           // Only fade out if still in greeting phase (user didn't click)
           setPhase((prev) => {
             if (prev === "greeting") {
               // Start slow fade
               setOpacity(0);
-              setTimeout(onDismiss, 1500);
+              setTimeout(onDismiss, 2000);
               return "idle";
             }
             return prev;
           });
-        }, 4000);
+        }, 8000);
       }
     };
     greetingTimerRef.current = setTimeout(type, 300);
