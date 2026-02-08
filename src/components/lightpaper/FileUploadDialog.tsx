@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 interface FileUploadDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onFileLoaded: (content: string, title: string) => void;
+  onFileLoaded: (content: string, title: string, metadata?: { detectedFormat?: string; fileType?: string }) => void;
 }
 
 export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDialogProps) {
@@ -103,16 +103,16 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
       setProgressValue(95);
       
       // Pass the content to parent based on mode
-      if (uploadMode === "view" && result.images) {
-        // View Mode: Pass images as JSON
+      if (result.images && result.images.length > 0) {
+        // Image-based rendering (View Mode or PDF edit mode)
         onFileLoaded(JSON.stringify({
           mode: 'view',
           images: result.images,
           metadata: result.metadata
-        }), title);
+        }), title, { detectedFormat: result.metadata.detectedFormat, fileType: result.metadata.fileType });
       } else {
-        // Edit Mode: Pass HTML content
-        onFileLoaded(result.html, title);
+        // Edit Mode: Pass HTML content with format metadata
+        onFileLoaded(result.html, title, { detectedFormat: result.metadata.detectedFormat, fileType: result.metadata.fileType });
       }
       
       setProgressValue(100);

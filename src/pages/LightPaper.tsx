@@ -28,7 +28,7 @@ export default function LightPaper() {
   const [showQuickNav, setShowQuickNav] = useState(false);
   const [isTabLoading, setIsTabLoading] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
-  const [uploadedContent, setUploadedContent] = useState<{content: string, title: string} | null>(null);
+  const [uploadedContent, setUploadedContent] = useState<{content: string, title: string, metadata?: { detectedFormat?: string; fileType?: string }} | null>(null);
 
 
   
@@ -205,8 +205,8 @@ export default function LightPaper() {
       <FileUploadDialog
         isOpen={showUploadDialog}
         onClose={() => setShowUploadDialog(false)}
-        onFileLoaded={(content, title) => {
-          setUploadedContent({ content, title });
+        onFileLoaded={(content, title, metadata) => {
+          setUploadedContent({ content, title, metadata });
           setActiveTab('document');
         }}
       />
