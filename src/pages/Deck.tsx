@@ -895,118 +895,103 @@ export default function Deck() {
 
         {/* NEW SLIDE: The Product */}
         <SlideWrapper>
-          <section className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
-            {/* Soft gradient background like the reference */}
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-200 via-slate-100 to-slate-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 print:hidden" />
-            <div className="absolute inset-[2%] border-2 border-emerald-500/20 rounded-lg print:border-gray-300" />
+          <section className="absolute inset-0 flex items-center justify-center overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+            {/* Neutral gray background matching the reference */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-400/80 via-slate-300/90 to-slate-400/80 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 print:hidden" />
+            <div className="absolute inset-[2%] border-2 border-emerald-500/15 rounded-lg print:border-gray-300" />
             <TechGrid />
             <CornerAccents />
 
-            <div className="relative z-10 w-full max-w-[92%] mx-auto flex flex-col items-center">
-              {/* Title */}
-              <div className="flex items-center gap-3 mb-1">
+            <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-[4%]">
+              {/* Title at top */}
+              <div className="flex items-center gap-3 mb-0.5">
                 <IconBadge icon={Cpu} color="emerald" />
-                <h2 className="text-xl md:text-2xl font-bold text-slate-800 dark:text-white print:text-black">The Product</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-white print:text-black drop-shadow-lg">The Product</h2>
               </div>
-              <p className="text-sm text-emerald-600 dark:text-emerald-400 font-semibold text-center mb-1">All-in-One Startup Operating System</p>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 text-center mb-3 max-w-2xl">
-                A unified platform combining AI-powered tools, global resources, mentorship, and structured startup journeys.
-              </p>
+              <p className="text-xs text-emerald-300 font-semibold text-center mb-4 drop-shadow">All-in-One Startup Operating System</p>
 
-              {/* Floating mockup scene - matching the reference image */}
-              <div className="relative w-full flex items-end justify-center" style={{ height: '380px', perspective: '1800px' }}>
+              {/* Scene: Monitor on right, floating pages cascading upper-left */}
+              <div className="relative w-full flex-1 min-h-0" style={{ perspective: '2000px' }}>
 
-                {/* Floating page 1 - far left, tilted */}
+                {/* Floating page 1 - far upper left */}
                 <div 
-                  className="absolute rounded-md overflow-hidden shadow-[0_15px_50px_rgba(0,0,0,0.15)]"
+                  className="absolute bg-white rounded shadow-[0_8px_40px_rgba(0,0,0,0.25)] overflow-hidden"
                   style={{ 
-                    width: '200px', 
-                    left: '2%', 
-                    top: '8%',
-                    transform: 'rotateY(25deg) rotateZ(-4deg) translateZ(-40px)',
+                    width: '22%',
+                    aspectRatio: '16/10',
+                    left: '3%', 
+                    top: '5%',
+                    transform: 'rotateY(8deg) rotateZ(-3deg)',
                     zIndex: 1
                   }}
                 >
-                  <img src={mockupDashboard} alt="Dashboard View" className="w-full h-auto block rounded-md" />
-                  <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-emerald-500/90 flex items-center justify-center text-white text-[9px] font-bold shadow-lg">01</div>
-                  <div className="absolute bottom-2 left-2 text-[8px] font-semibold text-white drop-shadow-lg">Dashboard</div>
+                  <img src={mockupDashboard} alt="Dashboard" className="w-full h-full object-cover object-top" />
                 </div>
 
-                {/* Floating page 2 - left-center, slightly tilted */}
+                {/* Floating page 2 - upper left-center, overlapping */}
                 <div 
-                  className="absolute rounded-md overflow-hidden shadow-[0_15px_50px_rgba(0,0,0,0.15)]"
+                  className="absolute bg-white rounded shadow-[0_10px_45px_rgba(0,0,0,0.25)] overflow-hidden"
                   style={{ 
-                    width: '210px', 
-                    left: '18%', 
-                    top: '-2%',
-                    transform: 'rotateY(15deg) rotateZ(-2deg) translateZ(-20px)',
+                    width: '24%',
+                    aspectRatio: '16/10',
+                    left: '17%', 
+                    top: '0%',
+                    transform: 'rotateY(5deg) rotateZ(-1deg)',
                     zIndex: 2
                   }}
                 >
-                  <img src={mockupResources} alt="Resources View" className="w-full h-auto block rounded-md" />
-                  <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-cyan-500/90 flex items-center justify-center text-white text-[9px] font-bold shadow-lg">02</div>
-                  <div className="absolute bottom-2 left-2 text-[8px] font-semibold text-white drop-shadow-lg">Resources</div>
+                  <img src={mockupResources} alt="Resources" className="w-full h-full object-cover object-top" />
                 </div>
 
-                {/* Floating page 3 - right-center */}
+                {/* Floating page 3 - center, bridging to monitor */}
                 <div 
-                  className="absolute rounded-md overflow-hidden shadow-[0_15px_50px_rgba(0,0,0,0.15)]"
+                  className="absolute bg-white rounded shadow-[0_12px_50px_rgba(0,0,0,0.25)] overflow-hidden"
                   style={{ 
-                    width: '210px', 
-                    right: '18%', 
-                    top: '-2%',
-                    transform: 'rotateY(-15deg) rotateZ(2deg) translateZ(-20px)',
-                    zIndex: 2
+                    width: '24%',
+                    aspectRatio: '16/10',
+                    left: '33%', 
+                    top: '10%',
+                    transform: 'rotateY(-2deg) rotateZ(1deg)',
+                    zIndex: 3
                   }}
                 >
-                  <img src={mockupJourney} alt="Journey View" className="w-full h-auto block rounded-md" />
-                  <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-teal-500/90 flex items-center justify-center text-white text-[9px] font-bold shadow-lg">04</div>
-                  <div className="absolute bottom-2 left-2 text-[8px] font-semibold text-white drop-shadow-lg">Journey</div>
+                  <img src={mockupJourney} alt="Journey" className="w-full h-full object-cover object-top" />
                 </div>
 
-                {/* Floating page 4 - far right */}
+                {/* Main monitor - right side, like the reference */}
                 <div 
-                  className="absolute rounded-md overflow-hidden shadow-[0_15px_50px_rgba(0,0,0,0.15)]"
+                  className="absolute"
                   style={{ 
-                    width: '200px', 
                     right: '2%', 
-                    top: '8%',
-                    transform: 'rotateY(-25deg) rotateZ(4deg) translateZ(-40px)',
-                    zIndex: 1
+                    bottom: '4%',
+                    width: '42%',
+                    zIndex: 4
                   }}
                 >
-                  <img src={mockupDashboard} alt="Analytics View" className="w-full h-auto block rounded-md" />
-                  <div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-violet-500/90 flex items-center justify-center text-white text-[9px] font-bold shadow-lg">05</div>
-                  <div className="absolute bottom-2 left-2 text-[8px] font-semibold text-white drop-shadow-lg">Analytics</div>
+                  {/* Monitor bezel */}
+                  <div className="rounded-lg overflow-hidden bg-black p-[3px] shadow-[0_20px_70px_rgba(0,0,0,0.35)]">
+                    {/* Thin top bezel with camera dot */}
+                    <div className="bg-black flex justify-center py-[2px]">
+                      <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+                    </div>
+                    {/* Screen */}
+                    <div className="bg-white rounded-sm overflow-hidden">
+                      <img src={mockupDashboard} alt="Platform Dashboard" className="w-full h-auto block" />
+                    </div>
+                  </div>
+                  {/* Monitor stand - matching reference style */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-[6%] h-6 bg-gradient-to-b from-slate-400 to-slate-500 dark:from-slate-500 dark:to-slate-600" />
+                    <div className="w-[25%] h-[3px] bg-gradient-to-r from-transparent via-slate-400 to-transparent rounded-full" />
+                    <div className="w-[18%] h-[2px] bg-slate-400/60 rounded-full mt-[1px]" />
+                  </div>
                 </div>
 
-                {/* Center monitor - main showcase */}
-                <div 
-                  className="relative"
-                  style={{ zIndex: 4 }}
-                >
-                  {/* Monitor frame */}
-                  <div className="rounded-lg overflow-hidden border-2 border-slate-300 dark:border-slate-600 shadow-[0_25px_80px_rgba(0,0,0,0.2)] bg-white" style={{ width: '320px' }}>
-                    {/* Browser chrome */}
-                    <div className="bg-slate-100 dark:bg-slate-800 px-3 py-1.5 flex items-center gap-1.5 border-b border-slate-200 dark:border-slate-700">
-                      <div className="flex gap-1">
-                        <div className="w-2 h-2 rounded-full bg-red-400" />
-                        <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                        <div className="w-2 h-2 rounded-full bg-green-400" />
-                      </div>
-                      <div className="flex-1 mx-2">
-                        <div className="bg-white dark:bg-slate-700 rounded px-2 py-0.5 text-[7px] text-slate-500 dark:text-slate-400 text-center border border-slate-200 dark:border-slate-600">startupfactoryhub.lovable.app</div>
-                      </div>
-                    </div>
-                    <img src={mockupResources} alt="Platform" className="w-full h-auto block" />
-                  </div>
-                  {/* Monitor stand */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-8 h-8 bg-gradient-to-b from-slate-300 to-slate-400 dark:from-slate-600 dark:to-slate-700" style={{ clipPath: 'polygon(25% 0%, 75% 0%, 100% 100%, 0% 100%)' }} />
-                    <div className="w-20 h-1.5 bg-slate-400 dark:bg-slate-600 rounded-full -mt-0.5" />
-                  </div>
-                  {/* Number badge on monitor */}
-                  <div className="absolute top-8 left-3 w-6 h-6 rounded-full bg-emerald-500/90 flex items-center justify-center text-white text-[9px] font-bold shadow-lg">03</div>
+                {/* Feature labels */}
+                <div className="absolute bottom-2 left-3 flex gap-3 z-10">
+                  <div className="px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/40 rounded-full text-[7px] text-emerald-300 font-semibold backdrop-blur-sm">🌍 AI Dashboard</div>
+                  <div className="px-2 py-0.5 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-[7px] text-cyan-300 font-semibold backdrop-blur-sm">📍 Resources Map</div>
+                  <div className="px-2 py-0.5 bg-teal-500/20 border border-teal-500/40 rounded-full text-[7px] text-teal-300 font-semibold backdrop-blur-sm">🚀 Startup Journey</div>
                 </div>
               </div>
             </div>
