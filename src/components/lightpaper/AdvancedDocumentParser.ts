@@ -151,7 +151,118 @@ export async function parseDocumentAsImages(
     };
   }
   
-  throw new Error('View Mode currently only supports PDF files. Please use Edit Mode for DOCX files.');
+  if (fileType === 'docx') {
+    return parseDocxAsImages(file, onProgress);
+  }
+  
+  throw new Error('Unsupported file type for View Mode. Please upload a PDF or DOCX file.');
+}
+
+/**
+ * Parse DOCX as high-resolution page images using docx-preview + html2canvas
+ * Provides pixel-perfect rendering identical to the original document
+ */
+async function parseDocxAsImages(
+  file: File,
+  onProgress?: (message: string, current?: number, total?: number) => void
+): Promise<ParsedContent> {
+  onProgress?.('Rendering DOCX document...', 0, 1);
+  
+  // Create hidden container with proper A4/Letter dimensions
+  const container = document.createElement('div');
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  container.style.top = '0';
+  container.style.width = '816px'; // US Letter width at 96dpi
+  container.style.backgroundColor = 'white';
+  document.body.appendChild(container);
+
+  try {
+    // Render DOCX with page breaks enabled
+    await renderAsync(file, container, undefined, {
+      className: 'docx-content',
+      inWrapper: true,
+      ignoreWidth: false,
+      ignoreHeight: false,
+      ignoreFonts: false,
+      breakPages: true,
+      renderHeaders: true,
+      renderFooters: true,
+      renderFootnotes: true,
+      renderEndnotes: true,
+      useBase64URL: true,
+      debug: false,
+    });
+
+    // Wait for fonts and images to load
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    onProgress?.('Detecting pages...', 0, 1);
+
+    // Find page sections created by docx-preview with breakPages: true
+    // docx-preview wraps each page in a section element
+    const sections = container.querySelectorAll('section.docx');
+    const pageDivs = sections.length > 0 ? Array.from(sections) : [container];
+    const totalPages = pageDivs.length;
+    
+    onProgress?.(`Capturing ${totalPages} pages as images...`, 0, totalPages);
+
+    const images: string[] = [];
+    const html2canvasModule = (await import('html2canvas')).default;
+
+    for (let i = 0; i < pageDivs.length; i++) {
+      onProgress?.(`Capturing page ${i + 1}/${totalPages}...`, i + 1, totalPages);
+      
+      const pageEl = pageDivs[i] as HTMLElement;
+      
+      // Ensure the element is visible and properly sized
+      pageEl.style.display = 'block';
+      pageEl.style.backgroundColor = 'white';
+      
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
+      try {
+        const canvas = await html2canvasModule(pageEl, {
+          scale: 2, // High-res capture
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff',
+          logging: false,
+          width: pageEl.scrollWidth,
+          height: pageEl.scrollHeight,
+        });
+        
+        images.push(canvas.toDataURL('image/png'));
+      } catch (err) {
+        console.error(`Failed to capture DOCX page ${i + 1}:`, err);
+      }
+    }
+
+    // Clean up
+    document.body.removeChild(container);
+
+    if (images.length === 0) {
+      throw new Error('Failed to render DOCX pages as images');
+    }
+
+    onProgress?.('View Mode rendering complete!', totalPages, totalPages);
+
+    return {
+      html: '',
+      metadata: {
+        pageCount: images.length,
+        hasEditableText: false,
+        hasImages: true,
+        fileType: 'docx',
+        detectedFormat: 'letter',
+      },
+      images,
+      pages: []
+    };
+  } catch (error) {
+    document.body.removeChild(container);
+    throw error;
+  }
 }
 
 export interface ParsedContent {
