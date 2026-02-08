@@ -1196,13 +1196,12 @@ export default function Deck() {
               Compounding growth delivers <span className="text-emerald-400 font-semibold">8.6x revenue increase</span> over 5 years
             </p>
             
-            {/* Main Chart - Animated Bar Chart */}
+            {/* Main Chart - Bar Chart */}
             <div className="max-w-4xl w-full mb-3">
               <TechCard glowColor="emerald" className="p-4">
-                {/* Y-axis labels + bars */}
                 <div className="flex">
                   {/* Y-axis */}
-                  <div className="flex flex-col justify-between h-44 pr-2 text-right">
+                  <div className="flex flex-col justify-between h-48 pr-2 text-right shrink-0">
                     <span className="text-[8px] text-slate-500">$50M</span>
                     <span className="text-[8px] text-slate-500">$40M</span>
                     <span className="text-[8px] text-slate-500">$30M</span>
@@ -1211,49 +1210,48 @@ export default function Deck() {
                     <span className="text-[8px] text-slate-500">$0</span>
                   </div>
                   {/* Chart area */}
-                  <div className="flex-1 relative">
+                  <div className="flex-1 relative h-48 border-b border-l border-slate-700/40">
                     {/* Grid lines */}
-                    {[0, 20, 40, 60, 80, 100].map((p) => (
-                      <div key={p} className="absolute w-full border-t border-slate-700/30" style={{ bottom: `${p}%` }} />
+                    {[20, 40, 60, 80].map((p) => (
+                      <div key={p} className="absolute w-full border-t border-dashed border-slate-700/20" style={{ bottom: `${p}%` }} />
                     ))}
-                    {/* Bars */}
-                    <div className="flex items-end justify-around gap-3 h-44 relative z-10 px-2">
+                    {/* Bars container */}
+                    <div className="absolute inset-0 flex items-end justify-around px-4">
                       {[
-                        { year: "Year 1", revenue: "$5.34M", value: 5.34, color: "from-teal-600 to-teal-400", delay: "0.3s" },
-                        { year: "Year 2", revenue: "$9.65M", value: 9.65, color: "from-teal-500 to-cyan-400", delay: "0.5s" },
-                        { year: "Year 3", revenue: "$16.50M", value: 16.50, color: "from-cyan-500 to-cyan-400", delay: "0.7s" },
-                        { year: "Year 4", revenue: "$27.30M", value: 27.30, color: "from-cyan-500 to-emerald-400", delay: "0.9s" },
-                        { year: "Year 5", revenue: "$46.00M", value: 46.00, color: "from-emerald-500 to-emerald-400", delay: "1.1s" },
-                      ].map((item, i) => {
-                        const heightPercent = (item.value / 50) * 100;
-                        return (
-                          <div key={i} className="flex-1 flex flex-col items-center">
-                            <span className="text-[10px] md:text-xs font-bold text-emerald-400 mb-1">{item.revenue}</span>
-                            <div className="w-full flex justify-center" style={{ height: `${heightPercent}%` }}>
-                              <div
-                                className={`w-10 md:w-14 bg-gradient-to-t ${item.color} rounded-t-md relative overflow-hidden`}
-                                style={{
-                                  height: '100%',
-                                  animation: `growBarScale 1s ease-out ${item.delay} both`,
-                                  transformOrigin: 'bottom',
-                                }}
-                              >
-                                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0" />
-                                <div className="absolute top-0 left-0 right-0 h-0.5 bg-white/40" />
-                              </div>
-                            </div>
-                            <span className="text-[9px] md:text-[10px] text-slate-400 mt-1.5 font-medium">{item.year}</span>
-                            {/* Growth % indicator */}
-                            {i > 0 && (
-                              <span className="text-[8px] text-emerald-400/80 font-medium mt-0.5">
-                                +{Math.round(([5.34, 9.65, 16.5, 27.3, 46][i] / [5.34, 9.65, 16.5, 27.3, 46][i-1] - 1) * 100)}%
-                              </span>
-                            )}
+                        { year: "Y1", revenue: "$5.34M", value: 5.34, color: "bg-gradient-to-t from-teal-700 to-teal-400" },
+                        { year: "Y2", revenue: "$9.65M", value: 9.65, color: "bg-gradient-to-t from-teal-600 to-cyan-400" },
+                        { year: "Y3", revenue: "$16.50M", value: 16.50, color: "bg-gradient-to-t from-cyan-600 to-cyan-400" },
+                        { year: "Y4", revenue: "$27.30M", value: 27.30, color: "bg-gradient-to-t from-cyan-600 to-emerald-400" },
+                        { year: "Y5", revenue: "$46.00M", value: 46.00, color: "bg-gradient-to-t from-emerald-600 to-emerald-400" },
+                      ].map((item, i) => (
+                        <div key={i} className="flex flex-col items-center flex-1">
+                          <span className="text-[10px] md:text-xs font-bold text-emerald-400 mb-1">{item.revenue}</span>
+                          <div
+                            className={`w-12 md:w-16 ${item.color} rounded-t-md relative overflow-hidden shadow-lg shadow-emerald-500/10`}
+                            style={{ height: `${(item.value / 50) * 100}%`, minHeight: 8 }}
+                          >
+                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0" />
+                            <div className="absolute top-0 left-0 right-0 h-px bg-white/30" />
                           </div>
-                        );
-                      })}
+                        </div>
+                      ))}
                     </div>
                   </div>
+                </div>
+                {/* X-axis labels */}
+                <div className="flex pl-8">
+                  {[
+                    { year: "Year 1", pct: "" },
+                    { year: "Year 2", pct: "+81%" },
+                    { year: "Year 3", pct: "+71%" },
+                    { year: "Year 4", pct: "+65%" },
+                    { year: "Year 5", pct: "+68%" },
+                  ].map((item, i) => (
+                    <div key={i} className="flex-1 text-center pt-1.5">
+                      <span className="text-[9px] md:text-[10px] text-slate-400 font-medium block">{item.year}</span>
+                      {item.pct && <span className="text-[8px] text-emerald-400/80 font-semibold">{item.pct}</span>}
+                    </div>
+                  ))}
                 </div>
                 
                 {/* Growth Arrow Indicator */}
@@ -1265,17 +1263,6 @@ export default function Deck() {
                 </div>
               </TechCard>
             </div>
-
-            <style>{`
-              @keyframes growBarScale {
-                from { transform: scaleY(0); }
-                to { transform: scaleY(1); }
-              }
-              @keyframes shimmer {
-                0%, 100% { opacity: 0; }
-                50% { opacity: 1; }
-              }
-            `}</style>
             
             {/* Year 5 Revenue Breakdown - Horizontal Stacked Bar */}
             <div className="max-w-4xl w-full mb-3">
