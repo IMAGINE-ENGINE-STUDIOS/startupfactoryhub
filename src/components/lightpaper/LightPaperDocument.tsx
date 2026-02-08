@@ -1673,68 +1673,27 @@ export function LightPaperDocument({
       const pdfHeight = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].height * 10 : PAGE_FORMATS[pageFormat].width * 10;
       
       if (viewMode && viewModeImages.length > 0) {
-        // VIEW MODE: Capture actual page element which includes signatures & overlays
-        const pageElement = containerRef.current?.querySelector('.page') as HTMLElement;
-        if (!pageElement) {
+        // VIEW MODE: Each page is now its own .page div with id="page-N"
+        const pageContainers = containerRef.current?.querySelectorAll('[id^="page-"]');
+        
+        if (!pageContainers || pageContainers.length === 0) {
           toast.dismiss();
-          toast.error("No document found");
+          toast.error("No document pages found");
           return;
         }
         
-        // For view mode, we need to capture each page image with its overlays
-        // Get all page containers within the scrollable view
-        const pageContainers = pageElement.querySelectorAll('[id^="page-"]');
-        
-        if (pageContainers.length > 0) {
+        for (let i = 0; i < pageContainers.length; i++) {
+          const container = pageContainers[i] as HTMLElement;
+          
           // Temporarily remove zoom transform for accurate capture
-          const originalTransform = pageElement.style.transform;
-          pageElement.style.transform = 'none';
+          const originalTransform = container.style.transform;
+          container.style.transform = 'none';
           
-          for (let i = 0; i < pageContainers.length; i++) {
-            const container = pageContainers[i] as HTMLElement;
-            
-            // Scroll the container into view for accurate capture
-            container.scrollIntoView({ behavior: 'instant' as any });
-            await new Promise(resolve => setTimeout(resolve, 200));
-            
-            const canvas = await html2canvas(container, {
-              scale: 2,
-              useCORS: true,
-              allowTaint: true,
-              backgroundColor: null, // Preserve original backgrounds (dark pages, images, etc.)
-              logging: false
-            });
-            
-            const imgData = canvas.toDataURL('image/png');
-            if (i > 0) pdf.addPage();
-            
-            // Maintain aspect ratio - fit image within the PDF page
-            const imgAspect = canvas.width / canvas.height;
-            const pageAspect = pdfWidth / pdfHeight;
-            let drawWidth = pdfWidth;
-            let drawHeight = pdfHeight;
-            let drawX = 0;
-            let drawY = 0;
-            
-            if (imgAspect > pageAspect) {
-              drawHeight = pdfWidth / imgAspect;
-              drawY = (pdfHeight - drawHeight) / 2;
-            } else {
-              drawWidth = pdfHeight * imgAspect;
-              drawX = (pdfWidth - drawWidth) / 2;
-            }
-            
-            pdf.addImage(imgData, 'PNG', drawX, drawY, drawWidth, drawHeight);
-          }
+          // Scroll the container into view for accurate capture
+          container.scrollIntoView({ behavior: 'instant' as any });
+          await new Promise(resolve => setTimeout(resolve, 200));
           
-          // Restore zoom
-          pageElement.style.transform = originalTransform;
-        } else {
-          // Single page view mode - capture the whole page
-          const originalTransform = pageElement.style.transform;
-          pageElement.style.transform = 'none';
-          
-          const canvas = await html2canvas(pageElement, {
+          const canvas = await html2canvas(container, {
             scale: 2,
             useCORS: true,
             allowTaint: true,
@@ -1742,15 +1701,20 @@ export function LightPaperDocument({
             logging: false
           });
           
-          pageElement.style.transform = originalTransform;
+          // Restore transform
+          container.style.transform = originalTransform;
           
           const imgData = canvas.toDataURL('image/png');
+          if (i > 0) pdf.addPage();
+          
+          // Maintain aspect ratio - fit image within the PDF page
           const imgAspect = canvas.width / canvas.height;
           const pageAspect = pdfWidth / pdfHeight;
           let drawWidth = pdfWidth;
           let drawHeight = pdfHeight;
           let drawX = 0;
           let drawY = 0;
+          
           if (imgAspect > pageAspect) {
             drawHeight = pdfWidth / imgAspect;
             drawY = (pdfHeight - drawHeight) / 2;
@@ -1758,12 +1722,13 @@ export function LightPaperDocument({
             drawWidth = pdfHeight * imgAspect;
             drawX = (pdfWidth - drawWidth) / 2;
           }
+          
           pdf.addImage(imgData, 'PNG', drawX, drawY, drawWidth, drawHeight);
         }
         
-        // Also capture any signatures placed on the page
-        const signatureElements = pageElement.querySelectorAll('.signature-element');
-        if (signatureElements.length > 0) {
+        // Log signature count
+        const signatureElements = containerRef.current?.querySelectorAll('.signature-element');
+        if (signatureElements && signatureElements.length > 0) {
           console.log(`📄 Export - ${signatureElements.length} signatures included`);
         }
         
@@ -2529,7 +2494,6 @@ export function LightPaperDocument({
         <style>{`
           .page {
             width: ${getPageDimensions().width}cm;
-            height: ${getPageDimensions().height}cm;
             max-width: ${getPageDimensions().width}cm;
             padding: 0;
             background: ${isDarkMode ? 'black' : 'white'};
@@ -2542,6 +2506,15 @@ export function LightPaperDocument({
             transition: transform 0.2s ease;
             margin: 0 auto;
             flex-shrink: 0;
+          }
+          
+          .page:not(.view-mode-page) {
+            height: ${getPageDimensions().height}cm;
+          }
+          
+          .page.view-mode-page {
+            height: auto;
+            overflow: visible;
           }
           
           .page-content {
@@ -2816,71 +2789,83 @@ export function LightPaperDocument({
           alignItems: 'center',
           overflow: 'visible'
         }}>
-          <div 
-            className={`page ${editMode ? 'edit-mode' : 'view-mode'} ${viewMode ? 'view-mode' : ''}`} 
-            style={{ position: 'relative' }}
-            onClick={handleCanvasClick}
-          >
-            <div className="page-content">
-              {viewMode && viewModeImages.length > 0 ? (
-                // VIEW MODE: Display ALL pages as scrollable document
-                <div style={{
-                  width: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '20px',
-                  padding: '20px 0',
-                  background: isDarkMode ? '#1a1a1a' : '#f5f5f5'
-                }}>
-                  {viewModeImages.map((imageSrc, index) => (
-                    <div 
-                      key={`page-${index + 1}`}
-                      id={`page-${index + 1}`}
-                      style={{
-                        width: '100%',
-                        background: '#fff',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                        borderRadius: '4px',
-                        overflow: 'hidden',
-                        position: 'relative'
-                      }}
-                    >
-                      {/* Page number overlay */}
-                      <div style={{
-                        position: 'absolute',
-                        top: '10px',
-                        right: '10px',
-                        background: 'rgba(0,0,0,0.7)',
-                        color: '#fff',
-                        padding: '4px 12px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        zIndex: 10
-                      }}>
-                        Page {index + 1} of {viewModeImages.length}
-                      </div>
-                      
-                      <img 
-                        src={imageSrc}
-                        alt={`Page ${index + 1}`}
-                        onLoad={() => console.log(`✓ Page ${index + 1} loaded`)}
-                        onError={(e) => {
-                          console.error(`✗ Page ${index + 1} failed`, e);
-                          toast.error(`Failed to load page ${index + 1}`);
-                        }}
-                        style={{
-                          width: '100%',
-                          height: 'auto',
-                          display: 'block',
-                          imageRendering: 'crisp-edges'
-                        }}
+          {viewMode && viewModeImages.length > 0 ? (
+            // VIEW MODE: Each image gets its own page container for proper sizing
+            <>
+              {viewModeImages.map((imageSrc, index) => (
+                <div 
+                  key={`page-${index + 1}`}
+                  id={`page-${index + 1}`}
+                  className="page view-mode-page"
+                  style={{ 
+                    position: 'relative',
+                    height: 'auto',
+                    overflow: 'visible',
+                    marginBottom: '20px'
+                  }}
+                  onClick={handleCanvasClick}
+                >
+                  {/* Page number overlay */}
+                  <div style={{
+                    position: 'absolute',
+                    top: '10px',
+                    right: '10px',
+                    background: 'rgba(0,0,0,0.7)',
+                    color: '#fff',
+                    padding: '4px 12px',
+                    borderRadius: '4px',
+                    fontSize: '12px',
+                    fontWeight: 'bold',
+                    zIndex: 10
+                  }}>
+                    Page {index + 1} of {viewModeImages.length}
+                  </div>
+                  
+                  <img 
+                    src={imageSrc}
+                    alt={`Page ${index + 1}`}
+                    onLoad={() => console.log(`✓ Page ${index + 1} loaded`)}
+                    onError={(e) => {
+                      console.error(`✗ Page ${index + 1} failed`, e);
+                      toast.error(`Failed to load page ${index + 1}`);
+                    }}
+                    style={{
+                      width: '100%',
+                      height: 'auto',
+                      display: 'block'
+                    }}
+                  />
+                  
+                  {/* Overlay Text Boxes for this page */}
+                  {overlayTextBoxes
+                    .filter(box => {
+                      // Determine which page this text box belongs to based on Y position
+                      const pageHeight = getPageDimensions().height * CM_TO_PX;
+                      const pageIndex = Math.floor(box.y / pageHeight);
+                      return pageIndex === index;
+                    })
+                    .map(box => (
+                      <OverlayTextBox
+                        key={box.id}
+                        {...box}
+                        y={box.y - (index * getPageDimensions().height * CM_TO_PX)}
+                        onUpdate={updateTextBox}
+                        onDelete={deleteTextBox}
+                        zoomLevel={zoomLevel}
                       />
-                    </div>
-                  ))}
+                    ))
+                  }
                 </div>
-              ) : (
-                // EDIT MODE: Editable content — height constrained to trigger overflow detection
+              ))}
+            </>
+          ) : (
+            // EDIT MODE: Single page container
+            <div 
+              className={`page ${editMode ? 'edit-mode' : 'view-mode'}`} 
+              style={{ position: 'relative' }}
+              onClick={handleCanvasClick}
+            >
+              <div className="page-content">
                 <div
                   ref={editorRef} 
                   contentEditable={!viewMode}
@@ -2907,81 +2892,79 @@ export function LightPaperDocument({
                     }
                   }}
                 />
-              )}
-            </div>
+              </div>
             
             {/* AI Toolbar Integration */}
-            <AIToolbar 
-              onInsertText={(text) => {
-                if (!editorRef.current || viewMode) return;
-                const selection = window.getSelection();
-                if (selection && selection.rangeCount > 0) {
-                  const range = selection.getRangeAt(0);
-                  range.deleteContents();
-                  const textNode = document.createTextNode(text);
-                  range.insertNode(textNode);
-                } else {
-                  editorRef.current.innerHTML += `<p>${text}</p>`;
-                }
-              }}
-              isDarkMode={isDarkMode}
-              isEditMode={isEditingText && !viewMode}
-            />
-            
-            
-            {/* Overlay Text Boxes in View Mode */}
-            {viewMode && overlayTextBoxes.map(box => (
-              <OverlayTextBox
-                key={box.id}
-                {...box}
-                onUpdate={updateTextBox}
-                onDelete={deleteTextBox}
-                zoomLevel={zoomLevel}
-              />
-            ))}
-            
-            {/* Signature preview while dragging */}
-            {draggingSignature && signaturePreviewPosition && (
-              <div
-                style={{
-                  position: 'absolute',
-                  left: signaturePreviewPosition.x,
-                  top: signaturePreviewPosition.y,
-                  transform: 'translate(-50%, -100%)',
-                  pointerEvents: 'none',
-                  opacity: 0.6,
-                  zIndex: 1000,
-                  padding: '4px 8px',
-                  background: 'rgba(255, 255, 255, 0.95)',
-                  border: '2px dashed #3b82f6',
-                  borderRadius: '4px',
+              <AIToolbar 
+                onInsertText={(text) => {
+                  if (!editorRef.current || viewMode) return;
+                  const selection = window.getSelection();
+                  if (selection && selection.rangeCount > 0) {
+                    const range = selection.getRangeAt(0);
+                    range.deleteContents();
+                    const textNode = document.createTextNode(text);
+                    range.insertNode(textNode);
+                  } else {
+                    editorRef.current.innerHTML += `<p>${text}</p>`;
+                  }
                 }}
-              >
-                {draggingSignature.type === "draw" ? (
-                  <img src={draggingSignature.data} alt="Signature preview" style={{ height: '35px', display: 'block' }} />
-                ) : (
-                  <span style={{ fontFamily: 'cursive', fontSize: '18px', color: '#000' }}>
-                    {draggingSignature.data}
-                  </span>
-                )}
-              </div>
-            )}
-            
-            {/* Signature placement indicator */}
-            {draggingSignature && !signaturePreviewPosition && (
-              <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[200] flex gap-2">
-                <Button 
-                  size="sm" 
-                  variant="outline"
-                  onClick={(e) => { e.stopPropagation(); setDraggingSignature(null); setSignaturePreviewPosition(null); }}
-                  className="shadow-lg bg-background"
+                isDarkMode={isDarkMode}
+                isEditMode={isEditingText && !viewMode}
+              />
+              
+              {/* Overlay Text Boxes in Edit Mode */}
+              {!viewMode && overlayTextBoxes.map(box => (
+                <OverlayTextBox
+                  key={box.id}
+                  {...box}
+                  onUpdate={updateTextBox}
+                  onDelete={deleteTextBox}
+                  zoomLevel={zoomLevel}
+                />
+              ))}
+              
+              {/* Signature preview while dragging */}
+              {draggingSignature && signaturePreviewPosition && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: signaturePreviewPosition.x,
+                    top: signaturePreviewPosition.y,
+                    transform: 'translate(-50%, -100%)',
+                    pointerEvents: 'none',
+                    opacity: 0.6,
+                    zIndex: 1000,
+                    padding: '4px 8px',
+                    background: 'rgba(255, 255, 255, 0.95)',
+                    border: '2px dashed #3b82f6',
+                    borderRadius: '4px',
+                  }}
                 >
-                  ✕ Cancel
-                </Button>
-              </div>
-            )}
-            
-          </div>
+                  {draggingSignature.type === "draw" ? (
+                    <img src={draggingSignature.data} alt="Signature preview" style={{ height: '35px', display: 'block' }} />
+                  ) : (
+                    <span style={{ fontFamily: 'cursive', fontSize: '18px', color: '#000' }}>
+                      {draggingSignature.data}
+                    </span>
+                  )}
+                </div>
+              )}
+              
+              {/* Signature placement indicator */}
+              {draggingSignature && !signaturePreviewPosition && (
+                <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[200] flex gap-2">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={(e) => { e.stopPropagation(); setDraggingSignature(null); setSignaturePreviewPosition(null); }}
+                    className="shadow-lg bg-background"
+                  >
+                    ✕ Cancel
+                  </Button>
+                </div>
+              )}
+            </div>
+          )}
           
           {/* Genius AI Bubble - rendered outside page to avoid overflow:hidden clipping */}
           {geniusBubblePos && (
