@@ -9,6 +9,7 @@ import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreads
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
 
 import AIAssistant from "@/components/AIAssistant";
+import GeniusAIChat from "@/components/lightpaper/GeniusAIChat";
 import { ScientificCalculator } from "@/components/ScientificCalculator";
 import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
@@ -41,6 +42,7 @@ export default function LightPaper() {
   const [showSentiment, setShowSentiment] = useState(false);
   const [showDocAnalyzer, setShowDocAnalyzer] = useState(false);
   const [showTaskAutomation, setShowTaskAutomation] = useState(false);
+  const [showGeniusAI, setShowGeniusAI] = useState(false);
 
   // Keyboard shortcut for quick navigation (Ctrl+K or Cmd+K)
   useEffect(() => {
@@ -137,45 +139,60 @@ export default function LightPaper() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-auto">
-        <Tabs 
-          value={activeTab} 
-          onValueChange={(value) => {
-            setIsTabLoading(true);
-            setActiveTab(value as ProjectType);
-            // Simulate loading delay for smooth transition
-            setTimeout(() => setIsTabLoading(false), 300);
-          }} 
-          className="h-full flex flex-col"
-        >
-          <TabsContent value="document" className="flex-1 mt-0 overflow-hidden">
-            {isTabLoading && activeTab === "document" ? (
-              <DocumentLoadingSkeleton />
-            ) : (
-              <LightPaperDocument 
-                selectedProject={selectedProject} 
-                uploadedContent={uploadedContent}
-                onContentLoaded={() => setUploadedContent(null)}
-              />
-            )}
-          </TabsContent>
+      <div className="flex-1 overflow-hidden flex">
+        <div className={`flex-1 overflow-auto transition-all duration-300 ${showGeniusAI ? 'mr-0' : ''}`}>
+          <Tabs 
+            value={activeTab} 
+            onValueChange={(value) => {
+              setIsTabLoading(true);
+              setActiveTab(value as ProjectType);
+              setTimeout(() => setIsTabLoading(false), 300);
+            }} 
+            className="h-full flex flex-col"
+          >
+            <TabsContent value="document" className="flex-1 mt-0 overflow-hidden">
+              {isTabLoading && activeTab === "document" ? (
+                <DocumentLoadingSkeleton />
+              ) : (
+                <LightPaperDocument 
+                  selectedProject={selectedProject} 
+                  uploadedContent={uploadedContent}
+                  onContentLoaded={() => setUploadedContent(null)}
+                />
+              )}
+            </TabsContent>
 
-          <TabsContent value="spreadsheet" className="flex-1 mt-0 overflow-hidden">
-            {isTabLoading && activeTab === "spreadsheet" ? (
-              <SpreadsheetLoadingSkeleton />
-            ) : (
-              <LightPaperSpreadsheet />
-            )}
-          </TabsContent>
+            <TabsContent value="spreadsheet" className="flex-1 mt-0 overflow-hidden">
+              {isTabLoading && activeTab === "spreadsheet" ? (
+                <SpreadsheetLoadingSkeleton />
+              ) : (
+                <LightPaperSpreadsheet />
+              )}
+            </TabsContent>
 
-          <TabsContent value="presentation" className="flex-1 mt-0 overflow-auto">
-            {isTabLoading && activeTab === "presentation" ? (
-              <PresentationLoadingSkeleton />
-            ) : (
-              <LightPaperPresentation />
-            )}
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="presentation" className="flex-1 mt-0 overflow-auto">
+              {isTabLoading && activeTab === "presentation" ? (
+                <PresentationLoadingSkeleton />
+              ) : (
+                <LightPaperPresentation />
+              )}
+            </TabsContent>
+          </Tabs>
+        </div>
+
+        {/* Genius AI Side Panel */}
+        {showGeniusAI && (
+          <div className="w-[380px] flex-shrink-0 h-full">
+            <GeniusAIChat
+              isOpen={showGeniusAI}
+              onClose={() => setShowGeniusAI(false)}
+              onInsertText={(text) => {
+                // Copy to clipboard as a universal insert method
+                navigator.clipboard.writeText(text);
+              }}
+            />
+          </div>
+        )}
       </div>
 
       <AIAssistant isOpen={showAI} onClose={() => setShowAI(false)} />
@@ -234,12 +251,12 @@ export default function LightPaper() {
               variant="ghost" 
               className="w-full justify-start gap-2" 
               onClick={() => {
-                setShowAI(true);
+                setShowGeniusAI(true);
                 setShowAIFeaturesMenu(false);
               }}
             >
               <Bot className="h-4 w-4" />
-              Ask AI
+              Genius AI
             </Button>
             <Button 
               variant="ghost" 

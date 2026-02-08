@@ -68,3 +68,6 @@ verify_jwt = true
 
 [functions.hub-ai-assistant]
 verify_jwt = true
+
+[functions.lightpaper-genius]
+verify_jwt = false
