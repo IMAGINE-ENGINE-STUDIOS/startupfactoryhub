@@ -274,6 +274,7 @@ export function LightPaperDocument({
   // Load uploaded content - ENHANCED for View Mode
   useEffect(() => {
     if (!uploadedContent || !editorRef.current) return;
+    const loadContent = async () => {
     
     console.log('Loading uploaded content', uploadedContent.content.substring(0, 100));
     
@@ -333,75 +334,136 @@ export function LightPaperDocument({
     }
     
     // EDIT MODE LOGIC (only runs if JSON parse failed or not view mode)
-    setViewMode(false);
-    setViewModeImages([]);
-    
+    // For PDFs in edit mode, re-parse as images to preserve exact layout
+    // This prevents distortion from text reconstruction
+    const htmlContent = uploadedContent.content;
     const parser = new DOMParser();
-    const doc = parser.parseFromString(uploadedContent.content, 'text/html');
-    const pages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
-    const pageCount = pages.length > 0 ? pages.length : 1;
+    const doc = parser.parseFromString(htmlContent, 'text/html');
+    const reconstructedPages = doc.querySelectorAll('.pdf-page-reconstructed, .docx-page-wrapper');
     
-    // Try to detect and set page format from the content metadata
-    // Check if the HTML contains data attributes with format info
-    const firstPage = doc.querySelector('.pdf-page-reconstructed');
-    if (firstPage) {
-      const innerContent = firstPage.querySelector('.pdf-inner-content');
-      if (innerContent) {
-        const vpWidth = parseFloat(innerContent.getAttribute('data-viewport-width') || '0');
-        const vpHeight = parseFloat(innerContent.getAttribute('data-viewport-height') || '0');
-        if (vpWidth > 0 && vpHeight > 0) {
-          // Viewport is at scale 1.5, so original PDF dimensions at 72dpi
-          const pdfWidthPt = vpWidth / 1.5;
-          const pdfHeightPt = vpHeight / 1.5;
-          const pdfWidthMm = (pdfWidthPt / 72) * 25.4;
-          const pdfHeightMm = (pdfHeightPt / 72) * 25.4;
-          
-          // Match to closest page format
-          const tolerance = 10;
-          const formats: Record<string, { w: number; h: number }> = {
-            letter: { w: 215.9, h: 279.4 },
-            legal: { w: 215.9, h: 355.6 },
-            a4: { w: 210, h: 297 },
-            a3: { w: 297, h: 420 },
-            a5: { w: 148, h: 210 },
-            tabloid: { w: 279.4, h: 431.8 },
-          };
-          
-          for (const [name, dims] of Object.entries(formats)) {
-            if ((Math.abs(pdfWidthMm - dims.w) < tolerance && Math.abs(pdfHeightMm - dims.h) < tolerance) ||
-                (Math.abs(pdfWidthMm - dims.h) < tolerance && Math.abs(pdfHeightMm - dims.w) < tolerance)) {
-              setPageFormat(name as PageFormat);
-              if (pdfWidthMm > pdfHeightMm) {
-                setOrientation('landscape');
-              } else {
-                setOrientation('portrait');
+    if (reconstructedPages.length > 0) {
+      // PDF/DOCX with reconstructed pages - convert to images for perfect fidelity
+      const pageImages: string[] = [];
+      
+      // Create hidden container for rendering
+      const hiddenContainer = document.createElement('div');
+      hiddenContainer.style.position = 'absolute';
+      hiddenContainer.style.left = '-9999px';
+      hiddenContainer.style.top = '0';
+      document.body.appendChild(hiddenContainer);
+      
+      for (let i = 0; i < reconstructedPages.length; i++) {
+        const pageEl = reconstructedPages[i] as HTMLElement;
+        const clone = pageEl.cloneNode(true) as HTMLElement;
+        
+        // Get viewport dimensions from inner content
+        const innerContent = clone.querySelector('.pdf-inner-content') as HTMLElement;
+        let renderWidth = 816; // default letter width
+        let renderHeight = 1056;
+        
+        if (innerContent) {
+          const vpW = parseFloat(innerContent.getAttribute('data-viewport-width') || '0');
+          const vpH = parseFloat(innerContent.getAttribute('data-viewport-height') || '0');
+          if (vpW > 0 && vpH > 0) {
+            renderWidth = vpW;
+            renderHeight = vpH;
+            // Remove CSS transform - render at native size
+            innerContent.style.transform = 'none';
+          }
+        }
+        
+        clone.style.width = `${renderWidth}px`;
+        clone.style.height = `${renderHeight}px`;
+        clone.style.overflow = 'hidden';
+        clone.style.background = 'white';
+        clone.style.position = 'relative';
+        
+        hiddenContainer.innerHTML = '';
+        hiddenContainer.appendChild(clone);
+        
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        try {
+          const canvas = await html2canvas(clone, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: '#ffffff',
+            width: renderWidth,
+            height: renderHeight,
+            logging: false
+          });
+          pageImages.push(canvas.toDataURL('image/png'));
+        } catch (err) {
+          console.error(`Failed to render page ${i + 1}:`, err);
+        }
+      }
+      
+      document.body.removeChild(hiddenContainer);
+      
+      if (pageImages.length > 0) {
+        // Detect format from first reconstructed page
+        const firstInner = reconstructedPages[0]?.querySelector('.pdf-inner-content');
+        if (firstInner) {
+          const vpW = parseFloat(firstInner.getAttribute('data-viewport-width') || '0');
+          const vpH = parseFloat(firstInner.getAttribute('data-viewport-height') || '0');
+          if (vpW > 0 && vpH > 0) {
+            const pdfWidthPt = vpW / 1.5;
+            const pdfHeightPt = vpH / 1.5;
+            const pdfWidthMm = (pdfWidthPt / 72) * 25.4;
+            const pdfHeightMm = (pdfHeightPt / 72) * 25.4;
+            const tolerance = 10;
+            const formats: Record<string, { w: number; h: number }> = {
+              letter: { w: 215.9, h: 279.4 }, legal: { w: 215.9, h: 355.6 },
+              a4: { w: 210, h: 297 }, a3: { w: 297, h: 420 },
+              a5: { w: 148, h: 210 }, tabloid: { w: 279.4, h: 431.8 },
+            };
+            for (const [name, dims] of Object.entries(formats)) {
+              if ((Math.abs(pdfWidthMm - dims.w) < tolerance && Math.abs(pdfHeightMm - dims.h) < tolerance) ||
+                  (Math.abs(pdfWidthMm - dims.h) < tolerance && Math.abs(pdfHeightMm - dims.w) < tolerance)) {
+                setPageFormat(name as PageFormat);
+                setOrientation(pdfWidthMm > pdfHeightMm ? 'landscape' : 'portrait');
+                break;
               }
-              break;
             }
           }
         }
+        
+        // Use View Mode rendering for perfect layout preservation
+        setViewMode(true);
+        setViewModeImages(pageImages);
+        setTotalPages(pageImages.length);
+        setCurrentPage(1);
+        setVisiblePage(1);
+        
+        if (editorRef.current) editorRef.current.innerHTML = '';
+        setDocumentContent('');
+        
+        toast.success(`Document loaded: ${pageImages.length} pages (layout preserved)`);
+        setProjectTitle(uploadedContent.title);
+        setCurrentProjectId(null);
+        onContentLoaded?.();
+        return;
       }
     }
     
-    setDocumentContent(uploadedContent.content);
-    setTotalPages(pageCount);
+    // Fallback: plain HTML content (non-PDF, typed content, etc.)
+    setViewMode(false);
+    setViewModeImages([]);
+    setDocumentContent(htmlContent);
+    setTotalPages(1);
     setCurrentPage(1);
     
-    // Load first page - apply CSS scaling to fit the page container
-    if (pages.length > 0) {
-      editorRef.current.innerHTML = pages[0].outerHTML;
-      // Apply scaling after DOM update
-      requestAnimationFrame(() => {
-        scalePdfContentToFit(editorRef.current);
-      });
-    } else {
-      editorRef.current.innerHTML = uploadedContent.content;
+    if (editorRef.current) {
+      editorRef.current.innerHTML = htmlContent;
     }
     
-    toast.success(`Document loaded in Edit Mode: ${pageCount} pages`);
+    toast.success(`Document loaded`);
     setProjectTitle(uploadedContent.title);
     setCurrentProjectId(null);
     onContentLoaded?.();
+    };
+    loadContent();
   }, [uploadedContent, onContentLoaded]);
 
   // Intersection Observer to track visible page in View Mode
@@ -1451,106 +1513,68 @@ export function LightPaperDocument({
     try {
       toast.loading("Preparing document for print...");
       
-      // CRITICAL: Save current page content before printing
-      if (editorRef.current) {
-        const currentContent = editorRef.current.innerHTML;
-        console.log('📄 Print - Current editor content:', currentContent.substring(0, 100));
-        console.log('📄 Print - Pages array before update:', pages.length, 'pages');
-        
-        const updatedPages = [...pages];
-        updatedPages[currentPage - 1] = currentContent;
-        
-        console.log('📄 Print - Updated pages:', updatedPages.length, 'pages');
-        console.log('📄 Print - First page content:', updatedPages[0]?.substring(0, 100));
-        
-        // Check if we have valid content
-        const hasContent = updatedPages.some(page => page && page.trim().length > 0);
-        if (!hasContent) {
-          console.error('❌ Print - No valid content in any page');
-          toast.dismiss();
-          toast.error("No document content found");
-          return;
-        }
-        
-        // Create PDF with proper dimensions
-        const pdf = new jsPDF(orientation === 'portrait' ? 'p' : 'l', 'mm', pageFormat);
-        const pdfWidth = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].width * 10 : PAGE_FORMATS[pageFormat].height * 10;
-        const pdfHeight = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].height * 10 : PAGE_FORMATS[pageFormat].width * 10;
-        
-        // Create hidden container
-        const hiddenContainer = document.createElement('div');
-        hiddenContainer.style.position = 'absolute';
-        hiddenContainer.style.left = '-9999px';
-        hiddenContainer.style.top = '0';
-        hiddenContainer.style.width = `${getPageDimensions().width}cm`;
-        document.body.appendChild(hiddenContainer);
-        
-        console.log(`📄 Print - Starting PDF generation for ${updatedPages.length} pages`);
-        
-        for (let i = 0; i < updatedPages.length; i++) {
-          console.log(`📄 Print - Processing page ${i + 1}/${updatedPages.length}`);
-          const pageDiv = document.createElement('div');
-          pageDiv.innerHTML = updatedPages[i] || '<p>Empty page</p>';
-          
-          console.log(`📄 Print - Page ${i + 1} content length:`, updatedPages[i]?.length || 0);
-          
-          // Apply comprehensive styling
-          Object.assign(pageDiv.style, {
-            width: `${getPageDimensions().width}cm`,
-            minHeight: `${getPageDimensions().height}cm`,
-            background: '#ffffff',
-            color: '#000000',
-            fontFamily: selectedFont,
-            fontSize: `${selectedSize}px`,
-            padding: '2cm',
-            boxSizing: 'border-box',
-            lineHeight: '1.6',
-            overflow: 'visible',
-            position: 'relative',
-            display: 'block'
-          });
-          
-          // Clear and add single page at a time
-          hiddenContainer.innerHTML = '';
-          hiddenContainer.appendChild(pageDiv);
-          
-          // Wait for render
-          await new Promise(resolve => setTimeout(resolve, 100));
-          
-          console.log(`📄 Print - Capturing page ${i + 1} with html2canvas...`);
-          const canvas = await html2canvas(pageDiv, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-            width: pageDiv.offsetWidth,
-            height: pageDiv.offsetHeight,
-            logging: false
-          });
-          
-          console.log(`📄 Print - Page ${i + 1} captured, canvas size: ${canvas.width}x${canvas.height}`);
-          
-          const imgData = canvas.toDataURL('image/jpeg', 0.95);
-          
-          if (i > 0) {
-            console.log(`📄 Print - Adding new page to PDF`);
-            pdf.addPage();
-          }
-          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
-          console.log(`📄 Print - Page ${i + 1} added to PDF`);
-        }
-        
-        // Clean up
-        document.body.removeChild(hiddenContainer);
-        
-        // Open PDF in new tab for printing
-        const pdfBlob = pdf.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        window.open(pdfUrl, '_blank');
-        
+      const pdf = new jsPDF(orientation === 'portrait' ? 'p' : 'l', 'mm', pageFormat);
+      const pdfWidth = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].width * 10 : PAGE_FORMATS[pageFormat].height * 10;
+      const pdfHeight = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].height * 10 : PAGE_FORMATS[pageFormat].width * 10;
+      
+      const pageElement = containerRef.current?.querySelector('.page') as HTMLElement;
+      if (!pageElement) {
         toast.dismiss();
-        toast.success(`Document ready for printing (${updatedPages.length} pages)`);
+        toast.error("No document found");
+        return;
       }
+      
+      // Temporarily remove zoom
+      const originalTransform = pageElement.style.transform;
+      pageElement.style.transform = 'none';
+      
+      if (viewMode && viewModeImages.length > 0) {
+        const pageContainers = pageElement.querySelectorAll('[id^="page-"]');
+        const targets = pageContainers.length > 0 ? Array.from(pageContainers) : [pageElement];
+        
+        for (let i = 0; i < targets.length; i++) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          const canvas = await html2canvas(targets[i] as HTMLElement, {
+            scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false
+          });
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          if (i > 0) pdf.addPage();
+          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+        }
+      } else {
+        // Edit mode: capture each page
+        if (editorRef.current) {
+          const updatedPages = [...pages];
+          updatedPages[currentPage - 1] = editorRef.current.innerHTML;
+          
+          for (let i = 0; i < updatedPages.length; i++) {
+            if (i !== currentPage - 1 && editorRef.current) {
+              editorRef.current.innerHTML = updatedPages[i] || '<p>Empty page</p>';
+            }
+            await new Promise(resolve => setTimeout(resolve, 200));
+            const canvas = await html2canvas(pageElement, {
+              scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff', logging: false
+            });
+            const imgData = canvas.toDataURL('image/jpeg', 0.95);
+            if (i > 0) pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+          }
+          
+          // Restore original page
+          if (editorRef.current) {
+            editorRef.current.innerHTML = pages[currentPage - 1] || '';
+          }
+        }
+      }
+      
+      pageElement.style.transform = originalTransform;
+      
+      const pdfBlob = pdf.output('blob');
+      const pdfUrl = URL.createObjectURL(pdfBlob);
+      window.open(pdfUrl, '_blank');
+      
+      toast.dismiss();
+      toast.success(`Document ready for printing`);
     } catch (error) {
       console.error('Print error:', error);
       toast.dismiss();
@@ -1562,84 +1586,124 @@ export function LightPaperDocument({
     try {
       toast.loading("Generating PDF...");
       
-      // CRITICAL: Save current page content before export
-      if (editorRef.current) {
-        const currentContent = editorRef.current.innerHTML;
-        const updatedPages = [...pages];
-        updatedPages[currentPage - 1] = currentContent;
-        
-        if (updatedPages.length === 0 || (updatedPages.length === 1 && !updatedPages[0])) {
+      const pdf = new jsPDF(orientation === 'portrait' ? 'p' : 'l', 'mm', pageFormat);
+      const pdfWidth = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].width * 10 : PAGE_FORMATS[pageFormat].height * 10;
+      const pdfHeight = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].height * 10 : PAGE_FORMATS[pageFormat].width * 10;
+      
+      if (viewMode && viewModeImages.length > 0) {
+        // VIEW MODE: Capture actual page element which includes signatures & overlays
+        const pageElement = containerRef.current?.querySelector('.page') as HTMLElement;
+        if (!pageElement) {
           toast.dismiss();
-          toast.error("No document content found");
+          toast.error("No document found");
           return;
         }
         
-        const pdf = new jsPDF(orientation === 'portrait' ? 'p' : 'l', 'mm', pageFormat);
-        const pdfWidth = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].width * 10 : PAGE_FORMATS[pageFormat].height * 10;
-        const pdfHeight = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].height * 10 : PAGE_FORMATS[pageFormat].width * 10;
+        // For view mode, we need to capture each page image with its overlays
+        // Get all page containers within the scrollable view
+        const pageContainers = pageElement.querySelectorAll('[id^="page-"]');
         
-        // Use a fixed pixel width for consistent rendering
-        const renderWidthPx = Math.round(pdfWidth * 3.7795275591 * 2); // mm to px at 96dpi * scale 2
-        
-        // Create hidden container
-        const hiddenContainer = document.createElement('div');
-        hiddenContainer.style.position = 'absolute';
-        hiddenContainer.style.left = '-9999px';
-        hiddenContainer.style.top = '0';
-        hiddenContainer.style.width = `${renderWidthPx / 2}px`;
-        document.body.appendChild(hiddenContainer);
-        
-        for (let i = 0; i < updatedPages.length; i++) {
-          const pageDiv = document.createElement('div');
-          pageDiv.innerHTML = updatedPages[i] || '<p>Empty page</p>';
+        if (pageContainers.length > 0) {
+          // Temporarily remove zoom transform for accurate capture
+          const originalTransform = pageElement.style.transform;
+          pageElement.style.transform = 'none';
           
-          // Apply comprehensive styling with fixed height to match PDF page
-          const renderHeightPx = Math.round(pdfHeight * 3.7795275591 * 2);
-          Object.assign(pageDiv.style, {
-            width: `${renderWidthPx / 2}px`,
-            height: `${renderHeightPx / 2}px`,
-            background: '#ffffff',
-            color: '#000000',
-            fontFamily: selectedFont,
-            fontSize: `${selectedSize}px`,
-            padding: `${MARGIN_CM}cm`,
-            boxSizing: 'border-box',
-            lineHeight: '1.6',
-            overflow: 'hidden',
-            position: 'relative',
-            display: 'block'
-          });
+          for (let i = 0; i < pageContainers.length; i++) {
+            const container = pageContainers[i] as HTMLElement;
+            
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            const canvas = await html2canvas(container, {
+              scale: 2,
+              useCORS: true,
+              allowTaint: true,
+              backgroundColor: '#ffffff',
+              logging: false
+            });
+            
+            const imgData = canvas.toDataURL('image/png');
+            if (i > 0) pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+          }
           
-          // Clear and add single page at a time
-          hiddenContainer.innerHTML = '';
-          hiddenContainer.appendChild(pageDiv);
+          // Restore zoom
+          pageElement.style.transform = originalTransform;
+        } else {
+          // Single page view mode - capture the whole page
+          const originalTransform = pageElement.style.transform;
+          pageElement.style.transform = 'none';
           
-          // Wait for render
-          await new Promise(resolve => setTimeout(resolve, 150));
-          
-          const canvas = await html2canvas(pageDiv, {
+          const canvas = await html2canvas(pageElement, {
             scale: 2,
             useCORS: true,
             allowTaint: true,
             backgroundColor: '#ffffff',
-            width: pageDiv.offsetWidth,
-            height: pageDiv.offsetHeight,
             logging: false
           });
           
-          const imgData = canvas.toDataURL('image/png');
+          pageElement.style.transform = originalTransform;
           
-          if (i > 0) pdf.addPage();
-          // Use exact PDF dimensions so image maps 1:1 without stretching
+          const imgData = canvas.toDataURL('image/png');
           pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         }
         
-        document.body.removeChild(hiddenContainer);
+        // Also capture any signatures placed on the page
+        const signatureElements = pageElement.querySelectorAll('.signature-element');
+        if (signatureElements.length > 0) {
+          console.log(`📄 Export - ${signatureElements.length} signatures included`);
+        }
         
-        pdf.save(`${projectTitle || 'Document'}.pdf`);
-        toast.dismiss();
-        toast.success(`PDF exported with ${updatedPages.length} pages!`);
+      } else {
+        // EDIT MODE: Capture the actual page element directly (includes signatures & overlays)
+        const pageElement = containerRef.current?.querySelector('.page') as HTMLElement;
+        if (!pageElement) {
+          toast.dismiss();
+          toast.error("No document found");
+          return;
+        }
+        
+        // Save current page content
+        if (editorRef.current) {
+          const currentContent = editorRef.current.innerHTML;
+          const updatedPages = [...pages];
+          updatedPages[currentPage - 1] = currentContent;
+          
+          // Temporarily remove zoom for accurate capture
+          const originalTransform = pageElement.style.transform;
+          pageElement.style.transform = 'none';
+          
+          for (let i = 0; i < updatedPages.length; i++) {
+            // Navigate to each page to render it
+            if (i !== currentPage - 1 && editorRef.current) {
+              editorRef.current.innerHTML = updatedPages[i] || '<p>Empty page</p>';
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 200));
+            
+            const canvas = await html2canvas(pageElement, {
+              scale: 2,
+              useCORS: true,
+              allowTaint: true,
+              backgroundColor: '#ffffff',
+              logging: false
+            });
+            
+            const imgData = canvas.toDataURL('image/png');
+            if (i > 0) pdf.addPage();
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+          }
+          
+          // Restore original page
+          if (editorRef.current) {
+            editorRef.current.innerHTML = updatedPages[currentPage - 1] || '';
+          }
+          pageElement.style.transform = originalTransform;
+        }
       }
+      
+      pdf.save(`${projectTitle || 'Document'}.pdf`);
+      toast.dismiss();
+      toast.success(`PDF exported successfully!`);
     } catch (error) {
       console.error('Export PDF error:', error);
       toast.dismiss();
