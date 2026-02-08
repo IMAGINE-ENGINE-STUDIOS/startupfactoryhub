@@ -49,41 +49,54 @@ export async function detectFileType(file: File): Promise<'pdf' | 'docx' | 'unkn
   return 'unknown';
 }
 
-export function detectPageFormat(widthPx: number, heightPx: number): 'letter' | 'legal' | 'tabloid' | 'a3' | 'a4' | 'a5' | 'b4' | 'b5' | 'executive' | 'folio' | 'custom' {
-  // Convert to mm for comparison (assuming 72 DPI)
+export function detectPageFormat(widthPx: number, heightPx: number): string {
+  // Convert to mm for comparison (assuming 72 DPI for PDF points)
   const widthMm = (widthPx / 72) * 25.4;
   const heightMm = (heightPx / 72) * 25.4;
   
   const tolerance = 10; // mm tolerance
   
-  const formats = {
+  const formats: Record<string, { w: number; h: number }> = {
+    // US Standard
     letter: { w: 215.9, h: 279.4 },
     legal: { w: 215.9, h: 355.6 },
     tabloid: { w: 279.4, h: 431.8 },
+    ledger: { w: 431.8, h: 279.4 },
+    statement: { w: 139.7, h: 215.9 },
+    executive: { w: 184.15, h: 266.7 },
+    folio: { w: 210, h: 330 },
+    quarto: { w: 215.9, h: 275 },
+    // ISO A Series
     a3: { w: 297, h: 420 },
     a4: { w: 210, h: 297 },
     a5: { w: 148, h: 210 },
+    a6: { w: 105, h: 148 },
+    // ISO B Series
     b4: { w: 250, h: 353 },
     b5: { w: 176, h: 250 },
-    executive: { w: 184, h: 267 },
-    folio: { w: 210, h: 330 }
+    // JIS B Series
+    jisb4: { w: 257, h: 364 },
+    jisb5: { w: 182, h: 257 },
+    // Google Docs extras
+    "10x15": { w: 254, h: 381 },
+    "8x13": { w: 203.2, h: 330.2 },
   };
   
   // Check portrait
   for (const [name, dims] of Object.entries(formats)) {
     if (Math.abs(widthMm - dims.w) < tolerance && Math.abs(heightMm - dims.h) < tolerance) {
-      return name as any;
+      return name;
     }
   }
   
   // Check landscape (swap dimensions)
   for (const [name, dims] of Object.entries(formats)) {
     if (Math.abs(widthMm - dims.h) < tolerance && Math.abs(heightMm - dims.w) < tolerance) {
-      return name as any;
+      return name;
     }
   }
   
-  return 'custom';
+  return 'letter'; // Default to Letter instead of 'custom'
 }
 
 /**
@@ -334,7 +347,7 @@ export interface ParsedContent {
     hasEditableText: boolean;
     hasImages: boolean;
     fileType: 'pdf' | 'docx';
-    detectedFormat?: 'letter' | 'legal' | 'tabloid' | 'a3' | 'a4' | 'a5' | 'b4' | 'b5' | 'executive' | 'folio' | 'custom';
+    detectedFormat?: string;
     dimensions?: { width: number; height: number };
   };
   pages?: string[]; // Multiple page HTML strings
@@ -342,8 +355,8 @@ export interface ParsedContent {
 }
 
 /**
- * Parse DOCX with enhanced semantic structure + approximate positioning
- * Preserves: text, formatting, images, tables, layout
+ * Parse DOCX with enhanced semantic structure for EDITING
+ * Produces clean editable HTML without transforms or absolute positioning
  */
 export async function parseDOCX(
   file: File,
@@ -351,14 +364,14 @@ export async function parseDOCX(
 ): Promise<ParsedContent> {
   onProgress?.('Rendering DOCX document...');
   
-  // Create temporary container with A4 dimensions
+  // Create temporary container 
   const container = document.createElement('div');
   container.style.position = 'absolute';
   container.style.left = '-9999px';
   container.style.width = `${CANVAS_WIDTH_CM}cm`;
   container.style.maxWidth = `${CANVAS_WIDTH_CM}cm`;
   container.style.minHeight = `${CANVAS_HEIGHT_CM}cm`;
-  container.style.padding = '2cm';
+  container.style.padding = '0';
   container.style.boxSizing = 'border-box';
   document.body.appendChild(container);
 
@@ -375,60 +388,46 @@ export async function parseDOCX(
       renderFooters: true,
       renderFootnotes: true,
       renderEndnotes: true,
-      useBase64URL: true, // Embed images as base64
+      useBase64URL: true,
       debug: false,
     });
 
     onProgress?.('Processing document structure...');
 
-    // Measure actual content dimensions
-    const contentWidth = container.scrollWidth;
-    const contentHeight = container.scrollHeight;
-    
-    // Calculate scale to fit within canvas (with padding)
-    const availableWidth = CANVAS_WIDTH_PX - (2 * PADDING_PX);
-    const availableHeight = CANVAS_HEIGHT_PX - (2 * PADDING_PX);
-    
-    let scale = 1.0;
-    if (contentWidth > availableWidth || contentHeight > availableHeight) {
-      const scaleX = availableWidth / contentWidth;
-      const scaleY = availableHeight / contentHeight;
-      scale = Math.min(scaleX, scaleY);
-    }
-    
-    // Extract rendered HTML
+    // Extract the rendered HTML - keep it clean and editable
     let html = container.innerHTML;
     
-    // Always wrap with proper scaling
-    html = `
-      <div class="docx-page-wrapper" style="
-        width: 100%;
-        height: 100%;
-        max-width: 100%;
-        max-height: 100%;
-        overflow: hidden;
-        position: relative;
-      ">
-        <div class="docx-page" style="
-          transform: scale(${scale});
-          transform-origin: top left;
-          width: ${contentWidth}px;
-          max-width: 100%;
-        ">
-          ${html}
-        </div>
-      </div>
-    `;
+    // Remove any absolute positioning or transforms that would break editing
+    html = html.replace(/position:\s*absolute/gi, 'position: relative');
+    html = html.replace(/transform:\s*scale\([^)]+\)/gi, '');
+    
+    // Ensure all text elements are editable
+    html = html.replace(/contenteditable="false"/gi, '');
     
     // Check if content has images
-    const hasImages = container.innerHTML.includes('<img') || container.innerHTML.includes('base64');
-    
-    // Check if content is editable (has text content)
+    const hasImages = html.includes('<img') || html.includes('base64');
     const textContent = container.textContent || '';
     const isEditable = textContent.trim().length > 0;
-    
-    // Estimate page count
+    const contentHeight = container.scrollHeight;
     const estimatedPages = Math.max(1, Math.ceil(contentHeight / CANVAS_HEIGHT_PX));
+    
+    // Detect format - DOCX files from Word default to Letter, from Google Docs could vary
+    // Check for page size hints in the rendered content
+    let detectedFormat = 'letter'; // Default for DOCX
+    const sections = container.querySelectorAll('section');
+    if (sections.length > 0) {
+      const firstSection = sections[0] as HTMLElement;
+      const sectionWidth = firstSection.offsetWidth;
+      const sectionHeight = firstSection.offsetHeight;
+      if (sectionWidth > 0 && sectionHeight > 0) {
+        // Convert px to approximate mm (96dpi)
+        const widthMm = (sectionWidth / 96) * 25.4;
+        const heightMm = (sectionHeight / 96) * 25.4;
+        if (Math.abs(widthMm - 210) < 15 && Math.abs(heightMm - 297) < 20) {
+          detectedFormat = 'a4';
+        }
+      }
+    }
     
     // Clean up
     document.body.removeChild(container);
@@ -442,6 +441,7 @@ export async function parseDOCX(
         hasEditableText: isEditable,
         hasImages,
         fileType: 'docx',
+        detectedFormat,
       }
     };
   } catch (error) {
