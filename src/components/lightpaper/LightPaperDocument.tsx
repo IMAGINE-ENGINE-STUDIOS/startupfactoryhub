@@ -115,7 +115,12 @@ export function LightPaperDocument({
     <p style="font-size: 14pt; color: inherit;">Start writing your document...</p>
   `);
   const [showSignDialog, setShowSignDialog] = useState(false);
-  const [signatures, setSignatures] = useState<Array<{type: "draw" | "text", data: string, id: string}>>([]);
+  const [signatures, setSignatures] = useState<Array<{type: "draw" | "text", data: string, id: string}>>(() => {
+    try {
+      const saved = localStorage.getItem('lightpaper-signatures');
+      return saved ? JSON.parse(saved) : [];
+    } catch { return []; }
+  });
   const [signatureMode, setSignatureMode] = useState<"draw" | "text">("draw");
   const [textSignature, setTextSignature] = useState("");
   const [isDrawingSignature, setIsDrawingSignature] = useState(false);
@@ -1024,13 +1029,17 @@ export function LightPaperDocument({
   };
 
   const insertSignature = (signature: {type: "draw" | "text", data: string, id: string}) => {
-    // Create a unique copy for each placement
     setDraggingSignature({ ...signature, id: Date.now().toString() });
     setShowSignDialog(false);
-    toast.info("Tap/click on the document to place the signature. Press Escape to cancel.");
+    toast.info("Click/tap on the document to place the signature. Press Escape to cancel.");
   };
 
-  // Handle signature placement with both mouse and touch support
+  // Persist signatures to localStorage
+  useEffect(() => {
+    try { localStorage.setItem('lightpaper-signatures', JSON.stringify(signatures)); } catch {}
+  }, [signatures]);
+
+  // Handle signature placement — single placement then exit
   useEffect(() => {
     if (!draggingSignature || !containerRef.current) return;
 
@@ -1039,13 +1048,9 @@ export function LightPaperDocument({
 
     const getPositionFromEvent = (e: MouseEvent | TouchEvent) => {
       const pageRect = pageElement.getBoundingClientRect();
-      const clientX = 'touches' in e ? e.touches[0]?.clientX ?? e.changedTouches[0]?.clientX : e.clientX;
-      const clientY = 'touches' in e ? e.touches[0]?.clientY ?? e.changedTouches[0]?.clientY : e.clientY;
-      return {
-        x: clientX - pageRect.left,
-        y: clientY - pageRect.top,
-        pageRect
-      };
+      const clientX = 'touches' in e ? (e.touches[0]?.clientX ?? e.changedTouches[0]?.clientX) : e.clientX;
+      const clientY = 'touches' in e ? (e.touches[0]?.clientY ?? e.changedTouches[0]?.clientY) : e.clientY;
+      return { x: clientX - pageRect.left, y: clientY - pageRect.top, pageRect };
     };
 
     const handlePointerMove = (e: MouseEvent | TouchEvent) => {
@@ -1057,16 +1062,16 @@ export function LightPaperDocument({
       if (!draggingSignature) return;
       e.preventDefault();
       e.stopPropagation();
-      
+
       const { x, y, pageRect } = getPositionFromEvent(e);
       const marginPx = MARGIN_CM * CM_TO_PX;
       const sigWidth = 120;
       const sigHeight = 40;
-      
+
+      // Place centered on pointer position
       const constrainedX = Math.max(marginPx, Math.min(pageRect.width - marginPx - sigWidth, x - sigWidth / 2));
       const constrainedY = Math.max(marginPx, Math.min(pageRect.height - marginPx - sigHeight, y - sigHeight / 2));
 
-      // Create signature element
       const signatureElement = document.createElement('div');
       signatureElement.contentEditable = "false";
       signatureElement.id = `sig-placed-${Date.now()}`;
@@ -1087,17 +1092,9 @@ export function LightPaperDocument({
       `;
       signatureElement.classList.add('signature-element');
 
-      // Auto-hide border after 3s
-      setTimeout(() => {
-        signatureElement.style.border = '1px solid transparent';
-      }, 3000);
-
-      signatureElement.addEventListener('mouseenter', () => {
-        signatureElement.style.border = '2px dashed #3b82f6';
-      });
-      signatureElement.addEventListener('mouseleave', () => {
-        signatureElement.style.border = '1px solid transparent';
-      });
+      setTimeout(() => { signatureElement.style.border = '1px solid transparent'; }, 3000);
+      signatureElement.addEventListener('mouseenter', () => { signatureElement.style.border = '2px dashed #3b82f6'; });
+      signatureElement.addEventListener('mouseleave', () => { signatureElement.style.border = '1px solid transparent'; });
 
       if (draggingSignature.type === "draw") {
         const img = document.createElement('img');
@@ -1113,42 +1110,31 @@ export function LightPaperDocument({
         signatureElement.style.whiteSpace = 'nowrap';
       }
 
-      // Drag functionality (mouse + touch)
-      let isDragging = false;
-      let offsetX = 0;
-      let offsetY = 0;
+      // Drag functionality
+      let isDrag = false;
+      let offX = 0, offY = 0;
 
       const startDrag = (ev: MouseEvent | TouchEvent) => {
-        ev.preventDefault();
-        ev.stopPropagation();
-        isDragging = true;
+        ev.preventDefault(); ev.stopPropagation();
+        isDrag = true;
         const rect = signatureElement.getBoundingClientRect();
         const cx = 'touches' in ev ? ev.touches[0].clientX : ev.clientX;
         const cy = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
-        offsetX = cx - rect.left;
-        offsetY = cy - rect.top;
+        offX = cx - rect.left; offY = cy - rect.top;
         signatureElement.style.cursor = 'grabbing';
       };
-
       const moveDrag = (ev: MouseEvent | TouchEvent) => {
-        if (!isDragging) return;
-        ev.preventDefault();
+        if (!isDrag) return; ev.preventDefault();
         const pRect = pageElement.getBoundingClientRect();
         const cx = 'touches' in ev ? ev.touches[0].clientX : ev.clientX;
         const cy = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
-        let newX = cx - pRect.left - offsetX;
-        let newY = cy - pRect.top - offsetY;
+        let newX = cx - pRect.left - offX, newY = cy - pRect.top - offY;
         const sRect = signatureElement.getBoundingClientRect();
         newX = Math.max(0, Math.min(newX, pRect.width - sRect.width));
         newY = Math.max(0, Math.min(newY, pRect.height - sRect.height));
-        signatureElement.style.left = `${newX}px`;
-        signatureElement.style.top = `${newY}px`;
+        signatureElement.style.left = `${newX}px`; signatureElement.style.top = `${newY}px`;
       };
-
-      const endDrag = () => {
-        isDragging = false;
-        signatureElement.style.cursor = 'move';
-      };
+      const endDrag = () => { isDrag = false; signatureElement.style.cursor = 'move'; };
 
       signatureElement.addEventListener('mousedown', startDrag);
       signatureElement.addEventListener('touchstart', startDrag, { passive: false });
@@ -1157,7 +1143,6 @@ export function LightPaperDocument({
       document.addEventListener('mouseup', endDrag);
       document.addEventListener('touchend', endDrag);
 
-      // Double-click/tap to remove
       signatureElement.addEventListener('dblclick', () => {
         pageElement.removeChild(signatureElement);
         document.removeEventListener('mousemove', moveDrag);
@@ -1168,10 +1153,11 @@ export function LightPaperDocument({
       });
 
       pageElement.appendChild(signatureElement);
-      toast.success("Signature placed! Double-tap to remove. You can place more or press Escape.");
-      
-      // Stay in placement mode - don't reset dragging state
-      // User can keep clicking to add more of the same signature
+      toast.success("Signature placed! Double-tap to remove.");
+
+      // Single placement — exit placement mode immediately
+      setDraggingSignature(null);
+      setSignaturePreviewPosition(null);
     };
 
     const handleEscape = (e: KeyboardEvent) => {
@@ -2716,24 +2702,16 @@ export function LightPaperDocument({
               </div>
             )}
             
-            {/* Done placing signatures button */}
-            {draggingSignature && (
+            {/* Signature placement indicator */}
+            {draggingSignature && !signaturePreviewPosition && (
               <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[200] flex gap-2">
                 <Button 
                   size="sm" 
-                  variant="default"
-                  onClick={(e) => { e.stopPropagation(); setDraggingSignature(null); setSignaturePreviewPosition(null); }}
-                  className="shadow-lg"
-                >
-                  ✓ Done Placing
-                </Button>
-                <Button 
-                  size="sm" 
                   variant="outline"
-                  onClick={(e) => { e.stopPropagation(); setShowSignDialog(true); setDraggingSignature(null); setSignaturePreviewPosition(null); }}
+                  onClick={(e) => { e.stopPropagation(); setDraggingSignature(null); setSignaturePreviewPosition(null); }}
                   className="shadow-lg bg-background"
                 >
-                  + Add Different Signature
+                  ✕ Cancel
                 </Button>
               </div>
             )}
