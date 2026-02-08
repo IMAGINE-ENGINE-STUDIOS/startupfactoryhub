@@ -1,15 +1,13 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, Command, HelpCircle, Upload, Plus, Languages, TrendingUp } from "lucide-react";
+import { FileText, Table, Presentation, Command, HelpCircle, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FolderOpen } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
-
 import AIAssistant from "@/components/AIAssistant";
-
 import { ScientificCalculator } from "@/components/ScientificCalculator";
 import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
@@ -17,11 +15,6 @@ import { QuickNavigation } from "@/components/lightpaper/QuickNavigation";
 import { FileUploadDialog } from "@/components/lightpaper/FileUploadDialog";
 import { LightPaperProject, ProjectType } from "@/hooks/useLightPaperProjects";
 import { DocumentLoadingSkeleton, SpreadsheetLoadingSkeleton, PresentationLoadingSkeleton } from "@/components/lightpaper/LoadingSkeleton";
-import AISummaryCard from "@/components/AISummaryCard";
-import AITranslator from "@/components/AITranslator";
-import SentimentAnalyzer from "@/components/SentimentAnalyzer";
-import DocumentAnalyzer from "@/components/DocumentAnalyzer";
-import TaskAutomation from "@/components/TaskAutomation";
 
 export default function LightPaper() {
   const navigate = useNavigate();
@@ -36,12 +29,8 @@ export default function LightPaper() {
   const [isTabLoading, setIsTabLoading] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadedContent, setUploadedContent] = useState<{content: string, title: string} | null>(null);
-  const [showAIFeaturesMenu, setShowAIFeaturesMenu] = useState(false);
-  const [showSummary, setShowSummary] = useState(false);
-  const [showTranslate, setShowTranslate] = useState(false);
-  const [showSentiment, setShowSentiment] = useState(false);
-  const [showDocAnalyzer, setShowDocAnalyzer] = useState(false);
-  const [showTaskAutomation, setShowTaskAutomation] = useState(false);
+
+
   
 
   // Keyboard shortcut for quick navigation (Ctrl+K or Cmd+K)
@@ -222,156 +211,5 @@ export default function LightPaper() {
         }}
       />
 
-      {/* Floating AI Features Menu */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button
-          size="lg"
-          className="rounded-full h-14 w-14 shadow-2xl"
-          onClick={() => setShowAIFeaturesMenu(!showAIFeaturesMenu)}
-        >
-          <Plus className="h-6 w-6" />
-        </Button>
-        
-        {showAIFeaturesMenu && (
-          <div className="absolute bottom-16 right-0 tech-card border-0 rounded-lg shadow-2xl p-3 space-y-2 min-w-[200px]">
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start gap-2" 
-              onClick={() => {
-                setShowSummary(true);
-                setShowAIFeaturesMenu(false);
-              }}
-            >
-              <FileText className="h-4 w-4" />
-              Summarize Text
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start gap-2" 
-              onClick={() => {
-                setShowTranslate(true);
-                setShowAIFeaturesMenu(false);
-              }}
-            >
-              <Languages className="h-4 w-4" />
-              Translate Text
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start gap-2" 
-              onClick={() => {
-                setShowSentiment(true);
-                setShowAIFeaturesMenu(false);
-              }}
-            >
-              <TrendingUp className="h-4 w-4" />
-              Analyze Sentiment
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start gap-2" 
-              onClick={() => {
-                setShowDocAnalyzer(true);
-                setShowAIFeaturesMenu(false);
-              }}
-            >
-              <FileText className="h-4 w-4" />
-              Document Analysis
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start gap-2" 
-              onClick={() => {
-                setShowTaskAutomation(true);
-                setShowAIFeaturesMenu(false);
-              }}
-            >
-              <Command className="h-4 w-4" />
-              Task Automation
-            </Button>
-          </div>
-        )}
-      </div>
-
-      {/* AI Feature Dialogs */}
-      {showSummary && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="tech-card border-0 rounded-lg shadow-xl p-6 max-w-2xl w-full">
-            <AISummaryCard 
-              text="Enter your text to summarize" 
-              sourceType="document"
-            />
-            <Button 
-              variant="outline" 
-              onClick={() => setShowSummary(false)}
-              className="mt-4"
-            >
-              Close
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {showTranslate && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="tech-card border-0 rounded-lg shadow-xl p-6 max-w-2xl w-full">
-            <AITranslator 
-              text="Enter text to translate"
-            />
-            <Button 
-              variant="outline" 
-              onClick={() => setShowTranslate(false)}
-              className="mt-4"
-            >
-              Close
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {showSentiment && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="tech-card border-0 rounded-lg shadow-xl p-6 max-w-2xl w-full">
-            <SentimentAnalyzer />
-            <Button 
-              variant="outline" 
-              onClick={() => setShowSentiment(false)}
-              className="mt-4"
-            >
-              Close
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {showDocAnalyzer && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="tech-card border-0 rounded-lg shadow-xl p-6 max-w-2xl w-full">
-            <DocumentAnalyzer />
-            <Button 
-              variant="outline" 
-              onClick={() => setShowDocAnalyzer(false)}
-              className="mt-4"
-            >
-              Close
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {showTaskAutomation && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="tech-card border-0 rounded-lg shadow-xl p-6 max-w-2xl w-full">
-            <TaskAutomation />
-            <Button 
-              variant="outline" 
-              onClick={() => setShowTaskAutomation(false)}
-              className="mt-4"
-            >
-              Close
-            </Button>
-          </div>
-        </div>
-      )}
     </div>;
 }

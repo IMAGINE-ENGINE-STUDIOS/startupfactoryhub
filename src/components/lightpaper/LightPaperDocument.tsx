@@ -2208,12 +2208,12 @@ export function LightPaperDocument({
         <style>{`
           .page {
             width: ${getPageDimensions().width}cm;
-            height: ${getPageDimensions().height}cm;
+            min-height: ${getPageDimensions().height}cm;
             max-width: ${getPageDimensions().width}cm;
             padding: 0;
             background: ${isDarkMode ? 'black' : 'white'};
             box-shadow: 0 0 20px rgba(0,0,0,0.2);
-            overflow: hidden;
+            overflow: visible;
             position: relative;
             box-sizing: border-box;
             transform: scale(${zoomLevel});
@@ -2225,10 +2225,10 @@ export function LightPaperDocument({
           
           .page-content {
             width: 100%;
-            height: 100%;
+            min-height: 100%;
             padding: ${MARGIN_CM}cm;
             box-sizing: border-box;
-            overflow: auto;
+            overflow: visible;
             position: relative;
             display: block;
           }
@@ -2271,10 +2271,7 @@ export function LightPaperDocument({
           .page .uploaded-content,
           .page > div {
             width: 100%;
-            height: 100%;
             max-width: 100%;
-            max-height: 100%;
-            overflow: hidden;
             box-sizing: border-box;
           }
           

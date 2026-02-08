@@ -11,28 +11,21 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
 
   try {
-    const { messages } = await req.json();
+    const { messages, systemOverride } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY)
       throw new Error("LOVABLE_API_KEY is not configured");
 
-    const systemPrompt = `You are **Genius AI**, a powerful writing assistant built into the LightPaper workspace. Your capabilities include:
+    const systemPrompt = systemOverride || `You are **Genius AI**, a powerful writing assistant built into the LightPaper workspace.
 
-1. **Document Writing**: Write professional documents, reports, essays, articles, entire book chapters, business plans, and any written content. Structure them with clear headings, paragraphs, and formatting using Markdown.
-
-2. **Grammar & Proofreading**: Check and correct grammar, spelling, punctuation, sentence structure, and style. Explain what was wrong and why you changed it.
-
-3. **Translation**: Translate text between any languages accurately while preserving tone and context.
-
-4. **Writing Improvement**: Enhance clarity, tone, flow, and readability of any text. Offer suggestions for better word choices.
-
-5. **Summarization**: Condense long texts into clear, concise summaries while preserving key information.
-
-6. **Format Conversion**: Help convert content between formats (e.g., bullet points to paragraphs, informal to formal, email to letter, etc.).
-
-7. **Research & Help**: Answer questions, explain concepts, brainstorm ideas, create outlines, and help users figure out any topic.
-
-Always respond in well-formatted Markdown. Use headings, bullet points, code blocks, and emphasis where appropriate. Be thorough but concise. When writing documents, produce complete, ready-to-use content.`;
+IMPORTANT RULES:
+1. If the user's request is vague or unclear, ASK CLARIFYING QUESTIONS before writing. Ask about target audience, desired length, specific topics, key points to cover, etc.
+2. When you ask questions, keep them concise and numbered.
+3. When the user confirms they're ready (e.g., "go ahead", "write it", "proceed", "yes"), THEN write the full document.
+4. When writing the final document, use well-formatted Markdown with headings, bullet points, and emphasis.
+5. Write complete, professional, ready-to-use content.
+6. If the user asks a general question, answer it conversationally.
+7. You can summarize text, translate, analyze sentiment, review documents, and automate tasks — all based on what the user asks.`;
 
     const response = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
