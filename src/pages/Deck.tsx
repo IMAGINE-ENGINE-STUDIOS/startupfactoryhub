@@ -247,13 +247,13 @@ export default function Deck() {
             </h1>
             
             <p className="text-xl md:text-2xl font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-4 print:text-teal-700">
-              End-to-End Smart Platform for Consistent Workflow
+              The Online Hybrid Accelerator Platform Powered by A.I.
             </p>
             
             {/* Key Value Proposition */}
             <div className="max-w-3xl mb-4">
               <p className="text-base md:text-lg text-slate-300 leading-relaxed print:text-gray-700">
-                A <span className="text-teal-400 font-semibold">hybrid digital-physical</span> execution platform with global locations, AI-driven workflows, and human expertise—enabling founders to build consistently from idea to scale.
+                A <span className="text-teal-400 font-semibold">hybrid digital-physical</span> execution platform with global locations, <span className="text-cyan-400 font-semibold">AI-driven workflows</span>, and human expertise—enabling founders to build consistently from <span className="text-teal-400 font-semibold">idea to scale</span>.
               </p>
             </div>
             
@@ -354,7 +354,7 @@ export default function Deck() {
             {/* Differentiator - Hybrid Model */}
             <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-teal-500/10 border border-teal-500/30 rounded-lg px-6 py-3 max-w-3xl print:bg-gray-50 print:border-gray-300">
               <p className="text-sm text-slate-300 print:text-gray-700">
-                <span className="text-teal-400 font-semibold print:text-teal-700">Hybrid Philosophy:</span> Digital infrastructure meets physical presence. We don't just provide software—we provide <span className="text-cyan-400">workspaces, mentorship on-site, and community</span> across 6 global locations.
+                <span className="text-teal-400 font-semibold print:text-teal-700">Hybrid A.I. Accelerator:</span> Not just software—an <span className="text-cyan-400">intelligent operating system</span> that merges AI automation, physical workspaces, and human expertise into one continuous execution engine across global locations.
               </p>
             </div>
           </div>
@@ -383,14 +383,14 @@ export default function Deck() {
               <span className="text-sm font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">End-to-End Execution</span>
               <div className="w-3 h-3 bg-teal-500 rotate-45" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 print:text-black">How We're Different</h2>
-            <p className="text-lg text-slate-400 text-center mb-6 print:text-gray-600">Consistent Workflow, Global Scale</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 print:text-black">The Online Hybrid Accelerator</h2>
+            <p className="text-lg text-slate-400 text-center mb-6 print:text-gray-600">AI-Powered • Hybrid Execution • Global Scale</p>
             
             {/* Core Philosophy - Big Statement */}
             <div className="max-w-4xl w-full mb-6">
               <div className="bg-slate-900/60 border-2 border-teal-500/40 rounded-xl p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
                 <p className="text-lg text-center text-slate-200 leading-relaxed print:text-gray-700">
-                  <span className="text-teal-400 font-bold print:text-teal-700">We are not a 3-month program.</span> We are a <span className="text-cyan-400 font-semibold">permanent operating system</span> for your startup—combining AI-driven digital infrastructure with physical hubs, human expertise, and capital access in one unified platform.
+                  <span className="text-teal-400 font-bold print:text-teal-700">We are not a 3-month program.</span> We are an <span className="text-cyan-400 font-semibold">AI-powered hybrid accelerator platform</span>—a permanent operating system that combines intelligent automation, physical hubs, mentorship, and capital access into one continuous execution engine for founders worldwide.
                 </p>
               </div>
             </div>
@@ -400,19 +400,19 @@ export default function Deck() {
               <div className="bg-slate-900/60 border border-teal-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
                 <div className="flex items-center gap-2 mb-3">
                   <Zap className="h-5 w-5 text-teal-400 print:text-teal-700" />
-                  <span className="text-sm font-bold text-teal-400 print:text-teal-700">Continuous Execution</span>
+                  <span className="text-sm font-bold text-teal-400 print:text-teal-700">AI-Driven Workflows</span>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">
-                  Support founders <span className="text-white">before, during, and after</span> acceleration. No graduation—just consistent growth alongside the startup.
+                  Intelligent automation powers every stage—from <span className="text-white">AI matching and roadmaps</span> to real-time analytics. No manual gaps, just continuous execution.
                 </p>
               </div>
               <div className="bg-slate-900/60 border border-cyan-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
                 <div className="flex items-center gap-2 mb-3">
                   <Globe className="h-5 w-5 text-cyan-400 print:text-cyan-700" />
-                  <span className="text-sm font-bold text-cyan-400 print:text-cyan-700">Hybrid Model</span>
+                  <span className="text-sm font-bold text-cyan-400 print:text-cyan-700">Digital + Physical Hybrid</span>
                 </div>
                 <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">
-                  <span className="text-white">6 physical hub cities</span> + 5,800 partner locations worldwide. Digital platform meets real-world community.
+                  <span className="text-white">Online platform + 4 flagship hubs</span> + 5,800 partner locations. Build anywhere with local community and global reach.
                 </p>
               </div>
               <div className="bg-slate-900/60 border border-purple-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
@@ -488,7 +488,7 @@ export default function Deck() {
                   <div className="flex-1 h-px bg-gradient-to-r from-teal-500/40 to-transparent print:bg-gray-300" />
                 </div>
                 <p className="text-sm text-slate-300 leading-relaxed print:text-gray-600">
-                  <span className="text-teal-400 font-semibold print:text-teal-700">Unlike traditional accelerators:</span> Startup Factory Hub operates as a continuous execution environment, supporting founders <span className="text-cyan-400 font-medium print:text-cyan-700">before, during, and after</span> acceleration—with a global, hybrid-first model that scales alongside the startup.
+                  <span className="text-teal-400 font-semibold print:text-teal-700">The first online hybrid accelerator:</span> AI handles the heavy lifting—matching, analytics, roadmaps—while human mentors and physical hubs deliver <span className="text-cyan-400 font-medium print:text-cyan-700">real-world execution support</span>. No graduation, no time limits—just a permanent growth engine that scales with your startup.
                 </p>
               </div>
             </div>
