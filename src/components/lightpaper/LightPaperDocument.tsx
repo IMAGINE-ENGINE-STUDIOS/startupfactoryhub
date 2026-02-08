@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType, ChevronLeft, ChevronRight } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType, ChevronLeft, ChevronRight, Volume2 } from "lucide-react";
 import { toast } from "sonner";
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
@@ -28,6 +28,7 @@ import { FileUploadDialog } from "./FileUploadDialog";
 import { OverlayTextBox } from "./OverlayTextBox";
 import { AIToolbar } from "./AIToolbar";
 import { PageManagementPanel } from "./PageManagementPanel";
+import { TextReader } from "./TextReader";
 import GeniusAIBubble from "./GeniusAIBubble";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -125,6 +126,7 @@ export function LightPaperDocument({
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [showSearchDialog, setShowSearchDialog] = useState(false);
+  const [showTextReader, setShowTextReader] = useState(false);
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
   const [searchMatches, setSearchMatches] = useState<number[]>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
@@ -1900,10 +1902,13 @@ export function LightPaperDocument({
               </Select>
             </div>
 
-            {/* Signature */}
+            {/* Signature & Read Aloud */}
             <div className="flex gap-0.5 border-l pl-1">
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSignDialog(true)} title="Add Signature">
                 <PenLine className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowTextReader(true)} title="Read Aloud">
+                <Volume2 className="h-4 w-4" />
               </Button>
             </div>
 
@@ -2132,6 +2137,7 @@ export function LightPaperDocument({
               actions: [
                 { icon: Calculator, label: "Calculator", onClick: () => setShowCalculator(true), priority: "low" },
                 { icon: Search, label: "Find", onClick: () => setShowSearchDialog(true), priority: "medium" },
+                { icon: Volume2, label: "Read Aloud", onClick: () => setShowTextReader(true), priority: "medium" },
                 { icon: Highlighter, label: "Highlight", onClick: () => activateHighlighter(selectedHighlight), priority: "low" },
                 { icon: Keyboard, label: "Shortcuts", onClick: () => setShowShortcutsDialog(true), priority: "low" },
               ]
@@ -2861,7 +2867,19 @@ export function LightPaperDocument({
         type="document"
       />
 
-      {/* Signature Dialog */}
+      {/* Text Reader */}
+      <TextReader
+        isOpen={showTextReader}
+        onClose={() => setShowTextReader(false)}
+        getDocumentText={() => {
+          // Gather text from all pages
+          const allPages = [...pages];
+          if (editorRef.current) allPages[currentPage - 1] = editorRef.current.innerHTML;
+          const tempDiv = document.createElement('div');
+          return allPages.map(p => { tempDiv.innerHTML = p || ''; return tempDiv.textContent || ''; }).join('\n\n');
+        }}
+      />
+
       <Dialog open={showSignDialog} onOpenChange={setShowSignDialog}>
         <DialogContent className="max-w-2xl bg-background">
           <DialogHeader>
