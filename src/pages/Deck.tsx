@@ -1408,7 +1408,45 @@ export default function Deck() {
           </div>
         </SlideContainer>
 
-        {/* SLIDE 9: Contact */}
+        {/* SLIDE 9: Team */}
+        <SlideContainer>
+          <div className="flex flex-col items-center">
+            <div className="flex items-center gap-4 mb-6">
+              <IconBadge icon={Users} color="teal" />
+              <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">Leadership Team</h2>
+            </div>
+            <p className="text-lg text-slate-400 mb-8 text-center max-w-2xl print:text-gray-600">
+              A global team of innovators and industry leaders dedicated to empowering the next generation of deep tech startups.
+            </p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-4xl">
+              {[
+                { name: "Khalia Padilla", role: "Managing Partner & Founder", location: null, initials: "KP" },
+                { name: "Ricardo Font", role: "Managing Partner & Founder", location: null, initials: "RF" },
+                { name: "Steven Lidgreen", role: "Managing Partner", location: "SFH Tokyo", initials: "SL" },
+                { name: "Pablo Duenas", role: "Managing Partner", location: "SFH Chile", initials: "PD" },
+                { name: "Gary Jinks", role: "Strategic Advisor", location: null, initials: "GJ" },
+                { name: "Hiroaki Tanaka", role: "Managing Director", location: "SFH Tokyo", initials: "HT" },
+              ].map((member, i) => (
+                <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-4 flex flex-col items-center text-center hover:border-teal-500/40 transition-colors print:bg-gray-50 print:border-gray-300">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-500/30 to-cyan-500/30 border-2 border-teal-500/40 flex items-center justify-center mb-3">
+                    <span className="text-lg font-bold text-teal-300">{member.initials}</span>
+                  </div>
+                  <h3 className="text-sm md:text-base font-bold text-white print:text-black">{member.name}</h3>
+                  <p className="text-[10px] md:text-xs text-teal-400 font-medium mt-1">{member.role}</p>
+                  {member.location && (
+                    <div className="flex items-center gap-1 mt-2">
+                      <MapPin className="h-3 w-3 text-cyan-400" />
+                      <span className="text-[10px] text-cyan-400">{member.location}</span>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        </SlideContainer>
+
+        {/* SLIDE 10: Contact */}
         <SlideContainer className="print:break-after-avoid">
           <div className="flex flex-col items-center text-center">
             <div className="flex items-center gap-4 mb-4">
