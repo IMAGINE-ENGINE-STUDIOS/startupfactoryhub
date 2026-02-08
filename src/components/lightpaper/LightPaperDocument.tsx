@@ -1250,34 +1250,43 @@ export function LightPaperDocument({
   useEffect(() => {
     if (!draggingSignature || !containerRef.current) return;
 
-    const pageElement = containerRef.current.querySelector('.page') as HTMLElement;
-    if (!pageElement) return;
+    const container = containerRef.current;
+    const pages = Array.from(container.querySelectorAll('.page')) as HTMLElement[];
+    if (pages.length === 0) return;
 
-    const getPositionFromEvent = (e: MouseEvent | TouchEvent) => {
-      const pageRect = pageElement.getBoundingClientRect();
-      const clientX = 'touches' in e ? (e.touches[0]?.clientX ?? e.changedTouches[0]?.clientX) : e.clientX;
-      const clientY = 'touches' in e ? (e.touches[0]?.clientY ?? e.changedTouches[0]?.clientY) : e.clientY;
-      return { x: clientX - pageRect.left, y: clientY - pageRect.top, pageRect };
+    const getPageFromPoint = (clientX: number, clientY: number) => {
+      for (const page of pages) {
+        const rect = page.getBoundingClientRect();
+        if (clientY >= rect.top && clientY <= rect.bottom && clientX >= rect.left && clientX <= rect.right) {
+          return page;
+        }
+      }
+      // Find nearest page
+      let closest = pages[0];
+      let minDist = Infinity;
+      for (const page of pages) {
+        const rect = page.getBoundingClientRect();
+        const cy = rect.top + rect.height / 2;
+        const dist = Math.abs(clientY - cy);
+        if (dist < minDist) { minDist = dist; closest = page; }
+      }
+      return closest;
     };
 
     const handlePointerMove = (e: MouseEvent | TouchEvent) => {
-      const pos = getPositionFromEvent(e);
-      setSignaturePreviewPosition({ x: pos.x, y: pos.y });
+      const clientX = 'touches' in e ? (e.touches[0]?.clientX ?? 0) : e.clientX;
+      const clientY = 'touches' in e ? (e.touches[0]?.clientY ?? 0) : e.clientY;
+      const page = getPageFromPoint(clientX, clientY);
+      const pageRect = page.getBoundingClientRect();
+      setSignaturePreviewPosition({ x: clientX - pageRect.left, y: clientY - pageRect.top });
     };
 
-    const placeSignature = (e: MouseEvent | TouchEvent) => {
-      if (!draggingSignature) return;
-      e.preventDefault();
-      e.stopPropagation();
-
-      const { x, y, pageRect } = getPositionFromEvent(e);
-      const marginPx = MARGIN_CM * CM_TO_PX;
+    const createSignatureElement = (sig: typeof draggingSignature, parentPage: HTMLElement, x: number, y: number) => {
+      if (!sig) return;
       const sigWidth = 120;
       const sigHeight = 40;
-
-      // Place centered on pointer position
-      const constrainedX = Math.max(marginPx, Math.min(pageRect.width - marginPx - sigWidth, x - sigWidth / 2));
-      const constrainedY = Math.max(marginPx, Math.min(pageRect.height - marginPx - sigHeight, y - sigHeight / 2));
+      const placedX = x - sigWidth / 2;
+      const placedY = y - sigHeight / 2;
 
       const signatureElement = document.createElement('div');
       signatureElement.contentEditable = "false";
@@ -1288,11 +1297,10 @@ export function LightPaperDocument({
         padding: 4px 8px;
         border: 2px dashed #3b82f6;
         background: rgba(255,255,255,0.95);
-        left: ${constrainedX}px;
-        top: ${constrainedY}px;
+        left: ${Math.max(0, placedX)}px;
+        top: ${Math.max(0, placedY)}px;
         z-index: 100;
-        max-width: ${sigWidth}px;
-        min-width: 50px;
+        width: ${sigWidth}px;
         border-radius: 4px;
         user-select: none;
         touch-action: none;
@@ -1303,25 +1311,67 @@ export function LightPaperDocument({
       signatureElement.addEventListener('mouseenter', () => { signatureElement.style.border = '2px dashed #3b82f6'; });
       signatureElement.addEventListener('mouseleave', () => { signatureElement.style.border = '1px solid transparent'; });
 
-      if (draggingSignature.type === "draw") {
+      let aspectRatio = 1;
+
+      if (sig.type === "draw") {
         const img = document.createElement('img');
-        img.src = draggingSignature.data;
-        img.style.cssText = "height: 35px; width: auto; max-width: 110px; display: block; pointer-events: none;";
+        img.src = sig.data;
+        img.style.cssText = "width: 100%; height: auto; display: block; pointer-events: none;";
+        img.onload = () => { aspectRatio = img.naturalWidth / img.naturalHeight; };
         signatureElement.appendChild(img);
       } else {
         signatureElement.style.fontFamily = "cursive";
         signatureElement.style.fontSize = "18px";
         signatureElement.style.lineHeight = "35px";
-        signatureElement.textContent = draggingSignature.data;
+        signatureElement.textContent = sig.data;
         signatureElement.style.color = '#000000';
         signatureElement.style.whiteSpace = 'nowrap';
       }
 
-      // Drag functionality
+      // Resize handle (bottom-right corner, aspect-ratio locked)
+      const resizeHandle = document.createElement('div');
+      resizeHandle.style.cssText = `
+        position: absolute; bottom: -4px; right: -4px;
+        width: 10px; height: 10px; background: #3b82f6;
+        border-radius: 50%; cursor: se-resize; z-index: 110;
+        border: 2px solid white; opacity: 0; transition: opacity 0.2s;
+      `;
+      signatureElement.addEventListener('mouseenter', () => { resizeHandle.style.opacity = '1'; });
+      signatureElement.addEventListener('mouseleave', () => { resizeHandle.style.opacity = '0'; });
+      signatureElement.appendChild(resizeHandle);
+
+      // Resize logic — aspect-ratio locked
+      let isResizing = false;
+      let resizeStartX = 0, resizeStartWidth = 0;
+      const startResize = (ev: MouseEvent | TouchEvent) => {
+        ev.preventDefault(); ev.stopPropagation();
+        isResizing = true;
+        resizeStartX = 'touches' in ev ? ev.touches[0].clientX : ev.clientX;
+        resizeStartWidth = signatureElement.offsetWidth;
+      };
+      const moveResize = (ev: MouseEvent | TouchEvent) => {
+        if (!isResizing) return; ev.preventDefault();
+        const cx = 'touches' in ev ? ev.touches[0].clientX : ev.clientX;
+        const delta = cx - resizeStartX;
+        const newWidth = Math.max(50, resizeStartWidth + delta);
+        signatureElement.style.width = `${newWidth}px`;
+        // height is auto via img width:100%, so aspect ratio is preserved
+      };
+      const endResize = () => { isResizing = false; };
+      resizeHandle.addEventListener('mousedown', startResize);
+      resizeHandle.addEventListener('touchstart', startResize, { passive: false });
+      document.addEventListener('mousemove', moveResize);
+      document.addEventListener('touchmove', moveResize, { passive: false });
+      document.addEventListener('mouseup', endResize);
+      document.addEventListener('touchend', endResize);
+
+      // Drag with cross-page support
       let isDrag = false;
       let offX = 0, offY = 0;
+      let currentParent = parentPage;
 
       const startDrag = (ev: MouseEvent | TouchEvent) => {
+        if (isResizing) return;
         ev.preventDefault(); ev.stopPropagation();
         isDrag = true;
         const rect = signatureElement.getBoundingClientRect();
@@ -1331,15 +1381,29 @@ export function LightPaperDocument({
         signatureElement.style.cursor = 'grabbing';
       };
       const moveDrag = (ev: MouseEvent | TouchEvent) => {
-        if (!isDrag) return; ev.preventDefault();
-        const pRect = pageElement.getBoundingClientRect();
+        if (!isDrag || isResizing) return; ev.preventDefault();
         const cx = 'touches' in ev ? ev.touches[0].clientX : ev.clientX;
         const cy = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
-        let newX = cx - pRect.left - offX, newY = cy - pRect.top - offY;
-        const sRect = signatureElement.getBoundingClientRect();
-        newX = Math.max(0, Math.min(newX, pRect.width - sRect.width));
-        newY = Math.max(0, Math.min(newY, pRect.height - sRect.height));
-        signatureElement.style.left = `${newX}px`; signatureElement.style.top = `${newY}px`;
+
+        // Find which page the cursor is over
+        const targetPage = getPageFromPoint(cx, cy);
+        if (targetPage && targetPage !== currentParent) {
+          // Move to new page
+          currentParent.removeChild(signatureElement);
+          targetPage.appendChild(signatureElement);
+          currentParent = targetPage;
+        }
+
+        const pRect = currentParent.getBoundingClientRect();
+        let newX = cx - pRect.left - offX;
+        let newY = cy - pRect.top - offY;
+        // Allow full movement within page bounds
+        const sW = signatureElement.offsetWidth;
+        const sH = signatureElement.offsetHeight;
+        newX = Math.max(0, Math.min(newX, pRect.width - sW));
+        newY = Math.max(0, Math.min(newY, pRect.height - sH));
+        signatureElement.style.left = `${newX}px`;
+        signatureElement.style.top = `${newY}px`;
       };
       const endDrag = () => { isDrag = false; signatureElement.style.cursor = 'move'; };
 
@@ -1350,19 +1414,38 @@ export function LightPaperDocument({
       document.addEventListener('mouseup', endDrag);
       document.addEventListener('touchend', endDrag);
 
+      // Double-click to remove
       signatureElement.addEventListener('dblclick', () => {
-        pageElement.removeChild(signatureElement);
+        currentParent.removeChild(signatureElement);
         document.removeEventListener('mousemove', moveDrag);
         document.removeEventListener('touchmove', moveDrag);
         document.removeEventListener('mouseup', endDrag);
         document.removeEventListener('touchend', endDrag);
+        document.removeEventListener('mousemove', moveResize);
+        document.removeEventListener('touchmove', moveResize);
+        document.removeEventListener('mouseup', endResize);
+        document.removeEventListener('touchend', endResize);
         toast.success("Signature removed");
       });
 
-      pageElement.appendChild(signatureElement);
+      currentParent.appendChild(signatureElement);
       toast.success("Signature placed! Double-tap to remove.");
+    };
 
-      // Single placement — exit placement mode immediately
+    const placeSignature = (e: MouseEvent | TouchEvent) => {
+      if (!draggingSignature) return;
+      e.preventDefault();
+      e.stopPropagation();
+
+      const clientX = 'touches' in e ? (e.changedTouches[0]?.clientX ?? 0) : e.clientX;
+      const clientY = 'touches' in e ? (e.changedTouches[0]?.clientY ?? 0) : e.clientY;
+      const targetPage = getPageFromPoint(clientX, clientY);
+      const pageRect = targetPage.getBoundingClientRect();
+      const x = clientX - pageRect.left;
+      const y = clientY - pageRect.top;
+
+      createSignatureElement(draggingSignature, targetPage, x, y);
+
       setDraggingSignature(null);
       setSignaturePreviewPosition(null);
     };
@@ -1375,20 +1458,21 @@ export function LightPaperDocument({
       }
     };
 
-    pageElement.addEventListener('mousemove', handlePointerMove);
-    pageElement.addEventListener('touchmove', handlePointerMove as any, { passive: true });
-    pageElement.addEventListener('click', placeSignature as any);
-    pageElement.addEventListener('touchend', placeSignature as any);
+    // Listen on container (all pages) instead of single page
+    container.addEventListener('mousemove', handlePointerMove);
+    container.addEventListener('touchmove', handlePointerMove as any, { passive: true });
+    container.addEventListener('click', placeSignature as any);
+    container.addEventListener('touchend', placeSignature as any);
     document.addEventListener('keydown', handleEscape);
-    pageElement.style.cursor = 'crosshair';
+    container.style.cursor = 'crosshair';
 
     return () => {
-      pageElement.removeEventListener('mousemove', handlePointerMove);
-      pageElement.removeEventListener('touchmove', handlePointerMove as any);
-      pageElement.removeEventListener('click', placeSignature as any);
-      pageElement.removeEventListener('touchend', placeSignature as any);
+      container.removeEventListener('mousemove', handlePointerMove);
+      container.removeEventListener('touchmove', handlePointerMove as any);
+      container.removeEventListener('click', placeSignature as any);
+      container.removeEventListener('touchend', placeSignature as any);
       document.removeEventListener('keydown', handleEscape);
-      pageElement.style.cursor = 'text';
+      container.style.cursor = '';
     };
   }, [draggingSignature, isDarkMode]);
 
@@ -2959,7 +3043,7 @@ export function LightPaperDocument({
                     position: 'absolute',
                     left: signaturePreviewPosition.x,
                     top: signaturePreviewPosition.y,
-                    transform: 'translate(-50%, -100%)',
+                    transform: 'translate(-50%, -50%)',
                     pointerEvents: 'none',
                     opacity: 0.6,
                     zIndex: 1000,
