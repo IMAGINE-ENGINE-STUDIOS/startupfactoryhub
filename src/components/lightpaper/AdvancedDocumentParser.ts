@@ -376,14 +376,14 @@ export async function parseDOCX(
   document.body.appendChild(container);
 
   try {
-    // Render DOCX with full formatting preservation
+    // Render DOCX with formatting preservation but flexible width for editing
     await renderAsync(file, container, undefined, {
       className: 'docx-content',
       inWrapper: false,
-      ignoreWidth: false,
-      ignoreHeight: false,
+      ignoreWidth: true,  // Let content fill the editor width
+      ignoreHeight: true, // Let content flow naturally for editing
       ignoreFonts: false,
-      breakPages: true,
+      breakPages: false,  // Don't break pages - let editor handle pagination
       renderHeaders: true,
       renderFooters: true,
       renderFootnotes: true,
@@ -401,6 +401,11 @@ export async function parseDOCX(
     html = html.replace(/position:\s*absolute/gi, 'position: relative');
     html = html.replace(/transform:\s*scale\([^)]+\)/gi, '');
     
+    // Remove hard-coded widths from docx-preview that prevent filling the page
+    html = html.replace(/width:\s*\d+(\.\d+)?(pt|px|cm|mm|in)\s*;?/gi, '');
+    html = html.replace(/min-width:\s*\d+(\.\d+)?(pt|px|cm|mm|in)\s*;?/gi, '');
+    html = html.replace(/max-width:\s*\d+(\.\d+)?(pt|px|cm|mm|in)\s*;?/gi, '');
+    
     // Ensure all text elements are editable
     html = html.replace(/contenteditable="false"/gi, '');
     
@@ -411,8 +416,7 @@ export async function parseDOCX(
     const contentHeight = container.scrollHeight;
     const estimatedPages = Math.max(1, Math.ceil(contentHeight / CANVAS_HEIGHT_PX));
     
-    // Detect format - DOCX files from Word default to Letter, from Google Docs could vary
-    // Check for page size hints in the rendered content
+    // Detect format from section dimensions before cleanup
     let detectedFormat = 'letter'; // Default for DOCX
     const sections = container.querySelectorAll('section');
     if (sections.length > 0) {
@@ -420,11 +424,20 @@ export async function parseDOCX(
       const sectionWidth = firstSection.offsetWidth;
       const sectionHeight = firstSection.offsetHeight;
       if (sectionWidth > 0 && sectionHeight > 0) {
-        // Convert px to approximate mm (96dpi)
         const widthMm = (sectionWidth / 96) * 25.4;
         const heightMm = (sectionHeight / 96) * 25.4;
-        if (Math.abs(widthMm - 210) < 15 && Math.abs(heightMm - 297) < 20) {
-          detectedFormat = 'a4';
+        // Check common formats
+        const formatChecks: [string, number, number][] = [
+          ['a4', 210, 297], ['letter', 215.9, 279.4], ['legal', 215.9, 355.6],
+          ['a3', 297, 420], ['a5', 148, 210], ['tabloid', 279.4, 431.8],
+          ['executive', 184.15, 266.7], ['b5', 176, 250],
+        ];
+        for (const [name, w, h] of formatChecks) {
+          if ((Math.abs(widthMm - w) < 15 && Math.abs(heightMm - h) < 20) ||
+              (Math.abs(widthMm - h) < 15 && Math.abs(heightMm - w) < 20)) {
+            detectedFormat = name;
+            break;
+          }
         }
       }
     }
@@ -1085,7 +1098,9 @@ export async function parseDocument(
   
   // Route to appropriate parser
   if (detectedType === 'pdf') {
-    return parsePDF(file, onProgress);
+    // For PDFs, always use image-based rendering for reliability
+    // PDF text reconstruction via absolute positioning is fragile and breaks easily
+    return parseDocumentAsImages(file, onProgress);
   } else {
     return parseDOCX(file, (msg) => onProgress?.(msg));
   }

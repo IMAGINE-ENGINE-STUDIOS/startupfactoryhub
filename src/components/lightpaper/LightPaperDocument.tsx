@@ -87,7 +87,7 @@ interface OverlayTextBoxData {
 
 interface LightPaperDocumentProps {
   selectedProject?: LightPaperProject | null;
-  uploadedContent?: { content: string; title: string } | null;
+  uploadedContent?: { content: string; title: string; metadata?: { detectedFormat?: string; fileType?: string } } | null;
   onContentLoaded?: () => void;
 }
 
@@ -321,8 +321,8 @@ export function LightPaperDocument({
         setCurrentPage(1);
         setVisiblePage(1);
         
-        // Set format if detected
-        const detFormat = parsed.metadata?.detectedFormat || parsed.detectedFormat;
+        // Set format if detected (from JSON metadata or upload metadata)
+        const detFormat = parsed.metadata?.detectedFormat || parsed.detectedFormat || uploadedContent.metadata?.detectedFormat;
         if (detFormat && detFormat in PAGE_FORMATS) {
           setPageFormat(detFormat as PageFormat);
           toast.info(`Format: ${PAGE_FORMATS[detFormat as PageFormat]?.name || detFormat.toUpperCase()}`);
@@ -459,12 +459,28 @@ export function LightPaperDocument({
     setViewMode(false);
     setViewModeImages([]);
     setEditMode(true); // Auto-select edit mode for uploaded files
-    setDocumentContent(htmlContent);
+    
+    // Apply detected format from upload metadata
+    const detFormat = uploadedContent.metadata?.detectedFormat;
+    if (detFormat && detFormat in PAGE_FORMATS) {
+      setPageFormat(detFormat as PageFormat);
+      console.log(`[LightPaper] Applied detected format: ${detFormat}`);
+    }
+    
+    // Wrap DOCX content to fill the page width properly
+    const fileType = uploadedContent.metadata?.fileType;
+    let finalHtml = htmlContent;
+    if (fileType === 'docx' || fileType === 'pdf') {
+      // Ensure content fills the page by wrapping with proper styling
+      finalHtml = `<div style="width: 100%; min-height: 100%; font-size: 12pt; line-height: 1.5; word-wrap: break-word; overflow-wrap: break-word;">${htmlContent}</div>`;
+    }
+    
+    setDocumentContent(finalHtml);
     setTotalPages(1);
     setCurrentPage(1);
     
     if (editorRef.current) {
-      editorRef.current.innerHTML = htmlContent;
+      editorRef.current.innerHTML = finalHtml;
     }
     
     toast.success(`Document loaded`);
