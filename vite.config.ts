@@ -24,6 +24,7 @@ export default defineConfig(({ mode }) => ({
   },
   publicDir: 'public',
   build: {
+    target: 'esnext',
     rollupOptions: {
       output: {
         assetFileNames: (assetInfo) => {

@@ -287,7 +287,7 @@ export function LightPaperDocument({
 
   // Load uploaded content - ENHANCED for View Mode
   useEffect(() => {
-    if (!uploadedContent || !editorRef.current) return;
+    if (!uploadedContent) return;
     const loadContent = async () => {
     
     console.log('Loading uploaded content', uploadedContent.content.substring(0, 100));
