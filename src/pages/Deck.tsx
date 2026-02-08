@@ -1229,19 +1229,17 @@ export default function Deck() {
                         return (
                           <div key={i} className="flex-1 flex flex-col items-center">
                             <span className="text-[10px] md:text-xs font-bold text-emerald-400 mb-1">{item.revenue}</span>
-                            <div className="w-full flex justify-center">
+                            <div className="w-full flex justify-center" style={{ height: `${heightPercent}%` }}>
                               <div
                                 className={`w-10 md:w-14 bg-gradient-to-t ${item.color} rounded-t-md relative overflow-hidden`}
                                 style={{
-                                  height: '0%',
-                                  animation: `growBar 1s ease-out ${item.delay} forwards`,
-                                  ['--target-height' as string]: `${heightPercent}%`,
+                                  height: '100%',
+                                  animation: `growBarScale 1s ease-out ${item.delay} both`,
+                                  transformOrigin: 'bottom',
                                 }}
                               >
                                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0" />
                                 <div className="absolute top-0 left-0 right-0 h-0.5 bg-white/40" />
-                                {/* Shine animation */}
-                                <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/10 to-white/20 opacity-0" style={{ animation: `shimmer 2s ease-in-out ${Number(item.delay.replace('s','')) + 1}s infinite` }} />
                               </div>
                             </div>
                             <span className="text-[9px] md:text-[10px] text-slate-400 mt-1.5 font-medium">{item.year}</span>
@@ -1269,9 +1267,9 @@ export default function Deck() {
             </div>
 
             <style>{`
-              @keyframes growBar {
-                from { height: 0%; }
-                to { height: var(--target-height); }
+              @keyframes growBarScale {
+                from { transform: scaleY(0); }
+                to { transform: scaleY(1); }
               }
               @keyframes shimmer {
                 0%, 100% { opacity: 0; }
