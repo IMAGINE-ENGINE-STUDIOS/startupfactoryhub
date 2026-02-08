@@ -1022,68 +1022,76 @@ export function LightPaperDocument({
   };
 
   const insertSignature = (signature: {type: "draw" | "text", data: string, id: string}) => {
-    setDraggingSignature(signature);
+    // Create a unique copy for each placement
+    setDraggingSignature({ ...signature, id: Date.now().toString() });
     setShowSignDialog(false);
-    toast.info("Move your cursor to position the signature, then click to place it");
+    toast.info("Tap/click on the document to place the signature. Press Escape to cancel.");
   };
 
-  // Handle signature dragging
+  // Handle signature placement with both mouse and touch support
   useEffect(() => {
     if (!draggingSignature || !containerRef.current) return;
 
     const pageElement = containerRef.current.querySelector('.page') as HTMLElement;
     if (!pageElement) return;
 
-    const handleMouseMove = (e: MouseEvent) => {
+    const getPositionFromEvent = (e: MouseEvent | TouchEvent) => {
       const pageRect = pageElement.getBoundingClientRect();
-      const x = e.clientX - pageRect.left;
-      const y = e.clientY - pageRect.top;
-      setSignaturePreviewPosition({ x, y });
+      const clientX = 'touches' in e ? e.touches[0]?.clientX ?? e.changedTouches[0]?.clientX : e.clientX;
+      const clientY = 'touches' in e ? e.touches[0]?.clientY ?? e.changedTouches[0]?.clientY : e.clientY;
+      return {
+        x: clientX - pageRect.left,
+        y: clientY - pageRect.top,
+        pageRect
+      };
     };
 
-    const handleClick = (e: MouseEvent) => {
+    const handlePointerMove = (e: MouseEvent | TouchEvent) => {
+      const pos = getPositionFromEvent(e);
+      setSignaturePreviewPosition({ x: pos.x, y: pos.y });
+    };
+
+    const placeSignature = (e: MouseEvent | TouchEvent) => {
       if (!draggingSignature) return;
+      e.preventDefault();
+      e.stopPropagation();
       
-      const pageRect = pageElement.getBoundingClientRect();
-      const x = e.clientX - pageRect.left;
-      const y = e.clientY - pageRect.top;
-
-      // Calculate signature dimensions and constrain position
-      const pageWidth = pageRect.width;
-      const pageHeight = pageRect.height;
+      const { x, y, pageRect } = getPositionFromEvent(e);
       const marginPx = MARGIN_CM * CM_TO_PX;
-      const sigWidth = 80;  // Smaller width for better mobile display
-      const sigHeight = 25; // Smaller height
+      const sigWidth = 120;
+      const sigHeight = 40;
       
-      // Constrain to margins with extra padding
-      const constrainedX = Math.max(marginPx + 10, Math.min(pageWidth - marginPx - sigWidth - 10, x));
-      const constrainedY = Math.max(marginPx + 10, Math.min(pageHeight - marginPx - sigHeight - 10, y));
+      const constrainedX = Math.max(marginPx, Math.min(pageRect.width - marginPx - sigWidth, x - sigWidth / 2));
+      const constrainedY = Math.max(marginPx, Math.min(pageRect.height - marginPx - sigHeight, y - sigHeight / 2));
 
-      // Create signature element with drag and resize support
+      // Create signature element
       const signatureElement = document.createElement('div');
       signatureElement.contentEditable = "false";
-      signatureElement.id = `sig-${draggingSignature.id}`;
-      signatureElement.dataset.signatureId = draggingSignature.id;
+      signatureElement.id = `sig-placed-${Date.now()}`;
       signatureElement.style.cssText = `
         position: absolute;
         cursor: move;
-        padding: 2px 4px;
-        border: 1px solid transparent;
-        background: transparent;
-        transition: border-color 0.2s ease;
+        padding: 4px 8px;
+        border: 2px dashed #3b82f6;
+        background: rgba(255,255,255,0.95);
         left: ${constrainedX}px;
         top: ${constrainedY}px;
         z-index: 100;
         max-width: ${sigWidth}px;
-        min-width: 40px;
-        resize: both;
-        overflow: hidden;
+        min-width: 50px;
+        border-radius: 4px;
+        user-select: none;
+        touch-action: none;
       `;
       signatureElement.classList.add('signature-element');
 
-      // Hover effect for signature element
+      // Auto-hide border after 3s
+      setTimeout(() => {
+        signatureElement.style.border = '1px solid transparent';
+      }, 3000);
+
       signatureElement.addEventListener('mouseenter', () => {
-        signatureElement.style.border = '1px dashed #3b82f6';
+        signatureElement.style.border = '2px dashed #3b82f6';
       });
       signatureElement.addEventListener('mouseleave', () => {
         signatureElement.style.border = '1px solid transparent';
@@ -1092,79 +1100,99 @@ export function LightPaperDocument({
       if (draggingSignature.type === "draw") {
         const img = document.createElement('img');
         img.src = draggingSignature.data;
-        img.style.cssText = "height: 25px; width: auto; max-width: 80px; display: block; pointer-events: none;";
+        img.style.cssText = "height: 35px; width: auto; max-width: 110px; display: block; pointer-events: none;";
         signatureElement.appendChild(img);
       } else {
         signatureElement.style.fontFamily = "cursive";
-        signatureElement.style.fontSize = "14px";
-        signatureElement.style.lineHeight = "25px";
+        signatureElement.style.fontSize = "18px";
+        signatureElement.style.lineHeight = "35px";
         signatureElement.textContent = draggingSignature.data;
-        signatureElement.style.color = 'var(--foreground)';
+        signatureElement.style.color = '#000000';
         signatureElement.style.whiteSpace = 'nowrap';
       }
 
-      // Add drag functionality to placed signature
+      // Drag functionality (mouse + touch)
       let isDragging = false;
       let offsetX = 0;
       let offsetY = 0;
 
-      signatureElement.onmousedown = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
+      const startDrag = (ev: MouseEvent | TouchEvent) => {
+        ev.preventDefault();
+        ev.stopPropagation();
         isDragging = true;
         const rect = signatureElement.getBoundingClientRect();
-        offsetX = e.clientX - rect.left;
-        offsetY = e.clientY - rect.top;
+        const cx = 'touches' in ev ? ev.touches[0].clientX : ev.clientX;
+        const cy = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
+        offsetX = cx - rect.left;
+        offsetY = cy - rect.top;
         signatureElement.style.cursor = 'grabbing';
       };
 
-      const onMouseMove = (e: MouseEvent) => {
+      const moveDrag = (ev: MouseEvent | TouchEvent) => {
         if (!isDragging) return;
-        e.preventDefault();
-        
-        const pageRect = pageElement.getBoundingClientRect();
-        let newX = e.clientX - pageRect.left - offsetX;
-        let newY = e.clientY - pageRect.top - offsetY;
-        
-        const sigRect = signatureElement.getBoundingClientRect();
-        newX = Math.max(0, Math.min(newX, pageRect.width - sigRect.width));
-        newY = Math.max(0, Math.min(newY, pageRect.height - sigRect.height));
-        
+        ev.preventDefault();
+        const pRect = pageElement.getBoundingClientRect();
+        const cx = 'touches' in ev ? ev.touches[0].clientX : ev.clientX;
+        const cy = 'touches' in ev ? ev.touches[0].clientY : ev.clientY;
+        let newX = cx - pRect.left - offsetX;
+        let newY = cy - pRect.top - offsetY;
+        const sRect = signatureElement.getBoundingClientRect();
+        newX = Math.max(0, Math.min(newX, pRect.width - sRect.width));
+        newY = Math.max(0, Math.min(newY, pRect.height - sRect.height));
         signatureElement.style.left = `${newX}px`;
         signatureElement.style.top = `${newY}px`;
-        signatureElement.style.transform = 'none';
       };
 
-      const onMouseUp = () => {
+      const endDrag = () => {
         isDragging = false;
         signatureElement.style.cursor = 'move';
       };
 
-      document.addEventListener('mousemove', onMouseMove);
-      document.addEventListener('mouseup', onMouseUp);
+      signatureElement.addEventListener('mousedown', startDrag);
+      signatureElement.addEventListener('touchstart', startDrag, { passive: false });
+      document.addEventListener('mousemove', moveDrag);
+      document.addEventListener('touchmove', moveDrag, { passive: false });
+      document.addEventListener('mouseup', endDrag);
+      document.addEventListener('touchend', endDrag);
 
+      // Double-click/tap to remove
       signatureElement.addEventListener('dblclick', () => {
         pageElement.removeChild(signatureElement);
+        document.removeEventListener('mousemove', moveDrag);
+        document.removeEventListener('touchmove', moveDrag);
+        document.removeEventListener('mouseup', endDrag);
+        document.removeEventListener('touchend', endDrag);
         toast.success("Signature removed");
-        document.removeEventListener('mousemove', onMouseMove);
-        document.removeEventListener('mouseup', onMouseUp);
       });
 
       pageElement.appendChild(signatureElement);
-      toast.success("Signature placed! Double-click to remove");
+      toast.success("Signature placed! Double-tap to remove. You can place more or press Escape.");
       
-      // Reset dragging state
-      setDraggingSignature(null);
-      setSignaturePreviewPosition(null);
+      // Stay in placement mode - don't reset dragging state
+      // User can keep clicking to add more of the same signature
     };
 
-    pageElement.addEventListener('mousemove', handleMouseMove);
-    pageElement.addEventListener('click', handleClick);
-    pageElement.style.cursor = 'none';
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setDraggingSignature(null);
+        setSignaturePreviewPosition(null);
+        toast.info("Signature placement cancelled");
+      }
+    };
+
+    pageElement.addEventListener('mousemove', handlePointerMove);
+    pageElement.addEventListener('touchmove', handlePointerMove as any, { passive: true });
+    pageElement.addEventListener('click', placeSignature as any);
+    pageElement.addEventListener('touchend', placeSignature as any);
+    document.addEventListener('keydown', handleEscape);
+    pageElement.style.cursor = 'crosshair';
 
     return () => {
-      pageElement.removeEventListener('mousemove', handleMouseMove);
-      pageElement.removeEventListener('click', handleClick);
+      pageElement.removeEventListener('mousemove', handlePointerMove);
+      pageElement.removeEventListener('touchmove', handlePointerMove as any);
+      pageElement.removeEventListener('click', placeSignature as any);
+      pageElement.removeEventListener('touchend', placeSignature as any);
+      document.removeEventListener('keydown', handleEscape);
       pageElement.style.cursor = 'text';
     };
   }, [draggingSignature, isDarkMode]);
@@ -1487,30 +1515,34 @@ export function LightPaperDocument({
         const pdfWidth = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].width * 10 : PAGE_FORMATS[pageFormat].height * 10;
         const pdfHeight = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].height * 10 : PAGE_FORMATS[pageFormat].width * 10;
         
+        // Use a fixed pixel width for consistent rendering
+        const renderWidthPx = Math.round(pdfWidth * 3.7795275591 * 2); // mm to px at 96dpi * scale 2
+        
         // Create hidden container
         const hiddenContainer = document.createElement('div');
         hiddenContainer.style.position = 'absolute';
         hiddenContainer.style.left = '-9999px';
         hiddenContainer.style.top = '0';
-        hiddenContainer.style.width = `${getPageDimensions().width}cm`;
+        hiddenContainer.style.width = `${renderWidthPx / 2}px`;
         document.body.appendChild(hiddenContainer);
         
         for (let i = 0; i < updatedPages.length; i++) {
           const pageDiv = document.createElement('div');
           pageDiv.innerHTML = updatedPages[i] || '<p>Empty page</p>';
           
-          // Apply comprehensive styling
+          // Apply comprehensive styling with fixed height to match PDF page
+          const renderHeightPx = Math.round(pdfHeight * 3.7795275591 * 2);
           Object.assign(pageDiv.style, {
-            width: `${getPageDimensions().width}cm`,
-            minHeight: `${getPageDimensions().height}cm`,
+            width: `${renderWidthPx / 2}px`,
+            height: `${renderHeightPx / 2}px`,
             background: '#ffffff',
             color: '#000000',
             fontFamily: selectedFont,
             fontSize: `${selectedSize}px`,
-            padding: '2cm',
+            padding: `${MARGIN_CM}cm`,
             boxSizing: 'border-box',
             lineHeight: '1.6',
-            overflow: 'visible',
+            overflow: 'hidden',
             position: 'relative',
             display: 'block'
           });
@@ -1520,7 +1552,7 @@ export function LightPaperDocument({
           hiddenContainer.appendChild(pageDiv);
           
           // Wait for render
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise(resolve => setTimeout(resolve, 150));
           
           const canvas = await html2canvas(pageDiv, {
             scale: 2,
@@ -1532,10 +1564,11 @@ export function LightPaperDocument({
             logging: false
           });
           
-          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          const imgData = canvas.toDataURL('image/png');
           
           if (i > 0) pdf.addPage();
-          pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+          // Use exact PDF dimensions so image maps 1:1 without stretching
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         }
         
         document.body.removeChild(hiddenContainer);
@@ -2657,25 +2690,48 @@ export function LightPaperDocument({
                   position: 'absolute',
                   left: signaturePreviewPosition.x,
                   top: signaturePreviewPosition.y,
-                  transform: 'translate(-50%, -50%)',
+                  transform: 'translate(-50%, -100%)',
                   pointerEvents: 'none',
-                  opacity: 0.7,
+                  opacity: 0.6,
                   zIndex: 1000,
-                  padding: '8px',
-                  background: 'rgba(255, 255, 255, 0.9)',
-                  border: '2px dashed #666',
+                  padding: '4px 8px',
+                  background: 'rgba(255, 255, 255, 0.95)',
+                  border: '2px dashed #3b82f6',
                   borderRadius: '4px',
                 }}
               >
                 {draggingSignature.type === "draw" ? (
-                  <img src={draggingSignature.data} alt="Signature preview" style={{ height: '60px', display: 'block' }} />
+                  <img src={draggingSignature.data} alt="Signature preview" style={{ height: '35px', display: 'block' }} />
                 ) : (
-                  <span style={{ fontFamily: 'cursive', fontSize: '24px', color: isDarkMode ? 'black' : 'black' }}>
+                  <span style={{ fontFamily: 'cursive', fontSize: '18px', color: '#000' }}>
                     {draggingSignature.data}
                   </span>
                 )}
               </div>
             )}
+            
+            {/* Done placing signatures button */}
+            {draggingSignature && (
+              <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[200] flex gap-2">
+                <Button 
+                  size="sm" 
+                  variant="default"
+                  onClick={(e) => { e.stopPropagation(); setDraggingSignature(null); setSignaturePreviewPosition(null); }}
+                  className="shadow-lg"
+                >
+                  ✓ Done Placing
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={(e) => { e.stopPropagation(); setShowSignDialog(true); setDraggingSignature(null); setSignaturePreviewPosition(null); }}
+                  className="shadow-lg bg-background"
+                >
+                  + Add Different Signature
+                </Button>
+              </div>
+            )}
+            
           </div>
           
           {/* Genius AI Bubble - rendered outside page to avoid overflow:hidden clipping */}
