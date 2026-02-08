@@ -10,6 +10,7 @@ import globalFootprintBg from '@/assets/global-footprint-bg.avif';
 import mockupDashboard from '@/assets/mockup-dashboard.png';
 import mockupResources from '@/assets/mockup-resources.png';
 import mockupJourney from '@/assets/mockup-journey.png';
+import mockupMobile from '@/assets/mockup-mobile.png';
 
 // Enhanced Geometric Pattern Components (matching marketing banners)
 const TechGrid = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
@@ -896,102 +897,135 @@ export default function Deck() {
         {/* NEW SLIDE: The Product */}
         <SlideWrapper>
           <section className="absolute inset-0 flex items-center justify-center overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
-            {/* Neutral gray background matching the reference */}
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-400/80 via-slate-300/90 to-slate-400/80 dark:from-slate-700 dark:via-slate-600 dark:to-slate-700 print:hidden" />
-            <div className="absolute inset-[2%] border-2 border-emerald-500/15 rounded-lg print:border-gray-300" />
+            {/* Dark geometric background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 print:hidden" />
+            <div className="absolute inset-[2%] border-2 border-emerald-500/20 rounded-lg print:border-gray-300" />
             <TechGrid />
             <CornerAccents />
 
-            <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-[4%]">
-              {/* Title at top */}
+            {/* Geometric decorative shapes */}
+            <div className="absolute top-[8%] left-[5%] w-20 h-20 border border-emerald-500/15 rounded-full print:hidden" />
+            <div className="absolute bottom-[12%] left-[8%] w-12 h-12 border border-cyan-500/10 rotate-45 print:hidden" />
+            <div className="absolute top-[15%] right-[6%] w-16 h-16 border border-teal-500/10 rounded-full print:hidden" />
+            <div className="absolute bottom-[20%] right-[10%] w-8 h-8 border border-emerald-500/15 rotate-12 print:hidden" />
+            <div className="absolute top-[40%] left-[3%] w-6 h-6 bg-emerald-500/5 rounded-full print:hidden" />
+            <div className="absolute bottom-[35%] right-[4%] w-10 h-10 bg-cyan-500/5 rounded-full print:hidden" />
+
+            <div className="relative z-10 w-full h-full flex flex-col px-[4%] pt-[3%] pb-[2%]">
+              {/* Title */}
               <div className="flex items-center gap-3 mb-0.5">
                 <IconBadge icon={Cpu} color="emerald" />
-                <h2 className="text-xl md:text-2xl font-bold text-white print:text-black drop-shadow-lg">The Product</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-white print:text-black">The Product</h2>
               </div>
-              <p className="text-xs text-emerald-300 font-semibold text-center mb-4 drop-shadow">All-in-One Startup Operating System</p>
+              <p className="text-xs text-emerald-400 font-semibold mb-3">All-in-One Startup Operating System</p>
 
-              {/* Scene: Monitor on right, floating pages cascading upper-left */}
-              <div className="relative w-full flex-1 min-h-0" style={{ perspective: '2000px' }}>
-
-                {/* Floating page 1 - far upper left */}
-                <div 
-                  className="absolute bg-white rounded shadow-[0_8px_40px_rgba(0,0,0,0.25)] overflow-hidden"
-                  style={{ 
-                    width: '22%',
-                    aspectRatio: '16/10',
-                    left: '3%', 
-                    top: '5%',
-                    transform: 'rotateY(8deg) rotateZ(-3deg)',
-                    zIndex: 1
-                  }}
-                >
-                  <img src={mockupDashboard} alt="Dashboard" className="w-full h-full object-cover object-top" />
-                </div>
-
-                {/* Floating page 2 - upper left-center, overlapping */}
-                <div 
-                  className="absolute bg-white rounded shadow-[0_10px_45px_rgba(0,0,0,0.25)] overflow-hidden"
-                  style={{ 
-                    width: '24%',
-                    aspectRatio: '16/10',
-                    left: '17%', 
-                    top: '0%',
-                    transform: 'rotateY(5deg) rotateZ(-1deg)',
-                    zIndex: 2
-                  }}
-                >
-                  <img src={mockupResources} alt="Resources" className="w-full h-full object-cover object-top" />
-                </div>
-
-                {/* Floating page 3 - center, bridging to monitor */}
-                <div 
-                  className="absolute bg-white rounded shadow-[0_12px_50px_rgba(0,0,0,0.25)] overflow-hidden"
-                  style={{ 
-                    width: '24%',
-                    aspectRatio: '16/10',
-                    left: '33%', 
-                    top: '10%',
-                    transform: 'rotateY(-2deg) rotateZ(1deg)',
-                    zIndex: 3
-                  }}
-                >
-                  <img src={mockupJourney} alt="Journey" className="w-full h-full object-cover object-top" />
-                </div>
-
-                {/* Main monitor - right side, like the reference */}
-                <div 
-                  className="absolute"
-                  style={{ 
-                    right: '2%', 
-                    bottom: '4%',
-                    width: '42%',
-                    zIndex: 4
-                  }}
-                >
-                  {/* Monitor bezel */}
-                  <div className="rounded-lg overflow-hidden bg-black p-[3px] shadow-[0_20px_70px_rgba(0,0,0,0.35)]">
-                    {/* Thin top bezel with camera dot */}
-                    <div className="bg-black flex justify-center py-[2px]">
-                      <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
-                    </div>
-                    {/* Screen */}
-                    <div className="bg-white rounded-sm overflow-hidden">
-                      <img src={mockupDashboard} alt="Platform Dashboard" className="w-full h-auto block" />
-                    </div>
-                  </div>
-                  {/* Monitor stand - matching reference style */}
-                  <div className="flex flex-col items-center">
-                    <div className="w-[6%] h-6 bg-gradient-to-b from-slate-400 to-slate-500 dark:from-slate-500 dark:to-slate-600" />
-                    <div className="w-[25%] h-[3px] bg-gradient-to-r from-transparent via-slate-400 to-transparent rounded-full" />
-                    <div className="w-[18%] h-[2px] bg-slate-400/60 rounded-full mt-[1px]" />
+              {/* Main content: Left description + Right mockups */}
+              <div className="flex flex-1 min-h-0 gap-4">
+                
+                {/* Left side - Description */}
+                <div className="w-[30%] flex flex-col justify-center gap-3">
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    Startup Factory Hub unifies every tool a startup needs into a single, AI-powered platform — from founding to funding.
+                  </p>
+                  <div className="space-y-2">
+                    {[
+                      { emoji: '🤖', label: 'AI-Powered Dashboard', desc: 'Smart insights, analytics & 3D globe' },
+                      { emoji: '📍', label: 'Global Resources Map', desc: 'Partners, perks & coworking worldwide' },
+                      { emoji: '🚀', label: 'Startup Journey', desc: 'Guided checklists from idea to scale' },
+                      { emoji: '👥', label: 'Mentorship Network', desc: 'Connect with mentors & advisors' },
+                      { emoji: '💰', label: 'Investor Matching', desc: 'Pitch, connect & raise capital' },
+                      { emoji: '📱', label: 'Mobile Optimized', desc: 'Full experience on any device' },
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-start gap-2">
+                        <span className="text-[10px] mt-0.5">{item.emoji}</span>
+                        <div>
+                          <div className="text-[9px] font-semibold text-emerald-400">{item.label}</div>
+                          <div className="text-[8px] text-slate-400">{item.desc}</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {/* Feature labels */}
-                <div className="absolute bottom-2 left-3 flex gap-3 z-10">
-                  <div className="px-2 py-0.5 bg-emerald-500/20 border border-emerald-500/40 rounded-full text-[7px] text-emerald-300 font-semibold backdrop-blur-sm">🌍 AI Dashboard</div>
-                  <div className="px-2 py-0.5 bg-cyan-500/20 border border-cyan-500/40 rounded-full text-[7px] text-cyan-300 font-semibold backdrop-blur-sm">📍 Resources Map</div>
-                  <div className="px-2 py-0.5 bg-teal-500/20 border border-teal-500/40 rounded-full text-[7px] text-teal-300 font-semibold backdrop-blur-sm">🚀 Startup Journey</div>
+                {/* Right side - Mockup scene */}
+                <div className="flex-1 relative" style={{ perspective: '2000px' }}>
+
+                  {/* Floating page 1 - upper left */}
+                  <div 
+                    className="absolute bg-white rounded shadow-[0_8px_40px_rgba(0,0,0,0.3)] overflow-hidden"
+                    style={{ 
+                      width: '30%', aspectRatio: '16/10',
+                      left: '0%', top: '2%',
+                      transform: 'rotateY(8deg) rotateZ(-2deg)',
+                      zIndex: 1
+                    }}
+                  >
+                    <img src={mockupDashboard} alt="Dashboard" className="w-full h-full object-cover object-top" />
+                  </div>
+
+                  {/* Floating page 2 */}
+                  <div 
+                    className="absolute bg-white rounded shadow-[0_10px_45px_rgba(0,0,0,0.3)] overflow-hidden"
+                    style={{ 
+                      width: '32%', aspectRatio: '16/10',
+                      left: '14%', top: '-3%',
+                      transform: 'rotateY(4deg) rotateZ(-1deg)',
+                      zIndex: 2
+                    }}
+                  >
+                    <img src={mockupResources} alt="Resources" className="w-full h-full object-cover object-top" />
+                  </div>
+
+                  {/* Floating page 3 */}
+                  <div 
+                    className="absolute bg-white rounded shadow-[0_12px_50px_rgba(0,0,0,0.3)] overflow-hidden"
+                    style={{ 
+                      width: '30%', aspectRatio: '16/10',
+                      left: '30%', top: '8%',
+                      transform: 'rotateY(-2deg) rotateZ(1deg)',
+                      zIndex: 3
+                    }}
+                  >
+                    <img src={mockupJourney} alt="Journey" className="w-full h-full object-cover object-top" />
+                  </div>
+
+                  {/* Main monitor - right */}
+                  <div className="absolute" style={{ right: '5%', bottom: '8%', width: '48%', zIndex: 4 }}>
+                    <div className="rounded-lg overflow-hidden bg-black p-[3px] shadow-[0_20px_70px_rgba(0,0,0,0.4)]">
+                      <div className="bg-black flex justify-center py-[2px]">
+                        <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
+                      </div>
+                      <div className="bg-white rounded-sm overflow-hidden">
+                        <img src={mockupDashboard} alt="Platform" className="w-full h-auto block" />
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-center">
+                      <div className="w-[6%] h-5 bg-gradient-to-b from-slate-500 to-slate-600" />
+                      <div className="w-[22%] h-[3px] bg-slate-500 rounded-full" />
+                    </div>
+                  </div>
+
+                  {/* Phone mockup - bottom right, overlapping monitor */}
+                  <div 
+                    className="absolute"
+                    style={{ right: '0%', bottom: '5%', width: '14%', zIndex: 5 }}
+                  >
+                    {/* Phone frame */}
+                    <div className="rounded-[12px] overflow-hidden bg-black p-[2px] shadow-[0_15px_50px_rgba(0,0,0,0.4)]">
+                      {/* Notch */}
+                      <div className="bg-black flex justify-center pt-[3px] pb-[1px] rounded-t-[10px]">
+                        <div className="w-6 h-1 bg-slate-800 rounded-full" />
+                      </div>
+                      {/* Screen */}
+                      <div className="bg-white overflow-hidden">
+                        <img src={mockupMobile} alt="Mobile App" className="w-full h-auto block" />
+                      </div>
+                      {/* Bottom bar */}
+                      <div className="bg-black flex justify-center py-[2px]">
+                        <div className="w-4 h-0.5 bg-slate-700 rounded-full" />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
