@@ -97,7 +97,7 @@ interface OverlayTextBoxData {
 
 interface LightPaperDocumentProps {
   selectedProject?: LightPaperProject | null;
-  uploadedContent?: { content: string; title: string; metadata?: { detectedFormat?: string; fileType?: string } } | null;
+  uploadedContent?: { content: string; title: string; metadata?: { detectedFormat?: string; fileType?: string; uploadMode?: 'edit' | 'view' } } | null;
   onContentLoaded?: () => void;
 }
 
@@ -187,6 +187,7 @@ export function LightPaperDocument({
   const effectiveTotalPages = viewMode && viewModeImages.length > 0 ? viewModeImages.length : Math.max(pages.length, 1);
   const [editTextLayers, setEditTextLayers] = useState<any[][]>([]); // Per-page text layer items for hybrid editing
   const [editTextViewportSize, setEditTextViewportSize] = useState<{ width: number; height: number } | null>(null);
+  const [uploadSource, setUploadSource] = useState<'edit' | 'view' | null>(null); // Tracks user intent from FileUploadDialog
 
   // Scale PDF reconstructed content to fit within the editor container
   const scalePdfContentToFit = useCallback((container: HTMLDivElement | null) => {
@@ -336,6 +337,9 @@ export function LightPaperDocument({
         setCurrentPage(1);
         setVisiblePage(1);
         
+        // Track upload source from metadata
+        setUploadSource(uploadedContent.metadata?.uploadMode || (parsed.mode === 'hybrid' ? 'edit' : 'view'));
+        
         // Handle hybrid mode text layers
         if (parsed.mode === 'hybrid' && parsed.textLayers && Array.isArray(parsed.textLayers)) {
           setEditTextLayers(parsed.textLayers);
@@ -343,6 +347,11 @@ export function LightPaperDocument({
           // Store viewport dimensions for percentage-based positioning
           if (parsed.metadata?.dimensions) {
             setEditTextViewportSize(parsed.metadata.dimensions);
+          } else {
+            // Fallback: use standard page dimensions if metadata missing
+            const pageDims = getPageDimensions();
+            setEditTextViewportSize({ width: pageDims.width * CM_TO_PX, height: pageDims.height * CM_TO_PX });
+            console.log('⚠ Using fallback viewport size from page dimensions');
           }
           console.log(`✓ Loaded text layers for ${parsed.textLayers.length} pages`);
         } else {
@@ -489,6 +498,7 @@ export function LightPaperDocument({
     setViewMode(false);
     setViewModeImages([]);
     setEditMode(true); // Auto-select edit mode for uploaded files
+    setUploadSource(uploadedContent.metadata?.uploadMode || 'edit');
     
     // Apply detected format from upload metadata
     const detFormat = uploadedContent.metadata?.detectedFormat;
@@ -2303,24 +2313,42 @@ export function LightPaperDocument({
             {/* View Mode */}
             <div className="flex gap-0.5 border-l pl-1">
               <Button 
-                variant={viewMode ? "secondary" : "ghost"}
+                variant={(editMode || (viewMode && viewModeImages.length > 0)) ? "secondary" : "ghost"}
                 size="sm" 
                 className="h-8 w-8 p-0" 
                 onClick={() => {
                   if (viewMode && viewModeImages.length > 0) {
-                    // For uploaded files: toggle edit overlay instead of destroying view
-                    setEditMode(!editMode);
+                    // Hybrid mode (images + optional text layers): toggle edit overlay
+                    if (editTextLayers.length > 0) {
+                      setEditMode(!editMode);
+                    } else {
+                      toast.info('Edit mode not available for this document (no editable text layers)');
+                    }
+                  } else if (!viewMode && uploadSource === 'edit') {
+                    // HTML edit mode (DOCX): toggle contentEditable
+                    const newEditMode = !editMode;
+                    setEditMode(newEditMode);
+                    if (editorRef.current) {
+                      editorRef.current.contentEditable = String(newEditMode);
+                      editorRef.current.style.cursor = newEditMode ? 'text' : 'default';
+                    }
                   } else {
                     setViewMode(!viewMode);
                   }
                 }}
-                title={viewMode && viewModeImages.length > 0 
-                  ? (editMode ? "Switch to View Mode" : "Switch to Edit Mode") 
-                  : (viewMode ? "Switch to Edit Mode" : "Switch to View Mode")}
+                title={
+                  viewMode && viewModeImages.length > 0
+                    ? (editMode ? "Switch to View Mode" : "Switch to Edit Mode")
+                    : (!viewMode && uploadSource === 'edit')
+                      ? (editMode ? "Switch to Read-Only" : "Switch to Edit Mode")
+                      : (viewMode ? "Switch to Edit Mode" : "Switch to View Mode")
+                }
               >
                 {viewMode && viewModeImages.length > 0
                   ? (editMode ? <Eye className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />)
-                  : (viewMode ? <Edit3 className="h-4 w-4" /> : <Eye className="h-4 w-4" />)
+                  : (!viewMode && uploadSource === 'edit')
+                    ? (editMode ? <Eye className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />)
+                    : (viewMode ? <Edit3 className="h-4 w-4" /> : <Eye className="h-4 w-4" />)
                 }
               </Button>
               {viewMode && (
@@ -2546,10 +2574,10 @@ export function LightPaperDocument({
             <FileType className="h-3 w-3" />
             {PAGE_FORMATS[pageFormat].name} - {orientation === "portrait" ? "Portrait" : "Landscape"}
           </span>
-          {viewMode && (
+          {(viewMode || uploadSource === 'edit') && (
             <span className="flex items-center gap-1 text-primary font-medium">
-              {editMode && editTextLayers.length > 0 ? <Edit3 className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-              {editMode && editTextLayers.length > 0 ? 'Edit Mode (click text to edit)' : 'View Mode'}
+              {editMode ? <Edit3 className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+              {editMode ? 'Edit Mode' : 'View Mode'}
             </span>
           )}
           {isColorPickerActive && (
@@ -3011,7 +3039,7 @@ export function LightPaperDocument({
                   />
                   
                   {/* Hybrid Edit Mode: Editable text layer over the image */}
-                  {editMode && editTextLayers[index] && editTextLayers[index].length > 0 && editTextViewportSize && (
+                  {editMode && editTextLayers[index] && editTextLayers[index].length > 0 && (editTextViewportSize || viewModeImages[index]) && (
                     <div 
                       className="absolute inset-0" 
                       style={{ 
@@ -3021,8 +3049,10 @@ export function LightPaperDocument({
                       {(() => {
                         // Compute scale factor: page CSS width in px / viewport width
                         const pageCssWidthPx = getPageDimensions().width * CM_TO_PX;
-                        const vpW = editTextViewportSize.width;
-                        const vpH = editTextViewportSize.height;
+                        const fallbackVp = { width: pageCssWidthPx, height: getPageDimensions().height * CM_TO_PX };
+                        const vp = editTextViewportSize || fallbackVp;
+                        const vpW = vp.width;
+                        const vpH = vp.height;
                         const sf = pageCssWidthPx / vpW;
                         
                         return editTextLayers[index].map((item: any, textIdx: number) => (

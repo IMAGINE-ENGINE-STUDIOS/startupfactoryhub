@@ -9,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 interface FileUploadDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onFileLoaded: (content: string, title: string, metadata?: { detectedFormat?: string; fileType?: string }) => void;
+  onFileLoaded: (content: string, title: string, metadata?: { detectedFormat?: string; fileType?: string; uploadMode?: 'edit' | 'view' }) => void;
 }
 
 export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDialogProps) {
@@ -113,10 +113,10 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
         if (result.textLayers) {
           payload.textLayers = result.textLayers;
         }
-        onFileLoaded(JSON.stringify(payload), title, { detectedFormat: result.metadata.detectedFormat, fileType: result.metadata.fileType });
+        onFileLoaded(JSON.stringify(payload), title, { detectedFormat: result.metadata.detectedFormat, fileType: result.metadata.fileType, uploadMode: uploadMode || undefined });
       } else {
         // Edit Mode: Pass HTML content with format metadata
-        onFileLoaded(result.html, title, { detectedFormat: result.metadata.detectedFormat, fileType: result.metadata.fileType });
+        onFileLoaded(result.html, title, { detectedFormat: result.metadata.detectedFormat, fileType: result.metadata.fileType, uploadMode: uploadMode || undefined });
       }
       
       setProgressValue(100);
