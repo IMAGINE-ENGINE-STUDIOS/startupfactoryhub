@@ -2311,7 +2311,7 @@ export function LightPaperDocument({
               <Button 
                 variant={editMode ? "secondary" : "ghost"}
                 size="sm" 
-                className="h-8 w-8 p-0" 
+                className="h-8 px-2 text-xs gap-1" 
                 onClick={() => {
                   if (viewMode && viewModeImages.length > 0) {
                     if (editTextLayers.length > 0) {
@@ -2330,7 +2330,7 @@ export function LightPaperDocument({
                 }}
                 title={editMode ? "Switch to View Mode" : "Switch to Edit Mode"}
               >
-                {editMode ? <Eye className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}
+                {editMode ? <><Eye className="h-4 w-4" /> View</> : <><Edit3 className="h-4 w-4" /> Edit</>}
               </Button>
               {viewMode && (
                 <>
