@@ -2800,7 +2800,7 @@ export function LightPaperDocument({
       {/* Zoom and Page Navigation Controls */}
       <div className="flex items-center justify-between gap-2 px-4 py-1 border-b bg-background shrink-0 no-print zoom-controls page-navigation">
         {/* Status Info */}
-        <div className="flex items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground">
           {/* Page Format Dropdown */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -2831,25 +2831,13 @@ export function LightPaperDocument({
           {(viewMode || uploadSource === 'edit') && (
             <span className="flex items-center gap-1 text-primary font-medium">
               {editMode ? <Edit3 className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-              {editMode ? 'Edit Mode' : 'View Mode'}
+              {editMode ? 'Edit' : 'View'}
             </span>
           )}
           {isColorPickerActive && (
             <span className="flex items-center gap-1 text-accent font-medium animate-pulse">
               <Pipette className="h-3 w-3" />
-              Click element to pick color
-            </span>
-          )}
-          {lastSaved && (
-            <span className="flex items-center gap-1 text-muted-foreground">
-              <Save className="h-3 w-3" />
-              {isSaving ? "Saving..." : `Saved ${lastSaved.toLocaleTimeString()}`}
-            </span>
-          )}
-          {currentProjectId && !lastSaved && (
-            <span className="flex items-center gap-1 text-muted-foreground">
-              <Save className="h-3 w-3" />
-              Auto-save on
+              Pick color
             </span>
           )}
         </div>
