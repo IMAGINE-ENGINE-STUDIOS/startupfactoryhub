@@ -2606,6 +2606,44 @@ export function LightPaperDocument({
               >
                 {editMode ? <><Eye className="h-4 w-4" /> View</> : <><Edit3 className="h-4 w-4" /> Edit</>}
               </Button>
+              {/* PDF Text Overlay Edit Button */}
+              {viewMode && uploadedFileType === 'pdf' && (
+                <Button
+                  variant={editTextLayers.length > 0 && editMode ? "secondary" : "ghost"}
+                  size="sm"
+                  className="h-8 px-2 text-xs gap-1"
+                  disabled={!originalFile}
+                  onClick={async () => {
+                    if (editTextLayers.length > 0) {
+                      // Toggle text overlay visibility
+                      setEditMode(!editMode);
+                    } else if (originalFile) {
+                      // Load text layers from original file
+                      toast.info('Loading text layers...');
+                      try {
+                        const result = await parseDocumentForEditing(originalFile);
+                        if (result.textLayers && result.textLayers.length > 0) {
+                          setEditTextLayers(result.textLayers);
+                          if (result.metadata?.dimensions) {
+                            setEditTextViewportSize(result.metadata.dimensions);
+                          }
+                          setEditMode(true);
+                          toast.success(`Text layers loaded — click any text to edit`);
+                        } else {
+                          toast.info('No editable text found in this PDF');
+                        }
+                      } catch (err) {
+                        console.error('Failed to load text layers:', err);
+                        toast.error('Failed to load text layers');
+                      }
+                    }
+                  }}
+                  title="Edit text overlay on PDF pages"
+                >
+                  <FileType className="h-4 w-4" />
+                  {editTextLayers.length > 0 && editMode ? 'Text On' : 'Text Edit'}
+                </Button>
+              )}
               {viewMode && (
                 <>
                   <Button 
