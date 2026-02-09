@@ -507,73 +507,20 @@ export function LightPaperDocument({
       console.log(`[LightPaper] Applied detected format: ${detFormat}`);
     }
     
-    // For DOCX/PDF content, don't wrap in a single div — that prevents overflow pagination
-    // The parser already returns block-level elements (p, h1, h2, table, section, etc.)
+    // Wrap DOCX content to fill the page width properly
     const fileType = uploadedContent.metadata?.fileType;
     let finalHtml = htmlContent;
+    if (fileType === 'docx' || fileType === 'pdf') {
+      // Ensure content fills the page by wrapping with proper styling
+      finalHtml = `<div style="width: 100%; min-height: 100%; font-size: 12pt; line-height: 1.5; word-wrap: break-word; overflow-wrap: break-word;">${htmlContent}</div>`;
+    }
     
     setDocumentContent(finalHtml);
     setTotalPages(1);
     setCurrentPage(1);
-    setPages([finalHtml]);
     
     if (editorRef.current) {
       editorRef.current.innerHTML = finalHtml;
-      
-      // Trigger recursive overflow check to paginate loaded content
-      // We use a self-contained overflow check here since checkAndHandleOverflow
-      // may not be defined yet (declared later in the component)
-      const paginateLoadedContent = (editor: HTMLDivElement, iteration: number) => {
-        if (iteration > 200) return;
-        setTimeout(() => {
-          const pageContentEl = editor.parentElement;
-          const maxH = pageContentEl
-            ? pageContentEl.clientHeight - 2
-            : 800; // safe fallback
-          
-          if (editor.scrollHeight <= maxH + 2) return;
-          
-          // Find split point
-          const children = Array.from(editor.childNodes);
-          if (children.length <= 1) return;
-          
-          let splitIndex = -1;
-          for (let i = 0; i < children.length; i++) {
-            const child = children[i] as HTMLElement;
-            if (child.offsetTop !== undefined && child.offsetHeight !== undefined) {
-              if (child.offsetTop + child.offsetHeight > maxH) {
-                splitIndex = i;
-                break;
-              }
-            }
-          }
-          if (splitIndex === -1) return;
-          
-          const effectiveSplitIndex = Math.max(splitIndex, 1);
-          const overflowNodes = children.slice(effectiveSplitIndex);
-          const overflowHtml = overflowNodes.map(n => {
-            if (n instanceof HTMLElement) return n.outerHTML;
-            if (n.nodeType === Node.TEXT_NODE) return `<p>${n.textContent || ''}</p>`;
-            return '';
-          }).join('');
-          
-          overflowNodes.forEach(n => editor.removeChild(n));
-          const currentHtml = editor.innerHTML;
-          
-          setPages(prevPages => {
-            const newPages = [...prevPages];
-            newPages[0] = currentHtml; // Always working on page 1 during initial load
-            newPages.push(overflowHtml);
-            return newPages;
-          });
-          
-          // Continue checking
-          paginateLoadedContent(editor, iteration + 1);
-        }, 100);
-      };
-      
-      // Wait for DOM to settle before paginating
-      setTimeout(() => paginateLoadedContent(editorRef.current!, 0), 500);
     }
     
     toast.success(`Document loaded`);
