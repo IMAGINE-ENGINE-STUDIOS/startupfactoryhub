@@ -2929,18 +2929,16 @@ export function LightPaperDocument({
       </div>
 
       {/* Zoom and Page Navigation Controls */}
-      <div className="flex items-center justify-between gap-2 px-4 py-1 border-b bg-background shrink-0 no-print zoom-controls page-navigation">
-        {/* Status Info */}
-        <div className="flex items-center gap-2 sm:gap-3 text-xs text-muted-foreground">
-          {/* Page Format Dropdown */}
+      <div className="flex items-center justify-center gap-1.5 px-2 py-1.5 border-b bg-background shrink-0 no-print zoom-controls page-navigation flex-wrap sm:flex-nowrap">
+        {/* Left: Page Format & Mode */}
+        <div className="flex items-center gap-1 order-1">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer px-1.5 py-0.5 rounded hover:bg-muted">
-                <FileType className="h-3 w-3" />
+              <Button variant="ghost" size="sm" className="h-7 px-1.5 text-xs gap-1 text-muted-foreground hover:text-foreground">
+                <FileType className="h-3.5 w-3.5" />
                 <span className="hidden sm:inline">{PAGE_FORMATS[pageFormat].name}</span>
                 <span className="sm:hidden">{pageFormat.toUpperCase()}</span>
-                - {orientation === "portrait" ? "Portrait" : "Landscape"}
-              </button>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start" className="bg-background z-50">
               {Object.entries(PAGE_FORMATS).map(([key, format]) => (
@@ -2955,112 +2953,79 @@ export function LightPaperDocument({
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setOrientation(orientation === "portrait" ? "landscape" : "portrait")}>
                 <FlipHorizontal className="h-4 w-4 mr-2" />
-                {orientation === "portrait" ? "Switch to Landscape" : "Switch to Portrait"}
+                {orientation === "portrait" ? "Landscape" : "Portrait"}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          
           {(viewMode || uploadSource === 'edit') && (
-            <span className="flex items-center gap-1 text-primary font-medium">
+            <span className="flex items-center gap-0.5 text-xs text-primary font-medium px-1.5 py-0.5 bg-primary/10 rounded">
               {editMode ? <Edit3 className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
               {editMode ? 'Edit' : 'View'}
             </span>
           )}
+          
           {isColorPickerActive && (
-            <span className="flex items-center gap-1 text-accent font-medium animate-pulse">
+            <span className="flex items-center gap-0.5 text-xs text-accent font-medium animate-pulse">
               <Pipette className="h-3 w-3" />
-              Pick color
             </span>
           )}
         </div>
-        
-        {/* Zoom Controls */}
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZoomLevel(Math.max(0.25, zoomLevel - 0.25))}
-            disabled={zoomLevel <= 0.25}
-          >
-            <ZoomOut className="h-4 w-4" />
-          </Button>
-          <span className="text-sm font-medium min-w-[60px] text-center">
-            {Math.round(zoomLevel * 100)}%
-          </span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZoomLevel(Math.min(3.0, zoomLevel + 0.25))}
-            disabled={zoomLevel >= 3.0}
-          >
-            <ZoomIn className="h-4 w-4" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZoomLevel(1.0)}
-          >
-            <Maximize2 className="h-4 w-4" />
-          </Button>
-        </div>
 
-      {/* Page Navigation Controls */}
-        {((viewMode && viewModeImages.length > 0) || (!viewMode && (effectiveTotalPages > 0 || documentContent))) && (
-          <div className="flex items-center justify-center gap-1 sm:gap-2 flex-1 min-w-0">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const cur = viewMode ? visiblePage : currentPage;
-                handlePageSelect(Math.max(1, cur - 1));
-              }}
-              disabled={(viewMode ? visiblePage : currentPage) <= 1}
-              className="h-8 w-8 sm:min-w-[90px] p-0 sm:px-3"
-            >
-              <ChevronLeft className="h-4 w-4 sm:mr-1" />
-              <span className="hidden sm:inline">Previous</span>
+        {/* Center: Zoom + Page Navigation (unified row) */}
+        <div className="flex items-center gap-1 order-2 flex-1 justify-center min-w-0">
+          {/* Zoom */}
+          <div className="flex items-center gap-0.5">
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoomLevel(Math.max(0.25, zoomLevel - 0.25))} disabled={zoomLevel <= 0.25}>
+              <ZoomOut className="h-3.5 w-3.5" />
             </Button>
-            <span className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-md min-w-[80px] sm:min-w-[120px] text-center">
-              Page <strong>{viewMode ? visiblePage : currentPage}</strong> of <strong>{effectiveTotalPages}</strong>
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                const cur = viewMode ? visiblePage : currentPage;
-                handlePageSelect(Math.min(effectiveTotalPages, cur + 1));
-              }}
-              disabled={(viewMode ? visiblePage : currentPage) >= effectiveTotalPages}
-              className="h-8 w-8 sm:min-w-[90px] p-0 sm:px-3"
+            <button 
+              onClick={() => setZoomLevel(1.0)} 
+              className="text-xs font-medium min-w-[38px] text-center px-1 py-0.5 rounded hover:bg-muted transition-colors cursor-pointer"
+              title="Reset zoom"
             >
-              <span className="hidden sm:inline">Next</span>
-              <ChevronRight className="h-4 w-4 sm:ml-1" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={addPage}
-              className="hidden sm:flex min-w-[90px]"
-            >
-              <Plus className="h-4 w-4 mr-1" />
-              Add Page
+              {Math.round(zoomLevel * 100)}%
+            </button>
+            <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={() => setZoomLevel(Math.min(3.0, zoomLevel + 0.25))} disabled={zoomLevel >= 3.0}>
+              <ZoomIn className="h-3.5 w-3.5" />
             </Button>
           </div>
-        )}
 
-        {/* Save/Export Dropdown */}
-        <div className="flex items-center gap-2">
+          {/* Divider */}
+          <div className="w-px h-4 bg-border mx-0.5 hidden sm:block" />
+
+          {/* Page Nav */}
+          {((viewMode && viewModeImages.length > 0) || (!viewMode && (effectiveTotalPages > 0 || documentContent))) && (
+            <div className="flex items-center gap-0.5">
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0"
+                onClick={() => { const cur = viewMode ? visiblePage : currentPage; handlePageSelect(Math.max(1, cur - 1)); }}
+                disabled={(viewMode ? visiblePage : currentPage) <= 1}
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </Button>
+              <span className="text-xs font-medium px-1.5 py-0.5 bg-primary/10 border border-primary/20 rounded min-w-[60px] text-center whitespace-nowrap">
+                {viewMode ? visiblePage : currentPage} / {effectiveTotalPages}
+              </span>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0"
+                onClick={() => { const cur = viewMode ? visiblePage : currentPage; handlePageSelect(Math.min(effectiveTotalPages, cur + 1)); }}
+                disabled={(viewMode ? visiblePage : currentPage) >= effectiveTotalPages}
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={addPage} title="Add Page">
+                <Plus className="h-3.5 w-3.5" />
+              </Button>
+            </div>
+          )}
+        </div>
+
+        {/* Right: Save/Export */}
+        <div className="flex items-center gap-1 order-3">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-8 gap-1.5 px-2 sm:px-3"
-                disabled={isSaving}
-              >
-                <Save className="h-4 w-4" />
-                <span className="hidden sm:inline text-xs">
-                  {isSaving ? "Saving..." : lastSaved ? `Saved ${lastSaved.toLocaleTimeString()}` : "Save"}
-                </span>
+              <Button variant="ghost" size="sm" className="h-7 px-1.5 gap-1 text-xs">
+                <Save className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">{isSaving ? "Saving..." : "Save"}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-background z-50">
