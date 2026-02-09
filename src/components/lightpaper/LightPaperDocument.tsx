@@ -113,7 +113,10 @@ export function LightPaperDocument({
   const [selectedFont, setSelectedFont] = useState("Arial");
   const [selectedSize, setSelectedSize] = useState("14");
   const [showSaveDialog, setShowSaveDialog] = useState(false);
-  const [projectTitle, setProjectTitle] = useState("Untitled Document");
+  const [projectTitle, setProjectTitle] = useState(() => {
+    const now = new Date();
+    return `Document - ${now.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
+  });
   const [currentProjectId, setCurrentProjectId] = useState<string | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
   const [versions, setVersions] = useState<any[]>([]);
@@ -562,7 +565,32 @@ export function LightPaperDocument({
     loadContent();
   }, [uploadedContent, onContentLoaded]);
 
-  // Intersection Observer to track visible page in View Mode
+  // Auto-save uploaded files that don't have a project ID yet
+  useEffect(() => {
+    if (currentProjectId || !user || !projectTitle) return;
+    // Only auto-save if there's actual content (view mode images or editor content)
+    const hasContent = (viewMode && viewModeImages.length > 0) || 
+                       (editorRef.current && editorRef.current.innerHTML && editorRef.current.innerHTML !== '<p style="font-size: 14pt; color: inherit;">Start writing...</p>');
+    if (!hasContent) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        setIsSaving(true);
+        const content = buildSaveContent();
+        const result = await saveProject(projectTitle, "document", content);
+        if (result) {
+          setCurrentProjectId(result.id);
+          setLastSaved(new Date());
+        }
+      } catch (err) {
+        console.error('Auto-save new project failed:', err);
+      } finally {
+        setIsSaving(false);
+      }
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [viewMode, viewModeImages.length, projectTitle, currentProjectId, user]);
+
   useEffect(() => {
     if (!viewMode || viewModeImages.length === 0) return;
     
@@ -633,46 +661,61 @@ export function LightPaperDocument({
       const content = selectedProject.content as any;
       
       if (content) {
-        // Reset view mode when loading a saved project
-        setViewMode(false);
-        setViewModeImages([]);
-
-        if (content.html) {
-          setDocumentContent(content.html);
-          
-          // Directly set editor content
-          if (editorRef.current) {
-            editorRef.current.innerHTML = content.html;
-          }
-          
-          // Restore other settings
-          if (content.font) setSelectedFont(content.font);
-          if (content.size) setSelectedSize(content.size);
-          if (content.totalPages) setTotalPages(content.totalPages);
-          if (content.currentPage) setCurrentPage(content.currentPage);
-          if (content.darkMode !== undefined) {
-            setIsDarkMode(content.darkMode);
-            const pageElement = document.querySelector('.page') as HTMLElement;
-            if (pageElement) {
-              pageElement.style.backgroundColor = content.darkMode ? 'black' : 'white';
-              pageElement.style.color = content.darkMode ? 'white' : 'black';
-            }
-            if (editorRef.current) {
-              editorRef.current.style.color = content.darkMode ? 'white' : 'black';
-            }
-          }
+        // Restore view mode images if saved
+        if (content.viewMode && content.viewModeImages && content.viewModeImages.length > 0) {
+          setViewMode(true);
+          setViewModeImages(content.viewModeImages);
+          setTotalPages(content.viewModeImages.length);
+          setCurrentPage(content.currentPage || 1);
+          setVisiblePage(content.currentPage || 1);
+          if (content.editTextLayers) setEditTextLayers(content.editTextLayers);
+          if (content.editTextViewportSize) setEditTextViewportSize(content.editTextViewportSize);
+          if (content.overlayTextBoxes) setOverlayTextBoxes(content.overlayTextBoxes);
           if (content.pageFormat) setPageFormat(content.pageFormat);
           if (content.orientation) setOrientation(content.orientation);
-          if (content.overlayTextBoxes) setOverlayTextBoxes(content.overlayTextBoxes);
+          if (content.uploadedFileType) setUploadedFileType(content.uploadedFileType);
+          if (editorRef.current) editorRef.current.innerHTML = '';
+          setDocumentContent('');
+          toast.success("Document restored");
+        } else {
+          // Reset view mode when loading a non-view saved project
+          setViewMode(false);
+          setViewModeImages([]);
 
-          // Initialize pages array from content
-          if (content.pages && Array.isArray(content.pages)) {
-            setPages(content.pages);
-          } else {
-            setPages([content.html]);
+          if (content.html) {
+            setDocumentContent(content.html);
+            
+            if (editorRef.current) {
+              editorRef.current.innerHTML = content.html;
+            }
+            
+            if (content.font) setSelectedFont(content.font);
+            if (content.size) setSelectedSize(content.size);
+            if (content.totalPages) setTotalPages(content.totalPages);
+            if (content.currentPage) setCurrentPage(content.currentPage);
+            if (content.darkMode !== undefined) {
+              setIsDarkMode(content.darkMode);
+              const pageElement = document.querySelector('.page') as HTMLElement;
+              if (pageElement) {
+                pageElement.style.backgroundColor = content.darkMode ? 'black' : 'white';
+                pageElement.style.color = content.darkMode ? 'white' : 'black';
+              }
+              if (editorRef.current) {
+                editorRef.current.style.color = content.darkMode ? 'white' : 'black';
+              }
+            }
+            if (content.pageFormat) setPageFormat(content.pageFormat);
+            if (content.orientation) setOrientation(content.orientation);
+            if (content.overlayTextBoxes) setOverlayTextBoxes(content.overlayTextBoxes);
+
+            if (content.pages && Array.isArray(content.pages)) {
+              setPages(content.pages);
+            } else {
+              setPages([content.html]);
+            }
+
+            toast.success("Document loaded successfully");
           }
-
-          toast.success("Document loaded successfully");
         }
       }
 
@@ -841,19 +884,7 @@ export function LightPaperDocument({
     autoSaveProjectRef.current = setTimeout(async () => {
       try {
         setIsSaving(true);
-        const content = {
-          html: editorRef.current?.innerHTML || documentContent || "",
-          pages,
-          font: selectedFont,
-          size: selectedSize,
-          darkMode: isDarkMode,
-          currentPage,
-          totalPages: pages.length,
-          pageFormat,
-          orientation,
-          viewMode,
-          overlayTextBoxes
-        };
+        const content = buildSaveContent();
         await saveProject(projectTitle, "document", content, currentProjectId);
         setLastSaved(new Date());
       } catch (err) {
@@ -862,7 +893,7 @@ export function LightPaperDocument({
         setIsSaving(false);
       }
     }, 3000); // Auto-save after 3s of inactivity
-  }, [currentProjectId, user, documentContent, pages, selectedFont, selectedSize, isDarkMode, currentPage, pageFormat, orientation, viewMode, overlayTextBoxes, projectTitle, saveProject]);
+  }, [currentProjectId, user, documentContent, pages, selectedFont, selectedSize, isDarkMode, currentPage, pageFormat, orientation, viewMode, viewModeImages, editTextLayers, overlayTextBoxes, projectTitle, saveProject]);
 
   // Auto-page creation: detect when content overflows the page
   const checkAndHandleOverflow = useCallback(() => {
@@ -1643,7 +1674,11 @@ export function LightPaperDocument({
     pageFormat,
     orientation,
     viewMode,
-    overlayTextBoxes
+    viewModeImages: viewMode ? viewModeImages : [],
+    editTextLayers: editTextLayers.length > 0 ? editTextLayers : undefined,
+    editTextViewportSize: editTextViewportSize || undefined,
+    overlayTextBoxes,
+    uploadedFileType: uploadedFileType || undefined,
   });
 
   // Quick save: overwrite existing or show dialog for new
