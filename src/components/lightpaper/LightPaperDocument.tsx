@@ -2473,34 +2473,10 @@ export function LightPaperDocument({
                 className="h-8 px-2 text-xs gap-1" 
                 onClick={async () => {
                   if (viewMode && viewModeImages.length > 0) {
-                    if (!editMode && uploadedFileType === 'docx' && originalFile) {
-                      // DOCX view→edit: re-parse as real editable HTML
-                      const { parseDOCX } = await import('./AdvancedDocumentParser');
-                      toast.info('Converting to editable mode...');
-                      try {
-                        const result = await parseDOCX(originalFile, () => {});
-                        setViewMode(false);
-                        setViewModeImages([]);
-                        setEditTextLayers([]);
-                        setEditMode(true);
-                        if (editorRef.current) {
-                          const finalHtml = `<div style="width: 100%; min-height: 100%; font-size: 12pt; line-height: 1.5; word-wrap: break-word; overflow-wrap: break-word;">${result.html}</div>`;
-                          editorRef.current.innerHTML = finalHtml;
-                          editorRef.current.contentEditable = 'true';
-                          editorRef.current.style.cursor = 'text';
-                          setDocumentContent(finalHtml);
-                        }
-                        toast.success('Switched to full editing mode');
-                      } catch (err) {
-                        console.error('Failed to re-parse DOCX:', err);
-                        toast.error('Failed to convert to edit mode');
-                      }
-                    } else {
-                      // PDF or no file: toggle overlay edit mode
-                      setEditMode(!editMode);
-                      if (!editMode && editTextLayers.length === 0) {
-                        toast.info('Edit mode enabled — use Text Box tool to annotate');
-                      }
+                    // Toggle overlay edit mode for both PDF and DOCX (hybrid approach)
+                    setEditMode(!editMode);
+                    if (!editMode && editTextLayers.length === 0) {
+                      toast.info('Edit mode enabled — use Text Box tool to annotate');
                     }
                   } else {
                     const newEditMode = !editMode;

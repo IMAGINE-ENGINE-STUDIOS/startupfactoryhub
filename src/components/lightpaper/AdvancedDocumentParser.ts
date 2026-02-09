@@ -1276,9 +1276,8 @@ export async function parseDocumentForEditing(
     };
   }
 
-  // For DOCX, use real editable HTML (not hybrid overlay like PDF)
-  // DOCX files are natively editable — no need for image+text-overlay approach
-  return parseDOCX(file, (msg) => onProgress?.(msg));
+  // For DOCX, use the same hybrid image+text approach as PDF for layout fidelity
+  return parseDocxForEditing(file, onProgress);
 }
 
 /**
