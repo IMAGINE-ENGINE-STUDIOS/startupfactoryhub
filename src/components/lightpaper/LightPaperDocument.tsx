@@ -2531,6 +2531,7 @@ export function LightPaperDocument({
                 size="sm" 
                 className="h-8 px-2 text-xs gap-1" 
                 onClick={async () => {
+                  console.log('[Edit Toggle] viewMode:', viewMode, 'editMode:', editMode, 'uploadedFileType:', uploadedFileType, 'originalFile:', !!originalFile, 'editTextLayers:', editTextLayers.length, 'docxEditablePages:', docxEditablePages.length);
                   if (docxEditablePages.length > 0) {
                     // DOCX Editable Mode: toggle between edit and view
                     if (editMode && originalFile) {
@@ -2576,7 +2577,7 @@ export function LightPaperDocument({
                         console.error('Failed to switch to edit mode:', err);
                         toast.error('Failed to switch mode');
                       }
-                    } else if (!editMode && uploadedFileType === 'pdf' && originalFile && editTextLayers.length === 0) {
+                    } else if (!editMode && uploadedFileType === 'pdf' && editTextLayers.length === 0 && originalFile) {
                       // PDF: switch from View to Edit — re-parse to get text layers
                       toast.info('Loading text layers for editing...');
                       try {
@@ -2598,6 +2599,11 @@ export function LightPaperDocument({
                         setEditMode(true);
                         toast.info('Edit mode enabled — use Text Box tool to annotate');
                       }
+                    } else if (!editMode && uploadedFileType === 'pdf' && editTextLayers.length > 0) {
+                      // PDF: text layers already loaded (from initial upload or restore) — just toggle
+                      console.log('[Edit Toggle] PDF text layers already loaded, toggling editMode on');
+                      setEditMode(true);
+                      toast.success('Edit mode ready — click text to edit');
                     } else {
                       // Toggle overlay edit mode for PDF (hybrid approach)
                       setEditMode(!editMode);
@@ -2725,9 +2731,35 @@ export function LightPaperDocument({
                   setPageFormat(formats[(currentIndex + 1) % formats.length]);
                 }, priority: "low" },
                 { icon: FlipHorizontal, label: "Rotate", onClick: () => setOrientation(orientation === "portrait" ? "landscape" : "portrait"), priority: "low" },
-                { icon: viewMode ? Edit3 : Eye, label: viewMode ? "Edit" : "View", onClick: () => {
+                { icon: viewMode ? Edit3 : Eye, label: viewMode ? "Edit" : "View", onClick: async () => {
+                  console.log('[Mobile Edit Toggle] viewMode:', viewMode, 'editMode:', editMode, 'uploadedFileType:', uploadedFileType, 'originalFile:', !!originalFile, 'editTextLayers:', editTextLayers.length);
                   if (viewMode && viewModeImages.length > 0) {
-                    setEditMode(!editMode);
+                    if (!editMode && uploadedFileType === 'pdf' && editTextLayers.length === 0 && originalFile) {
+                      toast.info('Loading text layers for editing...');
+                      try {
+                        const result = await parseDocumentForEditing(originalFile);
+                        if (result.textLayers && result.textLayers.length > 0) {
+                          setEditTextLayers(result.textLayers);
+                          if (result.metadata?.dimensions) {
+                            setEditTextViewportSize(result.metadata.dimensions);
+                          }
+                          setEditMode(true);
+                          toast.success('Edit mode ready — click text to edit');
+                        } else {
+                          setEditMode(true);
+                          toast.info('Edit mode enabled — use Text Box tool to annotate');
+                        }
+                      } catch (err) {
+                        console.error('Failed to load text layers:', err);
+                        setEditMode(true);
+                        toast.info('Edit mode enabled — use Text Box tool to annotate');
+                      }
+                    } else if (!editMode && uploadedFileType === 'pdf' && editTextLayers.length > 0) {
+                      setEditMode(true);
+                      toast.success('Edit mode ready — click text to edit');
+                    } else {
+                      setEditMode(!editMode);
+                    }
                   } else {
                     setViewMode(!viewMode);
                   }
