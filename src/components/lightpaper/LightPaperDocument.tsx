@@ -2147,21 +2147,8 @@ export function LightPaperDocument({
               </SelectContent>
             </Select>
 
-            {/* Text Formatting */}
+            {/* Text Color & Highlight - next to font size */}
             <div className="flex gap-0.5 border-l pl-1">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("bold")} title="Bold (Ctrl+B)">
-                <Bold className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("italic")} title="Italic (Ctrl+I)">
-                <Italic className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("underline")} title="Underline (Ctrl+U)">
-                <Underline className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("strikeThrough")} title="Strikethrough">
-                <Strikethrough className="h-4 w-4" />
-              </Button>
-              
               {/* Text Color Picker */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -2192,6 +2179,38 @@ export function LightPaperDocument({
                   </div>
                 </DropdownMenuContent>
               </DropdownMenu>
+              {/* Highlight */}
+              <Select value={selectedHighlight} onValueChange={activateHighlighter}>
+                <SelectTrigger className={`w-10 h-8 text-xs p-0 justify-center ${isHighlighterActive ? 'bg-primary/20 border-primary' : ''}`}>
+                  <Highlighter className="h-4 w-4" />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  {HIGHLIGHT_COLORS.map(color => (
+                    <SelectItem key={color} value={color}>
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border" style={{ backgroundColor: color }} />
+                        {color === "transparent" ? "None" : color}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Text Formatting */}
+            <div className="flex gap-0.5 border-l pl-1">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("bold")} title="Bold (Ctrl+B)">
+                <Bold className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("italic")} title="Italic (Ctrl+I)">
+                <Italic className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("underline")} title="Underline (Ctrl+U)">
+                <Underline className="h-4 w-4" />
+              </Button>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("strikeThrough")} title="Strikethrough">
+                <Strikethrough className="h-4 w-4" />
+              </Button>
             </div>
 
             {/* Alignment */}
@@ -2277,26 +2296,6 @@ export function LightPaperDocument({
               </Button>
             </div>
 
-            {/* Highlight */}
-            <div className="flex gap-0.5 border-l pl-1">
-              <Select value={selectedHighlight} onValueChange={activateHighlighter}>
-                <SelectTrigger className={`w-28 h-8 text-xs ${isHighlighterActive ? 'bg-primary/20 border-primary' : ''}`}>
-                  <Highlighter className="h-4 w-4 mr-1" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-background z-50">
-                  {HIGHLIGHT_COLORS.map(color => (
-                    <SelectItem key={color} value={color}>
-                      <div className="flex items-center gap-2">
-                        <div className="w-4 h-4 border" style={{ backgroundColor: color }} />
-                        {color === "transparent" ? "None" : color}
-                      </div>
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
             {/* Signature & Read Aloud */}
             <div className="flex gap-0.5 border-l pl-1">
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowSignDialog(true)} title="Add Signature">
@@ -2304,29 +2303,6 @@ export function LightPaperDocument({
               </Button>
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowTextReader(true)} title="Read Aloud">
                 <Volume2 className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {/* Page Format */}
-            <div className="flex gap-0.5 border-l pl-1">
-              <Select value={pageFormat} onValueChange={(val) => setPageFormat(val as PageFormat)}>
-                <SelectTrigger className="w-32 h-8 text-xs">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-background z-50">
-                  {Object.entries(PAGE_FORMATS).map(([key, format]) => (
-                    <SelectItem key={key} value={key}>{format.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="h-8 w-8 p-0" 
-                onClick={() => setOrientation(orientation === "portrait" ? "landscape" : "portrait")}
-                title={`Orientation: ${orientation}`}
-              >
-                <FlipHorizontal className="h-4 w-4" />
               </Button>
             </div>
 
@@ -2338,14 +2314,12 @@ export function LightPaperDocument({
                 className="h-8 w-8 p-0" 
                 onClick={() => {
                   if (viewMode && viewModeImages.length > 0) {
-                    // Hybrid mode (images + optional text layers): toggle edit overlay
                     if (editTextLayers.length > 0) {
                       setEditMode(!editMode);
                     } else {
                       toast.info('Edit mode not available for this document (no editable text layers)');
                     }
                   } else {
-                    // Standard or HTML edit mode: toggle contentEditable
                     const newEditMode = !editMode;
                     setEditMode(newEditMode);
                     if (editorRef.current) {
@@ -2380,13 +2354,6 @@ export function LightPaperDocument({
                   </Button>
                 </>
               )}
-            </div>
-
-            {/* Dark/Light Mode Toggle */}
-            <div className="flex gap-0.5 border-l pl-1">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={toggleDarkMode} title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
-                {isDarkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-              </Button>
             </div>
 
             {/* Search */}
@@ -2515,11 +2482,34 @@ export function LightPaperDocument({
       {/* Zoom and Page Navigation Controls */}
       <div className="flex items-center justify-between gap-4 px-4 py-1 border-b bg-background shrink-0 no-print zoom-controls page-navigation">
         {/* Status Info */}
-        <div className="flex items-center gap-4 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1">
-            <FileType className="h-3 w-3" />
-            {PAGE_FORMATS[pageFormat].name} - {orientation === "portrait" ? "Portrait" : "Landscape"}
-          </span>
+        <div className="flex items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
+          {/* Page Format Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-1 hover:text-foreground transition-colors cursor-pointer px-1.5 py-0.5 rounded hover:bg-muted">
+                <FileType className="h-3 w-3" />
+                <span className="hidden sm:inline">{PAGE_FORMATS[pageFormat].name}</span>
+                <span className="sm:hidden">{pageFormat.toUpperCase()}</span>
+                - {orientation === "portrait" ? "Portrait" : "Landscape"}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="bg-background z-50">
+              {Object.entries(PAGE_FORMATS).map(([key, format]) => (
+                <DropdownMenuItem 
+                  key={key} 
+                  onClick={() => setPageFormat(key as PageFormat)}
+                  className={pageFormat === key ? 'bg-primary/10' : ''}
+                >
+                  {format.name}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setOrientation(orientation === "portrait" ? "landscape" : "portrait")}>
+                <FlipHorizontal className="h-4 w-4 mr-2" />
+                {orientation === "portrait" ? "Switch to Landscape" : "Switch to Portrait"}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {(viewMode || uploadSource === 'edit') && (
             <span className="flex items-center gap-1 text-primary font-medium">
               {editMode ? <Edit3 className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
