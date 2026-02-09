@@ -43,59 +43,45 @@ export function OverlayTextBox({
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [isSelected, setIsSelected] = useState(false);
   const [isSampling, setIsSampling] = useState(false);
   const dragStart = useRef({ x: 0, y: 0 });
   const resizeStart = useRef<{ startX: number; startY: number; startWidth: number; startHeight: number } | null>(null);
   const boxRef = useRef<HTMLDivElement>(null);
 
+  // Click outside to deselect
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (boxRef.current && !boxRef.current.contains(e.target as Node)) {
+        setIsSelected(false);
+      }
+    };
+    if (isSelected) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [isSelected]);
+
   const sampleBackgroundColor = async () => {
     setIsSampling(true);
     try {
-      // Get the page container
       const pageElement = document.querySelector('.page') as HTMLElement;
-      if (!pageElement) {
-        toast.error('Could not find document page');
-        return;
-      }
-      
-      // Get bounding rectangles
+      if (!pageElement) { toast.error('Could not find document page'); return; }
       const pageRect = pageElement.getBoundingClientRect();
       const boxRect = boxRef.current!.getBoundingClientRect();
-      
-      // Calculate relative position
-      const relativeX = boxRect.left - pageRect.left;
-      const relativeY = boxRect.top - pageRect.top;
-      
-      // Create temporary canvas to sample colors
       const canvas = document.createElement('canvas');
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      
-      // Sample a small area from center of text box
       const sampleSize = 30;
       canvas.width = sampleSize;
       canvas.height = sampleSize;
-      
-      // Try to get image data from the document
       const bgElements = document.querySelectorAll('img, canvas');
       let sampledColor = null;
-      
       for (const el of Array.from(bgElements)) {
         const rect = el.getBoundingClientRect();
-        
-        // Check if this element is under the text box
         if (rect.left < boxRect.right && rect.right > boxRect.left &&
             rect.top < boxRect.bottom && rect.bottom > boxRect.top) {
-          
-          if (el instanceof HTMLImageElement) {
-            // Sample from image
-            ctx.drawImage(el, 0, 0, sampleSize, sampleSize);
-            const imageData = ctx.getImageData(sampleSize/2, sampleSize/2, 1, 1);
-            const [r, g, b] = imageData.data;
-            sampledColor = `rgb(${r}, ${g}, ${b})`;
-            break;
-          } else if (el instanceof HTMLCanvasElement) {
-            // Sample from canvas
+          if (el instanceof HTMLImageElement || el instanceof HTMLCanvasElement) {
             ctx.drawImage(el, 0, 0, sampleSize, sampleSize);
             const imageData = ctx.getImageData(sampleSize/2, sampleSize/2, 1, 1);
             const [r, g, b] = imageData.data;
@@ -104,10 +90,9 @@ export function OverlayTextBox({
           }
         }
       }
-      
       if (sampledColor) {
         onUpdate(id, { backgroundColor: sampledColor });
-        toast.success(`Background color sampled: ${sampledColor}`);
+        toast.success(`Background color sampled`);
       } else {
         toast.info('No image found under text box to sample from');
       }
@@ -130,9 +115,10 @@ export function OverlayTextBox({
         startWidth: width,
         startHeight: height
       };
-    } else if (!(e.target as HTMLElement).classList.contains('controls-area')) {
+    } else if (!(e.target as HTMLElement).closest('.controls-area')) {
       e.preventDefault();
       e.stopPropagation();
+      setIsSelected(true);
       setIsDragging(true);
       dragStart.current = { x: e.clientX, y: e.clientY };
     }
@@ -144,38 +130,30 @@ export function OverlayTextBox({
         e.preventDefault();
         const pageElement = document.querySelector('.page');
         if (!pageElement) return;
-        
         const pageRect = pageElement.getBoundingClientRect();
         const deltaX = e.clientX - dragStart.current.x;
         const deltaY = e.clientY - dragStart.current.y;
-        
         const newX = x + deltaX / zoomLevel;
         const newY = y + deltaY / zoomLevel;
-        
         onUpdate(id, { 
           x: Math.max(0, Math.min(newX, (pageRect.width / zoomLevel) - width)),
           y: Math.max(0, Math.min(newY, (pageRect.height / zoomLevel) - height))
         });
-        
         dragStart.current = { x: e.clientX, y: e.clientY };
       } else if (isResizing && resizeStart.current) {
         e.preventDefault();
         const deltaX = e.clientX - resizeStart.current.startX;
         const deltaY = e.clientY - resizeStart.current.startY;
-        
         const newWidth = Math.max(100, resizeStart.current.startWidth + deltaX / zoomLevel);
         const newHeight = Math.max(50, resizeStart.current.startHeight + deltaY / zoomLevel);
-        
         onUpdate(id, { width: newWidth, height: newHeight });
       }
     };
-
     const handleMouseUp = () => {
       setIsDragging(false);
       setIsResizing(false);
       resizeStart.current = null;
     };
-
     if (isDragging || isResizing) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
@@ -189,7 +167,7 @@ export function OverlayTextBox({
   return (
     <div
       ref={boxRef}
-      className="absolute group"
+      className="absolute"
       style={{
         left: `${x}px`,
         top: `${y}px`,
@@ -200,13 +178,7 @@ export function OverlayTextBox({
       }}
       onMouseDown={handleMouseDown}
     >
-      {/* Drag handle */}
-      <div className="drag-handle absolute -top-8 left-0 bg-primary text-primary-foreground px-2 py-1 rounded-t text-xs flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing">
-        <GripVertical className="h-3 w-3" />
-        <span>Drag</span>
-      </div>
-
-      {/* Text box */}
+      {/* Text box - NO border, blends with background */}
       <div
         className="w-full h-full p-2 relative"
         style={{
@@ -214,7 +186,9 @@ export function OverlayTextBox({
           color: color,
           fontSize: `${fontSize}px`,
           fontFamily: fontFamily,
-          border: borderVisible ? '1px solid rgba(0,0,0,0.2)' : 'none',
+          border: 'none',
+          outline: 'none',
+          boxShadow: 'none',
           overflow: 'hidden'
         }}
         onDoubleClick={() => setIsEditing(true)}
@@ -225,75 +199,95 @@ export function OverlayTextBox({
             value={text}
             onChange={(e) => onUpdate(id, { text: e.target.value })}
             onBlur={() => setIsEditing(false)}
-            className="w-full h-full bg-transparent resize-none outline-none"
-            style={{ color, fontSize: `${fontSize}px`, fontFamily }}
+            className="w-full h-full bg-transparent resize-none"
+            style={{ 
+              color, 
+              fontSize: `${fontSize}px`, 
+              fontFamily,
+              outline: 'none',
+              border: 'none',
+              boxShadow: 'none',
+            }}
           />
         ) : (
           <div className="whitespace-pre-wrap break-words">{text || 'Double-click to edit'}</div>
         )}
       </div>
 
-      {/* Controls */}
-      <div className="controls-area absolute -right-2 -top-8 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1">
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-6 w-6 p-0"
-          onClick={sampleBackgroundColor}
-          disabled={isSampling}
-          title="Sample background color"
-        >
-          <Pipette className="h-3 w-3" />
-        </Button>
-        
-        <Select value={fontFamily} onValueChange={(val) => onUpdate(id, { fontFamily: val })}>
-          <SelectTrigger className="h-6 w-24 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {FONTS.map(font => <SelectItem key={font} value={font}>{font}</SelectItem>)}
-          </SelectContent>
-        </Select>
-        
-        <Input
-          type="number"
-          value={fontSize}
-          onChange={(e) => onUpdate(id, { fontSize: parseInt(e.target.value) || 12 })}
-          className="h-6 w-14 text-xs"
-          min="8"
-          max="72"
-        />
+      {/* Controls - only visible when selected */}
+      {isSelected && (
+        <>
+          {/* Drag handle */}
+          <div className="absolute -top-8 left-0 bg-primary text-primary-foreground px-2 py-1 rounded-t text-xs flex items-center gap-2 cursor-grab active:cursor-grabbing">
+            <GripVertical className="h-3 w-3" />
+            <span>Drag</span>
+          </div>
 
-        <input
-          type="color"
-          value={color}
-          onChange={(e) => onUpdate(id, { color: e.target.value })}
-          className="h-6 w-8 cursor-pointer rounded border"
-          title="Text color"
-        />
+          <div className="controls-area absolute -right-2 -top-8 flex gap-1">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-6 w-6 p-0"
+              onClick={sampleBackgroundColor}
+              disabled={isSampling}
+              title="Sample background color"
+            >
+              <Pipette className="h-3 w-3" />
+            </Button>
+            
+            <Select value={fontFamily} onValueChange={(val) => onUpdate(id, { fontFamily: val })}>
+              <SelectTrigger className="h-6 w-24 text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {FONTS.map(font => <SelectItem key={font} value={font}>{font}</SelectItem>)}
+              </SelectContent>
+            </Select>
+            
+            <Input
+              type="number"
+              value={fontSize}
+              onChange={(e) => onUpdate(id, { fontSize: parseInt(e.target.value) || 12 })}
+              className="h-6 w-14 text-xs"
+              min="8"
+              max="72"
+            />
 
-        <input
-          type="color"
-          value={backgroundColor}
-          onChange={(e) => onUpdate(id, { backgroundColor: e.target.value })}
-          className="h-6 w-8 cursor-pointer rounded border"
-          title="Background color"
-        />
+            <input
+              type="color"
+              value={color}
+              onChange={(e) => onUpdate(id, { color: e.target.value })}
+              className="h-6 w-8 cursor-pointer rounded border"
+              title="Text color"
+            />
 
-        <Button
-          size="sm"
-          variant="destructive"
-          className="h-6 w-6 p-0"
-          onClick={() => onDelete(id)}
-        >
-          <Trash2 className="h-3 w-3" />
-        </Button>
-      </div>
+            <input
+              type="color"
+              value={backgroundColor === 'transparent' ? '#ffffff' : backgroundColor}
+              onChange={(e) => onUpdate(id, { backgroundColor: e.target.value })}
+              className="h-6 w-8 cursor-pointer rounded border"
+              title="Background color"
+            />
 
-      {/* Resize handle */}
-      <div
-        className="resize-handle absolute -bottom-2 -right-2 w-4 h-4 bg-primary rounded-full cursor-se-resize opacity-0 group-hover:opacity-100 transition-opacity"
-      />
+            <Button
+              size="sm"
+              variant="destructive"
+              className="h-6 w-6 p-0"
+              onClick={() => onDelete(id)}
+            >
+              <Trash2 className="h-3 w-3" />
+            </Button>
+          </div>
+
+          {/* Selection border - only when selected, using primary color */}
+          <div className="absolute inset-0 pointer-events-none" style={{ border: '1px dashed hsl(var(--primary))', borderRadius: '2px' }} />
+
+          {/* Resize handle */}
+          <div
+            className="resize-handle absolute -bottom-2 -right-2 w-4 h-4 bg-primary rounded-full cursor-se-resize"
+          />
+        </>
+      )}
     </div>
   );
 }
