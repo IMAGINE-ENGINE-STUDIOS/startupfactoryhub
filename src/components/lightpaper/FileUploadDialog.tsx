@@ -103,7 +103,16 @@ export function FileUploadDialog({ isOpen, onClose, onFileLoaded }: FileUploadDi
       setProgressValue(95);
       
       // Pass the content to parent based on mode
-      if (result.images && result.images.length > 0) {
+      if (result.editablePages && result.editablePages.length > 0) {
+        // DOCX Edit Mode: editable HTML per page
+        const payload = {
+          mode: 'docx-editable',
+          editablePages: result.editablePages,
+          styles: result.pages?.[0] || '', // Collected styles
+          metadata: result.metadata,
+        };
+        onFileLoaded(JSON.stringify(payload), title, { detectedFormat: result.metadata.detectedFormat, fileType: result.metadata.fileType, uploadMode: uploadMode || undefined }, file);
+      } else if (result.images && result.images.length > 0) {
         // Image-based rendering (View Mode or hybrid edit mode with text layers)
         const payload: any = {
           mode: result.textLayers ? 'hybrid' : 'view',

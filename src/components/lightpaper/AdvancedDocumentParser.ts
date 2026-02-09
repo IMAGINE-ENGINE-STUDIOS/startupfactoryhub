@@ -367,6 +367,7 @@ export interface ParsedContent {
   pages?: string[]; // Multiple page HTML strings
   images?: string[]; // For View Mode - array of page images
   textLayers?: TextLayerItem[][]; // Per-page text layer items for hybrid editing
+  editablePages?: string[]; // Per-page editable HTML strings (DOCX Edit Mode)
 }
 
 /**
@@ -1276,8 +1277,135 @@ export async function parseDocumentForEditing(
     };
   }
 
-  // For DOCX, use the same hybrid image+text approach as PDF for layout fidelity
-  return parseDocxForEditing(file, onProgress);
+  // For DOCX, use layout-preserving editable HTML
+  return parseDOCXEditable(file, onProgress);
+}
+
+/**
+ * Parse DOCX for true editing: renders with layout-preserving settings (same as View Mode)
+ * but extracts real editable HTML per page instead of capturing images.
+ * This allows real text editing while maintaining the original document layout.
+ */
+async function parseDOCXEditable(
+  file: File,
+  onProgress?: (message: string, current?: number, total?: number) => void
+): Promise<ParsedContent> {
+  onProgress?.('Preparing DOCX for editing...', 0, 1);
+
+  const PAGE_WIDTH_PX = 816;
+  const PAGE_HEIGHT_PX = 1056;
+
+  const container = document.createElement('div');
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  container.style.top = '0';
+  container.style.width = `${PAGE_WIDTH_PX}px`;
+  container.style.zIndex = '-1';
+  document.body.appendChild(container);
+
+  try {
+    // Render with SAME settings as View Mode for layout fidelity
+    await renderAsync(file, container, undefined, {
+      className: 'docx',
+      inWrapper: true,
+      ignoreWidth: false,
+      ignoreHeight: false,
+      ignoreFonts: false,
+      breakPages: true,
+      renderHeaders: true,
+      renderFooters: true,
+      renderFootnotes: true,
+      renderEndnotes: true,
+      useBase64URL: true,
+      debug: false,
+    });
+
+    // Wait for fonts/images to load
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    onProgress?.('Extracting editable pages...', 0, 1);
+
+    // Collect all styles from the rendered container (docx-preview injects <style> tags)
+    const styleElements = container.querySelectorAll('style');
+    let collectedStyles = '';
+    styleElements.forEach(styleEl => {
+      collectedStyles += styleEl.outerHTML + '\n';
+    });
+
+    // Find page sections
+    let pageDivs: HTMLElement[] = [];
+    const sections = container.querySelectorAll('section.docx');
+    if (sections.length > 1) {
+      pageDivs = Array.from(sections) as HTMLElement[];
+      console.log(`[DOCX Editable] Found ${pageDivs.length} section.docx elements`);
+    }
+    if (pageDivs.length <= 1) {
+      const wrapperSections = container.querySelectorAll('.docx-wrapper > section');
+      if (wrapperSections.length > 1) {
+        pageDivs = Array.from(wrapperSections) as HTMLElement[];
+        console.log(`[DOCX Editable] Found ${pageDivs.length} wrapper sections`);
+      }
+    }
+
+    const editablePages: string[] = [];
+
+    if (pageDivs.length > 1) {
+      const totalPages = pageDivs.length;
+      onProgress?.(`Processing ${totalPages} editable pages...`, 0, totalPages);
+
+      for (let i = 0; i < pageDivs.length; i++) {
+        onProgress?.(`Extracting page ${i + 1}/${totalPages}...`, i + 1, totalPages);
+        const pageEl = pageDivs[i];
+
+        // Get the section's outerHTML, preserving all inline styles
+        let pageHtml = pageEl.outerHTML;
+
+        // Remove contenteditable="false" attributes to allow editing
+        pageHtml = pageHtml.replace(/contenteditable\s*=\s*"false"/gi, '');
+
+        editablePages.push(pageHtml);
+      }
+    } else {
+      // Single section or no sections - use the full wrapper content
+      console.log('[DOCX Editable] Single section fallback - using full content');
+      const wrapper = container.querySelector('.docx-wrapper') as HTMLElement;
+      const target = wrapper || container;
+
+      let fullHtml = target.innerHTML;
+      // Remove style tags from the content (we'll prepend them separately)
+      fullHtml = fullHtml.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+      // Remove contenteditable="false"
+      fullHtml = fullHtml.replace(/contenteditable\s*=\s*"false"/gi, '');
+
+      editablePages.push(fullHtml);
+    }
+
+    document.body.removeChild(container);
+
+    if (editablePages.length === 0) {
+      throw new Error('Failed to extract editable DOCX pages');
+    }
+
+    onProgress?.('Editable document ready!', editablePages.length, editablePages.length);
+
+    return {
+      html: '',
+      metadata: {
+        pageCount: editablePages.length,
+        hasEditableText: true,
+        hasImages: false,
+        fileType: 'docx',
+        detectedFormat: 'letter',
+        dimensions: { width: PAGE_WIDTH_PX, height: PAGE_HEIGHT_PX },
+      },
+      editablePages,
+      // Prepend collected styles so the editor can inject them
+      pages: [collectedStyles],
+    };
+  } catch (error) {
+    document.body.removeChild(container);
+    throw error;
+  }
 }
 
 /**
