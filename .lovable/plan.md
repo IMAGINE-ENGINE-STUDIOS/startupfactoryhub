@@ -1,74 +1,44 @@
 
 
-## Fix DOCX Edit Mode: True Editing with Layout Fidelity
+## Fix PDF Text Overlay Editing
 
-### Problem Summary
+### What's Wrong
 
-Currently, DOCX files in **Edit Mode** use the same hybrid image+overlay approach as PDFs. This means:
-- Text appears as transparent overlays on top of page images
-- Users can only annotate (add text boxes on top), NOT actually edit the original text
-- The "Edit" toggle just enables/disables overlay annotations
+There are two overlapping buttons trying to control PDF text editing -- the main **Edit/View** toggle button and the new **Text Edit** button -- and they conflict with each other. The main Edit button (lines 2567-2588) tries to load text layers AND toggle `editMode`, while the Text Edit button (lines 2616-2640) does the exact same thing. When the user clicks either button:
 
-The user wants DOCX Edit Mode to allow **real editing** -- erasing, modifying, and reformatting the actual document text -- while keeping the layout as close to the original as possible.
+1. The main **Edit** button loads text layers and sets `editMode = true`
+2. But the text spans render with `color: 'transparent'` -- they're invisible until individually clicked/focused
+3. The user sees no visible change and thinks it's broken
+4. The **Text Edit** button also has `viewMode && uploadedFileType === 'pdf'` as its show condition, but once `editMode` is toggled ON via the main button, the Text Edit button still shows (since `viewMode` stays true), creating confusion about which button to use
 
-### Root Cause
+The core issue: the text overlay system works, but the toggle flow is broken because two buttons fight over the same state, and there's no clear visual feedback that editing is active.
 
-The `parseDOCX()` function (which produces real editable HTML) aggressively strips formatting:
-- Sets `ignoreWidth: true` and `breakPages: false`
-- Removes all width values from CSS
-- This destroys the original layout, making it look nothing like the View Mode version
+### Fix Plan
 
-Meanwhile, `parseDocxForEditing()` preserves layout perfectly (image-based) but only supports overlay annotations, not real editing.
+#### 1. Remove the duplicate "Text Edit" button (lines 2609-2646 in LightPaperDocument.tsx)
 
-### Solution
+The separate button adds confusion. Instead, make the **main Edit/View toggle** the single entry point for PDF text editing, which is how it originally worked.
 
-Rewrite the DOCX Edit Mode pipeline to use `docx-preview` with **layout-preserving settings** (same as View Mode) but output real, editable HTML instead of images.
+#### 2. Fix the main Edit/View toggle for PDFs (lines 2567-2595)
 
-### Changes
+Ensure the PDF branch in the main toggle button:
+- Loads text layers on first click (already does this at line 2567-2578)
+- Properly toggles `editMode` on subsequent clicks (already does this at line 2589-2591)
+- Shows a clear toast message indicating text editing is active
 
-#### 1. `AdvancedDocumentParser.ts` -- New `parseDOCXEditable()` function
+#### 3. Make text spans visible immediately when edit mode is active
 
-- Render with `breakPages: true`, `ignoreWidth: false`, `ignoreHeight: false` (same settings as View Mode for layout fidelity)
-- Instead of capturing images with html2canvas, extract the actual rendered HTML from each page section
-- Preserve all inline styles, fonts, spacing, and formatting
-- Only remove `contenteditable="false"` attributes to allow editing
-- Return HTML per page (not images) so the editor can display real editable content
+Currently text spans start with `color: 'transparent'` and only show on focus. Change this so when `editMode` is true, ALL text spans render with their actual text color and background color immediately, giving clear visual feedback that editing is active. On blur after no changes, keep them visible (don't revert to transparent).
 
-#### 2. `AdvancedDocumentParser.ts` -- Update `parseDocumentForEditing()`
-
-- Route DOCX files through the new `parseDOCXEditable()` instead of `parseDocxForEditing()` (hybrid)
-- Return result with `html` content (not `images`/`textLayers`)
-
-#### 3. `LightPaperDocument.tsx` -- Edit Mode Content Loading
-
-- When DOCX edit mode content arrives as HTML (not JSON with images), load it into the contenteditable editor
-- Wrap each page's HTML in a page container that matches the document dimensions
-- Preserve the page-by-page structure for proper pagination
-- Keep `contentEditable="true"` on the editor for real text manipulation
-
-#### 4. `LightPaperDocument.tsx` -- Edit Toggle for DOCX
-
-- When toggling from View to Edit on a DOCX file, re-parse the original file using the new `parseDOCXEditable()` to get real editable HTML
-- When toggling from Edit to View, re-parse using `parseDocumentAsImages()` to get pristine page images
+This is the key UX fix -- the user needs to SEE the text overlay is active.
 
 ### Technical Details
 
-**New `parseDOCXEditable()` function approach:**
+**File: `src/components/lightpaper/LightPaperDocument.tsx`**
 
-```text
-1. Render DOCX in hidden container with breakPages:true, ignoreWidth:false
-2. Find all page sections (section.docx elements)
-3. For each section, extract innerHTML preserving all styles
-4. Remove contenteditable="false" attributes
-5. Keep all widths, margins, fonts, spacing intact
-6. Return as HTML string with page dividers
-7. If only 1 section found, use the full content as a single page
-```
+Changes:
+1. **Delete lines 2609-2646** -- remove the duplicate "Text Edit" button entirely
+2. **Lines 3368-3392 (text span rendering)** -- change `color: 'transparent'` to `color: item.color` and `background: 'transparent'` to `background: item.backgroundColor` so text is always visible in edit mode
+3. The `onFocus`/`onBlur` handlers can be simplified since text is already visible
 
-**Key differences from current `parseDOCX()`:**
-- Keep `ignoreWidth: false` (preserves original widths)
-- Keep `breakPages: true` (preserves page breaks)
-- Do NOT strip width/min-width/max-width CSS values
-- Keep `inWrapper: true` for proper page structure
-
-This ensures the Edit Mode HTML matches the View Mode layout while remaining fully editable.
+This is a minimal, surgical fix that doesn't touch DOCX logic at all.
