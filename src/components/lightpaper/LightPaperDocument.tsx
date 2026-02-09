@@ -173,6 +173,7 @@ export function LightPaperDocument({
   const [pages, setPages] = useState<string[]>(['']);
   const [showPagePanel, setShowPagePanel] = useState(false);
   const [editTextLayers, setEditTextLayers] = useState<any[][]>([]); // Per-page text layer items for hybrid editing
+  const [editTextViewportSize, setEditTextViewportSize] = useState<{ width: number; height: number } | null>(null);
 
   // Scale PDF reconstructed content to fit within the editor container
   const scalePdfContentToFit = useCallback((container: HTMLDivElement | null) => {
@@ -326,9 +327,14 @@ export function LightPaperDocument({
         if (parsed.mode === 'hybrid' && parsed.textLayers && Array.isArray(parsed.textLayers)) {
           setEditTextLayers(parsed.textLayers);
           setEditMode(true); // Auto-enable edit mode for hybrid
+          // Store viewport dimensions for percentage-based positioning
+          if (parsed.metadata?.dimensions) {
+            setEditTextViewportSize(parsed.metadata.dimensions);
+          }
           console.log(`✓ Loaded text layers for ${parsed.textLayers.length} pages`);
         } else {
           setEditTextLayers([]);
+          setEditTextViewportSize(null);
         }
         
         // Set format if detected (from JSON metadata or upload metadata)
@@ -2519,8 +2525,8 @@ export function LightPaperDocument({
           </span>
           {viewMode && (
             <span className="flex items-center gap-1 text-primary font-medium">
-              <Eye className="h-3 w-3" />
-              View Mode
+              {editMode && editTextLayers.length > 0 ? <Edit3 className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+              {editMode && editTextLayers.length > 0 ? 'Edit Mode (click text to edit)' : 'View Mode'}
             </span>
           )}
           {isColorPickerActive && (
@@ -2979,31 +2985,21 @@ export function LightPaperDocument({
                   />
                   
                   {/* Hybrid Edit Mode: Editable text layer over the image */}
-                  {editMode && editTextLayers[index] && editTextLayers[index].length > 0 && (
+                  {editMode && editTextLayers[index] && editTextLayers[index].length > 0 && editTextViewportSize && (
                     <div 
                       className="absolute inset-0" 
                       style={{ 
                         pointerEvents: 'none',
                       }}
                     >
-                      {editTextLayers[index].map((item: any, textIdx: number) => {
-                        // Scale positions relative to the displayed image
-                        // Text layer coords are at scale=1 (viewport coords)
-                        // The image is rendered at the page container width
-                        const pageEl = document.getElementById(`page-${index + 1}`);
-                        const imgEl = pageEl?.querySelector('img');
-                        const imgWidth = imgEl?.naturalWidth || 1;
-                        const viewportWidth = editTextLayers[index]?.[0]?.x !== undefined 
-                          ? (imgWidth / 2) // renderScale was 2
-                          : 816;
+                      {(() => {
+                        // Compute scale factor: page CSS width in px / viewport width
+                        const pageCssWidthPx = getPageDimensions().width * CM_TO_PX;
+                        const vpW = editTextViewportSize.width;
+                        const vpH = editTextViewportSize.height;
+                        const sf = pageCssWidthPx / vpW;
                         
-                        // We need the actual viewport dimensions from the first page metadata
-                        // For now, use the image natural dimensions / renderScale(2)
-                        const naturalW = imgEl?.naturalWidth || 1632;
-                        const displayW = imgEl?.clientWidth || 816;
-                        const scaleFactor = displayW / (naturalW / 2);
-                        
-                        return (
+                        return editTextLayers[index].map((item: any, textIdx: number) => (
                           <span
                             key={`text-${index}-${textIdx}`}
                             contentEditable
@@ -3012,16 +3008,16 @@ export function LightPaperDocument({
                             data-original-text={item.text}
                             style={{
                               position: 'absolute',
-                              left: `${item.x * scaleFactor}px`,
-                              top: `${item.y * scaleFactor}px`,
-                              width: `${item.width * scaleFactor}px`,
-                              height: `${item.height * scaleFactor}px`,
-                              fontSize: `${item.fontSize * scaleFactor}px`,
+                              left: `${item.x * sf}px`,
+                              top: `${item.y * sf}px`,
+                              width: `${item.width * sf}px`,
+                              height: `${item.height * sf}px`,
+                              fontSize: `${item.fontSize * sf}px`,
                               fontFamily: item.fontFamily,
                               fontWeight: item.fontWeight,
                               fontStyle: item.fontStyle,
                               color: 'transparent',
-                              lineHeight: `${item.height * scaleFactor}px`,
+                              lineHeight: `${item.height * sf}px`,
                               whiteSpace: 'nowrap',
                               cursor: 'text',
                               background: 'transparent',
@@ -3033,7 +3029,6 @@ export function LightPaperDocument({
                               zIndex: 10,
                             }}
                             onFocus={(e) => {
-                              // Show text with sampled background for seamless editing
                               e.currentTarget.style.color = item.color;
                               e.currentTarget.style.backgroundColor = item.backgroundColor;
                               e.currentTarget.style.outline = '1px solid rgba(66, 153, 225, 0.4)';
@@ -3041,12 +3036,10 @@ export function LightPaperDocument({
                             onBlur={(e) => {
                               const hasChanged = e.currentTarget.textContent !== item.text;
                               if (hasChanged) {
-                                // Keep text visible if edited
                                 e.currentTarget.style.color = item.color;
                                 e.currentTarget.style.backgroundColor = item.backgroundColor;
                                 e.currentTarget.style.outline = 'none';
                               } else {
-                                // Revert to transparent if unchanged
                                 e.currentTarget.style.color = 'transparent';
                                 e.currentTarget.style.backgroundColor = 'transparent';
                                 e.currentTarget.style.outline = 'none';
@@ -3066,10 +3059,11 @@ export function LightPaperDocument({
                           >
                             {item.text}
                           </span>
-                        );
-                      })}
+                        ));
+                      })()}
                     </div>
                   )}
+                  
                   
                   {/* Overlay Text Boxes for this page */}
                   {overlayTextBoxes
