@@ -6,7 +6,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType, ChevronLeft, ChevronRight, Volume2 } from "lucide-react";
-import { toast } from "sonner";
+import { addLightPaperMessage } from "./MessageCenter";
+
+// Replace toast with message center - same API surface
+const toast = {
+  success: (msg: string) => addLightPaperMessage("success", msg),
+  error: (msg: string) => addLightPaperMessage("error", msg),
+  info: (msg: string) => addLightPaperMessage("info", msg),
+  warning: (msg: string) => addLightPaperMessage("warning", msg),
+  loading: (msg: string) => addLightPaperMessage("info", msg),
+  dismiss: (_?: any) => {},
+};
 import { useLightPaperProjects, LightPaperProject } from "@/hooks/useLightPaperProjects";
 import CollapsibleToolbar from "./CollapsibleToolbar";
 import FloatingActionMenu from "./FloatingActionMenu";

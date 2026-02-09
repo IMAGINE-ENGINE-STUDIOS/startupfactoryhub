@@ -1,15 +1,16 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Sparkles, Send, X, Loader2, ChevronDown, Plus, Save, Trash2, BookOpen, CheckCircle2 } from "lucide-react";
-import { toast } from "sonner";
+import { Sparkles, Send, X, Loader2, ChevronDown, Plus, Save, Trash2, BookOpen, CheckCircle2, Square, Play } from "lucide-react";
+import { addLightPaperMessage } from "./MessageCenter";
+
+type Phase = "idle" | "greeting" | "input" | "conversation" | "loading" | "outline-review" | "generating-chapters" | "stopped" | "done";
 
 interface GeniusAIBubbleProps {
   onInsertText: (html: string) => void;
+  onStreamingChunk?: (html: string) => void;
   isDarkMode: boolean;
   triggerPosition: { x: number; y: number } | null;
   onDismiss: () => void;
 }
-
-type Phase = "idle" | "greeting" | "input" | "conversation" | "loading" | "outline-review" | "generating-chapters" | "done";
 
 interface Preset {
   id: string;
@@ -563,6 +564,7 @@ function saveCustomPresets(presets: Preset[]) {
 
 export default function GeniusAIBubble({
   onInsertText,
+  onStreamingChunk,
   isDarkMode,
   triggerPosition,
   onDismiss,
@@ -583,6 +585,8 @@ export default function GeniusAIBubble({
   const [chapterOutlines, setChapterOutlines] = useState<ChapterOutline[]>([]);
   const [generatingChapter, setGeneratingChapter] = useState(0);
   const [totalChapters, setTotalChapters] = useState(0);
+  const [stoppedAtChapter, setStoppedAtChapter] = useState(0);
+  const abortControllerRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const conversationRef = useRef<HTMLDivElement>(null);
   const fadeTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -604,6 +608,8 @@ export default function GeniusAIBubble({
       setChapterOutlines([]);
       setGeneratingChapter(0);
       setTotalChapters(0);
+      setStoppedAtChapter(0);
+      abortControllerRef.current?.abort();
       return;
     }
 
@@ -667,8 +673,8 @@ export default function GeniusAIBubble({
       }
     );
 
-    if (resp.status === 429) { toast.error("Rate limit exceeded. Please wait."); throw new Error("rate-limit"); }
-    if (resp.status === 402) { toast.error("AI credits exhausted."); throw new Error("credits"); }
+    if (resp.status === 429) { addLightPaperMessage("error", "Rate limit exceeded. Please wait."); throw new Error("rate-limit"); }
+    if (resp.status === 402) { addLightPaperMessage("error", "AI credits exhausted."); throw new Error("credits"); }
     if (!resp.ok || !resp.body) throw new Error("Stream failed");
 
     const reader = resp.body.getReader();
@@ -724,6 +730,26 @@ export default function GeniusAIBubble({
     const newConversation = [...conversation, userMsg];
     setConversation(newConversation);
     setInput("");
+
+    // In stopped mode, send the message as context adjustment and stay in stopped phase
+    if (phase === "stopped") {
+      setIsStreaming(true);
+      try {
+        const systemContent = buildSystemPrompt(selectedPreset) + "\n\nThe user has PAUSED document generation. They want to adjust the upcoming chapters. Acknowledge their request briefly and confirm the adjustment will apply when they resume.";
+        const messages = newConversation.map(m => ({ role: m.role, content: m.content }));
+        const fullText = await callAI(messages, systemContent);
+        setConversation(prev => [...prev, { role: "assistant", content: fullText }]);
+        setPhase("stopped"); // stay in stopped
+      } catch (err: any) {
+        if (err.message !== "rate-limit" && err.message !== "credits") {
+          addLightPaperMessage("error", "Failed to get AI response.");
+        }
+      } finally {
+        setIsStreaming(false);
+      }
+      return;
+    }
+
     setPhase("loading");
     setIsStreaming(true);
 
@@ -748,7 +774,7 @@ export default function GeniusAIBubble({
           // Direct insert
           const html = markdownToHtml(fullText);
           onInsertText(html);
-          toast.success("Document written by Genius AI");
+          addLightPaperMessage("success", "Document written by Genius AI");
           setPhase("done");
           setOpacity(0);
           setTimeout(onDismiss, 800);
@@ -757,7 +783,7 @@ export default function GeniusAIBubble({
     } catch (err: any) {
       if (err.message !== "rate-limit" && err.message !== "credits") {
         console.error("Genius AI error:", err);
-        toast.error("Failed to get AI response.");
+        addLightPaperMessage("error", "Failed to get AI response.");
       }
       setPhase("conversation");
     } finally {
@@ -766,14 +792,23 @@ export default function GeniusAIBubble({
   };
 
   /** Generate chapters one by one after outline approval */
-  const handleApproveOutline = async () => {
+  const generateChaptersFrom = async (startIndex: number) => {
     setPhase("generating-chapters");
     setIsStreaming(true);
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     const systemContent = buildSystemPrompt(selectedPreset);
-    let allHtml = "";
 
-    for (let i = 0; i < chapterOutlines.length; i++) {
+    for (let i = startIndex; i < chapterOutlines.length; i++) {
+      if (controller.signal.aborted) {
+        setStoppedAtChapter(i);
+        setPhase("stopped");
+        setIsStreaming(false);
+        addLightPaperMessage("info", `Stopped at chapter ${i}/${chapterOutlines.length}. You can resume or edit instructions.`);
+        return;
+      }
+
       setGeneratingChapter(i + 1);
       const chapter = chapterOutlines[i];
 
@@ -796,24 +831,52 @@ IMPORTANT:
         ];
 
         const chapterText = await callAI(messages, systemContent);
+        
+        if (controller.signal.aborted) {
+          setStoppedAtChapter(i + 1);
+          setPhase("stopped");
+          setIsStreaming(false);
+          addLightPaperMessage("info", `Stopped after chapter ${i + 1}. You can resume or edit instructions.`);
+          return;
+        }
+
         const chapterHtml = markdownToHtml(chapterText);
-        allHtml += `<div class="chapter-break" style="page-break-before: always;"></div>${chapterHtml}`;
 
         // Insert progressively
         onInsertText(chapterHtml);
-        toast.success(`Chapter ${i + 1}/${chapterOutlines.length} written`);
-      } catch (err) {
+        addLightPaperMessage("success", `Chapter ${i + 1}/${chapterOutlines.length} written`);
+      } catch (err: any) {
+        if (err.name === 'AbortError' || controller.signal.aborted) {
+          setStoppedAtChapter(i);
+          setPhase("stopped");
+          setIsStreaming(false);
+          addLightPaperMessage("info", `Stopped at chapter ${i + 1}. You can resume.`);
+          return;
+        }
         console.error(`Error generating chapter ${i + 1}:`, err);
-        toast.error(`Failed on chapter ${i + 1}. Stopping.`);
+        addLightPaperMessage("error", `Failed on chapter ${i + 1}. Stopping.`);
         break;
       }
     }
 
     setPhase("done");
     setIsStreaming(false);
-    toast.success(`✅ All ${chapterOutlines.length} chapters written!`);
+    abortControllerRef.current = null;
+    addLightPaperMessage("success", `✅ All ${chapterOutlines.length} chapters written!`);
     setOpacity(0);
     setTimeout(onDismiss, 1500);
+  };
+
+  const handleApproveOutline = async () => {
+    await generateChaptersFrom(0);
+  };
+
+  const handleStop = () => {
+    abortControllerRef.current?.abort();
+  };
+
+  const handleResume = () => {
+    generateChaptersFrom(stoppedAtChapter);
   };
 
   const handleClose = () => {
@@ -825,7 +888,7 @@ IMPORTANT:
 
   const handleSaveCustomPreset = () => {
     if (!newPresetName.trim() || !newPresetInstruction.trim()) {
-      toast.error("Name and instructions are required");
+      addLightPaperMessage("error", "Name and instructions are required");
       return;
     }
     const preset: Preset = {
@@ -844,7 +907,7 @@ IMPORTANT:
     setNewPresetFormat("");
     setShowNewPreset(false);
     setSelectedPreset(preset);
-    toast.success(`Preset "${preset.name}" saved`);
+    addLightPaperMessage("success", `Preset "${preset.name}" saved`);
   };
 
   const handleDeleteCustomPreset = (id: string) => {
@@ -852,7 +915,7 @@ IMPORTANT:
     setCustomPresets(updated);
     saveCustomPresets(updated);
     if (selectedPreset?.id === id) setSelectedPreset(null);
-    toast.success("Preset deleted");
+    addLightPaperMessage("success", "Preset deleted");
   };
 
   if (!triggerPosition || phase === "idle") return null;
@@ -894,7 +957,7 @@ IMPORTANT:
       )}
 
       {/* Main interactive panel */}
-      {(phase === "input" || phase === "loading" || phase === "conversation" || phase === "outline-review" || phase === "generating-chapters") && (
+      {(phase === "input" || phase === "loading" || phase === "conversation" || phase === "outline-review" || phase === "generating-chapters" || phase === "stopped") && (
         <div
           className={`${bg} backdrop-blur-xl ${border} border rounded-2xl shadow-2xl shadow-emerald-500/10`}
           style={{
@@ -1052,11 +1115,19 @@ IMPORTANT:
           {phase === "generating-chapters" && (
             <div className="px-4 mb-2">
               <div className={`rounded-lg p-3 ${isDarkMode ? "bg-white/5" : "bg-black/5"}`}>
-                <div className="flex items-center gap-2 mb-2">
-                  <Loader2 className="h-4 w-4 text-emerald-500 animate-spin" />
-                  <span className={`text-xs font-semibold ${fg}`}>
-                    Writing chapter {generatingChapter} of {totalChapters}...
-                  </span>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="h-4 w-4 text-emerald-500 animate-spin" />
+                    <span className={`text-xs font-semibold ${fg}`}>
+                      Writing chapter {generatingChapter} of {totalChapters}...
+                    </span>
+                  </div>
+                  <button
+                    onClick={handleStop}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-red-500/20 text-red-500 text-[10px] font-semibold hover:bg-red-500/30 transition-colors"
+                  >
+                    <Square className="h-3 w-3" /> Stop
+                  </button>
                 </div>
                 <div className="w-full h-2 rounded-full bg-emerald-500/20 overflow-hidden">
                   <div
@@ -1082,7 +1153,49 @@ IMPORTANT:
             </div>
           )}
 
-          {/* Input area — hidden during generation */}
+          {/* Stopped state - show resume button and allow editing */}
+          {phase === "stopped" && (
+            <div className="px-4 mb-2">
+              <div className={`rounded-lg p-3 ${isDarkMode ? "bg-white/5" : "bg-black/5"}`}>
+                <div className="flex items-center justify-between mb-2">
+                  <span className={`text-xs font-semibold ${fg}`}>
+                    ⏸ Paused at chapter {stoppedAtChapter}/{totalChapters}
+                  </span>
+                  <button
+                    onClick={handleResume}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-emerald-500/20 text-emerald-500 text-[10px] font-semibold hover:bg-emerald-500/30 transition-colors"
+                  >
+                    <Play className="h-3 w-3" /> Resume
+                  </button>
+                </div>
+                <div className="w-full h-2 rounded-full bg-emerald-500/20 overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full"
+                    style={{ width: `${(stoppedAtChapter / totalChapters) * 100}%` }}
+                  />
+                </div>
+                <div className="mt-2 space-y-0.5">
+                  {chapterOutlines.map((ch, i) => (
+                    <div key={i} className={`text-[10px] ${fg} flex items-center gap-1.5 ${i < stoppedAtChapter ? "opacity-40" : i === stoppedAtChapter ? "opacity-100 font-semibold" : "opacity-25"}`}>
+                      {i < stoppedAtChapter ? (
+                        <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                      ) : i === stoppedAtChapter ? (
+                        <Square className="h-3 w-3 text-yellow-500" />
+                      ) : (
+                        <span className="w-3 h-3 rounded-full border border-current flex-shrink-0" />
+                      )}
+                      {ch.title}
+                    </div>
+                  ))}
+                </div>
+                <p className={`text-[10px] ${fg} opacity-50 mt-2`}>
+                  💡 Use the input below to adjust upcoming chapters before resuming.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Input area — hidden during active generation & outline review */}
           {phase !== "outline-review" && phase !== "generating-chapters" && (
             <div className="px-4 pb-3 pt-1 flex-shrink-0">
               <textarea
@@ -1096,7 +1209,9 @@ IMPORTANT:
                   }
                 }}
                 placeholder={
-                  selectedPreset
+                  phase === "stopped"
+                    ? "Adjust instructions for remaining chapters, then Resume..."
+                    : selectedPreset
                     ? `Describe your ${selectedPreset.name.toLowerCase()}... (mention page count for long docs)`
                     : "Ask anything, or describe a document to write..."
                 }
@@ -1107,7 +1222,7 @@ IMPORTANT:
               />
               <div className="flex items-center justify-between mt-2">
                 <span className={`text-[10px] ${fg} opacity-30`}>
-                  {selectedPreset ? `${selectedPreset.icon} ${selectedPreset.name}` : "Shift+Enter for new line"}
+                  {phase === "stopped" ? "⏸ Stopped — edit or resume" : selectedPreset ? `${selectedPreset.icon} ${selectedPreset.name}` : "Shift+Enter for new line"}
                 </span>
                 <button
                   onClick={handleSubmit}

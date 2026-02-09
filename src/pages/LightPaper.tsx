@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, Command, HelpCircle, Upload } from "lucide-react";
+import { FileText, Table, Presentation, Command, HelpCircle, Upload, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FolderOpen } from "lucide-react";
+import { MessageCenterButton } from "@/components/lightpaper/MessageCenter";
 import { useNavigate } from "react-router-dom";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
@@ -58,6 +58,7 @@ export default function LightPaper() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <MessageCenterButton />
               <Button 
                 variant="outline" 
                 onClick={() => setShowUploadDialog(true)} 
