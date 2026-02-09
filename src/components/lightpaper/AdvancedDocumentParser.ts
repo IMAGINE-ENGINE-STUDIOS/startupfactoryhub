@@ -1276,8 +1276,245 @@ export async function parseDocumentForEditing(
     };
   }
 
-  // For DOCX, use the editable HTML parser (returns clean HTML without images)
-  return parseDOCX(file, (msg) => onProgress?.(msg));
+  // For DOCX, use hybrid approach (images + text layers) just like PDF
+  return parseDocxForEditing(file, onProgress);
+}
+
+/**
+ * Parse DOCX for hybrid editing: renders pages as images AND extracts text layers.
+ * Uses docx-preview with breakPages:true + html2canvas, same output format as PDF hybrid.
+ */
+async function parseDocxForEditing(
+  file: File,
+  onProgress?: (message: string, current?: number, total?: number) => void
+): Promise<ParsedContent> {
+  onProgress?.('Preparing DOCX for editing...', 0, 1);
+
+  const PAGE_WIDTH_PX = 816;
+  const PAGE_HEIGHT_PX = 1056;
+
+  const container = document.createElement('div');
+  container.style.position = 'absolute';
+  container.style.left = '-9999px';
+  container.style.top = '0';
+  container.style.width = `${PAGE_WIDTH_PX}px`;
+  container.style.zIndex = '-1';
+  document.body.appendChild(container);
+
+  try {
+    await renderAsync(file, container, undefined, {
+      className: 'docx',
+      inWrapper: true,
+      ignoreWidth: false,
+      ignoreHeight: false,
+      ignoreFonts: false,
+      breakPages: true,
+      renderHeaders: true,
+      renderFooters: true,
+      renderFootnotes: true,
+      renderEndnotes: true,
+      useBase64URL: true,
+      debug: false,
+    });
+
+    // Wait for fonts/images to load
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    onProgress?.('Detecting pages...', 0, 1);
+
+    // Find page sections
+    let pageDivs: HTMLElement[] = [];
+    const sections = container.querySelectorAll('section.docx');
+    if (sections.length > 1) {
+      pageDivs = Array.from(sections) as HTMLElement[];
+    }
+    if (pageDivs.length <= 1) {
+      const wrapperSections = container.querySelectorAll('.docx-wrapper > section');
+      if (wrapperSections.length > 1) {
+        pageDivs = Array.from(wrapperSections) as HTMLElement[];
+      }
+    }
+
+    const html2canvasModule = (await import('html2canvas')).default;
+    const images: string[] = [];
+    const textLayers: TextLayerItem[][] = [];
+
+    const extractTextFromElement = (element: HTMLElement, offsetX: number, offsetY: number): TextLayerItem[] => {
+      const items: TextLayerItem[] = [];
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT, null);
+      let node: Text | null;
+
+      while ((node = walker.nextNode() as Text | null)) {
+        const text = node.textContent?.trim();
+        if (!text) continue;
+
+        const range = document.createRange();
+        range.selectNodeContents(node);
+        const rects = range.getClientRects();
+        if (rects.length === 0) continue;
+
+        const rect = rects[0];
+        const parentEl = node.parentElement;
+        if (!parentEl) continue;
+
+        const computedStyle = window.getComputedStyle(parentEl);
+        const fontSize = parseFloat(computedStyle.fontSize) || 12;
+        const { fontFamily, fontWeight, fontStyle } = recognizeFont(computedStyle.fontFamily);
+
+        items.push({
+          text,
+          x: rect.left - offsetX,
+          y: rect.top - offsetY,
+          width: rect.width,
+          height: rect.height,
+          fontSize,
+          fontFamily,
+          fontWeight,
+          fontStyle,
+          color: computedStyle.color || 'rgb(0, 0, 0)',
+          backgroundColor: 'rgb(255, 255, 255)', // Will be sampled from canvas
+        });
+      }
+
+      return items;
+    };
+
+    if (pageDivs.length > 1) {
+      const totalPages = pageDivs.length;
+      onProgress?.(`Processing ${totalPages} pages...`, 0, totalPages);
+
+      for (let i = 0; i < pageDivs.length; i++) {
+        onProgress?.(`Processing page ${i + 1}/${totalPages}...`, i + 1, totalPages);
+        const pageEl = pageDivs[i];
+        pageEl.style.display = 'block';
+        await new Promise(resolve => setTimeout(resolve, 200));
+
+        // Extract text positions BEFORE capturing image
+        const pageRect = pageEl.getBoundingClientRect();
+        const pageTextItems = extractTextFromElement(pageEl, pageRect.left, pageRect.top);
+
+        try {
+          const canvas = await html2canvasModule(pageEl, {
+            scale: 2,
+            useCORS: true,
+            allowTaint: true,
+            backgroundColor: null,
+            logging: false,
+            width: pageEl.scrollWidth || PAGE_WIDTH_PX,
+            height: pageEl.scrollHeight || PAGE_HEIGHT_PX,
+          });
+          images.push(canvas.toDataURL('image/png'));
+
+          // Sample background colors from the canvas for each text item
+          for (const item of pageTextItems) {
+            item.backgroundColor = sampleBackgroundColor(
+              canvas, item.x, item.y, item.width, item.height, 2
+            );
+          }
+          textLayers.push(pageTextItems);
+        } catch (err) {
+          console.error(`Failed to capture DOCX page ${i + 1}:`, err);
+          textLayers.push([]);
+        }
+      }
+    } else {
+      // Single section — slice into pages
+      const renderTarget = container.querySelector('.docx-wrapper') as HTMLElement || container;
+      const totalHeight = renderTarget.scrollHeight;
+      const totalWidth = renderTarget.scrollWidth || PAGE_WIDTH_PX;
+      const numPages = Math.max(1, Math.ceil(totalHeight / PAGE_HEIGHT_PX));
+
+      onProgress?.(`Splitting into ${numPages} pages...`, 0, numPages);
+
+      // Extract all text items relative to the render target
+      const targetRect = renderTarget.getBoundingClientRect();
+      const allTextItems = extractTextFromElement(renderTarget, targetRect.left, targetRect.top);
+
+      const fullCanvas = await html2canvasModule(renderTarget, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: totalWidth,
+        height: totalHeight,
+        windowWidth: totalWidth,
+        windowHeight: totalHeight,
+      });
+
+      const scaleFactor = 2;
+      const sliceWidth = totalWidth * scaleFactor;
+      const sliceHeight = PAGE_HEIGHT_PX * scaleFactor;
+
+      for (let i = 0; i < numPages; i++) {
+        onProgress?.(`Processing page ${i + 1}/${numPages}...`, i + 1, numPages);
+
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = sliceWidth;
+        const remainingHeight = fullCanvas.height - (i * sliceHeight);
+        pageCanvas.height = Math.min(sliceHeight, remainingHeight);
+
+        const ctx = pageCanvas.getContext('2d')!;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+        ctx.drawImage(
+          fullCanvas,
+          0, i * sliceHeight,
+          sliceWidth, pageCanvas.height,
+          0, 0,
+          pageCanvas.width, pageCanvas.height
+        );
+
+        images.push(pageCanvas.toDataURL('image/png'));
+
+        // Filter text items for this page slice
+        const pageTop = i * PAGE_HEIGHT_PX;
+        const pageBottom = pageTop + PAGE_HEIGHT_PX;
+        const pageItems = allTextItems
+          .filter(item => item.y >= pageTop && item.y < pageBottom)
+          .map(item => ({
+            ...item,
+            y: item.y - pageTop, // Adjust Y relative to page
+            backgroundColor: sampleBackgroundColor(
+              pageCanvas, item.x, item.y - pageTop, item.width, item.height, 2
+            ),
+          }));
+        textLayers.push(pageItems);
+      }
+    }
+
+    document.body.removeChild(container);
+
+    if (images.length === 0) {
+      throw new Error('Failed to render DOCX pages');
+    }
+
+    const viewportWidth = pageDivs.length > 1 
+      ? (pageDivs[0]?.scrollWidth || PAGE_WIDTH_PX) 
+      : PAGE_WIDTH_PX;
+    const viewportHeight = pageDivs.length > 1 
+      ? (pageDivs[0]?.scrollHeight || PAGE_HEIGHT_PX) 
+      : PAGE_HEIGHT_PX;
+
+    onProgress?.('Hybrid editing ready!', images.length, images.length);
+
+    return {
+      html: '',
+      metadata: {
+        pageCount: images.length,
+        hasEditableText: true,
+        hasImages: true,
+        fileType: 'docx',
+        detectedFormat: 'letter',
+        dimensions: { width: viewportWidth, height: viewportHeight },
+      },
+      images,
+      textLayers,
+    };
+  } catch (error) {
+    document.body.removeChild(container);
+    throw error;
+  }
 }
 
 /**
