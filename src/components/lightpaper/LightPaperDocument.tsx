@@ -1955,12 +1955,12 @@ export function LightPaperDocument({
     try {
       toast.loading("Generating PDF...");
       
-      const pdf = new jsPDF(orientation === 'portrait' ? 'p' : 'l', 'mm', pageFormat);
+      let pdf = new jsPDF(orientation === 'portrait' ? 'p' : 'l', 'mm', pageFormat);
       const pdfWidth = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].width * 10 : PAGE_FORMATS[pageFormat].height * 10;
       const pdfHeight = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].height * 10 : PAGE_FORMATS[pageFormat].width * 10;
       
       if (viewMode && viewModeImages.length > 0) {
-        // VIEW MODE: Each page is now its own .page div with id="page-N"
+        // VIEW MODE: Canvas-based export that draws edits directly onto captured images
         const pageContainers = containerRef.current?.querySelectorAll('[id^="page-"]');
         
         if (!pageContainers || pageContainers.length === 0) {
@@ -1969,7 +1969,7 @@ export function LightPaperDocument({
           return;
         }
 
-        // Pre-compute scale factor for text overlay injection
+        // Pre-compute scale factor for text overlay positions
         const pageCssWidthPx = getPageDimensions().width * CM_TO_PX;
         const fallbackVp = { width: pageCssWidthPx, height: getPageDimensions().height * CM_TO_PX };
         const vp = editTextViewportSize || fallbackVp;
@@ -1983,63 +1983,11 @@ export function LightPaperDocument({
           const originalTransform = container.style.transform;
           container.style.transform = 'none';
           
-          // FIX 1: Inject edited text overlay spans into the DOM temporarily
-          // These spans are only rendered when editMode=true, but export runs in viewMode
-          const tempElements: HTMLElement[] = [];
-          
-          if (editTextLayers[i] && editTextLayers[i].length > 0) {
-            const overlayDiv = document.createElement('div');
-            overlayDiv.style.position = 'absolute';
-            overlayDiv.style.inset = '0';
-            overlayDiv.style.pointerEvents = 'none';
-            overlayDiv.style.zIndex = '10';
-            overlayDiv.className = 'export-temp-overlay';
-            
-            for (const item of editTextLayers[i]) {
-              const span = document.createElement('span');
-              span.textContent = item.text;
-              span.style.position = 'absolute';
-              span.style.left = `${(item.x * sf) - 1}px`;
-              span.style.top = `${(item.y * sf) - 1}px`;
-              span.style.width = `${(item.width * sf) + 2}px`;
-              span.style.height = `${(item.height * sf) + 2}px`;
-              span.style.fontSize = `${item.fontSize * sf}px`;
-              span.style.fontFamily = item.fontFamily;
-              span.style.fontWeight = item.fontWeight || 'normal';
-              span.style.fontStyle = item.fontStyle || 'normal';
-              span.style.letterSpacing = item.letterSpacing ? `${item.letterSpacing * sf}px` : 'normal';
-              span.style.color = item.color;
-              span.style.lineHeight = `${(item.height * sf) + 2}px`;
-              span.style.whiteSpace = 'nowrap';
-              span.style.background = item.backgroundColor || 'transparent';
-              span.style.border = 'none';
-              span.style.outline = 'none';
-              span.style.padding = '1px 1px';
-              span.style.margin = '0';
-              span.style.overflow = 'hidden';
-              overlayDiv.appendChild(span);
-            }
-            
-            container.appendChild(overlayDiv);
-            tempElements.push(overlayDiv);
-          }
-          
-          // FIX 3: For OverlayTextBoxes, ensure their text content is visible for capture
-          // The OverlayTextBox component uses contentEditable divs that html2canvas may miss.
-          // Find overlay text box elements in this container and inject plain text fallbacks.
-          const overlayBoxEls = container.querySelectorAll('.absolute[style*="z-index: 100"]');
-          const tempTextFallbacks: HTMLElement[] = [];
-          overlayBoxEls.forEach((boxEl) => {
-            const textDiv = boxEl.querySelector('.whitespace-pre-wrap, textarea');
-            if (textDiv && textDiv.textContent) {
-              // Already visible text — nothing to do
-            }
-          });
-          
           // Scroll into view for accurate capture
           container.scrollIntoView({ behavior: 'instant' as any });
           await new Promise(resolve => setTimeout(resolve, 200));
           
+          // Capture the base page image (just the PDF image, no edits needed in DOM)
           const canvas = await html2canvas(container, {
             scale: 2,
             useCORS: true,
@@ -2048,36 +1996,118 @@ export function LightPaperDocument({
             logging: false
           });
           
-          // Clean up temporary elements
-          tempElements.forEach(el => el.remove());
-          
           // Restore transform
           container.style.transform = originalTransform;
           
-          const imgData = canvas.toDataURL('image/png');
-          
-          // FIX 2: Use the captured canvas aspect ratio to set PDF page dimensions
-          // instead of forcing everything into a fixed A4 size
-          const imgWidthPx = canvas.width;
-          const imgHeightPx = canvas.height;
-          const imgAspect = imgWidthPx / imgHeightPx;
-          
-          // Calculate draw dimensions that preserve aspect ratio
-          const pageAspect = pdfWidth / pdfHeight;
-          let drawW: number, drawH: number;
-          
-          if (imgAspect > pageAspect) {
-            // Image is wider than page — fit to width
-            drawW = pdfWidth;
-            drawH = pdfWidth / imgAspect;
-          } else {
-            // Image is taller or same — fit to height
-            drawH = pdfHeight;
-            drawW = pdfHeight * imgAspect;
+          // DRAW EDITS DIRECTLY ONTO CANVAS using Canvas 2D API
+          // This is the most reliable method - bypasses all DOM/React rendering issues
+          const ctx = canvas.getContext('2d');
+          if (ctx) {
+            const canvasScale = 2; // matches html2canvas scale
+            
+            // Draw edited text spans onto canvas
+            if (editTextLayers[i] && editTextLayers[i].length > 0) {
+              for (const item of editTextLayers[i]) {
+                const drawX = ((item.x * sf) - 1) * canvasScale;
+                const drawY = ((item.y * sf) - 1) * canvasScale;
+                const drawW = ((item.width * sf) + 2) * canvasScale;
+                const drawH = ((item.height * sf) + 2) * canvasScale;
+                const drawFontSize = item.fontSize * sf * canvasScale;
+                
+                // Draw background rectangle to cover original text
+                if (item.backgroundColor && item.backgroundColor !== 'transparent') {
+                  ctx.fillStyle = item.backgroundColor;
+                  ctx.fillRect(drawX, drawY, drawW, drawH);
+                }
+                
+                // Draw the edited text
+                const fontStyle = item.fontStyle || 'normal';
+                const fontWeight = item.fontWeight || 'normal';
+                ctx.font = `${fontStyle} ${fontWeight} ${drawFontSize}px ${item.fontFamily}`;
+                ctx.fillStyle = item.color;
+                ctx.textBaseline = 'middle';
+                
+                if (item.letterSpacing) {
+                  // Draw character by character for letter spacing
+                  let charX = drawX + (1 * canvasScale);
+                  const charY = drawY + drawH / 2;
+                  const ls = item.letterSpacing * sf * canvasScale;
+                  for (const char of item.text) {
+                    ctx.fillText(char, charX, charY);
+                    charX += ctx.measureText(char).width + ls;
+                  }
+                } else {
+                  ctx.fillText(item.text, drawX + (1 * canvasScale), drawY + drawH / 2);
+                }
+              }
+            }
+            
+            // Draw overlay text boxes onto canvas
+            const pageHeight = getPageDimensions().height * CM_TO_PX;
+            for (const box of overlayTextBoxes) {
+              const boxPageIndex = Math.floor(box.y / pageHeight);
+              if (boxPageIndex !== i) continue;
+              
+              const localY = box.y - (i * pageHeight);
+              const bx = box.x * canvasScale;
+              const by = localY * canvasScale;
+              const bw = box.width * canvasScale;
+              const bh = box.height * canvasScale;
+              
+              // Draw background
+              if (box.backgroundColor && box.backgroundColor !== 'transparent') {
+                ctx.fillStyle = box.backgroundColor;
+                ctx.fillRect(bx, by, bw, bh);
+              }
+              
+              // Draw text
+              if (box.text) {
+                ctx.font = `${box.fontSize * canvasScale}px ${box.fontFamily}`;
+                ctx.fillStyle = box.color;
+                ctx.textBaseline = 'top';
+                
+                // Simple word-wrap within box
+                const words = box.text.split(' ');
+                let line = '';
+                let lineY = by + (4 * canvasScale); // padding
+                const maxWidth = bw - (8 * canvasScale);
+                const lineHeight = box.fontSize * canvasScale * 1.2;
+                
+                for (const word of words) {
+                  const testLine = line ? `${line} ${word}` : word;
+                  if (ctx.measureText(testLine).width > maxWidth && line) {
+                    ctx.fillText(line, bx + (4 * canvasScale), lineY);
+                    line = word;
+                    lineY += lineHeight;
+                    if (lineY > by + bh) break;
+                  } else {
+                    line = testLine;
+                  }
+                }
+                if (line && lineY <= by + bh) {
+                  ctx.fillText(line, bx + (4 * canvasScale), lineY);
+                }
+              }
+            }
           }
           
-          if (i > 0) pdf.addPage();
-          pdf.addImage(imgData, 'PNG', 0, 0, drawW, drawH);
+          const imgData = canvas.toDataURL('image/png');
+          
+          // Set PDF page size to match captured image exactly (eliminates white gaps)
+          const imgWidthMM = (canvas.width / 2) * 0.264583; // px to mm at 96dpi
+          const imgHeightMM = (canvas.height / 2) * 0.264583;
+          
+          if (i === 0) {
+            // First page: set the PDF size to match
+            pdf = new jsPDF({
+              orientation: imgWidthMM > imgHeightMM ? 'landscape' : 'portrait',
+              unit: 'mm',
+              format: [imgWidthMM, imgHeightMM]
+            });
+          } else {
+            pdf.addPage([imgWidthMM, imgHeightMM], imgWidthMM > imgHeightMM ? 'landscape' : 'portrait');
+          }
+          pdf.addImage(imgData, 'PNG', 0, 0, imgWidthMM, imgHeightMM);
         }
         
         // Log signature count
