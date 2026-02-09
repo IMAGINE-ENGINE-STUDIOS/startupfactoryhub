@@ -1167,7 +1167,13 @@ CRITICAL RULES:
    1. Chapter Title | Summary
    2. Chapter Title | Summary
 8. Your questions appear in a chat bubble — keep them SHORT and conversational, not formal paragraphs.
-9. You can also: summarize, translate, proofread, brainstorm, analyze — based on user request.`;
+9. You can also: summarize, translate, proofread, brainstorm, analyze — based on user request.
+10. DOCUMENT FORMATTING — ALWAYS include these elements:
+    - **Header**: Start EVERY document with the document title as H1, followed by the date and author/organization placeholder on a separate line (e.g., "*Date: January 15, 2026 | Author: [Your Name]*")
+    - **Introduction**: Begin with a clear introduction paragraph stating the purpose and scope of the document
+    - **Conclusion**: End EVERY document with a proper "## Conclusion" section that summarizes key points, provides final thoughts, and includes next steps or recommendations
+    - **Professional closing**: Add appropriate closing elements based on document type (signature block, references list, appendices, acknowledgments, disclaimers, or contact information)
+    - NEVER leave a document without a conclusive ending — every document must feel complete and professionally finished`;
 
   if (preset) {
     let prompt = `${base}\n\n## PRESET: ${preset.name}\n${preset.systemInstruction}`;
