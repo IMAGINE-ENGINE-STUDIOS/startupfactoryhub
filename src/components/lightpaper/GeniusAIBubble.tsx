@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { Sparkles, Send, X, Loader2, ChevronDown, Plus, Save, Trash2, BookOpen, CheckCircle2, Square, Play } from "lucide-react";
+import { Send, X, Loader2, ChevronDown, Plus, Save, Trash2, BookOpen, CheckCircle2, Square, Play } from "lucide-react";
 import { addLightPaperMessage } from "./MessageCenter";
+import geniusAILogo from "@/assets/genius-ai-logo.png";
 
 type Phase = "idle" | "greeting" | "input" | "conversation" | "loading" | "outline-review" | "generating-chapters" | "stopped" | "done";
 
@@ -945,9 +946,7 @@ IMPORTANT:
           }}
         >
           <div className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center flex-shrink-0">
-              <Sparkles className="h-3.5 w-3.5 text-white" />
-            </div>
+            <img src={geniusAILogo} alt="Genius AI" className="h-7 w-7 rounded-full flex-shrink-0 object-cover" />
             <span className={`text-sm font-medium ${fg}`}>
               {displayedGreeting}
               <span className="inline-block w-[2px] h-4 bg-emerald-500 ml-0.5 align-middle" style={{ animation: "geniusBlink 0.8s step-end infinite" }} />
@@ -972,9 +971,7 @@ IMPORTANT:
           {/* Header */}
           <div className="flex items-center justify-between px-4 pt-3 pb-1 flex-shrink-0">
             <div className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
-                <Sparkles className="h-3 w-3 text-white" />
-              </div>
+              <img src={geniusAILogo} alt="Genius AI" className="h-6 w-6 rounded-full object-cover" />
               <span className={`text-xs font-semibold ${fg} opacity-70`}>Genius AI</span>
               {phase === "generating-chapters" && (
                 <span className="text-[10px] text-emerald-500 font-mono">
