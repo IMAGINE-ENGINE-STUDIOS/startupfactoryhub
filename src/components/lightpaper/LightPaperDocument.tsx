@@ -1960,145 +1960,121 @@ export function LightPaperDocument({
       const pdfHeight = orientation === 'portrait' ? PAGE_FORMATS[pageFormat].height * 10 : PAGE_FORMATS[pageFormat].width * 10;
       
       if (viewMode && viewModeImages.length > 0) {
-        // VIEW MODE: Canvas-based export that draws edits directly onto captured images
-        const pageContainers = containerRef.current?.querySelectorAll('[id^="page-"]');
+        // VIEW MODE: Use original source images directly — no html2canvas needed.
+        // Draw edits (text layers + overlay boxes) onto each image via Canvas 2D.
         
-        if (!pageContainers || pageContainers.length === 0) {
-          toast.dismiss();
-          toast.error("No document pages found");
-          return;
-        }
-
-        // Pre-compute scale factor for text overlay positions
-        const pageCssWidthPx = getPageDimensions().width * CM_TO_PX;
-        const fallbackVp = { width: pageCssWidthPx, height: getPageDimensions().height * CM_TO_PX };
-        const vp = editTextViewportSize || fallbackVp;
-        const vpW = vp.width;
-        const sf = pageCssWidthPx / vpW;
-        
-        for (let i = 0; i < pageContainers.length; i++) {
-          const container = pageContainers[i] as HTMLElement;
-          
-          // Temporarily remove zoom transform for accurate capture
-          const originalTransform = container.style.transform;
-          container.style.transform = 'none';
-          
-          // Scroll into view for accurate capture
-          container.scrollIntoView({ behavior: 'instant' as any });
-          await new Promise(resolve => setTimeout(resolve, 200));
-          
-          // Capture the base page image (just the PDF image, no edits needed in DOM)
-          const canvas = await html2canvas(container, {
-            scale: 2,
-            useCORS: true,
-            allowTaint: true,
-            backgroundColor: '#ffffff',
-            logging: false
+        for (let i = 0; i < viewModeImages.length; i++) {
+          // Load the original page image
+          const img = document.createElement('img');
+          img.src = viewModeImages[i];
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = () => reject(new Error(`Failed to load page image ${i + 1}`));
           });
           
-          // Restore transform
-          container.style.transform = originalTransform;
+          // Create canvas at image's native resolution (already high-res from pdfjs)
+          const canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth;
+          canvas.height = img.naturalHeight;
+          const ctx = canvas.getContext('2d')!;
+          ctx.drawImage(img, 0, 0);
           
-          // DRAW EDITS DIRECTLY ONTO CANVAS using Canvas 2D API
-          // This is the most reliable method - bypasses all DOM/React rendering issues
-          const ctx = canvas.getContext('2d');
-          if (ctx) {
-            const canvasScale = 2; // matches html2canvas scale
+          // Scale factor: how the image maps to CSS page dimensions
+          const pageCssW = getPageDimensions().width * CM_TO_PX;
+          const pageCssH = getPageDimensions().height * CM_TO_PX;
+          const sX = canvas.width / pageCssW;
+          const sY = canvas.height / pageCssH;
+          
+          // Draw edited text layers
+          if (editTextLayers[i] && editTextLayers[i].length > 0) {
+            const vpW = (editTextViewportSize?.width) || pageCssW;
+            const sf = pageCssW / vpW;
             
-            // Draw edited text spans onto canvas
-            if (editTextLayers[i] && editTextLayers[i].length > 0) {
-              for (const item of editTextLayers[i]) {
-                const drawX = ((item.x * sf) - 1) * canvasScale;
-                const drawY = ((item.y * sf) - 1) * canvasScale;
-                const drawW = ((item.width * sf) + 2) * canvasScale;
-                const drawH = ((item.height * sf) + 2) * canvasScale;
-                const drawFontSize = item.fontSize * sf * canvasScale;
-                
-                // Draw background rectangle to cover original text
-                if (item.backgroundColor && item.backgroundColor !== 'transparent') {
-                  ctx.fillStyle = item.backgroundColor;
-                  ctx.fillRect(drawX, drawY, drawW, drawH);
-                }
-                
-                // Draw the edited text
-                const fontStyle = item.fontStyle || 'normal';
-                const fontWeight = item.fontWeight || 'normal';
-                ctx.font = `${fontStyle} ${fontWeight} ${drawFontSize}px ${item.fontFamily}`;
-                ctx.fillStyle = item.color;
-                ctx.textBaseline = 'middle';
-                
-                if (item.letterSpacing) {
-                  // Draw character by character for letter spacing
-                  let charX = drawX + (1 * canvasScale);
-                  const charY = drawY + drawH / 2;
-                  const ls = item.letterSpacing * sf * canvasScale;
-                  for (const char of item.text) {
-                    ctx.fillText(char, charX, charY);
-                    charX += ctx.measureText(char).width + ls;
-                  }
-                } else {
-                  ctx.fillText(item.text, drawX + (1 * canvasScale), drawY + drawH / 2);
-                }
-              }
-            }
-            
-            // Draw overlay text boxes onto canvas
-            const pageHeight = getPageDimensions().height * CM_TO_PX;
-            for (const box of overlayTextBoxes) {
-              const boxPageIndex = Math.floor(box.y / pageHeight);
-              if (boxPageIndex !== i) continue;
+            for (const item of editTextLayers[i]) {
+              const drawX = (item.x * sf) * sX;
+              const drawY = (item.y * sf) * sY;
+              const drawW = (item.width * sf) * sX;
+              const drawH = (item.height * sf) * sY;
+              const drawFontSize = item.fontSize * sf * sX;
               
-              const localY = box.y - (i * pageHeight);
-              const bx = box.x * canvasScale;
-              const by = localY * canvasScale;
-              const bw = box.width * canvasScale;
-              const bh = box.height * canvasScale;
-              
-              // Draw background
-              if (box.backgroundColor && box.backgroundColor !== 'transparent') {
-                ctx.fillStyle = box.backgroundColor;
-                ctx.fillRect(bx, by, bw, bh);
+              if (item.backgroundColor && item.backgroundColor !== 'transparent') {
+                ctx.fillStyle = item.backgroundColor;
+                ctx.fillRect(drawX - sX, drawY - sY, drawW + 2 * sX, drawH + 2 * sY);
               }
               
-              // Draw text
-              if (box.text) {
-                ctx.font = `${box.fontSize * canvasScale}px ${box.fontFamily}`;
-                ctx.fillStyle = box.color;
-                ctx.textBaseline = 'top';
-                
-                // Simple word-wrap within box
-                const words = box.text.split(' ');
-                let line = '';
-                let lineY = by + (4 * canvasScale); // padding
-                const maxWidth = bw - (8 * canvasScale);
-                const lineHeight = box.fontSize * canvasScale * 1.2;
-                
-                for (const word of words) {
-                  const testLine = line ? `${line} ${word}` : word;
-                  if (ctx.measureText(testLine).width > maxWidth && line) {
-                    ctx.fillText(line, bx + (4 * canvasScale), lineY);
-                    line = word;
-                    lineY += lineHeight;
-                    if (lineY > by + bh) break;
-                  } else {
-                    line = testLine;
-                  }
+              const fontStyle = item.fontStyle || 'normal';
+              const fontWeight = item.fontWeight || 'normal';
+              ctx.font = `${fontStyle} ${fontWeight} ${drawFontSize}px ${item.fontFamily}`;
+              ctx.fillStyle = item.color;
+              ctx.textBaseline = 'middle';
+              
+              if (item.letterSpacing) {
+                let charX = drawX;
+                const charY = drawY + drawH / 2;
+                const ls = item.letterSpacing * sf * sX;
+                for (const char of item.text) {
+                  ctx.fillText(char, charX, charY);
+                  charX += ctx.measureText(char).width + ls;
                 }
-                if (line && lineY <= by + bh) {
-                  ctx.fillText(line, bx + (4 * canvasScale), lineY);
-                }
+              } else {
+                ctx.fillText(item.text, drawX, drawY + drawH / 2);
               }
             }
           }
           
-          const imgData = canvas.toDataURL('image/png');
+          // Draw overlay text boxes
+          const pageHeight = pageCssH;
+          for (const box of overlayTextBoxes) {
+            const boxPageIndex = Math.floor(box.y / pageHeight);
+            if (boxPageIndex !== i) continue;
+            
+            const localY = box.y - (i * pageHeight);
+            const bx = box.x * sX;
+            const by = localY * sY;
+            const bw = box.width * sX;
+            const bh = box.height * sY;
+            
+            if (box.backgroundColor && box.backgroundColor !== 'transparent') {
+              ctx.fillStyle = box.backgroundColor;
+              ctx.fillRect(bx, by, bw, bh);
+            }
+            
+            if (box.text) {
+              const fontSize = box.fontSize * sX;
+              ctx.font = `${fontSize}px ${box.fontFamily}`;
+              ctx.fillStyle = box.color;
+              ctx.textBaseline = 'top';
+              
+              const words = box.text.split(' ');
+              let line = '';
+              let lineY = by + 4 * sY;
+              const maxWidth = bw - 8 * sX;
+              const lineHeight = fontSize * 1.2;
+              
+              for (const word of words) {
+                const testLine = line ? `${line} ${word}` : word;
+                if (ctx.measureText(testLine).width > maxWidth && line) {
+                  ctx.fillText(line, bx + 4 * sX, lineY);
+                  line = word;
+                  lineY += lineHeight;
+                  if (lineY > by + bh) break;
+                } else {
+                  line = testLine;
+                }
+              }
+              if (line && lineY <= by + bh) {
+                ctx.fillText(line, bx + 4 * sX, lineY);
+              }
+            }
+          }
           
-          // Set PDF page size to match captured image exactly (eliminates white gaps)
-          const imgWidthMM = (canvas.width / 2) * 0.264583; // px to mm at 96dpi
-          const imgHeightMM = (canvas.height / 2) * 0.264583;
+          const imgData = canvas.toDataURL('image/jpeg', 0.95);
+          
+          // Convert image pixel size to mm (at 72 DPI for PDF)
+          const imgWidthMM = (canvas.width / 72) * 25.4;
+          const imgHeightMM = (canvas.height / 72) * 25.4;
           
           if (i === 0) {
-            // First page: set the PDF size to match
             pdf = new jsPDF({
               orientation: imgWidthMM > imgHeightMM ? 'landscape' : 'portrait',
               unit: 'mm',
@@ -2107,13 +2083,7 @@ export function LightPaperDocument({
           } else {
             pdf.addPage([imgWidthMM, imgHeightMM], imgWidthMM > imgHeightMM ? 'landscape' : 'portrait');
           }
-          pdf.addImage(imgData, 'PNG', 0, 0, imgWidthMM, imgHeightMM);
-        }
-        
-        // Log signature count
-        const signatureElements = containerRef.current?.querySelectorAll('.signature-element');
-        if (signatureElements && signatureElements.length > 0) {
-          console.log(`📄 Export - ${signatureElements.length} signatures included`);
+          pdf.addImage(imgData, 'JPEG', 0, 0, imgWidthMM, imgHeightMM);
         }
         
       } else {
