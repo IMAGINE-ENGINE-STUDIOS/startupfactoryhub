@@ -1,57 +1,74 @@
 
-# Fix DOCX Upload Issues: Edit Mode Multi-Page + View-to-Edit Toggle
 
-## Problems Identified
+## Fix DOCX Edit Mode: True Editing with Layout Fidelity
 
-1. **DOCX Edit Mode shows only 1 page or images-only**: The `parseDocumentForEditing()` function for DOCX falls back to `parseDOCX()` which returns raw HTML (no images). This HTML is inserted into a single page editor, and the recursive pagination system (synthetic input events) fails to reliably split multi-page content.
+### Problem Summary
 
-2. **DOCX View Mode to Edit toggle does nothing**: Clicking "Edit" when a DOCX is loaded in View Mode only toggles a state flag and shows a toast ("use Text Box tool") -- it does not re-parse the document into editable HTML.
+Currently, DOCX files in **Edit Mode** use the same hybrid image+overlay approach as PDFs. This means:
+- Text appears as transparent overlays on top of page images
+- Users can only annotate (add text boxes on top), NOT actually edit the original text
+- The "Edit" toggle just enables/disables overlay annotations
 
-3. **Root cause**: For DOCX files, `parseDocumentForEditing()` does NOT produce images + text layers (hybrid mode) like it does for PDFs. It just falls back to raw HTML parsing which breaks multi-page rendering.
+The user wants DOCX Edit Mode to allow **real editing** -- erasing, modifying, and reformatting the actual document text -- while keeping the layout as close to the original as possible.
 
-## Solution
+### Root Cause
 
-### Part 1: Make DOCX Edit Mode use Hybrid Approach (like PDF)
+The `parseDOCX()` function (which produces real editable HTML) aggressively strips formatting:
+- Sets `ignoreWidth: true` and `breakPages: false`
+- Removes all width values from CSS
+- This destroys the original layout, making it look nothing like the View Mode version
 
-Modify `parseDocumentForEditing()` in `AdvancedDocumentParser.ts` so that DOCX files also get the hybrid treatment: render pages as images (using the existing `parseDocxAsImages` logic) AND extract text content per page.
+Meanwhile, `parseDocxForEditing()` preserves layout perfectly (image-based) but only supports overlay annotations, not real editing.
 
-**Changes to `AdvancedDocumentParser.ts`:**
-- Replace the DOCX fallback at line 1279-1281 with a new function `parseDocxForEditing()` that:
-  1. Renders the DOCX into a hidden container using `docx-preview` (with `breakPages: true`)
-  2. Captures each page/section as an image using `html2canvas` (reusing existing logic from `parseDocxAsImages`)
-  3. Extracts text content from each section/page to create `TextLayerItem[][]` arrays
-  4. Returns `{ images, textLayers, metadata }` -- the same hybrid format that PDFs use
-- This ensures DOCX files in Edit Mode go through the JSON/hybrid path in `FileUploadDialog` and `LightPaperDocument`, getting proper multi-page image rendering with editable text overlays
+### Solution
 
-### Part 2: Fix View-to-Edit Toggle for DOCX
+Rewrite the DOCX Edit Mode pipeline to use `docx-preview` with **layout-preserving settings** (same as View Mode) but output real, editable HTML instead of images.
 
-Modify the Edit toggle handler in `LightPaperDocument.tsx` (around line 2430-2441):
-- When toggling to Edit mode on a DOCX that was loaded in View Mode (no text layers), instead of just showing a toast, enable `editMode` so overlay text boxes and annotations work properly on top of the view-mode images
-- This is already partially working but the toast message is misleading -- clean it up
+### Changes
 
-### Part 3: Fix Pagination for HTML Fallback (safety net)
+#### 1. `AdvancedDocumentParser.ts` -- New `parseDOCXEditable()` function
 
-In `LightPaperDocument.tsx` (around line 530-545):
-- Increase the reliability of the `triggerPagination` approach by using `requestAnimationFrame` instead of fixed timeouts
-- Add a check: if after all iterations, only 1 page exists but content is clearly multi-page (scrollHeight >> clientHeight), log a warning
+- Render with `breakPages: true`, `ignoreWidth: false`, `ignoreHeight: false` (same settings as View Mode for layout fidelity)
+- Instead of capturing images with html2canvas, extract the actual rendered HTML from each page section
+- Preserve all inline styles, fonts, spacing, and formatting
+- Only remove `contenteditable="false"` attributes to allow editing
+- Return HTML per page (not images) so the editor can display real editable content
 
-## Files to Modify
+#### 2. `AdvancedDocumentParser.ts` -- Update `parseDocumentForEditing()`
 
-1. **`src/components/lightpaper/AdvancedDocumentParser.ts`** -- Add `parseDocxForEditing()` function and update the DOCX branch in `parseDocumentForEditing()`
-2. **`src/components/lightpaper/LightPaperDocument.tsx`** -- Clean up the edit toggle handler for view-mode DOCX files
+- Route DOCX files through the new `parseDOCXEditable()` instead of `parseDocxForEditing()` (hybrid)
+- Return result with `html` content (not `images`/`textLayers`)
 
-## Technical Details
+#### 3. `LightPaperDocument.tsx` -- Edit Mode Content Loading
 
-### New `parseDocxForEditing()` function outline:
+- When DOCX edit mode content arrives as HTML (not JSON with images), load it into the contenteditable editor
+- Wrap each page's HTML in a page container that matches the document dimensions
+- Preserve the page-by-page structure for proper pagination
+- Keep `contentEditable="true"` on the editor for real text manipulation
+
+#### 4. `LightPaperDocument.tsx` -- Edit Toggle for DOCX
+
+- When toggling from View to Edit on a DOCX file, re-parse the original file using the new `parseDOCXEditable()` to get real editable HTML
+- When toggling from Edit to View, re-parse using `parseDocumentAsImages()` to get pristine page images
+
+### Technical Details
+
+**New `parseDOCXEditable()` function approach:**
 
 ```text
-1. Render DOCX in hidden container with breakPages: true
-2. Find page sections (section.docx or .docx-wrapper > section)
-3. For each section:
-   a. Capture as image via html2canvas (scale: 2)
-   b. Extract text nodes with their bounding rects relative to section
-   c. Build TextLayerItem[] with position, font, color, backgroundColor
-4. Return { images, textLayers, metadata } as hybrid ParsedContent
+1. Render DOCX in hidden container with breakPages:true, ignoreWidth:false
+2. Find all page sections (section.docx elements)
+3. For each section, extract innerHTML preserving all styles
+4. Remove contenteditable="false" attributes
+5. Keep all widths, margins, fonts, spacing intact
+6. Return as HTML string with page dividers
+7. If only 1 section found, use the full content as a single page
 ```
 
-This ensures DOCX Edit Mode produces the same data structure as PDF Edit Mode, so the existing hybrid rendering pipeline handles it correctly with multi-page support.
+**Key differences from current `parseDOCX()`:**
+- Keep `ignoreWidth: false` (preserves original widths)
+- Keep `breakPages: true` (preserves page breaks)
+- Do NOT strip width/min-width/max-width CSS values
+- Keep `inWrapper: true` for proper page structure
+
+This ensures the Edit Mode HTML matches the View Mode layout while remaining fully editable.
