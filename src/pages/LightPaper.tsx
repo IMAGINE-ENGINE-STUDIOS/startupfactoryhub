@@ -14,7 +14,7 @@ import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
 import { QuickNavigation } from "@/components/lightpaper/QuickNavigation";
 import { FileUploadDialog } from "@/components/lightpaper/FileUploadDialog";
-import { LightPaperProject, ProjectType } from "@/hooks/useLightPaperProjects";
+import { LightPaperProject, ProjectType, useLightPaperProjects } from "@/hooks/useLightPaperProjects";
 import { DocumentLoadingSkeleton, SpreadsheetLoadingSkeleton, PresentationLoadingSkeleton } from "@/components/lightpaper/LoadingSkeleton";
 
 export default function LightPaper() {
@@ -30,9 +30,22 @@ export default function LightPaper() {
   const [isTabLoading, setIsTabLoading] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadedContent, setUploadedContent] = useState<{content: string, title: string, metadata?: { detectedFormat?: string; fileType?: string }} | null>(null);
+  const [hasRestoredLastProject, setHasRestoredLastProject] = useState(false);
 
+  // Fetch projects to auto-load the last accessed one
+  const { projects, loading: projectsLoading } = useLightPaperProjects('document');
 
-  
+  // Auto-load last accessed project for logged-in user
+  useEffect(() => {
+    if (hasRestoredLastProject || projectsLoading || selectedProject || uploadedContent) return;
+    if (projects.length > 0) {
+      // Projects are already sorted by updated_at desc; pick the most recent
+      const lastProject = projects[0];
+      setSelectedProject(lastProject);
+      setActiveTab(lastProject.project_type);
+      setHasRestoredLastProject(true);
+    }
+  }, [projects, projectsLoading, hasRestoredLastProject, selectedProject, uploadedContent]);
 
   // Keyboard shortcut for quick navigation (Ctrl+K or Cmd+K)
   useEffect(() => {
