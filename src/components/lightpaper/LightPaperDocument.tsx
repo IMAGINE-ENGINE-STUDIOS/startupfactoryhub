@@ -189,6 +189,8 @@ export function LightPaperDocument({
   const [editTextLayers, setEditTextLayers] = useState<any[][]>([]); // Per-page text layer items for hybrid editing
   const [editTextViewportSize, setEditTextViewportSize] = useState<{ width: number; height: number } | null>(null);
   const [uploadSource, setUploadSource] = useState<'edit' | 'view' | null>(null); // Tracks user intent from FileUploadDialog
+  const [uploadedFileType, setUploadedFileType] = useState<'pdf' | 'docx' | null>(null); // Track file type for mode switching
+  const [originalFile, setOriginalFile] = useState<File | null>(null); // Store original file for re-parsing (DOCX view→edit)
 
   // Scale PDF reconstructed content to fit within the editor container
   const scalePdfContentToFit = useCallback((container: HTMLDivElement | null) => {
@@ -338,8 +340,9 @@ export function LightPaperDocument({
         setCurrentPage(1);
         setVisiblePage(1);
         
-        // Track upload source from metadata
+        // Track upload source and file type from metadata
         setUploadSource(uploadedContent.metadata?.uploadMode || (parsed.mode === 'hybrid' ? 'edit' : 'view'));
+        setUploadedFileType((uploadedContent.metadata?.fileType as 'pdf' | 'docx') || null);
         
         // Handle hybrid mode text layers
         if (parsed.mode === 'hybrid' && parsed.textLayers && Array.isArray(parsed.textLayers)) {
@@ -500,6 +503,7 @@ export function LightPaperDocument({
     setViewModeImages([]);
     setEditMode(true); // Auto-select edit mode for uploaded files
     setUploadSource(uploadedContent.metadata?.uploadMode || 'edit');
+    setUploadedFileType((uploadedContent.metadata?.fileType as 'pdf' | 'docx') || null);
     
     // Apply detected format from upload metadata
     const detFormat = uploadedContent.metadata?.detectedFormat;
@@ -2432,12 +2436,36 @@ export function LightPaperDocument({
                 variant={editMode ? "secondary" : "ghost"}
                 size="sm" 
                 className="h-8 px-2 text-xs gap-1" 
-                onClick={() => {
+                onClick={async () => {
                   if (viewMode && viewModeImages.length > 0) {
-                    // Toggle edit mode for image-based documents (both hybrid and view-only)
-                    setEditMode(!editMode);
-                    if (!editMode && editTextLayers.length === 0) {
-                      toast.info('Edit mode enabled — use Text Box tool to annotate');
+                    if (!editMode && uploadedFileType === 'docx' && originalFile) {
+                      // DOCX view→edit: re-parse as real editable HTML
+                      const { parseDOCX } = await import('./AdvancedDocumentParser');
+                      toast.info('Converting to editable mode...');
+                      try {
+                        const result = await parseDOCX(originalFile, () => {});
+                        setViewMode(false);
+                        setViewModeImages([]);
+                        setEditTextLayers([]);
+                        setEditMode(true);
+                        if (editorRef.current) {
+                          const finalHtml = `<div style="width: 100%; min-height: 100%; font-size: 12pt; line-height: 1.5; word-wrap: break-word; overflow-wrap: break-word;">${result.html}</div>`;
+                          editorRef.current.innerHTML = finalHtml;
+                          editorRef.current.contentEditable = 'true';
+                          editorRef.current.style.cursor = 'text';
+                          setDocumentContent(finalHtml);
+                        }
+                        toast.success('Switched to full editing mode');
+                      } catch (err) {
+                        console.error('Failed to re-parse DOCX:', err);
+                        toast.error('Failed to convert to edit mode');
+                      }
+                    } else {
+                      // PDF or no file: toggle overlay edit mode
+                      setEditMode(!editMode);
+                      if (!editMode && editTextLayers.length === 0) {
+                        toast.info('Edit mode enabled — use Text Box tool to annotate');
+                      }
                     }
                   } else {
                     const newEditMode = !editMode;
@@ -3604,7 +3632,11 @@ export function LightPaperDocument({
       <FileUploadDialog
         isOpen={showUploadDialog}
         onClose={() => setShowUploadDialog(false)}
-                  onFileLoaded={(content, title, metadata) => {
+                  onFileLoaded={(content, title, metadata, file) => {
+                    // Store original file and file type for mode switching
+                    if (file) setOriginalFile(file);
+                    setUploadedFileType((metadata?.fileType as 'pdf' | 'docx') || null);
+                    
                     // Check if content is JSON (view/hybrid mode with images)
                     try {
                       const parsed = JSON.parse(content);
