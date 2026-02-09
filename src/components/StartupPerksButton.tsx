@@ -100,6 +100,21 @@ export function StartupPerksButton() {
             </div>
             <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-blue-500" />
           </a>
+          <a 
+            href="mailto:safi.keshvargar@us.hsbc.com" 
+            className="flex items-center gap-3 p-3 mt-2 rounded-lg bg-gradient-to-r from-red-500/10 to-red-600/10 border border-red-500/20 hover:border-red-500/40 transition-all group"
+          >
+            <img 
+              src="/partners/hsbc-logo.png" 
+              alt="HSBC Innovation Banking" 
+              className="h-10 w-10 rounded-full object-contain bg-white p-1"
+            />
+            <div className="flex-1">
+              <p className="font-semibold text-sm group-hover:text-red-500 transition-colors">HSBC Innovation Banking</p>
+              <p className="text-xs text-muted-foreground">Free banking services for startups</p>
+            </div>
+            <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-red-500" />
+          </a>
         </div>
 
         {/* Benefits Grid */}
