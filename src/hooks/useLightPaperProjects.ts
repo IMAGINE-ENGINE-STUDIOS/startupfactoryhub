@@ -83,8 +83,6 @@ export function useLightPaperProjects(projectType?: ProjectType) {
           .single();
 
         if (error) throw error;
-        toast.success("Project updated successfully!");
-        await fetchProjects();
         return data;
       } else {
         // Create new project
@@ -101,7 +99,6 @@ export function useLightPaperProjects(projectType?: ProjectType) {
 
         if (error) throw error;
         toast.success("Project saved successfully!");
-        await fetchProjects();
         return data;
       }
     } catch (error: any) {
