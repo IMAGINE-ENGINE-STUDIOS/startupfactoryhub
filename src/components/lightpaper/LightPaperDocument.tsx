@@ -2564,6 +2564,28 @@ export function LightPaperDocument({
                         console.error('Failed to switch to edit mode:', err);
                         toast.error('Failed to switch mode');
                       }
+                    } else if (!editMode && uploadedFileType === 'pdf' && originalFile && editTextLayers.length === 0) {
+                      // PDF: switch from View to Edit — re-parse to get text layers
+                      toast.info('Loading text layers for editing...');
+                      try {
+                        const result = await parseDocumentForEditing(originalFile);
+                        if (result.textLayers && result.textLayers.length > 0) {
+                          setEditTextLayers(result.textLayers);
+                          if (result.metadata?.dimensions) {
+                            setEditTextViewportSize(result.metadata.dimensions);
+                          }
+                          setEditMode(true);
+                          toast.success('Edit mode ready — click text to edit');
+                        } else {
+                          // No text layers found, enable annotation-only mode
+                          setEditMode(true);
+                          toast.info('Edit mode enabled — use Text Box tool to annotate');
+                        }
+                      } catch (err) {
+                        console.error('Failed to load text layers:', err);
+                        setEditMode(true);
+                        toast.info('Edit mode enabled — use Text Box tool to annotate');
+                      }
                     } else {
                       // Toggle overlay edit mode for PDF (hybrid approach)
                       setEditMode(!editMode);
