@@ -2177,7 +2177,50 @@ export function LightPaperDocument({
   // Helper function to get current page dimensions based on format and orientation
   // Page management functions
   const addPage = () => {
-    // Save current page content before adding new page
+    // Handle uploaded PDF files (viewMode with images)
+    if (viewMode && viewModeImages.length > 0) {
+      // Create a blank white page image (data URL for a white rectangle matching page dimensions)
+      const pageDims = getPageDimensions();
+      const w = Math.round(pageDims.width * CM_TO_PX);
+      const h = Math.round(pageDims.height * CM_TO_PX);
+      const blankCanvas = document.createElement('canvas');
+      blankCanvas.width = w;
+      blankCanvas.height = h;
+      const ctx = blankCanvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, w, h);
+      }
+      const blankImage = blankCanvas.toDataURL('image/png');
+      const newImages = [...viewModeImages, blankImage];
+      setViewModeImages(newImages);
+      setTotalPages(newImages.length);
+      setCurrentPage(newImages.length);
+      // Scroll to new page
+      setTimeout(() => {
+        const newPageEl = document.getElementById(`page-${newImages.length}`);
+        newPageEl?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      toast.success("New page added");
+      return;
+    }
+    
+    // Handle uploaded DOCX files (editable pages)
+    if (docxEditablePages.length > 0) {
+      const blankHtml = `<div style="padding: 2cm; min-height: ${getPageDimensions().height}cm; font-family: inherit;"><p style="font-size: 12pt;">New page...</p></div>`;
+      const newPages = [...docxEditablePages, blankHtml];
+      setDocxEditablePages(newPages);
+      setTotalPages(newPages.length);
+      setCurrentPage(newPages.length);
+      setTimeout(() => {
+        const newPageEl = document.getElementById(`page-${newPages.length}`);
+        newPageEl?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+      toast.success("New page added");
+      return;
+    }
+    
+    // Default: in-house document
     saveCurrentPageContent();
     
     const newPage = `<p style="font-size: 14pt; color: inherit;">New page...</p>`;
@@ -2405,8 +2448,11 @@ export function LightPaperDocument({
       return;
     }
 
-    // Genius AI bubble trigger — only in edit mode, and only if bubble not already showing
-    if (!viewMode && !geniusBubblePos) {
+    // Genius AI bubble trigger — works in edit mode AND in viewMode with editMode on (uploaded files)
+    const canTriggerGenius = (!viewMode && !geniusBubblePos) || 
+                              (viewMode && editMode && !geniusBubblePos) ||
+                              (docxEditablePages.length > 0 && editMode && !geniusBubblePos);
+    if (canTriggerGenius) {
       const pageEl = (e.currentTarget as HTMLElement);
       const rect = pageEl.getBoundingClientRect();
       const x = ((e.clientX - rect.left) / rect.width) * 100;
@@ -3694,18 +3740,57 @@ export function LightPaperDocument({
                   isDarkMode={isDarkMode}
                   onDismiss={() => setGeniusBubblePos(null)}
                   onInsertText={(html) => {
-                    if (!editorRef.current || viewMode) return;
+                    // Handle uploaded PDF files (viewMode) — create overlay text box with content
+                    if (viewMode && viewModeImages.length > 0) {
+                      const pageHeight = getPageDimensions().height * CM_TO_PX;
+                      const pageIndex = currentPage - 1;
+                      const boxY = (pageIndex * pageHeight) + 50;
+                      const newBox: OverlayTextBoxData = {
+                        id: `genius-${Date.now()}`,
+                        x: 50,
+                        y: boxY,
+                        width: (getPageDimensions().width * CM_TO_PX) - 100,
+                        height: Math.min(400, pageHeight - 100),
+                        text: html.replace(/<[^>]*>/g, '\n').replace(/\n{3,}/g, '\n\n').trim(),
+                        fontSize: 12,
+                        fontFamily: 'Arial',
+                        color: '#000000',
+                        backgroundColor: '#ffffff',
+                        borderVisible: false,
+                      };
+                      setOverlayTextBoxes(prev => [...prev, newBox]);
+                      setGeniusBubblePos(null);
+                      toast.success("Genius AI content added as text box");
+                      return;
+                    }
                     
-                    // Split HTML into block-level chunks for page distribution
+                    // Handle uploaded DOCX files — insert into the editable page
+                    if (docxEditablePages.length > 0) {
+                      const pageIndex = currentPage - 1;
+                      const pageEl = document.querySelector(`#page-${currentPage} .docx-editable-page`) as HTMLElement;
+                      if (pageEl) {
+                        pageEl.innerHTML += html;
+                        setDocxEditablePages(prev => {
+                          const newPages = [...prev];
+                          newPages[pageIndex] = pageEl.innerHTML;
+                          return newPages;
+                        });
+                      }
+                      setGeniusBubblePos(null);
+                      toast.success("Genius AI content inserted");
+                      return;
+                    }
+                    
+                    // Default: in-house document
+                    if (!editorRef.current) return;
+                    
                     const tempDiv = document.createElement('div');
                     tempDiv.innerHTML = html;
                     const blocks = Array.from(tempDiv.children);
                     
                     if (blocks.length === 0) {
-                      // Plain text, just append
                       editorRef.current.innerHTML += html;
                     } else {
-                      // Append blocks one by one, checking overflow after each
                       for (const block of blocks) {
                         editorRef.current.appendChild(block.cloneNode(true));
                       }
@@ -3719,12 +3804,10 @@ export function LightPaperDocument({
                     });
                     setGeniusBubblePos(null);
                     
-                    // Check overflow repeatedly to create as many pages as needed
                     const recursiveOverflowCheck = (iteration: number) => {
-                      if (iteration > 200) return; // safety limit
+                      if (iteration > 200) return;
                       setTimeout(() => {
                         checkAndHandleOverflow();
-                        // Re-check: if the current page still overflows after split, keep going
                         const editor = editorRef.current;
                         if (!editor) return;
                         const pageContentEl = editor.parentElement;
