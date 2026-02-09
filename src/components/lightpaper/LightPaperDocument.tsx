@@ -2725,7 +2725,6 @@ export function LightPaperDocument({
               onAddPage={addPage}
               onDeletePage={deletePage}
               onDuplicatePage={duplicatePage}
-              onRotatePage={rotatePage}
               onMovePage={movePage}
             />
           </div>

@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Plus, Trash2, Copy, RotateCw, MoveUp, MoveDown } from "lucide-react";
+import { Plus, Trash2, Copy, MoveUp, MoveDown } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface PageManagementPanelProps {
@@ -11,7 +11,6 @@ interface PageManagementPanelProps {
   onAddPage: () => void;
   onDeletePage: (page: number) => void;
   onDuplicatePage: (page: number) => void;
-  onRotatePage: (page: number) => void;
   onMovePage: (from: number, to: number) => void;
   pageThumbnails?: string[];
 }
@@ -23,7 +22,6 @@ export const PageManagementPanel = ({
   onAddPage,
   onDeletePage,
   onDuplicatePage,
-  onRotatePage,
   onMovePage,
   pageThumbnails = []
 }: PageManagementPanelProps) => {
@@ -129,18 +127,6 @@ export const PageManagementPanel = ({
                       title="Duplicate Page"
                     >
                       <Copy className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onRotatePage(pageNum);
-                      }}
-                      className="h-7 w-7 p-0"
-                      title="Rotate 90°"
-                    >
-                      <RotateCw className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       size="sm"
