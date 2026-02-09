@@ -1972,6 +1972,17 @@ export function LightPaperDocument({
         for (let i = 0; i < pageContainers.length; i++) {
           const container = pageContainers[i] as HTMLElement;
           
+          // Hide text overlay layers so they don't appear in the export
+          const textOverlays = container.querySelectorAll('.pdf-text-span');
+          const overlayParents = new Set<HTMLElement>();
+          textOverlays.forEach(span => {
+            const parent = span.parentElement;
+            if (parent && parent.classList.contains('absolute')) {
+              overlayParents.add(parent);
+            }
+          });
+          overlayParents.forEach(el => { el.style.display = 'none'; });
+          
           // Temporarily remove zoom transform for accurate capture
           const originalTransform = container.style.transform;
           container.style.transform = 'none';
@@ -1988,8 +1999,9 @@ export function LightPaperDocument({
             logging: false
           });
           
-          // Restore transform
+          // Restore transform and text overlays
           container.style.transform = originalTransform;
+          overlayParents.forEach(el => { el.style.display = ''; });
           
           const imgData = canvas.toDataURL('image/png');
           if (i > 0) pdf.addPage();
