@@ -3367,15 +3367,12 @@ export function LightPaperDocument({
                   className="page view-mode-page"
                   style={{
                     position: 'relative',
-                    overflow: 'hidden',
-                    marginBottom: '20px',
+                    overflow: 'visible',
+                    marginBottom: '0px',
                     background: isDarkMode ? '#1a1a1a' : 'white',
                     transform: `scale(${zoomLevel})`,
                     transformOrigin: 'top center',
                     transition: 'transform 0.2s ease',
-                    width: `${getPageDimensions().width}cm`,
-                    height: `${getPageDimensions().height}cm`,
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
                   }}
                   onClick={handleCanvasClick}
                 >
@@ -3385,10 +3382,7 @@ export function LightPaperDocument({
                     className="docx-editable-page"
                     style={{
                       width: '100%',
-                      height: '100%',
-                      overflow: 'hidden',
-                      padding: `${MARGIN_CM}cm`,
-                      boxSizing: 'border-box',
+                      minHeight: `${getPageDimensions().height}cm`,
                       outline: 'none',
                       cursor: editMode ? 'text' : 'default',
                       pointerEvents: editMode ? 'auto' : 'none',
