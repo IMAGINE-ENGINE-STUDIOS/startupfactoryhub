@@ -3317,28 +3317,30 @@ export function LightPaperDocument({
                              suppressContentEditableWarning
                              className="pdf-text-span"
                              data-original-text={item.text}
-                             style={{
-                               position: 'absolute',
-                               left: `${item.x * sf}px`,
-                               top: `${item.y * sf}px`,
-                               width: `${item.width * sf}px`,
-                               height: `${item.height * sf}px`,
-                               fontSize: `${item.fontSize * sf}px`,
-                               fontFamily: item.fontFamily,
-                               fontWeight: item.fontWeight,
-                               fontStyle: item.fontStyle,
+                              style={{
+                                position: 'absolute',
+                                left: `${(item.x * sf) - 1}px`,
+                                top: `${(item.y * sf) - 1}px`,
+                                width: `${(item.width * sf) + 2}px`,
+                                height: `${(item.height * sf) + 2}px`,
+                                fontSize: `${item.fontSize * sf}px`,
+                                fontFamily: item.fontFamily,
+                                fontWeight: item.fontWeight,
+                                fontStyle: item.fontStyle,
+                                letterSpacing: item.letterSpacing ? `${item.letterSpacing * sf}px` : 'normal',
                                 color: item.color,
-                                lineHeight: `${item.height * sf}px`,
+                                lineHeight: `${(item.height * sf) + 2}px`,
                                 whiteSpace: 'nowrap',
                                 cursor: 'text',
                                 background: item.backgroundColor,
-                               border: 'none',
-                               outline: 'none',
-                               pointerEvents: 'auto',
-                               padding: 0,
-                               margin: 0,
-                               caretColor: item.color,
-                             }}
+                                border: 'none',
+                                outline: 'none',
+                                pointerEvents: 'auto',
+                                padding: '1px 1px',
+                                margin: 0,
+                                caretColor: item.color,
+                                overflow: 'hidden',
+                              }}
                               onFocus={(e) => {
                                 e.currentTarget.style.outline = '1px solid hsl(var(--primary) / 0.5)';
                               }}
