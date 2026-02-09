@@ -29,6 +29,7 @@ const PARTNERS = [
   { name: "Nouel Consult", logo: "/partners/nouel-logo.png", tier: "Legal" },
   { name: "PitchPerfecter.AI", logo: "/partners/pitchperfecter-logo.png", tier: "Startup" },
   { name: "LOT Network", logo: "/partners/lotnetwork-logo.png", tier: "Legal" },
+  { name: "HSBC Innovation Banking", logo: "/partners/hsbc-logo.png", tier: "Banking" },
 ];
 
 const PartnersCarousel = () => {
