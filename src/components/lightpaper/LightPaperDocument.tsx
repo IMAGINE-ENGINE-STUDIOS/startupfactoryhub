@@ -3075,87 +3075,72 @@ export function LightPaperDocument({
                     }}
                   />
                   
-                  {/* Hybrid Edit Mode: Editable text layer over the image */}
-                  {editMode && editTextLayers[index] && editTextLayers[index].length > 0 && (editTextViewportSize || viewModeImages[index]) && (
-                    <div 
-                      className="absolute inset-0" 
-                      style={{ 
-                        pointerEvents: 'none',
-                      }}
-                    >
-                      {(() => {
-                        // Compute scale factor: page CSS width in px / viewport width
-                        const pageCssWidthPx = getPageDimensions().width * CM_TO_PX;
-                        const fallbackVp = { width: pageCssWidthPx, height: getPageDimensions().height * CM_TO_PX };
-                        const vp = editTextViewportSize || fallbackVp;
-                        const vpW = vp.width;
-                        const vpH = vp.height;
-                        const sf = pageCssWidthPx / vpW;
-                        
-                        return editTextLayers[index].map((item: any, textIdx: number) => (
-                          <span
-                            key={`text-${index}-${textIdx}`}
-                            contentEditable
-                            suppressContentEditableWarning
-                            className="pdf-text-span"
-                            data-original-text={item.text}
-                            style={{
-                              position: 'absolute',
-                              left: `${item.x * sf}px`,
-                              top: `${item.y * sf}px`,
-                              width: `${item.width * sf}px`,
-                              height: `${item.height * sf}px`,
-                              fontSize: `${item.fontSize * sf}px`,
-                              fontFamily: item.fontFamily,
-                              fontWeight: item.fontWeight,
-                              fontStyle: item.fontStyle,
-                              color: 'transparent',
-                              lineHeight: `${item.height * sf}px`,
-                              whiteSpace: 'nowrap',
-                              cursor: 'text',
-                              background: 'transparent',
-                              border: 'none',
-                              outline: 'none',
-                              pointerEvents: 'auto',
-                              padding: 0,
-                              margin: 0,
-                              zIndex: 10,
-                            }}
-                            onFocus={(e) => {
-                              e.currentTarget.style.color = item.color;
-                              e.currentTarget.style.backgroundColor = item.backgroundColor;
-                              e.currentTarget.style.outline = '1px solid rgba(66, 153, 225, 0.4)';
-                            }}
-                            onBlur={(e) => {
-                              const hasChanged = e.currentTarget.textContent !== item.text;
-                              if (hasChanged) {
-                                e.currentTarget.style.color = item.color;
-                                e.currentTarget.style.backgroundColor = item.backgroundColor;
-                                e.currentTarget.style.outline = 'none';
-                              } else {
-                                e.currentTarget.style.color = 'transparent';
-                                e.currentTarget.style.backgroundColor = 'transparent';
-                                e.currentTarget.style.outline = 'none';
-                              }
-                            }}
-                            onMouseEnter={(e) => {
-                              if (document.activeElement !== e.currentTarget) {
-                                e.currentTarget.style.textDecoration = 'underline';
-                                e.currentTarget.style.textDecorationColor = 'rgba(66, 153, 225, 0.4)';
-                              }
-                            }}
-                            onMouseLeave={(e) => {
-                              if (document.activeElement !== e.currentTarget) {
-                                e.currentTarget.style.textDecoration = 'none';
-                              }
-                            }}
-                          >
-                            {item.text}
-                          </span>
-                        ));
-                      })()}
-                    </div>
-                  )}
+                   {/* Hybrid Edit Mode: Editable text layer over the image */}
+                   {editMode && editTextLayers[index] && editTextLayers[index].length > 0 && (
+                     <div 
+                       className="absolute inset-0" 
+                       style={{ 
+                         pointerEvents: 'none',
+                         zIndex: 10,
+                       }}
+                     >
+                       {(() => {
+                         const pageCssWidthPx = getPageDimensions().width * CM_TO_PX;
+                         const fallbackVp = { width: pageCssWidthPx, height: getPageDimensions().height * CM_TO_PX };
+                         const vp = editTextViewportSize || fallbackVp;
+                         const vpW = vp.width;
+                         const sf = pageCssWidthPx / vpW;
+                         
+                         return editTextLayers[index].map((item: any, textIdx: number) => (
+                           <span
+                             key={`text-${index}-${textIdx}`}
+                             contentEditable
+                             suppressContentEditableWarning
+                             className="pdf-text-span"
+                             data-original-text={item.text}
+                             style={{
+                               position: 'absolute',
+                               left: `${item.x * sf}px`,
+                               top: `${item.y * sf}px`,
+                               width: `${item.width * sf}px`,
+                               height: `${item.height * sf}px`,
+                               fontSize: `${item.fontSize * sf}px`,
+                               fontFamily: item.fontFamily,
+                               fontWeight: item.fontWeight,
+                               fontStyle: item.fontStyle,
+                               color: 'transparent',
+                               lineHeight: `${item.height * sf}px`,
+                               whiteSpace: 'nowrap',
+                               cursor: 'text',
+                               background: 'transparent',
+                               border: 'none',
+                               outline: 'none',
+                               pointerEvents: 'auto',
+                               padding: 0,
+                               margin: 0,
+                               caretColor: item.color,
+                             }}
+                             onFocus={(e) => {
+                               e.currentTarget.style.color = item.color;
+                               e.currentTarget.style.backgroundColor = item.backgroundColor;
+                             }}
+                             onBlur={(e) => {
+                               const hasChanged = e.currentTarget.textContent !== item.text;
+                               if (hasChanged) {
+                                 e.currentTarget.style.color = item.color;
+                                 e.currentTarget.style.backgroundColor = item.backgroundColor;
+                               } else {
+                                 e.currentTarget.style.color = 'transparent';
+                                 e.currentTarget.style.backgroundColor = 'transparent';
+                               }
+                             }}
+                           >
+                             {item.text}
+                           </span>
+                         ));
+                       })()}
+                     </div>
+                   )}
                   
                   
                   {/* Overlay Text Boxes for this page */}
