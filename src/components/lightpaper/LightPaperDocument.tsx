@@ -3541,14 +3541,52 @@ export function LightPaperDocument({
       <FileUploadDialog
         isOpen={showUploadDialog}
         onClose={() => setShowUploadDialog(false)}
-                  onFileLoaded={(content, title) => {
+                  onFileLoaded={(content, title, metadata) => {
+                    // Check if content is JSON (view/hybrid mode with images)
+                    try {
+                      const parsed = JSON.parse(content);
+                      if ((parsed.mode === 'view' || parsed.mode === 'hybrid') && parsed.images && Array.isArray(parsed.images)) {
+                        // Image-based mode - validate images
+                        const validImages = parsed.images.filter((img: string) => 
+                          typeof img === 'string' && (img.startsWith('data:image/jpeg;base64,') || img.startsWith('data:image/png;base64,'))
+                        );
+                        if (validImages.length > 0) {
+                          setViewMode(true);
+                          setViewModeImages(validImages);
+                          setTotalPages(validImages.length);
+                          setCurrentPage(1);
+                          setVisiblePage(1);
+                          setUploadSource(metadata?.uploadMode || (parsed.mode === 'hybrid' ? 'edit' : 'view'));
+                          if (parsed.mode === 'hybrid' && parsed.textLayers) {
+                            setEditTextLayers(parsed.textLayers);
+                            setEditMode(true);
+                            if (parsed.metadata?.dimensions) {
+                              setEditTextViewportSize(parsed.metadata.dimensions);
+                            }
+                          }
+                          if (editorRef.current) editorRef.current.innerHTML = '';
+                          setDocumentContent('');
+                          setProjectTitle(title);
+                          setCurrentProjectId(null);
+                          const detFormat = parsed.metadata?.detectedFormat || metadata?.detectedFormat;
+                          if (detFormat && detFormat in PAGE_FORMATS) {
+                            setPageFormat(detFormat as PageFormat);
+                          }
+                          toast.success(`Document loaded: ${validImages.length} pages`);
+                          setShowUploadDialog(false);
+                          return;
+                        }
+                      }
+                    } catch {
+                      // Not JSON - treat as HTML content
+                    }
+
+                    // HTML content (edit mode)
                     if (editorRef.current) {
-                      // Wrap uploaded content properly
                       const wrapper = document.createElement('div');
                       wrapper.className = 'uploaded-content';
                       wrapper.innerHTML = content;
                       
-                      // Make images draggable
                       const images = wrapper.querySelectorAll('img');
                       images.forEach(img => {
                         (img as HTMLImageElement).draggable = true;
