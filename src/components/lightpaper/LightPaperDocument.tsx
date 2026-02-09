@@ -1972,16 +1972,8 @@ export function LightPaperDocument({
         for (let i = 0; i < pageContainers.length; i++) {
           const container = pageContainers[i] as HTMLElement;
           
-          // Hide text overlay layers so they don't appear in the export
-          const textOverlays = container.querySelectorAll('.pdf-text-span');
-          const overlayParents = new Set<HTMLElement>();
-          textOverlays.forEach(span => {
-            const parent = span.parentElement;
-            if (parent && parent.classList.contains('absolute')) {
-              overlayParents.add(parent);
-            }
-          });
-          overlayParents.forEach(el => { el.style.display = 'none'; });
+          // Keep text overlay spans visible so edits are captured in the export.
+          // The spans have background colors that cover the original image text.
           
           // Temporarily remove zoom transform for accurate capture
           const originalTransform = container.style.transform;
@@ -1995,34 +1987,18 @@ export function LightPaperDocument({
             scale: 2,
             useCORS: true,
             allowTaint: true,
-            backgroundColor: null,
+            backgroundColor: '#ffffff',
             logging: false
           });
           
-          // Restore transform and text overlays
+          // Restore transform
           container.style.transform = originalTransform;
-          overlayParents.forEach(el => { el.style.display = ''; });
           
           const imgData = canvas.toDataURL('image/png');
           if (i > 0) pdf.addPage();
           
-          // Maintain aspect ratio - fit image within the PDF page
-          const imgAspect = canvas.width / canvas.height;
-          const pageAspect = pdfWidth / pdfHeight;
-          let drawWidth = pdfWidth;
-          let drawHeight = pdfHeight;
-          let drawX = 0;
-          let drawY = 0;
-          
-          if (imgAspect > pageAspect) {
-            drawHeight = pdfWidth / imgAspect;
-            drawY = (pdfHeight - drawHeight) / 2;
-          } else {
-            drawWidth = pdfHeight * imgAspect;
-            drawX = (pdfWidth - drawWidth) / 2;
-          }
-          
-          pdf.addImage(imgData, 'PNG', drawX, drawY, drawWidth, drawHeight);
+          // Fill entire PDF page — no centering gaps
+          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
         }
         
         // Log signature count
