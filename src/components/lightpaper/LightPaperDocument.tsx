@@ -3581,7 +3581,7 @@ export function LightPaperDocument({
                       // Not JSON - treat as HTML content
                     }
 
-                    // HTML content (edit mode)
+                    // HTML content (edit mode for DOCX)
                     if (editorRef.current) {
                       const wrapper = document.createElement('div');
                       wrapper.className = 'uploaded-content';
@@ -3595,10 +3595,27 @@ export function LightPaperDocument({
                         });
                       });
                       
+                      // Ensure we're NOT in view mode for HTML editing
+                      setViewMode(false);
+                      setViewModeImages([]);
+                      setEditMode(true);
+                      setUploadSource(metadata?.uploadMode || 'edit');
+                      
                       editorRef.current.innerHTML = '';
                       editorRef.current.appendChild(wrapper);
+                      editorRef.current.contentEditable = 'true';
+                      editorRef.current.style.cursor = 'text';
+                      
                       setProjectTitle(title);
-                      toast.success("Document loaded from file");
+                      setCurrentProjectId(null);
+                      
+                      // Apply detected format if available
+                      const detFormat = metadata?.detectedFormat;
+                      if (detFormat && detFormat in PAGE_FORMATS) {
+                        setPageFormat(detFormat as PageFormat);
+                      }
+                      
+                      toast.success("Document loaded in Edit Mode");
                     }
                     setShowUploadDialog(false);
                    }}
