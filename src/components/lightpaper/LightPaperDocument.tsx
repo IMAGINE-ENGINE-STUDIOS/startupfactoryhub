@@ -154,7 +154,7 @@ export function LightPaperDocument({
   const [editMode, setEditMode] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(0.75);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [totalPages, setTotalPages] = useState(1); // kept for compat but effectiveTotalPages is used for navigation
   const saveTimeoutRef = useRef<NodeJS.Timeout>();
   const commandHistory = useRef(new CommandHistory());
   const { user } = useAuth();
@@ -172,6 +172,9 @@ export function LightPaperDocument({
   const [isEditingText, setIsEditingText] = useState(false);
   const [pages, setPages] = useState<string[]>(['']);
   const [showPagePanel, setShowPagePanel] = useState(false);
+
+  // Derive totalPages from pages array to avoid sync issues
+  const effectiveTotalPages = viewMode && viewModeImages.length > 0 ? viewModeImages.length : Math.max(pages.length, 1);
   const [editTextLayers, setEditTextLayers] = useState<any[][]>([]); // Per-page text layer items for hybrid editing
   const [editTextViewportSize, setEditTextViewportSize] = useState<{ width: number; height: number } | null>(null);
 
@@ -736,25 +739,35 @@ export function LightPaperDocument({
 
   // Handle page selection with content save/load
   const handlePageSelect = (newPage: number) => {
-    // Save current page content first
-    saveCurrentPageContent();
+    // Clamp to valid range
+    const maxPage = viewMode ? viewModeImages.length : pages.length;
+    const targetPage = Math.max(1, Math.min(newPage, maxPage));
+    if (targetPage === currentPage && !viewMode) return;
+    
+    // Save current page content first (edit mode only)
+    if (!viewMode) {
+      saveCurrentPageContent();
+    }
     
     // Switch to new page
-    setCurrentPage(newPage);
+    setCurrentPage(targetPage);
+    setVisiblePage(targetPage);
     
     // In view mode, scroll to the target page
     if (viewMode && viewModeImages.length > 0) {
-      const pageEl = document.getElementById(`page-${newPage}`);
-      if (pageEl) {
-        pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      setTimeout(() => {
+        const pageEl = document.getElementById(`page-${targetPage}`);
+        if (pageEl) {
+          pageEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 50);
       return;
     }
     
     // Load new page content into editor
-    if (editorRef.current && pages[newPage - 1]) {
-      editorRef.current.innerHTML = pages[newPage - 1];
-      setDocumentContent(pages[newPage - 1]);
+    if (editorRef.current && pages[targetPage - 1] !== undefined) {
+      editorRef.current.innerHTML = pages[targetPage - 1];
+      setDocumentContent(pages[targetPage - 1]);
     }
   };
 
@@ -877,7 +890,7 @@ export function LightPaperDocument({
       }
       return newPages;
     });
-    setTotalPages(prev => prev + 1);
+    // totalPages will be derived from pages.length via effectiveTotalPages
 
     toast.info(`Content moved to page ${currentPage + 1}`);
   }, [currentPage, viewMode, pageFormat, orientation]);
@@ -2580,29 +2593,32 @@ export function LightPaperDocument({
         </div>
 
       {/* Page Navigation Controls - Desktop Only */}
-        {((viewMode && viewModeImages.length > 0) || (!viewMode && (totalPages > 0 || documentContent))) && (
+        {((viewMode && viewModeImages.length > 0) || (!viewMode && (effectiveTotalPages > 0 || documentContent))) && (
           <div className="hidden md:flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handlePageSelect(Math.max(1, currentPage - 1))}
-              disabled={currentPage <= 1}
+              onClick={() => {
+                const cur = viewMode ? visiblePage : currentPage;
+                handlePageSelect(Math.max(1, cur - 1));
+              }}
+              disabled={(viewMode ? visiblePage : currentPage) <= 1}
               className="min-w-[90px]"
             >
               <ChevronLeft className="h-4 w-4 mr-1" />
               Previous
             </Button>
             <span className="text-sm font-medium px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-md min-w-[120px] text-center">
-              Page <strong>{viewMode ? visiblePage : currentPage}</strong> of <strong>{viewMode ? viewModeImages.length : totalPages}</strong>
+              Page <strong>{viewMode ? visiblePage : currentPage}</strong> of <strong>{effectiveTotalPages}</strong>
             </span>
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
-                const maxPage = viewMode ? viewModeImages.length : totalPages;
-                handlePageSelect(Math.min(maxPage, currentPage + 1));
+                const cur = viewMode ? visiblePage : currentPage;
+                handlePageSelect(Math.min(effectiveTotalPages, cur + 1));
               }}
-              disabled={currentPage >= (viewMode ? viewModeImages.length : totalPages)}
+              disabled={(viewMode ? visiblePage : currentPage) >= effectiveTotalPages}
               className="min-w-[90px]"
             >
               Next
@@ -2627,7 +2643,7 @@ export function LightPaperDocument({
         {showPagePanel && (
           <div className="w-64 border-r bg-background shrink-0 z-50 relative h-full overflow-auto shadow-lg">
             <PageManagementPanel
-              numPages={totalPages}
+              numPages={effectiveTotalPages}
               currentPage={currentPage}
               onPageSelect={handlePageSelect}
               onAddPage={addPage}
@@ -3474,29 +3490,32 @@ export function LightPaperDocument({
       />
 
       {/* Mobile Page Navigation - Fixed at Bottom */}
-      {((viewMode && viewModeImages.length > 0) || (!viewMode && (totalPages > 0 || documentContent))) && (
+      {((viewMode && viewModeImages.length > 0) || (!viewMode && (effectiveTotalPages > 0 || documentContent))) && (
         <div className="md:hidden fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t p-3 z-50 no-print page-navigation">
           <div className="flex items-center justify-center gap-2">
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handlePageSelect(Math.max(1, currentPage - 1))}
-              disabled={currentPage <= 1}
+              onClick={() => {
+                const cur = viewMode ? visiblePage : currentPage;
+                handlePageSelect(Math.max(1, cur - 1));
+              }}
+              disabled={(viewMode ? visiblePage : currentPage) <= 1}
               className="flex-1 max-w-[100px]"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             <span className="text-xs font-medium px-3 py-2 bg-primary/10 border border-primary/20 rounded-md whitespace-nowrap">
-              {viewMode ? visiblePage : currentPage} / {viewMode ? viewModeImages.length : totalPages}
+              {viewMode ? visiblePage : currentPage} / {effectiveTotalPages}
             </span>
             <Button
               variant="outline"
               size="sm"
               onClick={() => {
-                const maxPage = viewMode ? viewModeImages.length : totalPages;
-                handlePageSelect(Math.min(maxPage, currentPage + 1));
+                const cur = viewMode ? visiblePage : currentPage;
+                handlePageSelect(Math.min(effectiveTotalPages, cur + 1));
               }}
-              disabled={currentPage >= (viewMode ? viewModeImages.length : totalPages)}
+              disabled={(viewMode ? visiblePage : currentPage) >= effectiveTotalPages}
               className="flex-1 max-w-[100px]"
             >
               <ChevronRight className="h-4 w-4" />
