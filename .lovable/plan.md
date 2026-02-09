@@ -1,87 +1,58 @@
 
+# Fix Edit Mode for Uploaded Documents
 
-# Fix Document Upload Fidelity and Export Accuracy
+## Problem Summary
+When uploading files in "Edit Mode," documents either stay in View Mode or the Edit toggle button doesn't work. There are three separate bugs:
 
-## Problem Analysis
-
-After thorough code review, I identified **three root causes** why uploaded documents look different from the originals and why exports don't include edits:
-
-### Root Cause 1: DOCX Upload Uses Low-Fidelity HTML Reconstruction
-The `parseDOCX()` function in `AdvancedDocumentParser.ts` renders DOCX files using the `docx-preview` library into a temporary off-screen container, extracts the raw HTML, and wraps it with a CSS scale transform. This approach:
-- Loses precise formatting (margins, spacing, indentation)
-- Doesn't produce page-by-page images like PDF View Mode does
-- The scale calculation is based on a single content measurement that may be inaccurate
-
-### Root Cause 2: Edit Mode Converts Reconstructed Pages to Images via html2canvas (Unreliable)
-In `LightPaperDocument.tsx` lines 338-448, when Edit Mode content is loaded, the code clones the reconstructed HTML pages into a hidden container and uses `html2canvas` to capture them. This is brittle because:
-- The cloned elements may not render identically when detached from their original context
-- CSS styles, fonts, and images can fail to load in the hidden container
-- The 100ms delay before capture may not be enough for complex layouts
-
-### Root Cause 3: DOCX Has No View Mode Support
-`parseDocumentAsImages()` only supports PDFs. For DOCX files, it throws an error: "View Mode currently only supports PDF files." This means DOCX files are forced through the lossy Edit Mode path.
+1. **DOCX files in Edit Mode** load as raw HTML into the editor with `viewMode=false`, but the toggle button assumes `viewMode=true` with images -- so clicking it does nothing useful.
+2. **PDF files in Edit Mode** load correctly as hybrid (images + text layers), but if `editTextViewportSize` is null or text layers are empty, the edit overlay doesn't render, making it look identical to View Mode.
+3. **The toggle button logic** has conflicting conditions that don't cover all states properly.
 
 ## Solution
 
-### Step 1: Add DOCX Support to View Mode (Image-Based Rendering)
-Modify `parseDocumentAsImages()` in `AdvancedDocumentParser.ts` to support DOCX files by:
-1. Rendering the DOCX into a hidden container using `docx-preview` (same as now)
-2. Using `html2canvas` to capture the fully-rendered container as high-res images (page by page)
-3. Returning these images in the same format as PDF View Mode
+### 1. Fix the Edit/View toggle button logic (LightPaperDocument.tsx ~line 2305)
+- Track a new state `uploadedAsEdit` that is set to `true` when a file is uploaded via Edit Mode.
+- When `uploadedAsEdit` is true AND the document is in HTML edit mode (not view mode with images), the toggle button should switch between the rich editor and a read-only/view presentation.
+- When in hybrid mode (images + text layers), the toggle should work as currently intended.
 
-This ensures DOCX files get the same pixel-perfect treatment as PDFs.
+### 2. Ensure DOCX Edit Mode produces editable content properly (AdvancedDocumentParser.ts)
+- For DOCX files, `parseDocumentForEditing` currently returns HTML without images. This is correct behavior, but the document component needs to properly recognize this and enable the contentEditable editor.
+- The content loading logic already handles this (lines 488-519), but the editor's `contentEditable` state needs to be explicitly enabled.
 
-### Step 2: Fix Edit Mode Upload to Use Direct Image Rendering
-Instead of the current flow (parse to HTML, clone to hidden container, re-render with html2canvas), change Edit Mode for PDFs to:
-1. Render each PDF page directly to a canvas using `pdf.js` (which already works perfectly in View Mode)
-2. Return the canvas images wrapped in editable overlay containers
-3. This removes the fragile html2canvas-of-cloned-HTML step entirely
+### 3. Fix state initialization on upload (LightPaperDocument.tsx ~lines 303-520)
+- When hybrid mode content loads (PDF edit): ensure `editTextViewportSize` is always set from metadata dimensions. Add a fallback default if dimensions are missing.
+- When HTML edit mode loads (DOCX edit): ensure the editor div is set to `contentEditable=true` and `editMode=true`, and the content is properly injected.
 
-### Step 3: Fix Export to Properly Capture All Visible Content
-The export function (`handleExportPDF`) needs to:
-1. Iterate through ALL pages (not just the visible one) in View Mode
-2. Temporarily scroll to each page container before capture
-3. Ensure overlays (signatures, text boxes) are captured at their correct positions
-4. Reset zoom transform consistently before AND after capture
+### 4. Fix the bottom status bar (LightPaperDocument.tsx ~line 2549)
+- Update the status indicator to show "Edit Mode" when `editMode` is true regardless of whether it's hybrid or HTML-based editing.
 
-## Technical Details
-
-### File: `src/components/lightpaper/AdvancedDocumentParser.ts`
-
-**Change 1:** Update `parseDocumentAsImages` to handle DOCX files:
-- Render DOCX into hidden container with `docx-preview`
-- Enable `breakPages: true` to get separate page sections
-- Use `html2canvas` to capture each page section as a PNG image
-- Return images array in the same format as PDF View Mode
-
-**Change 2:** Improve DOCX rendering dimensions:
-- Use the actual rendered dimensions from `docx-preview` instead of fixed constants
-- Account for multi-page DOCX documents by detecting page breaks
+## Technical Changes
 
 ### File: `src/components/lightpaper/LightPaperDocument.tsx`
 
-**Change 3:** Simplify Edit Mode content loading (lines 338-448):
-- For PDF files in Edit Mode, use `pdf.js` canvas rendering directly (same as View Mode) instead of html2canvas on cloned HTML
-- This eliminates the fragile hidden-container approach
-- Fall back to View Mode images with editable overlay text boxes
+**A) Add tracking state for upload source:**
+- Add `const [uploadSource, setUploadSource] = useState<'edit' | 'view' | null>(null);`
+- Set it in the content loading `useEffect` based on the parsed mode.
 
-**Change 4:** Fix export page iteration in View Mode (lines 1679-1734):
-- Ensure `pageContainers` selector finds all page divs correctly
-- Add proper timing for each page capture
-- Verify signatures and overlay text boxes are included in the DOM during capture
+**B) Fix toggle button (around line 2305-2325):**
+- When `viewMode` is true and images exist and text layers exist: toggle `editMode` (hybrid).
+- When `viewMode` is true and images exist but NO text layers: show disabled or info that edit isn't available for this file.
+- When `viewMode` is false (HTML edit mode): toggle between `contentEditable` true/false for view vs edit.
+
+**C) Fix hybrid mode fallback (around line 3014):**
+- Add fallback viewport size if `editTextViewportSize` is null but text layers exist. Use the image's natural dimensions as fallback.
+
+**D) Ensure `editMode` state is correctly initialized:**
+- In the hybrid branch (line 342): already sets `editMode(true)` -- keep this.
+- In the HTML branch (line 491): already sets `editMode(true)` -- keep this.
+- Ensure that when the user explicitly clicked "Edit Mode" in FileUploadDialog, the document component respects it.
 
 ### File: `src/components/lightpaper/FileUploadDialog.tsx`
 
-**Change 5:** Enable View Mode for DOCX files:
-- Remove the PDF-only restriction message
-- Both modes should work for both file types
+**E) Pass upload mode in metadata:**
+- Add `uploadMode` to the metadata passed to `onFileLoaded` so the document component knows the user's intent:
+  ```
+  onFileLoaded(content, title, { detectedFormat, fileType, uploadMode: 'edit' })
+  ```
 
-## Expected Results
-
-After these changes:
-- **View Mode (PDF):** Pixel-perfect rendering (already works, no changes)
-- **View Mode (DOCX):** New capability - renders as high-res images identical to the original
-- **Edit Mode (PDF):** Uses canvas rendering instead of fragile HTML reconstruction
-- **Edit Mode (DOCX):** Improved rendering with proper page detection
-- **Export/Download:** Captures all pages with all edits, signatures, and overlays visible
-
+This ensures the document component can differentiate between "user wanted edit mode" vs "file was processed as view mode."
