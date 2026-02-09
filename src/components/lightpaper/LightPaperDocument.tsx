@@ -2429,67 +2429,8 @@ export function LightPaperDocument({
               </Button>
             </div>
 
-            {/* Export Options */}
-            <div className="flex gap-0.5 border-l pl-1">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Export">
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-background z-50">
-                  <DropdownMenuItem onClick={handleExportPDF}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Export as PDF
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handlePrint}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Print Document
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-
-            {/* Save Button */}
-            <div className="flex gap-2 items-center border-l pl-1 ml-auto shrink-0">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-8 w-8 p-0" 
-                    disabled={isSaving}
-                    title="Save Document"
-                  >
-                    <Save className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-background z-50">
-                  <DropdownMenuItem onClick={handleExportPDF}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Save as PDF
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleDownloadHTML}>
-                    <FileText className="h-4 w-4 mr-2" />
-                    Save as HTML
-                  </DropdownMenuItem>
-              <DropdownMenuItem onClick={handleDownloadDOCX}>
-                <FileText className="h-4 w-4 mr-2" />
-                Save as Text
-              </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-              {isSaving && (
-                <span className="text-xs text-muted-foreground">
-                  Saving...
-                </span>
-              )}
-              {lastSaved && !isSaving && (
-                <span className="text-xs text-muted-foreground">
-                  Saved {lastSaved.toLocaleTimeString()}
-                </span>
-              )}
-            </div>
+            {/* Spacer */}
+            <div className="ml-auto" />
           </div>
         </CollapsibleToolbar>
       </div>
@@ -2562,13 +2503,11 @@ export function LightPaperDocument({
             },
           ]}
           rightActions={[
-            { icon: Save, label: currentProjectId ? (isSaving ? "Saving..." : "Save") : "Save", onClick: handleQuickSave, priority: "high" as const, variant: "default" as const, disabled: isSaving },
             { icon: MessageSquare, label: "Comments", onClick: () => setShowComments(!showComments), priority: "high" as const, variant: showComments ? ("default" as const) : ("outline" as const) },
             ...(viewMode ? [
               { icon: Plus, label: "Add Box", onClick: addTextBox, priority: "high" as const },
               { icon: Pipette, label: "Pick Color", onClick: () => setIsColorPickerActive(!isColorPickerActive), priority: "medium" as const, variant: isColorPickerActive ? ("default" as const) : ("outline" as const) },
             ] : []),
-            { icon: Download, label: "Export", onClick: handleExportPDF, priority: "medium" as const },
           ]}
         />
       </div>
@@ -2637,9 +2576,9 @@ export function LightPaperDocument({
           </Button>
         </div>
 
-      {/* Page Navigation Controls - Desktop Only */}
+      {/* Page Navigation Controls */}
         {((viewMode && viewModeImages.length > 0) || (!viewMode && (effectiveTotalPages > 0 || documentContent))) && (
-          <div className="hidden md:flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <Button
               variant="outline"
               size="sm"
@@ -2648,12 +2587,12 @@ export function LightPaperDocument({
                 handlePageSelect(Math.max(1, cur - 1));
               }}
               disabled={(viewMode ? visiblePage : currentPage) <= 1}
-              className="min-w-[90px]"
+              className="h-8 w-8 sm:min-w-[90px] p-0 sm:px-3"
             >
-              <ChevronLeft className="h-4 w-4 mr-1" />
-              Previous
+              <ChevronLeft className="h-4 w-4 sm:mr-1" />
+              <span className="hidden sm:inline">Previous</span>
             </Button>
-            <span className="text-sm font-medium px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-md min-w-[120px] text-center">
+            <span className="text-xs sm:text-sm font-medium px-2 sm:px-4 py-1.5 bg-primary/10 border border-primary/20 rounded-md min-w-[80px] sm:min-w-[120px] text-center">
               Page <strong>{viewMode ? visiblePage : currentPage}</strong> of <strong>{effectiveTotalPages}</strong>
             </span>
             <Button
@@ -2664,22 +2603,64 @@ export function LightPaperDocument({
                 handlePageSelect(Math.min(effectiveTotalPages, cur + 1));
               }}
               disabled={(viewMode ? visiblePage : currentPage) >= effectiveTotalPages}
-              className="min-w-[90px]"
+              className="h-8 w-8 sm:min-w-[90px] p-0 sm:px-3"
             >
-              Next
-              <ChevronRight className="h-4 w-4 ml-1" />
+              <span className="hidden sm:inline">Next</span>
+              <ChevronRight className="h-4 w-4 sm:ml-1" />
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={addPage}
-              className="min-w-[90px]"
+              className="hidden sm:flex min-w-[90px]"
             >
               <Plus className="h-4 w-4 mr-1" />
               Add Page
             </Button>
           </div>
         )}
+
+        {/* Save/Export Dropdown */}
+        <div className="flex items-center gap-2">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="h-8 gap-1.5 px-2 sm:px-3"
+                disabled={isSaving}
+              >
+                <Save className="h-4 w-4" />
+                <span className="hidden sm:inline text-xs">
+                  {isSaving ? "Saving..." : lastSaved ? `Saved ${lastSaved.toLocaleTimeString()}` : "Save"}
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-background z-50">
+              <DropdownMenuItem onClick={handleQuickSave} disabled={isSaving}>
+                <Save className="h-4 w-4 mr-2" />
+                {currentProjectId ? "Quick Save" : "Save to My Files"}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleExportPDF}>
+                <FileText className="h-4 w-4 mr-2" />
+                Export as PDF
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDownloadHTML}>
+                <FileText className="h-4 w-4 mr-2" />
+                Save as HTML
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleDownloadDOCX}>
+                <FileText className="h-4 w-4 mr-2" />
+                Save as DOCX
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handlePrint}>
+                <FileText className="h-4 w-4 mr-2" />
+                Print Document
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
 
       {/* Main Content Area with Page Panel */}
