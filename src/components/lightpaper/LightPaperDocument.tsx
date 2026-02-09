@@ -2036,19 +2036,79 @@ export function LightPaperDocument({
     newPages.splice(pageNum, 0, pageToDuplicate);
     setPages(newPages);
     setTotalPages(newPages.length);
-    toast.success(`Page ${pageNum} duplicated`);
+    
+    // Navigate to the duplicated page (inserted after the original)
+    const newPageNum = pageNum + 1;
+    setCurrentPage(newPageNum);
+    if (editorRef.current) {
+      editorRef.current.innerHTML = pageToDuplicate;
+      setDocumentContent(pageToDuplicate);
+    }
+    toast.success(`Page ${pageNum} duplicated as page ${newPageNum}`);
   };
 
   const rotatePage = (pageNum: number) => {
-    toast.info(`Page ${pageNum} rotated`);
+    saveCurrentPageContent();
+    
+    // Wrap or unwrap the page content with a rotation container
+    const newPages = [...pages];
+    const content = newPages[pageNum - 1];
+    
+    // Check if already rotated by looking for our rotation wrapper
+    const rotationMatch = content.match(/^<div data-rotation="(\d+)"[^>]*>([\s\S]*)<\/div>$/);
+    let newRotation = 90;
+    let innerContent = content;
+    
+    if (rotationMatch) {
+      const currentRotation = parseInt(rotationMatch[1]);
+      newRotation = (currentRotation + 90) % 360;
+      innerContent = rotationMatch[2];
+    }
+    
+    if (newRotation === 0) {
+      // Remove rotation wrapper
+      newPages[pageNum - 1] = innerContent;
+    } else {
+      // Apply rotation wrapper
+      newPages[pageNum - 1] = `<div data-rotation="${newRotation}" style="transform: rotate(${newRotation}deg); transform-origin: center center; width: 100%; height: 100%;">${innerContent}</div>`;
+    }
+    
+    setPages(newPages);
+    
+    // If viewing the rotated page, reload it
+    if (currentPage === pageNum && editorRef.current) {
+      editorRef.current.innerHTML = newPages[pageNum - 1];
+      setDocumentContent(newPages[pageNum - 1]);
+    }
+    
+    toast.success(`Page ${pageNum} rotated ${newRotation}°`);
   };
 
   const movePage = (from: number, to: number) => {
+    saveCurrentPageContent();
+    
     const newPages = [...pages];
     const [movedPage] = newPages.splice(from - 1, 1);
     newPages.splice(to - 1, 0, movedPage);
     setPages(newPages);
-    toast.success(`Page moved from ${from} to ${to}`);
+    
+    // Update current page to follow the moved page
+    if (currentPage === from) {
+      setCurrentPage(to);
+    } else if (from < to && currentPage > from && currentPage <= to) {
+      setCurrentPage(currentPage - 1);
+    } else if (from > to && currentPage >= to && currentPage < from) {
+      setCurrentPage(currentPage + 1);
+    }
+    
+    // Reload the editor with the current page's content after move
+    const newCurrentPage = currentPage === from ? to : currentPage;
+    if (editorRef.current && newPages[newCurrentPage - 1]) {
+      editorRef.current.innerHTML = newPages[newCurrentPage - 1];
+      setDocumentContent(newPages[newCurrentPage - 1]);
+    }
+    
+    toast.success(`Page moved from position ${from} to ${to}`);
   };
 
   const getPageDimensions = () => {
