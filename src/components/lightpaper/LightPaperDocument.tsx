@@ -2266,15 +2266,6 @@ export function LightPaperDocument({
               <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setShowCalculator(true)} title="Calculator">
                 <Calculator className="h-4 w-4" />
               </Button>
-              <Button 
-                variant={editMode ? "default" : "ghost"}
-                size="sm"
-                className="h-8 px-2 text-xs"
-                onClick={() => setEditMode(!editMode)}
-                title={editMode ? "Switch to View Mode (full visibility)" : "Switch to Edit Mode (text editing)"}
-              >
-                {editMode ? 'View' : 'Edit'}
-              </Button>
             </div>
 
             {/* Highlight */}
@@ -2333,7 +2324,7 @@ export function LightPaperDocument({
             {/* View Mode */}
             <div className="flex gap-0.5 border-l pl-1">
               <Button 
-                variant={(editMode || (viewMode && viewModeImages.length > 0)) ? "secondary" : "ghost"}
+                variant={editMode ? "secondary" : "ghost"}
                 size="sm" 
                 className="h-8 w-8 p-0" 
                 onClick={() => {
@@ -2344,32 +2335,19 @@ export function LightPaperDocument({
                     } else {
                       toast.info('Edit mode not available for this document (no editable text layers)');
                     }
-                  } else if (!viewMode && uploadSource === 'edit') {
-                    // HTML edit mode (DOCX): toggle contentEditable
+                  } else {
+                    // Standard or HTML edit mode: toggle contentEditable
                     const newEditMode = !editMode;
                     setEditMode(newEditMode);
                     if (editorRef.current) {
                       editorRef.current.contentEditable = String(newEditMode);
                       editorRef.current.style.cursor = newEditMode ? 'text' : 'default';
                     }
-                  } else {
-                    setViewMode(!viewMode);
                   }
                 }}
-                title={
-                  viewMode && viewModeImages.length > 0
-                    ? (editMode ? "Switch to View Mode" : "Switch to Edit Mode")
-                    : (!viewMode && uploadSource === 'edit')
-                      ? (editMode ? "Switch to Read-Only" : "Switch to Edit Mode")
-                      : (viewMode ? "Switch to Edit Mode" : "Switch to View Mode")
-                }
+                title={editMode ? "Switch to View Mode" : "Switch to Edit Mode"}
               >
-                {viewMode && viewModeImages.length > 0
-                  ? (editMode ? <Eye className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />)
-                  : (!viewMode && uploadSource === 'edit')
-                    ? (editMode ? <Eye className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />)
-                    : (viewMode ? <Edit3 className="h-4 w-4" /> : <Eye className="h-4 w-4" />)
-                }
+                {editMode ? <Eye className="h-4 w-4" /> : <Edit3 className="h-4 w-4" />}
               </Button>
               {viewMode && (
                 <>
