@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Table, Presentation, Command, HelpCircle, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -14,11 +14,14 @@ import MyFilesDrawer from "@/components/lightpaper/MyFilesDrawer";
 import ShareDialog from "@/components/lightpaper/ShareDialog";
 import { QuickNavigation } from "@/components/lightpaper/QuickNavigation";
 import { FileUploadDialog } from "@/components/lightpaper/FileUploadDialog";
-import { LightPaperProject, ProjectType, useLightPaperProjects } from "@/hooks/useLightPaperProjects";
+import { LightPaperProject, ProjectType } from "@/hooks/useLightPaperProjects";
 import { DocumentLoadingSkeleton, SpreadsheetLoadingSkeleton, PresentationLoadingSkeleton } from "@/components/lightpaper/LoadingSkeleton";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function LightPaper() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<ProjectType>('document');
   const [showAI, setShowAI] = useState(false);
   const [showCalculator, setShowCalculator] = useState(false);
@@ -30,22 +33,33 @@ export default function LightPaper() {
   const [isTabLoading, setIsTabLoading] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [uploadedContent, setUploadedContent] = useState<{content: string, title: string, metadata?: { detectedFormat?: string; fileType?: string }} | null>(null);
-  const [hasRestoredLastProject, setHasRestoredLastProject] = useState(false);
+  const hasRestoredRef = useRef(false);
 
-  // Fetch projects to auto-load the last accessed one
-  const { projects, loading: projectsLoading } = useLightPaperProjects('document');
-
-  // Auto-load last accessed project for logged-in user
+  // Auto-load last accessed project ONCE on mount for logged-in users
   useEffect(() => {
-    if (hasRestoredLastProject || projectsLoading || selectedProject || uploadedContent) return;
-    if (projects.length > 0) {
-      // Projects are already sorted by updated_at desc; pick the most recent
-      const lastProject = projects[0];
-      setSelectedProject(lastProject);
-      setActiveTab(lastProject.project_type);
-      setHasRestoredLastProject(true);
-    }
-  }, [projects, projectsLoading, hasRestoredLastProject, selectedProject, uploadedContent]);
+    if (hasRestoredRef.current || !user || selectedProject || uploadedContent) return;
+    hasRestoredRef.current = true;
+
+    const restoreLastProject = async () => {
+      try {
+        const { data } = await supabase
+          .from("lightpaper_projects")
+          .select("*")
+          .in('project_type', ['document', 'spreadsheet', 'presentation'])
+          .order("updated_at", { ascending: false })
+          .limit(1)
+          .single();
+
+        if (data) {
+          setSelectedProject(data as LightPaperProject);
+          setActiveTab((data as LightPaperProject).project_type);
+        }
+      } catch {
+        // No projects or not logged in — that's fine
+      }
+    };
+    restoreLastProject();
+  }, [user]);
 
   // Keyboard shortcut for quick navigation (Ctrl+K or Cmd+K)
   useEffect(() => {
