@@ -2196,18 +2196,27 @@ export function LightPaperDocument({
 
             {/* Alignment */}
             <div className="flex gap-0.5 border-l pl-1">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyLeft")} title="Align Left">
-                <AlignLeft className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyCenter")} title="Align Center">
-                <AlignCenter className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyRight")} title="Align Right">
-                <AlignRight className="h-4 w-4" />
-              </Button>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => execCommand("justifyFull")} title="Justify">
-                <AlignJustify className="h-4 w-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Text Alignment">
+                    <AlignLeft className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="min-w-0 w-auto p-1">
+                  <DropdownMenuItem onClick={() => execCommand("justifyLeft")} className="gap-2 px-2 py-1.5">
+                    <AlignLeft className="h-4 w-4" /> Left
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => execCommand("justifyCenter")} className="gap-2 px-2 py-1.5">
+                    <AlignCenter className="h-4 w-4" /> Center
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => execCommand("justifyRight")} className="gap-2 px-2 py-1.5">
+                    <AlignRight className="h-4 w-4" /> Right
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => execCommand("justifyFull")} className="gap-2 px-2 py-1.5">
+                    <AlignJustify className="h-4 w-4" /> Justify
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Lists */}

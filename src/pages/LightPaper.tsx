@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Table, Presentation, Command, HelpCircle, Upload, FolderOpen } from "lucide-react";
+import { FileText, Table, Presentation, Command, HelpCircle, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MessageCenterButton } from "@/components/lightpaper/MessageCenter";
 import { useNavigate } from "react-router-dom";
@@ -59,16 +59,7 @@ export default function LightPaper() {
             </div>
             <div className="flex items-center gap-2">
               <MessageCenterButton />
-              <Button 
-                variant="outline" 
-                onClick={() => setShowUploadDialog(true)} 
-                className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
-                title="Upload Document"
-              >
-                <Upload className="h-3 w-3 sm:h-4 sm:w-4" />
-                <span className="hidden sm:inline">Upload</span>
-              </Button>
-              <Button 
+              <Button
                 variant="outline" 
                 onClick={() => navigate("/guidelines")} 
                 className="gap-2 h-8 sm:h-9 text-xs sm:text-sm"
