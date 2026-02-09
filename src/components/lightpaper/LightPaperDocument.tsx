@@ -1701,23 +1701,32 @@ export function LightPaperDocument({
     }
   };
   // Build content object for saving
-  const buildSaveContent = () => ({
-    html: editorRef.current?.innerHTML || documentContent || "",
-    pages,
-    font: selectedFont,
-    size: selectedSize,
-    darkMode: isDarkMode,
-    currentPage,
-    totalPages: pages.length,
-    pageFormat,
-    orientation,
-    viewMode,
-    viewModeImages: viewMode ? viewModeImages : [],
-    editTextLayers: editTextLayers.length > 0 ? editTextLayers : undefined,
-    editTextViewportSize: editTextViewportSize || undefined,
-    overlayTextBoxes,
-    uploadedFileType: uploadedFileType || undefined,
-  });
+  const buildSaveContent = () => {
+    // For docx editable mode, don't save the full HTML pages (too large for DB)
+    // Instead save a lightweight reference
+    const hasDocxEditable = docxEditablePages.length > 0;
+    return {
+      html: editorRef.current?.innerHTML || documentContent || "",
+      pages,
+      font: selectedFont,
+      size: selectedSize,
+      darkMode: isDarkMode,
+      currentPage,
+      totalPages: pages.length,
+      pageFormat,
+      orientation,
+      viewMode,
+      // Don't save large base64 images or docx HTML to avoid tsvector overflow
+      viewModeImages: viewMode ? viewModeImages.slice(0, 3).map(img => 
+        img.length > 500000 ? img.substring(0, 100) + '...[truncated]' : img
+      ) : [],
+      editTextLayers: editTextLayers.length > 0 ? editTextLayers : undefined,
+      editTextViewportSize: editTextViewportSize || undefined,
+      overlayTextBoxes,
+      uploadedFileType: uploadedFileType || undefined,
+      docxEditableMode: hasDocxEditable || undefined,
+    };
+  };
 
   // Quick save: overwrite existing or show dialog for new
   const handleQuickSave = async () => {

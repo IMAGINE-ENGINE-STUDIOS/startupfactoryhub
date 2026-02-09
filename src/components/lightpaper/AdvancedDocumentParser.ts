@@ -1332,24 +1332,37 @@ async function parseDOCXEditable(
       collectedStyles += styleEl.outerHTML + '\n';
     });
 
-    // Find page sections
+    // Find page sections - try multiple selectors
     let pageDivs: HTMLElement[] = [];
+    
+    // Strategy 1: section.docx elements (most common)
     const sections = container.querySelectorAll('section.docx');
-    if (sections.length > 1) {
+    if (sections.length >= 1) {
       pageDivs = Array.from(sections) as HTMLElement[];
       console.log(`[DOCX Editable] Found ${pageDivs.length} section.docx elements`);
     }
-    if (pageDivs.length <= 1) {
+    
+    // Strategy 2: wrapper > section elements
+    if (pageDivs.length === 0) {
       const wrapperSections = container.querySelectorAll('.docx-wrapper > section');
-      if (wrapperSections.length > 1) {
+      if (wrapperSections.length >= 1) {
         pageDivs = Array.from(wrapperSections) as HTMLElement[];
         console.log(`[DOCX Editable] Found ${pageDivs.length} wrapper sections`);
       }
     }
 
+    // Strategy 3: any section elements
+    if (pageDivs.length === 0) {
+      const anySections = container.querySelectorAll('section');
+      if (anySections.length >= 1) {
+        pageDivs = Array.from(anySections) as HTMLElement[];
+        console.log(`[DOCX Editable] Found ${pageDivs.length} generic section elements`);
+      }
+    }
+
     const editablePages: string[] = [];
 
-    if (pageDivs.length > 1) {
+    if (pageDivs.length >= 1) {
       const totalPages = pageDivs.length;
       onProgress?.(`Processing ${totalPages} editable pages...`, 0, totalPages);
 
@@ -1366,18 +1379,21 @@ async function parseDOCXEditable(
         editablePages.push(pageHtml);
       }
     } else {
-      // Single section or no sections - use the full wrapper content
-      console.log('[DOCX Editable] Single section fallback - using full content');
+      // No sections found at all - use the full wrapper content as single page
+      console.log('[DOCX Editable] No sections found - using full wrapper content');
       const wrapper = container.querySelector('.docx-wrapper') as HTMLElement;
       const target = wrapper || container;
 
       let fullHtml = target.innerHTML;
+      console.log(`[DOCX Editable] Wrapper innerHTML length: ${fullHtml.length}`);
       // Remove style tags from the content (we'll prepend them separately)
       fullHtml = fullHtml.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
       // Remove contenteditable="false"
       fullHtml = fullHtml.replace(/contenteditable\s*=\s*"false"/gi, '');
 
-      editablePages.push(fullHtml);
+      if (fullHtml.trim().length > 0) {
+        editablePages.push(fullHtml);
+      }
     }
 
     document.body.removeChild(container);
