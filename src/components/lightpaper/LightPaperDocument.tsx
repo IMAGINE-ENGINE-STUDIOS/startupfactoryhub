@@ -524,24 +524,23 @@ export function LightPaperDocument({
       editorRef.current.contentEditable = 'true';
       editorRef.current.style.cursor = 'text';
       
-      // Trigger overflow pagination repeatedly to split content across pages
-      // Each input event triggers checkAndHandleOverflow which splits one page
+      // Trigger overflow pagination after DOM settles
+      // Dispatch synthetic input events to trigger the existing overflow handler
       const triggerPagination = (iteration: number) => {
         if (iteration > 200) return;
         setTimeout(() => {
           const editor = editorRef.current;
           if (!editor) return;
+          // Check if content overflows by comparing scrollHeight vs clientHeight
           const pageContentEl = editor.parentElement;
-          const maxH = pageContentEl
-            ? pageContentEl.clientHeight - 2
-            : ((getPageDimensions().height - (MARGIN_CM * 2)) * CM_TO_PX);
-          if (editor.scrollHeight > maxH + 2) {
+          if (pageContentEl && editor.scrollHeight > pageContentEl.clientHeight + 2) {
             editor.dispatchEvent(new Event('input', { bubbles: true }));
             triggerPagination(iteration + 1);
           }
-        }, 200);
+        }, 300);
       };
-      triggerPagination(0);
+      // Initial delay to let the DOM render
+      setTimeout(() => triggerPagination(0), 500);
     }
     
     toast.success(`Document loaded`);
