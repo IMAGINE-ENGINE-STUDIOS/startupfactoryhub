@@ -179,6 +179,7 @@ export function LightPaperDocument({
   const [overlayTextBoxes, setOverlayTextBoxes] = useState<OverlayTextBoxData[]>([]);
   const [isColorPickerActive, setIsColorPickerActive] = useState(false);
   const [selectedTextBoxId, setSelectedTextBoxId] = useState<string | null>(null);
+  const [placingTextBox, setPlacingTextBox] = useState(false); // Text box anchored to cursor mode
   const [isEditingText, setIsEditingText] = useState(false);
   const [pages, setPages] = useState<string[]>(['']);
   const [showPagePanel, setShowPagePanel] = useState(false);
@@ -1348,7 +1349,10 @@ export function LightPaperDocument({
       const clientY = 'touches' in e ? (e.touches[0]?.clientY ?? 0) : e.clientY;
       const page = getPageFromPoint(clientX, clientY);
       const pageRect = page.getBoundingClientRect();
-      setSignaturePreviewPosition({ x: clientX - pageRect.left, y: clientY - pageRect.top });
+      // Calculate position relative to page, accounting for zoom
+      const relX = clientX - pageRect.left;
+      const relY = clientY - pageRect.top;
+      setSignaturePreviewPosition({ x: relX, y: relY });
     };
 
     const createSignatureElement = (sig: typeof draggingSignature, parentPage: HTMLElement, x: number, y: number) => {
@@ -2118,24 +2122,74 @@ export function LightPaperDocument({
     return { width, height };
   };
 
-  // Text box management functions
+  // Text box management functions — click-to-place mode
   const addTextBox = () => {
-    const newBox: OverlayTextBoxData = {
-      id: `textbox_${Date.now()}`,
-      x: 100,
-      y: 100,
-      width: 200,
-      height: 100,
-      text: "New text box",
-      fontSize: 14,
-      fontFamily: "Arial",
-      color: "#000000",
-      backgroundColor: "transparent",
-      borderVisible: true
-    };
-    setOverlayTextBoxes([...overlayTextBoxes, newBox]);
-    toast.success("Text box added");
+    setPlacingTextBox(true);
+    toast.info("Click on the document to place the text box");
   };
+
+  // Handle text box placement via click on document
+  useEffect(() => {
+    if (!placingTextBox || !containerRef.current) return;
+    const container = containerRef.current;
+    const pages = Array.from(container.querySelectorAll('.page')) as HTMLElement[];
+
+    const getPageFromPoint = (cx: number, cy: number) => {
+      for (const page of pages) {
+        const rect = page.getBoundingClientRect();
+        if (cy >= rect.top && cy <= rect.bottom && cx >= rect.left && cx <= rect.right) return page;
+      }
+      return pages[0] || null;
+    };
+
+    // Show crosshair cursor
+    container.style.cursor = 'crosshair';
+
+    const handleClick = (e: MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const page = getPageFromPoint(e.clientX, e.clientY);
+      if (!page) return;
+      const pageRect = page.getBoundingClientRect();
+      const pageIndex = pages.indexOf(page);
+      const pageHeight = getPageDimensions().height * CM_TO_PX;
+      const clickX = (e.clientX - pageRect.left) / zoomLevel;
+      const clickY = (e.clientY - pageRect.top) / zoomLevel + (pageIndex * pageHeight);
+      const boxW = 200;
+      const boxH = 100;
+      const newBox: OverlayTextBoxData = {
+        id: `textbox_${Date.now()}`,
+        x: Math.max(0, clickX - boxW / 2),
+        y: Math.max(0, clickY - boxH / 2),
+        width: boxW,
+        height: boxH,
+        text: "",
+        fontSize: 14,
+        fontFamily: "Arial",
+        color: "#000000",
+        backgroundColor: "transparent",
+        borderVisible: false
+      };
+      setOverlayTextBoxes(prev => [...prev, newBox]);
+      setPlacingTextBox(false);
+      toast.success("Text box placed");
+    };
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setPlacingTextBox(false);
+        toast.info("Text box placement cancelled");
+      }
+    };
+
+    container.addEventListener('click', handleClick, true);
+    document.addEventListener('keydown', handleEscape);
+    return () => {
+      container.removeEventListener('click', handleClick, true);
+      document.removeEventListener('keydown', handleEscape);
+      container.style.cursor = '';
+    };
+  }, [placingTextBox, zoomLevel]);
 
   const updateTextBox = (id: string, updates: Partial<Omit<OverlayTextBoxData, 'id'>>) => {
     setOverlayTextBoxes(boxes =>
@@ -2375,9 +2429,15 @@ export function LightPaperDocument({
                 onClick={() => {
                   if (viewMode && viewModeImages.length > 0) {
                     if (editTextLayers.length > 0) {
+                      // Hybrid mode: toggle text layer editing
                       setEditMode(!editMode);
                     } else {
-                      toast.info('Edit mode not available for this document (no editable text layers)');
+                      // No text layers (DOCX view mode) — switch to editable HTML mode
+                      // Convert view mode images back to basic editable document
+                      setEditMode(!editMode);
+                      if (!editMode) {
+                        toast.info('Edit overlay enabled — use Text Box tool to annotate');
+                      }
                     }
                   } else {
                     const newEditMode = !editMode;
@@ -3264,6 +3324,24 @@ export function LightPaperDocument({
                     size="sm" 
                     variant="outline"
                     onClick={(e) => { e.stopPropagation(); setDraggingSignature(null); setSignaturePreviewPosition(null); }}
+                    className="shadow-lg bg-background"
+                  >
+                    ✕ Cancel
+                  </Button>
+                </div>
+              )}
+
+              {/* Text box placement indicator */}
+              {placingTextBox && (
+                <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[200] flex gap-2 items-center">
+                  <div className="bg-primary text-primary-foreground px-3 py-2 rounded-lg shadow-lg text-sm flex items-center gap-2">
+                    <Plus className="h-4 w-4" />
+                    <span>Click to place text box</span>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={(e) => { e.stopPropagation(); setPlacingTextBox(false); }}
                     className="shadow-lg bg-background"
                   >
                     ✕ Cancel
