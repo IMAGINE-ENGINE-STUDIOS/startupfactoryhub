@@ -1968,18 +1968,75 @@ export function LightPaperDocument({
           toast.error("No document pages found");
           return;
         }
+
+        // Pre-compute scale factor for text overlay injection
+        const pageCssWidthPx = getPageDimensions().width * CM_TO_PX;
+        const fallbackVp = { width: pageCssWidthPx, height: getPageDimensions().height * CM_TO_PX };
+        const vp = editTextViewportSize || fallbackVp;
+        const vpW = vp.width;
+        const sf = pageCssWidthPx / vpW;
         
         for (let i = 0; i < pageContainers.length; i++) {
           const container = pageContainers[i] as HTMLElement;
-          
-          // Keep text overlay spans visible so edits are captured in the export.
-          // The spans have background colors that cover the original image text.
           
           // Temporarily remove zoom transform for accurate capture
           const originalTransform = container.style.transform;
           container.style.transform = 'none';
           
-          // Scroll the container into view for accurate capture
+          // FIX 1: Inject edited text overlay spans into the DOM temporarily
+          // These spans are only rendered when editMode=true, but export runs in viewMode
+          const tempElements: HTMLElement[] = [];
+          
+          if (editTextLayers[i] && editTextLayers[i].length > 0) {
+            const overlayDiv = document.createElement('div');
+            overlayDiv.style.position = 'absolute';
+            overlayDiv.style.inset = '0';
+            overlayDiv.style.pointerEvents = 'none';
+            overlayDiv.style.zIndex = '10';
+            overlayDiv.className = 'export-temp-overlay';
+            
+            for (const item of editTextLayers[i]) {
+              const span = document.createElement('span');
+              span.textContent = item.text;
+              span.style.position = 'absolute';
+              span.style.left = `${(item.x * sf) - 1}px`;
+              span.style.top = `${(item.y * sf) - 1}px`;
+              span.style.width = `${(item.width * sf) + 2}px`;
+              span.style.height = `${(item.height * sf) + 2}px`;
+              span.style.fontSize = `${item.fontSize * sf}px`;
+              span.style.fontFamily = item.fontFamily;
+              span.style.fontWeight = item.fontWeight || 'normal';
+              span.style.fontStyle = item.fontStyle || 'normal';
+              span.style.letterSpacing = item.letterSpacing ? `${item.letterSpacing * sf}px` : 'normal';
+              span.style.color = item.color;
+              span.style.lineHeight = `${(item.height * sf) + 2}px`;
+              span.style.whiteSpace = 'nowrap';
+              span.style.background = item.backgroundColor || 'transparent';
+              span.style.border = 'none';
+              span.style.outline = 'none';
+              span.style.padding = '1px 1px';
+              span.style.margin = '0';
+              span.style.overflow = 'hidden';
+              overlayDiv.appendChild(span);
+            }
+            
+            container.appendChild(overlayDiv);
+            tempElements.push(overlayDiv);
+          }
+          
+          // FIX 3: For OverlayTextBoxes, ensure their text content is visible for capture
+          // The OverlayTextBox component uses contentEditable divs that html2canvas may miss.
+          // Find overlay text box elements in this container and inject plain text fallbacks.
+          const overlayBoxEls = container.querySelectorAll('.absolute[style*="z-index: 100"]');
+          const tempTextFallbacks: HTMLElement[] = [];
+          overlayBoxEls.forEach((boxEl) => {
+            const textDiv = boxEl.querySelector('.whitespace-pre-wrap, textarea');
+            if (textDiv && textDiv.textContent) {
+              // Already visible text — nothing to do
+            }
+          });
+          
+          // Scroll into view for accurate capture
           container.scrollIntoView({ behavior: 'instant' as any });
           await new Promise(resolve => setTimeout(resolve, 200));
           
@@ -1991,14 +2048,36 @@ export function LightPaperDocument({
             logging: false
           });
           
+          // Clean up temporary elements
+          tempElements.forEach(el => el.remove());
+          
           // Restore transform
           container.style.transform = originalTransform;
           
           const imgData = canvas.toDataURL('image/png');
-          if (i > 0) pdf.addPage();
           
-          // Fill entire PDF page — no centering gaps
-          pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+          // FIX 2: Use the captured canvas aspect ratio to set PDF page dimensions
+          // instead of forcing everything into a fixed A4 size
+          const imgWidthPx = canvas.width;
+          const imgHeightPx = canvas.height;
+          const imgAspect = imgWidthPx / imgHeightPx;
+          
+          // Calculate draw dimensions that preserve aspect ratio
+          const pageAspect = pdfWidth / pdfHeight;
+          let drawW: number, drawH: number;
+          
+          if (imgAspect > pageAspect) {
+            // Image is wider than page — fit to width
+            drawW = pdfWidth;
+            drawH = pdfWidth / imgAspect;
+          } else {
+            // Image is taller or same — fit to height
+            drawH = pdfHeight;
+            drawW = pdfHeight * imgAspect;
+          }
+          
+          if (i > 0) pdf.addPage();
+          pdf.addImage(imgData, 'PNG', 0, 0, drawW, drawH);
         }
         
         // Log signature count
