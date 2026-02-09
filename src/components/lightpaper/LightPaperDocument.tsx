@@ -2540,7 +2540,7 @@ export function LightPaperDocument({
       </div>
 
       {/* Zoom and Page Navigation Controls */}
-      <div className="flex items-center justify-between gap-4 px-4 py-1 border-b bg-background shrink-0 no-print zoom-controls page-navigation">
+      <div className="relative flex items-center justify-between gap-4 px-4 py-1 border-b bg-background shrink-0 no-print zoom-controls page-navigation">
         {/* Status Info */}
         <div className="flex items-center gap-2 sm:gap-4 text-xs text-muted-foreground">
           {/* Page Format Dropdown */}
@@ -2628,7 +2628,7 @@ export function LightPaperDocument({
 
       {/* Page Navigation Controls */}
         {((viewMode && viewModeImages.length > 0) || (!viewMode && (effectiveTotalPages > 0 || documentContent))) && (
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1 sm:gap-2 z-10">
             <Button
               variant="outline"
               size="sm"
