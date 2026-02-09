@@ -529,19 +529,25 @@ export function LightPaperDocument({
       // Dispatch synthetic input events to trigger the existing overflow handler
       const triggerPagination = (iteration: number) => {
         if (iteration > 200) return;
-        setTimeout(() => {
-          const editor = editorRef.current;
-          if (!editor) return;
-          // Check if content overflows by comparing scrollHeight vs clientHeight
-          const pageContentEl = editor.parentElement;
-          if (pageContentEl && editor.scrollHeight > pageContentEl.clientHeight + 2) {
-            editor.dispatchEvent(new Event('input', { bubbles: true }));
-            triggerPagination(iteration + 1);
-          }
-        }, 300);
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            const editor = editorRef.current;
+            if (!editor) return;
+            const pageContentEl = editor.parentElement;
+            if (pageContentEl && editor.scrollHeight > pageContentEl.clientHeight + 2) {
+              editor.dispatchEvent(new Event('input', { bubbles: true }));
+              triggerPagination(iteration + 1);
+            } else if (iteration === 200) {
+              // Safety check: warn if content still seems too large for one page
+              if (editor.scrollHeight > pageContentEl!.clientHeight * 1.5) {
+                console.warn('[LightPaper] HTML pagination may have failed — content still overflows after max iterations');
+              }
+            }
+          }, 100);
+        });
       };
       // Initial delay to let the DOM render
-      setTimeout(() => triggerPagination(0), 500);
+      requestAnimationFrame(() => triggerPagination(0));
     }
     
     toast.success(`Document loaded`);
@@ -2428,16 +2434,10 @@ export function LightPaperDocument({
                 className="h-8 px-2 text-xs gap-1" 
                 onClick={() => {
                   if (viewMode && viewModeImages.length > 0) {
-                    if (editTextLayers.length > 0) {
-                      // Hybrid mode: toggle text layer editing
-                      setEditMode(!editMode);
-                    } else {
-                      // No text layers (DOCX view mode) — switch to editable HTML mode
-                      // Convert view mode images back to basic editable document
-                      setEditMode(!editMode);
-                      if (!editMode) {
-                        toast.info('Edit overlay enabled — use Text Box tool to annotate');
-                      }
+                    // Toggle edit mode for image-based documents (both hybrid and view-only)
+                    setEditMode(!editMode);
+                    if (!editMode && editTextLayers.length === 0) {
+                      toast.info('Edit mode enabled — use Text Box tool to annotate');
                     }
                   } else {
                     const newEditMode = !editMode;
