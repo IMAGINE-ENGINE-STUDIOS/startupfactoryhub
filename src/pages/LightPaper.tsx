@@ -4,6 +4,7 @@ import { FileText, Table, Presentation, Command, HelpCircle, FolderOpen } from "
 import { Button } from "@/components/ui/button";
 import { MessageCenterButton } from "@/components/lightpaper/MessageCenter";
 import { useNavigate } from "react-router-dom";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { LightPaperDocument } from "@/components/lightpaper/LightPaperDocument";
 import { LightPaperSpreadsheet } from "@/components/lightpaper/LightPaperSpreadsheet";
 import { LightPaperPresentation } from "@/components/lightpaper/LightPaperPresentation";
@@ -58,6 +59,7 @@ export default function LightPaper() {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <ThemeToggle />
               <MessageCenterButton />
               <Button
                 variant="outline" 
