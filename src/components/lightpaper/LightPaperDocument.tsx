@@ -3844,10 +3844,22 @@ export function LightPaperDocument({
         isOpen={showTextReader}
         onClose={() => setShowTextReader(false)}
         getDocumentText={() => {
-          // Gather text from all pages
+          const tempDiv = document.createElement('div');
+          // PDF view mode: extract from editTextLayers or overlay text boxes
+          if (viewMode && viewModeImages.length > 0) {
+            const layerTexts = editTextLayers.flat().map((item: any) => item?.text || '').filter(Boolean);
+            const overlayTexts = overlayTextBoxes.map(b => b.text).filter(Boolean);
+            const combined = [...layerTexts, ...overlayTexts].join('\n');
+            if (combined.trim()) return combined;
+            return 'No extractable text found in this PDF.';
+          }
+          // DOCX editable pages
+          if (docxEditablePages.length > 0) {
+            return docxEditablePages.map(p => { tempDiv.innerHTML = p || ''; return tempDiv.textContent || ''; }).join('\n\n');
+          }
+          // In-house document pages
           const allPages = [...pages];
           if (editorRef.current) allPages[currentPage - 1] = editorRef.current.innerHTML;
-          const tempDiv = document.createElement('div');
           return allPages.map(p => { tempDiv.innerHTML = p || ''; return tempDiv.textContent || ''; }).join('\n\n');
         }}
       />

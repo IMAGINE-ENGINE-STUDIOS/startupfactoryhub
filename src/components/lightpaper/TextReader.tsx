@@ -117,6 +117,13 @@ export function TextReader({ getDocumentText, isOpen, onClose }: TextReaderProps
     onClose();
   };
 
+  // Auto-play when opened
+  useEffect(() => {
+    if (isOpen && !isPlaying && !isPaused && voices.length > 0) {
+      startReading();
+    }
+  }, [isOpen, voices]);
+
   if (!isOpen) return null;
 
   if (isMinimized) {
