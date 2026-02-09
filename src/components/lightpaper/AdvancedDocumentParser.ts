@@ -1265,8 +1265,8 @@ export async function parseDocumentForEditing(
     };
   }
 
-  // For DOCX, fall back to image-based view mode (text extraction from DOCX is lossy)
-  return parseDocumentAsImages(file, onProgress);
+  // For DOCX, use the editable HTML parser (returns clean HTML without images)
+  return parseDOCX(file, (msg) => onProgress?.(msg));
 }
 
 /**
