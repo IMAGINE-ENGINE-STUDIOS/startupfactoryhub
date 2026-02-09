@@ -35,6 +35,7 @@ import { useNetworkStatus } from "@/hooks/useNetworkStatus";
 import { sanitizeHTML } from "@/utils/sanitize";
 import { MobileToolbar } from "./MobileToolbar";
 import { FileUploadDialog } from "./FileUploadDialog";
+import { parseDocumentAsImages, parseDocumentForEditing } from "./AdvancedDocumentParser";
 import { OverlayTextBox } from "./OverlayTextBox";
 import { AIToolbar } from "./AIToolbar";
 import { PageManagementPanel } from "./PageManagementPanel";
@@ -187,13 +188,16 @@ export function LightPaperDocument({
   const [pages, setPages] = useState<string[]>(['']);
   const [showPagePanel, setShowPagePanel] = useState(false);
 
-  // Derive totalPages from pages array to avoid sync issues
-  const effectiveTotalPages = viewMode && viewModeImages.length > 0 ? viewModeImages.length : Math.max(pages.length, 1);
   const [editTextLayers, setEditTextLayers] = useState<any[][]>([]); // Per-page text layer items for hybrid editing
   const [editTextViewportSize, setEditTextViewportSize] = useState<{ width: number; height: number } | null>(null);
   const [uploadSource, setUploadSource] = useState<'edit' | 'view' | null>(null); // Tracks user intent from FileUploadDialog
   const [uploadedFileType, setUploadedFileType] = useState<'pdf' | 'docx' | null>(null); // Track file type for mode switching
   const [originalFile, setOriginalFile] = useState<File | null>(null); // Store original file for re-parsing (DOCX view→edit)
+  const [docxEditablePages, setDocxEditablePages] = useState<string[]>([]); // Per-page editable HTML for DOCX Edit Mode
+  const [docxEditableStyles, setDocxEditableStyles] = useState<string>(''); // Collected styles from docx-preview
+
+  // Derive totalPages from pages array to avoid sync issues
+  const effectiveTotalPages = docxEditablePages.length > 0 ? docxEditablePages.length : (viewMode && viewModeImages.length > 0 ? viewModeImages.length : Math.max(pages.length, 1));
 
   // Scale PDF reconstructed content to fit within the editor container
   const scalePdfContentToFit = useCallback((container: HTMLDivElement | null) => {
@@ -318,6 +322,38 @@ export function LightPaperDocument({
       // TRY TO PARSE AS JSON (View Mode or Hybrid Mode)
       const parsed = JSON.parse(uploadedContent.content);
       
+      if (parsed.mode === 'docx-editable' && parsed.editablePages && Array.isArray(parsed.editablePages)) {
+        console.log(`✓ DOCX Editable Mode: ${parsed.editablePages.length} pages`);
+        
+        // Set editable pages state
+        setDocxEditablePages(parsed.editablePages);
+        setDocxEditableStyles(parsed.styles || '');
+        setViewMode(false);
+        setViewModeImages([]);
+        setEditMode(true);
+        setEditTextLayers([]);
+        setTotalPages(parsed.editablePages.length);
+        setCurrentPage(1);
+        setVisiblePage(1);
+        setUploadSource(uploadedContent.metadata?.uploadMode || 'edit');
+        setUploadedFileType((uploadedContent.metadata?.fileType as 'pdf' | 'docx') || null);
+        
+        // Set format if detected
+        const detFormat = parsed.metadata?.detectedFormat || uploadedContent.metadata?.detectedFormat;
+        if (detFormat && detFormat in PAGE_FORMATS) {
+          setPageFormat(detFormat as PageFormat);
+        }
+        
+        if (editorRef.current) editorRef.current.innerHTML = '';
+        setDocumentContent('');
+        
+        toast.success(`DOCX loaded: ${parsed.editablePages.length} editable pages`);
+        setProjectTitle(uploadedContent.title);
+        setCurrentProjectId(null);
+        onContentLoaded?.();
+        return;
+      }
+      
       if ((parsed.mode === 'view' || parsed.mode === 'hybrid') && parsed.images && Array.isArray(parsed.images)) {
         console.log(`✓ ${parsed.mode === 'hybrid' ? 'Hybrid' : 'View'} Mode: ${parsed.images.length} pages with images`);
         
@@ -339,6 +375,7 @@ export function LightPaperDocument({
         // Set state
         setViewMode(true);
         setViewModeImages(validImages);
+        setDocxEditablePages([]); // Clear editable pages
         setTotalPages(validImages.length);
         setCurrentPage(1);
         setVisiblePage(1);
@@ -592,7 +629,8 @@ export function LightPaperDocument({
   }, [viewMode, viewModeImages.length, projectTitle, currentProjectId, user]);
 
   useEffect(() => {
-    if (!viewMode || viewModeImages.length === 0) return;
+    const pageCount = viewMode && viewModeImages.length > 0 ? viewModeImages.length : docxEditablePages.length;
+    if (pageCount === 0) return;
     
     const observer = new IntersectionObserver(
       (entries) => {
@@ -614,17 +652,17 @@ export function LightPaperDocument({
     
     // Small delay to ensure DOM is ready
     const timeoutId = setTimeout(() => {
-      viewModeImages.forEach((_, index) => {
-        const pageEl = document.getElementById(`page-${index + 1}`);
+      for (let i = 0; i < pageCount; i++) {
+        const pageEl = document.getElementById(`page-${i + 1}`);
         if (pageEl) observer.observe(pageEl);
-      });
+      }
     }, 100);
     
     return () => {
       clearTimeout(timeoutId);
       observer.disconnect();
     };
-  }, [viewMode, viewModeImages]);
+  }, [viewMode, viewModeImages, docxEditablePages]);
 
   // Sync documentContent to editor when it changes (but not during user input)
   const isUserTyping = useRef(false);
@@ -2472,11 +2510,57 @@ export function LightPaperDocument({
                 size="sm" 
                 className="h-8 px-2 text-xs gap-1" 
                 onClick={async () => {
-                  if (viewMode && viewModeImages.length > 0) {
-                    // Toggle overlay edit mode for both PDF and DOCX (hybrid approach)
-                    setEditMode(!editMode);
-                    if (!editMode && editTextLayers.length === 0) {
-                      toast.info('Edit mode enabled — use Text Box tool to annotate');
+                  if (docxEditablePages.length > 0) {
+                    // DOCX Editable Mode: toggle between edit and view
+                    if (editMode && originalFile) {
+                      // Switch to View Mode: re-parse as images
+                      toast.info('Switching to View Mode...');
+                      try {
+                        const result = await parseDocumentAsImages(originalFile);
+                        if (result.images && result.images.length > 0) {
+                          setDocxEditablePages([]);
+                          setDocxEditableStyles('');
+                          setViewMode(true);
+                          setViewModeImages(result.images);
+                          setEditMode(false);
+                          setEditTextLayers([]);
+                          setTotalPages(result.images.length);
+                          toast.success('View Mode loaded');
+                        }
+                      } catch (err) {
+                        console.error('Failed to switch to view mode:', err);
+                        toast.error('Failed to switch mode');
+                      }
+                    } else {
+                      setEditMode(true);
+                    }
+                  } else if (viewMode && viewModeImages.length > 0) {
+                    // View mode with images - check if DOCX to allow editable switch
+                    if (!editMode && uploadedFileType === 'docx' && originalFile) {
+                      // Switch to DOCX Editable Mode
+                      toast.info('Switching to Edit Mode...');
+                      try {
+                        const result = await parseDocumentForEditing(originalFile);
+                        if (result.editablePages && result.editablePages.length > 0) {
+                          setViewMode(false);
+                          setViewModeImages([]);
+                          setDocxEditablePages(result.editablePages);
+                          setDocxEditableStyles(result.pages?.[0] || '');
+                          setEditMode(true);
+                          setEditTextLayers([]);
+                          setTotalPages(result.editablePages.length);
+                          toast.success('Edit Mode loaded');
+                        }
+                      } catch (err) {
+                        console.error('Failed to switch to edit mode:', err);
+                        toast.error('Failed to switch mode');
+                      }
+                    } else {
+                      // Toggle overlay edit mode for PDF (hybrid approach)
+                      setEditMode(!editMode);
+                      if (!editMode && editTextLayers.length === 0) {
+                        toast.info('Edit mode enabled — use Text Box tool to annotate');
+                      }
                     }
                   } else {
                     const newEditMode = !editMode;
@@ -3130,12 +3214,17 @@ export function LightPaperDocument({
         `}</style>
         <div ref={containerRef} className="mx-auto pb-0" style={{ 
           width: 'fit-content',
-          minHeight: viewMode ? '100vh' : 'auto',
+          minHeight: (viewMode || docxEditablePages.length > 0) ? '100vh' : 'auto',
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
           overflow: 'visible',
           ...(viewMode && viewModeImages.length > 0 ? {
+            transform: `scale(${zoomLevel})`,
+            transformOrigin: 'top center',
+            transition: 'transform 0.2s ease',
+          } : {}),
+          ...(docxEditablePages.length > 0 ? {
             transform: `scale(${zoomLevel})`,
             transformOrigin: 'top center',
             transition: 'transform 0.2s ease',
@@ -3246,6 +3335,65 @@ export function LightPaperDocument({
                   {overlayTextBoxes
                     .filter(box => {
                       // Determine which page this text box belongs to based on Y position
+                      const pageHeight = getPageDimensions().height * CM_TO_PX;
+                      const pageIndex = Math.floor(box.y / pageHeight);
+                      return pageIndex === index;
+                    })
+                    .map(box => (
+                      <OverlayTextBox
+                        key={box.id}
+                        {...box}
+                        y={box.y - (index * getPageDimensions().height * CM_TO_PX)}
+                        onUpdate={updateTextBox}
+                        onDelete={deleteTextBox}
+                        zoomLevel={zoomLevel}
+                      />
+                    ))
+                  }
+                </div>
+              ))}
+            </>
+          ) : docxEditablePages.length > 0 ? (
+            // DOCX EDITABLE MODE: Real editable HTML pages with original layout
+            <>
+              {/* Inject docx-preview styles */}
+              {docxEditableStyles && (
+                <div dangerouslySetInnerHTML={{ __html: docxEditableStyles }} style={{ display: 'none' }} />
+              )}
+              {docxEditablePages.map((pageHtml, index) => (
+                <div
+                  key={`docx-edit-page-${index + 1}`}
+                  id={`page-${index + 1}`}
+                  className="page view-mode-page"
+                  style={{
+                    position: 'relative',
+                    overflow: 'visible',
+                    marginBottom: '0px',
+                    background: isDarkMode ? '#1a1a1a' : 'white',
+                    transform: `scale(${zoomLevel})`,
+                    transformOrigin: 'top center',
+                    transition: 'transform 0.2s ease',
+                  }}
+                  onClick={handleCanvasClick}
+                >
+                  <div
+                    contentEditable={editMode}
+                    suppressContentEditableWarning
+                    className="docx-editable-page"
+                    style={{
+                      width: '100%',
+                      minHeight: `${getPageDimensions().height}cm`,
+                      outline: 'none',
+                      cursor: editMode ? 'text' : 'default',
+                      pointerEvents: editMode ? 'auto' : 'none',
+                      userSelect: editMode ? 'auto' : 'none',
+                    }}
+                    dangerouslySetInnerHTML={{ __html: pageHtml }}
+                  />
+                  
+                  {/* Overlay Text Boxes for this page */}
+                  {overlayTextBoxes
+                    .filter(box => {
                       const pageHeight = getPageDimensions().height * CM_TO_PX;
                       const pageIndex = Math.floor(box.y / pageHeight);
                       return pageIndex === index;
@@ -3648,9 +3796,35 @@ export function LightPaperDocument({
                     if (file) setOriginalFile(file);
                     setUploadedFileType((metadata?.fileType as 'pdf' | 'docx') || null);
                     
-                    // Check if content is JSON (view/hybrid mode with images)
+                    // Check if content is JSON (view/hybrid/docx-editable mode)
                     try {
                       const parsed = JSON.parse(content);
+                      
+                      // DOCX Editable Mode
+                      if (parsed.mode === 'docx-editable' && parsed.editablePages && Array.isArray(parsed.editablePages)) {
+                        setDocxEditablePages(parsed.editablePages);
+                        setDocxEditableStyles(parsed.styles || '');
+                        setViewMode(false);
+                        setViewModeImages([]);
+                        setEditMode(true);
+                        setEditTextLayers([]);
+                        setTotalPages(parsed.editablePages.length);
+                        setCurrentPage(1);
+                        setVisiblePage(1);
+                        setUploadSource(metadata?.uploadMode || 'edit');
+                        if (editorRef.current) editorRef.current.innerHTML = '';
+                        setDocumentContent('');
+                        setProjectTitle(title);
+                        setCurrentProjectId(null);
+                        const detFormat = parsed.metadata?.detectedFormat || metadata?.detectedFormat;
+                        if (detFormat && detFormat in PAGE_FORMATS) {
+                          setPageFormat(detFormat as PageFormat);
+                        }
+                        toast.success(`DOCX loaded: ${parsed.editablePages.length} editable pages`);
+                        setShowUploadDialog(false);
+                        return;
+                      }
+                      
                       if ((parsed.mode === 'view' || parsed.mode === 'hybrid') && parsed.images && Array.isArray(parsed.images)) {
                         // Image-based mode - validate images
                         const validImages = parsed.images.filter((img: string) => 
@@ -3659,6 +3833,7 @@ export function LightPaperDocument({
                         if (validImages.length > 0) {
                           setViewMode(true);
                           setViewModeImages(validImages);
+                          setDocxEditablePages([]); // Clear editable pages
                           setTotalPages(validImages.length);
                           setCurrentPage(1);
                           setVisiblePage(1);
