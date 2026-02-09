@@ -352,6 +352,7 @@ export interface TextLayerItem {
   fontStyle: string;
   color: string;
   backgroundColor: string; // Sampled from the page image
+  letterSpacing?: number; // Calculated from PDF item width vs measured width
 }
 
 export interface ParsedContent {
@@ -1099,8 +1100,65 @@ function escapeHtml(text: string): string {
 }
 
 /**
- * Sample background color from a canvas at a specific region around a text item.
- * Returns the dominant background color behind the text.
+ * Sample a color from a canvas region using mode (most frequent) instead of average.
+ * This produces more accurate results for text on colored backgrounds.
+ */
+function sampleColorFromRegion(
+  ctx: CanvasRenderingContext2D,
+  sx: number,
+  sy: number,
+  sw: number,
+  sh: number,
+  canvasWidth: number,
+  canvasHeight: number
+): string | null {
+  const clampedSx = Math.max(0, Math.floor(sx));
+  const clampedSy = Math.max(0, Math.floor(sy));
+  const clampedSw = Math.min(canvasWidth - clampedSx, Math.ceil(sw));
+  const clampedSh = Math.min(canvasHeight - clampedSy, Math.ceil(sh));
+
+  if (clampedSw <= 0 || clampedSh <= 0) return null;
+
+  try {
+    const imageData = ctx.getImageData(clampedSx, clampedSy, clampedSw, clampedSh);
+    const data = imageData.data;
+    const colorCounts = new Map<string, number>();
+
+    // Sample every 2nd pixel for speed
+    for (let py = 0; py < clampedSh; py += 2) {
+      for (let px = 0; px < clampedSw; px += 2) {
+        const idx = (py * clampedSw + px) * 4;
+        if (idx + 2 >= data.length) continue;
+        // Quantize to reduce noise (group similar colors)
+        const r = Math.round(data[idx] / 4) * 4;
+        const g = Math.round(data[idx + 1] / 4) * 4;
+        const b = Math.round(data[idx + 2] / 4) * 4;
+        const key = `${r},${g},${b}`;
+        colorCounts.set(key, (colorCounts.get(key) || 0) + 1);
+      }
+    }
+
+    if (colorCounts.size === 0) return null;
+
+    // Find the most frequent color (mode)
+    let maxCount = 0;
+    let modeColor = '255,255,255';
+    for (const [color, count] of colorCounts) {
+      if (count > maxCount) {
+        maxCount = count;
+        modeColor = color;
+      }
+    }
+
+    const [r, g, b] = modeColor.split(',').map(Number);
+    return `rgb(${r}, ${g}, ${b})`;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Sample background color from the edges/corners around a text region.
  */
 function sampleBackgroundColor(
   canvas: HTMLCanvasElement,
@@ -1113,50 +1171,100 @@ function sampleBackgroundColor(
   const ctx = canvas.getContext('2d');
   if (!ctx) return 'rgb(255, 255, 255)';
 
-  // Sample a small region around the text (slightly expanded)
+  // Sample a thin strip above the text region (pure background, no text)
+  const stripHeight = Math.max(2, Math.ceil(height * scale * 0.15));
+  const aboveResult = sampleColorFromRegion(
+    ctx,
+    Math.floor(x * scale),
+    Math.max(0, Math.floor(y * scale) - stripHeight),
+    Math.ceil(width * scale),
+    stripHeight,
+    canvas.width,
+    canvas.height
+  );
+  if (aboveResult) return aboveResult;
+
+  // Fallback: sample corners
   const sx = Math.max(0, Math.floor((x - 2) * scale));
   const sy = Math.max(0, Math.floor((y - 2) * scale));
   const sw = Math.min(canvas.width - sx, Math.ceil((width + 4) * scale));
   const sh = Math.min(canvas.height - sy, Math.ceil((height + 4) * scale));
+  
+  const fallback = sampleColorFromRegion(ctx, sx, sy, sw, sh, canvas.width, canvas.height);
+  return fallback || 'rgb(255, 255, 255)';
+}
 
-  if (sw <= 0 || sh <= 0) return 'rgb(255, 255, 255)';
+/**
+ * Sample text color by looking at the center of the text region on the canvas.
+ * Uses the darkest/most saturated color found in the text area center strip.
+ */
+function sampleTextColor(
+  canvas: HTMLCanvasElement,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  scale: number,
+  bgColor: string
+): string {
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return 'rgb(0, 0, 0)';
+
+  // Sample the center horizontal strip of the text (where glyph strokes are densest)
+  const centerY = Math.floor((y + height * 0.3) * scale);
+  const stripH = Math.max(2, Math.ceil(height * scale * 0.4));
+  const sx = Math.max(0, Math.floor(x * scale) + 2);
+  const sy = Math.max(0, centerY);
+  const sw = Math.min(canvas.width - sx, Math.ceil(width * scale) - 4);
+  const sh = Math.min(canvas.height - sy, stripH);
+
+  if (sw <= 0 || sh <= 0) return 'rgb(0, 0, 0)';
 
   try {
     const imageData = ctx.getImageData(sx, sy, sw, sh);
     const data = imageData.data;
 
-    // Sample edges of the region (not center where text is)
-    // Take pixels from top-left corner, top-right corner, and left edge
-    const samplePixels: number[][] = [];
-    const addSample = (px: number, py: number) => {
-      const idx = (py * sw + px) * 4;
-      if (idx >= 0 && idx + 2 < data.length) {
-        samplePixels.push([data[idx], data[idx + 1], data[idx + 2]]);
+    // Parse background color for comparison
+    const bgMatch = bgColor.match(/(\d+)/g);
+    const bgR = bgMatch ? parseInt(bgMatch[0]) : 255;
+    const bgG = bgMatch ? parseInt(bgMatch[1]) : 255;
+    const bgB = bgMatch ? parseInt(bgMatch[2]) : 255;
+
+    // Collect non-background pixels (text pixels)
+    const colorCounts = new Map<string, number>();
+    const threshold = 30; // Color distance threshold from background
+
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i + 1], b = data[i + 2];
+      const dist = Math.sqrt(
+        (r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2
+      );
+      if (dist > threshold) {
+        // Quantize
+        const qr = Math.round(r / 8) * 8;
+        const qg = Math.round(g / 8) * 8;
+        const qb = Math.round(b / 8) * 8;
+        const key = `${qr},${qg},${qb}`;
+        colorCounts.set(key, (colorCounts.get(key) || 0) + 1);
       }
-    };
-
-    // Sample corners and edges (where background is likely visible)
-    addSample(0, 0);
-    addSample(sw - 1, 0);
-    addSample(0, sh - 1);
-    addSample(sw - 1, sh - 1);
-    addSample(Math.floor(sw / 2), 0);
-    addSample(0, Math.floor(sh / 2));
-
-    if (samplePixels.length === 0) return 'rgb(255, 255, 255)';
-
-    // Average the sampled colors
-    let r = 0, g = 0, b = 0;
-    for (const [pr, pg, pb] of samplePixels) {
-      r += pr; g += pg; b += pb;
     }
-    r = Math.round(r / samplePixels.length);
-    g = Math.round(g / samplePixels.length);
-    b = Math.round(b / samplePixels.length);
 
+    if (colorCounts.size === 0) return 'rgb(0, 0, 0)';
+
+    // Most frequent non-background color = text color
+    let maxCount = 0;
+    let textColor = '0,0,0';
+    for (const [color, count] of colorCounts) {
+      if (count > maxCount) {
+        maxCount = count;
+        textColor = color;
+      }
+    }
+
+    const [r, g, b] = textColor.split(',').map(Number);
     return `rgb(${r}, ${g}, ${b})`;
   } catch {
-    return 'rgb(255, 255, 255)';
+    return 'rgb(0, 0, 0)';
   }
 }
 
@@ -1224,14 +1332,20 @@ export async function parseDocumentForEditing(
 
         const { fontFamily, fontWeight, fontStyle } = recognizeFont(item.fontName || '');
         measureCtx.font = `${fontWeight} ${fontStyle} ${fontHeight}px ${fontFamily}`;
-        const textWidth = measureCtx.measureText(item.str).width;
+        const measuredWidth = measureCtx.measureText(item.str).width;
 
-        let color = 'rgb(0, 0, 0)';
-        if (item.color && Array.isArray(item.color)) {
-          const r = Math.round(item.color[0] * 255);
-          const g = Math.round(item.color[1] * 255);
-          const b = Math.round(item.color[2] * 255);
-          color = `rgb(${r}, ${g}, ${b})`;
+        // Use PDF-reported width if available (more accurate), else measured
+        const pdfWidth = item.width || 0;
+        const textWidth = pdfWidth > 0 ? pdfWidth : measuredWidth;
+
+        // Calculate letter spacing from width difference
+        let letterSpacing: number | undefined;
+        if (pdfWidth > 0 && item.str.length > 1 && measuredWidth > 0) {
+          const widthDiff = pdfWidth - measuredWidth;
+          const spacing = widthDiff / (item.str.length - 1);
+          if (Math.abs(spacing) > 0.01) {
+            letterSpacing = spacing;
+          }
         }
 
         // 3. Sample background color from the rendered canvas
@@ -1240,6 +1354,15 @@ export async function parseDocumentForEditing(
           x, y - fontHeight,
           textWidth, fontHeight,
           renderScale
+        );
+
+        // 4. Sample text color from the rendered canvas (PDF.js doesn't provide color)
+        const color = sampleTextColor(
+          canvas,
+          x, y - fontHeight,
+          textWidth, fontHeight,
+          renderScale,
+          bgColor
         );
 
         pageTextLayer.push({
@@ -1254,6 +1377,7 @@ export async function parseDocumentForEditing(
           fontStyle,
           color,
           backgroundColor: bgColor,
+          letterSpacing,
         });
       }
 
