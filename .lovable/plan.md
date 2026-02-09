@@ -1,58 +1,57 @@
 
-# Fix Edit Mode for Uploaded Documents
+# Fix DOCX Upload Issues: Edit Mode Multi-Page + View-to-Edit Toggle
 
-## Problem Summary
-When uploading files in "Edit Mode," documents either stay in View Mode or the Edit toggle button doesn't work. There are three separate bugs:
+## Problems Identified
 
-1. **DOCX files in Edit Mode** load as raw HTML into the editor with `viewMode=false`, but the toggle button assumes `viewMode=true` with images -- so clicking it does nothing useful.
-2. **PDF files in Edit Mode** load correctly as hybrid (images + text layers), but if `editTextViewportSize` is null or text layers are empty, the edit overlay doesn't render, making it look identical to View Mode.
-3. **The toggle button logic** has conflicting conditions that don't cover all states properly.
+1. **DOCX Edit Mode shows only 1 page or images-only**: The `parseDocumentForEditing()` function for DOCX falls back to `parseDOCX()` which returns raw HTML (no images). This HTML is inserted into a single page editor, and the recursive pagination system (synthetic input events) fails to reliably split multi-page content.
+
+2. **DOCX View Mode to Edit toggle does nothing**: Clicking "Edit" when a DOCX is loaded in View Mode only toggles a state flag and shows a toast ("use Text Box tool") -- it does not re-parse the document into editable HTML.
+
+3. **Root cause**: For DOCX files, `parseDocumentForEditing()` does NOT produce images + text layers (hybrid mode) like it does for PDFs. It just falls back to raw HTML parsing which breaks multi-page rendering.
 
 ## Solution
 
-### 1. Fix the Edit/View toggle button logic (LightPaperDocument.tsx ~line 2305)
-- Track a new state `uploadedAsEdit` that is set to `true` when a file is uploaded via Edit Mode.
-- When `uploadedAsEdit` is true AND the document is in HTML edit mode (not view mode with images), the toggle button should switch between the rich editor and a read-only/view presentation.
-- When in hybrid mode (images + text layers), the toggle should work as currently intended.
+### Part 1: Make DOCX Edit Mode use Hybrid Approach (like PDF)
 
-### 2. Ensure DOCX Edit Mode produces editable content properly (AdvancedDocumentParser.ts)
-- For DOCX files, `parseDocumentForEditing` currently returns HTML without images. This is correct behavior, but the document component needs to properly recognize this and enable the contentEditable editor.
-- The content loading logic already handles this (lines 488-519), but the editor's `contentEditable` state needs to be explicitly enabled.
+Modify `parseDocumentForEditing()` in `AdvancedDocumentParser.ts` so that DOCX files also get the hybrid treatment: render pages as images (using the existing `parseDocxAsImages` logic) AND extract text content per page.
 
-### 3. Fix state initialization on upload (LightPaperDocument.tsx ~lines 303-520)
-- When hybrid mode content loads (PDF edit): ensure `editTextViewportSize` is always set from metadata dimensions. Add a fallback default if dimensions are missing.
-- When HTML edit mode loads (DOCX edit): ensure the editor div is set to `contentEditable=true` and `editMode=true`, and the content is properly injected.
+**Changes to `AdvancedDocumentParser.ts`:**
+- Replace the DOCX fallback at line 1279-1281 with a new function `parseDocxForEditing()` that:
+  1. Renders the DOCX into a hidden container using `docx-preview` (with `breakPages: true`)
+  2. Captures each page/section as an image using `html2canvas` (reusing existing logic from `parseDocxAsImages`)
+  3. Extracts text content from each section/page to create `TextLayerItem[][]` arrays
+  4. Returns `{ images, textLayers, metadata }` -- the same hybrid format that PDFs use
+- This ensures DOCX files in Edit Mode go through the JSON/hybrid path in `FileUploadDialog` and `LightPaperDocument`, getting proper multi-page image rendering with editable text overlays
 
-### 4. Fix the bottom status bar (LightPaperDocument.tsx ~line 2549)
-- Update the status indicator to show "Edit Mode" when `editMode` is true regardless of whether it's hybrid or HTML-based editing.
+### Part 2: Fix View-to-Edit Toggle for DOCX
 
-## Technical Changes
+Modify the Edit toggle handler in `LightPaperDocument.tsx` (around line 2430-2441):
+- When toggling to Edit mode on a DOCX that was loaded in View Mode (no text layers), instead of just showing a toast, enable `editMode` so overlay text boxes and annotations work properly on top of the view-mode images
+- This is already partially working but the toast message is misleading -- clean it up
 
-### File: `src/components/lightpaper/LightPaperDocument.tsx`
+### Part 3: Fix Pagination for HTML Fallback (safety net)
 
-**A) Add tracking state for upload source:**
-- Add `const [uploadSource, setUploadSource] = useState<'edit' | 'view' | null>(null);`
-- Set it in the content loading `useEffect` based on the parsed mode.
+In `LightPaperDocument.tsx` (around line 530-545):
+- Increase the reliability of the `triggerPagination` approach by using `requestAnimationFrame` instead of fixed timeouts
+- Add a check: if after all iterations, only 1 page exists but content is clearly multi-page (scrollHeight >> clientHeight), log a warning
 
-**B) Fix toggle button (around line 2305-2325):**
-- When `viewMode` is true and images exist and text layers exist: toggle `editMode` (hybrid).
-- When `viewMode` is true and images exist but NO text layers: show disabled or info that edit isn't available for this file.
-- When `viewMode` is false (HTML edit mode): toggle between `contentEditable` true/false for view vs edit.
+## Files to Modify
 
-**C) Fix hybrid mode fallback (around line 3014):**
-- Add fallback viewport size if `editTextViewportSize` is null but text layers exist. Use the image's natural dimensions as fallback.
+1. **`src/components/lightpaper/AdvancedDocumentParser.ts`** -- Add `parseDocxForEditing()` function and update the DOCX branch in `parseDocumentForEditing()`
+2. **`src/components/lightpaper/LightPaperDocument.tsx`** -- Clean up the edit toggle handler for view-mode DOCX files
 
-**D) Ensure `editMode` state is correctly initialized:**
-- In the hybrid branch (line 342): already sets `editMode(true)` -- keep this.
-- In the HTML branch (line 491): already sets `editMode(true)` -- keep this.
-- Ensure that when the user explicitly clicked "Edit Mode" in FileUploadDialog, the document component respects it.
+## Technical Details
 
-### File: `src/components/lightpaper/FileUploadDialog.tsx`
+### New `parseDocxForEditing()` function outline:
 
-**E) Pass upload mode in metadata:**
-- Add `uploadMode` to the metadata passed to `onFileLoaded` so the document component knows the user's intent:
-  ```
-  onFileLoaded(content, title, { detectedFormat, fileType, uploadMode: 'edit' })
-  ```
+```text
+1. Render DOCX in hidden container with breakPages: true
+2. Find page sections (section.docx or .docx-wrapper > section)
+3. For each section:
+   a. Capture as image via html2canvas (scale: 2)
+   b. Extract text nodes with their bounding rects relative to section
+   c. Build TextLayerItem[] with position, font, color, backgroundColor
+4. Return { images, textLayers, metadata } as hybrid ParsedContent
+```
 
-This ensures the document component can differentiate between "user wanted edit mode" vs "file was processed as view mode."
+This ensures DOCX Edit Mode produces the same data structure as PDF Edit Mode, so the existing hybrid rendering pipeline handles it correctly with multi-page support.
