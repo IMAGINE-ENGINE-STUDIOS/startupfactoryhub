@@ -521,6 +521,27 @@ export function LightPaperDocument({
     
     if (editorRef.current) {
       editorRef.current.innerHTML = finalHtml;
+      editorRef.current.contentEditable = 'true';
+      editorRef.current.style.cursor = 'text';
+      
+      // Trigger overflow pagination repeatedly to split content across pages
+      // Each input event triggers checkAndHandleOverflow which splits one page
+      const triggerPagination = (iteration: number) => {
+        if (iteration > 200) return;
+        setTimeout(() => {
+          const editor = editorRef.current;
+          if (!editor) return;
+          const pageContentEl = editor.parentElement;
+          const maxH = pageContentEl
+            ? pageContentEl.clientHeight - 2
+            : ((getPageDimensions().height - (MARGIN_CM * 2)) * CM_TO_PX);
+          if (editor.scrollHeight > maxH + 2) {
+            editor.dispatchEvent(new Event('input', { bubbles: true }));
+            triggerPagination(iteration + 1);
+          }
+        }, 200);
+      };
+      triggerPagination(0);
     }
     
     toast.success(`Document loaded`);

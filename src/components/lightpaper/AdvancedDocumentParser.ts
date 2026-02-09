@@ -416,10 +416,21 @@ export async function parseDOCX(
     html = html.replace(/position:\s*absolute/gi, 'position: relative');
     html = html.replace(/transform:\s*scale\([^)]+\)/gi, '');
     
-    // Remove hard-coded widths from docx-preview that prevent filling the page
+    // Remove hard-coded widths from layout containers (sections, wrappers) but NOT from images
+    // First, protect image tags by temporarily replacing them
+    const imgPlaceholders: string[] = [];
+    html = html.replace(/<img[^>]*>/gi, (match) => {
+      imgPlaceholders.push(match);
+      return `__IMG_PLACEHOLDER_${imgPlaceholders.length - 1}__`;
+    });
+    
+    // Now strip widths from non-image elements
     html = html.replace(/width:\s*\d+(\.\d+)?(pt|px|cm|mm|in)\s*;?/gi, '');
     html = html.replace(/min-width:\s*\d+(\.\d+)?(pt|px|cm|mm|in)\s*;?/gi, '');
     html = html.replace(/max-width:\s*\d+(\.\d+)?(pt|px|cm|mm|in)\s*;?/gi, '');
+    
+    // Restore image tags with their original widths
+    html = html.replace(/__IMG_PLACEHOLDER_(\d+)__/g, (_, index) => imgPlaceholders[parseInt(index)]);
     
     // Ensure all text elements are editable
     html = html.replace(/contenteditable="false"/gi, '');
