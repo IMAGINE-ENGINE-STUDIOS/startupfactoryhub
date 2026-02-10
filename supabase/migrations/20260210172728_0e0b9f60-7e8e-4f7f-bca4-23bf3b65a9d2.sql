@@ -1,0 +1,3 @@
+ALTER TABLE public.resources DROP CONSTRAINT check_resource_type;
+ALTER TABLE public.resources ADD CONSTRAINT check_resource_type CHECK (resource_type = ANY (ARRAY['office','lab','venue','perk','chamber_of_commerce','technology_transfer','community','government_grant','accelerator_incubator','entrepreneur_center','university','coworking','investor_network','human_capital','event','banking','other']));
+UPDATE public.resources SET resource_type = 'banking' WHERE title = 'HSBC Innovation Banking';

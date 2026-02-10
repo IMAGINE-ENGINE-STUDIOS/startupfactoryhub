@@ -40,6 +40,7 @@ import {
   Locate,
   Loader2,
   CalendarDays,
+  Banknote,
   Globe2,
   ArrowRight,
   Share2,
@@ -65,6 +66,7 @@ const RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: s
   investor_network: { icon: TrendingUp, color: '#facc15', label: 'Investor Net' },
   human_capital: { icon: Users, color: '#0ea5e9', label: 'Human Capital' },
   event: { icon: CalendarDays, color: '#f43f5e', label: 'Events' },
+  banking: { icon: Banknote, color: '#dc2626', label: 'Banking' },
   other: { icon: MapPin, color: '#64748b', label: 'Other' },
 };
 
