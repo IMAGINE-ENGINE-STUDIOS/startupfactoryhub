@@ -694,6 +694,8 @@ export default function Deck() {
             {/* Border frame */}
             <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
+            <FloatingHexagons />
+            <EnergyLines />
             <CornerAccents />
             <div className="relative z-10 w-full max-w-[90%] mx-auto">
           <div className="flex flex-col items-center">
@@ -1415,6 +1417,8 @@ export default function Deck() {
             <div className="absolute inset-0 bg-slate-950/70 print:hidden" />
             <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300 z-[1]" />
             <TechGrid />
+            <FloatingHexagons />
+            <EnergyLines />
             <CornerAccents />
             <div className="relative z-10 w-full max-w-[90%] mx-auto">
           <div className="flex flex-col items-center">
@@ -1541,6 +1545,8 @@ export default function Deck() {
             <div className="absolute inset-0 bg-slate-950/50 print:hidden" />
             <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300 z-[1]" />
             <TechGrid />
+            <FloatingHexagons />
+            <EnergyLines />
             <CornerAccents />
             <div className="relative z-10 w-full max-w-[90%] mx-auto">
           <div className="flex flex-col items-center text-center">
