@@ -900,7 +900,8 @@ export default function Deck() {
               {/* Bottom feature cards - horizontal row, tech-card style */}
               <div className="flex items-center justify-center gap-2 mt-1 flex-wrap" style={{ zIndex: 6 }}>
                 {[
-                  { emoji: '🤖', label: 'AI Dashboard', desc: 'Smart insights & analytics' },
+                  { emoji: '🤖', label: 'AI Strategies', desc: 'Smart growth & recommendations' },
+                  { emoji: '📊', label: 'Business Intelligence', desc: 'Market insights & analytics' },
                   { emoji: '📍', label: 'Resources Map', desc: 'Global partners & perks' },
                   { emoji: '🚀', label: 'Startup Journey', desc: 'Idea to scale guidance' },
                   { emoji: '👥', label: 'Mentorship', desc: 'Mentors & advisors' },
