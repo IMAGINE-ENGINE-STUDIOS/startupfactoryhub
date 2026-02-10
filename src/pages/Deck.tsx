@@ -1419,21 +1419,26 @@ export default function Deck() {
             <div className="grid grid-cols-4 md:grid-cols-6 gap-3 max-w-5xl w-full">
               {[
                 { name: "NASA", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/200px-NASA_logo.svg.png" },
-                { name: "GitHub", logo: "/github-logo.png" },
                 { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" },
-                { name: "MongoDB", logo: "/mongodb-logo.webp" },
+                { name: "HSBC Innovation Banking", logo: "/partners/hsbc-logo.png" },
                 { name: "Nasdaq", logo: "/nasdaq-logo.png" },
-                { name: "HubSpot", logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png" },
+                { name: "GitHub", logo: "/github-logo.png" },
+                { name: "TradingView", logo: "/partners/tradingview-logo.png" },
+                { name: "MongoDB", logo: "/mongodb-logo.webp" },
+                { name: "NVIDIA Inception", logo: "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/logo-and-brand/02-nvidia-logo-color-grn-500x200-4c25-p.png" },
+                { name: "F6S", logo: "/partners/f6s-logo.png" },
+                { name: "Flippa", logo: "/partners/flippa-logo.png" },
+                { name: "IWG", logo: "/partners/iwg-logo.png" },
+                { name: "Regus", logo: "/partners/regus-logo.png" },
+                { name: "Advantary Capital", logo: "/partners/advantary-logo.jpg" },
                 { name: "Lovable", logo: "/partners/lovable-logo.png" },
                 { name: "Lehigh University", logo: "/lehigh-university-logo.png" },
+                { name: "HubSpot", logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png" },
                 { name: "Datadog", logo: "https://imgix.datadoghq.com/img/dd_logo_n_70x75.png" },
                 { name: "LivePlan", logo: "/partners/liveplan-logo.png" },
-                { name: "Flippa", logo: "/partners/flippa-logo.png" },
-                { name: "F6S", logo: "/partners/f6s-logo.png" },
                 { name: "Decahedron Ventures", logo: "/partners/decahedron-ventures-logo.jpg" },
                 { name: "Flusso Capital", logo: "/partners/flusso-capital-logo.png" },
                 { name: "UK Venture Partners", logo: "/partners/uk-venture-logo.jpg" },
-                { name: "Advantary Capital", logo: "/partners/advantary-logo.jpg" },
                 { name: "Ducere University", logo: "/partners/ducere-logo.png" },
                 { name: "HackerEarth", logo: "/partners/hackerearth-logo.png" },
                 { name: "Orlandopreneur", logo: "/partners/orlandopreneur-logo.png" },
@@ -1481,16 +1486,25 @@ export default function Deck() {
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-4xl">
               {[
-                { name: "Khalia Padilla", role: "Managing Partner & Founder", location: null, initials: "KP" },
-                { name: "Ricardo Font", role: "Managing Partner & Founder", location: null, initials: "RF" },
-                { name: "Steven Lidgreen", role: "Managing Partner", location: "SFH Tokyo", initials: "SL" },
-                { name: "Pablo Duenas", role: "Managing Partner", location: "SFH Chile", initials: "PD" },
-                { name: "Gary Jinks", role: "Strategic Advisor", location: null, initials: "GJ" },
-                { name: "Hiroaki Tanaka", role: "Managing Director", location: "SFH Tokyo", initials: "HT" },
+                { name: "Khalia Padilla", role: "Managing Partner & Founder", location: null, img: "/src/assets/team-khalia.jpg" },
+                { name: "Ricardo Font", role: "Managing Partner & Founder", location: null, img: "/src/assets/team-ricardo.jpg" },
+                { name: "Steven Lidgreen", role: "Managing Partner", location: "SFH Tokyo", img: "/src/assets/team-steven.png" },
+                { name: "Pablo Duenas", role: "Managing Partner", location: "SFH Chile", img: "/src/assets/team-pablo.jpg" },
+                { name: "Gary Jinks", role: "Strategic Advisor", location: null, img: "/src/assets/team-gary.png" },
+                { name: "Hiroaki Tanaka", role: "Managing Director", location: "SFH Tokyo", img: "/src/assets/team-hiro.png" },
               ].map((member, i) => (
                 <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-4 flex flex-col items-center text-center hover:border-teal-500/40 transition-colors print:bg-gray-50 print:border-gray-300">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-500/30 to-cyan-500/30 border-2 border-teal-500/40 flex items-center justify-center mb-3">
-                    <span className="text-lg font-bold text-teal-300">{member.initials}</span>
+                  <div className="w-16 h-16 rounded-full border-2 border-teal-500/40 overflow-hidden mb-3">
+                    <img 
+                      src={member.img} 
+                      alt={member.name}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.parentElement!.innerHTML = `<span class="flex items-center justify-center w-full h-full text-lg font-bold text-teal-300 bg-gradient-to-br from-teal-500/30 to-cyan-500/30">${member.name.split(' ').map(n => n[0]).join('')}</span>`;
+                      }}
+                    />
                   </div>
                   <h3 className="text-sm md:text-base font-bold text-white print:text-black">{member.name}</h3>
                   <p className="text-[10px] md:text-xs text-teal-400 font-medium mt-1">{member.role}</p>
