@@ -8,6 +8,7 @@ import moonEarthBg from '@/assets/moon-earth.jpg';
 import galaxyBg from '@/assets/galaxy-bg.webp';
 import blackHoleBg from '@/assets/black-hole-bg.jpg';
 import jupiterBg from '@/assets/jupiter-bg.jpg';
+import nebulaBg from '@/assets/nebula-bg.jpg';
 
 import mockupDashboard from '@/assets/mockup-dashboard.png';
 import mockupResources from '@/assets/mockup-resources.png';
@@ -792,8 +793,9 @@ export default function Deck() {
         {/* NEW SLIDE: The Product */}
         <SlideWrapper>
           <section className="absolute inset-0 flex items-center justify-center overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
-            {/* Dark geometric background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 print:hidden" />
+            {/* Background image */}
+            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${nebulaBg})` }} />
+            <div className="absolute inset-0 bg-slate-950/60 print:hidden" />
             <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
             <FloatingHexagons />
