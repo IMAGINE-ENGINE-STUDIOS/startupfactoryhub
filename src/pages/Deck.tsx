@@ -6,6 +6,7 @@ import rocketLaunchBg from '@/assets/rocket-launch-bg.jpg';
 import astronautBg from '@/assets/astronaut-bg.jpg';
 import moonEarthBg from '@/assets/moon-earth.jpg';
 import galaxyBg from '@/assets/galaxy-bg.webp';
+import blackHoleBg from '@/assets/black-hole-bg.jpg';
 
 import mockupDashboard from '@/assets/mockup-dashboard.png';
 import mockupResources from '@/assets/mockup-resources.png';
@@ -1522,7 +1523,10 @@ export default function Deck() {
 
         {/* SLIDE 10: Contact */}
         <SlideContainer className="print:break-after-avoid">
-          <div className="flex flex-col items-center text-center">
+          {/* Background image */}
+          <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${blackHoleBg})` }} />
+          <div className="absolute inset-0 bg-slate-950/60 print:hidden" />
+          <div className="flex flex-col items-center text-center relative z-10">
             <div className="flex items-center gap-4 mb-4">
               <IconBadge icon={Rocket} color="teal" />
               <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">Join Our Mission</h2>
