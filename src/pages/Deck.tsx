@@ -14,6 +14,10 @@ import mockupDashboard from '@/assets/mockup-dashboard.png';
 import mockupResources from '@/assets/mockup-resources.png';
 import mockupJourney from '@/assets/mockup-journey.png';
 import mockupMobile from '@/assets/mockup-mobile.png';
+import teamKhalia from '@/assets/team-khalia.jpg';
+import teamRicardo from '@/assets/team-ricardo.jpg';
+import teamSteven from '@/assets/team-steven.png';
+import teamGary from '@/assets/team-gary.png';
 
 // Enhanced Geometric Pattern Components (matching marketing banners)
 const TechGrid = () => <div className="absolute inset-0 overflow-hidden pointer-events-none print:hidden">
@@ -1501,14 +1505,12 @@ export default function Deck() {
               A global team of innovators and industry leaders dedicated to empowering the next generation of deep tech startups.
             </p>
             
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-4xl">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl">
               {[
-                { name: "Khalia Padilla", role: "Managing Partner & Founder", location: null, img: "/src/assets/team-khalia.jpg" },
-                { name: "Ricardo Font", role: "Managing Partner & Founder", location: null, img: "/src/assets/team-ricardo.jpg" },
-                { name: "Steven Lidgreen", role: "Managing Partner", location: "SFH Tokyo", img: "/src/assets/team-steven.png" },
-                { name: "Pablo Duenas", role: "Managing Partner", location: "SFH Chile", img: "/src/assets/team-pablo.jpg" },
-                { name: "Gary Jinks", role: "Strategic Advisor", location: null, img: "/src/assets/team-gary.png" },
-                { name: "Hiroaki Tanaka", role: "Managing Director", location: "SFH Tokyo", img: "/src/assets/team-hiro.png" },
+                { name: "Khalia Padilla", role: "Managing Partner & Founder", location: null, img: teamKhalia },
+                { name: "Ricardo Font", role: "Managing Partner & Founder", location: null, img: teamRicardo },
+                { name: "Steven Lidgreen", role: "Managing Partner", location: "SFH Tokyo", img: teamSteven },
+                { name: "Gary Jinks", role: "Strategic Advisor", location: null, img: teamGary },
               ].map((member, i) => (
                 <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-4 flex flex-col items-center text-center hover:border-teal-500/40 transition-colors print:bg-gray-50 print:border-gray-300">
                   <div className="w-16 h-16 rounded-full border-2 border-teal-500/40 overflow-hidden mb-3">
