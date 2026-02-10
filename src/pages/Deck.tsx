@@ -7,6 +7,7 @@ import astronautBg from '@/assets/astronaut-bg.jpg';
 import moonEarthBg from '@/assets/moon-earth.jpg';
 import galaxyBg from '@/assets/galaxy-bg.webp';
 import blackHoleBg from '@/assets/black-hole-bg.jpg';
+import jupiterBg from '@/assets/jupiter-bg.jpg';
 
 import mockupDashboard from '@/assets/mockup-dashboard.png';
 import mockupResources from '@/assets/mockup-resources.png';
@@ -1406,7 +1407,14 @@ export default function Deck() {
           </div>
         </SlideContainer>
         {/* SLIDE 8: Our Partners */}
-        <SlideContainer>
+        <SlideWrapper>
+          <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${jupiterBg})` }} />
+            <div className="absolute inset-0 bg-slate-950/70 print:hidden" />
+            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300 z-[1]" />
+            <TechGrid />
+            <CornerAccents />
+            <div className="relative z-10 w-full max-w-[90%] mx-auto">
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-4 mb-3">
               <IconBadge icon={Handshake} color="teal" />
@@ -1472,7 +1480,9 @@ export default function Deck() {
               ))}
             </div>
           </div>
-        </SlideContainer>
+          </div>
+          </section>
+        </SlideWrapper>
 
         {/* SLIDE 9: Team */}
         <SlideContainer>
