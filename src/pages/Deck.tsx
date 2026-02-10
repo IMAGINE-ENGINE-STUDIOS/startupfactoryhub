@@ -1522,11 +1522,16 @@ export default function Deck() {
         </SlideContainer>
 
         {/* SLIDE 10: Contact */}
-        <SlideContainer className="print:break-after-avoid">
-          {/* Background image */}
-          <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${blackHoleBg})` }} />
-          <div className="absolute inset-0 bg-slate-950/60 print:hidden" />
-          <div className="flex flex-col items-center text-center relative z-10">
+        <SlideWrapper>
+          <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-avoid print:bg-white">
+            {/* Full background image */}
+            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${blackHoleBg})` }} />
+            <div className="absolute inset-0 bg-slate-950/50 print:hidden" />
+            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300 z-[1]" />
+            <TechGrid />
+            <CornerAccents />
+            <div className="relative z-10 w-full max-w-[90%] mx-auto">
+          <div className="flex flex-col items-center text-center">
             <div className="flex items-center gap-4 mb-4">
               <IconBadge icon={Rocket} color="teal" />
               <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">Join Our Mission</h2>
@@ -1552,7 +1557,9 @@ export default function Deck() {
             
             <p className="text-sm text-slate-600 mt-8 print:text-gray-400">© 2025 Startup Factory Hub. All rights reserved.</p>
           </div>
-        </SlideContainer>
+            </div>
+          </section>
+        </SlideWrapper>
       </div>
     </div>;
 }
