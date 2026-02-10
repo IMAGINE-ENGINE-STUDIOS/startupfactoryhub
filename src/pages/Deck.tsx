@@ -6,7 +6,7 @@ import rocketLaunchBg from '@/assets/rocket-launch-bg.jpg';
 import astronautBg from '@/assets/astronaut-bg.jpg';
 import moonEarthBg from '@/assets/moon-earth.jpg';
 import galaxyBg from '@/assets/galaxy-bg.webp';
-import globalFootprintBg from '@/assets/global-footprint-bg.avif';
+
 import mockupDashboard from '@/assets/mockup-dashboard.png';
 import mockupResources from '@/assets/mockup-resources.png';
 import mockupJourney from '@/assets/mockup-journey.png';
@@ -781,113 +781,6 @@ export default function Deck() {
                   A comprehensive 3D global visualization tool to map resources across the world—coworking spaces, labs, accelerators, grants, and partners in one interactive view.
                 </p>
               </TechCard>
-            </div>
-          </div>
-            </div>
-          </section>
-        </SlideWrapper>
-
-        {/* NEW SLIDE: Global Footprint & Hybrid Philosophy */}
-        <SlideWrapper>
-          <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
-            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${globalFootprintBg})` }} />
-            <div className="absolute inset-0 bg-slate-950/60 print:hidden" />
-            <div className="absolute inset-[2%] border-2 border-cyan-500/30 rounded-lg print:border-gray-300" />
-            <TechGrid />
-            <CornerAccents />
-            <div className="relative z-10 w-full max-w-[90%] mx-auto">
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-3 mb-2">
-              <IconBadge icon={Globe} color="cyan" />
-              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Global Footprint</h2>
-            </div>
-            <p className="text-base md:text-lg text-cyan-400 font-semibold text-center mb-1 print:text-cyan-700">Hybrid Digital-Physical Presence</p>
-            <p className="text-xs md:text-sm text-slate-400 text-center mb-6 max-w-3xl print:text-gray-600">
-              Unlike purely digital platforms, we combine software with physical hubs—creating real communities where founders work, meet, and scale together.
-            </p>
-            
-            {/* 4 Flagship Locations - Prominent */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl w-full mb-6">
-              {[
-                { city: "Orlando", country: "USA", flag: "🇺🇸", type: "HQ", color: "emerald" },
-                { city: "Santiago", country: "Chile", flag: "🇨🇱", type: "LATAM", color: "amber" },
-                { city: "Tokyo", country: "Japan", flag: "🇯🇵", type: "APAC", color: "rose" },
-                { city: "Sevilla", country: "Spain", flag: "🇪🇸", type: "EMEA", color: "cyan" },
-              ].map((location, i) => (
-                <div key={i} className={`relative bg-slate-900/80 border-2 rounded-xl p-4 backdrop-blur-sm text-center transition-all hover:scale-105 print:bg-gray-50 ${
-                  location.type === "HQ" 
-                    ? "border-emerald-500/60 ring-2 ring-emerald-500/20" 
-                    : `border-${location.color}-500/40 hover:border-${location.color}-500/60`
-                }`}>
-                  {location.type === "HQ" && (
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-emerald-500 rounded text-[8px] font-bold text-white">
-                      HEADQUARTERS
-                    </div>
-                  )}
-                  <span className="text-3xl mb-2 block">{location.flag}</span>
-                  <h4 className={`text-base font-bold text-${location.color}-400 print:text-${location.color}-700`}>{location.city}</h4>
-                  <p className="text-xs text-slate-500">{location.country}</p>
-                  <span className={`inline-block mt-2 px-2 py-0.5 text-[10px] font-medium bg-${location.color}-500/20 text-${location.color}-400 rounded`}>
-                    {location.type}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            {/* Hybrid Philosophy Section */}
-            <SectionDivider title="Our Philosophy" />
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl w-full mb-4">
-              <TechCard glowColor="teal" className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center">
-                    <Zap className="h-4 w-4 text-teal-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-teal-400">Continuous Execution</h3>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Not a 3-month program—a <span className="text-teal-400">permanent operating system</span> for your startup. We support founders before, during, and after acceleration phases.
-                </p>
-              </TechCard>
-
-              <TechCard glowColor="cyan" className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center">
-                    <Building2 className="h-4 w-4 text-cyan-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-cyan-400">Physical + Digital</h3>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Real workspaces in 4 cities across 3 continents. <span className="text-cyan-400">5,800+ partner locations</span> via IWG. Software that works anywhere, community that meets in person.
-                </p>
-              </TechCard>
-
-              <TechCard glowColor="purple" className="p-4">
-                <div className="flex items-center gap-2 mb-3">
-                  <div className="w-8 h-8 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center">
-                    <Network className="h-4 w-4 text-purple-400" />
-                  </div>
-                  <h3 className="font-semibold text-sm text-purple-400">Ecosystem Integration</h3>
-                </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Not isolated—<span className="text-purple-400">connected to accelerators, universities, corporates</span>, and investors globally. Your success network expands with us.
-                </p>
-              </TechCard>
-            </div>
-
-            {/* IWG Partnership Callout */}
-            <div className="bg-gradient-to-r from-cyan-500/10 via-teal-500/10 to-cyan-500/10 border border-cyan-500/30 rounded-lg px-6 py-3 max-w-4xl">
-              <div className="flex items-center justify-center gap-4 flex-wrap">
-                <div className="flex items-center gap-2">
-                  <MapPin className="h-4 w-4 text-cyan-400" />
-                  <span className="text-sm font-semibold text-cyan-400">Global Workspace Network:</span>
-                </div>
-                <span className="text-sm text-slate-300">
-                  <span className="text-white font-bold">5,800+</span> locations • 
-                  <span className="text-white font-bold"> 130</span> countries • 
-                  <span className="text-white font-bold"> IWG</span> partnership
-                </span>
-              </div>
             </div>
           </div>
             </div>
