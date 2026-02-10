@@ -18,6 +18,7 @@ export type ResourceType =
   | 'investor_network'
   | 'human_capital'
   | 'event'
+  | 'banking'
   | 'other';
 
 export type LocationType = 'physical' | 'online' | 'hybrid';
