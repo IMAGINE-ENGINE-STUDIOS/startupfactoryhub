@@ -935,9 +935,9 @@ export default function Deck() {
             <div className="absolute bottom-[32%] right-[32%] w-1.5 h-1.5 bg-cyan-500/40 shadow-[0_0_6px_rgba(6,182,212,0.4)] print:hidden" />
             <div className="absolute top-[48%] right-[16%] w-1.5 h-1.5 bg-emerald-500/40 shadow-[0_0_6px_rgba(16,185,129,0.4)] print:hidden" />
 
-            <div className="relative z-10 w-full h-full flex flex-col px-[4%] pt-[3%] pb-[2%]">
-              {/* Centered Title - matching other slides */}
-              <div className="flex flex-col items-center mb-3">
+            <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-[4%] py-[3%]">
+              {/* Centered Title */}
+              <div className="flex flex-col items-center mb-4">
                 <div className="flex items-center gap-3 mb-1">
                   <IconBadge icon={Cpu} color="emerald" />
                   <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">The Product</h2>
@@ -945,113 +945,72 @@ export default function Deck() {
                 <p className="text-sm text-emerald-400 font-semibold">All-in-One Startup Operating System</p>
               </div>
 
-              {/* Main content: Left description + Right mockups */}
-              <div className="flex flex-1 min-h-0 gap-3">
+              {/* Main layout: big screen center + floating bubbles */}
+              <div className="relative flex-1 w-full min-h-0">
                 
-                {/* Left side - Description */}
-                <div className="w-[22%] flex flex-col justify-center gap-2.5">
-                  <p className="text-[10px] text-slate-300 leading-relaxed">
-                    Startup Factory Hub unifies every tool a startup needs into a single, AI-powered platform — from founding to funding.
-                  </p>
-                  <div className="space-y-1.5">
-                    {[
-                      { emoji: '🤖', label: 'AI-Powered Dashboard', desc: 'Smart insights, analytics & 3D globe' },
-                      { emoji: '📍', label: 'Global Resources Map', desc: 'Partners, perks & coworking worldwide' },
-                      { emoji: '🚀', label: 'Startup Journey', desc: 'Guided checklists from idea to scale' },
-                      { emoji: '👥', label: 'Mentorship Network', desc: 'Connect with mentors & advisors' },
-                      { emoji: '💰', label: 'Investor Matching', desc: 'Pitch, connect & raise capital' },
-                      { emoji: '📱', label: 'Mobile Optimized', desc: 'Full experience on any device' },
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-start gap-1.5">
-                        <span className="text-[9px] mt-0.5">{item.emoji}</span>
-                        <div>
-                          <div className="text-[8px] font-semibold text-emerald-400">{item.label}</div>
-                          <div className="text-[7px] text-slate-400">{item.desc}</div>
-                        </div>
-                      </div>
-                    ))}
+                {/* Central monitor - large */}
+                <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2" style={{ width: '58%', zIndex: 4 }}>
+                  <div className="rounded-xl overflow-hidden bg-black p-[4px] shadow-[0_25px_80px_rgba(0,0,0,0.5),0_0_40px_rgba(16,185,129,0.25)]">
+                    <div className="bg-black flex justify-center py-[3px]">
+                      <div className="w-2 h-2 rounded-full bg-slate-700" />
+                    </div>
+                    <div className="bg-white rounded-sm overflow-hidden">
+                      <img src={mockupDashboard} alt="Platform" className="w-full h-auto block" />
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <div className="w-[5%] h-6 bg-gradient-to-b from-slate-500 to-slate-600" />
+                    <div className="w-[18%] h-[3px] bg-slate-500 rounded-full" />
                   </div>
                 </div>
 
-                {/* Right side - Mockup scene */}
-                <div className="flex-1 relative" style={{ perspective: '2000px' }}>
-
-                  {/* Floating page 1 - upper left */}
-                  <div 
-                    className="absolute bg-white rounded overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.3),0_0_20px_rgba(6,182,212,0.2)]"
-                    style={{ 
-                      width: '34%', aspectRatio: '16/10',
-                      left: '0%', top: '0%',
-                      transform: 'rotateY(8deg) rotateZ(-2deg)',
-                      zIndex: 1
-                    }}
-                  >
-                    <img src={mockupDashboard} alt="Dashboard" className="w-full h-full object-cover object-top" />
-                  </div>
-
-                  {/* Floating page 2 */}
-                  <div 
-                    className="absolute bg-white rounded overflow-hidden shadow-[0_10px_45px_rgba(0,0,0,0.3),0_0_20px_rgba(6,182,212,0.2)]"
-                    style={{ 
-                      width: '36%', aspectRatio: '16/10',
-                      left: '12%', top: '-5%',
-                      transform: 'rotateY(4deg) rotateZ(-1deg)',
-                      zIndex: 2
-                    }}
-                  >
-                    <img src={mockupResources} alt="Resources" className="w-full h-full object-cover object-top" />
-                  </div>
-
-                  {/* Floating page 3 */}
-                  <div 
-                    className="absolute bg-white rounded overflow-hidden shadow-[0_12px_50px_rgba(0,0,0,0.3),0_0_20px_rgba(6,182,212,0.2)]"
-                    style={{ 
-                      width: '34%', aspectRatio: '16/10',
-                      left: '28%', top: '8%',
-                      transform: 'rotateY(-2deg) rotateZ(1deg)',
-                      zIndex: 3
-                    }}
-                  >
-                    <img src={mockupJourney} alt="Journey" className="w-full h-full object-cover object-top" />
-                  </div>
-
-                  {/* Main monitor - right */}
-                  <div className="absolute" style={{ right: '2%', bottom: '5%', width: '55%', zIndex: 4 }}>
-                    <div className="rounded-lg overflow-hidden bg-black p-[3px] shadow-[0_20px_70px_rgba(0,0,0,0.4),0_0_30px_rgba(16,185,129,0.3)]">
-                      <div className="bg-black flex justify-center py-[2px]">
-                        <div className="w-1.5 h-1.5 rounded-full bg-slate-700" />
-                      </div>
-                      <div className="bg-white rounded-sm overflow-hidden">
-                        <img src={mockupDashboard} alt="Platform" className="w-full h-auto block" />
-                      </div>
+                {/* Phone mockup - bottom right overlapping */}
+                <div className="absolute" style={{ right: '12%', bottom: '4%', width: '13%', zIndex: 5 }}>
+                  <div className="rounded-[12px] overflow-hidden bg-black p-[2px] shadow-[0_15px_50px_rgba(0,0,0,0.4),0_0_25px_rgba(16,185,129,0.25)]">
+                    <div className="bg-black flex justify-center pt-[3px] pb-[1px] rounded-t-[10px]">
+                      <div className="w-6 h-1 bg-slate-800 rounded-full" />
                     </div>
-                    <div className="flex flex-col items-center">
-                      <div className="w-[6%] h-5 bg-gradient-to-b from-slate-500 to-slate-600" />
-                      <div className="w-[22%] h-[3px] bg-slate-500 rounded-full" />
+                    <div className="bg-white overflow-hidden">
+                      <img src={mockupMobile} alt="Mobile App" className="w-full h-auto block" />
                     </div>
-                  </div>
-
-                  {/* Phone mockup - bottom right, overlapping monitor */}
-                  <div 
-                    className="absolute"
-                    style={{ right: '-2%', bottom: '3%', width: '16%', zIndex: 5 }}
-                  >
-                    <div className="rounded-[12px] overflow-hidden bg-black p-[2px] shadow-[0_15px_50px_rgba(0,0,0,0.4),0_0_25px_rgba(16,185,129,0.25)]">
-                      <div className="bg-black flex justify-center pt-[3px] pb-[1px] rounded-t-[10px]">
-                        <div className="w-6 h-1 bg-slate-800 rounded-full" />
-                      </div>
-                      <div className="bg-white overflow-hidden">
-                        <img src={mockupMobile} alt="Mobile App" className="w-full h-auto block" />
-                      </div>
-                      <div className="bg-black flex justify-center py-[2px]">
-                        <div className="w-4 h-0.5 bg-slate-700 rounded-full" />
-                      </div>
+                    <div className="bg-black flex justify-center py-[2px]">
+                      <div className="w-4 h-0.5 bg-slate-700 rounded-full" />
                     </div>
                   </div>
                 </div>
+
+                {/* Floating rectangular bubble cards */}
+                {[
+                  { emoji: '🤖', label: 'AI Dashboard', desc: 'Smart insights & analytics', top: '4%', left: '2%', rotate: '-3deg' },
+                  { emoji: '📍', label: 'Resources Map', desc: 'Global partners & perks', top: '2%', right: '3%', left: 'auto', rotate: '2deg' },
+                  { emoji: '🚀', label: 'Startup Journey', desc: 'Idea to scale guidance', top: '38%', left: '1%', rotate: '-2deg' },
+                  { emoji: '👥', label: 'Mentorship', desc: 'Mentors & advisors network', top: '40%', right: '1%', left: 'auto', rotate: '3deg' },
+                  { emoji: '💰', label: 'Investor Match', desc: 'Pitch & raise capital', bottom: '8%', left: '3%', top: 'auto', rotate: '-1deg' },
+                  { emoji: '📱', label: 'Mobile Ready', desc: 'Full experience anywhere', bottom: '28%', right: '2%', left: 'auto', top: 'auto', rotate: '2deg' },
+                ].map((item, i) => (
+                  <div 
+                    key={i}
+                    className="absolute backdrop-blur-md bg-slate-800/70 border border-emerald-500/30 rounded-xl px-3 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.3),0_0_15px_rgba(16,185,129,0.15)] hover:border-emerald-500/50 transition-all"
+                    style={{ 
+                      top: item.top, 
+                      left: item.left, 
+                      right: (item as any).right,
+                      bottom: (item as any).bottom,
+                      transform: `rotate(${item.rotate})`,
+                      zIndex: 6,
+                      maxWidth: '160px'
+                    }}
+                  >
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className="text-sm">{item.emoji}</span>
+                      <span className="text-[9px] font-bold text-emerald-400 whitespace-nowrap">{item.label}</span>
+                    </div>
+                    <p className="text-[7px] text-slate-300 leading-tight">{item.desc}</p>
+                  </div>
+                ))}
               </div>
 
-              {/* Bottom accent bar - glowing line */}
+              {/* Bottom accent bar */}
               <div className="mt-2 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent shadow-[0_0_15px_rgba(16,185,129,0.3)] print:hidden" />
             </div>
           </section>
