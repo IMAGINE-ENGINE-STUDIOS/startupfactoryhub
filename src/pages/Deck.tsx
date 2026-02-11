@@ -156,9 +156,7 @@ const CoverSlideContainer = ({
 }) => <SlideWrapper>
     <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
       {/* Background image */}
-      <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{
-      backgroundImage: `url(${rocketLaunchBg})`
-    }} />
+      <img src={rocketLaunchBg} alt="" className="absolute inset-0 w-full h-full object-cover print:hidden" crossOrigin="anonymous" />
       {/* Dark cinematic overlay */}
       <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
       {/* Scan lines effect */}
@@ -303,6 +301,16 @@ export default function Deck() {
         slideEl.style.top = '0';
         slideEl.style.marginLeft = '0';
         slideEl.style.marginTop = '0';
+
+        // Wait for images inside this slide to fully load
+        const imgs = slideEl.querySelectorAll('img');
+        await Promise.all(Array.from(imgs).map(img => {
+          if (img.complete) return Promise.resolve();
+          return new Promise<void>((resolve) => {
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+          });
+        }));
 
         const canvas = await html2canvas(slideEl, {
           width: 1920,
@@ -984,7 +992,7 @@ export default function Deck() {
         {/* SLIDE 6: Market Opportunity */}
         <SlideWrapper>
            <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] print:relative print:p-8 print:break-after-page print:bg-white">
-            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat" style={{ backgroundImage: `url(${issMarketBg})` }} />
+            <img src={issMarketBg} alt="" className="absolute inset-0 w-full h-full object-cover" crossOrigin="anonymous" />
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
             <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
