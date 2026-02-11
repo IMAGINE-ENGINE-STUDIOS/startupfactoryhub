@@ -10,6 +10,7 @@ const PARTNERS = [
   { name: "TradingView", logo: "https://www.tradingview.com/static/images/logo-tradingview.svg", tier: "Finance" },
   { name: "IWG", logo: "/partners/iwg-logo.png", tier: "Workspace" },
   { name: "Regus", logo: "/partners/regus-logo.png", tier: "Workspace" },
+  { name: "HSBC Innovation Banking", logo: "/partners/hsbc-logo.png", tier: "Banking" },
   { name: "Advantary Capital Partners", logo: "/partners/advantary-logo.jpg", tier: "Investment" },
   { name: "Lehigh University", logo: "/lehigh-university-logo.png", tier: "Academic" },
   { name: "HubSpot", logo: "https://www.hubspot.com/hubfs/HubSpot_Logos/HubSpot-Inversed-Favicon.png", tier: "Marketing" },
@@ -29,7 +30,6 @@ const PARTNERS = [
   { name: "Nouel Consult", logo: "/partners/nouel-logo.png", tier: "Legal" },
   { name: "PitchPerfecter.AI", logo: "/partners/pitchperfecter-logo.png", tier: "Startup" },
   { name: "LOT Network", logo: "/partners/lotnetwork-logo.png", tier: "Legal" },
-  { name: "HSBC Innovation Banking", logo: "/partners/hsbc-logo.png", tier: "Banking" },
   { name: "NVIDIA Inception", logo: "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/logo-and-brand/02-nvidia-logo-color-grn-500x200-4c25-p.png", tier: "Technology" },
   { name: "WorkingAdvantage", logo: "/working-advantage-logo.png", tier: "Perks" },
 ];
