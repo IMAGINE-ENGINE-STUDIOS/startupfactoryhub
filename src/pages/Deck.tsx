@@ -10,7 +10,7 @@ import galaxyBg from '@/assets/galaxy-bg.webp';
 import blackHoleBg from '@/assets/black-hole-bg.jpg';
 import jupiterBg from '@/assets/jupiter-bg.jpg';
 import nebulaBg from '@/assets/nebula-bg.jpg';
-import issMarketBg from '@/assets/iss-market-bg.jpg';
+import issMarketBg from '@/assets/hubble-star-bg.jpg';
 import artemisTeamBg from '@/assets/artemis-team-bg.jpg';
 import moonTeamBg from '@/assets/moon-team-bg.jpg';
 
@@ -1047,7 +1047,7 @@ export default function Deck() {
         <SlideWrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] print:relative print:p-8 print:break-after-page print:bg-white">
             <img src={issMarketBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/60" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
             <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
             <FloatingHexagons />
