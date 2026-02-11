@@ -916,6 +916,7 @@ export default function Deck() {
                 { icon: Users, label: 'Mentorship', color: 'purple', top: '40%', right: '1%' },
                 { icon: Diamond, label: 'Investor Match', color: 'amber', bottom: '18%', right: '3%' },
                 { icon: Smartphone, label: 'Mobile Ready', color: 'cyan', bottom: '6%', left: '38%' },
+                { icon: Building2, label: 'Hybrid', color: 'rose', bottom: '6%', right: '35%' },
               ].map((item, i) => {
                 const posStyle: React.CSSProperties = { zIndex: 6 };
                 if (item.top) posStyle.top = item.top;
