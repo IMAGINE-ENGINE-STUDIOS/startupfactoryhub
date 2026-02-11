@@ -983,17 +983,17 @@ export default function Deck() {
 
         {/* SLIDE 5: Ecosystem Overview - Consolidated Users + Key Value */}
         <SlideContainer>
-          <div className="flex flex-col items-center w-full">
-            <div className="flex items-center gap-3 mb-2">
+          <div className="flex flex-col items-center justify-center w-full h-full">
+            <div className="flex items-center gap-4 mb-3">
               <IconBadge icon={Users} color="teal" />
-              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Ecosystem Overview</h2>
+              <h2 className="text-4xl font-bold text-white print:text-black">Ecosystem Overview</h2>
             </div>
-            <p className="text-base text-slate-400 text-center mb-5 max-w-3xl print:text-gray-600">
+            <p className="text-lg text-slate-400 text-center mb-4 max-w-4xl print:text-gray-600">
               A unified platform serving 8 stakeholder types with role-specific dashboards and AI-powered workflow automation.
             </p>
             
             {/* Compact User Grid - 8 columns */}
-            <div className="grid grid-cols-4 md:grid-cols-8 gap-2 max-w-5xl w-full mb-5">
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-3 w-full mb-6">
               {[
                 { icon: Rocket, label: "Startups", color: "emerald" },
                 { icon: Diamond, label: "Investors", color: "purple" },
@@ -1004,26 +1004,27 @@ export default function Deck() {
                 { icon: Handshake, label: "Corporates", color: "indigo" },
                 { icon: Network, label: "Admins", color: "slate" },
               ].map((user, i) => (
-                <div key={i} className={`bg-slate-900/60 border border-${user.color}-500/30 rounded-lg p-2 text-center hover:border-${user.color}-500/60 transition-all print:bg-gray-50`}>
-                  <div className={`w-8 h-8 rounded-lg bg-${user.color}-500/20 flex items-center justify-center mx-auto mb-1`}>
-                    <user.icon className={`h-4 w-4 text-${user.color}-400`} />
+                <div key={i} className={`bg-slate-900/60 border border-${user.color}-500/30 rounded-xl p-3 text-center hover:border-${user.color}-500/60 transition-all print:bg-gray-50`}>
+                  <div className={`w-10 h-10 rounded-lg bg-${user.color}-500/20 flex items-center justify-center mx-auto mb-1.5`}>
+                    <user.icon className={`h-5 w-5 text-${user.color}-400`} />
                   </div>
-                  <span className={`text-[9px] font-medium text-${user.color}-400`}>{user.label}</span>
+                  <span className={`text-xs font-semibold text-${user.color}-400`}>{user.label}</span>
                 </div>
               ))}
             </div>
 
             <SectionDivider title="Startup Journey Roadmap" />
             
-            {/* Dynamic Roadmap Timeline */}
-            <div className="relative w-full max-w-6xl mt-4">
+            {/* Dynamic Roadmap Timeline - Full Width */}
+            <div className="relative w-full mt-2">
               {/* Glowing connection line */}
-              <div className="absolute top-[52px] left-[8%] right-[8%] h-[3px] z-0">
-                <div className="w-full h-full bg-gradient-to-r from-amber-500/40 via-teal-500/60 to-rose-500/40 rounded-full" />
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 via-teal-500/30 to-rose-500/20 rounded-full blur-md" />
+              <div className="absolute top-[72px] left-[8%] right-[8%] h-[4px] z-0">
+                <div className="w-full h-full bg-gradient-to-r from-amber-500/50 via-teal-500/70 via-purple-500/60 to-rose-500/50 rounded-full" />
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/30 via-teal-500/40 via-purple-500/30 to-rose-500/30 rounded-full blur-lg" />
+                <div className="absolute inset-[-2px] bg-gradient-to-r from-amber-500/10 via-teal-500/15 to-rose-500/10 rounded-full blur-2xl" />
               </div>
 
-              <div className="grid grid-cols-6 gap-2 relative z-10">
+              <div className="grid grid-cols-6 gap-4 relative z-10">
                 {[
                   { icon: Lightbulb, label: "Idea", desc: "Validate concept & identify market need", color: "amber", step: "01" },
                   { icon: Search, label: "Research", desc: "Analyze market, competitors & segments", color: "cyan", step: "02" },
@@ -1034,21 +1035,21 @@ export default function Deck() {
                 ].map((stage, i) => (
                   <div key={i} className="flex flex-col items-center group relative">
                     {/* Step number badge */}
-                    <div className={`text-[8px] font-bold tracking-widest text-${stage.color}-400/70 mb-1 uppercase`}>Step {stage.step}</div>
+                    <div className={`text-xs font-bold tracking-widest text-${stage.color}-400/80 mb-2 uppercase`}>Step {stage.step}</div>
                     
                     {/* Glowing node circle */}
-                    <div className="relative mb-3">
-                      <div className={`absolute inset-[-6px] rounded-full bg-${stage.color}-500/20 blur-lg group-hover:bg-${stage.color}-500/40 transition-all duration-500`} />
-                      <div className={`relative w-14 h-14 rounded-full bg-gradient-to-br from-${stage.color}-500/30 to-${stage.color}-600/20 border-2 border-${stage.color}-500/50 flex items-center justify-center group-hover:border-${stage.color}-400 transition-all duration-500`}>
-                        <stage.icon className={`h-6 w-6 text-${stage.color}-400 group-hover:text-${stage.color}-300 transition-colors`} />
+                    <div className="relative mb-4">
+                      <div className={`absolute inset-[-10px] rounded-full bg-${stage.color}-500/20 blur-xl group-hover:bg-${stage.color}-500/40 transition-all duration-500`} />
+                      <div className={`relative w-20 h-20 rounded-full bg-gradient-to-br from-${stage.color}-500/30 to-${stage.color}-600/20 border-2 border-${stage.color}-500/50 flex items-center justify-center group-hover:border-${stage.color}-400 group-hover:scale-110 transition-all duration-500`}>
+                        <stage.icon className={`h-9 w-9 text-${stage.color}-400 group-hover:text-${stage.color}-300 transition-colors`} />
                       </div>
-                      <div className={`absolute inset-[-3px] rounded-full border border-${stage.color}-500/0 group-hover:border-${stage.color}-500/40 group-hover:scale-125 transition-all duration-700`} />
+                      <div className={`absolute inset-[-5px] rounded-full border border-${stage.color}-500/0 group-hover:border-${stage.color}-500/40 group-hover:scale-125 transition-all duration-700`} />
                     </div>
 
                     {/* Content card */}
-                    <div className={`bg-slate-900/70 border border-${stage.color}-500/20 rounded-lg p-2.5 text-center w-full group-hover:border-${stage.color}-500/50 group-hover:bg-slate-800/60 transition-all duration-500`}>
-                      <p className={`text-sm font-bold text-${stage.color}-400 mb-1`}>{stage.label}</p>
-                      <p className="text-[8px] text-slate-500 leading-relaxed">{stage.desc}</p>
+                    <div className={`bg-slate-900/70 border border-${stage.color}-500/20 rounded-xl p-4 text-center w-full group-hover:border-${stage.color}-500/50 group-hover:bg-slate-800/60 transition-all duration-500`}>
+                      <p className={`text-lg font-bold text-${stage.color}-400 mb-1.5`}>{stage.label}</p>
+                      <p className="text-xs text-slate-400 leading-relaxed">{stage.desc}</p>
                     </div>
                   </div>
                 ))}
