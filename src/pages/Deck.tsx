@@ -1013,33 +1013,27 @@ export default function Deck() {
               ))}
             </div>
 
-            <SectionDivider title="Core Value Drivers" />
+            <SectionDivider title="Startup Journey Process" />
             
-            {/* Key Value Props - What We Deliver */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 max-w-5xl w-full">
-              <TechCard glowColor="teal" className="p-3 text-center">
-                <div className="text-2xl font-bold text-teal-400 mb-1">24/7</div>
-                <p className="text-xs text-slate-400">AI-Powered Guidance</p>
-                <p className="text-[9px] text-slate-500 mt-1">Automated roadmaps & recommendations</p>
-              </TechCard>
-
-              <TechCard glowColor="cyan" className="p-3 text-center">
-                <div className="text-2xl font-bold text-cyan-400 mb-1">6</div>
-                <p className="text-xs text-slate-400">Physical Hub Cities</p>
-                <p className="text-[9px] text-slate-500 mt-1">Real workspaces & community events</p>
-              </TechCard>
-
-              <TechCard glowColor="purple" className="p-3 text-center">
-                <div className="text-2xl font-bold text-purple-400 mb-1">100+</div>
-                <p className="text-xs text-slate-400">Partner Network</p>
-                <p className="text-[9px] text-slate-500 mt-1">Investors, corporates & accelerators</p>
-              </TechCard>
-
-              <TechCard glowColor="emerald" className="p-3 text-center">
-                <div className="text-2xl font-bold text-emerald-400 mb-1">∞</div>
-                <p className="text-xs text-slate-400">Continuous Support</p>
-                <p className="text-[9px] text-slate-500 mt-1">Before, during & after acceleration</p>
-              </TechCard>
+            {/* Startup Journey Steps */}
+            <div className="grid grid-cols-3 md:grid-cols-6 gap-3 max-w-5xl w-full">
+              {[
+                { icon: Lightbulb, label: "Idea", desc: "Validate your concept & market fit", color: "amber", step: "01" },
+                { icon: Search, label: "Research", desc: "Deep dive into market & competitors", color: "cyan", step: "02" },
+                { icon: Cpu, label: "MVP", desc: "Build your minimum viable product", color: "teal", step: "03" },
+                { icon: Target, label: "Validation", desc: "Test with real users & iterate", color: "purple", step: "04" },
+                { icon: Rocket, label: "Launch", desc: "Go to market & acquire customers", color: "emerald", step: "05" },
+                { icon: TrendingUp, label: "Growth", desc: "Scale operations & raise funding", color: "rose", step: "06" },
+              ].map((stage, i) => (
+                <TechCard key={i} glowColor={stage.color as any} className="p-3 text-center relative">
+                  <div className={`text-[9px] font-bold text-${stage.color}-500/60 mb-1`}>STEP {stage.step}</div>
+                  <div className={`w-10 h-10 rounded-lg bg-${stage.color}-500/20 flex items-center justify-center mx-auto mb-2`}>
+                    <stage.icon className={`h-5 w-5 text-${stage.color}-400`} />
+                  </div>
+                  <p className={`text-sm font-bold text-${stage.color}-400 mb-1`}>{stage.label}</p>
+                  <p className="text-[9px] text-slate-500">{stage.desc}</p>
+                </TechCard>
+              ))}
             </div>
           </div>
         </SlideContainer>
