@@ -1631,15 +1631,15 @@ export default function Deck() {
               A global team of innovators and industry leaders dedicated to empowering the next generation of deep tech startups.
             </p>
             
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 w-full max-w-5xl">
               {[
                 { name: "Khalia Padilla", role: "Managing Partner & Founder", location: null, img: teamKhalia },
                 { name: "Ricardo Font", role: "Managing Partner & Founder", location: null, img: teamRicardo },
                 { name: "Steven Lidgreen", role: "Managing Partner", location: "SFH Tokyo", img: teamSteven },
                 { name: "Gary Jinks", role: "Strategic Advisor", location: null, img: teamGary },
               ].map((member, i) => (
-                <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-4 flex flex-col items-center text-center hover:border-teal-500/40 transition-colors print:bg-gray-50 print:border-gray-300">
-                  <div className="w-16 h-16 rounded-full border-2 border-teal-500/40 overflow-hidden mb-3">
+                <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-6 flex flex-col items-center text-center hover:border-teal-500/40 transition-colors print:bg-gray-50 print:border-gray-300">
+                  <div className="w-28 h-28 rounded-full border-2 border-teal-500/40 overflow-hidden mb-4">
                     <img 
                       src={member.img} 
                       alt={member.name}
@@ -1647,12 +1647,12 @@ export default function Deck() {
                       onError={(e) => {
                         const target = e.target as HTMLImageElement;
                         target.style.display = 'none';
-                        target.parentElement!.innerHTML = `<span class="flex items-center justify-center w-full h-full text-lg font-bold text-teal-300 bg-gradient-to-br from-teal-500/30 to-cyan-500/30">${member.name.split(' ').map(n => n[0]).join('')}</span>`;
+                        target.parentElement!.innerHTML = `<span class="flex items-center justify-center w-full h-full text-2xl font-bold text-teal-300 bg-gradient-to-br from-teal-500/30 to-cyan-500/30">${member.name.split(' ').map(n => n[0]).join('')}</span>`;
                       }}
                     />
                   </div>
-                  <h3 className="text-sm md:text-base font-bold text-white print:text-black">{member.name}</h3>
-                  <p className="text-[10px] md:text-xs text-teal-400 font-medium mt-1">{member.role}</p>
+                  <h3 className="text-base md:text-lg font-bold text-white print:text-black">{member.name}</h3>
+                  <p className="text-xs md:text-sm text-teal-400 font-medium mt-1">{member.role}</p>
                   {member.location && (
                     <div className="flex items-center gap-1 mt-2">
                       <MapPin className="h-3 w-3 text-cyan-400" />
