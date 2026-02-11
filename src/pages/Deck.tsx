@@ -12,6 +12,7 @@ import jupiterBg from '@/assets/jupiter-bg.jpg';
 import nebulaBg from '@/assets/nebula-bg.jpg';
 import issMarketBg from '@/assets/iss-market-bg.jpg';
 import artemisTeamBg from '@/assets/artemis-team-bg.jpg';
+import moonTeamBg from '@/assets/moon-team-bg.jpg';
 
 import mockupDashboard from '@/assets/mockup-dashboard.png';
 import mockupResources from '@/assets/mockup-resources.png';
@@ -1613,7 +1614,7 @@ export default function Deck() {
         {/* SLIDE 9: Team */}
         <SlideWrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] print:relative print:p-8 print:break-after-page print:bg-white">
-            <img src={artemisTeamBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <img src={moonTeamBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-black/65" />
             <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
