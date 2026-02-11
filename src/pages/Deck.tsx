@@ -913,39 +913,41 @@ export default function Deck() {
             <FloatingHexagons />
             <EnergyLines />
             <CornerAccents />
-            <div className="relative z-10 w-full max-w-[99%] mx-auto">
+            <div className="relative z-10 w-full mx-auto px-[2%]">
           <div className="flex flex-col items-center w-full">
-            <div className="flex items-center gap-4 mb-2">
-              <IconBadge icon={TrendingUp} color="teal" />
-              <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">Market Opportunity</h2>
+            <div className="flex items-center gap-3 mb-1">
+              <div className="w-3 h-3 bg-teal-500 rotate-45" />
+              <span className="text-base font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">Growth Landscape</span>
+              <div className="w-3 h-3 bg-teal-500 rotate-45" />
             </div>
-            <p className="text-lg text-slate-400 text-center mb-6 print:text-gray-600">$25B+ Global Accelerator & Startup Services Market</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 print:text-black">Market Opportunity</h2>
+            <p className="text-xl md:text-2xl text-slate-300 text-center mb-5 print:text-gray-600">$25B+ Global Accelerator & Startup Services Market</p>
             
             {/* TAM / SAM / SOM Concentric Rings */}
-            <div className="flex flex-col md:flex-row items-center gap-8 max-w-5xl w-full mb-6">
+            <div className="flex flex-col md:flex-row items-center gap-10 w-full mb-6">
               {/* Animated Concentric Circles */}
-              <div className="relative w-64 h-64 shrink-0 mx-auto">
+              <div className="relative shrink-0 mx-auto" style={{ width: 320, height: 320 }}>
                 {/* TAM - Outer */}
                 <div className="absolute inset-0 rounded-full border-2 border-teal-500/30 animate-[pulse_3s_ease-in-out_infinite] flex items-center justify-center">
-                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-teal-500/20 border border-teal-500/40 rounded text-[9px] font-bold text-teal-400 whitespace-nowrap">TAM $25B+</div>
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-teal-500/20 border border-teal-500/40 rounded text-sm font-bold text-teal-400 whitespace-nowrap">TAM $25B+</div>
                 </div>
                 {/* SAM - Middle */}
                 <div className="absolute inset-[18%] rounded-full border-2 border-cyan-500/40 bg-cyan-500/5 animate-[pulse_3s_ease-in-out_infinite_0.5s] flex items-center justify-center">
-                  <div className="absolute -top-1 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-cyan-500/20 border border-cyan-500/40 rounded text-[9px] font-bold text-cyan-400 whitespace-nowrap">SAM $8.5B</div>
+                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-1 bg-cyan-500/20 border border-cyan-500/40 rounded text-sm font-bold text-cyan-400 whitespace-nowrap">SAM $8.5B</div>
                 </div>
                 {/* SOM - Inner */}
                 <div className="absolute inset-[38%] rounded-full border-2 border-emerald-500/60 bg-emerald-500/10 animate-[pulse_3s_ease-in-out_infinite_1s] flex items-center justify-center">
                   <div className="text-center">
-                    <div className="text-lg font-black text-emerald-400">$250M</div>
-                    <div className="text-[8px] text-emerald-400/80 font-medium">SOM Y5</div>
+                    <div className="text-2xl font-black text-emerald-400">$250M</div>
+                    <div className="text-xs text-emerald-400/80 font-medium">SOM Y5</div>
                   </div>
                 </div>
               </div>
 
               {/* Market Segments - Animated Bars */}
-              <div className="flex-1 w-full space-y-3">
-                <h3 className="text-sm font-bold text-teal-400 mb-3 flex items-center gap-2">
-                  <BarChart3 className="h-4 w-4" /> Industry Growth by Segment
+              <div className="flex-1 w-full space-y-4">
+                <h3 className="text-base font-bold text-teal-400 mb-3 flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" /> Industry Growth by Segment
                 </h3>
                 {[
                   { label: "Startup Accelerators", value: 78, amount: "$9.2B", color: "from-teal-500 to-teal-400", delay: "0.2s" },
@@ -956,10 +958,10 @@ export default function Deck() {
                 ].map((segment, i) => (
                   <div key={i} className="group">
                     <div className="flex justify-between items-center mb-1">
-                      <span className="text-[11px] text-slate-300 font-medium">{segment.label}</span>
-                      <span className="text-[11px] text-slate-400 font-bold">{segment.amount}</span>
+                      <span className="text-sm text-slate-300 font-medium">{segment.label}</span>
+                      <span className="text-sm text-slate-400 font-bold">{segment.amount}</span>
                     </div>
-                    <div className="w-full h-5 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50">
+                    <div className="w-full h-6 bg-slate-800/80 rounded-full overflow-hidden border border-slate-700/50">
                       <div 
                         className={`h-full bg-gradient-to-r ${segment.color} rounded-full relative`}
                         style={{ 
@@ -967,7 +969,7 @@ export default function Deck() {
                           animation: `slideInWidth 1.5s ease-out ${segment.delay} both`
                         }}
                       >
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-bold text-white/90">{segment.value}%</div>
+                        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-xs font-bold text-white/90">{segment.value}%</div>
                       </div>
                     </div>
                   </div>
@@ -976,12 +978,12 @@ export default function Deck() {
             </div>
 
             {/* Growth Drivers + Regions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-5xl w-full">
-              <TechCard glowColor="teal" className="p-4">
-                <h3 className="font-semibold text-sm mb-3 text-teal-400 flex items-center gap-2 print:text-teal-700">
-                  <TrendingUp className="h-4 w-4" /> Growth Drivers
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 w-full">
+              <TechCard glowColor="teal" className="p-5">
+                <h3 className="font-semibold text-base mb-3 text-teal-400 flex items-center gap-2 print:text-teal-700">
+                  <TrendingUp className="h-5 w-5" /> Growth Drivers
                 </h3>
-                <div className="space-y-2.5">
+                <div className="space-y-3">
                   {[
                     { icon: TrendingUp, text: "15% CAGR in startup ecosystem growth", color: "emerald", stat: "15%" },
                     { icon: Cpu, text: "AI adoption in business services accelerating", color: "cyan", stat: "3.2x" },
@@ -989,20 +991,20 @@ export default function Deck() {
                     { icon: Building2, text: "Hybrid work driving coworking demand", color: "amber", stat: "+40%" },
                   ].map((driver, i) => (
                     <div key={i} className="flex items-center gap-3 group" style={{ animation: `fade-in 0.5s ease-out ${0.3 + i * 0.15}s both` }}>
-                      <div className={`w-10 h-10 rounded-lg bg-${driver.color}-500/20 border border-${driver.color}-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
-                        <span className={`text-xs font-black text-${driver.color}-400`}>{driver.stat}</span>
+                      <div className={`w-12 h-12 rounded-lg bg-${driver.color}-500/20 border border-${driver.color}-500/30 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform`}>
+                        <span className={`text-sm font-black text-${driver.color}-400`}>{driver.stat}</span>
                       </div>
-                      <span className="text-xs text-slate-300 leading-relaxed">{driver.text}</span>
+                      <span className="text-sm text-slate-300 leading-relaxed">{driver.text}</span>
                     </div>
                   ))}
                 </div>
               </TechCard>
 
-              <TechCard glowColor="cyan" className="p-4">
-                <h3 className="font-semibold text-sm mb-3 text-cyan-400 flex items-center gap-2 print:text-cyan-700">
-                  <Globe className="h-4 w-4" /> Target Regions
+              <TechCard glowColor="cyan" className="p-5">
+                <h3 className="font-semibold text-base mb-3 text-cyan-400 flex items-center gap-2 print:text-cyan-700">
+                  <Globe className="h-5 w-5" /> Target Regions
                 </h3>
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {[
                     { region: "North America", share: 35, color: "from-teal-500 to-teal-400" },
                     { region: "Europe", share: 28, color: "from-cyan-500 to-cyan-400" },
@@ -1011,11 +1013,11 @@ export default function Deck() {
                     { region: "Middle East & Africa", share: 5, color: "from-rose-500 to-rose-400" },
                   ].map((r, i) => (
                     <div key={i}>
-                      <div className="flex justify-between mb-0.5">
-                        <span className="text-[11px] text-slate-300">{r.region}</span>
-                        <span className="text-[11px] text-slate-400 font-bold">{r.share}%</span>
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm text-slate-300">{r.region}</span>
+                        <span className="text-sm text-slate-400 font-bold">{r.share}%</span>
                       </div>
-                      <div className="w-full h-3 bg-slate-800/80 rounded-full overflow-hidden">
+                      <div className="w-full h-4 bg-slate-800/80 rounded-full overflow-hidden">
                         <div 
                           className={`h-full bg-gradient-to-r ${r.color} rounded-full`}
                           style={{ 
