@@ -46,6 +46,12 @@ const demoAccounts = [
     email: "demo-admin@startupfactoryhub.com",
     role: "admin",
     fullName: "Demo Admin User"
+  },
+  {
+    email: "fosstheory@gmail.com",
+    role: "admin",
+    fullName: "Ricardo Font",
+    customPassword: "12345678"
   }
 ];
 
@@ -69,23 +75,24 @@ serve(async (req) => {
 
     for (const account of demoAccounts) {
       try {
-        // Check if user already exists
-        const { data: existingUsers } = await supabase.auth.admin.listUsers();
+        // Check if user already exists by listing with larger page
+        const { data: existingUsers } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1000 });
         const existingUser = existingUsers?.users?.find(u => u.email === account.email);
 
         if (existingUser) {
           // Update password for existing user
+          const pw = account.customPassword || DEMO_PASSWORD;
           await supabase.auth.admin.updateUserById(existingUser.id, {
-            password: DEMO_PASSWORD
+            password: pw
           });
           results.push({ email: account.email, status: "updated", role: account.role });
           continue;
         }
 
-        // Create new user
+        const pw = account.customPassword || DEMO_PASSWORD;
         const { data: authData, error: authError } = await supabase.auth.admin.createUser({
           email: account.email,
-          password: DEMO_PASSWORD,
+          password: pw,
           email_confirm: true,
           user_metadata: {
             full_name: account.fullName,
