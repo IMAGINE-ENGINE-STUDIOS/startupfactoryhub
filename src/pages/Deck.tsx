@@ -727,7 +727,7 @@ export default function Deck() {
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
             {/* Galaxy background */}
             <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${galaxyBg})` }} />
-            <div className="absolute inset-0 bg-slate-950/70 print:hidden" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
             {/* Border frame */}
             <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
@@ -834,7 +834,7 @@ export default function Deck() {
           <section className="absolute inset-0 flex items-center justify-center overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
             {/* Background image */}
             <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${nebulaBg})` }} />
-            <div className="absolute inset-0 bg-slate-950/60 print:hidden" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
             <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
             <FloatingHexagons />
@@ -1615,7 +1615,7 @@ export default function Deck() {
         <SlideWrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] print:relative print:p-8 print:break-after-page print:bg-white">
             <img src={moonTeamBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-black/65" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
             <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
             <FloatingHexagons />
@@ -1672,7 +1672,7 @@ export default function Deck() {
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-avoid print:bg-white">
             {/* Full background image */}
             <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${rocketLaunchBg})` }} />
-            <div className="absolute inset-0 bg-slate-950/50 print:hidden" />
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
             <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300 z-[1]" />
             <TechGrid />
             <FloatingHexagons />
