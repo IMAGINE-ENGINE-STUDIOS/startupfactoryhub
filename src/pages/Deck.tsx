@@ -12,6 +12,7 @@ import nebulaBg from '@/assets/nebula-bg.jpg';
 
 import mockupDashboard from '@/assets/mockup-dashboard.png';
 import mockupResources from '@/assets/mockup-resources.png';
+import mockupHubs from '@/assets/mockup-hubs.png';
 import mockupJourney from '@/assets/mockup-journey.png';
 import mockupMobile from '@/assets/mockup-mobile.png';
 import teamKhalia from '@/assets/team-khalia.jpg';
@@ -866,13 +867,13 @@ export default function Deck() {
                 {/* Floating screen - mid left */}
                 <div className="absolute bg-white rounded overflow-hidden shadow-[0_10px_45px_rgba(0,0,0,0.3),0_0_15px_rgba(16,185,129,0.15)]"
                   style={{ width: '22%', aspectRatio: '16/10', left: '5%', top: '40%', transform: 'rotateY(8deg) rotateZ(-1deg)', zIndex: 1 }}>
-                  <img src={mockupJourney} alt="Journey" className="w-full h-full object-cover object-center" />
+                  <img src={mockupHubs} alt="Hubs Map" className="w-full h-full object-cover object-center" />
                 </div>
 
                 {/* Floating screen - mid right */}
                 <div className="absolute bg-white rounded overflow-hidden shadow-[0_10px_45px_rgba(0,0,0,0.3),0_0_15px_rgba(16,185,129,0.15)]"
                   style={{ width: '24%', aspectRatio: '16/10', right: '4%', top: '38%', transform: 'rotateY(-6deg) rotateZ(1deg)', zIndex: 1 }}>
-                  <img src={mockupResources} alt="Resources" className="w-full h-full object-cover object-center" />
+                  <img src={mockupHubs} alt="Hubs" className="w-full h-full object-cover object-top" />
                 </div>
 
                 {/* Central monitor - large, dominant */}
@@ -909,14 +910,14 @@ export default function Deck() {
 
               {/* Feature bubbles distributed around the slide */}
               {[
-                { icon: Cpu, label: 'AI Strategies', color: 'emerald', top: '8%', left: '4%' },
-                { icon: BarChart3, label: 'Business Intelligence', color: 'cyan', top: '8%', right: '4%' },
-                { icon: MapPin, label: 'Resources Map', color: 'teal', top: '40%', left: '1%' },
-                { icon: Rocket, label: 'Startup Journey', color: 'emerald', bottom: '18%', left: '3%' },
-                { icon: Users, label: 'Mentorship', color: 'purple', top: '40%', right: '1%' },
-                { icon: Diamond, label: 'Investor Match', color: 'amber', bottom: '18%', right: '3%' },
-                { icon: Smartphone, label: 'Mobile Ready', color: 'cyan', bottom: '6%', left: '38%' },
-                { icon: Building2, label: 'Hybrid', color: 'rose', bottom: '6%', right: '35%' },
+                { icon: Cpu, label: 'AI Strategies', desc: 'Smart growth recommendations', color: 'emerald', top: '8%', left: '4%' },
+                { icon: BarChart3, label: 'Business Intelligence', desc: 'Market insights & analytics', color: 'cyan', top: '8%', right: '4%' },
+                { icon: MapPin, label: 'Resources Map', desc: 'Global partners & perks', color: 'teal', top: '40%', left: '1%' },
+                { icon: Rocket, label: 'Startup Journey', desc: 'Idea to scale guidance', color: 'emerald', bottom: '18%', left: '3%' },
+                { icon: Users, label: 'Mentorship', desc: 'Mentors & advisors', color: 'purple', top: '40%', right: '1%' },
+                { icon: Diamond, label: 'Investor Match', desc: 'Pitch & raise capital', color: 'amber', bottom: '18%', right: '3%' },
+                { icon: Smartphone, label: 'Mobile Ready', desc: 'Any device, anywhere', color: 'cyan', bottom: '6%', left: '38%' },
+                { icon: Building2, label: 'Hybrid', desc: 'Digital + physical model', color: 'rose', bottom: '6%', right: '35%' },
               ].map((item, i) => {
                 const posStyle: React.CSSProperties = { zIndex: 6 };
                 if (item.top) posStyle.top = item.top;
@@ -933,7 +934,10 @@ export default function Deck() {
                       <div className={`w-9 h-9 rounded-lg bg-${item.color}-500/20 flex items-center justify-center`}>
                         <item.icon className={`h-5 w-5 text-${item.color}-400`} />
                       </div>
-                      <span className={`text-[11px] font-bold text-${item.color}-400 whitespace-nowrap`}>{item.label}</span>
+                      <div className="flex flex-col">
+                        <span className={`text-[11px] font-bold text-${item.color}-400 whitespace-nowrap`}>{item.label}</span>
+                        <span className="text-[8px] text-slate-400 leading-tight">{item.desc}</span>
+                      </div>
                     </div>
                   </div>
                 );
