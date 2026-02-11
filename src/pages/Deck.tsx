@@ -277,129 +277,72 @@ export default function Deck() {
       <div className="pt-16 print:pt-0">
         {/* SLIDE 1: Cover */}
         <CoverSlideContainer>
-          <div className="flex flex-col items-center text-center">
+          <div className="flex flex-col items-center text-center w-full">
             {/* Logo with glow */}
-            <div className="relative mb-6">
+            <div className="relative mb-5">
               <div className="absolute inset-0 bg-teal-500/30 blur-3xl rounded-full print:hidden" />
-              <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-28 h-28 md:w-36 md:h-36 object-contain" />
+              <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-36 h-36 md:w-44 md:h-44 object-contain" />
               {/* Orbit ring */}
               <div className="absolute inset-[-20px] border border-dashed border-teal-500/40 rounded-full animate-spin print:hidden" style={{
               animationDuration: '20s'
             }} />
             </div>
             
-            <h1 className="text-4xl md:text-5xl font-black text-white mb-3 tracking-tight print:text-black">
+            <h1 className="text-5xl md:text-6xl font-black text-white mb-3 tracking-tight print:text-black">
               Startup Factory Hub
             </h1>
             
-            <p className="text-xl md:text-2xl font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-4 print:text-teal-700">
+            <p className="text-2xl md:text-3xl font-semibold bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent mb-4 print:text-teal-700">
               The Online Hybrid Accelerator Platform Powered by A.I.
             </p>
             
             {/* Key Value Proposition */}
-            <div className="max-w-3xl mb-4">
-              <p className="text-base md:text-lg text-slate-300 leading-relaxed print:text-gray-700">
+            <div className="w-full mb-4">
+              <p className="text-lg md:text-xl text-slate-300 leading-relaxed print:text-gray-700">
                 A <span className="text-teal-400 font-semibold">hybrid digital-physical</span> execution platform with global locations, <span className="text-cyan-400 font-semibold">AI-driven workflows</span>, and human expertise—enabling founders to build consistently from <span className="text-teal-400 font-semibold">idea to scale</span>.
               </p>
             </div>
             
             {/* Global Presence Highlight */}
-            <div className="flex items-center gap-2 mb-4">
-              <Globe className="h-5 w-5 text-cyan-400" />
-              <span className="text-sm font-medium text-cyan-400">4 Global Hubs</span>
+            <div className="flex items-center gap-3 mb-4">
+              <Globe className="h-6 w-6 text-cyan-400" />
+              <span className="text-base font-medium text-cyan-400">4 Global Hubs</span>
               <span className="text-slate-500 mx-2">•</span>
-              <MapPin className="h-4 w-4 text-slate-400" />
-              <span className="text-xs text-slate-400">Orlando • Santiago • Tokyo • Sevilla</span>
+              <MapPin className="h-5 w-5 text-slate-400" />
+              <span className="text-sm text-slate-400">Orlando • Santiago • Tokyo • Sevilla</span>
             </div>
             
             <SectionDivider title="Built for Everyone" />
             
             {/* User Types Grid - 5 columns */}
-            <div className="grid grid-cols-5 gap-3 max-w-4xl w-full mb-6">
-              {/* Startups */}
-              <div className="relative group">
-                <div className="absolute inset-0 bg-teal-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
-                <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-teal-500/40 rounded-lg hover:border-teal-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{
-                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
-                }}>
-                    <div className="absolute w-12 h-12 bg-gradient-to-br from-teal-500/30 to-teal-600/30 border border-teal-500/60" style={{
+            <div className="grid grid-cols-5 gap-4 w-full mb-5">
+              {[
+                { icon: Rocket, label: "Startups", color: "teal" },
+                { icon: Users, label: "Mentors", color: "cyan" },
+                { icon: Diamond, label: "Investors", color: "purple" },
+                { icon: GraduationCap, label: "Students", color: "rose" },
+                { icon: Building2, label: "Accelerators", color: "emerald" },
+              ].map((item, i) => (
+                <div key={i} className="relative group">
+                  <div className={`absolute inset-0 bg-${item.color}-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden`} />
+                  <div className={`relative flex flex-col items-center p-5 bg-slate-900/80 border border-${item.color}-500/40 rounded-xl hover:border-${item.color}-500/80 transition-all print:bg-gray-50 print:border-gray-300`}>
+                    <div className="w-14 h-14 mb-3 flex items-center justify-center" style={{
                     clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
-                  }} />
-                    <Rocket className="h-5 w-5 text-teal-400 z-10 print:text-teal-700" />
+                  }}>
+                      <div className={`absolute w-14 h-14 bg-gradient-to-br from-${item.color}-500/30 to-${item.color}-600/30 border border-${item.color}-500/60`} style={{
+                      clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
+                    }} />
+                      <item.icon className={`h-6 w-6 text-${item.color}-400 z-10 print:text-${item.color}-700`} />
+                    </div>
+                    <span className={`text-base font-semibold text-slate-200 print:text-gray-700`}>{item.label}</span>
                   </div>
-                  <span className="text-sm font-medium text-slate-200 print:text-gray-700">Startups</span>
                 </div>
-              </div>
-
-              {/* Mentors */}
-              <div className="relative group">
-                <div className="absolute inset-0 bg-cyan-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
-                <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-cyan-500/40 rounded-lg hover:border-cyan-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{
-                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
-                }}>
-                    <div className="absolute w-12 h-12 bg-gradient-to-br from-cyan-500/30 to-cyan-600/30 border border-cyan-500/60" style={{
-                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
-                  }} />
-                    <Users className="h-5 w-5 text-cyan-400 z-10 print:text-cyan-700" />
-                  </div>
-                  <span className="text-sm font-medium text-slate-200 print:text-gray-700">Mentors</span>
-                </div>
-              </div>
-
-              {/* Investors */}
-              <div className="relative group">
-                <div className="absolute inset-0 bg-purple-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
-                <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-purple-500/40 rounded-lg hover:border-purple-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{
-                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
-                }}>
-                    <div className="absolute w-12 h-12 bg-gradient-to-br from-purple-500/30 to-purple-600/30 border border-purple-500/60" style={{
-                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
-                  }} />
-                    <Diamond className="h-5 w-5 text-purple-400 z-10 print:text-purple-700" />
-                  </div>
-                  <span className="text-sm font-medium text-slate-200 print:text-gray-700">Investors</span>
-                </div>
-              </div>
-
-              {/* Students */}
-              <div className="relative group">
-                <div className="absolute inset-0 bg-rose-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
-                <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-rose-500/40 rounded-lg hover:border-rose-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{
-                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
-                }}>
-                    <div className="absolute w-12 h-12 bg-gradient-to-br from-rose-500/30 to-rose-600/30 border border-rose-500/60" style={{
-                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
-                  }} />
-                    <GraduationCap className="h-5 w-5 text-rose-400 z-10 print:text-rose-700" />
-                  </div>
-                  <span className="text-sm font-medium text-slate-200 print:text-gray-700">Students</span>
-                </div>
-              </div>
-
-              {/* Accelerators */}
-              <div className="relative group">
-                <div className="absolute inset-0 bg-emerald-500/20 blur-xl rounded-lg opacity-0 group-hover:opacity-100 transition-opacity print:hidden" />
-                <div className="relative flex flex-col items-center p-4 bg-slate-900/80 border border-emerald-500/40 rounded-lg hover:border-emerald-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-12 h-12 mb-3 flex items-center justify-center" style={{
-                  clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
-                }}>
-                    <div className="absolute w-12 h-12 bg-gradient-to-br from-emerald-500/30 to-emerald-600/30 border border-emerald-500/60" style={{
-                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)'
-                  }} />
-                    <Building2 className="h-5 w-5 text-emerald-400 z-10 print:text-emerald-700" />
-                  </div>
-                  <span className="text-sm font-medium text-slate-200 print:text-gray-700">Accelerators</span>
-                </div>
-              </div>
+              ))}
             </div>
             
             {/* Differentiator - Hybrid Model */}
-            <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-teal-500/10 border border-teal-500/30 rounded-lg px-6 py-3 max-w-3xl print:bg-gray-50 print:border-gray-300">
-              <p className="text-sm text-slate-300 print:text-gray-700">
+            <div className="bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-teal-500/10 border border-teal-500/30 rounded-xl px-8 py-4 w-full print:bg-gray-50 print:border-gray-300">
+              <p className="text-base text-slate-300 print:text-gray-700">
                 <span className="text-teal-400 font-semibold print:text-teal-700">Hybrid A.I. Accelerator:</span> Not just software—an <span className="text-cyan-400">intelligent operating system</span> that merges AI automation, physical workspaces, and human expertise into one continuous execution engine across global locations.
               </p>
             </div>
