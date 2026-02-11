@@ -1045,46 +1045,48 @@ export default function Deck() {
 
         {/* SLIDE 7: Business Model & Revenue Streams */}
         <SlideContainer>
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-3">
-              <IconBadge icon={DollarSign} color="emerald" />
-              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Business Model & Revenue Streams</h2>
+          <div className="flex flex-col items-center w-full">
+            <div className="flex items-center gap-3 mb-1">
+              <div className="w-3 h-3 bg-emerald-500 rotate-45" />
+              <span className="text-base font-semibold text-emerald-400 tracking-[0.3em] uppercase print:text-gray-600">Monetization</span>
+              <div className="w-3 h-3 bg-emerald-500 rotate-45" />
             </div>
-            <p className="text-base text-slate-400 text-center mb-4 print:text-gray-600">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 print:text-black">Business Model & Revenue Streams</h2>
+            <p className="text-lg md:text-xl text-slate-300 text-center mb-5 print:text-gray-600">
               Freemium adoption drives monetization through tiered subscriptions + enterprise revenue streams
             </p>
             
             {/* Core Growth Model */}
-            <div className="grid grid-cols-3 gap-3 max-w-5xl w-full mb-4">
-              <TechCard glowColor="teal" className="p-3">
-                <h3 className="font-semibold text-xs text-teal-400 mb-2 flex items-center gap-1.5">
-                  <TrendingUp className="h-3.5 w-3.5" /> Growth Engine
+            <div className="grid grid-cols-3 gap-5 w-full mb-5">
+              <TechCard glowColor="teal" className="p-5">
+                <h3 className="font-semibold text-sm text-teal-400 mb-3 flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5" /> Growth Engine
                 </h3>
-                <div className="space-y-1.5 text-[10px] text-slate-300 print:text-gray-600">
+                <div className="space-y-2 text-sm text-slate-300 print:text-gray-600">
                   <p><span className="text-teal-400 font-medium">Start:</span> 100 startups Month 1</p>
                   <p><span className="text-teal-400 font-medium">Growth:</span> 10% MoM compound</p>
                   <p><span className="text-teal-400 font-medium">Model:</span> 40% Free / 60% Paid</p>
                 </div>
               </TechCard>
               
-              <TechCard glowColor="emerald" className="p-3">
-                <h3 className="font-semibold text-xs text-emerald-400 mb-2 flex items-center gap-1.5">
-                  <Award className="h-3.5 w-3.5" /> Subscription Tiers
+              <TechCard glowColor="emerald" className="p-5">
+                <h3 className="font-semibold text-sm text-emerald-400 mb-3 flex items-center gap-2">
+                  <Award className="h-5 w-5" /> Subscription Tiers
                 </h3>
-                <div className="space-y-1 text-[10px] text-slate-300 print:text-gray-600">
+                <div className="space-y-2 text-sm text-slate-300 print:text-gray-600">
                   <div className="flex justify-between"><span>Early Stage</span><span className="text-emerald-400">$300/mo</span></div>
                   <div className="flex justify-between"><span>Build Stage</span><span className="text-emerald-400">$500/mo</span></div>
                   <div className="flex justify-between"><span>Growth Stage</span><span className="text-emerald-400">$950/mo</span></div>
                   <div className="flex justify-between"><span>Scale Stage</span><span className="text-emerald-400">$1,500/mo</span></div>
-                  <div className="flex justify-between border-t border-emerald-500/30 pt-1 mt-1"><span className="font-medium">Blended ARPU</span><span className="text-emerald-400 font-bold">$750/mo</span></div>
+                  <div className="flex justify-between border-t border-emerald-500/30 pt-2 mt-2"><span className="font-medium">Blended ARPU</span><span className="text-emerald-400 font-bold">$750/mo</span></div>
                 </div>
               </TechCard>
               
-              <TechCard glowColor="cyan" className="p-3">
-                <h3 className="font-semibold text-xs text-cyan-400 mb-2 flex items-center gap-1.5">
-                  <BarChart3 className="h-3.5 w-3.5" /> 5-Year Startup Growth
+              <TechCard glowColor="cyan" className="p-5">
+                <h3 className="font-semibold text-sm text-cyan-400 mb-3 flex items-center gap-2">
+                  <BarChart3 className="h-5 w-5" /> 5-Year Startup Growth
                 </h3>
-                <div className="space-y-1 text-[10px] text-slate-300 print:text-gray-600">
+                <div className="space-y-2 text-sm text-slate-300 print:text-gray-600">
                   <div className="flex justify-between"><span>Year 1</span><span className="text-cyan-400">~190 startups</span></div>
                   <div className="flex justify-between"><span>Year 2</span><span className="text-cyan-400">~540 startups</span></div>
                   <div className="flex justify-between"><span>Year 3</span><span className="text-cyan-400">~1,550 startups</span></div>
@@ -1095,75 +1097,75 @@ export default function Deck() {
             </div>
             
             {/* Revenue Streams Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-w-5xl w-full">
-              <TechCard glowColor="purple" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-purple-500/20 flex items-center justify-center">
-                    <Building2 className="h-3.5 w-3.5 text-purple-400" />
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 w-full">
+              <TechCard glowColor="purple" className="p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                    <Building2 className="h-5 w-5 text-purple-400" />
                   </div>
-                  <h3 className="font-semibold text-xs text-purple-400">Corporate Partners</h3>
+                  <h3 className="font-semibold text-sm text-purple-400">Corporate Partners</h3>
                 </div>
-                <p className="text-[10px] text-slate-300 print:text-gray-600">
+                <p className="text-sm text-slate-300 print:text-gray-600">
                   <span className="text-purple-400 font-medium">$100K/year</span> per partner
                 </p>
               </TechCard>
               
-              <TechCard glowColor="amber" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-amber-500/20 flex items-center justify-center">
-                    <Target className="h-3.5 w-3.5 text-amber-400" />
+              <TechCard glowColor="amber" className="p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center">
+                    <Target className="h-5 w-5 text-amber-400" />
                   </div>
-                  <h3 className="font-semibold text-xs text-amber-400">Pilot Programs</h3>
+                  <h3 className="font-semibold text-sm text-amber-400">Pilot Programs</h3>
                 </div>
-                <p className="text-[10px] text-slate-300 print:text-gray-600">
+                <p className="text-sm text-slate-300 print:text-gray-600">
                   <span className="text-amber-400 font-medium">$200K</span> per pilot (2+/year)
                 </p>
               </TechCard>
               
-              <TechCard glowColor="rose" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-rose-500/20 flex items-center justify-center">
-                    <Globe className="h-3.5 w-3.5 text-rose-400" />
+              <TechCard glowColor="rose" className="p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-rose-500/20 flex items-center justify-center">
+                    <Globe className="h-5 w-5 text-rose-400" />
                   </div>
-                  <h3 className="font-semibold text-xs text-rose-400">New Chapters</h3>
+                  <h3 className="font-semibold text-sm text-rose-400">New Chapters</h3>
                 </div>
-                <p className="text-[10px] text-slate-300 print:text-gray-600">
+                <p className="text-sm text-slate-300 print:text-gray-600">
                   <span className="text-rose-400 font-medium">$200K</span> per chapter (2+/year)
                 </p>
               </TechCard>
               
-              <TechCard glowColor="teal" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-teal-500/20 flex items-center justify-center">
-                    <Award className="h-3.5 w-3.5 text-teal-400" />
+              <TechCard glowColor="teal" className="p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-teal-500/20 flex items-center justify-center">
+                    <Award className="h-5 w-5 text-teal-400" />
                   </div>
-                  <h3 className="font-semibold text-xs text-teal-400">Sponsorships</h3>
+                  <h3 className="font-semibold text-sm text-teal-400">Sponsorships</h3>
                 </div>
-                <p className="text-[10px] text-slate-300 print:text-gray-600">
+                <p className="text-sm text-slate-300 print:text-gray-600">
                   <span className="text-teal-400 font-medium">$5K-$50K</span> (avg $20K/sponsor)
                 </p>
               </TechCard>
               
-              <TechCard glowColor="cyan" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-cyan-500/20 flex items-center justify-center">
-                    <GraduationCap className="h-3.5 w-3.5 text-cyan-400" />
+              <TechCard glowColor="cyan" className="p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                    <GraduationCap className="h-5 w-5 text-cyan-400" />
                   </div>
-                  <h3 className="font-semibold text-xs text-cyan-400">Education Programs</h3>
+                  <h3 className="font-semibold text-sm text-cyan-400">Education Programs</h3>
                 </div>
-                <p className="text-[10px] text-slate-300 print:text-gray-600">
+                <p className="text-sm text-slate-300 print:text-gray-600">
                   <span className="text-cyan-400 font-medium">$10K avg</span> (100 students Y1, 2x/year)
                 </p>
               </TechCard>
               
-              <TechCard glowColor="emerald" className="p-3">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="w-6 h-6 rounded bg-emerald-500/20 flex items-center justify-center">
-                    <DollarSign className="h-3.5 w-3.5 text-emerald-400" />
+              <TechCard glowColor="emerald" className="p-5">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                    <DollarSign className="h-5 w-5 text-emerald-400" />
                   </div>
-                  <h3 className="font-semibold text-xs text-emerald-400">Revenue Formula</h3>
+                  <h3 className="font-semibold text-sm text-emerald-400">Revenue Formula</h3>
                 </div>
-                <p className="text-[9px] text-slate-300 print:text-gray-600">
+                <p className="text-sm text-slate-300 print:text-gray-600">
                   Subscriptions + Corporate + Pilots + Chapters + Sponsors + Education
                 </p>
               </TechCard>
@@ -1173,36 +1175,38 @@ export default function Deck() {
 
         {/* SLIDE 8: Financial Projections */}
         <SlideContainer>
-          <div className="flex flex-col items-center h-full">
-            <div className="flex items-center gap-3 mb-2">
-              <IconBadge icon={BarChart3} color="emerald" />
-              <h2 className="text-xl md:text-2xl font-bold text-white print:text-black">5-Year Financial Projections</h2>
+          <div className="flex flex-col items-center h-full w-full">
+            <div className="flex items-center gap-3 mb-1">
+              <div className="w-3 h-3 bg-emerald-500 rotate-45" />
+              <span className="text-base font-semibold text-emerald-400 tracking-[0.3em] uppercase print:text-gray-600">Projections</span>
+              <div className="w-3 h-3 bg-emerald-500 rotate-45" />
             </div>
-            <p className="text-xs text-slate-400 text-center mb-3 print:text-gray-600">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 print:text-black">5-Year Financial Projections</h2>
+            <p className="text-base md:text-lg text-slate-300 text-center mb-4 print:text-gray-600">
               Compounding growth delivers <span className="text-emerald-400 font-semibold">8.6x revenue increase</span> over 5 years
             </p>
             
             {/* Charts Row: Bar Chart + Funding Allocation */}
-            <div className="flex gap-3 max-w-5xl w-full mb-3">
+            <div className="flex gap-5 w-full mb-4">
               {/* Revenue Bar Chart */}
               <div className="flex-[3]">
-                <TechCard glowColor="emerald" className="p-4 h-full">
+                <TechCard glowColor="emerald" className="p-5 h-full">
                   <div className="flex">
                     {/* Y-axis */}
-                    <div className="flex flex-col justify-between h-44 pr-2 text-right shrink-0">
-                      <span className="text-[8px] text-slate-500">$50M</span>
-                      <span className="text-[8px] text-slate-500">$40M</span>
-                      <span className="text-[8px] text-slate-500">$30M</span>
-                      <span className="text-[8px] text-slate-500">$20M</span>
-                      <span className="text-[8px] text-slate-500">$10M</span>
-                      <span className="text-[8px] text-slate-500">$0</span>
+                    <div className="flex flex-col justify-between h-56 pr-3 text-right shrink-0">
+                      <span className="text-xs text-slate-500">$50M</span>
+                      <span className="text-xs text-slate-500">$40M</span>
+                      <span className="text-xs text-slate-500">$30M</span>
+                      <span className="text-xs text-slate-500">$20M</span>
+                      <span className="text-xs text-slate-500">$10M</span>
+                      <span className="text-xs text-slate-500">$0</span>
                     </div>
                     {/* Chart area */}
-                    <div className="flex-1 relative h-44 border-b border-l border-slate-700/40">
+                    <div className="flex-1 relative h-56 border-b border-l border-slate-700/40">
                       {[20, 40, 60, 80].map((p) => (
                         <div key={p} className="absolute w-full border-t border-dashed border-slate-700/20" style={{ bottom: `${p}%` }} />
                       ))}
-                      <div className="absolute inset-0 flex items-end px-3 gap-1.5">
+                      <div className="absolute inset-0 flex items-end px-4 gap-3">
                         {[
                           { revenue: "$5.34M", value: 5.34, color: "bg-gradient-to-t from-teal-700 to-teal-400" },
                           { revenue: "$9.65M", value: 9.65, color: "bg-gradient-to-t from-teal-600 to-cyan-400" },
@@ -1211,10 +1215,10 @@ export default function Deck() {
                           { revenue: "$46.00M", value: 46.00, color: "bg-gradient-to-t from-emerald-600 to-emerald-400" },
                         ].map((item, i) => (
                           <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
-                            <span className="text-[9px] font-bold text-emerald-400 mb-1 shrink-0">{item.revenue}</span>
+                            <span className="text-xs font-bold text-emerald-400 mb-1 shrink-0">{item.revenue}</span>
                             <div
-                              className={`w-10 md:w-14 ${item.color} rounded-t-md relative overflow-hidden shadow-lg shadow-emerald-500/10 shrink-0`}
-                              style={{ height: `${(item.value / 50) * 176}px` }}
+                              className={`w-full max-w-[60px] ${item.color} rounded-t-md relative overflow-hidden shadow-lg shadow-emerald-500/10 shrink-0`}
+                              style={{ height: `${(item.value / 50) * 224}px` }}
                             >
                               <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0" />
                             </div>
@@ -1223,7 +1227,7 @@ export default function Deck() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex pl-8">
+                  <div className="flex pl-10">
                     {[
                       { year: "Year 1", pct: "" },
                       { year: "Year 2", pct: "+81%" },
@@ -1231,31 +1235,30 @@ export default function Deck() {
                       { year: "Year 4", pct: "+65%" },
                       { year: "Year 5", pct: "+68%" },
                     ].map((item, i) => (
-                      <div key={i} className="flex-1 text-center pt-1">
-                        <span className="text-[8px] text-slate-400 font-medium block">{item.year}</span>
-                        {item.pct && <span className="text-[7px] text-emerald-400/80 font-semibold">{item.pct}</span>}
+                      <div key={i} className="flex-1 text-center pt-2">
+                        <span className="text-xs text-slate-400 font-medium block">{item.year}</span>
+                        {item.pct && <span className="text-xs text-emerald-400/80 font-semibold">{item.pct}</span>}
                       </div>
                     ))}
                   </div>
-                  <div className="flex items-center justify-center gap-2 mt-2 pt-1.5 border-t border-emerald-500/20">
-                    <TrendingUp className="h-3 w-3 text-emerald-400" />
-                    <span className="text-[9px] text-slate-300">
+                  <div className="flex items-center justify-center gap-2 mt-3 pt-2 border-t border-emerald-500/20">
+                    <TrendingUp className="h-4 w-4 text-emerald-400" />
+                    <span className="text-sm text-slate-300">
                       <span className="text-emerald-400 font-semibold">+762%</span> growth • 10% MoM • $5.34M → $46M
                     </span>
                   </div>
                 </TechCard>
               </div>
 
-              {/* Funding Allocation - Pentagon Shape */}
+              {/* Funding Allocation */}
               <div className="flex-[2]">
-                <TechCard glowColor="cyan" className="p-4 h-full flex flex-col items-center justify-center">
-                  <h4 className="text-[11px] font-bold text-cyan-400 mb-1 text-center">Raising $5M</h4>
-                  <p className="text-[8px] text-slate-500 mb-3 text-center">Capital Allocation Strategy</p>
+                <TechCard glowColor="cyan" className="p-5 h-full flex flex-col items-center justify-center">
+                  <h4 className="text-base font-bold text-cyan-400 mb-1 text-center">Raising $5M</h4>
+                  <p className="text-xs text-slate-500 mb-3 text-center">Capital Allocation Strategy</p>
                   
-                  {/* Pentagon SVG Chart */}
-                  <div className="relative w-[200px] h-[200px] mx-auto mb-3">
+                  {/* Pie SVG Chart */}
+                  <div className="relative w-[240px] h-[240px] mx-auto mb-4">
                     <svg viewBox="0 0 200 200" className="w-full h-full">
-                      {/* Pentagon segments as colored wedges */}
                       {(() => {
                         const cx = 100, cy = 100, r = 85;
                         const segments = [
@@ -1285,7 +1288,7 @@ export default function Deck() {
                           return (
                             <g key={i}>
                               <path d={path} fill={seg.color} stroke="rgba(15,23,42,0.8)" strokeWidth="2" opacity="0.85" />
-                              <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fill="white" fontSize="11" fontWeight="bold">{seg.label}</text>
+                              <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fill="white" fontSize="13" fontWeight="bold">{seg.label}</text>
                             </g>
                           );
                         });
@@ -1294,7 +1297,7 @@ export default function Deck() {
                   </div>
 
                   {/* Legend */}
-                  <div className="grid grid-cols-1 gap-1.5 w-full">
+                  <div className="grid grid-cols-1 gap-2 w-full">
                     {[
                       { label: 'Growth & Distribution', pct: '60%', amount: '$3M', color: 'bg-teal-500' },
                       { label: 'Product & Technology', pct: '25%', amount: '$1.25M', color: 'bg-cyan-500' },
@@ -1302,10 +1305,10 @@ export default function Deck() {
                       { label: 'Strategic Reserve', pct: '5%', amount: '$250K', color: 'bg-amber-500' },
                     ].map((item, i) => (
                       <div key={i} className="flex items-center gap-2">
-                        <div className={`w-2.5 h-2.5 rounded-sm ${item.color} shrink-0`} />
-                        <span className="text-[9px] text-slate-300 flex-1">{item.label}</span>
-                        <span className="text-[9px] font-bold text-white">{item.pct}</span>
-                        <span className="text-[8px] text-slate-500">{item.amount}</span>
+                        <div className={`w-3 h-3 rounded-sm ${item.color} shrink-0`} />
+                        <span className="text-sm text-slate-300 flex-1">{item.label}</span>
+                        <span className="text-sm font-bold text-white">{item.pct}</span>
+                        <span className="text-xs text-slate-500">{item.amount}</span>
                       </div>
                     ))}
                   </div>
@@ -1314,29 +1317,23 @@ export default function Deck() {
             </div>
             
             {/* Year 5 Revenue Breakdown - Horizontal Stacked Bar */}
-            <div className="max-w-4xl w-full mb-3">
-              <TechCard glowColor="teal" className="p-3">
-                <h4 className="text-[10px] font-semibold text-center text-teal-400 mb-2">Year 5 Revenue Mix: $46M</h4>
-                <div className="flex items-center h-7 rounded-lg overflow-hidden border border-slate-700/50">
-                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center relative" style={{
-                  width: '74%'
-                }}>
-                    <span className="text-[8px] md:text-[9px] font-medium text-white">Subscriptions $34.2M</span>
+            <div className="w-full mb-4">
+              <TechCard glowColor="teal" className="p-4">
+                <h4 className="text-sm font-semibold text-center text-teal-400 mb-3">Year 5 Revenue Mix: $46M</h4>
+                <div className="flex items-center h-9 rounded-lg overflow-hidden border border-slate-700/50">
+                  <div className="h-full bg-gradient-to-r from-teal-600 to-teal-500 flex items-center justify-center relative" style={{ width: '74%' }}>
+                    <span className="text-xs font-medium text-white">Subscriptions $34.2M</span>
                     <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
                   </div>
-                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center relative" style={{
-                  width: '18%'
-                }}>
-                    <span className="text-[8px] font-medium text-white">Edu</span>
+                  <div className="h-full bg-gradient-to-r from-cyan-600 to-cyan-500 flex items-center justify-center relative" style={{ width: '18%' }}>
+                    <span className="text-xs font-medium text-white">Edu</span>
                     <div className="absolute right-0 top-0 bottom-0 w-px bg-slate-900/50" />
                   </div>
-                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center" style={{
-                  width: '8%'
-                }}>
-                    <span className="text-[8px] font-medium text-white">+</span>
+                  <div className="h-full bg-gradient-to-r from-purple-600 to-purple-500 flex items-center justify-center" style={{ width: '8%' }}>
+                    <span className="text-xs font-medium text-white">+</span>
                   </div>
                 </div>
-                <div className="flex justify-between text-[8px] text-slate-500 mt-1 px-1">
+                <div className="flex justify-between text-xs text-slate-500 mt-2 px-1">
                   <span>Subscriptions (74%)</span>
                   <span>Education (18%)</span>
                   <span>Other (8%)</span>
@@ -1345,7 +1342,7 @@ export default function Deck() {
             </div>
             
             {/* Revenue Streams Summary - Compact Grid */}
-            <div className="grid grid-cols-6 gap-2 max-w-4xl w-full mb-2">
+            <div className="grid grid-cols-6 gap-3 w-full mb-3">
               {[{
               label: "Startups Y5",
               value: "~12,650",
@@ -1376,17 +1373,17 @@ export default function Deck() {
               value: "2x/yr",
               icon: GraduationCap,
               color: "cyan"
-            }].map((item, i) => <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-2 text-center">
-                  <item.icon className={`h-3 w-3 mx-auto mb-1 text-${item.color}-400`} />
-                  <p className={`text-[9px] font-bold text-${item.color}-400`}>{item.value}</p>
-                  <p className="text-[7px] text-slate-500">{item.label}</p>
+            }].map((item, i) => <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-3 text-center">
+                  <item.icon className={`h-5 w-5 mx-auto mb-2 text-${item.color}-400`} />
+                  <p className={`text-sm font-bold text-${item.color}-400`}>{item.value}</p>
+                  <p className="text-xs text-slate-500">{item.label}</p>
                 </div>)}
             </div>
             
             {/* Model Summary */}
-            <div className="max-w-4xl w-full">
-              <div className="bg-slate-900/40 border border-emerald-500/20 rounded-lg px-3 py-2">
-                <p className="text-[9px] text-center text-slate-400">
+            <div className="w-full">
+              <div className="bg-slate-900/40 border border-emerald-500/20 rounded-lg px-4 py-3">
+                <p className="text-sm text-center text-slate-400">
                   <span className="text-emerald-400 font-medium">Model:</span> 100 startups → 10% MoM growth → 60% paid ($750 ARPU) + enterprise streams = $46M Year 5
                 </p>
               </div>
