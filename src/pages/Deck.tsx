@@ -365,19 +365,19 @@ export default function Deck() {
             <EnergyLines />
             <CornerAccents />
             <div className="relative z-10 w-full max-w-[99%] mx-auto">
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center w-full">
             {/* Header */}
             <div className="flex items-center gap-3 mb-2">
               <div className="w-3 h-3 bg-teal-500 rotate-45" />
-              <span className="text-sm font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">End-to-End Execution</span>
+              <span className="text-base font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">End-to-End Execution</span>
               <div className="w-3 h-3 bg-teal-500 rotate-45" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-2 print:text-black">The Online Hybrid Accelerator</h2>
-            <p className="text-lg text-slate-400 text-center mb-6 print:text-gray-600">AI-Powered • Hybrid Execution • Global Scale</p>
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 print:text-black">The Online Hybrid Accelerator</h2>
+            <p className="text-xl text-slate-400 text-center mb-5 print:text-gray-600">AI-Powered • Hybrid Execution • Global Scale</p>
             
             {/* Core Philosophy - Big Statement */}
-            <div className="max-w-4xl w-full mb-6">
-              <div className="bg-slate-900/60 border-2 border-teal-500/40 rounded-xl p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+            <div className="w-full mb-5">
+              <div className="bg-slate-900/60 border-2 border-teal-500/40 rounded-xl p-6 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
                 <p className="text-lg text-center text-slate-200 leading-relaxed print:text-gray-700">
                   <span className="text-teal-400 font-bold print:text-teal-700">We are not a 3-month program.</span> We are an <span className="text-cyan-400 font-semibold">AI-powered hybrid accelerator platform</span>—a permanent operating system that combines intelligent automation, physical hubs, mentorship, and capital access into one continuous execution engine for founders worldwide.
                 </p>
@@ -385,98 +385,68 @@ export default function Deck() {
             </div>
             
             {/* What Makes Us Different - 3 Pillars */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl w-full mb-6">
-              <div className="bg-slate-900/60 border border-teal-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5 w-full mb-5">
+              <div className="bg-slate-900/60 border border-teal-500/30 rounded-xl p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
                 <div className="flex items-center gap-2 mb-3">
-                  <Zap className="h-5 w-5 text-teal-400 print:text-teal-700" />
-                  <span className="text-sm font-bold text-teal-400 print:text-teal-700">AI-Driven Workflows</span>
+                  <Zap className="h-6 w-6 text-teal-400 print:text-teal-700" />
+                  <span className="text-base font-bold text-teal-400 print:text-teal-700">AI-Driven Workflows</span>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">
+                <p className="text-sm text-slate-400 leading-relaxed print:text-gray-600">
                   Intelligent automation powers every stage—from <span className="text-white">AI matching and roadmaps</span> to real-time analytics. No manual gaps, just continuous execution.
                 </p>
               </div>
-              <div className="bg-slate-900/60 border border-cyan-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+              <div className="bg-slate-900/60 border border-cyan-500/30 rounded-xl p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
                 <div className="flex items-center gap-2 mb-3">
-                  <Globe className="h-5 w-5 text-cyan-400 print:text-cyan-700" />
-                  <span className="text-sm font-bold text-cyan-400 print:text-cyan-700">Digital + Physical Hybrid</span>
+                  <Globe className="h-6 w-6 text-cyan-400 print:text-cyan-700" />
+                  <span className="text-base font-bold text-cyan-400 print:text-cyan-700">Digital + Physical Hybrid</span>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">
+                <p className="text-sm text-slate-400 leading-relaxed print:text-gray-600">
                   <span className="text-white">Online platform + 4 flagship hubs</span> + 5,800 partner locations. Build anywhere with local community and global reach.
                 </p>
               </div>
-              <div className="bg-slate-900/60 border border-purple-500/30 rounded-lg p-4 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+              <div className="bg-slate-900/60 border border-purple-500/30 rounded-xl p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
                 <div className="flex items-center gap-2 mb-3">
-                  <Network className="h-5 w-5 text-purple-400 print:text-purple-700" />
-                  <span className="text-sm font-bold text-purple-400 print:text-purple-700">Integrated Ecosystem</span>
+                  <Network className="h-6 w-6 text-purple-400 print:text-purple-700" />
+                  <span className="text-base font-bold text-purple-400 print:text-purple-700">Integrated Ecosystem</span>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed print:text-gray-600">
+                <p className="text-sm text-slate-400 leading-relaxed print:text-gray-600">
                   <span className="text-white">AI + Mentors + Corporates + Capital</span> in one platform. No fragmented tools—one consistent workflow.
                 </p>
               </div>
             </div>
 
             {/* Mechanism Flow - 4 Pillars */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-5xl w-full mb-8">
-              {/* Pillar 1 */}
-              <div className="relative group">
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-teal-500/60 to-teal-500/20 print:hidden" />
-                <div className="bg-slate-900/80 border border-teal-500/40 rounded-lg p-4 backdrop-blur-sm hover:border-teal-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-10 h-10 rounded-lg bg-teal-500/20 border border-teal-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
-                    <Cpu className="h-5 w-5 text-teal-400 print:text-teal-700" />
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-5 w-full mb-5">
+              {[
+                { icon: Cpu, label: "Digital Infrastructure", desc: "AI-powered tools & automation", color: "teal" },
+                { icon: Users, label: "Human Expertise", desc: "Mentors, advisors & network", color: "cyan" },
+                { icon: Building2, label: "Corporate Partners", desc: "Strategic alliances & deals", color: "purple" },
+                { icon: DollarSign, label: "Capital Access", desc: "Investor network & funding", color: "emerald" },
+              ].map((pillar, i) => (
+                <div key={i} className="relative group">
+                  <div className={`absolute -top-6 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-${pillar.color}-500/60 to-${pillar.color}-500/20 print:hidden`} />
+                  <div className={`bg-slate-900/80 border border-${pillar.color}-500/40 rounded-xl p-5 backdrop-blur-sm hover:border-${pillar.color}-500/80 transition-all print:bg-gray-50 print:border-gray-300`}>
+                    <div className={`w-12 h-12 rounded-lg bg-${pillar.color}-500/20 border border-${pillar.color}-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100`}>
+                      <pillar.icon className={`h-6 w-6 text-${pillar.color}-400 print:text-${pillar.color}-700`} />
+                    </div>
+                    <h4 className={`text-base font-bold text-${pillar.color}-400 text-center mb-2 print:text-${pillar.color}-700`}>{pillar.label}</h4>
+                    <p className="text-sm text-slate-400 text-center leading-relaxed print:text-gray-600">{pillar.desc}</p>
                   </div>
-                  <h4 className="text-sm font-bold text-teal-400 text-center mb-2 print:text-teal-700">Digital Infrastructure</h4>
-                  <p className="text-xs text-slate-400 text-center leading-relaxed print:text-gray-600">AI-powered tools & automation</p>
                 </div>
-              </div>
-
-              {/* Pillar 2 */}
-              <div className="relative group">
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-cyan-500/60 to-cyan-500/20 print:hidden" />
-                <div className="bg-slate-900/80 border border-cyan-500/40 rounded-lg p-4 backdrop-blur-sm hover:border-cyan-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-10 h-10 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
-                    <Users className="h-5 w-5 text-cyan-400 print:text-cyan-700" />
-                  </div>
-                  <h4 className="text-sm font-bold text-cyan-400 text-center mb-2 print:text-cyan-700">Human Expertise</h4>
-                  <p className="text-xs text-slate-400 text-center leading-relaxed print:text-gray-600">Mentors, advisors & network</p>
-                </div>
-              </div>
-
-              {/* Pillar 3 */}
-              <div className="relative group">
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-purple-500/60 to-purple-500/20 print:hidden" />
-                <div className="bg-slate-900/80 border border-purple-500/40 rounded-lg p-4 backdrop-blur-sm hover:border-purple-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 border border-purple-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
-                    <Building2 className="h-5 w-5 text-purple-400 print:text-purple-700" />
-                  </div>
-                  <h4 className="text-sm font-bold text-purple-400 text-center mb-2 print:text-purple-700">Corporate Partners</h4>
-                  <p className="text-xs text-slate-400 text-center leading-relaxed print:text-gray-600">Strategic alliances & deals</p>
-                </div>
-              </div>
-
-              {/* Pillar 4 */}
-              <div className="relative group">
-                <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-0.5 h-6 bg-gradient-to-b from-emerald-500/60 to-emerald-500/20 print:hidden" />
-                <div className="bg-slate-900/80 border border-emerald-500/40 rounded-lg p-4 backdrop-blur-sm hover:border-emerald-500/80 transition-all print:bg-gray-50 print:border-gray-300">
-                  <div className="w-10 h-10 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center mx-auto mb-3 print:bg-gray-100">
-                    <DollarSign className="h-5 w-5 text-emerald-400 print:text-emerald-700" />
-                  </div>
-                  <h4 className="text-sm font-bold text-emerald-400 text-center mb-2 print:text-emerald-700">Capital Access</h4>
-                  <p className="text-xs text-slate-400 text-center leading-relaxed print:text-gray-600">Investor network & funding</p>
-                </div>
-              </div>
+              ))}
             </div>
 
-            <div className="relative max-w-4xl w-full">
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/10 to-teal-500/5 rounded-lg print:hidden" />
-              <div className="relative border border-teal-500/30 rounded-lg p-5 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
+            <div className="relative w-full">
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/5 via-cyan-500/10 to-teal-500/5 rounded-xl print:hidden" />
+              <div className="relative border border-teal-500/30 rounded-xl p-6 backdrop-blur-sm print:bg-gray-50 print:border-gray-300">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="flex items-center gap-2">
                     <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse print:animate-none" />
-                    <span className="text-xs font-bold text-teal-400 tracking-widest uppercase print:text-teal-700">Continuous Execution</span>
+                    <span className="text-sm font-bold text-teal-400 tracking-widest uppercase print:text-teal-700">Continuous Execution</span>
                   </div>
                   <div className="flex-1 h-px bg-gradient-to-r from-teal-500/40 to-transparent print:bg-gray-300" />
                 </div>
-                <p className="text-sm text-slate-300 leading-relaxed print:text-gray-600">
+                <p className="text-base text-slate-300 leading-relaxed print:text-gray-600">
                   <span className="text-teal-400 font-semibold print:text-teal-700">The first online hybrid accelerator:</span> AI handles the heavy lifting—matching, analytics, roadmaps—while human mentors and physical hubs deliver <span className="text-cyan-400 font-medium print:text-cyan-700">real-world execution support</span>. No graduation, no time limits—just a permanent growth engine that scales with your startup.
                 </p>
               </div>
