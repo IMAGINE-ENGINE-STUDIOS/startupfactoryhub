@@ -1670,7 +1670,7 @@ export default function Deck() {
         <SlideWrapper>
           <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] overflow-hidden print:relative print:p-8 print:break-after-avoid print:bg-white">
             {/* Full background image */}
-            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${blackHoleBg})` }} />
+            <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${rocketLaunchBg})` }} />
             <div className="absolute inset-0 bg-slate-950/50 print:hidden" />
             <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300 z-[1]" />
             <TechGrid />
