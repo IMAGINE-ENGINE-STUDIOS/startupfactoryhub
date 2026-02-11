@@ -1400,18 +1400,20 @@ export default function Deck() {
             <FloatingHexagons />
             <EnergyLines />
             <CornerAccents />
-            <div className="relative z-10 w-full max-w-[99%] mx-auto">
-          <div className="flex flex-col items-center">
-            <div className="flex items-center gap-4 mb-3">
-              <IconBadge icon={Handshake} color="teal" />
-              <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Our Partners & Network</h2>
+            <div className="relative z-10 w-full mx-auto px-[2%]">
+          <div className="flex flex-col items-center w-full">
+            <div className="flex items-center gap-3 mb-1">
+              <div className="w-3 h-3 bg-teal-500 rotate-45" />
+              <span className="text-base font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">Strategic Network</span>
+              <div className="w-3 h-3 bg-teal-500 rotate-45" />
             </div>
-            <p className="text-base text-slate-400 text-center mb-6 print:text-gray-600">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 print:text-black">Our Partners & Network</h2>
+            <p className="text-lg md:text-xl text-slate-300 text-center mb-6 print:text-gray-600">
               Backed by industry leaders and innovators shaping the future
             </p>
             
-            {/* Partners Grid - Compact 6 columns */}
-            <div className="grid grid-cols-4 md:grid-cols-6 gap-3 max-w-5xl w-full">
+            {/* Partners Grid - 6 columns enlarged */}
+            <div className="grid grid-cols-4 md:grid-cols-6 gap-4 w-full">
               {[
                 { name: "NASA", logo: "https://upload.wikimedia.org/wikipedia/commons/thumb/e/e5/NASA_logo.svg/200px-NASA_logo.svg.png" },
                 { name: "Google", logo: "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" },
@@ -1443,11 +1445,11 @@ export default function Deck() {
                 { name: "PitchPerfecter.AI", logo: "/partners/pitchperfecter-logo.png" },
                 { name: "WorkingAdvantage", logo: "/working-advantage-logo.png" },
               ].map((partner, i) => (
-                <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-lg p-2 flex items-center justify-center h-14 hover:border-teal-500/40 transition-colors print:bg-gray-50 print:border-gray-300">
+                <div key={i} className="bg-slate-900/60 border border-slate-700/50 rounded-xl p-3 flex items-center justify-center h-20 hover:border-teal-500/40 transition-colors print:bg-gray-50 print:border-gray-300">
                   <img 
                     src={partner.logo} 
                     alt={partner.name}
-                    className="max-h-8 max-w-[80px] object-contain filter brightness-90 hover:brightness-110 transition-all print:filter-none"
+                    className="max-h-12 max-w-[100px] object-contain filter brightness-90 hover:brightness-110 transition-all print:filter-none"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
@@ -1458,15 +1460,15 @@ export default function Deck() {
             </div>
             
             {/* Partner categories */}
-            <div className="flex flex-wrap justify-center gap-2 mt-4">
+            <div className="flex flex-wrap justify-center gap-3 mt-5">
               {["Technology", "Investment", "Academic", "Marketplace", "Legal", "Community"].map((category, i) => (
-                <span key={i} className="px-2 py-0.5 text-[9px] font-medium bg-slate-800/60 border border-teal-500/20 rounded-full text-teal-400/80 print:bg-gray-100 print:border-gray-300 print:text-gray-600">
+                <span key={i} className="px-4 py-1.5 text-sm font-medium bg-slate-800/60 border border-teal-500/20 rounded-full text-teal-400/80 print:bg-gray-100 print:border-gray-300 print:text-gray-600">
                   {category}
                 </span>
               ))}
             </div>
           </div>
-          </div>
+           </div>
           </section>
         </SlideWrapper>
 
