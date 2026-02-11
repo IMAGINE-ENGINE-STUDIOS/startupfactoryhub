@@ -1,3 +1,4 @@
+import { useState, useRef, useEffect } from 'react';
 import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, ExternalLink, Printer, Search, Network, BarChart3, Briefcase, GraduationCap, Building2, Diamond, Video, FileText, Calendar, Cpu, DollarSign, Handshake, Zap, ArrowRight, MapPin, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -109,11 +110,39 @@ const SlideWrapper = ({
   children
 }: {
   children: React.ReactNode;
-}) => <div className="w-full min-h-screen flex items-center justify-center bg-slate-950 p-2 sm:p-4 print:min-h-0 print:p-0 print:bg-white">
-    <div className="relative w-full max-w-[1920px] aspect-video overflow-hidden print:aspect-auto print:max-w-none">
-      {children}
+}) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver(([entry]) => {
+      const { width, height } = entry.contentRect;
+      setScale(Math.min(width / 1920, height / 1080));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div ref={containerRef} className="w-full min-h-screen flex items-center justify-center bg-slate-950 print:min-h-0 print:p-0 print:bg-white" style={{ position: 'relative', overflow: 'hidden' }}>
+      <div style={{
+        width: 1920,
+        height: 1080,
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        marginLeft: -960,
+        marginTop: -540,
+        transform: `scale(${scale})`,
+        transformOrigin: 'center center',
+      }} className="print:relative print:transform-none print:w-full print:h-auto print:position-static print:m-0">
+        {children}
+      </div>
     </div>
-  </div>;
+  );
+};
 
 // Cover slide with background image
 const CoverSlideContainer = ({
