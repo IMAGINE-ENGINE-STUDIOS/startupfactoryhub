@@ -1385,20 +1385,6 @@ export default function Deck() {
                           );
                         });
                       })()}
-                      {/* Pentagon outline overlay */}
-                      {(() => {
-                        const cx = 100, cy = 100, r = 88;
-                        const points = Array.from({ length: 5 }, (_, i) => {
-                          const angle = ((i * 72) - 90) * Math.PI / 180;
-                          return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
-                        }).join(' ');
-                        return (
-                          <>
-                            <polygon points={points} fill="none" stroke="rgba(6,182,212,0.4)" strokeWidth="2" />
-                            <polygon points={points} fill="none" stroke="rgba(6,182,212,0.15)" strokeWidth="6" />
-                          </>
-                        );
-                      })()}
                     </svg>
                   </div>
 
