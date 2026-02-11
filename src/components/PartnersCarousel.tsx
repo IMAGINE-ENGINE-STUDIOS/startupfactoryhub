@@ -30,6 +30,8 @@ const PARTNERS = [
   { name: "PitchPerfecter.AI", logo: "/partners/pitchperfecter-logo.png", tier: "Startup" },
   { name: "LOT Network", logo: "/partners/lotnetwork-logo.png", tier: "Legal" },
   { name: "HSBC Innovation Banking", logo: "/partners/hsbc-logo.png", tier: "Banking" },
+  { name: "NVIDIA Inception", logo: "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/logo-and-brand/02-nvidia-logo-color-grn-500x200-4c25-p.png", tier: "Technology" },
+  { name: "WorkingAdvantage", logo: "/working-advantage-logo.png", tier: "Perks" },
 ];
 
 const PartnersCarousel = () => {
