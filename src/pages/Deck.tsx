@@ -983,17 +983,17 @@ export default function Deck() {
 
         {/* SLIDE 5: Ecosystem Overview - Consolidated Users + Key Value */}
         <SlideContainer>
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center w-full">
             <div className="flex items-center gap-3 mb-2">
               <IconBadge icon={Users} color="teal" />
               <h2 className="text-2xl md:text-3xl font-bold text-white print:text-black">Ecosystem Overview</h2>
             </div>
-            <p className="text-base text-slate-400 text-center mb-6 max-w-3xl print:text-gray-600">
+            <p className="text-base text-slate-400 text-center mb-5 max-w-3xl print:text-gray-600">
               A unified platform serving 8 stakeholder types with role-specific dashboards and AI-powered workflow automation.
             </p>
             
             {/* Compact User Grid - 8 columns */}
-            <div className="grid grid-cols-4 md:grid-cols-8 gap-2 max-w-5xl w-full mb-6">
+            <div className="grid grid-cols-4 md:grid-cols-8 gap-2 max-w-5xl w-full mb-5">
               {[
                 { icon: Rocket, label: "Startups", color: "emerald" },
                 { icon: Diamond, label: "Investors", color: "purple" },
@@ -1013,27 +1013,46 @@ export default function Deck() {
               ))}
             </div>
 
-            <SectionDivider title="Startup Journey Process" />
+            <SectionDivider title="Startup Journey Roadmap" />
             
-            {/* Startup Journey Steps */}
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-3 max-w-5xl w-full">
-              {[
-                { icon: Lightbulb, label: "Idea", desc: "Validate your concept & market fit", color: "amber", step: "01" },
-                { icon: Search, label: "Research", desc: "Deep dive into market & competitors", color: "cyan", step: "02" },
-                { icon: Cpu, label: "MVP", desc: "Build your minimum viable product", color: "teal", step: "03" },
-                { icon: Target, label: "Validation", desc: "Test with real users & iterate", color: "purple", step: "04" },
-                { icon: Rocket, label: "Launch", desc: "Go to market & acquire customers", color: "emerald", step: "05" },
-                { icon: TrendingUp, label: "Growth", desc: "Scale operations & raise funding", color: "rose", step: "06" },
-              ].map((stage, i) => (
-                <TechCard key={i} glowColor={stage.color as any} className="p-3 text-center relative">
-                  <div className={`text-[9px] font-bold text-${stage.color}-500/60 mb-1`}>STEP {stage.step}</div>
-                  <div className={`w-10 h-10 rounded-lg bg-${stage.color}-500/20 flex items-center justify-center mx-auto mb-2`}>
-                    <stage.icon className={`h-5 w-5 text-${stage.color}-400`} />
+            {/* Dynamic Roadmap Timeline */}
+            <div className="relative w-full max-w-6xl mt-4">
+              {/* Glowing connection line */}
+              <div className="absolute top-[52px] left-[8%] right-[8%] h-[3px] z-0">
+                <div className="w-full h-full bg-gradient-to-r from-amber-500/40 via-teal-500/60 to-rose-500/40 rounded-full" />
+                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/20 via-teal-500/30 to-rose-500/20 rounded-full blur-md" />
+              </div>
+
+              <div className="grid grid-cols-6 gap-2 relative z-10">
+                {[
+                  { icon: Lightbulb, label: "Idea", desc: "Validate concept & identify market need", color: "amber", step: "01" },
+                  { icon: Search, label: "Research", desc: "Analyze market, competitors & segments", color: "cyan", step: "02" },
+                  { icon: Cpu, label: "MVP", desc: "Build minimum viable product & core features", color: "teal", step: "03" },
+                  { icon: Target, label: "Validation", desc: "User testing & iterate on real feedback", color: "purple", step: "04" },
+                  { icon: Rocket, label: "Launch", desc: "Go-to-market & customer acquisition", color: "emerald", step: "05" },
+                  { icon: TrendingUp, label: "Growth", desc: "Scale operations, raise funding & expand", color: "rose", step: "06" },
+                ].map((stage, i) => (
+                  <div key={i} className="flex flex-col items-center group relative">
+                    {/* Step number badge */}
+                    <div className={`text-[8px] font-bold tracking-widest text-${stage.color}-400/70 mb-1 uppercase`}>Step {stage.step}</div>
+                    
+                    {/* Glowing node circle */}
+                    <div className="relative mb-3">
+                      <div className={`absolute inset-[-6px] rounded-full bg-${stage.color}-500/20 blur-lg group-hover:bg-${stage.color}-500/40 transition-all duration-500`} />
+                      <div className={`relative w-14 h-14 rounded-full bg-gradient-to-br from-${stage.color}-500/30 to-${stage.color}-600/20 border-2 border-${stage.color}-500/50 flex items-center justify-center group-hover:border-${stage.color}-400 transition-all duration-500`}>
+                        <stage.icon className={`h-6 w-6 text-${stage.color}-400 group-hover:text-${stage.color}-300 transition-colors`} />
+                      </div>
+                      <div className={`absolute inset-[-3px] rounded-full border border-${stage.color}-500/0 group-hover:border-${stage.color}-500/40 group-hover:scale-125 transition-all duration-700`} />
+                    </div>
+
+                    {/* Content card */}
+                    <div className={`bg-slate-900/70 border border-${stage.color}-500/20 rounded-lg p-2.5 text-center w-full group-hover:border-${stage.color}-500/50 group-hover:bg-slate-800/60 transition-all duration-500`}>
+                      <p className={`text-sm font-bold text-${stage.color}-400 mb-1`}>{stage.label}</p>
+                      <p className="text-[8px] text-slate-500 leading-relaxed">{stage.desc}</p>
+                    </div>
                   </div>
-                  <p className={`text-sm font-bold text-${stage.color}-400 mb-1`}>{stage.label}</p>
-                  <p className="text-[9px] text-slate-500">{stage.desc}</p>
-                </TechCard>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </SlideContainer>
