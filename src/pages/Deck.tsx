@@ -1,4 +1,4 @@
-import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, ExternalLink, Printer, Search, Network, BarChart3, Briefcase, GraduationCap, Building2, Diamond, Video, FileText, Calendar, Cpu, DollarSign, Handshake, Zap, ArrowRight, MapPin } from 'lucide-react';
+import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, ExternalLink, Printer, Search, Network, BarChart3, Briefcase, GraduationCap, Building2, Diamond, Video, FileText, Calendar, Cpu, DollarSign, Handshake, Zap, ArrowRight, MapPin, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
@@ -907,30 +907,36 @@ export default function Deck() {
                 </div>
               </div>
 
-              {/* Bottom feature cards - horizontal row, tech-card style */}
-              <div className="flex items-center justify-center gap-2 mt-1 flex-wrap" style={{ zIndex: 6 }}>
-                {[
-                  { emoji: '🤖', label: 'AI Strategies', desc: 'Smart growth & recommendations' },
-                  { emoji: '📊', label: 'Business Intelligence', desc: 'Market insights & analytics' },
-                  { emoji: '📍', label: 'Resources Map', desc: 'Global partners & perks' },
-                  { emoji: '🚀', label: 'Startup Journey', desc: 'Idea to scale guidance' },
-                  { emoji: '👥', label: 'Mentorship', desc: 'Mentors & advisors' },
-                  { emoji: '💰', label: 'Investor Match', desc: 'Pitch & raise capital' },
-                  { emoji: '📱', label: 'Mobile Ready', desc: 'Any device, anywhere' },
-                ].map((item, i) => (
-                  <div 
+              {/* Feature bubbles distributed around the slide */}
+              {[
+                { icon: Cpu, label: 'AI Strategies', color: 'emerald', top: '8%', left: '4%' },
+                { icon: BarChart3, label: 'Business Intelligence', color: 'cyan', top: '8%', right: '4%' },
+                { icon: MapPin, label: 'Resources Map', color: 'teal', top: '40%', left: '1%' },
+                { icon: Rocket, label: 'Startup Journey', color: 'emerald', bottom: '18%', left: '3%' },
+                { icon: Users, label: 'Mentorship', color: 'purple', top: '40%', right: '1%' },
+                { icon: Diamond, label: 'Investor Match', color: 'amber', bottom: '18%', right: '3%' },
+                { icon: Smartphone, label: 'Mobile Ready', color: 'cyan', bottom: '6%', left: '38%' },
+              ].map((item, i) => {
+                const posStyle: React.CSSProperties = { zIndex: 6 };
+                if (item.top) posStyle.top = item.top;
+                if (item.bottom) posStyle.bottom = item.bottom;
+                if (item.left) posStyle.left = item.left;
+                if (item.right) posStyle.right = item.right;
+                return (
+                  <div
                     key={i}
-                    className="backdrop-blur-md bg-slate-900/60 border border-emerald-500/20 rounded-lg px-2.5 py-1.5 shadow-[0_4px_20px_rgba(0,0,0,0.3),0_0_10px_rgba(16,185,129,0.1)] hover:border-emerald-500/40 transition-all"
-                    style={{ minWidth: '120px', maxWidth: '140px' }}
+                    className={`absolute backdrop-blur-md bg-slate-900/70 border border-${item.color}-500/30 rounded-xl px-4 py-3 shadow-[0_8px_30px_rgba(0,0,0,0.4),0_0_15px_rgba(16,185,129,0.15)] hover:border-${item.color}-500/60 transition-all`}
+                    style={posStyle}
                   >
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs">{item.emoji}</span>
-                      <span className="text-[8px] font-bold text-emerald-400 whitespace-nowrap">{item.label}</span>
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-9 h-9 rounded-lg bg-${item.color}-500/20 flex items-center justify-center`}>
+                        <item.icon className={`h-5 w-5 text-${item.color}-400`} />
+                      </div>
+                      <span className={`text-[11px] font-bold text-${item.color}-400 whitespace-nowrap`}>{item.label}</span>
                     </div>
-                    <p className="text-[7px] text-slate-400 leading-tight mt-0.5">{item.desc}</p>
                   </div>
-                ))}
-              </div>
+                );
+              })}
 
               {/* Bottom accent bar */}
               <div className="mt-1.5 w-full h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent shadow-[0_0_15px_rgba(16,185,129,0.3)] print:hidden" />
