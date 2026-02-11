@@ -270,7 +270,10 @@ export default function Deck() {
 
       for (let i = 0; i < slideEls.length; i++) {
         const slideEl = slideEls[i];
-        const origStyles = {
+        const parentEl = slideEl.parentElement as HTMLDivElement;
+        
+        // Save original styles for both slide and parent
+        const origSlide = {
           transform: slideEl.style.transform,
           position: slideEl.style.position,
           left: slideEl.style.left,
@@ -278,7 +281,22 @@ export default function Deck() {
           marginLeft: slideEl.style.marginLeft,
           marginTop: slideEl.style.marginTop,
         };
+        const origParent = {
+          overflow: parentEl.style.overflow,
+          width: parentEl.style.width,
+          height: parentEl.style.height,
+          minHeight: parentEl.style.minHeight,
+          position: parentEl.style.position,
+        };
 
+        // Expand parent to full slide size and remove overflow clipping
+        parentEl.style.overflow = 'visible';
+        parentEl.style.width = '1920px';
+        parentEl.style.height = '1080px';
+        parentEl.style.minHeight = '1080px';
+        parentEl.style.position = 'relative';
+
+        // Reset slide to natural position at full size
         slideEl.style.transform = 'none';
         slideEl.style.position = 'relative';
         slideEl.style.left = '0';
@@ -294,9 +312,13 @@ export default function Deck() {
           allowTaint: true,
           backgroundColor: '#020617',
           logging: false,
+          windowWidth: 1920,
+          windowHeight: 1080,
         });
 
-        Object.assign(slideEl.style, origStyles);
+        // Restore original styles
+        Object.assign(slideEl.style, origSlide);
+        Object.assign(parentEl.style, origParent);
 
         if (i > 0) pdf.addPage([1920, 1080], 'landscape');
         pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 1920, 1080);
