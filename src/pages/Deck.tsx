@@ -1277,72 +1277,149 @@ export default function Deck() {
               Compounding growth delivers <span className="text-emerald-400 font-semibold">8.6x revenue increase</span> over 5 years
             </p>
             
-            {/* Main Chart - Bar Chart */}
-            <div className="max-w-4xl w-full mb-3">
-              <TechCard glowColor="emerald" className="p-4">
-                <div className="flex">
-                  {/* Y-axis */}
-                  <div className="flex flex-col justify-between h-48 pr-2 text-right shrink-0">
-                    <span className="text-[8px] text-slate-500">$50M</span>
-                    <span className="text-[8px] text-slate-500">$40M</span>
-                    <span className="text-[8px] text-slate-500">$30M</span>
-                    <span className="text-[8px] text-slate-500">$20M</span>
-                    <span className="text-[8px] text-slate-500">$10M</span>
-                    <span className="text-[8px] text-slate-500">$0</span>
-                  </div>
-                  {/* Chart area */}
-                  <div className="flex-1 relative h-48 border-b border-l border-slate-700/40">
-                    {/* Grid lines */}
-                    {[20, 40, 60, 80].map((p) => (
-                      <div key={p} className="absolute w-full border-t border-dashed border-slate-700/20" style={{ bottom: `${p}%` }} />
-                    ))}
-                    {/* Bars container */}
-                    <div className="absolute inset-0 flex items-end px-4 gap-2">
-                      {[
-                        { revenue: "$5.34M", value: 5.34, color: "bg-gradient-to-t from-teal-700 to-teal-400" },
-                        { revenue: "$9.65M", value: 9.65, color: "bg-gradient-to-t from-teal-600 to-cyan-400" },
-                        { revenue: "$16.50M", value: 16.50, color: "bg-gradient-to-t from-cyan-600 to-cyan-400" },
-                        { revenue: "$27.30M", value: 27.30, color: "bg-gradient-to-t from-cyan-600 to-emerald-400" },
-                        { revenue: "$46.00M", value: 46.00, color: "bg-gradient-to-t from-emerald-600 to-emerald-400" },
-                      ].map((item, i) => (
-                        <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
-                          <span className="text-[10px] md:text-xs font-bold text-emerald-400 mb-1 shrink-0">{item.revenue}</span>
-                          <div
-                            className={`w-12 md:w-16 ${item.color} rounded-t-md relative overflow-hidden shadow-lg shadow-emerald-500/10 shrink-0`}
-                            style={{ height: `${(item.value / 50) * 192}px` }}
-                          >
-                            <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0" />
-                            <div className="absolute top-0 left-0 right-0 h-px bg-white/30" />
-                          </div>
-                        </div>
+            {/* Charts Row: Bar Chart + Funding Allocation */}
+            <div className="flex gap-3 max-w-5xl w-full mb-3">
+              {/* Revenue Bar Chart */}
+              <div className="flex-[3]">
+                <TechCard glowColor="emerald" className="p-4 h-full">
+                  <div className="flex">
+                    {/* Y-axis */}
+                    <div className="flex flex-col justify-between h-44 pr-2 text-right shrink-0">
+                      <span className="text-[8px] text-slate-500">$50M</span>
+                      <span className="text-[8px] text-slate-500">$40M</span>
+                      <span className="text-[8px] text-slate-500">$30M</span>
+                      <span className="text-[8px] text-slate-500">$20M</span>
+                      <span className="text-[8px] text-slate-500">$10M</span>
+                      <span className="text-[8px] text-slate-500">$0</span>
+                    </div>
+                    {/* Chart area */}
+                    <div className="flex-1 relative h-44 border-b border-l border-slate-700/40">
+                      {[20, 40, 60, 80].map((p) => (
+                        <div key={p} className="absolute w-full border-t border-dashed border-slate-700/20" style={{ bottom: `${p}%` }} />
                       ))}
+                      <div className="absolute inset-0 flex items-end px-3 gap-1.5">
+                        {[
+                          { revenue: "$5.34M", value: 5.34, color: "bg-gradient-to-t from-teal-700 to-teal-400" },
+                          { revenue: "$9.65M", value: 9.65, color: "bg-gradient-to-t from-teal-600 to-cyan-400" },
+                          { revenue: "$16.50M", value: 16.50, color: "bg-gradient-to-t from-cyan-600 to-cyan-400" },
+                          { revenue: "$27.30M", value: 27.30, color: "bg-gradient-to-t from-cyan-600 to-emerald-400" },
+                          { revenue: "$46.00M", value: 46.00, color: "bg-gradient-to-t from-emerald-600 to-emerald-400" },
+                        ].map((item, i) => (
+                          <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
+                            <span className="text-[9px] font-bold text-emerald-400 mb-1 shrink-0">{item.revenue}</span>
+                            <div
+                              className={`w-10 md:w-14 ${item.color} rounded-t-md relative overflow-hidden shadow-lg shadow-emerald-500/10 shrink-0`}
+                              style={{ height: `${(item.value / 50) * 176}px` }}
+                            >
+                              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/15 to-white/0" />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                </div>
-                {/* X-axis labels */}
-                <div className="flex pl-8">
-                  {[
-                    { year: "Year 1", pct: "" },
-                    { year: "Year 2", pct: "+81%" },
-                    { year: "Year 3", pct: "+71%" },
-                    { year: "Year 4", pct: "+65%" },
-                    { year: "Year 5", pct: "+68%" },
-                  ].map((item, i) => (
-                    <div key={i} className="flex-1 text-center pt-1.5">
-                      <span className="text-[9px] md:text-[10px] text-slate-400 font-medium block">{item.year}</span>
-                      {item.pct && <span className="text-[8px] text-emerald-400/80 font-semibold">{item.pct}</span>}
-                    </div>
-                  ))}
-                </div>
-                
-                {/* Growth Arrow Indicator */}
-                <div className="flex items-center justify-center gap-2 mt-3 pt-2 border-t border-emerald-500/20">
-                  <TrendingUp className="h-3.5 w-3.5 text-emerald-400" />
-                  <span className="text-[10px] text-slate-300">
-                    <span className="text-emerald-400 font-semibold">+762%</span> total growth • 10% MoM compound • $5.34M → $46M
-                  </span>
-                </div>
-              </TechCard>
+                  <div className="flex pl-8">
+                    {[
+                      { year: "Year 1", pct: "" },
+                      { year: "Year 2", pct: "+81%" },
+                      { year: "Year 3", pct: "+71%" },
+                      { year: "Year 4", pct: "+65%" },
+                      { year: "Year 5", pct: "+68%" },
+                    ].map((item, i) => (
+                      <div key={i} className="flex-1 text-center pt-1">
+                        <span className="text-[8px] text-slate-400 font-medium block">{item.year}</span>
+                        {item.pct && <span className="text-[7px] text-emerald-400/80 font-semibold">{item.pct}</span>}
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center justify-center gap-2 mt-2 pt-1.5 border-t border-emerald-500/20">
+                    <TrendingUp className="h-3 w-3 text-emerald-400" />
+                    <span className="text-[9px] text-slate-300">
+                      <span className="text-emerald-400 font-semibold">+762%</span> growth • 10% MoM • $5.34M → $46M
+                    </span>
+                  </div>
+                </TechCard>
+              </div>
+
+              {/* Funding Allocation - Pentagon Shape */}
+              <div className="flex-[2]">
+                <TechCard glowColor="cyan" className="p-4 h-full flex flex-col items-center justify-center">
+                  <h4 className="text-[11px] font-bold text-cyan-400 mb-1 text-center">Raising $5M</h4>
+                  <p className="text-[8px] text-slate-500 mb-3 text-center">Capital Allocation Strategy</p>
+                  
+                  {/* Pentagon SVG Chart */}
+                  <div className="relative w-[200px] h-[200px] mx-auto mb-3">
+                    <svg viewBox="0 0 200 200" className="w-full h-full">
+                      {/* Pentagon segments as colored wedges */}
+                      {(() => {
+                        const cx = 100, cy = 100, r = 85;
+                        const segments = [
+                          { pct: 60, color: '#14b8a6', label: '60%' },
+                          { pct: 25, color: '#06b6d4', label: '25%' },
+                          { pct: 10, color: '#a855f7', label: '10%' },
+                          { pct: 5, color: '#f59e0b', label: '5%' },
+                        ];
+                        let startAngle = -90;
+                        return segments.map((seg, i) => {
+                          const sweep = (seg.pct / 100) * 360;
+                          const endAngle = startAngle + sweep;
+                          const midAngle = startAngle + sweep / 2;
+                          const startRad = (startAngle * Math.PI) / 180;
+                          const endRad = (endAngle * Math.PI) / 180;
+                          const midRad = (midAngle * Math.PI) / 180;
+                          const x1 = cx + r * Math.cos(startRad);
+                          const y1 = cy + r * Math.sin(startRad);
+                          const x2 = cx + r * Math.cos(endRad);
+                          const y2 = cy + r * Math.sin(endRad);
+                          const largeArc = sweep > 180 ? 1 : 0;
+                          const path = `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+                          const labelR = r * 0.6;
+                          const lx = cx + labelR * Math.cos(midRad);
+                          const ly = cy + labelR * Math.sin(midRad);
+                          startAngle = endAngle;
+                          return (
+                            <g key={i}>
+                              <path d={path} fill={seg.color} stroke="rgba(15,23,42,0.8)" strokeWidth="2" opacity="0.85" />
+                              <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle" fill="white" fontSize="11" fontWeight="bold">{seg.label}</text>
+                            </g>
+                          );
+                        });
+                      })()}
+                      {/* Pentagon outline overlay */}
+                      {(() => {
+                        const cx = 100, cy = 100, r = 88;
+                        const points = Array.from({ length: 5 }, (_, i) => {
+                          const angle = ((i * 72) - 90) * Math.PI / 180;
+                          return `${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`;
+                        }).join(' ');
+                        return (
+                          <>
+                            <polygon points={points} fill="none" stroke="rgba(6,182,212,0.4)" strokeWidth="2" />
+                            <polygon points={points} fill="none" stroke="rgba(6,182,212,0.15)" strokeWidth="6" />
+                          </>
+                        );
+                      })()}
+                    </svg>
+                  </div>
+
+                  {/* Legend */}
+                  <div className="grid grid-cols-1 gap-1.5 w-full">
+                    {[
+                      { label: 'Growth & Distribution', pct: '60%', amount: '$3M', color: 'bg-teal-500' },
+                      { label: 'Product & Technology', pct: '25%', amount: '$1.25M', color: 'bg-cyan-500' },
+                      { label: 'Operations, Legal & Finance', pct: '10%', amount: '$500K', color: 'bg-purple-500' },
+                      { label: 'Strategic Reserve', pct: '5%', amount: '$250K', color: 'bg-amber-500' },
+                    ].map((item, i) => (
+                      <div key={i} className="flex items-center gap-2">
+                        <div className={`w-2.5 h-2.5 rounded-sm ${item.color} shrink-0`} />
+                        <span className="text-[9px] text-slate-300 flex-1">{item.label}</span>
+                        <span className="text-[9px] font-bold text-white">{item.pct}</span>
+                        <span className="text-[8px] text-slate-500">{item.amount}</span>
+                      </div>
+                    ))}
+                  </div>
+                </TechCard>
+              </div>
             </div>
             
             {/* Year 5 Revenue Breakdown - Horizontal Stacked Bar */}
