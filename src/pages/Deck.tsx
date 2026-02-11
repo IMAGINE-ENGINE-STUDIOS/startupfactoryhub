@@ -9,6 +9,7 @@ import galaxyBg from '@/assets/galaxy-bg.webp';
 import blackHoleBg from '@/assets/black-hole-bg.jpg';
 import jupiterBg from '@/assets/jupiter-bg.jpg';
 import nebulaBg from '@/assets/nebula-bg.jpg';
+import issMarketBg from '@/assets/iss-market-bg.jpg';
 
 import mockupDashboard from '@/assets/mockup-dashboard.png';
 import mockupResources from '@/assets/mockup-resources.png';
@@ -1012,7 +1013,16 @@ export default function Deck() {
           </div>
         </SlideContainer>
         {/* SLIDE 6: Market Opportunity */}
-        <SlideContainer>
+        <SlideWrapper>
+          <section className="absolute inset-0 flex flex-col items-center justify-center p-[4%] print:relative print:p-8 print:break-after-page print:bg-white">
+            <img src={issMarketBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
+            <div className="absolute inset-0 bg-black/60" />
+            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
+            <TechGrid />
+            <FloatingHexagons />
+            <EnergyLines />
+            <CornerAccents />
+            <div className="relative z-10 w-full max-w-[90%] mx-auto">
           <div className="flex flex-col items-center w-full">
             <div className="flex items-center gap-4 mb-2">
               <IconBadge icon={TrendingUp} color="teal" />
@@ -1136,7 +1146,9 @@ export default function Deck() {
               }
             `}</style>
           </div>
-        </SlideContainer>
+            </div>
+          </section>
+        </SlideWrapper>
 
         {/* SLIDE 7: Business Model & Revenue Streams */}
         <SlideContainer>
