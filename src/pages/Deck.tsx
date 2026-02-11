@@ -1,5 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
-import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, ExternalLink, Printer, Search, Network, BarChart3, Briefcase, GraduationCap, Building2, Diamond, Video, FileText, Calendar, Cpu, DollarSign, Handshake, Zap, ArrowRight, MapPin, Smartphone } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Home, Rocket, Target, Users, Lightbulb, TrendingUp, Globe, Award, Mail, ExternalLink, Printer, Search, Network, BarChart3, Briefcase, GraduationCap, Building2, Diamond, Video, FileText, Calendar, Cpu, DollarSign, Handshake, Zap, ArrowRight, MapPin, Smartphone, Loader2 } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import sfhLogo from '@/assets/sfh-logo-sphere.png';
@@ -128,7 +131,7 @@ const SlideWrapper = ({
 
   return (
     <div ref={containerRef} className="w-full min-h-screen flex items-center justify-center bg-slate-950 print:min-h-0 print:p-0 print:bg-white" style={{ position: 'relative', overflow: 'hidden' }}>
-      <div style={{
+      <div data-slide style={{
         width: 1920,
         height: 1080,
         position: 'absolute',
@@ -138,7 +141,7 @@ const SlideWrapper = ({
         marginTop: -540,
         transform: `scale(${scale})`,
         transformOrigin: 'center center',
-      }} className="print:relative print:transform-none print:w-full print:h-auto print:position-static print:m-0">
+      }}>
         {children}
       </div>
     </div>
@@ -253,10 +256,63 @@ const IconBadge = ({
 };
 export default function Deck() {
   const navigate = useNavigate();
-  const handlePrint = () => {
-    window.print();
-  };
-  return <div className="min-h-screen bg-slate-950 text-white print:bg-white print:text-black">
+  const [isExporting, setIsExporting] = useState(false);
+  const deckRef = useRef<HTMLDivElement>(null);
+
+  const handleExportPDF = useCallback(async () => {
+    if (!deckRef.current || isExporting) return;
+    setIsExporting(true);
+    toast.info("Generating PDF... This may take a moment.");
+
+    try {
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'px', format: [1920, 1080] });
+      const slideEls = deckRef.current.querySelectorAll<HTMLDivElement>('[data-slide]');
+
+      for (let i = 0; i < slideEls.length; i++) {
+        const slideEl = slideEls[i];
+        const origStyles = {
+          transform: slideEl.style.transform,
+          position: slideEl.style.position,
+          left: slideEl.style.left,
+          top: slideEl.style.top,
+          marginLeft: slideEl.style.marginLeft,
+          marginTop: slideEl.style.marginTop,
+        };
+
+        slideEl.style.transform = 'none';
+        slideEl.style.position = 'relative';
+        slideEl.style.left = '0';
+        slideEl.style.top = '0';
+        slideEl.style.marginLeft = '0';
+        slideEl.style.marginTop = '0';
+
+        const canvas = await html2canvas(slideEl, {
+          width: 1920,
+          height: 1080,
+          scale: 1,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#020617',
+          logging: false,
+        });
+
+        Object.assign(slideEl.style, origStyles);
+
+        if (i > 0) pdf.addPage([1920, 1080], 'landscape');
+        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, 1920, 1080);
+      }
+
+      pdf.save('Startup-Factory-Hub-Pitch-Deck.pdf');
+      toast.success("PDF exported successfully!");
+    } catch (error) {
+      console.error('PDF export error:', error);
+      toast.error("Failed to export PDF. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  }, [isExporting]);
+
+  return <div ref={deckRef} className="min-h-screen bg-slate-950 text-white">
       {/* Navigation Bar - Hidden in Print */}
       <div className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 py-4 bg-slate-950/95 backdrop-blur-sm border-b border-teal-500/30 print:hidden">
         <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="gap-2 text-white hover:bg-slate-800 hover:text-teal-400">
@@ -267,9 +323,9 @@ export default function Deck() {
           <div className="w-2 h-2 bg-teal-500 rounded-full animate-pulse" />
           <span className="text-sm text-teal-400 font-medium tracking-wide">STARTUP FACTORY HUB // PITCH DECK</span>
         </div>
-        <Button variant="outline" size="sm" onClick={handlePrint} className="gap-2 border-teal-500/50 text-teal-400 hover:bg-teal-500/10 hover:border-teal-500">
-          <Printer className="h-4 w-4" />
-          <span className="hidden sm:inline">Export PDF</span>
+        <Button variant="outline" size="sm" onClick={handleExportPDF} disabled={isExporting} className="gap-2 border-teal-500/50 text-teal-400 hover:bg-teal-500/10 hover:border-teal-500">
+          {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
+          <span className="hidden sm:inline">{isExporting ? 'Exporting...' : 'Export PDF'}</span>
         </Button>
       </div>
 
