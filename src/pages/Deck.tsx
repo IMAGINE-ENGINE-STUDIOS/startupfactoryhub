@@ -1539,32 +1539,33 @@ export default function Deck() {
             <FloatingHexagons />
             <EnergyLines />
             <CornerAccents />
-            <div className="relative z-10 w-full max-w-[99%] mx-auto">
-          <div className="flex flex-col items-center text-center">
-            <div className="flex items-center gap-4 mb-4">
-              <IconBadge icon={Rocket} color="teal" />
-              <h2 className="text-3xl md:text-4xl font-bold text-white print:text-black">Join Our Mission</h2>
+            <div className="relative z-10 w-full mx-auto px-[3%]">
+          <div className="flex flex-col items-center text-center w-full">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-3 h-3 bg-teal-500 rotate-45" />
+              <span className="text-base font-semibold text-teal-400 tracking-[0.3em] uppercase print:text-gray-600">Get Involved</span>
+              <div className="w-3 h-3 bg-teal-500 rotate-45" />
             </div>
-            <p className="text-xl text-slate-400 mb-8 print:text-gray-600">Let's Build the Future Together</p>
+            <h2 className="text-5xl md:text-6xl font-bold text-white mb-3 print:text-black">Join Our Mission</h2>
+            <p className="text-2xl md:text-3xl text-slate-300 mb-6 print:text-gray-600">Let's Build the Future Together</p>
             
-            <p className="text-lg text-slate-400 max-w-2xl mb-8 print:text-gray-600">
+            <p className="text-xl text-slate-400 max-w-4xl mb-10 leading-relaxed print:text-gray-600">
               We're looking for partners, investors, and innovators who share our vision of democratizing access to startup success.
             </p>
             
-            <div className="flex flex-wrap gap-4 justify-center mb-8">
-              <a href="mailto:contact@startupfactoryhub.com" className="inline-flex items-center gap-3 bg-slate-900/80 border-2 border-teal-500/40 rounded-lg px-6 py-3 hover:border-teal-500/60 transition-colors print:bg-white print:border-gray-300">
-                <Mail className="h-5 w-5 text-teal-400 print:text-gray-700" />
-                <span className="text-slate-200 font-medium print:text-gray-700">contact@startupfactoryhub.com</span>
+            <div className="flex flex-wrap gap-6 justify-center mb-10">
+              <a href="mailto:contact@startupfactoryhub.com" className="inline-flex items-center gap-4 bg-slate-900/80 border-2 border-teal-500/40 rounded-xl px-10 py-5 hover:border-teal-500/60 transition-colors print:bg-white print:border-gray-300">
+                <Mail className="h-7 w-7 text-teal-400 print:text-gray-700" />
+                <span className="text-xl text-slate-200 font-medium print:text-gray-700">contact@startupfactoryhub.com</span>
               </a>
-              
             </div>
             
             <div className="relative">
-              <div className="absolute inset-0 bg-teal-500/20 blur-2xl rounded-full print:hidden" />
-              <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-24 h-24 object-contain" />
+              <div className="absolute inset-0 bg-teal-500/20 blur-3xl rounded-full scale-150 print:hidden" />
+              <img src={sfhLogo} alt="Startup Factory Hub" className="relative w-36 h-36 object-contain" />
             </div>
             
-            <p className="text-sm text-slate-600 mt-8 print:text-gray-400">© 2025 Startup Factory Hub. All rights reserved.</p>
+            <p className="text-base text-slate-500 mt-10 print:text-gray-400">© 2025 Startup Factory Hub. All rights reserved.</p>
           </div>
             </div>
           </section>
