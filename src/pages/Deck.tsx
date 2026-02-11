@@ -151,7 +151,7 @@ const CoverSlideContainer = ({
 }: {
   children: React.ReactNode;
 }) => <SlideWrapper>
-    <section className="absolute inset-0 flex flex-col items-center justify-center p-[2.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+    <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
       {/* Background image */}
       <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{
       backgroundImage: `url(${rocketLaunchBg})`
@@ -163,12 +163,12 @@ const CoverSlideContainer = ({
       backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(20, 184, 166, 0.02) 2px, rgba(20, 184, 166, 0.02) 4px)'
     }} />
       {/* Border frame */}
-      <div className="absolute inset-[2%] border-2 border-teal-500/40 rounded-lg print:border-gray-300" />
+      <div className="absolute inset-[1%] border-2 border-teal-500/40 rounded-lg print:border-gray-300" />
       <TechGrid />
       <FloatingHexagons />
       <EnergyLines />
       <CornerAccents />
-      <div className="relative z-10 w-full max-w-[96%] mx-auto">
+      <div className="relative z-10 w-full max-w-[99%] mx-auto">
         {children}
       </div>
     </section>
@@ -182,14 +182,14 @@ const SlideContainer = ({
   children: React.ReactNode;
   className?: string;
 }) => <SlideWrapper>
-    <section className={`absolute inset-0 flex flex-col items-center justify-center p-[2.5%] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 print:relative print:p-8 print:break-after-page print:bg-white ${className}`}>
+    <section className={`absolute inset-0 flex flex-col items-center justify-center p-[1.5%] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 print:relative print:p-8 print:break-after-page print:bg-white ${className}`}>
       {/* Border frame */}
-      <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
+      <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
       <TechGrid />
       <FloatingHexagons />
       <EnergyLines />
       <CornerAccents />
-      <div className="relative z-10 w-full max-w-[96%] mx-auto">
+      <div className="relative z-10 w-full max-w-[99%] mx-auto">
         {children}
       </div>
     </section>
@@ -408,7 +408,7 @@ export default function Deck() {
 
         {/* SLIDE 2: Company Summary - Mechanism Journey */}
         <SlideWrapper>
-           <section className="absolute inset-0 flex flex-col items-center justify-center p-[2.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+           <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
             {/* Background image */}
             <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{
             backgroundImage: `url(${astronautBg})`
@@ -416,12 +416,12 @@ export default function Deck() {
             {/* Dark overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
             {/* Border frame */}
-            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
+             <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
             <FloatingHexagons />
             <EnergyLines />
             <CornerAccents />
-            <div className="relative z-10 w-full max-w-[96%] mx-auto">
+            <div className="relative z-10 w-full max-w-[99%] mx-auto">
             <div className="flex flex-col items-center">
             {/* Header */}
             <div className="flex items-center gap-3 mb-2">
@@ -545,7 +545,7 @@ export default function Deck() {
 
         {/* SLIDE 3: The Problem - System Failure */}
         <SlideWrapper>
-           <section className="absolute inset-0 flex flex-col items-center justify-center p-[2.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+           <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
             {/* Background image */}
             <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{
             backgroundImage: `url(${moonEarthBg})`
@@ -553,12 +553,12 @@ export default function Deck() {
             {/* Dark overlay */}
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950/85 via-slate-900/80 to-slate-950/85 print:hidden" />
             {/* Border frame */}
-            <div className="absolute inset-[2%] border-2 border-rose-500/30 rounded-lg print:border-gray-300" />
+            <div className="absolute inset-[1%] border-2 border-rose-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
             <FloatingHexagons />
             <EnergyLines />
             <CornerAccents />
-            <div className="relative z-10 w-full max-w-[96%] mx-auto">
+            <div className="relative z-10 w-full max-w-[99%] mx-auto">
               <div className="flex flex-col items-center">
             {/* Header */}
             <div className="flex items-center gap-3 mb-2">
@@ -724,17 +724,17 @@ export default function Deck() {
 
         {/* SLIDE 4: Solution */}
         <SlideWrapper>
-           <section className="absolute inset-0 flex flex-col items-center justify-center p-[2.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+           <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
             {/* Galaxy background */}
             <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${galaxyBg})` }} />
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
             {/* Border frame */}
-            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
+             <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
             <FloatingHexagons />
             <EnergyLines />
             <CornerAccents />
-            <div className="relative z-10 w-full max-w-[96%] mx-auto">
+            <div className="relative z-10 w-full max-w-[99%] mx-auto">
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-3 mb-2">
               <IconBadge icon={Lightbulb} color="teal" />
@@ -1059,15 +1059,15 @@ export default function Deck() {
         </SlideContainer>
         {/* SLIDE 6: Market Opportunity */}
         <SlideWrapper>
-           <section className="absolute inset-0 flex flex-col items-center justify-center p-[2.5%] print:relative print:p-8 print:break-after-page print:bg-white">
+           <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] print:relative print:p-8 print:break-after-page print:bg-white">
             <img src={issMarketBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
-            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
+            <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
             <FloatingHexagons />
             <EnergyLines />
             <CornerAccents />
-            <div className="relative z-10 w-full max-w-[96%] mx-auto">
+            <div className="relative z-10 w-full max-w-[99%] mx-auto">
           <div className="flex flex-col items-center w-full">
             <div className="flex items-center gap-4 mb-2">
               <IconBadge icon={TrendingUp} color="teal" />
@@ -1547,15 +1547,15 @@ export default function Deck() {
         </SlideContainer>
         {/* SLIDE 8: Our Partners */}
         <SlideWrapper>
-          <section className="absolute inset-0 flex flex-col items-center justify-center p-[2.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
+          <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-page print:bg-white">
             <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${jupiterBg})` }} />
             <div className="absolute inset-0 bg-slate-950/70 print:hidden" />
-            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300 z-[1]" />
+            <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300 z-[1]" />
             <TechGrid />
             <FloatingHexagons />
             <EnergyLines />
             <CornerAccents />
-            <div className="relative z-10 w-full max-w-[96%] mx-auto">
+            <div className="relative z-10 w-full max-w-[99%] mx-auto">
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-4 mb-3">
               <IconBadge icon={Handshake} color="teal" />
@@ -1627,15 +1627,15 @@ export default function Deck() {
 
         {/* SLIDE 9: Team */}
         <SlideWrapper>
-          <section className="absolute inset-0 flex flex-col items-center justify-center p-[2.5%] print:relative print:p-8 print:break-after-page print:bg-white">
+          <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] print:relative print:p-8 print:break-after-page print:bg-white">
             <img src={moonTeamBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
-            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
+            <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300" />
             <TechGrid />
             <FloatingHexagons />
             <EnergyLines />
             <CornerAccents />
-            <div className="relative z-10 w-full max-w-[96%] mx-auto">
+            <div className="relative z-10 w-full max-w-[99%] mx-auto">
           <div className="flex flex-col items-center">
             <div className="flex items-center gap-4 mb-6">
               <IconBadge icon={Users} color="teal" />
@@ -1683,16 +1683,16 @@ export default function Deck() {
 
         {/* SLIDE 10: Contact */}
         <SlideWrapper>
-          <section className="absolute inset-0 flex flex-col items-center justify-center p-[2.5%] overflow-hidden print:relative print:p-8 print:break-after-avoid print:bg-white">
+          <section className="absolute inset-0 flex flex-col items-center justify-center p-[1.5%] overflow-hidden print:relative print:p-8 print:break-after-avoid print:bg-white">
             {/* Full background image */}
             <div className="absolute inset-0 bg-cover bg-center bg-no-repeat print:hidden" style={{ backgroundImage: `url(${rocketLaunchBg})` }} />
             <div className="absolute inset-0 bg-gradient-to-br from-slate-950/90 via-slate-900/85 to-slate-950/90 print:hidden" />
-            <div className="absolute inset-[2%] border-2 border-teal-500/30 rounded-lg print:border-gray-300 z-[1]" />
+            <div className="absolute inset-[1%] border-2 border-teal-500/30 rounded-lg print:border-gray-300 z-[1]" />
             <TechGrid />
             <FloatingHexagons />
             <EnergyLines />
             <CornerAccents />
-            <div className="relative z-10 w-full max-w-[96%] mx-auto">
+            <div className="relative z-10 w-full max-w-[99%] mx-auto">
           <div className="flex flex-col items-center text-center">
             <div className="flex items-center gap-4 mb-4">
               <IconBadge icon={Rocket} color="teal" />
