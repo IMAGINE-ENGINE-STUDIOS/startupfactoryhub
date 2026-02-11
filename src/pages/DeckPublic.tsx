@@ -130,7 +130,7 @@ const SlideWrapper = ({
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full min-h-screen flex items-center justify-center bg-slate-950 print:min-h-0 print:p-0 print:bg-white" style={{ position: 'relative', overflow: 'hidden' }}>
+    <div ref={containerRef} className="w-full aspect-video bg-slate-950 print:aspect-auto print:min-h-0 print:p-0 print:bg-white" style={{ position: 'relative', overflow: 'hidden' }}>
       <div data-slide style={{
         width: 1920,
         height: 1080,
