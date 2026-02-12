@@ -31,6 +31,7 @@ const ResourcesWidget = ({ currentJourneyStep, userCity }: ResourcesWidgetProps)
       university: "bg-red-500/10 text-red-600",
       investor_network: "bg-yellow-500/10 text-yellow-600",
       community: "bg-pink-500/10 text-pink-600",
+      national_archives: "bg-violet-500/10 text-violet-600",
     };
     return colors[type] || "bg-muted/10 text-muted-foreground";
   };
