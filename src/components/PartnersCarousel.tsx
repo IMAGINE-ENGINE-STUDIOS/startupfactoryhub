@@ -32,6 +32,7 @@ const PARTNERS = [
   { name: "LOT Network", logo: "/partners/lotnetwork-logo.png", tier: "Legal" },
   { name: "NVIDIA Inception", logo: "https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/logo-and-brand/02-nvidia-logo-color-grn-500x200-4c25-p.png", tier: "Technology" },
   { name: "WorkingAdvantage", logo: "/working-advantage-logo.png", tier: "Perks" },
+  { name: "National Archives", logo: "/partners/national-archives-logo.webp", tier: "Government" },
 ];
 
 const PartnersCarousel = () => {
