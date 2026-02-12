@@ -4,7 +4,7 @@ import teamRicardo from "@/assets/team-ricardo.jpg";
 import teamSteven from "@/assets/team-steven.png";
 import teamPablo from "@/assets/team-pablo.jpg";
 import teamGary from "@/assets/team-gary.png";
-import teamHiro from "@/assets/team-hiro.png";
+
 
 const teamMembers = [
   {
@@ -36,12 +36,6 @@ const teamMembers = [
     role: "Strategic Advisor",
     location: null,
     image: teamGary,
-  },
-  {
-    name: "Hiroaki Tanaka",
-    role: "Managing Director",
-    location: "SFH Tokyo",
-    image: teamHiro,
   },
 ];
 
