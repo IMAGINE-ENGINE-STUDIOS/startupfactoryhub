@@ -19,6 +19,7 @@ export type ResourceType =
   | 'human_capital'
   | 'event'
   | 'banking'
+  | 'national_archives'
   | 'other';
 
 export type LocationType = 'physical' | 'online' | 'hybrid';

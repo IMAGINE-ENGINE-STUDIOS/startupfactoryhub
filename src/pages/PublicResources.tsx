@@ -67,6 +67,7 @@ const RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: s
   human_capital: { icon: Users, color: '#0ea5e9', label: 'Human Capital' },
   event: { icon: CalendarDays, color: '#f43f5e', label: 'Events' },
   banking: { icon: Banknote, color: '#dc2626', label: 'Banking' },
+  national_archives: { icon: Landmark, color: '#7c3aed', label: 'National Archives' },
   other: { icon: MapPin, color: '#64748b', label: 'Other' },
 };
 
