@@ -58,40 +58,26 @@ const MentorBanner = () => {
     else { dh = width / bgRatio; oy = -(dh - height) / 2; }
     ctx.drawImage(bgImage, ox, oy, dw, dh);
 
-    // Dark overlay - stronger on left, lighter on right to show photo
-    const overlay = ctx.createLinearGradient(0, 0, width, 0);
-    overlay.addColorStop(0, 'rgba(0, 12, 22, 0.97)');
-    overlay.addColorStop(0.42, 'rgba(0, 15, 28, 0.90)');
-    overlay.addColorStop(0.62, 'rgba(0, 15, 28, 0.70)');
-    overlay.addColorStop(1, 'rgba(0, 10, 20, 0.55)');
+    // Dark overlay — same as LocalHubBanner (full dark, no photo)
+    const overlay = ctx.createLinearGradient(0, 0, width, height);
+    overlay.addColorStop(0, 'rgba(0, 15, 25, 0.93)');
+    overlay.addColorStop(0.5, 'rgba(0, 18, 30, 0.90)');
+    overlay.addColorStop(1, 'rgba(0, 12, 22, 0.95)');
     ctx.fillStyle = overlay;
     ctx.fillRect(0, 0, width, height);
 
-    // Vertical gradient on top and bottom for blending
-    const topFade = ctx.createLinearGradient(0, 0, 0, 80);
-    topFade.addColorStop(0, 'rgba(0, 12, 22, 0.6)');
-    topFade.addColorStop(1, 'rgba(0, 12, 22, 0)');
-    ctx.fillStyle = topFade;
-    ctx.fillRect(0, 0, width, 80);
-
-    const botFade = ctx.createLinearGradient(0, height - 80, 0, height);
-    botFade.addColorStop(0, 'rgba(0, 12, 22, 0)');
-    botFade.addColorStop(1, 'rgba(0, 12, 22, 0.8)');
-    ctx.fillStyle = botFade;
-    ctx.fillRect(0, height - 80, width, 80);
-
-    // === TECH GRID (left side only) ===
+    // === TECH GRID (full canvas) ===
     ctx.strokeStyle = 'rgba(20, 184, 166, 0.04)';
     ctx.lineWidth = 1;
-    for (let x = 0; x < width * 0.55; x += 60) {
+    for (let x = 0; x < width; x += 60) {
       ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
     }
     for (let y = 0; y < height; y += 60) {
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width * 0.55, y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
     }
 
-    // Grid dots
-    for (let x = 60; x < width * 0.55; x += 120) {
+    // === GRID INTERSECTION DOTS ===
+    for (let x = 60; x < width; x += 120) {
       for (let y = 60; y < height; y += 120) {
         ctx.fillStyle = 'rgba(20, 184, 166, 0.08)';
         ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill();
@@ -100,11 +86,14 @@ const MentorBanner = () => {
 
     // === FLOATING HEXAGONS ===
     const hexagons = [
-      { x: 50, y: 55, size: 22, opacity: 0.09 },
-      { x: 490, y: 38, size: 14, opacity: 0.05 },
-      { x: 80, y: 560, size: 18, opacity: 0.06 },
-      { x: 320, y: 595, size: 12, opacity: 0.04 },
-      { x: 430, y: 480, size: 16, opacity: 0.05 },
+      { x: 50, y: 55, size: 24, opacity: 0.09 },
+      { x: 480, y: 40, size: 16, opacity: 0.05 },
+      { x: 1150, y: 70, size: 28, opacity: 0.10 },
+      { x: 1100, y: 560, size: 22, opacity: 0.07 },
+      { x: 80, y: 560, size: 20, opacity: 0.06 },
+      { x: 520, y: 590, size: 14, opacity: 0.04 },
+      { x: 950, y: 30, size: 18, opacity: 0.06 },
+      { x: 300, y: 600, size: 12, opacity: 0.04 },
     ];
     hexagons.forEach(hex => {
       ctx.strokeStyle = `rgba(20, 184, 166, ${hex.opacity})`;
@@ -128,31 +117,56 @@ const MentorBanner = () => {
     ctx.beginPath();
     ctx.arc(-100, height / 2, 380, -Math.PI / 3, Math.PI / 3);
     ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(width + 100, height / 2, 380, Math.PI * 0.67, Math.PI * 1.33);
+    ctx.stroke();
     ctx.strokeStyle = 'rgba(20, 184, 166, 0.05)';
     ctx.beginPath();
-    ctx.arc(width / 4, -200, 400, Math.PI * 0.15, Math.PI * 0.85);
+    ctx.arc(width / 2, -200, 400, Math.PI * 0.15, Math.PI * 0.85);
     ctx.stroke();
 
-    // === DIAGONAL DASHED LINES ===
-    const drawDashLine = (x1: number, y1: number, x2: number, y2: number, op: number) => {
-      const g = ctx.createLinearGradient(x1, y1, x2, y2);
-      g.addColorStop(0, `rgba(20, 184, 166, 0)`);
-      g.addColorStop(0.3, `rgba(20, 184, 166, ${op})`);
-      g.addColorStop(0.7, `rgba(20, 184, 166, ${op})`);
-      g.addColorStop(1, `rgba(20, 184, 166, 0)`);
-      ctx.strokeStyle = g;
+    // === DIAGONAL CONNECTION LINES ===
+    const drawConnectionLine = (x1: number, y1: number, x2: number, y2: number, opacity: number) => {
+      const grad = ctx.createLinearGradient(x1, y1, x2, y2);
+      grad.addColorStop(0, `rgba(20, 184, 166, 0)`);
+      grad.addColorStop(0.3, `rgba(20, 184, 166, ${opacity})`);
+      grad.addColorStop(0.7, `rgba(20, 184, 166, ${opacity})`);
+      grad.addColorStop(1, `rgba(20, 184, 166, 0)`);
+      ctx.strokeStyle = grad;
       ctx.lineWidth = 1;
       ctx.setLineDash([4, 8]);
       ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
       ctx.setLineDash([]);
     };
-    drawDashLine(0, 120, 460, 420, 0.06);
-    drawDashLine(200, 0, 550, 600, 0.04);
+    drawConnectionLine(0, 120, 520, 440, 0.06);
+    drawConnectionLine(width, 100, 540, 440, 0.06);
+    drawConnectionLine(200, 0, 600, 630, 0.04);
+    drawConnectionLine(1000, 0, 600, 630, 0.04);
+
+    // === FLOATING DIAMONDS ===
+    const diamonds = [
+      { x: 530, y: 315, size: 6, opacity: 0.15 },
+      { x: 540, y: 200, size: 4, opacity: 0.10 },
+      { x: 1050, y: 450, size: 5, opacity: 0.12 },
+      { x: 150, y: 470, size: 4, opacity: 0.08 },
+    ];
+    diamonds.forEach(d => {
+      ctx.save();
+      ctx.translate(d.x, d.y);
+      ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = `rgba(20, 184, 166, ${d.opacity})`;
+      ctx.fillRect(-d.size, -d.size, d.size * 2, d.size * 2);
+      ctx.strokeStyle = `rgba(20, 184, 166, ${d.opacity * 2})`;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(-d.size, -d.size, d.size * 2, d.size * 2);
+      ctx.restore();
+    });
 
     // === PARTICLES ===
     const particles = [
-      { x: 400, y: 80, r: 2 }, { x: 280, y: 50, r: 1.5 }, { x: 350, y: 520, r: 2 },
-      { x: 180, y: 300, r: 1 }, { x: 460, y: 520, r: 1 }, { x: 90, y: 400, r: 1.5 },
+      { x: 420, y: 80, r: 2 }, { x: 750, y: 50, r: 1.5 }, { x: 900, y: 580, r: 2 },
+      { x: 350, y: 520, r: 1.5 }, { x: 680, y: 600, r: 1 }, { x: 1050, y: 150, r: 2 },
+      { x: 200, y: 300, r: 1 }, { x: 850, y: 300, r: 1.5 }, { x: 480, y: 500, r: 1 },
     ];
     particles.forEach(p => {
       const pGlow = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
@@ -188,7 +202,7 @@ const MentorBanner = () => {
     });
 
     // ============================================================
-    // LEFT SIDE — Logo + Headline + Benefits
+    // LEFT SIDE — Logo + Headline + Tagline
     // ============================================================
     const leftX = 60;
 
@@ -197,7 +211,7 @@ const MentorBanner = () => {
     const logoY = 52;
 
     const logoGlow = ctx.createRadialGradient(leftX + logoSize / 2, logoY, 0, leftX + logoSize / 2, logoY, logoSize);
-    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.35)');
+    logoGlow.addColorStop(0, 'rgba(20, 184, 166, 0.3)');
     logoGlow.addColorStop(1, 'rgba(20, 184, 166, 0)');
     ctx.fillStyle = logoGlow;
     ctx.beginPath(); ctx.arc(leftX + logoSize / 2, logoY, logoSize, 0, Math.PI * 2); ctx.fill();
@@ -227,32 +241,34 @@ const MentorBanner = () => {
     ctx.fillText('BECOME A', leftX, 120);
 
     // "MENTOR"
-    ctx.font = '900 58px "Segoe UI", system-ui, sans-serif';
-    const mentorGrad = ctx.createLinearGradient(leftX, 175, leftX + 320, 175);
+    ctx.font = '900 52px "Segoe UI", system-ui, sans-serif';
+    const mentorGrad = ctx.createLinearGradient(leftX, 165, leftX + 300, 165);
     mentorGrad.addColorStop(0, '#14b8a6');
     mentorGrad.addColorStop(0.5, '#22d3ee');
     mentorGrad.addColorStop(1, '#14b8a6');
     ctx.fillStyle = mentorGrad;
-    ctx.shadowColor = 'rgba(20, 184, 166, 0.55)';
-    ctx.shadowBlur = 22;
-    ctx.fillText('MENTOR', leftX, 178);
+    ctx.shadowColor = 'rgba(20, 184, 166, 0.5)';
+    ctx.shadowBlur = 20;
+    ctx.fillText('MENTOR', leftX, 168);
     ctx.shadowBlur = 0;
 
     // Tagline
     ctx.font = '400 14px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.65)';
-    ctx.fillText('Shape the next generation of startup founders', leftX, 206);
+    ctx.fillText('Shape the next generation of startup founders', leftX, 196);
 
-    // Accent line
-    const lineGrad = ctx.createLinearGradient(leftX, 220, leftX + 300, 220);
+    // Accent line under tagline
+    const lineGrad = ctx.createLinearGradient(leftX, 210, leftX + 280, 210);
     lineGrad.addColorStop(0, '#14b8a6');
     lineGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
     ctx.strokeStyle = lineGrad;
     ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.moveTo(leftX, 220); ctx.lineTo(leftX + 300, 220); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(leftX, 210); ctx.lineTo(leftX + 280, 210); ctx.stroke();
 
-    // Benefits list
-    const benefits = [
+    // ============================================================
+    // LEFT SIDE — Benefits list
+    // ============================================================
+    const benefitItems = [
       'Direct impact on high-potential startups',
       'AI-powered matching with founders',
       'Flexible scheduling & session tools',
@@ -261,10 +277,10 @@ const MentorBanner = () => {
       'Co-invest & advise equity opportunities',
     ];
 
-    const benefitStartY = 248;
+    const benefitStartY = 238;
     const benefitSpacing = 28;
 
-    benefits.forEach((item, i) => {
+    benefitItems.forEach((item, i) => {
       const y = benefitStartY + i * benefitSpacing;
 
       ctx.fillStyle = '#14b8a6';
@@ -285,16 +301,18 @@ const MentorBanner = () => {
     });
 
     // ============================================================
-    // RIGHT SIDE — "What You'll Do" — 4 stacked role cards
+    // RIGHT SIDE — "What Mentors Do" — 4 large stacked cards
     // ============================================================
     const rightX = 500;
     const cardAreaW = width - rightX - 50;
 
+    // Section label
     ctx.font = 'bold 15px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
     ctx.textAlign = 'left';
     ctx.fillText('WHAT MENTORS DO AT SFH', rightX, 48);
 
+    // Accent line
     const accentGrad = ctx.createLinearGradient(rightX, 56, rightX + cardAreaW, 56);
     accentGrad.addColorStop(0, 'rgba(20, 184, 166, 0.6)');
     accentGrad.addColorStop(1, 'rgba(20, 184, 166, 0)');
@@ -321,7 +339,6 @@ const MentorBanner = () => {
       ctx.lineJoin = 'round';
       switch (iconType) {
         case 'handshake':
-          // Two hands meeting
           ctx.beginPath();
           ctx.moveTo(ix - sz * 0.7, iy + sz * 0.1);
           ctx.lineTo(ix, iy - sz * 0.1);
@@ -334,7 +351,6 @@ const MentorBanner = () => {
           ctx.beginPath(); ctx.arc(ix, iy - sz * 0.1, sz * 0.13, 0, Math.PI * 2); ctx.fill();
           break;
         case 'chart':
-          // Bar chart
           ctx.beginPath();
           ctx.moveTo(ix - sz * 0.6, iy + sz * 0.7); ctx.lineTo(ix - sz * 0.6, iy + sz * 0.2); ctx.lineTo(ix - sz * 0.35, iy + sz * 0.2); ctx.lineTo(ix - sz * 0.35, iy + sz * 0.7);
           ctx.stroke();
@@ -349,20 +365,16 @@ const MentorBanner = () => {
           ctx.stroke();
           break;
         case 'network':
-          // Network nodes
           ctx.beginPath(); ctx.arc(ix, iy - sz * 0.5, sz * 0.2, 0, Math.PI * 2); ctx.stroke();
           ctx.beginPath(); ctx.arc(ix - sz * 0.6, iy + sz * 0.4, sz * 0.2, 0, Math.PI * 2); ctx.stroke();
           ctx.beginPath(); ctx.arc(ix + sz * 0.6, iy + sz * 0.4, sz * 0.2, 0, Math.PI * 2); ctx.stroke();
           ctx.beginPath();
-          ctx.moveTo(ix - sz * 0.05, iy - sz * 0.3);
-          ctx.lineTo(ix - sz * 0.5, iy + sz * 0.25);
-          ctx.moveTo(ix + sz * 0.05, iy - sz * 0.3);
-          ctx.lineTo(ix + sz * 0.5, iy + sz * 0.25);
+          ctx.moveTo(ix - sz * 0.05, iy - sz * 0.3); ctx.lineTo(ix - sz * 0.5, iy + sz * 0.25);
+          ctx.moveTo(ix + sz * 0.05, iy - sz * 0.3); ctx.lineTo(ix + sz * 0.5, iy + sz * 0.25);
           ctx.moveTo(ix - sz * 0.4, iy + sz * 0.4); ctx.lineTo(ix + sz * 0.4, iy + sz * 0.4);
           ctx.stroke();
           break;
         case 'award':
-          // Trophy / star
           ctx.beginPath();
           for (let s = 0; s < 5; s++) {
             const outerA = (s * 4 * Math.PI) / 5 - Math.PI / 2;
@@ -376,7 +388,6 @@ const MentorBanner = () => {
           }
           ctx.closePath();
           ctx.stroke();
-          // Pedestal
           ctx.beginPath();
           ctx.moveTo(ix - sz * 0.3, iy + sz * 0.7); ctx.lineTo(ix + sz * 0.3, iy + sz * 0.7);
           ctx.moveTo(ix, iy + sz * 0.6); ctx.lineTo(ix, iy + sz * 0.7);
@@ -455,6 +466,7 @@ const MentorBanner = () => {
 
       drawRoleIcon(r.icon, hexX, hexY, 14);
 
+      // Corner accents
       const cornerLen = 14;
       const cornerInset = 7;
       ctx.strokeStyle = `${r.color}60`;
@@ -487,24 +499,25 @@ const MentorBanner = () => {
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(60, sepY); ctx.lineTo(width - 60, sepY); ctx.stroke();
 
-    // Headline
+    // Bottom headline — left aligned
     ctx.font = '900 28px "Segoe UI", system-ui, sans-serif';
-    const ctaGrad = ctx.createLinearGradient(leftX, 490, leftX + 500, 490);
-    ctaGrad.addColorStop(0, '#14b8a6');
-    ctaGrad.addColorStop(0.5, '#22d3ee');
-    ctaGrad.addColorStop(1, '#14b8a6');
-    ctx.fillStyle = ctaGrad;
+    const nextGrad = ctx.createLinearGradient(leftX, 490, leftX + 500, 490);
+    nextGrad.addColorStop(0, '#14b8a6');
+    nextGrad.addColorStop(0.5, '#22d3ee');
+    nextGrad.addColorStop(1, '#14b8a6');
+    ctx.fillStyle = nextGrad;
     ctx.textAlign = 'left';
     ctx.shadowColor = 'rgba(20, 184, 166, 0.4)';
     ctx.shadowBlur = 15;
-    ctx.fillText('YOUR EXPERTISE CHANGES LIVES', leftX, 490);
+    ctx.fillText('YOUR EXPERTISE CAN CHANGE LIVES', leftX, 490);
     ctx.shadowBlur = 0;
 
+    // Subtitle
     ctx.font = '400 13px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
-    ctx.fillText('Join 500+ mentors guiding startups from idea to market on the Startup Factory Hub platform.', leftX, 515);
+    ctx.fillText('Share your knowledge, guide the next wave of entrepreneurs, and leave a lasting impact on the startup ecosystem.', leftX, 515);
 
-    // CTA Button
+    // CTA button — right side
     const btnW = 240;
     const btnH = 44;
     const btnX = width - 60 - btnW;
@@ -530,9 +543,9 @@ const MentorBanner = () => {
     ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
-    ctx.fillText('APPLY TO MENTOR →', btnX + btnW / 2, btnY + btnH / 2 + 5);
+    ctx.fillText('APPLY TO BECOME A MENTOR', btnX + btnW / 2, btnY + btnH / 2 + 5);
 
-    // Bottom bar
+    // === BOTTOM BAR ===
     ctx.textAlign = 'left';
     ctx.font = '400 11px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
@@ -541,7 +554,7 @@ const MentorBanner = () => {
     ctx.textAlign = 'right';
     ctx.font = '400 9px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(20, 184, 166, 0.35)';
-    ctx.fillText('#StartupFactoryHub  #Mentorship  #StartupMentors  #GlobalMentors', width - 60, height - 22);
+    ctx.fillText('#StartupFactoryHub  #MentorNetwork  #StartupMentors  #GlobalInnovation', width - 60, height - 22);
   };
 
   const downloadBanner = (format: 'png' | 'jpg') => {
@@ -550,7 +563,7 @@ const MentorBanner = () => {
     const link = document.createElement('a');
     const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
     const quality = format === 'jpg' ? 0.95 : undefined;
-    link.download = `startup-factory-hub-mentor-banner.${format}`;
+    link.download = `startup-factory-hub-mentor.${format}`;
     link.href = canvas.toDataURL(mimeType, quality);
     link.click();
     toast.success(`Downloaded as ${format.toUpperCase()}`);
@@ -561,9 +574,9 @@ const MentorBanner = () => {
       <div className="tech-card border-0 p-6 mb-6">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-foreground mb-2">Mentor Recruitment Banner (1200×630)</h2>
+            <h2 className="text-xl font-semibold text-foreground mb-2">Become a Mentor (1200×630)</h2>
             <p className="text-muted-foreground text-sm">
-              Call to action targeting experienced professionals to join as mentors on SFH.
+              Call to action for experienced professionals to join SFH as mentors.
             </p>
           </div>
           <div className="flex items-center gap-2">
