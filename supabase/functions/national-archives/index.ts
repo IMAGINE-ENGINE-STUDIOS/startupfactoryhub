@@ -50,16 +50,22 @@ serve(async (req) => {
       console.log('Searching National Archives:', searchUrl);
 
       const searchRes = await fetch(searchUrl, {
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' }
       });
 
-      if (!searchRes.ok) {
-        const errText = await searchRes.text();
-        console.error('National Archives API error:', searchRes.status, errText);
-        throw new Error(`National Archives API failed: ${searchRes.status}`);
+      const contentType = searchRes.headers.get('content-type') || '';
+      const rawText = await searchRes.text();
+
+      if (!searchRes.ok || !contentType.includes('application/json')) {
+        console.error('National Archives API error:', searchRes.status, contentType);
+        console.error('Response preview:', rawText.substring(0, 300));
+        if (rawText.trim().startsWith('<!') || rawText.includes('<html')) {
+          throw new Error(`National Archives API returned an HTML error page (status ${searchRes.status}). The API key may be invalid, expired, or the endpoint has changed.`);
+        }
+        throw new Error(`National Archives API failed with status ${searchRes.status}: ${rawText.substring(0, 200)}`);
       }
 
-      const searchData = await searchRes.json();
+      const searchData = JSON.parse(rawText);
       await logApiUsage('national_archives', 'records/search', undefined, 0.0001);
 
       const items = searchData?.body?.hits?.hits || [];
