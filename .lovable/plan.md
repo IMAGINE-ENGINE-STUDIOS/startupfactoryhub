@@ -1,80 +1,99 @@
 
-## National Archives — Full In-App Content Viewer
+## Admin: Startup Factory Hub MVP Accelerator Management
 
-### The Problem
+### Overview
 
-Currently the component has two issues that send users outside the app:
-
-1. **"View Full Record on Archives.gov" button** in `RecordDetail` calls `window.open(record.url, '_blank')` — this redirects externally.
-2. **Featured collections** are hardcoded stubs with only a title and a 1-sentence description. Clicking one shows almost no content, so there's nothing useful to view in-app.
-3. **Search results** only return metadata fields (title, creator, date, description) — no document body, transcriptions, digital objects, or image thumbnails to render.
-
-### The Solution: Fetch Full Record Content via the API
-
-The National Archives API (`/api/v2`) supports:
-- **`/records/search`** — already used, returns metadata + `digitalObjects` (image URLs, thumbnails)
-- **`/records/parentNaId/{naId}`** — fetches child records (the actual pages/files) of a parent record
-- **`/transcriptions/naId/{naId}`** — fetches any crowdsourced transcription text for a record
-
-The plan is to build a **3-layer in-app experience**:
-
-```text
-[Search Results Grid]
-        ↓ click
-[Record Detail View — full metadata + digital images]
-        ↓ click thumbnail
-[Image/Document Viewer — full-size in-app render]
-```
+The goal is to add a dedicated admin panel section that lets admins manage the **Startup Factory Hub - MVP Accelerator** program. This is a special "platform-owned" accelerator profile (already exists in the DB as `Startup Factory HUB` with ID `abd41d15-f707-4e36-b2f5-3a08d7b7b13a`). The admin section reuses the same data model as regular accelerators but provides an admin-specific management UI, plus an "External Link" field for the program's public landing page.
 
 ---
 
-### What Will Change
+### What Exists Already
 
-#### 1. Edge Function: `supabase/functions/national-archives/index.ts`
+- `accelerator_profiles` table: has a row for "Startup Factory HUB" owned by user `45b54179-...`
+- `accelerator_cohorts` table: linked by `accelerator_id`
+- `CohortManagement` component: reusable cohort management UI
+- `CreateCohortDialog`: create cohorts
+- `CohortApplicationsManager`: manage startup applications
+- `AlumniPortfolio`, `StartupJourneyTracker`, `MentorAdvisorAssignment`: all reusable from AcceleratorDashboard
+- Admin Dashboard already has a tab slot system
 
-Add two new request types:
+---
 
-- **`type: 'record'`** — Given a `naId`, fetch the full record including:
-  - All metadata fields (scope note, organization history, arrangement, restrictions)
-  - `digitalObjects` array (thumbnail URLs, object URLs, object type — image/pdf/audio)
-  - `transcriptions` by calling `/transcriptions/naId/{naId}`
-  - Child records via `/records/parentNaId/{naId}` (e.g., individual pages of a multi-page document)
+### Changes Required
 
-- **`type: 'featured'`** — Replace hardcoded stubs with real API calls for the 6 featured records using their known `naId` values (e.g., `1` for Declaration of Independence, `1667751` for the Constitution), so they load rich content.
+#### 1. Database Migration — Add `external_link` to `accelerator_profiles`
 
-The API key is passed via the `x-api-key` header (correct per the docs), not a query param.
+Add an `external_link` column (text, nullable) to `accelerator_profiles` to store an external URL for the program (e.g., a landing page or registration form outside the platform).
 
-#### 2. UI Component: `src/components/intelligence/NationalArchivesSection.tsx`
+```sql
+ALTER TABLE public.accelerator_profiles
+ADD COLUMN IF NOT EXISTS external_link text;
+```
 
-**Remove completely**: The `window.open(record.url, '_blank')` button in `RecordDetail`.
+#### 2. New Component: `src/components/admin/SFHAcceleratorManager.tsx`
 
-**Upgrade `RecordDetail`** to show:
-- Full metadata panels (all available fields from the API)
-- **Digital Objects Gallery**: A grid of thumbnail images rendered with `<img>` tags inside the app. Clicking a thumbnail opens a full-size in-app lightbox modal (using the existing `Dialog` component from the UI library).
-- **Transcription Panel**: If the API returns transcription text, display it in a scrollable tech-card panel with a "Transcription" label.
-- **Child Records**: If the record has child pages, show a paginated grid of those thumbnails.
+A self-contained admin management panel for the SFH MVP Accelerator program. It will:
 
-**Add `ImageLightbox` sub-component**: A `Dialog`-based full-screen viewer that shows the selected image at full resolution with prev/next navigation — entirely within the app, no external redirect.
+- **Hardcode the SFH accelerator profile ID** (`abd41d15-f707-4e36-b2f5-3a08d7b7b13a`) to always target the correct record — no user-level auth required.
+- **Profile Editor section**: Edit `organization_name`, `description`, `website`, `external_link`, `program_duration`, `equity_percentage`, `funding_offered`, `is_accepting_applications`, `logo_url`, `location`.
+- **External Link Manager**: A prominent card showing the current external link with a copy button and "Open" button.
+- **Cohort Management**: Reuse `CohortManagement` + `CreateCohortDialog` components to create and view cohorts linked to the SFH accelerator.
+- **Applications viewer**: Show all `cohort_applications` for SFH cohorts.
+- **Portfolio viewer**: Show all `cohort_startups` for SFH cohorts.
+- **Stats cards**: Total cohorts, total startups, total applications, accepting status.
 
-**Update `RecordCard`**: Show thumbnail previews in the card grid if available, making results more visual.
+Component structure (tabs within the panel):
+```text
+SFHAcceleratorManager
+├── Overview Tab (profile info + stats + external link)
+├── Cohorts Tab (CohortManagement component)
+├── Applications Tab (CohortApplicationsManager)
+└── Portfolio Tab (StartupJourneyTracker / portfolio list)
+```
 
-**Update featured loading**: Call `type: 'record'` for each of the 6 featured `naId`s so they display real, rich content.
+#### 3. Update Admin Dashboard (`src/pages/AdminDashboard.tsx`)
+
+- Add a new tab `"sfh-program"` with icon `Rocket` and label `"MVP Program"`.
+- Import and render `<SFHAcceleratorManager />` inside the new `TabsContent`.
+
+---
+
+### Data Flow
+
+```text
+Admin opens "MVP Program" tab
+        ↓
+SFHAcceleratorManager loads
+        ↓
+Queries accelerator_profiles WHERE id = 'abd41d15-...'  (hardcoded SFH ID)
+        ↓
+Queries accelerator_cohorts WHERE accelerator_id = SFH_ID
+        ↓
+Queries cohort_applications WHERE cohort_id IN [sfh cohort ids]
+        ↓
+Queries cohort_startups WHERE cohort_id IN [sfh cohort ids]
+        ↓
+Admin can edit profile fields, manage cohorts, review applications, manage portfolio
+```
 
 ---
 
 ### Technical Details
 
-**API authentication fix**: The current edge function passes the key as `?apikey=` query param. The official docs show it should be in the `x-api-key` header — this will be corrected, which will also fix the HTML error page issue.
+- **No new auth needed**: Admin role is already validated at the AdminDashboard level — the component trusts that only admins can reach it.
+- **SFH Profile ID is a constant**: Defined at the top of the component for easy future updates.
+- **External Link**: Stored in `external_link` column (new migration), shown with a copy + open button prominently in the Overview tab.
+- **Logo upload**: Reuse the existing `AvatarUpload` component with `bucket="company-logos"`.
+- **Create cohort**: Calls Supabase insert directly using the SFH `accelerator_id` (bypasses `useAcceleratorProfile` hook which relies on `useAuth()`).
+- **Cohort actions**: Admin can create cohorts, update status, and view applications without being the profile's owning user.
 
-**Image rendering**: `digitalObjects` returned by the API include direct image URLs (JPEG/PNG from the National Archives CDN). These are public URLs served from `media.archives.gov` and can be embedded directly in `<img>` tags.
+---
 
-**No external navigation**: The `ExternalLink` button and `window.open` will be completely removed from the user flow. A subtle "Source: archives.gov" attribution text will remain as a non-clickable label for reference.
+### Files to Create/Modify
 
-**Pagination**: For records with many digital objects or child records, a simple prev/next page control will be added within the component.
-
-### Files to Edit
-
-| File | Change |
+| File | Action |
 |---|---|
-| `supabase/functions/national-archives/index.ts` | Add `record` type handler; fix API key header; add transcription + child record fetching |
-| `src/components/intelligence/NationalArchivesSection.tsx` | Remove all `window.open` calls; add image gallery, lightbox viewer, transcription panel, and child record grid |
+| `src/components/admin/SFHAcceleratorManager.tsx` | **Create** — new admin management component |
+| `src/pages/AdminDashboard.tsx` | **Modify** — add new tab + import |
+| Database migration | **Run** — add `external_link` column to `accelerator_profiles` |
+
