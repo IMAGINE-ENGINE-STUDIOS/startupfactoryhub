@@ -241,7 +241,7 @@ const MVPBanner = () => {
 
     // === PROGRAM BADGE ===
     const badgeX = 80, badgeY = 130;
-    const badgeW = 210, badgeH = 30;
+    const badgeW = 330, badgeH = 30;
     const badgeGrad = ctx.createLinearGradient(badgeX, badgeY, badgeX + badgeW, badgeY);
     badgeGrad.addColorStop(0, 'rgba(20, 184, 166, 0.25)');
     badgeGrad.addColorStop(1, 'rgba(20, 184, 166, 0.05)');
