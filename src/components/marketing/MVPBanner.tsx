@@ -254,13 +254,13 @@ const MVPBanner = () => {
     ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = '#14b8a6';
     ctx.textAlign = 'left';
-    ctx.fillText('STARTUP FACTORY HUB  |  8-WEEK PROGRAM', badgeX + 12, badgeY + 20);
+    ctx.fillText('STARTUP FACTORY HUB  |  4-WEEK PROGRAM', badgeX + 12, badgeY + 20);
 
     // === HEADLINE ===
     ctx.font = '300 38px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(255,255,255,0.85)';
     ctx.textAlign = 'left';
-    ctx.fillText('LAUNCH YOUR', 80, 208);
+    ctx.fillText('LAUNCH YOUR STARTUPS', 80, 208);
 
     const mvpGrad = ctx.createLinearGradient(80, 240, 560, 240);
     mvpGrad.addColorStop(0, '#14b8a6');
@@ -280,7 +280,7 @@ const MVPBanner = () => {
     // Subheadline
     ctx.font = '400 16px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = 'rgba(20, 184, 166, 0.9)';
-    ctx.fillText('Functionally MVP software — built, validated & launched in 8 weeks.', 80, 380);
+    ctx.fillText('Functionally MVP software — built, validated & launched in 4 weeks.', 80, 380);
 
     // === DIVIDER ===
     const divGrad = ctx.createLinearGradient(80, 0, 480, 0);
