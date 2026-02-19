@@ -13,6 +13,7 @@ import sfhQrCode from '@/assets/sfh-qr-code.png';
 import GIF from 'gif.js';
 import LocalHubBanner from '@/components/marketing/LocalHubBanner';
 import MentorBanner from '@/components/marketing/MentorBanner';
+import MVPBanner from '@/components/marketing/MVPBanner';
 
 const Marketing = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -3078,6 +3079,9 @@ const Marketing = () => {
 
           {/* Banner 7 - Mentor Recruitment CTA */}
           <MentorBanner />
+
+          {/* Banner 8 - MVP Program */}
+          <MVPBanner />
 
           <div className="grid md:grid-cols-3 gap-4">
             <div className="tech-card border-0 p-4">
