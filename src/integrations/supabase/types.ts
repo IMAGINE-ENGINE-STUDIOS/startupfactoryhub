@@ -99,6 +99,7 @@ export type Database = {
           created_at: string | null
           description: string | null
           equity_percentage: number | null
+          external_link: string | null
           founded_year: number | null
           funding_offered: number | null
           id: string
@@ -124,6 +125,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           equity_percentage?: number | null
+          external_link?: string | null
           founded_year?: number | null
           funding_offered?: number | null
           id?: string
@@ -149,6 +151,7 @@ export type Database = {
           created_at?: string | null
           description?: string | null
           equity_percentage?: number | null
+          external_link?: string | null
           founded_year?: number | null
           funding_offered?: number | null
           id?: string
