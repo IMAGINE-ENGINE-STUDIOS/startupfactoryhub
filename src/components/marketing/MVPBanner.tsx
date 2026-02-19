@@ -434,7 +434,7 @@ const MVPBanner = () => {
     // =========================================================
     // === RIGHT SIDE LAYOUT ===
     // =========================================================
-    const gridStartX = 510;
+    const gridStartX = 622;
     const gridEndX = width - 16;
     const gridW = gridEndX - gridStartX;
     const gap = 8;
@@ -479,10 +479,10 @@ const MVPBanner = () => {
     };
 
     // === ALL 5 EQUAL SQUARES (2 top + 3 bottom) ===
-    // squareW based on 3-column grid so all squares share same width
     const squareW = (gridW - gap * 2) / 3;
-    // squareH = squareW to make them actual squares
-    const squareH = squareW;
+    // Cap squareH so both rows fit: topRowY + 2*h + gap + bottomMargin <= height
+    const maxH = (height - 46 - gap - 30) / 2;
+    const squareH = Math.min(squareW, maxH);
     const topRowY = 46;
     // Top row: 2 squares centered (Mentorship, Advising)
     const topRowOffsetX = (gridW - 2 * squareW - gap) / 2;
