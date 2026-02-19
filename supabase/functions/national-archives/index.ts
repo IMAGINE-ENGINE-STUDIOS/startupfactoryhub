@@ -9,7 +9,7 @@ const corsHeaders = {
 
 const BASE_URL = 'https://catalog.archives.gov/api/v2';
 
-async function logApiUsage(serviceName: string, endpoint: string, tokensUsed?: number, estimatedCost?: number) {
+async function logApiUsage(serviceName: string, endpoint: string, estimatedCost?: number) {
   try {
     const supabaseClient = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -19,7 +19,6 @@ async function logApiUsage(serviceName: string, endpoint: string, tokensUsed?: n
       service_name: serviceName,
       endpoint: endpoint,
       request_count: 1,
-      tokens_used: tokensUsed || null,
       estimated_cost: estimatedCost || 0.0001,
       metadata: { timestamp: new Date().toISOString() }
     });
@@ -31,19 +30,18 @@ async function logApiUsage(serviceName: string, endpoint: string, tokensUsed?: n
 function getApiHeaders(apiKey: string) {
   return {
     'Accept': 'application/json',
-    'Content-Type': 'application/json',
     'x-api-key': apiKey,
   };
 }
 
 async function fetchJson(url: string, apiKey: string): Promise<any> {
   const res = await fetch(url, { headers: getApiHeaders(apiKey) });
-  const contentType = res.headers.get('content-type') || '';
   const rawText = await res.text();
+  const contentType = res.headers.get('content-type') || '';
 
   if (!res.ok || !contentType.includes('application/json')) {
     if (rawText.trim().startsWith('<!') || rawText.includes('<html')) {
-      throw new Error(`National Archives API returned an HTML error page (status ${res.status}). The API key may be invalid or expired.`);
+      throw new Error(`National Archives API returned an HTML error page (status ${res.status}).`);
     }
     throw new Error(`National Archives API failed with status ${res.status}: ${rawText.substring(0, 200)}`);
   }
@@ -52,33 +50,78 @@ async function fetchJson(url: string, apiKey: string): Promise<any> {
 }
 
 function mapRecord(hit: any) {
-  const src = hit._source || {};
-  const desc = src.description || {};
+  // The catalog API v2 nests data differently — handle multiple possible structures
+  const src = hit._source || hit.source || hit || {};
+
+  // Title can be in many places
+  const title =
+    src.title ||
+    src.description?.title ||
+    src.record?.title ||
+    'Untitled Record';
+
+  // Date
+  const date =
+    src.date ||
+    src.coverageDates?.proposableQualifiableDate ||
+    src.description?.coverageDates?.proposableQualifiableDate ||
+    src.dateNote ||
+    src.description?.dateNote ||
+    null;
+
+  // Creator
+  const creatingOrgs =
+    src.creatingOrganizations ||
+    src.description?.creatingOrganizations ||
+    [];
+  const creator = creatingOrgs.map((o: any) => o.name || o).filter(Boolean).join(', ') || null;
+
+  // Description text
+  const description =
+    src.scopeAndContentNote ||
+    src.description?.scopeAndContentNote ||
+    src.generalNote ||
+    src.description?.generalNote ||
+    src.description?.description ||
+    null;
+
+  // Level / type
+  const type =
+    src.levelOfDescription ||
+    src.description?.levelOfDescription ||
+    src.type ||
+    'Record';
+
+  // Digital objects
+  const rawObjects = src.digitalObjects || src.description?.digitalObjects || [];
+  const digitalObjects = rawObjects.map((obj: any) => ({
+    id: obj.objectId || obj.id || String(Math.random()),
+    thumbnailUrl: obj.thumbnailUrl || obj.thumbnail || null,
+    objectUrl: obj.objectUrl || obj.url || obj.objectFilename || null,
+    objectType: obj.objectType || obj.mimeType || 'image',
+    title: obj.objectDescription || obj.description || obj.title || null,
+  }));
+
+  const naId = src.naId || hit._id || hit.id || '';
+
+  console.log('mapRecord raw src keys:', Object.keys(src).join(', '));
+
   return {
-    id: src.naId || hit._id,
-    naId: src.naId || hit._id,
-    title: desc.title || src.title || 'Untitled Record',
-    type: desc.levelOfDescription || src.type || 'Record',
-    date: desc.coverageDates?.proposableQualifiableDate || desc.dateNote || null,
-    creator: (desc.creatingOrganizations || []).map((o: any) => o.name).filter(Boolean).join(', ') || null,
-    description: desc.scopeAndContentNote || desc.generalNote || null,
-    series: desc.series?.title || null,
+    id: String(naId),
+    naId: String(naId),
+    title,
+    type,
+    date,
+    creator,
+    description,
+    series: src.series?.title || src.description?.series?.title || null,
     accessLevel: src.accessLevel || 'public',
-    thumbnailUrl: src.digitalObjects?.[0]?.thumbnailUrl || null,
-    digitalObjects: (src.digitalObjects || []).map((obj: any) => ({
-      id: obj.objectId || obj.id,
-      thumbnailUrl: obj.thumbnailUrl || null,
-      objectUrl: obj.objectUrl || obj.url || null,
-      objectType: obj.objectType || obj.mimeType || 'image',
-      title: obj.objectDescription || obj.title || null,
-    })),
-    url: `https://catalog.archives.gov/id/${src.naId || hit._id}`,
-    scopeAndContentNote: desc.scopeAndContentNote || null,
-    generalNote: desc.generalNote || null,
-    arrangementNote: desc.arrangementNote || null,
-    accessRestriction: desc.accessRestriction?.status || null,
-    useRestriction: desc.useRestriction?.status || null,
-    levelOfDescription: desc.levelOfDescription || null,
+    thumbnailUrl: digitalObjects[0]?.thumbnailUrl || null,
+    digitalObjects,
+    url: `https://catalog.archives.gov/id/${naId}`,
+    scopeAndContentNote: src.scopeAndContentNote || src.description?.scopeAndContentNote || null,
+    arrangementNote: src.arrangementNote || src.description?.arrangementNote || null,
+    accessRestriction: src.accessRestriction?.status || src.description?.accessRestriction?.status || null,
   };
 }
 
@@ -98,15 +141,19 @@ serve(async (req) => {
 
     let results: any = {};
 
-    // ── SEARCH ────────────────────────────────────────────────────────────────
+    // ── SEARCH ───────────────────────────────────────────────────────────────
     if (type === 'search' || !type) {
       const searchUrl = `${BASE_URL}/records/search?q=${encodeURIComponent(query)}&limit=20&offset=0`;
-      console.log('Searching National Archives:', searchUrl);
+      console.log('Searching:', searchUrl);
 
       const searchData = await fetchJson(searchUrl, API_KEY);
-      await logApiUsage('national_archives', 'records/search', undefined, 0.0001);
-
       const items = searchData?.body?.hits?.hits || [];
+      console.log('Search hits count:', items.length);
+      if (items.length > 0) {
+        console.log('First hit _source keys:', Object.keys(items[0]._source || {}).join(', '));
+      }
+
+      await logApiUsage('national_archives', 'records/search');
 
       results = {
         type: 'search',
@@ -116,103 +163,94 @@ serve(async (req) => {
       };
     }
 
-    // ── FULL RECORD ───────────────────────────────────────────────────────────
+    // ── FULL RECORD ──────────────────────────────────────────────────────────
     else if (type === 'record') {
       if (!naId) throw new Error('naId is required for type=record');
-
       console.log('Fetching full record for naId:', naId);
 
-      // Fetch record + transcriptions + child records in parallel
-      const recordUrl = `${BASE_URL}/records/search?naIds=${naId}`;
-      const transcriptionUrl = `${BASE_URL}/transcriptions/naId/${naId}`;
-      const childUrl = `${BASE_URL}/records/parentNaId/${naId}?limit=50`;
+      // Try direct record endpoint first, then fall back to search by naId
+      let record: any = null;
+      let transcriptions: any[] = [];
 
-      const [recordData, transcriptionData, childData] = await Promise.allSettled([
+      // Try the direct naId search
+      const recordUrl = `${BASE_URL}/records/search?naId=${encodeURIComponent(naId)}`;
+      console.log('Fetching record:', recordUrl);
+
+      const [recordData, transcriptionData] = await Promise.allSettled([
         fetchJson(recordUrl, API_KEY),
-        fetchJson(transcriptionUrl, API_KEY),
-        fetchJson(childUrl, API_KEY),
+        fetchJson(`${BASE_URL}/transcriptions/naId/${naId}`, API_KEY),
       ]);
 
-      await logApiUsage('national_archives', 'records/full', undefined, 0.0003);
-
-      // Parse record
-      let record: any = null;
       if (recordData.status === 'fulfilled') {
         const hits = recordData.value?.body?.hits?.hits || [];
+        console.log('Record hits:', hits.length);
         if (hits.length > 0) {
+          console.log('Record _source keys:', Object.keys(hits[0]._source || {}).join(', '));
+          console.log('Record _source sample:', JSON.stringify(hits[0]._source).substring(0, 500));
           record = mapRecord(hits[0]);
         }
+      } else {
+        console.error('Record fetch failed:', recordData.reason);
       }
 
-      // Parse transcriptions
-      let transcriptions: any[] = [];
       if (transcriptionData.status === 'fulfilled') {
         const tData = transcriptionData.value;
         const tItems = tData?.body?.hits?.hits || tData?.transcriptions || [];
         transcriptions = tItems.map((t: any) => ({
           id: t._id || t.id,
-          text: t._source?.transcription?.text || t.text || t._source?.text || '',
+          text: t._source?.transcription?.text || t._source?.text || t.text || '',
           contributor: t._source?.transcription?.contributor || t.contributor || null,
           status: t._source?.transcription?.status || t.status || 'completed',
         })).filter((t: any) => t.text);
-      } else {
-        console.warn('Transcriptions fetch failed (may not exist):', transcriptionData.reason);
       }
 
-      // Parse child records (individual pages / objects)
-      let children: any[] = [];
-      if (childData.status === 'fulfilled') {
-        const childHits = childData.value?.body?.hits?.hits || [];
-        children = childHits.slice(0, 50).map(mapRecord);
-      } else {
-        console.warn('Child records fetch failed (may not have children):', childData.reason);
-      }
+      await logApiUsage('national_archives', 'records/full');
 
       results = {
         type: 'record',
         record,
         transcriptions,
-        children,
+        // No children — removed per user request
       };
     }
 
     // ── FEATURED ─────────────────────────────────────────────────────────────
     else if (type === 'featured') {
-      // Known naIds for famous collections
       const featuredNaIds = [
-        { naId: '1', title: 'Declaration of Independence' },
-        { naId: '1667751', title: 'U.S. Constitution' },
-        { naId: '300389', title: 'Emancipation Proclamation' },
-        { naId: '594975', title: 'WWII Posters Collection' },
-        { naId: '17414036', title: 'Apollo 11 Mission Records' },
-        { naId: '278669', title: 'Civil War Maps' },
+        { naId: '1', title: 'Declaration of Independence', category: 'Founding Documents' },
+        { naId: '1667751', title: 'U.S. Constitution', category: 'Founding Documents' },
+        { naId: '300389', title: 'Emancipation Proclamation', category: 'Historical Documents' },
+        { naId: '594975', title: 'WWII Posters Collection', category: 'Military Records' },
+        { naId: '17414036', title: 'Apollo 11 Mission Records', category: 'Scientific Records' },
+        { naId: '278669', title: 'Civil War Maps', category: 'Military Records' },
       ];
 
-      const fetchPromises = featuredNaIds.map(async ({ naId: fNaId, title }) => {
+      const fetchPromises = featuredNaIds.map(async ({ naId: fNaId, title, category }) => {
         try {
-          const url = `${BASE_URL}/records/search?naIds=${fNaId}`;
+          const url = `${BASE_URL}/records/search?naId=${encodeURIComponent(fNaId)}`;
           const data = await fetchJson(url, API_KEY);
           const hits = data?.body?.hits?.hits || [];
-          if (hits.length > 0) return mapRecord(hits[0]);
-          // Fallback stub if not found
-          return {
-            id: fNaId, naId: fNaId, title, type: 'Featured Collection',
-            date: null, creator: null, description: null, series: null,
-            accessLevel: 'public', thumbnailUrl: null, digitalObjects: [],
-            url: `https://catalog.archives.gov/id/${fNaId}`,
-          };
-        } catch {
-          return {
-            id: fNaId, naId: fNaId, title, type: 'Featured Collection',
-            date: null, creator: null, description: null, series: null,
-            accessLevel: 'public', thumbnailUrl: null, digitalObjects: [],
-            url: `https://catalog.archives.gov/id/${fNaId}`,
-          };
+          if (hits.length > 0) {
+            const mapped = mapRecord(hits[0]);
+            // Ensure featured items have at minimum the fallback title
+            if (!mapped.title || mapped.title === 'Untitled Record') mapped.title = title;
+            if (!mapped.type || mapped.type === 'Record') mapped.type = category;
+            return mapped;
+          }
+        } catch (err) {
+          console.warn(`Failed to fetch featured naId ${fNaId}:`, err);
         }
+        // Fallback stub
+        return {
+          id: fNaId, naId: fNaId, title, type: category,
+          date: null, creator: null, description: null, series: null,
+          accessLevel: 'public', thumbnailUrl: null, digitalObjects: [],
+          url: `https://catalog.archives.gov/id/${fNaId}`,
+        };
       });
 
       const records = await Promise.all(fetchPromises);
-      await logApiUsage('national_archives', 'records/featured', undefined, 0.0006);
+      await logApiUsage('national_archives', 'records/featured');
 
       results = {
         type: 'featured',

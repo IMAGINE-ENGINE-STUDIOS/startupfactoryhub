@@ -60,7 +60,7 @@ interface FullRecordData {
   type: 'record';
   record: ArchiveRecord | null;
   transcriptions: Transcription[];
-  children: ArchiveRecord[];
+  children?: ArchiveRecord[];
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -291,10 +291,7 @@ const RecordDetail = ({
   }, [record.id, record.naId]);
 
   const displayRecord = fullData?.record || record;
-  const allDigitalObjects = [
-    ...(displayRecord.digitalObjects || []),
-    ...(fullData?.children || []).flatMap(c => c.digitalObjects || []),
-  ];
+  const allDigitalObjects = displayRecord.digitalObjects || [];
   const transcriptions = fullData?.transcriptions || [];
 
   return (
@@ -441,22 +438,7 @@ const RecordDetail = ({
             </div>
           )}
 
-          {/* Child records (pages) */}
-          {(fullData?.children || []).length > 0 && allDigitalObjects.length === 0 && (
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest">
-                Pages / Child Records ({fullData!.children.length})
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {fullData!.children.slice(0, 10).map((child) => (
-                  <div key={child.id} className="tech-card border-0 p-3 rounded-xl">
-                    <p className="text-xs font-medium line-clamp-2">{child.title}</p>
-                    {child.date && <p className="text-[10px] text-muted-foreground mt-0.5">{child.date}</p>}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Child records intentionally not displayed */}
         </div>
       )}
     </div>
