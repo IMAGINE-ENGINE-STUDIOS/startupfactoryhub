@@ -291,7 +291,7 @@ const MVPBanner = () => {
     ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(80, 398); ctx.lineTo(480, 398); ctx.stroke();
 
-    // === 8-WEEK BUTTON (purple, styled like APPLY NOW) ===
+    // === 4-WEEK BUTTON (purple, styled like APPLY NOW) ===
     const wkX = 80, wkY = 416, wkW = 170, wkH = 44;
     const wkGlow = ctx.createRadialGradient(wkX + wkW / 2, wkY + wkH / 2, 0, wkX + wkW / 2, wkY + wkH / 2, 110);
     wkGlow.addColorStop(0, 'rgba(129,140,248,0.45)');
@@ -310,7 +310,7 @@ const MVPBanner = () => {
     ctx.font = 'bold 14px "Segoe UI", system-ui, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
-    ctx.fillText('8-WEEK PROGRAM', wkX + wkW / 2, wkY + wkH / 2 + 5);
+    ctx.fillText('4-WEEK PROGRAM', wkX + wkW / 2, wkY + wkH / 2 + 5);
 
     // === CTA BUTTON (teal APPLY NOW) ===
     const btnX = 80, btnY = 474, btnW = 200, btnH = 44;
@@ -553,7 +553,7 @@ const MVPBanner = () => {
           <div>
             <h2 className="text-xl font-semibold text-foreground mb-2">MVP Program Banner (1200×630)</h2>
             <p className="text-muted-foreground text-sm">
-              8-week intensive MVP software startup program — Mentorship, Advising, Deck Pitch, Business Plan & Promo Video.
+              4-week intensive MVP software startup program — Mentorship, Advising, Deck Pitch, Business Plan & Promo Video.
             </p>
           </div>
           <div className="flex items-center gap-2">
