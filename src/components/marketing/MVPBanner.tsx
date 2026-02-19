@@ -385,67 +385,57 @@ const MVPBanner = () => {
       ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(odX, odY, 2.5, 0, Math.PI * 2); ctx.fill();
     };
 
-    // --- TOP WIDE CARD: Mentorship + Advising ---
-    const topCardH = 178;
-    const topCardY = 46;
-    drawTechCard(gridStartX, topCardY, gridW, topCardH, '#14b8a6');
+    // === ALL 5 EQUAL SQUARES (2 top + 3 bottom) ===
+    // squareW based on 3-column grid so all squares share same width
+    const squareW = (gridW - gap * 2) / 3;
+    // squareH = squareW to make them actual squares
+    const squareH = squareW;
+    const topRowY = 46;
+    // Top row: 2 squares centered (Mentorship, Advising)
+    const topRowOffsetX = (gridW - 2 * squareW - gap) / 2;
 
-    ctx.font = 'bold 9px "Segoe UI", system-ui, sans-serif';
-    ctx.fillStyle = 'rgba(20, 184, 166, 0.6)';
-    ctx.textAlign = 'left';
-    ctx.fillText('CORE PROGRAM TRACK', gridStartX + 14, topCardY + 17);
-
-    const subItems = [
-      { label: 'Mentorship', sub: 'Expert guidance from\nindustry leaders', color: '#14b8a6', drawIcon: drawIconMentorship },
+    const topSquares = [
+      { label: 'Mentorship', sub: 'Expert guidance\nfrom industry leaders', color: '#14b8a6', drawIcon: drawIconMentorship },
       { label: 'Advising', sub: 'Strategic direction &\nbusiness model coaching', color: '#22d3ee', drawIcon: drawIconAdvising },
     ];
-    const halfW = (gridW - gap * 3) / 2;
-    subItems.forEach((item, i) => {
-      const sx = gridStartX + gap + i * (halfW + gap);
-      const sy = topCardY + 26;
-      const sh = topCardH - 34;
-      const subGrad2 = ctx.createLinearGradient(sx, sy, sx + halfW, sy + sh);
-      subGrad2.addColorStop(0, `${item.color}12`); subGrad2.addColorStop(1, 'rgba(0,0,0,0)');
-      ctx.fillStyle = subGrad2; ctx.strokeStyle = `${item.color}28`; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.roundRect(sx, sy, halfW, sh, 10); ctx.fill(); ctx.stroke();
-      const iconX2 = sx + 30, iconY2 = sy + sh / 2;
-      drawIconContainer(iconX2, iconY2, 22, item.color);
-      item.drawIcon(iconX2, iconY2, 12, item.color);
-      ctx.textAlign = 'left';
-      ctx.font = 'bold 13px "Segoe UI", system-ui, sans-serif';
-      ctx.fillStyle = '#ffffff';
-      ctx.fillText(item.label, sx + 62, sy + 38);
+
+    topSquares.forEach((sq, i) => {
+      const sx = gridStartX + topRowOffsetX + i * (squareW + gap);
+      const sy = topRowY;
+      drawTechCard(sx, sy, squareW, squareH, sq.color);
+      const iconX2 = sx + squareW / 2, iconY2 = sy + squareH * 0.36;
+      drawIconContainer(iconX2, iconY2, 24, sq.color);
+      sq.drawIcon(iconX2, iconY2, 14, sq.color);
+      ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
+      ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
+      ctx.fillText(sq.label, sx + squareW / 2, sy + squareH * 0.66);
       ctx.font = '10px "Segoe UI", system-ui, sans-serif';
-      ctx.fillStyle = 'rgba(255,255,255,0.52)';
-      item.sub.split('\n').forEach((line, li) => ctx.fillText(line, sx + 62, sy + 57 + li * 15));
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      sq.sub.split('\n').forEach((line, li) => ctx.fillText(line, sx + squareW / 2, sy + squareH * 0.79 + li * 14));
     });
 
-    // --- BOTTOM 3 SQUARES ---
-    const bottomY = topCardY + topCardH + gap;
-    const bottomH = height - bottomY - 24;
-    const squareW = (gridW - gap * 2) / 3;
+    // Bottom row: 3 squares (Deck Pitch, Business Plan, Promo Video)
+    const bottomY = topRowY + squareH + gap;
 
-    const squares = [
+    const bottomSquares = [
       { label: 'Deck Pitch', sub: 'Investor-ready\npresentation', color: '#22d3ee', drawIcon: drawIconDeckPitch },
       { label: 'Business Plan', sub: 'Go-to-market &\nfinancial model', color: '#14b8a6', drawIcon: drawIconBusinessPlan },
       { label: 'Promo Video', sub: 'Professional\npitch video', color: '#818cf8', drawIcon: drawIconPromoVideo },
     ];
 
-    squares.forEach((sq, i) => {
+    bottomSquares.forEach((sq, i) => {
       const sx = gridStartX + i * (squareW + gap);
       const sy = bottomY;
-      const sw = squareW;
-      const sh = bottomH;
-      drawTechCard(sx, sy, sw, sh, sq.color);
-      const iconX3 = sx + sw / 2, iconY3 = sy + sh * 0.36;
+      drawTechCard(sx, sy, squareW, squareH, sq.color);
+      const iconX3 = sx + squareW / 2, iconY3 = sy + squareH * 0.36;
       drawIconContainer(iconX3, iconY3, 24, sq.color);
       sq.drawIcon(iconX3, iconY3, 14, sq.color);
       ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = '#ffffff'; ctx.textAlign = 'center';
-      ctx.fillText(sq.label, sx + sw / 2, sy + sh * 0.66);
+      ctx.fillText(sq.label, sx + squareW / 2, sy + squareH * 0.66);
       ctx.font = '10px "Segoe UI", system-ui, sans-serif';
       ctx.fillStyle = 'rgba(255,255,255,0.5)';
-      sq.sub.split('\n').forEach((line, li) => ctx.fillText(line, sx + sw / 2, sy + sh * 0.79 + li * 14));
+      sq.sub.split('\n').forEach((line, li) => ctx.fillText(line, sx + squareW / 2, sy + squareH * 0.79 + li * 14));
     });
   };
 
