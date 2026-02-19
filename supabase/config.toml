@@ -71,3 +71,6 @@ verify_jwt = true
 
 [functions.lightpaper-genius]
 verify_jwt = false
+
+[functions.national-archives]
+verify_jwt = true
