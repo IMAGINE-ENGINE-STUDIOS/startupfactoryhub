@@ -1,0 +1,1 @@
+ALTER TABLE public.accelerator_profiles ADD COLUMN IF NOT EXISTS external_link text;

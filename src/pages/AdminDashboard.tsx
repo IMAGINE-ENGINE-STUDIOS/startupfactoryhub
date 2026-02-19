@@ -19,7 +19,8 @@ import {
   DollarSign,
   RefreshCw,
   Handshake,
-  AlertTriangle
+  AlertTriangle,
+  Rocket
 } from 'lucide-react';
 
 // Admin components
@@ -37,6 +38,7 @@ import AdminSettings from '@/components/admin/AdminSettings';
 import { InvestorsManagement } from '@/components/admin/InvestorsManagement';
 import CorporatePartnersManagement from '@/components/admin/CorporatePartnersManagement';
 import HubApplicationsManagement from '@/components/admin/HubApplicationsManagement';
+import SFHAcceleratorManager from '@/components/admin/SFHAcceleratorManager';
 
 const AdminDashboard = () => {
   const { user, loading: authLoading } = useAuth();
@@ -97,7 +99,7 @@ const AdminDashboard = () => {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold flex items-center gap-2">
-              <Shield className="h-8 w-8 text-red-500" />
+              <Shield className="h-8 w-8 text-destructive" />
               Admin Dashboard
             </h1>
             <p className="text-muted-foreground mt-1">Platform management and oversight</p>
@@ -171,6 +173,10 @@ const AdminDashboard = () => {
               <Settings className="h-4 w-4" />
               <span className="hidden lg:inline">Settings</span>
             </TabsTrigger>
+            <TabsTrigger value="sfh-program" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <Rocket className="h-4 w-4" />
+              <span className="hidden lg:inline">MVP Program</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
@@ -187,6 +193,7 @@ const AdminDashboard = () => {
           <TabsContent value="analytics"><AdminAnalytics /></TabsContent>
           <TabsContent value="api-usage"><ApiUsageTracker /></TabsContent>
           <TabsContent value="settings"><AdminSettings /></TabsContent>
+          <TabsContent value="sfh-program"><SFHAcceleratorManager /></TabsContent>
         </Tabs>
       </main>
     </div>
