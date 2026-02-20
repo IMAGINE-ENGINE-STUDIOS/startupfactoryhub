@@ -11,6 +11,7 @@ import { Switch } from '@/components/ui/switch';
 import { useLiveRooms } from '@/hooks/useLiveRooms';
 import { useAuth } from '@/contexts/AuthContext';
 import VideoMeetingDialog from '@/components/VideoMeetingDialog';
+import VillageRooms from '@/components/VillageRooms';
 import { Plus, Users, Video, Loader2, Radio, X, Globe, Lock, Clock } from 'lucide-react';
 
 const LiveRooms = () => {
@@ -73,6 +74,9 @@ const LiveRooms = () => {
 
   return (
     <div className="space-y-5">
+      {/* Village Rooms — always first */}
+      <VillageRooms />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
