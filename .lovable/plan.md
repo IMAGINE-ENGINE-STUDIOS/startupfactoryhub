@@ -1,91 +1,129 @@
+# /emails Page Redesign — Icons, Geometric Patterns & Matrix Background
 
-# New `/emails` Page — Email Template Manager
+## What's Being Changed
 
-## Overview
+The `/emails` page (`src/pages/EmailTemplates.tsx`) needs three visual upgrades to the **page shell** (not the email HTML previews themselves):
 
-Create a dedicated `/emails` route that serves as a full **Email Template Manager** for admins. This is separate from the existing `EmailMonitor` tab in the admin dashboard (which handles sending/monitoring). The new `/emails` page will allow admins to **preview, edit, and test** each of the 4 email templates directly in the browser — without touching the edge function code.
+1. **Replace all emojis in the page UI** with Lucide icons
+2. **Add geometric pattern overlay** (tech-grid style like the marketing banners)
+3. **Add Matrix-style background animation** (reusing the existing `MatrixBackground` component at a simplified/lower opacity)
+
+The **email HTML templates** (the content inside the iframe preview) will also have their emojis replaced with inline SVG equivalents where possible, or ASCII/text symbols where SVG is not suitable for email clients.
 
 ---
 
-## What Will Be Built
+## Scope of Changes
 
-### 1. New Route: `/emails`
+### File: `src/pages/EmailTemplates.tsx`
 
-Add `/emails` to `src/App.tsx` pointing to a new `EmailTemplates` page. This page will be **admin-only protected**.
+#### 1. Page Shell — Emoji Replacements (React UI layer)
 
-### 2. New Page: `src/pages/EmailTemplates.tsx`
+All emojis currently in the React JSX UI will be replaced with Lucide icons:
 
-A full-page template manager with:
 
-- **Sidebar** listing all 4 email types
-- **Live HTML Preview** (rendered in an iframe) of the selected template
-- **Variable controls panel** to fill in dynamic values and see the preview update in real-time
-- **Send Test Email** button to fire off a real email to any address
+| Location             | Emoji | Lucide Icon     |
+| -------------------- | ----- | --------------- |
+| Auth warning note    | `⚠️`  | `AlertTriangle` |
+| Toast (auth emails)  | `ℹ️`  | `Info`          |
+| Toast (send success) | `✅`   | `CheckCircle2`  |
 
-### 3. Template Definitions
 
-Each template is defined with its variables and the HTML rendering logic mirrored from the edge functions:
+#### 2. Background — Matrix Animation + Geometric Pattern
 
-| Template | Variables |
-|---|---|
-| Notification Email | `to`, `title`, `message`, `type` (info/success/warning/error/message/connection/event) |
-| Application Invitation | `email`, `jobTitle`, `companyName`, `token` |
-| Weekly Digest | Preview-only (pulls live data from platform) |
-| Partnership Announcement | `partnerName`, `partnerLogo`, `partnerWebsite`, `partnerDescription`, `benefitsForStartups`, `ctaLabel`, `ctaUrl` |
+The page's root `div` will become `relative overflow-hidden` and will receive:
 
-### 4. UI Structure
+- `**MatrixBackground**` component (already exists at `src/components/MatrixBackground.tsx`) rendered at low opacity (the component already has `opacity-20` built in, perfect for a subtle effect)
+- **Geometric grid overlay** using an inline `div` with a CSS `backgroundImage` grid pattern (same technique used in `FeaturesSection.tsx` and `HeroSection.tsx`)
+- A subtle radial gradient over the geometric layer for depth
+
+The header, sidebar, and main panel will remain on top via `relative z-10`.
+
+#### 3. Email HTML Templates — Emoji Replacements
+
+Inside the HTML template generator functions, emojis are used as icon substitutes. Since email clients don't support SVG, these will be replaced with:
+
+- **Styled text/symbol alternatives** using CSS-styled `<span>` elements with Unicode symbols or short text labels
+- **Colored bullet indicators** using CSS `border-radius` circles
+- Specific replacements:
+
+
+| Template                          | Emoji              | Replacement                                     | &nbsp;     |
+| --------------------------------- | ------------------ | ----------------------------------------------- | ---------- |
+| Notification hero icon            | `🔔 🤝 💬 📅 ✨ ⚠️` | CSS circle with colored border + letter initial | &nbsp;     |
+| Notification button               | `🚀`               | &nbsp;                                          | style icon |
+| Notification tip                  | `💡`               | Styled `[TIP]` label                            | &nbsp;     |
+| Invitation badge                  | `🎉`               | Styled text badge                               | &nbsp;     |
+| Invitation hero                   | `🚀`               | &nbsp;                                          | style icon |
+| Invitation card title             | `📋`               | `[>]` styled label                              | &nbsp;     |
+| Invitation status                 | `✅`                | Colored dot                                     | &nbsp;     |
+| Invitation CTA                    | `🚀`               | &nbsp;                                          | style icon |
+| Invitation expiry                 | `⏰`                | `[!]` styled                                    | &nbsp;     |
+| Digest preview badge              | `⚠️`               | `[!]` styled                                    | &nbsp;     |
+| Digest week badge                 | `📰`               | &nbsp;                                          | style icon |
+| Digest greeting                   | `👋`               | style icon                                      | &nbsp;     |
+| Digest section headers            | `🚀 🎓 💰 📚 📅`   | Colored square accent                           | &nbsp;     |
+| Digest CTA                        | `🔭`               | &nbsp;                                          | style icon |
+| Partnership badge                 | `🤝`               | `[+]` styled                                    | &nbsp;     |
+| Partnership card labels           | `🏢 🎁 🌐`         | Text label                                      | &nbsp;     |
+| Partnership benefits `li::before` | `✅`                | CSS green dot                                   | &nbsp;     |
+| Partnership CTA                   | `🚀`               | &nbsp;                                          | style icon |
+| Auth hero icon                    | `🔐 ✨ 🔑 🚀`       | CSS circle with letter                          | &nbsp;     |
+| Auth expiry                       | `⏰`                | &nbsp;                                          | style icon |
+| PDF signature badge               | `📄`               | Text label                                      | &nbsp;     |
+| PDF hero icon                     | `✍️ ✏️ 📄`         | CSS circle with letter                          | &nbsp;     |
+| PDF card label                    | `📋`               | &nbsp;                                          | style icon |
+| PDF CTA                           | `📄`               | &nbsp;                                          | style icon |
+
+
+---
+
+## Technical Approach
+
+### Background Layers (z-index stack)
 
 ```text
-+------------------------------------------+
-|  Email Template Manager     [Admin badge] |
-+------------+-----------------------------+
-|            |   [Variable Controls]       |
-|  Template  |                             |
-|  Sidebar   |   [Live HTML Preview]       |
-|            |   (iframe, full render)     |
-|  • Notif   |                             |
-|  • Invite  |                             |
-|  • Digest  |   [Send Test Email]         |
-|  • Partner |                             |
-+------------+-----------------------------+
+z-0  MatrixBackground (canvas, opacity-20)
+z-1  Geometric grid overlay (div with backgroundImage, opacity-10)
+z-2  Radial gradient vignette (div, pointer-events-none)
+z-10 Page content (header, sidebar, main panel)
 ```
 
----
+### Geometric Pattern CSS
 
-## Technical Details
+Same approach as `FeaturesSection.tsx`:
 
-### Files to Create / Modify
+```css
+backgroundImage: `linear-gradient(hsl(160 84% 39% / 0.08) 1px, transparent 1px),
+                  linear-gradient(90deg, hsl(160 84% 39% / 0.08) 1px, transparent 1px)`,
+backgroundSize: '40px 40px'
+```
 
-1. **`src/pages/EmailTemplates.tsx`** (new)
-   - Admin-only guard using `useUserRole()`
-   - Left sidebar: 4 template cards (clickable)
-   - Right panel: 2-tab layout — "Preview" and "Variables"
-   - Preview: rendered inside a sandboxed `<iframe srcDoc={...}>`  
-   - Variables: input fields specific to each template type
-   - "Send Test" button calls the appropriate Supabase edge function via `supabase.functions.invoke()`
+### Email HTML Icon Replacements
 
-2. **`src/App.tsx`** (modify)
-   - Add `<Route path="/emails" element={<EmailTemplates />} />` with lazy import
+For the **notification hero icon**, replace the emoji `div` with a CSS-styled circle containing the type initial:
 
-### HTML Preview
+```html
+<!-- Before -->
+<div class="hero-icon">${icon_emoji}</div>
 
-The HTML for each template will be generated client-side using the **exact same template strings** as the edge functions, but with template variable substitution done in JavaScript. This means the preview is 1:1 accurate with what gets delivered to the inbox.
+<!-- After -->
+<div class="hero-icon" style="...css circle styles...">
+  <span style="color:white; font-size:28px; font-weight:700; font-family:monospace">
+    ${typeInitial}
+  </span>
+</div>
+```
 
-For the **Weekly Digest**, the preview will show a mock version with sample data (since it pulls live data from the DB).
-
-### Send Test Email
-
-When "Send Test" is clicked:
-- Calls the matching edge function via `supabase.functions.invoke()`
-- Shows a success/error toast
-- No page reload needed
-
-### Admin Protection
-
-Uses the existing `useUserRole()` hook. If the user's role is not `admin`, they are redirected to `/auth`.
+Benefits list checkmarks (`✅`) become a CSS `::before` green filled circle via inline style.
 
 ---
 
-## No Database Changes Required
+## Files to Modify
 
-This is purely a frontend page + no new edge functions. All sends go through existing deployed functions.
+
+| File                           | Change                                                                                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `src/pages/EmailTemplates.tsx` | Add Matrix + geometric background, replace UI emojis with Lucide icons, replace all HTML template emojis with styled text/CSS alternatives |
+
+
+No new files needed — `MatrixBackground` already exists and will be imported.
