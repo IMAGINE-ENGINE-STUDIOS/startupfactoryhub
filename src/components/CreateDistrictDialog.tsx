@@ -11,15 +11,15 @@ import { useToast } from '@/hooks/use-toast';
 import { Crown, Vote, ShoppingBag, Loader2, DollarSign, Lock, Key, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface CreateVillageDialogProps {
+interface CreateDistrictDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-type VillageType = 'democratic_republic' | 'merchant_village';
+type DistrictType = 'democratic_republic' | 'merchant_village';
 
-const VILLAGE_TYPES: {
-  id: VillageType;
+const DISTRICT_TYPES: {
+  id: DistrictType;
   label: string;
   emoji: string;
   icon: typeof Vote;
@@ -32,13 +32,13 @@ const VILLAGE_TYPES: {
     label: 'Democratic Republic',
     emoji: '🏛️',
     icon: Vote,
-    description: 'Governed by members. Residents vote for a Host who leads the village. Members each pay an equal share of operating costs. Founding fee set by you — minimum $2/member.',
+    description: 'Governed by members. Residents vote for a Host who leads the district. Members each pay an equal share of operating costs. Founding fee set by you — minimum $2/member.',
     color: 'text-indigo-600',
     bgColor: 'bg-indigo-500/10 border-indigo-500/30',
   },
   {
     id: 'merchant_village',
-    label: 'Merchant Village',
+    label: 'Merchant District',
     emoji: '🏪',
     icon: ShoppingBag,
     description: 'You are the permanent owner and operator. No elections or voting system. Can be set as private (invitation only). Ideal for commerce-focused or creator-led communities.',
@@ -47,20 +47,20 @@ const VILLAGE_TYPES: {
   },
 ];
 
-export default function CreateVillageDialog({ open, onOpenChange }: CreateVillageDialogProps) {
+export default function CreateDistrictDialog({ open, onOpenChange }: CreateDistrictDialogProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [step, setStep] = useState<'configure' | 'confirm'>('configure');
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [selectedType, setSelectedType] = useState<VillageType | null>(null);
+  const [selectedType, setSelectedType] = useState<DistrictType | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Democratic Republic pricing
   const [joinFeeDollars, setJoinFeeDollars] = useState('1');
   const [govFundDollars, setGovFundDollars] = useState('1');
 
-  // Merchant Village options
+  // Merchant District options
   const [isPrivate, setIsPrivate] = useState(false);
 
   const reset = () => {
@@ -117,14 +117,14 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
       window.open(data.url, '_blank');
       toast({
         title: '🏘️ Complete your payment',
-        description: 'Finish the $200 checkout to activate your village. Once paid, your village will appear automatically.',
+        description: 'Finish the $200 checkout to activate your district. Once paid, your district will appear automatically.',
       });
       handleClose(false);
     } catch (err: any) {
-      console.error('Village payment error:', err);
+      console.error('District payment error:', err);
       toast({
         title: 'Error',
-        description: err.message || 'Failed to initiate village creation',
+        description: err.message || 'Failed to initiate district creation',
         variant: 'destructive',
       });
     } finally {
@@ -132,7 +132,7 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
     }
   };
 
-  const selectedTypeData = VILLAGE_TYPES.find(t => t.id === selectedType);
+  const selectedTypeData = DISTRICT_TYPES.find(t => t.id === selectedType);
   const totalMemberFee = (parseFloat(joinFeeDollars) || 1) + (parseFloat(govFundDollars) || 1);
 
   return (
@@ -148,7 +148,7 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
                 <Crown className="h-5 w-5 text-indigo-500" />
               </div>
               <div>
-                <DialogTitle className="text-lg">Found a Village</DialogTitle>
+                <DialogTitle className="text-lg">Found a District</DialogTitle>
                 <p className="text-xs text-muted-foreground mt-0.5">
                   {step === 'configure' ? 'Configure your new community space' : 'Review & confirm your purchase'}
                 </p>
@@ -160,9 +160,9 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
             <div className="space-y-5">
               {/* Name */}
               <div className="space-y-1.5">
-                <Label htmlFor="village-name" className="text-sm font-medium">Village Name</Label>
+                <Label htmlFor="district-name" className="text-sm font-medium">District Name</Label>
                 <Input
-                  id="village-name"
+                  id="district-name"
                   placeholder="e.g. The Northern Quarter"
                   value={name}
                   onChange={e => setName(e.target.value)}
@@ -172,10 +172,10 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
 
               {/* Description */}
               <div className="space-y-1.5">
-                <Label htmlFor="village-desc" className="text-sm font-medium">Description <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                <Label htmlFor="district-desc" className="text-sm font-medium">Description <span className="text-muted-foreground font-normal">(optional)</span></Label>
                 <Textarea
-                  id="village-desc"
-                  placeholder="What is this village about?"
+                  id="district-desc"
+                  placeholder="What is this district about?"
                   value={description}
                   onChange={e => setDescription(e.target.value)}
                   className="tech-card border-0 resize-none"
@@ -185,9 +185,9 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
 
               {/* Type selection */}
               <div className="space-y-2">
-                <Label className="text-sm font-medium">Village Type</Label>
+                <Label className="text-sm font-medium">District Type</Label>
                 <div className="grid grid-cols-1 gap-3">
-                  {VILLAGE_TYPES.map(type => {
+                  {DISTRICT_TYPES.map(type => {
                     const Icon = type.icon;
                     const isSelected = selectedType === type.id;
                     return (
@@ -264,14 +264,14 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
                 </div>
               )}
 
-              {/* Merchant Village: private toggle */}
+              {/* Merchant District: private toggle */}
               {selectedType === 'merchant_village' && (
                 <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Lock className="h-4 w-4 text-amber-500" />
                       <div>
-                        <p className="text-sm font-medium text-amber-700 dark:text-amber-300">Private Village</p>
+                        <p className="text-sm font-medium text-amber-700 dark:text-amber-300">Private District</p>
                         <p className="text-xs text-muted-foreground">Invitation code required to join</p>
                       </div>
                     </div>
@@ -310,7 +310,7 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
               {/* Pricing breakdown */}
               <div className="rounded-xl bg-muted/40 border border-border/50 p-4 space-y-2.5">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">Village founding fee</span>
+                  <span className="text-muted-foreground">District founding fee</span>
                   <span className="font-semibold">$200.00</span>
                 </div>
                 {selectedType === 'democratic_republic' && (
@@ -344,7 +344,7 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
               </div>
 
               <p className="text-xs text-muted-foreground">
-                You'll be redirected to Stripe to complete payment. Your village will be created automatically once the payment is confirmed.
+                You'll be redirected to Stripe to complete payment. Your district will be created automatically once the payment is confirmed.
               </p>
             </div>
           )}
@@ -374,7 +374,7 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
                   ) : (
                     <DollarSign className="h-4 w-4" />
                   )}
-                  Pay $200 & Found Village
+                  Pay $200 & Found District
                 </Button>
               </>
             )}

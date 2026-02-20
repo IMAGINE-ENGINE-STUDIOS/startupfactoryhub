@@ -192,7 +192,7 @@ serve(async (req) => {
 
     // Create feed post
     await supabaseAdmin.from("feed_posts").insert({
-      content: `🏘️ Just founded a new village: ${villageName}${villageDescription ? ` — ${villageDescription}` : ""}`,
+      content: `🏘️ Just founded a new district: ${villageName}${villageDescription ? ` — ${villageDescription}` : ""}`,
       user_id: user.id,
       post_type: "live_room",
       room_data: {
