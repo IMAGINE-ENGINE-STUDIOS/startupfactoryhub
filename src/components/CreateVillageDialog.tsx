@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Crown, Vote, ShoppingBag, Loader2, DollarSign, Zap, X } from 'lucide-react';
+import { Crown, Vote, ShoppingBag, Loader2, DollarSign, Lock, Key, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CreateVillageDialogProps {
@@ -24,7 +24,6 @@ const VILLAGE_TYPES: {
   emoji: string;
   icon: typeof Vote;
   description: string;
-  apiNote: string;
   color: string;
   bgColor: string;
 }[] = [
@@ -33,8 +32,7 @@ const VILLAGE_TYPES: {
     label: 'Democratic Republic',
     emoji: '🏛️',
     icon: Vote,
-    description: 'Governance by election. Residents vote for a Host who leads the village. Features election system, staff appointments, and democratic oversight.',
-    apiNote: 'Standard API billing rates (1×)',
+    description: 'Governed by members. Residents vote for a Host who leads the village. Members each pay an equal share of operating costs. Founding fee set by you — minimum $2/member.',
     color: 'text-indigo-600',
     bgColor: 'bg-indigo-500/10 border-indigo-500/30',
   },
@@ -43,8 +41,7 @@ const VILLAGE_TYPES: {
     label: 'Merchant Village',
     emoji: '🏪',
     icon: ShoppingBag,
-    description: 'No elections or voting system. You are the permanent owner and operator of the village. Ideal for commerce-focused or creator-led communities.',
-    apiNote: 'API usage billed at 2× standard rates',
+    description: 'You are the permanent owner and operator. No elections or voting system. Can be set as private (invitation only). Ideal for commerce-focused or creator-led communities.',
     color: 'text-amber-600',
     bgColor: 'bg-amber-500/10 border-amber-500/30',
   },
@@ -59,12 +56,22 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
   const [selectedType, setSelectedType] = useState<VillageType | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // Democratic Republic pricing
+  const [joinFeeDollars, setJoinFeeDollars] = useState('1');
+  const [govFundDollars, setGovFundDollars] = useState('1');
+
+  // Merchant Village options
+  const [isPrivate, setIsPrivate] = useState(false);
+
   const reset = () => {
     setStep('configure');
     setName('');
     setDescription('');
     setSelectedType(null);
     setLoading(false);
+    setJoinFeeDollars('1');
+    setGovFundDollars('1');
+    setIsPrivate(false);
   };
 
   const handleClose = (val: boolean) => {
@@ -74,6 +81,14 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
 
   const handleContinue = () => {
     if (!name.trim() || !selectedType) return;
+    if (selectedType === 'democratic_republic') {
+      const join = parseFloat(joinFeeDollars) || 0;
+      const gov = parseFloat(govFundDollars) || 0;
+      if (join < 1 || gov < 1) {
+        toast({ title: 'Minimum fees required', description: 'Join fee and government fund must each be at least $1.00', variant: 'destructive' });
+        return;
+      }
+    }
     setStep('confirm');
   };
 
@@ -81,19 +96,24 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
     if (!user || !selectedType || !name.trim()) return;
     setLoading(true);
 
+    const joinFeeCents = Math.round((parseFloat(joinFeeDollars) || 1) * 100);
+    const govFundCents = Math.round((parseFloat(govFundDollars) || 1) * 100);
+
     try {
       const { data, error } = await supabase.functions.invoke('create-village-payment', {
         body: {
           villageName: name.trim(),
           villageDescription: description.trim() || undefined,
           villageType: selectedType,
+          isPrivate: selectedType === 'merchant_village' ? isPrivate : false,
+          joinFeeCents: selectedType === 'democratic_republic' ? joinFeeCents : undefined,
+          govFundCents: selectedType === 'democratic_republic' ? govFundCents : undefined,
         },
       });
 
       if (error) throw error;
       if (!data?.url) throw new Error('No checkout URL received');
 
-      // Open Stripe checkout in new tab
       window.open(data.url, '_blank');
       toast({
         title: '🏘️ Complete your payment',
@@ -113,10 +133,11 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
   };
 
   const selectedTypeData = VILLAGE_TYPES.find(t => t.id === selectedType);
+  const totalMemberFee = (parseFloat(joinFeeDollars) || 1) + (parseFloat(govFundDollars) || 1);
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[520px] tech-card border-0 p-0 overflow-hidden">
+      <DialogContent className="sm:max-w-[540px] tech-card border-0 p-0 overflow-hidden">
         {/* Gradient header bar */}
         <div className="h-1 bg-gradient-to-r from-indigo-500 via-violet-500 to-amber-500" />
 
@@ -186,15 +207,8 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
                               <span className={cn('text-sm font-semibold', isSelected ? type.color : 'text-foreground')}>{type.label}</span>
-                              {type.id === 'merchant_village' && (
-                                <Badge className="text-[10px] px-1.5 py-0 h-4 bg-amber-500/10 text-amber-600 border-0">2× API</Badge>
-                              )}
                             </div>
                             <p className="text-xs text-muted-foreground leading-relaxed">{type.description}</p>
-                            <div className="flex items-center gap-1 mt-2">
-                              <Zap className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-[11px] text-muted-foreground">{type.apiNote}</span>
-                            </div>
                           </div>
                         </div>
                       </button>
@@ -202,6 +216,80 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
                   })}
                 </div>
               </div>
+
+              {/* Democratic Republic: membership pricing */}
+              {selectedType === 'democratic_republic' && (
+                <div className="rounded-xl border border-indigo-500/20 bg-indigo-500/5 p-4 space-y-3">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Users className="h-4 w-4 text-indigo-500" />
+                    <p className="text-sm font-medium text-indigo-700 dark:text-indigo-300">Member Pricing</p>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Each member pays equally. Set the per-member costs (minimum $1.00 each).
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Join Fee (per member)</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                        <Input
+                          type="number"
+                          min="1"
+                          step="0.50"
+                          value={joinFeeDollars}
+                          onChange={e => setJoinFeeDollars(e.target.value)}
+                          className="pl-6 h-8 text-sm tech-card border-0"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-muted-foreground">Gov. Fund (per member)</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground text-sm">$</span>
+                        <Input
+                          type="number"
+                          min="1"
+                          step="0.50"
+                          value={govFundDollars}
+                          onChange={e => setGovFundDollars(e.target.value)}
+                          className="pl-6 h-8 text-sm tech-card border-0"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between text-xs pt-1 border-t border-indigo-500/20">
+                    <span className="text-muted-foreground">Total per member</span>
+                    <span className="font-semibold text-indigo-600">${totalMemberFee.toFixed(2)}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Merchant Village: private toggle */}
+              {selectedType === 'merchant_village' && (
+                <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Lock className="h-4 w-4 text-amber-500" />
+                      <div>
+                        <p className="text-sm font-medium text-amber-700 dark:text-amber-300">Private Village</p>
+                        <p className="text-xs text-muted-foreground">Invitation code required to join</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={isPrivate}
+                      onCheckedChange={setIsPrivate}
+                    />
+                  </div>
+                  {isPrivate && (
+                    <div className="mt-3 flex items-center gap-2 rounded-lg bg-amber-500/10 px-3 py-2">
+                      <Key className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+                      <p className="text-xs text-amber-700 dark:text-amber-300">
+                        An invitation code will be generated and shared with you after creation.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           ) : (
             /* Confirm step */
@@ -225,12 +313,30 @@ export default function CreateVillageDialog({ open, onOpenChange }: CreateVillag
                   <span className="text-muted-foreground">Village founding fee</span>
                   <span className="font-semibold">$200.00</span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">API cost rate</span>
-                  <span className={cn('font-medium', selectedType === 'merchant_village' ? 'text-amber-600' : 'text-emerald-600')}>
-                    {selectedType === 'merchant_village' ? '2× standard' : '1× standard'}
-                  </span>
-                </div>
+                {selectedType === 'democratic_republic' && (
+                  <>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Per-member join fee</span>
+                      <span className="font-medium text-indigo-600">${parseFloat(joinFeeDollars || '1').toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">Per-member gov. fund</span>
+                      <span className="font-medium text-indigo-600">${parseFloat(govFundDollars || '1').toFixed(2)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <span>Total per member</span>
+                      <span>${totalMemberFee.toFixed(2)}</span>
+                    </div>
+                  </>
+                )}
+                {selectedType === 'merchant_village' && isPrivate && (
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Visibility</span>
+                    <span className="font-medium text-amber-600 flex items-center gap-1">
+                      <Lock className="h-3 w-3" /> Private (invitation only)
+                    </span>
+                  </div>
+                )}
                 <div className="border-t border-border/50 pt-2 flex items-center justify-between">
                   <span className="font-semibold text-sm">Due today</span>
                   <span className="font-bold text-lg">$200.00</span>

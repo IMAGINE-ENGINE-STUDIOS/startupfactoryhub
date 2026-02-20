@@ -104,6 +104,9 @@ serve(async (req) => {
     const villageDescription = meta.village_description || null;
     const villageType = meta.village_type as "democratic_republic" | "merchant_village";
     const apiMultiplier = parseFloat(meta.api_cost_multiplier || "1.0");
+    const isPrivate = meta.is_private === "true";
+    const joinFeeCents = parseInt(meta.join_fee_cents || "100");
+    const govFundCents = parseInt(meta.gov_fund_cents || "100");
 
     logStep("Creating Whereby room", { villageName });
 
@@ -143,6 +146,11 @@ serve(async (req) => {
 
     logStep("Creating live room in DB");
 
+    // Generate invitation code for private merchant villages
+    const invitationCode = isPrivate
+      ? Math.random().toString(36).substring(2, 10).toUpperCase()
+      : null;
+
     // Insert the live_room
     const { data: room, error: roomError } = await supabaseAdmin
       .from("live_rooms")
@@ -151,12 +159,17 @@ serve(async (req) => {
         description: villageDescription,
         creator_id: user.id,
         meeting_link: meetingLink,
-        is_public: true,
+        is_public: !isPrivate,
         is_active: true,
         room_category: "village",
         village_type: villageType,
         api_cost_multiplier: apiMultiplier,
         expires_at: tenYearsFromNow.toISOString(),
+        is_private: isPrivate,
+        invitation_code: invitationCode,
+        join_fee_cents: joinFeeCents,
+        government_fund_cents: govFundCents,
+        membership_fee_cents: joinFeeCents + govFundCents,
       })
       .select()
       .single();

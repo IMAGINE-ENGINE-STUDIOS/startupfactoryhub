@@ -9,9 +9,10 @@ import VideoMeetingDialog from '@/components/VideoMeetingDialog';
 import VillageElectionPanel from '@/components/VillageElectionPanel';
 import VillageDetailPanel from '@/components/VillageDetailPanel';
 import CreateVillageDialog from '@/components/CreateVillageDialog';
+import VillageGuideDialog from '@/components/VillageGuideDialog';
+import VillageMarketplace from '@/components/VillageMarketplace';
 import { useVillagePaymentVerification } from '@/hooks/useVillagePaymentVerification';
-import { Crown, Users, Vote, Trophy, Loader2, ShoppingBag, Plus } from 'lucide-react';
-
+import { Crown, Users, Vote, Trophy, Loader2, ShoppingBag, Plus, BookOpen, Store } from 'lucide-react';
 
 interface VillageRoom {
   id: string;
@@ -22,6 +23,8 @@ interface VillageRoom {
   host_elected_at: string | null;
   participant_count: number;
   village_type?: 'democratic_republic' | 'merchant_village' | null;
+  is_private?: boolean;
+  for_sale?: boolean;
   host?: {
     full_name: string;
     avatar_url: string | null;
@@ -44,7 +47,8 @@ export default function VillageRooms() {
   const [electionRoom, setElectionRoom] = useState<{ id: string; name: string } | null>(null);
   const [detailRoom, setDetailRoom] = useState<VillageRoom | null>(null);
   const [createVillageOpen, setCreateVillageOpen] = useState(false);
-
+  const [guideOpen, setGuideOpen] = useState(false);
+  const [marketplaceOpen, setMarketplaceOpen] = useState(false);
 
   const fetchVillageRooms = useCallback(async () => {
     try {
@@ -112,7 +116,6 @@ export default function VillageRooms() {
     return () => { supabase.removeChannel(ch); };
   }, [fetchVillageRooms]);
 
-  // Verify village payment on return from Stripe
   useVillagePaymentVerification(fetchVillageRooms);
 
   const handleJoin = async (room: VillageRoom) => {
@@ -153,16 +156,36 @@ export default function VillageRooms() {
             <p className="text-xs text-muted-foreground">Permanent open rooms — join or found your own</p>
           </div>
         </div>
-        {user && (
+        <div className="flex items-center gap-2">
           <Button
             size="sm"
-            className="h-8 text-xs gap-1.5 bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 border-0 text-white"
-            onClick={() => setCreateVillageOpen(true)}
+            variant="ghost"
+            className="h-8 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+            onClick={() => setGuideOpen(true)}
           >
-            <Plus className="h-3.5 w-3.5" />
-            Found a Village
+            <BookOpen className="h-3.5 w-3.5" />
+            Guide
           </Button>
-        )}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 text-xs gap-1.5 text-muted-foreground hover:text-foreground"
+            onClick={() => setMarketplaceOpen(true)}
+          >
+            <Store className="h-3.5 w-3.5" />
+            Marketplace
+          </Button>
+          {user && (
+            <Button
+              size="sm"
+              className="h-8 text-xs gap-1.5 bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 border-0 text-white"
+              onClick={() => setCreateVillageOpen(true)}
+            >
+              <Plus className="h-3.5 w-3.5" />
+              Found a Village
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
@@ -171,7 +194,6 @@ export default function VillageRooms() {
             key={room.id}
             className="tech-card border-0 relative overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5"
             onClick={() => setDetailRoom(room)}
-            style={{ borderTop: '2px solid', borderImage: 'linear-gradient(90deg, hsl(var(--indigo-500, 239 84% 67%)), hsl(var(--violet-500, 263 70% 50%))) 1' }}
           >
             {/* Gradient top accent */}
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 to-violet-500" />
@@ -199,6 +221,12 @@ export default function VillageRooms() {
                       Democratic
                     </Badge>
                   )}
+                  {room.for_sale && (
+                    <Badge className="text-[10px] px-1.5 py-0 h-5 bg-emerald-500/10 text-emerald-600 border-0 flex items-center gap-0.5">
+                      <Store className="h-2.5 w-2.5" />
+                      For Sale
+                    </Badge>
+                  )}
                   {room.active_election && (
                     <Badge className="text-[10px] px-1.5 py-0 h-5 bg-amber-500/10 text-amber-600 border-0 flex items-center gap-0.5 animate-pulse">
                       <Vote className="h-2.5 w-2.5" />
@@ -214,7 +242,7 @@ export default function VillageRooms() {
               {room.village_type === 'merchant_village' ? (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <ShoppingBag className="h-3 w-3 text-amber-500" />
-                  <span>Merchant Village — no election system</span>
+                  <span>Merchant Village — owner operated</span>
                 </div>
               ) : room.host ? (
                 <div className="flex items-center gap-1.5 text-xs">
@@ -241,6 +269,15 @@ export default function VillageRooms() {
                   <span>{room.participant_count} in room</span>
                 </div>
                 <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
+                  {/* Guide button on each card */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 text-xs px-2 gap-1 text-muted-foreground hover:text-foreground"
+                    onClick={() => setGuideOpen(true)}
+                  >
+                    <BookOpen className="h-3 w-3" />
+                  </Button>
                   {room.village_type !== 'merchant_village' && (
                     <Button
                       variant="outline"
@@ -302,8 +339,18 @@ export default function VillageRooms() {
         open={createVillageOpen}
         onOpenChange={setCreateVillageOpen}
       />
+
+      {/* Village Guide */}
+      <VillageGuideDialog
+        open={guideOpen}
+        onOpenChange={setGuideOpen}
+      />
+
+      {/* Village Marketplace */}
+      <VillageMarketplace
+        open={marketplaceOpen}
+        onOpenChange={setMarketplaceOpen}
+      />
     </>
   );
 }
-
-
