@@ -13,6 +13,8 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { useRealtime } from '@/hooks/useRealtime';
 import { Calendar as CalendarIcon, Users, TrendingUp, Star, Clock, Plus, MapPin, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Globe, Video, ExternalLink, XCircle, CheckCircle } from 'lucide-react';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
+import DistrictRooms from '@/components/DistrictRooms';
+import LiveRooms from '@/components/LiveRooms';
 import FloatingChat from '@/components/FloatingChat';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
 import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
@@ -309,6 +311,8 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="social" className="space-y-4">
             <UnifiedCommunityFeed />
+            <DistrictRooms />
+            <LiveRooms />
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">

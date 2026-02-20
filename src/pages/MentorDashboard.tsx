@@ -6,6 +6,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
+import DistrictRooms from '@/components/DistrictRooms';
+import LiveRooms from '@/components/LiveRooms';
 import AIFeaturesHub from "@/components/AIFeaturesHub";
 import MentorshipRequests from "@/components/MentorshipRequests";
 import FloatingChat from "@/components/FloatingChat";
@@ -154,6 +156,8 @@ const MentorDashboard = () => {
 
           <TabsContent value="social" className="space-y-4">
             <UnifiedCommunityFeed showCreatePost={true} />
+            <DistrictRooms />
+            <LiveRooms />
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">
