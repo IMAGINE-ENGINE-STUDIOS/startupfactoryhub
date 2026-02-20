@@ -21,7 +21,7 @@ export const useOnlineStatus = (user?: User | null) => {
       }
     };
 
-    // Set user as offline
+    // Set user as offline — only called on actual page unload (browser close / explicit logout)
     const setOffline = async () => {
       try {
         await supabase.rpc('update_user_online_status', {
@@ -33,7 +33,7 @@ export const useOnlineStatus = (user?: User | null) => {
       }
     };
 
-    // Track user activity
+    // Track user activity across all tabs/windows
     const updateActivity = () => {
       lastActivityRef.current = Date.now();
     };
@@ -41,46 +41,35 @@ export const useOnlineStatus = (user?: User | null) => {
     // Set online on mount
     setOnline();
 
-    // Update last_seen every 2 minutes while active
+    // Heartbeat: refresh last_seen every 2 minutes as long as the session is alive.
+    // Switching browser tabs does NOT count as inactivity — the interval keeps running.
     intervalRef.current = setInterval(async () => {
-      const timeSinceActivity = Date.now() - lastActivityRef.current;
-      
-      // If user has been inactive for more than 3 minutes, set as offline
-      if (timeSinceActivity > 3 * 60 * 1000) {
-        await setOffline();
-      } else {
-        // Update online status and last_seen
-        await supabase
-          .from('profiles')
-          .update({ last_seen: new Date().toISOString() })
-          .eq('user_id', user.id);
-      }
+      // Always keep the heartbeat going; do NOT check tab visibility.
+      await supabase
+        .from('profiles')
+        .update({ last_seen: new Date().toISOString() })
+        .eq('user_id', user.id);
     }, 2 * 60 * 1000); // Every 2 minutes
 
-    // Listen for user activity
+    // Track activity for informational purposes only
     const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
     events.forEach(event => {
       document.addEventListener(event, updateActivity);
     });
 
-    // Set offline on page unload
+    // Only set offline when the browser tab/window is actually closed or the user navigates away entirely.
+    // Tab switching fires visibilitychange but NOT beforeunload, so we intentionally ignore it.
     const handleBeforeUnload = () => {
-      setOffline();
-    };
-
-    // Use visibility API for better detection of page visibility
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        setOffline();
-      } else {
-        setOnline();
-      }
+      // Use sendBeacon for reliability on unload
+      navigator.sendBeacon(
+        `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/rpc/update_user_online_status`,
+        JSON.stringify({ p_user_id: user.id, p_is_online: false })
+      );
     };
 
     window.addEventListener('beforeunload', handleBeforeUnload);
-    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // Cleanup
+    // Cleanup: set offline only when the React session ends (logout / component unmount due to auth change)
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
@@ -89,8 +78,9 @@ export const useOnlineStatus = (user?: User | null) => {
         document.removeEventListener(event, updateActivity);
       });
       window.removeEventListener('beforeunload', handleBeforeUnload);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      // Only mark offline if user is truly logging out (user object disappears)
       setOffline();
     };
   }, [user]);
 };
+
