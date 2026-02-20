@@ -23,11 +23,13 @@ import {
   RefreshCw,
   Globe,
   Link,
-  Calendar
+  Calendar,
+  UserPlus
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { CohortManagement } from '@/components/accelerator/CohortManagement';
+import AddStartupToPortfolioDialog from '@/components/accelerator/AddStartupToPortfolioDialog';
 
 const SFH_ACCELERATOR_ID = 'abd41d15-f707-4e36-b2f5-3a08d7b7b13a';
 
@@ -75,6 +77,7 @@ const SFHAcceleratorManager = () => {
   const [cohortEditData, setCohortEditData] = useState<Partial<Cohort>>({});
   const [cohortSaving, setCohortSaving] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [addStartupOpen, setAddStartupOpen] = useState(false);
 
   const fetchData = async () => {
     setLoading(true);
@@ -290,30 +293,56 @@ const SFHAcceleratorManager = () => {
         ))}
       </div>
 
-      {/* External Link Card */}
-      {profile.external_link && (
+      {/* Platform Landing Page + External Link Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Platform public page — always shown */}
         <Card className="tech-card border-0 border-l-4 border-l-primary">
           <CardContent className="p-4">
             <div className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-2 min-w-0">
-                <Link className="h-4 w-4 text-primary shrink-0" />
+                <Rocket className="h-4 w-4 text-primary shrink-0" />
                 <div className="min-w-0">
-                  <p className="text-xs text-muted-foreground mb-1">External Program Link</p>
-                  <p className="text-sm font-medium truncate">{profile.external_link}</p>
+                  <p className="text-xs text-muted-foreground mb-1">Platform Landing Page</p>
+                  <p className="text-sm font-medium truncate">{window.location.origin}/mvp-program</p>
                 </div>
               </div>
               <div className="flex gap-2 shrink-0">
-                <Button size="sm" variant="outline" className="tech-card border-0" onClick={() => copyToClipboard(profile.external_link!)}>
+                <Button size="sm" variant="outline" className="tech-card border-0" onClick={() => copyToClipboard(`${window.location.origin}/mvp-program`)}>
                   <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy
                 </Button>
-                <Button size="sm" variant="outline" className="tech-card border-0" onClick={() => window.open(profile.external_link!, '_blank')}>
+                <Button size="sm" variant="outline" className="tech-card border-0" onClick={() => window.open('/mvp-program', '_blank')}>
                   <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Open
                 </Button>
               </div>
             </div>
           </CardContent>
         </Card>
-      )}
+
+        {/* Custom external link — only if set */}
+        {profile.external_link && (
+          <Card className="tech-card border-0 border-l-4 border-l-accent">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-2 min-w-0">
+                  <Link className="h-4 w-4 text-accent shrink-0" />
+                  <div className="min-w-0">
+                    <p className="text-xs text-muted-foreground mb-1">External Program Link</p>
+                    <p className="text-sm font-medium truncate">{profile.external_link}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <Button size="sm" variant="outline" className="tech-card border-0" onClick={() => copyToClipboard(profile.external_link!)}>
+                    <Copy className="h-3.5 w-3.5 mr-1.5" /> Copy
+                  </Button>
+                  <Button size="sm" variant="outline" className="tech-card border-0" onClick={() => window.open(profile.external_link!, '_blank')}>
+                    <ExternalLink className="h-3.5 w-3.5 mr-1.5" /> Open
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+      </div>
 
       {/* Main Tabs */}
       <Tabs defaultValue="overview" className="space-y-4">
@@ -423,7 +452,19 @@ const SFHAcceleratorManager = () => {
         </TabsContent>
 
         {/* Cohorts Tab */}
-        <TabsContent value="cohorts">
+        <TabsContent value="cohorts" className="space-y-4">
+          {/* Direct Enrollment Button */}
+          <div className="flex justify-end">
+            <Button
+              variant="outline"
+              className="gap-2 tech-card border-0"
+              onClick={() => setAddStartupOpen(true)}
+              disabled={cohorts.length === 0}
+            >
+              <UserPlus className="h-4 w-4" />
+              Add Startup Directly to Cohort
+            </Button>
+          </div>
           <CohortManagement
             cohorts={cohorts}
             onCreateCohort={handleCreateCohort}
@@ -458,6 +499,15 @@ const SFHAcceleratorManager = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Direct Enrollment Dialog */}
+      <AddStartupToPortfolioDialog
+        open={addStartupOpen}
+        onOpenChange={setAddStartupOpen}
+        cohorts={cohorts.map(c => ({ id: c.id, name: c.name }))}
+        onStartupAdded={() => { fetchData(); setAddStartupOpen(false); }}
+        isAlumniMode={false}
+      />
 
       {/* Cohort Detail Sheet */}
       <Sheet open={cohortSheetOpen} onOpenChange={(open) => { setCohortSheetOpen(open); if (!open) setSelectedCohort(null); }}>
