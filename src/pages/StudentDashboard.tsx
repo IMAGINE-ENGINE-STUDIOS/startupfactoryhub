@@ -28,6 +28,8 @@ import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
+import DistrictRooms from '@/components/DistrictRooms';
+import LiveRooms from '@/components/LiveRooms';
 export default function StudentDashboard() {
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
@@ -133,6 +135,8 @@ export default function StudentDashboard() {
 
           <TabsContent value="social" className="space-y-4">
             <UnifiedCommunityFeed />
+            <DistrictRooms />
+            <LiveRooms />
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-4">

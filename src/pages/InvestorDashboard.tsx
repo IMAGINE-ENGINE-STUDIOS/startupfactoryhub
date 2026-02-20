@@ -13,6 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useSearchParams } from 'react-router-dom';
 import { DollarSign, TrendingUp, Building, Target, Users, Calendar as CalendarIcon, ExternalLink, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Presentation, LineChart, Globe, Bell } from 'lucide-react';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
+import DistrictRooms from '@/components/DistrictRooms';
+import LiveRooms from '@/components/LiveRooms';
 import AIFeaturesHub from '@/components/AIFeaturesHub';
 import { format, parseISO } from 'date-fns';
 
@@ -908,6 +910,8 @@ export default function InvestorDashboard() {
 
           <TabsContent value="social" className="space-y-4">
             <UnifiedCommunityFeed />
+            <DistrictRooms />
+            <LiveRooms />
           </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">

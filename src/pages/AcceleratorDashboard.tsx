@@ -31,6 +31,8 @@ import { CohortDetailsDialog } from '@/components/accelerator/CohortDetailsDialo
 import AddStartupToPortfolioDialog from '@/components/accelerator/AddStartupToPortfolioDialog';
 import AcceleratorSchedulePitchDialog from '@/components/accelerator/AcceleratorSchedulePitchDialog';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
+import DistrictRooms from '@/components/DistrictRooms';
+import LiveRooms from '@/components/LiveRooms';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import UnifiedJobsBoard from '@/components/UnifiedJobsBoard';
@@ -392,6 +394,8 @@ const AcceleratorDashboard = () => {
           {/* Social Tab */}
           <TabsContent value="social" className="space-y-6">
             <UnifiedCommunityFeed showCreatePost={true} />
+            <DistrictRooms />
+            <LiveRooms />
           </TabsContent>
 
           {/* Network Tab */}
