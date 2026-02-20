@@ -20,7 +20,8 @@ import {
   RefreshCw,
   Handshake,
   AlertTriangle,
-  Rocket
+  Rocket,
+  Mail
 } from 'lucide-react';
 
 // Admin components
@@ -39,6 +40,7 @@ import { InvestorsManagement } from '@/components/admin/InvestorsManagement';
 import CorporatePartnersManagement from '@/components/admin/CorporatePartnersManagement';
 import HubApplicationsManagement from '@/components/admin/HubApplicationsManagement';
 import SFHAcceleratorManager from '@/components/admin/SFHAcceleratorManager';
+import EmailMonitor from '@/components/admin/EmailMonitor';
 
 const AdminDashboard = () => {
   const { user, loading: authLoading } = useAuth();
@@ -177,6 +179,10 @@ const AdminDashboard = () => {
               <Rocket className="h-4 w-4" />
               <span className="hidden lg:inline">Cohorts</span>
             </TabsTrigger>
+            <TabsTrigger value="emails" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <Mail className="h-4 w-4" />
+              <span className="hidden lg:inline">Emails</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
@@ -194,6 +200,7 @@ const AdminDashboard = () => {
           <TabsContent value="api-usage"><ApiUsageTracker /></TabsContent>
           <TabsContent value="settings"><AdminSettings /></TabsContent>
           <TabsContent value="sfh-program"><SFHAcceleratorManager /></TabsContent>
+          <TabsContent value="emails"><EmailMonitor /></TabsContent>
         </Tabs>
       </main>
     </div>
