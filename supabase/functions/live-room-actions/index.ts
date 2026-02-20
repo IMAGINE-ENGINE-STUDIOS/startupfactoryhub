@@ -78,7 +78,7 @@ serve(async (req) => {
 
     const { data: room, error: roomError } = await supabaseAdmin
       .from("live_rooms")
-      .select("id, creator_id")
+      .select("id, creator_id, room_category")
       .eq("id", roomId)
       .maybeSingle();
 
@@ -94,6 +94,20 @@ serve(async (req) => {
       return json(403, { error: "Forbidden" });
     }
 
+    // Village rooms can NEVER be closed while at least one participant is present
+    if (room.room_category === "village") {
+      const { count } = await supabaseAdmin
+        .from("live_room_participants")
+        .select("*", { count: "exact", head: true })
+        .eq("room_id", roomId);
+
+      if (count && count > 0) {
+        return json(409, {
+          error: "Village rooms cannot be closed while participants are present.",
+        });
+      }
+    }
+
     // Main action
     if (action === "close") {
       const { error } = await supabaseAdmin
@@ -105,6 +119,20 @@ serve(async (req) => {
         return json(500, { error: error.message });
       }
     } else {
+      // For village rooms, never allow permanent deletion while anyone is inside
+      if (room.room_category === "village") {
+        const { count } = await supabaseAdmin
+          .from("live_room_participants")
+          .select("*", { count: "exact", head: true })
+          .eq("room_id", roomId);
+
+        if (count && count > 0) {
+          return json(409, {
+            error: "Village rooms cannot be deleted while participants are present.",
+          });
+        }
+      }
+
       const { error } = await supabaseAdmin.from("live_rooms").delete().eq("id", roomId);
       if (error) {
         return json(500, { error: error.message });
@@ -113,6 +141,8 @@ serve(async (req) => {
 
     // Cleanup (best effort)
     await supabaseAdmin.from("live_room_participants").delete().eq("room_id", roomId);
+
+
 
     await supabaseAdmin
       .from("feed_posts")
