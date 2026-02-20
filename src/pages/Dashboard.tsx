@@ -28,6 +28,7 @@ import StartupMentoringSessions from '@/components/StartupMentoringSessions';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X } from "lucide-react";
 import LiveRooms from '@/components/LiveRooms';
+import DistrictRooms from '@/components/DistrictRooms';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
@@ -379,6 +380,7 @@ const Dashboard = () => {
           {activeTab === "social" && (
             <TabsContent value="social" className="space-y-4">
               <UnifiedCommunityFeed showCreatePost={true} />
+              <DistrictRooms />
             </TabsContent>
           )}
 
