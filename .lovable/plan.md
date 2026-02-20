@@ -1,99 +1,70 @@
 
-## Admin: Startup Factory Hub MVP Accelerator Management
+## Fixing SFH MVP Accelerator Admin Manager
 
-### Overview
+### Problems Found
 
-The goal is to add a dedicated admin panel section that lets admins manage the **Startup Factory Hub - MVP Accelerator** program. This is a special "platform-owned" accelerator profile (already exists in the DB as `Startup Factory HUB` with ID `abd41d15-f707-4e36-b2f5-3a08d7b7b13a`). The admin section reuses the same data model as regular accelerators but provides an admin-specific management UI, plus an "External Link" field for the program's public landing page.
+Three distinct issues were identified through code and database analysis:
 
 ---
 
-### What Exists Already
+### Issue 1 — Profile Save is Silently Blocked by RLS
 
-- `accelerator_profiles` table: has a row for "Startup Factory HUB" owned by user `45b54179-...`
-- `accelerator_cohorts` table: linked by `accelerator_id`
-- `CohortManagement` component: reusable cohort management UI
-- `CreateCohortDialog`: create cohorts
-- `CohortApplicationsManager`: manage startup applications
-- `AlumniPortfolio`, `StartupJourneyTracker`, `MentorAdvisorAssignment`: all reusable from AcceleratorDashboard
-- Admin Dashboard already has a tab slot system
+The `accelerator_profiles` table has a Row Level Security (RLS) policy:
+```
+Users can manage their own accelerator profile: auth.uid() = user_id
+```
+
+The SFH profile is owned by user `45b54179-...` (the SFH account). When an admin logs in and tries to save the profile, their `auth.uid()` does NOT match that `user_id`, so the UPDATE is silently dropped — no error, 0 rows changed, but Supabase reports success.
+
+**Fix:** Add a new RLS policy that also allows users with the `admin` role to update any accelerator profile. This uses the existing `has_role()` database function.
+
+---
+
+### Issue 2 — "View Details" Button on Cohorts is Disconnected
+
+In `CohortManagement`, clicking "View Details" calls `onSelectCohort(cohort)`, which sets the `selectedCohort` state in `SFHAcceleratorManager`. However, **nothing renders based on `selectedCohort`** — there is no drawer, modal, or detail panel wired up to it. The button is a dead end.
+
+**Fix:** Add a `CohortDetailSheet` (slide-over panel) inside `SFHAcceleratorManager` that opens when `selectedCohort` is set. It will display full cohort details and allow editing the cohort's status, dates, and description directly.
+
+---
+
+### Issue 3 — Applications List Does Not Refresh Properly
+
+`SFHApplicationsViewer` only re-fetches when the `cohorts` prop reference changes. When `onRefresh()` is called (after accepting/rejecting), `fetchData()` re-runs in the parent but the applications list doesn't re-query because `cohorts` hasn't changed identity.
+
+**Fix:** Add a `refreshKey` counter in `SFHAcceleratorManager` that increments on `onRefresh`, and pass it as a prop to `SFHApplicationsViewer` so its `useEffect` actually fires again.
 
 ---
 
 ### Changes Required
 
-#### 1. Database Migration — Add `external_link` to `accelerator_profiles`
-
-Add an `external_link` column (text, nullable) to `accelerator_profiles` to store an external URL for the program (e.g., a landing page or registration form outside the platform).
+#### 1. Database Migration — New RLS Policy for Admin Writes
 
 ```sql
-ALTER TABLE public.accelerator_profiles
-ADD COLUMN IF NOT EXISTS external_link text;
+-- Allow admins to update any accelerator profile
+CREATE POLICY "Admins can manage all accelerator profiles"
+ON public.accelerator_profiles
+FOR ALL
+TO public
+USING (public.has_role(auth.uid(), 'admin'))
+WITH CHECK (public.has_role(auth.uid(), 'admin'));
 ```
 
-#### 2. New Component: `src/components/admin/SFHAcceleratorManager.tsx`
+This uses the existing `has_role()` security-definer function already in the database, so no new infrastructure is needed.
 
-A self-contained admin management panel for the SFH MVP Accelerator program. It will:
+#### 2. Modify `src/components/admin/SFHAcceleratorManager.tsx`
 
-- **Hardcode the SFH accelerator profile ID** (`abd41d15-f707-4e36-b2f5-3a08d7b7b13a`) to always target the correct record — no user-level auth required.
-- **Profile Editor section**: Edit `organization_name`, `description`, `website`, `external_link`, `program_duration`, `equity_percentage`, `funding_offered`, `is_accepting_applications`, `logo_url`, `location`.
-- **External Link Manager**: A prominent card showing the current external link with a copy button and "Open" button.
-- **Cohort Management**: Reuse `CohortManagement` + `CreateCohortDialog` components to create and view cohorts linked to the SFH accelerator.
-- **Applications viewer**: Show all `cohort_applications` for SFH cohorts.
-- **Portfolio viewer**: Show all `cohort_startups` for SFH cohorts.
-- **Stats cards**: Total cohorts, total startups, total applications, accepting status.
-
-Component structure (tabs within the panel):
-```text
-SFHAcceleratorManager
-├── Overview Tab (profile info + stats + external link)
-├── Cohorts Tab (CohortManagement component)
-├── Applications Tab (CohortApplicationsManager)
-└── Portfolio Tab (StartupJourneyTracker / portfolio list)
-```
-
-#### 3. Update Admin Dashboard (`src/pages/AdminDashboard.tsx`)
-
-- Add a new tab `"sfh-program"` with icon `Rocket` and label `"MVP Program"`.
-- Import and render `<SFHAcceleratorManager />` inside the new `TabsContent`.
-
----
-
-### Data Flow
-
-```text
-Admin opens "MVP Program" tab
-        ↓
-SFHAcceleratorManager loads
-        ↓
-Queries accelerator_profiles WHERE id = 'abd41d15-...'  (hardcoded SFH ID)
-        ↓
-Queries accelerator_cohorts WHERE accelerator_id = SFH_ID
-        ↓
-Queries cohort_applications WHERE cohort_id IN [sfh cohort ids]
-        ↓
-Queries cohort_startups WHERE cohort_id IN [sfh cohort ids]
-        ↓
-Admin can edit profile fields, manage cohorts, review applications, manage portfolio
-```
-
----
-
-### Technical Details
-
-- **No new auth needed**: Admin role is already validated at the AdminDashboard level — the component trusts that only admins can reach it.
-- **SFH Profile ID is a constant**: Defined at the top of the component for easy future updates.
-- **External Link**: Stored in `external_link` column (new migration), shown with a copy + open button prominently in the Overview tab.
-- **Logo upload**: Reuse the existing `AvatarUpload` component with `bucket="company-logos"`.
-- **Create cohort**: Calls Supabase insert directly using the SFH `accelerator_id` (bypasses `useAcceleratorProfile` hook which relies on `useAuth()`).
-- **Cohort actions**: Admin can create cohorts, update status, and view applications without being the profile's owning user.
+- Add a `refreshKey` state (number) that increments when `fetchData()` completes. Pass it to `SFHApplicationsViewer` so its `useEffect` dependency triggers correctly.
+- Wire up the `selectedCohort` state: add a `Sheet` component (slide-over) that opens when `selectedCohort !== null`. Inside it, show cohort details and provide an inline form to edit status, dates, funding, and description, calling `handleUpdateCohort` on save.
+- Remove the now-unused `selectedCohort` dead-end.
+- Add a "Close" / "X" button to dismiss the cohort detail sheet by setting `selectedCohort` back to null.
+- In `SFHApplicationsViewer`, add `refreshKey` to the `useEffect` dependency array so re-fetching works.
 
 ---
 
 ### Files to Create/Modify
 
-| File | Action |
-|---|---|
-| `src/components/admin/SFHAcceleratorManager.tsx` | **Create** — new admin management component |
-| `src/pages/AdminDashboard.tsx` | **Modify** — add new tab + import |
-| Database migration | **Run** — add `external_link` column to `accelerator_profiles` |
-
+| File | Action | What Changes |
+|---|---|---|
+| Database migration | **Create** | Add admin RLS policy on `accelerator_profiles` |
+| `src/components/admin/SFHAcceleratorManager.tsx` | **Modify** | Fix refresh key, wire up cohort detail sheet, fix disconnected selectedCohort |
