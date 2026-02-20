@@ -154,7 +154,7 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'Startup Factory Hub <onboarding@resend.dev>',
+            from: 'Startup Factory Hub <info@startupfactoryhub.com>',
             to: [user.email],
             subject: `🤝 New Partnership: SFH × ${partnerName}`,
             html: html(user.full_name || 'Member'),
