@@ -27,6 +27,8 @@ import {
   Shield,
   Loader2,
   ArrowLeft,
+  KeyRound,
+  FileSignature,
 } from "lucide-react";
 
 // ─── Template HTML generators (mirrored from edge functions) ────────────────
@@ -429,6 +431,224 @@ function generatePartnershipHtml(vars: {
 </html>`;
 }
 
+// ─── Auth Email HTML generators ───────────────────────────────────────────────
+
+function generateAuthEmailHtml(vars: {
+  authType: string;
+  userEmail: string;
+  token: string;
+}) {
+  const { authType, userEmail, token } = vars;
+  const baseUrl = "https://startupfactoryhub.lovable.app";
+
+  const configs: Record<string, { subject: string; icon: string; headline: string; body: string; cta: string; actionUrl: string }> = {
+    magiclink: {
+      subject: "🔐 Your Magic Link",
+      icon: "🔐",
+      headline: "Sign in to Startup Factory Hub",
+      body: "Click the button below to securely sign in. This magic link will expire in 1 hour.",
+      cta: "Sign In Securely",
+      actionUrl: `${baseUrl}/auth/v1/verify?token=${token || "PREVIEW_TOKEN"}&type=magiclink`,
+    },
+    signup: {
+      subject: "✨ Verify Your Email",
+      icon: "✨",
+      headline: "Welcome! Verify your email to get started",
+      body: "Thank you for signing up. Please verify your email address to activate your account and access all platform features.",
+      cta: "Verify Email Address",
+      actionUrl: `${baseUrl}/auth/v1/verify?token=${token || "PREVIEW_TOKEN"}&type=signup`,
+    },
+    recovery: {
+      subject: "🔑 Reset Your Password",
+      icon: "🔑",
+      headline: "Reset your password",
+      body: "You requested a password reset for your Startup Factory Hub account. Click below to choose a new password. This link expires in 1 hour.",
+      cta: "Reset Password",
+      actionUrl: `${baseUrl}/auth/v1/verify?token=${token || "PREVIEW_TOKEN"}&type=recovery`,
+    },
+    welcome: {
+      subject: "🚀 Welcome to SFH!",
+      icon: "🚀",
+      headline: "You're in! Welcome to Startup Factory Hub",
+      body: "Your account has been created successfully. Explore the platform, connect with mentors, discover investors, and join an accelerator cohort.",
+      cta: "Explore the Platform",
+      actionUrl: `${baseUrl}/dashboard`,
+    },
+  };
+
+  const cfg = configs[authType] || configs.signup;
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #0a0f1e; padding: 20px; }
+    .wrapper { max-width: 600px; margin: 0 auto; }
+    .container { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(16,185,129,0.15); }
+    .header { background: linear-gradient(135deg, #0ea270 0%, #059669 100%); padding: 40px 32px; text-align: center; }
+    .header img { width: 72px; height: 72px; border-radius: 14px; margin-bottom: 14px; object-fit: contain; }
+    .header h1 { color: #fff; font-size: 22px; font-weight: 700; }
+    .header p { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 4px; }
+    .hero { background: linear-gradient(180deg,#1a1f35 0%,#0f1419 100%); padding: 40px 32px; text-align: center; }
+    .hero-icon { font-size: 56px; margin-bottom: 16px; display: block; }
+    .hero h2 { color: #f3f4f6; font-size: 22px; font-weight: 700; margin-bottom: 10px; }
+    .hero p { color: #9ca3af; font-size: 14px; line-height: 1.7; max-width: 420px; margin: 0 auto; }
+    .content { padding: 32px; background: #0f1419; }
+    .card { background: #1a1f35; border-radius: 12px; padding: 24px; border: 1px solid rgba(14,162,112,0.2); margin-bottom: 20px; }
+    .cta-section { text-align: center; padding: 8px 0 20px; }
+    .cta-btn { display: inline-block; background: linear-gradient(135deg,#0ea270,#059669); color: #fff; text-decoration: none; padding: 15px 40px; border-radius: 12px; font-size: 15px; font-weight: 700; box-shadow: 0 6px 20px rgba(14,162,112,0.4); }
+    .url-fallback { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 12px 16px; margin-top: 20px; }
+    .url-fallback p { color: #6b7280; font-size: 12px; margin-bottom: 6px; }
+    .url-fallback code { color: #0ea270; font-size: 11px; word-break: break-all; }
+    .expiry { background: rgba(251,191,36,0.08); border: 1px solid rgba(251,191,36,0.25); border-radius: 8px; padding: 10px 16px; text-align: center; color: #fbbf24; font-size: 12px; margin-top: 16px; }
+    .recipient { color: #6b7280; font-size: 12px; text-align: center; margin-top: 8px; }
+    .footer { background: #0a0f1e; padding: 28px 32px; text-align: center; border-top: 1px solid rgba(14,162,112,0.1); }
+    .footer p { color: #6b7280; font-size: 12px; line-height: 1.6; }
+    .footer a { color: #0ea270; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="SFH" />
+        <h1>Startup Factory Hub</h1>
+        <p>AI-Powered Startup Accelerator Platform</p>
+      </div>
+      <div class="hero">
+        <span class="hero-icon">${cfg.icon}</span>
+        <h2>${cfg.headline}</h2>
+        <p>${cfg.body}</p>
+      </div>
+      <div class="content">
+        <div class="cta-section">
+          <a href="${cfg.actionUrl}" class="cta-btn">${cfg.cta}</a>
+        </div>
+        ${authType !== "welcome" ? `<div class="expiry">⏰ This link expires in <strong>1 hour</strong>. If you didn't request this, you can safely ignore this email.</div>` : ""}
+        <div class="url-fallback">
+          <p>If the button doesn't work, copy and paste this link:</p>
+          <code>${cfg.actionUrl}</code>
+        </div>
+        ${userEmail ? `<p class="recipient">This email was sent to ${userEmail}</p>` : ""}
+      </div>
+      <div class="footer">
+        <p>© 2025 <a href="https://startupfactoryhub.lovable.app">Startup Factory Hub</a> · All rights reserved</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// ─── PDF Signature HTML generator ────────────────────────────────────────────
+
+function generatePdfSignatureHtml(vars: {
+  to: string;
+  documentTitle: string;
+  shareToken: string;
+  senderName: string;
+  message: string;
+  accessLevel: string;
+}) {
+  const { to, documentTitle, shareToken, senderName, message, accessLevel } = vars;
+  const shareUrl = `https://startupfactoryhub.lovable.app/pdf-view/${shareToken || "preview-token"}`;
+  const actionText = accessLevel === "sign" ? "Sign PDF" : accessLevel === "edit" ? "Edit PDF" : "View PDF";
+  const description = accessLevel === "sign"
+    ? "has invited you to sign a PDF document."
+    : accessLevel === "edit"
+    ? "has invited you to edit a PDF document."
+    : "has shared a PDF document with you.";
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #0a0f1e; padding: 20px; }
+    .wrapper { max-width: 600px; margin: 0 auto; }
+    .container { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(16,185,129,0.15); }
+    .header { background: linear-gradient(135deg, #0ea270 0%, #059669 100%); padding: 40px 32px; text-align: center; }
+    .header img { width: 72px; height: 72px; border-radius: 14px; margin-bottom: 14px; object-fit: contain; }
+    .header h1 { color: #fff; font-size: 22px; font-weight: 700; }
+    .header p { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 4px; }
+    .hero { background: linear-gradient(180deg,#1a1f35 0%,#0f1419 100%); padding: 36px 32px; text-align: center; }
+    .hero-badge { display: inline-block; background: rgba(14,162,112,0.15); border: 1px solid rgba(14,162,112,0.3); color: #0ea270; padding: 6px 18px; border-radius: 50px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+    .hero-icon { font-size: 52px; margin-bottom: 12px; display: block; }
+    .hero h2 { color: #f3f4f6; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .hero p { color: #9ca3af; font-size: 14px; }
+    .content { padding: 28px 32px; background: #0f1419; }
+    .card { background: #1a1f35; border-radius: 12px; padding: 20px 24px; border: 1px solid rgba(14,162,112,0.2); margin-bottom: 20px; }
+    .card-label { color: #0ea270; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+    .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .detail-row:last-child { border-bottom: none; }
+    .detail-label { color: #9ca3af; font-size: 13px; }
+    .detail-value { color: #f3f4f6; font-size: 13px; font-weight: 600; }
+    .message-box { background: rgba(14,162,112,0.07); border: 1px solid rgba(14,162,112,0.15); border-radius: 8px; padding: 12px 16px; color: #d1d5db; font-size: 13px; line-height: 1.6; font-style: italic; }
+    .cta-section { text-align: center; padding: 4px 0 20px; }
+    .cta-btn { display: inline-block; background: linear-gradient(135deg,#0ea270,#059669); color: #fff; text-decoration: none; padding: 14px 38px; border-radius: 12px; font-size: 15px; font-weight: 700; box-shadow: 0 6px 20px rgba(14,162,112,0.4); }
+    .url-fallback { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 12px 16px; margin-top: 16px; }
+    .url-fallback p { color: #6b7280; font-size: 12px; margin-bottom: 4px; }
+    .url-fallback code { color: #0ea270; font-size: 11px; word-break: break-all; }
+    .footer { background: #0a0f1e; padding: 28px 32px; text-align: center; border-top: 1px solid rgba(14,162,112,0.1); }
+    .footer p { color: #6b7280; font-size: 12px; line-height: 1.6; }
+    .footer a { color: #0ea270; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div class="header">
+        <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="SFH" />
+        <h1>Startup Factory Hub</h1>
+        <p>LightPaper Document Suite</p>
+      </div>
+      <div class="hero">
+        <div class="hero-badge">📄 Document Shared</div>
+        <span class="hero-icon">${accessLevel === "sign" ? "✍️" : accessLevel === "edit" ? "✏️" : "📄"}</span>
+        <h2>${actionText} Request</h2>
+        <p><strong style="color:#f3f4f6">${senderName || "Someone"}</strong> ${description}</p>
+      </div>
+      <div class="content">
+        <div class="card">
+          <div class="card-label">📋 Document Details</div>
+          <div class="detail-row">
+            <span class="detail-label">Document</span>
+            <span class="detail-value">${documentTitle || "Untitled Document"}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Shared By</span>
+            <span class="detail-value">${senderName || "—"}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Access Level</span>
+            <span class="detail-value" style="color:#0ea270">${accessLevel || "view"}</span>
+          </div>
+          ${to ? `<div class="detail-row"><span class="detail-label">Recipient</span><span class="detail-value">${to}</span></div>` : ""}
+        </div>
+        ${message ? `<div class="message-box">"${message}"</div><br/>` : ""}
+        <div class="cta-section">
+          <a href="${shareUrl}" class="cta-btn">📄 ${actionText}</a>
+        </div>
+        <div class="url-fallback">
+          <p>If the button doesn't work, copy and paste this link:</p>
+          <code>${shareUrl}</code>
+        </div>
+      </div>
+      <div class="footer">
+        <p>This is an automated email from LightPaper, powered by Startup Factory Hub.</p>
+        <p style="margin-top:8px">© 2025 <a href="https://startupfactoryhub.lovable.app">Startup Factory Hub</a> · All rights reserved</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
 // ─── Template config ────────────────────────────────────────────────────────
 
 const TEMPLATES = [
@@ -459,6 +679,20 @@ const TEMPLATES = [
     icon: Handshake,
     description: "Broadcast to all users when a new partner joins",
     edgeFunction: "send-partnership-announcement",
+  },
+  {
+    id: "auth",
+    label: "Auth Emails",
+    icon: KeyRound,
+    description: "Magic link, email verification, password reset & welcome",
+    edgeFunction: "send-auth-email",
+  },
+  {
+    id: "pdf-signature",
+    label: "PDF Signature Request",
+    icon: FileSignature,
+    description: "Sent when a user shares a document for viewing or signing",
+    edgeFunction: "send-pdf-signature-request",
   },
 ] as const;
 
@@ -496,6 +730,20 @@ const defaultVars = {
     ctaLabel: "Learn More",
     ctaUrl: "https://startupfactoryhub.lovable.app/dashboard",
   },
+  auth: {
+    to: "",
+    authType: "magiclink",
+    userEmail: "user@example.com",
+    token: "preview-token-abc123",
+  },
+  "pdf-signature": {
+    to: "",
+    documentTitle: "Startup Equity Agreement 2025",
+    shareToken: "preview-share-token",
+    senderName: "Alex Johnson",
+    message: "Please review and sign this document at your earliest convenience.",
+    accessLevel: "sign",
+  },
 };
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
@@ -529,6 +777,8 @@ export default function EmailTemplates() {
     if (selected === "invitation") return generateInvitationHtml(vars.invitation);
     if (selected === "digest") return generateWeeklyDigestHtml();
     if (selected === "partnership") return generatePartnershipHtml(vars.partnership);
+    if (selected === "auth") return generateAuthEmailHtml(vars.auth);
+    if (selected === "pdf-signature") return generatePdfSignatureHtml(vars["pdf-signature"]);
     return "";
   }
 
@@ -569,6 +819,20 @@ export default function EmailTemplates() {
           benefitsForStartups: v.benefitsForStartups.split("\n").filter(Boolean),
           ctaLabel: v.ctaLabel,
           ctaUrl: v.ctaUrl,
+        };
+      } else if (selected === "auth") {
+        toast({ title: "ℹ️ Auth emails", description: "Auth emails are triggered automatically by Supabase — they cannot be sent manually from here.", variant: "default" });
+        setSending(false);
+        return;
+      } else if (selected === "pdf-signature") {
+        const v = vars["pdf-signature"];
+        payload = {
+          to: toEmail,
+          documentTitle: v.documentTitle,
+          shareToken: v.shareToken,
+          senderName: v.senderName,
+          message: v.message,
+          accessLevel: v.accessLevel,
         };
       }
 
@@ -855,6 +1119,109 @@ export default function EmailTemplates() {
                             placeholder="https://..."
                           />
                         </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* ── Auth Emails ── */}
+                  {selected === "auth" && (
+                    <>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Auth Type</Label>
+                        <Select
+                          value={vars.auth.authType}
+                          onValueChange={(v) => updateVar("auth", "authType", v)}
+                        >
+                          <SelectTrigger className="h-9 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="magiclink">Magic Link</SelectItem>
+                            <SelectItem value="signup">Email Verification (Sign Up)</SelectItem>
+                            <SelectItem value="recovery">Password Reset</SelectItem>
+                            <SelectItem value="welcome">Welcome Email</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">User Email</Label>
+                        <Input
+                          value={vars.auth.userEmail}
+                          onChange={(e) => updateVar("auth", "userEmail", e.target.value)}
+                          className="h-9 text-sm"
+                          placeholder="user@example.com"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Token <span className="text-muted-foreground">(for URL preview)</span></Label>
+                        <Input
+                          value={vars.auth.token}
+                          onChange={(e) => updateVar("auth", "token", e.target.value)}
+                          className="h-9 text-sm"
+                          placeholder="preview-token-abc123"
+                        />
+                      </div>
+                      <div className="rounded-md bg-muted border border-border px-3 py-2.5 text-xs text-muted-foreground">
+                        ⚠️ Auth emails are triggered automatically by Supabase auth events. The "Send Test" button is not applicable here — these are handled via the <code className="font-mono">send-auth-email</code> hook.
+                      </div>
+                    </>
+                  )}
+
+                  {/* ── PDF Signature ── */}
+                  {selected === "pdf-signature" && (
+                    <>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Document Title</Label>
+                        <Input
+                          value={vars["pdf-signature"].documentTitle}
+                          onChange={(e) => updateVar("pdf-signature", "documentTitle", e.target.value)}
+                          className="h-9 text-sm"
+                          placeholder="Startup Equity Agreement"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Sender Name</Label>
+                        <Input
+                          value={vars["pdf-signature"].senderName}
+                          onChange={(e) => updateVar("pdf-signature", "senderName", e.target.value)}
+                          className="h-9 text-sm"
+                          placeholder="Alex Johnson"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Access Level</Label>
+                        <Select
+                          value={vars["pdf-signature"].accessLevel}
+                          onValueChange={(v) => updateVar("pdf-signature", "accessLevel", v)}
+                        >
+                          <SelectTrigger className="h-9 text-sm">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="view">View</SelectItem>
+                            <SelectItem value="sign">Sign</SelectItem>
+                            <SelectItem value="edit">Edit</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Share Token <span className="text-muted-foreground">(for URL preview)</span></Label>
+                        <Input
+                          value={vars["pdf-signature"].shareToken}
+                          onChange={(e) => updateVar("pdf-signature", "shareToken", e.target.value)}
+                          className="h-9 text-sm"
+                          placeholder="preview-share-token"
+                        />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Personal Message <span className="text-muted-foreground">(optional)</span></Label>
+                        <Textarea
+                          value={vars["pdf-signature"].message}
+                          onChange={(e) => updateVar("pdf-signature", "message", e.target.value)}
+                          rows={3}
+                          className="text-sm resize-none"
+                          placeholder="Please review and sign at your earliest convenience."
+                        />
                       </div>
                     </>
                   )}
