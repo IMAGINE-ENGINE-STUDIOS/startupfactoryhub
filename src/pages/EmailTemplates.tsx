@@ -30,6 +30,16 @@ import {
   KeyRound,
   FileSignature,
   AlertTriangle,
+  UserPlus,
+  MessageSquare,
+  Users,
+  CalendarCheck,
+  Briefcase,
+  RefreshCw,
+  Lock,
+  CheckCheck,
+  GraduationCap,
+  TrendingUp,
 } from "lucide-react";
 import MatrixBackground from "@/components/MatrixBackground";
 
@@ -671,19 +681,112 @@ function generatePdfSignatureHtml(vars: {
 // ─── Template config ────────────────────────────────────────────────────────
 
 const TEMPLATES = [
+  // ── Notification-based (all use send-notification-email) ──
   {
-    id: "notification",
-    label: "Notification Email",
-    icon: Bell,
-    description: "Platform alerts and updates sent to individual users",
+    id: "connection-request",
+    label: "Connection Request",
+    icon: UserPlus,
+    description: "connections INSERT — sent to the addressee",
     edgeFunction: "send-notification-email",
+    trigger: "connections INSERT",
   },
+  {
+    id: "connection-accepted",
+    label: "Connection Accepted",
+    icon: CheckCheck,
+    description: "connections UPDATE (status=accepted) — sent to requester",
+    edgeFunction: "send-notification-email",
+    trigger: "connections UPDATE",
+  },
+  {
+    id: "new-message",
+    label: "New Message",
+    icon: MessageSquare,
+    description: "messages INSERT — sent to receiver",
+    edgeFunction: "send-notification-email",
+    trigger: "messages INSERT",
+  },
+  {
+    id: "mentorship-request",
+    label: "Mentorship Request",
+    icon: Users,
+    description: "mentoring_sessions INSERT (pending) — sent to mentor",
+    edgeFunction: "send-notification-email",
+    trigger: "mentoring_sessions INSERT (pending)",
+  },
+  {
+    id: "session-booked",
+    label: "Session Booked",
+    icon: CalendarCheck,
+    description: "mentoring_sessions INSERT — sent to mentor & mentee",
+    edgeFunction: "send-notification-email",
+    trigger: "mentoring_sessions INSERT",
+  },
+  {
+    id: "cohort-acceptance",
+    label: "Cohort Acceptance",
+    icon: GraduationCap,
+    description: "cohort_startups INSERT — sent to company owner",
+    edgeFunction: "send-notification-email",
+    trigger: "cohort_startups INSERT",
+  },
+  {
+    id: "cohort-status-change",
+    label: "Cohort Status Change",
+    icon: RefreshCw,
+    description: "accelerator_cohorts UPDATE (status) — sent to all enrolled",
+    edgeFunction: "send-notification-email",
+    trigger: "accelerator_cohorts UPDATE",
+  },
+  {
+    id: "job-application-received",
+    label: "Job Application Received",
+    icon: Briefcase,
+    description: "job_applications INSERT — sent to company owner",
+    edgeFunction: "send-notification-email",
+    trigger: "job_applications INSERT",
+  },
+  {
+    id: "application-status-update",
+    label: "Application Status Update",
+    icon: TrendingUp,
+    description: "job_applications UPDATE (status) — sent to applicant",
+    edgeFunction: "send-notification-email",
+    trigger: "job_applications UPDATE",
+  },
+  {
+    id: "event-registration",
+    label: "Event Registration",
+    icon: Bell,
+    description: "event_registrations INSERT — sent to registrant",
+    edgeFunction: "send-notification-email",
+    trigger: "event_registrations INSERT",
+  },
+  // ── Auth emails ──
+  {
+    id: "account-verification",
+    label: "Account Verification",
+    icon: KeyRound,
+    description: "auth signup / magic-link — triggered by Supabase auth",
+    edgeFunction: "send-auth-email",
+    trigger: "auth signup/magic-link",
+  },
+  {
+    id: "password-reset",
+    label: "Password Reset",
+    icon: Lock,
+    description: "auth recovery — triggered by Supabase auth",
+    edgeFunction: "send-auth-email",
+    trigger: "auth recovery",
+  },
+  // ── Other platform emails ──
   {
     id: "invitation",
     label: "Application Invitation",
     icon: Mail,
     description: "Sent when an applicant is selected for a job/internship",
     edgeFunction: "send-application-invitation",
+    trigger: "manual",
   },
   {
     id: "digest",
@@ -691,6 +794,7 @@ const TEMPLATES = [
     icon: Newspaper,
     description: "Monday morning summary of new platform activity",
     edgeFunction: "weekly-digest",
+    trigger: "cron Monday 9AM UTC",
   },
   {
     id: "partnership",
@@ -698,13 +802,7 @@ const TEMPLATES = [
     icon: Handshake,
     description: "Broadcast to all users when a new partner joins",
     edgeFunction: "send-partnership-announcement",
-  },
-  {
-    id: "auth",
-    label: "Auth Emails",
-    icon: KeyRound,
-    description: "Magic link, email verification, password reset & welcome",
-    edgeFunction: "send-auth-email",
+    trigger: "manual broadcast",
   },
   {
     id: "pdf-signature",
@@ -712,6 +810,7 @@ const TEMPLATES = [
     icon: FileSignature,
     description: "Sent when a user shares a document for viewing or signing",
     edgeFunction: "send-pdf-signature-request",
+    trigger: "manual",
   },
 ] as const;
 
@@ -720,11 +819,82 @@ type TemplateId = (typeof TEMPLATES)[number]["id"];
 // ─── Default variable states ─────────────────────────────────────────────────
 
 const defaultVars = {
+  "connection-request": {
+    to: "",
+    title: "New Connection Request",
+    message: "Sarah Chen, a Startup Mentor, wants to connect with you. Building your network is key to success — accept their request and start collaborating!",
+    type: "connection",
+  },
+  "connection-accepted": {
+    to: "",
+    title: "Connection Accepted",
+    message: "Sarah Chen accepted your connection request. You are now connected — start a conversation!",
+    type: "success",
+  },
+  "new-message": {
+    to: "",
+    title: "New Message",
+    message: "Alex Johnson sent you a message on the platform. Log in to read and reply.",
+    type: "message",
+  },
+  "mentorship-request": {
+    to: "",
+    title: "New Mentorship Request",
+    message: "Jordan Park has requested mentorship from you. Review their profile and accept or decline the request.",
+    type: "info",
+  },
+  "session-booked": {
+    to: "",
+    title: "Mentoring Session Booked",
+    message: "Jordan Park has scheduled a mentoring session with you for Monday, 24 February 2025 at 10:00 AM UTC. Please log in to confirm and prepare.",
+    type: "event",
+  },
+  "cohort-acceptance": {
+    to: "",
+    title: "Congratulations! Accepted into Cohort",
+    message: "TechNova AI has been officially accepted into the Spring 2025 Cohort at Startup Factory Hub! Welcome to the program! Log in to view your cohort details, resources, and next steps.",
+    type: "success",
+  },
+  "cohort-status-change": {
+    to: "",
+    title: "Applications Are Now Open: Spring 2025",
+    message: "The cohort \"Spring 2025\" status has changed to: Applications Are Now Open. Log in to the platform for more details.",
+    type: "info",
+  },
+  "job-application-received": {
+    to: "",
+    title: "New Job Application",
+    message: "Jordan Park applied for Frontend Developer Intern at your company. Log in to review their application.",
+    type: "info",
+  },
+  "application-status-update": {
+    to: "",
+    title: "Application Update",
+    message: "Your application for Frontend Developer Intern has been accepted. Congratulations — log in to view next steps!",
+    type: "success",
+  },
+  "event-registration": {
+    to: "",
+    title: "Event Registration Confirmed",
+    message: "You have successfully registered for the AI & Startups Summit 2025. We look forward to seeing you there!",
+    type: "success",
+  },
+  "account-verification": {
+    to: "",
+    authType: "signup",
+    userEmail: "user@example.com",
+    token: "preview-token-abc123",
+  },
+  "password-reset": {
+    to: "",
+    authType: "recovery",
+    userEmail: "user@example.com",
+    token: "preview-token-abc123",
+  },
   notification: {
     to: "",
     title: "You have a new connection request!",
-    message:
-      "Sarah Chen, a Startup Mentor at Startup Factory Hub, wants to connect with you. Building your network is key to success — accept their request and start collaborating!",
+    message: "Sarah Chen wants to connect with you.",
     type: "connection",
   },
   invitation: {
@@ -765,6 +935,15 @@ const defaultVars = {
   },
 };
 
+// ─── Template group helpers ──────────────────────────────────────────────────
+
+const NOTIFICATION_IDS: TemplateId[] = [
+  "connection-request", "connection-accepted", "new-message", "mentorship-request",
+  "session-booked", "cohort-acceptance", "cohort-status-change",
+  "job-application-received", "application-status-update", "event-registration",
+];
+const AUTH_IDS: TemplateId[] = ["account-verification", "password-reset"];
+
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function EmailTemplates() {
@@ -772,7 +951,7 @@ export default function EmailTemplates() {
   const { role, loading } = useUserRole();
   const { toast } = useToast();
 
-  const [selected, setSelected] = useState<TemplateId>("notification");
+  const [selected, setSelected] = useState<TemplateId>("connection-request");
   const [vars, setVars] = useState(defaultVars);
   const [sending, setSending] = useState(false);
 
@@ -791,12 +970,19 @@ export default function EmailTemplates() {
 
   const currentTemplate = TEMPLATES.find((t) => t.id === selected)!;
 
+
   function getPreviewHtml() {
-    if (selected === "notification") return generateNotificationHtml(vars.notification);
+    if (NOTIFICATION_IDS.includes(selected)) {
+      const v = vars[selected] as { title: string; message: string; type: string };
+      return generateNotificationHtml(v);
+    }
+    if (AUTH_IDS.includes(selected)) {
+      const v = vars[selected] as { authType: string; userEmail: string; token: string };
+      return generateAuthEmailHtml(v);
+    }
     if (selected === "invitation") return generateInvitationHtml(vars.invitation);
     if (selected === "digest") return generateWeeklyDigestHtml();
     if (selected === "partnership") return generatePartnershipHtml(vars.partnership);
-    if (selected === "auth") return generateAuthEmailHtml(vars.auth);
     if (selected === "pdf-signature") return generatePdfSignatureHtml(vars["pdf-signature"]);
     return "";
   }
@@ -819,9 +1005,17 @@ export default function EmailTemplates() {
     try {
       let payload: Record<string, unknown> = {};
 
-      if (selected === "notification") {
-        const v = vars.notification;
+      if (NOTIFICATION_IDS.includes(selected)) {
+        const v = vars[selected] as { title: string; message: string; type: string };
         payload = { to: toEmail, title: v.title, message: v.message, type: v.type };
+      } else if (AUTH_IDS.includes(selected)) {
+        toast({
+          title: "Auth emails",
+          description: "Auth emails are triggered automatically by Supabase — they cannot be sent manually from here.",
+          variant: "default",
+        });
+        setSending(false);
+        return;
       } else if (selected === "invitation") {
         const v = vars.invitation;
         payload = { email: toEmail, jobTitle: v.jobTitle, companyName: v.companyName, token: v.token, applicationId: "preview" };
@@ -839,14 +1033,6 @@ export default function EmailTemplates() {
           ctaLabel: v.ctaLabel,
           ctaUrl: v.ctaUrl,
         };
-      } else if (selected === "auth") {
-        toast({
-          title: "Auth emails",
-          description: "Auth emails are triggered automatically by Supabase — they cannot be sent manually from here.",
-          variant: "default",
-        });
-        setSending(false);
-        return;
       } else if (selected === "pdf-signature") {
         const v = vars["pdf-signature"];
         payload = {
@@ -926,27 +1112,80 @@ export default function EmailTemplates() {
 
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar */}
-          <aside className="w-64 border-r border-border bg-card/80 backdrop-blur-sm flex flex-col shrink-0 overflow-y-auto">
+          <aside className="w-72 border-r border-border bg-card/80 backdrop-blur-sm flex flex-col shrink-0 overflow-y-auto">
             <div className="p-4">
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Templates</p>
-              <div className="space-y-1">
-                {TEMPLATES.map((t) => {
+              {/* Notification-based group */}
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Automated Notifications</p>
+              <div className="space-y-0.5 mb-4">
+                {TEMPLATES.filter(t => NOTIFICATION_IDS.includes(t.id as TemplateId)).map((t) => {
                   const Icon = t.icon;
                   const isActive = selected === t.id;
                   return (
                     <button
                       key={t.id}
                       onClick={() => setSelected(t.id)}
-                      className={`w-full text-left rounded-lg px-3 py-3 transition-colors flex items-start gap-3 ${
+                      className={`w-full text-left rounded-lg px-3 py-2.5 transition-colors flex items-start gap-3 ${
                         isActive
                           ? "bg-primary/10 border border-primary/30 text-primary"
                           : "hover:bg-muted text-muted-foreground hover:text-foreground"
                       }`}
                     >
-                      <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${isActive ? "text-primary" : ""}`} />
-                      <div>
+                      <Icon className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${isActive ? "text-primary" : ""}`} />
+                      <div className="min-w-0">
                         <p className="text-sm font-medium leading-tight">{t.label}</p>
-                        <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{t.description}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 font-mono opacity-70 truncate">{t.trigger}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Auth group */}
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Auth Emails</p>
+              <div className="space-y-0.5 mb-4">
+                {TEMPLATES.filter(t => AUTH_IDS.includes(t.id as TemplateId)).map((t) => {
+                  const Icon = t.icon;
+                  const isActive = selected === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setSelected(t.id)}
+                      className={`w-full text-left rounded-lg px-3 py-2.5 transition-colors flex items-start gap-3 ${
+                        isActive
+                          ? "bg-primary/10 border border-primary/30 text-primary"
+                          : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Icon className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${isActive ? "text-primary" : ""}`} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium leading-tight">{t.label}</p>
+                        <p className="text-[10px] text-muted-foreground mt-0.5 font-mono opacity-70 truncate">{t.trigger}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Other platform emails */}
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Platform Emails</p>
+              <div className="space-y-0.5">
+                {TEMPLATES.filter(t => !NOTIFICATION_IDS.includes(t.id as TemplateId) && !AUTH_IDS.includes(t.id as TemplateId)).map((t) => {
+                  const Icon = t.icon;
+                  const isActive = selected === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setSelected(t.id)}
+                      className={`w-full text-left rounded-lg px-3 py-2.5 transition-colors flex items-start gap-3 ${
+                        isActive
+                          ? "bg-primary/10 border border-primary/30 text-primary"
+                          : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Icon className={`h-3.5 w-3.5 mt-0.5 shrink-0 ${isActive ? "text-primary" : ""}`} />
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium leading-tight">{t.label}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-tight line-clamp-1">{t.description}</p>
                       </div>
                     </button>
                   );
@@ -1009,44 +1248,95 @@ export default function EmailTemplates() {
                   </div>
 
                   <div className="rounded-lg border border-border bg-card p-4 space-y-4">
-                    {/* ── Notification ── */}
-                    {selected === "notification" && (
-                      <>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs">Notification Type</Label>
-                          <Select
-                            value={vars.notification.type}
-                            onValueChange={(v) => updateVar("notification", "type", v)}
-                          >
-                            <SelectTrigger className="h-9 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {["info", "success", "warning", "error", "message", "connection", "event"].map((t) => (
-                                <SelectItem key={t} value={t}>{t}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs">Title</Label>
-                          <Input
-                            value={vars.notification.title}
-                            onChange={(e) => updateVar("notification", "title", e.target.value)}
-                            className="h-9 text-sm"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs">Message</Label>
-                          <Textarea
-                            value={vars.notification.message}
-                            onChange={(e) => updateVar("notification", "message", e.target.value)}
-                            rows={4}
-                            className="text-sm resize-none"
-                          />
-                        </div>
-                      </>
-                    )}
+                    {/* ── Notification-based templates (shared fields) ── */}
+                    {NOTIFICATION_IDS.includes(selected) && (() => {
+                      const v = vars[selected] as { title: string; message: string; type: string };
+                      return (
+                        <>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Title</Label>
+                            <Input
+                              value={v.title}
+                              onChange={(e) => updateVar(selected, "title", e.target.value)}
+                              className="h-9 text-sm"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Message</Label>
+                            <Textarea
+                              value={v.message}
+                              onChange={(e) => updateVar(selected, "message", e.target.value)}
+                              rows={4}
+                              className="text-sm resize-none"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Notification Type <span className="text-muted-foreground">(controls icon + colour)</span></Label>
+                            <Select
+                              value={v.type}
+                              onValueChange={(val) => updateVar(selected, "type", val)}
+                            >
+                              <SelectTrigger className="h-9 text-sm">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {["info", "success", "warning", "error", "message", "connection", "event"].map((t) => (
+                                  <SelectItem key={t} value={t}>{t}</SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          </div>
+                        </>
+                      );
+                    })()}
+
+                    {/* ── Auth templates ── */}
+                    {AUTH_IDS.includes(selected) && (() => {
+                      const v = vars[selected] as { authType: string; userEmail: string; token: string };
+                      return (
+                        <>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Auth Type</Label>
+                            <Select
+                              value={v.authType}
+                              onValueChange={(val) => updateVar(selected, "authType", val)}
+                            >
+                              <SelectTrigger className="h-9 text-sm">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="magiclink">Magic Link</SelectItem>
+                                <SelectItem value="signup">Email Verification (Sign Up)</SelectItem>
+                                <SelectItem value="recovery">Password Reset</SelectItem>
+                                <SelectItem value="welcome">Welcome Email</SelectItem>
+                              </SelectContent>
+                            </Select>
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">User Email</Label>
+                            <Input
+                              value={v.userEmail}
+                              onChange={(e) => updateVar(selected, "userEmail", e.target.value)}
+                              className="h-9 text-sm"
+                              placeholder="user@example.com"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Token <span className="text-muted-foreground">(for URL preview)</span></Label>
+                            <Input
+                              value={v.token}
+                              onChange={(e) => updateVar(selected, "token", e.target.value)}
+                              className="h-9 text-sm"
+                              placeholder="preview-token-abc123"
+                            />
+                          </div>
+                          <div className="rounded-md bg-muted border border-border px-3 py-2.5 text-xs text-muted-foreground flex items-start gap-2">
+                            <AlertTriangle className="h-3.5 w-3.5 text-yellow-500 mt-0.5 shrink-0" />
+                            Auth emails are triggered automatically by Supabase auth events. The "Send Test" button is not applicable here — these are handled via the <code className="font-mono">send-auth-email</code> hook.
+                          </div>
+                        </>
+                      );
+                    })()}
 
                     {/* ── Invitation ── */}
                     {selected === "invitation" && (
@@ -1172,50 +1462,6 @@ export default function EmailTemplates() {
                       </>
                     )}
 
-                    {/* ── Auth Emails ── */}
-                    {selected === "auth" && (
-                      <>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs">Auth Type</Label>
-                          <Select
-                            value={vars.auth.authType}
-                            onValueChange={(v) => updateVar("auth", "authType", v)}
-                          >
-                            <SelectTrigger className="h-9 text-sm">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="magiclink">Magic Link</SelectItem>
-                              <SelectItem value="signup">Email Verification (Sign Up)</SelectItem>
-                              <SelectItem value="recovery">Password Reset</SelectItem>
-                              <SelectItem value="welcome">Welcome Email</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs">User Email</Label>
-                          <Input
-                            value={vars.auth.userEmail}
-                            onChange={(e) => updateVar("auth", "userEmail", e.target.value)}
-                            className="h-9 text-sm"
-                            placeholder="user@example.com"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          <Label className="text-xs">Token <span className="text-muted-foreground">(for URL preview)</span></Label>
-                          <Input
-                            value={vars.auth.token}
-                            onChange={(e) => updateVar("auth", "token", e.target.value)}
-                            className="h-9 text-sm"
-                            placeholder="preview-token-abc123"
-                          />
-                        </div>
-                        <div className="rounded-md bg-muted border border-border px-3 py-2.5 text-xs text-muted-foreground flex items-start gap-2">
-                          <AlertTriangle className="h-3.5 w-3.5 text-yellow-500 mt-0.5 shrink-0" />
-                          Auth emails are triggered automatically by Supabase auth events. The "Send Test" button is not applicable here — these are handled via the <code className="font-mono">send-auth-email</code> hook.
-                        </div>
-                      </>
-                    )}
 
                     {/* ── PDF Signature ── */}
                     {selected === "pdf-signature" && (
