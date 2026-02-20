@@ -42,7 +42,7 @@ import CorporatePartnersManagement from '@/components/admin/CorporatePartnersMan
 import HubApplicationsManagement from '@/components/admin/HubApplicationsManagement';
 import SFHAcceleratorManager from '@/components/admin/SFHAcceleratorManager';
 import EmailMonitor from '@/components/admin/EmailMonitor';
-import VillagesManagement from '@/components/admin/VillagesManagement';
+import DistrictsManagement from '@/components/admin/DistrictsManagement';
 
 
 const AdminDashboard = () => {
@@ -186,9 +186,9 @@ const AdminDashboard = () => {
               <Mail className="h-4 w-4" />
               <span className="hidden lg:inline">Emails</span>
             </TabsTrigger>
-            <TabsTrigger value="villages" className="flex items-center gap-1 py-2 px-2 text-xs">
+            <TabsTrigger value="districts" className="flex items-center gap-1 py-2 px-2 text-xs">
               <Crown className="h-4 w-4" />
-              <span className="hidden lg:inline">Villages</span>
+              <span className="hidden lg:inline">Districts</span>
             </TabsTrigger>
           </TabsList>
 
@@ -208,7 +208,7 @@ const AdminDashboard = () => {
           <TabsContent value="settings"><AdminSettings /></TabsContent>
           <TabsContent value="sfh-program"><SFHAcceleratorManager /></TabsContent>
           <TabsContent value="emails"><EmailMonitor /></TabsContent>
-          <TabsContent value="villages"><VillagesManagement /></TabsContent>
+          <TabsContent value="districts"><DistrictsManagement /></TabsContent>
         </Tabs>
       </main>
     </div>
