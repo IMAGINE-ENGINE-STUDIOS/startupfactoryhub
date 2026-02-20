@@ -3156,37 +3156,46 @@ export type Database = {
         Row: {
           created_at: string | null
           creator_id: string
+          current_host_id: string | null
           description: string | null
           expires_at: string | null
+          host_elected_at: string | null
           id: string
           is_active: boolean | null
           is_public: boolean
           meeting_link: string
           name: string
+          room_category: string
           updated_at: string | null
         }
         Insert: {
           created_at?: string | null
           creator_id: string
+          current_host_id?: string | null
           description?: string | null
           expires_at?: string | null
+          host_elected_at?: string | null
           id?: string
           is_active?: boolean | null
           is_public?: boolean
           meeting_link: string
           name: string
+          room_category?: string
           updated_at?: string | null
         }
         Update: {
           created_at?: string | null
           creator_id?: string
+          current_host_id?: string | null
           description?: string | null
           expires_at?: string | null
+          host_elected_at?: string | null
           id?: string
           is_active?: boolean | null
           is_public?: boolean
           meeting_link?: string
           name?: string
+          room_category?: string
           updated_at?: string | null
         }
         Relationships: []
@@ -4936,6 +4945,76 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      village_elections: {
+        Row: {
+          concluded_at: string | null
+          created_at: string | null
+          id: string
+          room_id: string
+          started_at: string | null
+          status: string
+          winner_id: string | null
+        }
+        Insert: {
+          concluded_at?: string | null
+          created_at?: string | null
+          id?: string
+          room_id: string
+          started_at?: string | null
+          status?: string
+          winner_id?: string | null
+        }
+        Update: {
+          concluded_at?: string | null
+          created_at?: string | null
+          id?: string
+          room_id?: string
+          started_at?: string | null
+          status?: string
+          winner_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "village_elections_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "live_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      village_votes: {
+        Row: {
+          candidate_id: string
+          created_at: string | null
+          election_id: string
+          id: string
+          voter_id: string
+        }
+        Insert: {
+          candidate_id: string
+          created_at?: string | null
+          election_id: string
+          id?: string
+          voter_id: string
+        }
+        Update: {
+          candidate_id?: string
+          created_at?: string | null
+          election_id?: string
+          id?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "village_votes_election_id_fkey"
+            columns: ["election_id"]
+            isOneToOne: false
+            referencedRelation: "village_elections"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

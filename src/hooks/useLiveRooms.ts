@@ -34,6 +34,7 @@ export const useLiveRooms = () => {
         .from('live_rooms')
         .select('*')
         .eq('is_active', true)
+        .neq('room_category', 'village')
         .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false });
 
