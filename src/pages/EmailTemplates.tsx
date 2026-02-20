@@ -116,7 +116,7 @@ function generateNotificationHtml(vars: {
           <span class="notification-type type-${type}">${type}</span>
           <h2 class="title">${title}</h2>
           <div class="message">${message}</div>
-          <a href="https://startupfactoryhub.lovable.app/dashboard" class="button">🚀 View on Platform</a>
+          <a href="https://startupfactoryhub.com/dashboard" class="button">🚀 View on Platform</a>
         </div>
         <div class="tips-section">
           <div class="tips-title">💡 Pro Tip</div>
@@ -126,9 +126,9 @@ function generateNotificationHtml(vars: {
       <div class="footer">
         <div class="footer-text">Connect with us on social media</div>
         <div class="footer-links">
-          <a href="#" class="footer-link">Help Center</a>
-          <a href="#" class="footer-link">Privacy Policy</a>
-          <a href="#" class="footer-link">Unsubscribe</a>
+          <a href="https://startupfactoryhub.com" class="footer-link">Website</a>
+          <a href="https://www.linkedin.com/company/startup-factory-hub/?viewAsMember=true" class="footer-link">LinkedIn</a>
+          <a href="https://startupfactoryhub.com" class="footer-link">Help Center</a>
         </div>
         <div class="copyright">© 2025 Startup Factory Hub. All rights reserved.</div>
       </div>
@@ -145,7 +145,7 @@ function generateInvitationHtml(vars: {
   token: string;
 }) {
   const { email, jobTitle, companyName, token } = vars;
-  const invitationUrl = `https://startupfactoryhub.lovable.app/accept-invitation?token=${token || "PREVIEW_TOKEN"}`;
+  const invitationUrl = `https://startupfactoryhub.com/accept-invitation?token=${token || "PREVIEW_TOKEN"}`;
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -220,7 +220,7 @@ function generateInvitationHtml(vars: {
       </div>
       <div class="footer">
         <p>This invitation was sent to <strong>${email}</strong>.</p>
-        <p style="margin-top:8px">© 2025 Startup Factory Hub · <a href="https://startupfactoryhub.lovable.app">startupfactoryhub.lovable.app</a></p>
+        <p style="margin-top:8px">© 2025 Startup Factory Hub · <a href="https://startupfactoryhub.com">startupfactoryhub.com</a> · <a href="https://www.linkedin.com/company/startup-factory-hub/?viewAsMember=true" style="color:#0ea270;text-decoration:none;">LinkedIn</a></p>
       </div>
     </div>
   </div>
@@ -317,11 +317,11 @@ function generateWeeklyDigestHtml() {
           <div class="section-header">📅 Upcoming Events <span class="count">${mockData.events.length} new</span></div>
           <div class="section-content">${mockData.events.map(e => `<div class="item">• ${e}</div>`).join("")}</div>
         </div>
-        <div class="cta-section"><a href="https://startupfactoryhub.lovable.app/dashboard" class="cta-btn">🔭 Explore the Platform</a></div>
+        <div class="cta-section"><a href="https://startupfactoryhub.com/dashboard" class="cta-btn">🔭 Explore the Platform</a></div>
       </div>
       <div class="footer">
         <p>You're receiving this weekly digest as a member of Startup Factory Hub.</p>
-        <p style="margin-top:8px">© 2025 <a href="https://startupfactoryhub.lovable.app">Startup Factory Hub</a> · All rights reserved</p>
+        <p style="margin-top:8px">© 2025 <a href="https://startupfactoryhub.com">Startup Factory Hub</a> · <a href="https://www.linkedin.com/company/startup-factory-hub/?viewAsMember=true" style="color:#0ea270;text-decoration:none;">LinkedIn</a> · All rights reserved</p>
       </div>
     </div>
   </div>
@@ -419,11 +419,11 @@ function generatePartnershipHtml(vars: {
           ${partnerWebsite ? `<p style="margin-top:12px"><a href="${partnerWebsite}" style="color:#0ea270;text-decoration:none;font-weight:600;">🌐 Visit their website →</a></p>` : ""}
         </div>
         ${benefitsList ? `<div class="card"><div class="card-label">🎁 Benefits for You</div><ul class="benefits-list">${benefitsList}</ul></div>` : ""}
-        <div class="cta-section"><a href="${ctaUrl || "https://startupfactoryhub.lovable.app/dashboard"}" class="cta-btn">🚀 ${ctaLabel || "Learn More"}</a></div>
+        <div class="cta-section"><a href="${ctaUrl || "https://startupfactoryhub.com/dashboard"}" class="cta-btn">🚀 ${ctaLabel || "Learn More"}</a></div>
       </div>
       <div class="footer">
         <p>You're receiving this as a valued member of Startup Factory Hub.</p>
-        <p style="margin-top:8px">© 2025 <a href="https://startupfactoryhub.lovable.app">Startup Factory Hub</a> · All rights reserved</p>
+        <p style="margin-top:8px">© 2025 <a href="https://startupfactoryhub.com">Startup Factory Hub</a> · <a href="https://www.linkedin.com/company/startup-factory-hub/?viewAsMember=true" style="color:#0ea270;text-decoration:none;">LinkedIn</a> · All rights reserved</p>
       </div>
     </div>
   </div>
@@ -439,7 +439,7 @@ function generateAuthEmailHtml(vars: {
   token: string;
 }) {
   const { authType, userEmail, token } = vars;
-  const baseUrl = "https://startupfactoryhub.lovable.app";
+  const baseUrl = "https://startupfactoryhub.com";
 
   const configs: Record<string, { subject: string; icon: string; headline: string; body: string; cta: string; actionUrl: string }> = {
     magiclink: {
@@ -535,7 +535,7 @@ function generateAuthEmailHtml(vars: {
         ${userEmail ? `<p class="recipient">This email was sent to ${userEmail}</p>` : ""}
       </div>
       <div class="footer">
-        <p>© 2025 <a href="https://startupfactoryhub.lovable.app">Startup Factory Hub</a> · All rights reserved</p>
+        <p>© 2025 <a href="https://startupfactoryhub.com">Startup Factory Hub</a> · <a href="https://www.linkedin.com/company/startup-factory-hub/?viewAsMember=true" style="color:#0ea270;text-decoration:none;">LinkedIn</a> · All rights reserved</p>
       </div>
     </div>
   </div>
@@ -554,7 +554,7 @@ function generatePdfSignatureHtml(vars: {
   accessLevel: string;
 }) {
   const { to, documentTitle, shareToken, senderName, message, accessLevel } = vars;
-  const shareUrl = `https://startupfactoryhub.lovable.app/pdf-view/${shareToken || "preview-token"}`;
+  const shareUrl = `https://startupfactoryhub.com/pdf-view/${shareToken || "preview-token"}`;
   const actionText = accessLevel === "sign" ? "Sign PDF" : accessLevel === "edit" ? "Edit PDF" : "View PDF";
   const description = accessLevel === "sign"
     ? "has invited you to sign a PDF document."
@@ -641,7 +641,7 @@ function generatePdfSignatureHtml(vars: {
       </div>
       <div class="footer">
         <p>This is an automated email from LightPaper, powered by Startup Factory Hub.</p>
-        <p style="margin-top:8px">© 2025 <a href="https://startupfactoryhub.lovable.app">Startup Factory Hub</a> · All rights reserved</p>
+        <p style="margin-top:8px">© 2025 <a href="https://startupfactoryhub.com">Startup Factory Hub</a> · <a href="https://www.linkedin.com/company/startup-factory-hub/?viewAsMember=true" style="color:#0ea270;text-decoration:none;">LinkedIn</a> · All rights reserved</p>
       </div>
     </div>
   </div>
@@ -728,7 +728,7 @@ const defaultVars = {
     benefitsForStartups:
       "Access to $250K pre-seed funding\nFree co-working space for 3 months\nDedicated startup coach",
     ctaLabel: "Learn More",
-    ctaUrl: "https://startupfactoryhub.lovable.app/dashboard",
+    ctaUrl: "https://startupfactoryhub.com/dashboard",
   },
   auth: {
     to: "",
