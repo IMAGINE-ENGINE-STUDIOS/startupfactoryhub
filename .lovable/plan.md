@@ -1,129 +1,194 @@
-# /emails Page Redesign — Icons, Geometric Patterns & Matrix Background
 
-## What's Being Changed
+# Village Rooms + Activity-First Tab Ordering
 
-The `/emails` page (`src/pages/EmailTemplates.tsx`) needs three visual upgrades to the **page shell** (not the email HTML previews themselves):
+## Overview
 
-1. **Replace all emojis in the page UI** with Lucide icons
-2. **Add geometric pattern overlay** (tech-grid style like the marketing banners)
-3. **Add Matrix-style background animation** (reusing the existing `MatrixBackground` component at a simplified/lower opacity)
-
-The **email HTML templates** (the content inside the iframe preview) will also have their emojis replaced with inline SVG equivalents where possible, or ASCII/text symbols where SVG is not suitable for email clients.
+This plan covers two major parts:
+1. **Activity-First Tabs** — All tabs (including Meetings) sort content sections so widgets with real data always appear above empty/placeholder ones.
+2. **Village Rooms** — 3 permanent, always-on virtual community rooms with a built-in democratic election system for host/moderator power.
 
 ---
 
-## Scope of Changes
+## Part 1: Activity-First Tab Ordering
 
-### File: `src/pages/EmailTemplates.tsx`
+### Rule
+Any collapsible section inside a tab that has real content (mentors, pitches, sessions, rooms, etc.) must render **before** empty sections. This applies across **all** Dashboard tabs, with special focus on the Meetings tab.
 
-#### 1. Page Shell — Emoji Replacements (React UI layer)
+### Meetings Tab Changes (`src/pages/Dashboard.tsx`)
+Currently sections are fixed in order:
+- Rooms → Incoming Requests → Sent Requests → Upcoming Pitches → Past Pitches → Pending Offers → Active Mentors → Sessions
 
-All emojis currently in the React JSX UI will be replaced with Lucide icons:
+**New behavior**: Sort each group at render time so non-empty sections float to the top within their group:
+- **Left column (Pitches)**: Sections with data render first, empty ones collapse to bottom
+- **Right column (Mentorship)**: Same — Active Mentors before Pending Offers if mentors exist
+- **Live Rooms section**: Village rooms (always active) show first, then user-created rooms
 
-
-| Location             | Emoji | Lucide Icon     |
-| -------------------- | ----- | --------------- |
-| Auth warning note    | `⚠️`  | `AlertTriangle` |
-| Toast (auth emails)  | `ℹ️`  | `Info`          |
-| Toast (send success) | `✅`   | `CheckCircle2`  |
-
-
-#### 2. Background — Matrix Animation + Geometric Pattern
-
-The page's root `div` will become `relative overflow-hidden` and will receive:
-
-- `**MatrixBackground**` component (already exists at `src/components/MatrixBackground.tsx`) rendered at low opacity (the component already has `opacity-20` built in, perfect for a subtle effect)
-- **Geometric grid overlay** using an inline `div` with a CSS `backgroundImage` grid pattern (same technique used in `FeaturesSection.tsx` and `HeroSection.tsx`)
-- A subtle radial gradient over the geometric layer for depth
-
-The header, sidebar, and main panel will remain on top via `relative z-10`.
-
-#### 3. Email HTML Templates — Emoji Replacements
-
-Inside the HTML template generator functions, emojis are used as icon substitutes. Since email clients don't support SVG, these will be replaced with:
-
-- **Styled text/symbol alternatives** using CSS-styled `<span>` elements with Unicode symbols or short text labels
-- **Colored bullet indicators** using CSS `border-radius` circles
-- Specific replacements:
-
-
-| Template                          | Emoji              | Replacement                                     | &nbsp;     |
-| --------------------------------- | ------------------ | ----------------------------------------------- | ---------- |
-| Notification hero icon            | `🔔 🤝 💬 📅 ✨ ⚠️` | CSS circle with colored border + letter initial | &nbsp;     |
-| Notification button               | `🚀`               | &nbsp;                                          | style icon |
-| Notification tip                  | `💡`               | Styled `[TIP]` label                            | &nbsp;     |
-| Invitation badge                  | `🎉`               | Styled text badge                               | &nbsp;     |
-| Invitation hero                   | `🚀`               | &nbsp;                                          | style icon |
-| Invitation card title             | `📋`               | `[>]` styled label                              | &nbsp;     |
-| Invitation status                 | `✅`                | Colored dot                                     | &nbsp;     |
-| Invitation CTA                    | `🚀`               | &nbsp;                                          | style icon |
-| Invitation expiry                 | `⏰`                | `[!]` styled                                    | &nbsp;     |
-| Digest preview badge              | `⚠️`               | `[!]` styled                                    | &nbsp;     |
-| Digest week badge                 | `📰`               | &nbsp;                                          | style icon |
-| Digest greeting                   | `👋`               | style icon                                      | &nbsp;     |
-| Digest section headers            | `🚀 🎓 💰 📚 📅`   | Colored square accent                           | &nbsp;     |
-| Digest CTA                        | `🔭`               | &nbsp;                                          | style icon |
-| Partnership badge                 | `🤝`               | `[+]` styled                                    | &nbsp;     |
-| Partnership card labels           | `🏢 🎁 🌐`         | Text label                                      | &nbsp;     |
-| Partnership benefits `li::before` | `✅`                | CSS green dot                                   | &nbsp;     |
-| Partnership CTA                   | `🚀`               | &nbsp;                                          | style icon |
-| Auth hero icon                    | `🔐 ✨ 🔑 🚀`       | CSS circle with letter                          | &nbsp;     |
-| Auth expiry                       | `⏰`                | &nbsp;                                          | style icon |
-| PDF signature badge               | `📄`               | Text label                                      | &nbsp;     |
-| PDF hero icon                     | `✍️ ✏️ 📄`         | CSS circle with letter                          | &nbsp;     |
-| PDF card label                    | `📋`               | &nbsp;                                          | style icon |
-| PDF CTA                           | `📄`               | &nbsp;                                          | style icon |
-
+### How it works technically
+We'll create a helper `sortByHasContent(sections)` that takes an array of `{ key, hasContent, element }` objects and returns them with content-first ordering. This keeps React rendering stable while achieving the activity-first UX.
 
 ---
 
-## Technical Approach
+## Part 2: Village Rooms System
 
-### Background Layers (z-index stack)
+### Concept
+Three permanent, never-expiring community rooms — **The Plaza**, **The Commons**, **The Agora** — that always appear at the top of the Rooms section. These are special `village` category rooms with their own governance system.
+
+### Village Room Characteristics
+- Category: `village`
+- Never expire (`expires_at = NULL` or year 2099)
+- Always active (`is_active = true`)
+- Cannot be deleted by users
+- Have a dedicated `current_host_id` column
+- Show a "Village" badge (purple/indigo) instead of "Live"
+
+---
+
+## Database Schema Changes
+
+### 1. Alter `live_rooms` table — add new columns
+
+```sql
+ALTER TABLE public.live_rooms 
+  ADD COLUMN IF NOT EXISTS room_category TEXT DEFAULT 'standard',
+  ADD COLUMN IF NOT EXISTS current_host_id UUID REFERENCES auth.users(id),
+  ADD COLUMN IF NOT EXISTS host_elected_at TIMESTAMPTZ;
+```
+
+### 2. New `village_elections` table
+
+```sql
+CREATE TABLE public.village_elections (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  room_id UUID NOT NULL REFERENCES public.live_rooms(id) ON DELETE CASCADE,
+  status TEXT NOT NULL DEFAULT 'active', -- active | concluded | recalled
+  started_at TIMESTAMPTZ DEFAULT now(),
+  concluded_at TIMESTAMPTZ,
+  winner_id UUID REFERENCES auth.users(id),
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+```
+
+### 3. New `village_votes` table
+
+```sql
+CREATE TABLE public.village_votes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  election_id UUID NOT NULL REFERENCES public.village_elections(id) ON DELETE CASCADE,
+  voter_id UUID NOT NULL REFERENCES auth.users(id),
+  candidate_id UUID NOT NULL REFERENCES auth.users(id),
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(election_id, voter_id)
+);
+```
+
+### 4. Seed the 3 Village Rooms with real Whereby links
+The 3 villages will be inserted as permanent rows in `live_rooms` with `room_category = 'village'`, `expires_at = '2099-01-01'`, and the existing Whereby meeting links already created (Plaza room exists with link `startupfactoryhub.whereby.com/plaza...`).
+
+---
+
+## New Files to Create
+
+### `src/components/VillageRooms.tsx`
+The Village Rooms section UI showing the 3 permanent rooms. Features:
+- Distinctive card design with indigo/purple gradient + "Village" badge
+- Shows current host avatar + name if one has been elected
+- Participant count
+- "Join" button → opens VideoMeetingDialog
+- "Call Election" button (shown to any participant inside the room)
+- Election status indicator ("Election in Progress", "Awaiting Votes")
+
+### `src/components/VillageElectionPanel.tsx`
+A panel/dialog that shows when an election is active for a Village room:
+- Lists all current participants as candidate options
+- Each participant casts exactly one vote (radio selection)
+- Submit vote button (disabled after voted)
+- Live vote tally dashboard (hidden until all have voted OR election is recalled)
+- Shows result: Winner announced if >2 votes, or "No winner — recalling election" if tied
+
+### `src/hooks/useVillageElections.ts`
+Hook managing:
+- `fetchActiveElection(roomId)` — get current active election
+- `castVote(electionId, candidateId)` — upsert vote
+- `callElection(roomId)` — create new election, invite all current participants
+- `checkElectionResult(electionId)` — tally votes, determine winner (>2 votes threshold), update room host or recall election
+- Real-time subscription on `village_votes` and `village_elections`
+
+---
+
+## Election Rules (Implemented in Logic)
 
 ```text
-z-0  MatrixBackground (canvas, opacity-20)
-z-1  Geometric grid overlay (div with backgroundImage, opacity-10)
-z-2  Radial gradient vignette (div, pointer-events-none)
-z-10 Page content (header, sidebar, main panel)
+Election Called
+    → All room participants are asked to vote
+    → Each person votes once (one person = one vote)
+    
+After all participants have voted:
+    → Count votes per candidate
+    → If winner has > 2 votes → winner becomes Host
+    → If no candidate has > 2 votes → results shown, election auto-recalled
+    → Loop until host is chosen
+
+Host Powers:
+    → Only applies to Village rooms
+    → Can mute/spotlight (Whereby host controls via hostRoomUrl if available)
+    → Shown as "Host" badge on their profile in the room card
+    → Powers reset when new election is called and they lose
 ```
-
-### Geometric Pattern CSS
-
-Same approach as `FeaturesSection.tsx`:
-
-```css
-backgroundImage: `linear-gradient(hsl(160 84% 39% / 0.08) 1px, transparent 1px),
-                  linear-gradient(90deg, hsl(160 84% 39% / 0.08) 1px, transparent 1px)`,
-backgroundSize: '40px 40px'
-```
-
-### Email HTML Icon Replacements
-
-For the **notification hero icon**, replace the emoji `div` with a CSS-styled circle containing the type initial:
-
-```html
-<!-- Before -->
-<div class="hero-icon">${icon_emoji}</div>
-
-<!-- After -->
-<div class="hero-icon" style="...css circle styles...">
-  <span style="color:white; font-size:28px; font-weight:700; font-family:monospace">
-    ${typeInitial}
-  </span>
-</div>
-```
-
-Benefits list checkmarks (`✅`) become a CSS `::before` green filled circle via inline style.
 
 ---
 
-## Files to Modify
+## Component Integration
 
+### `src/components/LiveRooms.tsx` — Updated
+- Import and render `<VillageRooms />` at the **top** of the section, before user-created rooms
+- The village section has its own header "Community Villages"
+- Regular user-created rooms appear below in "Live Rooms"
 
-| File                           | Change                                                                                                                                     |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `src/pages/EmailTemplates.tsx` | Add Matrix + geometric background, replace UI emojis with Lucide icons, replace all HTML template emojis with styled text/CSS alternatives |
+### `src/pages/Dashboard.tsx` — Meetings Tab
+- Add activity-sort logic for collapsible sections
+- Village rooms (via LiveRooms component update) automatically appear first
 
+---
 
-No new files needed — `MatrixBackground` already exists and will be imported.
+## Technical Approach for Activity Sorting
+
+For each tab section that uses `Collapsible`, we define whether it "has content" at render time and sort using a simple pattern:
+
+```typescript
+// Example for Meetings tab pitch sections
+const pitchSections = [
+  { key: 'incoming', hasContent: incomingCount > 0, element: <IncomingSection /> },
+  { key: 'sent', hasContent: sentCount > 0, element: <SentSection /> },
+  { key: 'upcoming', hasContent: upcomingCount > 0, element: <UpcomingSection /> },
+  { key: 'past', hasContent: pastCount > 0, element: <PastSection /> },
+].sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
+```
+
+This is pure UI sorting — no data changes, no API calls.
+
+---
+
+## Summary of Files Changed
+
+| File | Action | What Changes |
+|---|---|---|
+| `src/pages/Dashboard.tsx` | Edit | Activity-sort for Meetings tab pitch & mentor sections |
+| `src/components/LiveRooms.tsx` | Edit | Render VillageRooms at top, user rooms below |
+| `src/hooks/useLiveRooms.ts` | Edit | Filter: `room_category != 'village'` for regular rooms |
+| `src/components/VillageRooms.tsx` | Create | Village room cards with election UI entry point |
+| `src/components/VillageElectionPanel.tsx` | Create | Full election voting + results dashboard |
+| `src/hooks/useVillageElections.ts` | Create | Election state, voting, result calculation |
+| DB Migration | Create | Add columns + new tables + seed 3 village rooms |
+
+---
+
+## Village Room Visual Design
+
+Each Village room card will have:
+- Gradient top border: indigo-to-violet
+- "Village" badge with a crown icon
+- If host elected: gold "Host" chip with avatar
+- If election active: pulsing orange "Election Live" badge
+- Permanent rooms show no expiry timer
+
+The Election Panel will open as a bottom sheet dialog showing candidates (participants) as avatar + name cards with radio selection, a live progress bar for votes received vs total participants, and final results in a clean bar chart style.
