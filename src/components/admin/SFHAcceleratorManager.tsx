@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Rocket, 
   ExternalLink, 
@@ -20,7 +22,8 @@ import {
   XCircle,
   RefreshCw,
   Globe,
-  Link
+  Link,
+  Calendar
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -68,6 +71,10 @@ const SFHAcceleratorManager = () => {
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<SFHProfile>>({});
   const [selectedCohort, setSelectedCohort] = useState<Cohort | null>(null);
+  const [cohortSheetOpen, setCohortSheetOpen] = useState(false);
+  const [cohortEditData, setCohortEditData] = useState<Partial<Cohort>>({});
+  const [cohortSaving, setCohortSaving] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const fetchData = async () => {
     setLoading(true);
@@ -117,12 +124,44 @@ const SFHAcceleratorManager = () => {
       toast({ title: 'Error loading program data', variant: 'destructive' });
     } finally {
       setLoading(false);
+      setRefreshKey(k => k + 1);
     }
   };
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleSelectCohort = (cohort: Cohort) => {
+    setSelectedCohort(cohort);
+    setCohortEditData({ ...cohort });
+    setCohortSheetOpen(true);
+  };
+
+  const handleSaveCohort = async () => {
+    if (!selectedCohort) return;
+    setCohortSaving(true);
+    try {
+      await handleUpdateCohort(selectedCohort.id, {
+        name: cohortEditData.name,
+        description: cohortEditData.description,
+        status: cohortEditData.status,
+        start_date: cohortEditData.start_date,
+        end_date: cohortEditData.end_date,
+        application_deadline: cohortEditData.application_deadline,
+        max_startups: cohortEditData.max_startups,
+        funding_per_startup: cohortEditData.funding_per_startup,
+        equity_percentage: cohortEditData.equity_percentage,
+      });
+      toast({ title: 'Cohort updated successfully!' });
+      setCohortSheetOpen(false);
+      setSelectedCohort(null);
+    } catch {
+      toast({ title: 'Error updating cohort', variant: 'destructive' });
+    } finally {
+      setCohortSaving(false);
+    }
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -389,7 +428,7 @@ const SFHAcceleratorManager = () => {
             cohorts={cohorts}
             onCreateCohort={handleCreateCohort}
             onUpdateCohort={handleUpdateCohort}
-            onSelectCohort={setSelectedCohort}
+            onSelectCohort={handleSelectCohort}
           />
         </TabsContent>
 
@@ -402,7 +441,7 @@ const SFHAcceleratorManager = () => {
               </CardContent>
             </Card>
           ) : (
-            <SFHApplicationsViewer cohorts={cohorts} onRefresh={fetchData} />
+            <SFHApplicationsViewer cohorts={cohorts} onRefresh={fetchData} refreshKey={refreshKey} />
           )}
         </TabsContent>
 
@@ -419,18 +458,126 @@ const SFHAcceleratorManager = () => {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Cohort Detail Sheet */}
+      <Sheet open={cohortSheetOpen} onOpenChange={(open) => { setCohortSheetOpen(open); if (!open) setSelectedCohort(null); }}>
+        <SheetContent className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader className="mb-6">
+            <SheetTitle>Cohort Details</SheetTitle>
+            <SheetDescription>View and edit cohort settings</SheetDescription>
+          </SheetHeader>
+          {selectedCohort && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Cohort Name</Label>
+                <Input
+                  value={cohortEditData.name || ''}
+                  onChange={e => setCohortEditData(p => ({ ...p, name: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Textarea
+                  value={cohortEditData.description || ''}
+                  onChange={e => setCohortEditData(p => ({ ...p, description: e.target.value }))}
+                  rows={3}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select
+                  value={cohortEditData.status || 'upcoming'}
+                  onValueChange={v => setCohortEditData(p => ({ ...p, status: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="upcoming">Upcoming</SelectItem>
+                    <SelectItem value="applications_open">Applications Open</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />Start Date</Label>
+                  <Input
+                    type="date"
+                    value={cohortEditData.start_date?.split('T')[0] || ''}
+                    onChange={e => setCohortEditData(p => ({ ...p, start_date: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />End Date</Label>
+                  <Input
+                    type="date"
+                    value={cohortEditData.end_date?.split('T')[0] || ''}
+                    onChange={e => setCohortEditData(p => ({ ...p, end_date: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="flex items-center gap-1.5"><Calendar className="h-3.5 w-3.5" />Application Deadline</Label>
+                <Input
+                  type="date"
+                  value={cohortEditData.application_deadline?.split('T')[0] || ''}
+                  onChange={e => setCohortEditData(p => ({ ...p, application_deadline: e.target.value }))}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>Max Startups</Label>
+                  <Input
+                    type="number"
+                    value={cohortEditData.max_startups ?? ''}
+                    onChange={e => setCohortEditData(p => ({ ...p, max_startups: Number(e.target.value) }))}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Funding per Startup ($)</Label>
+                  <Input
+                    type="number"
+                    value={cohortEditData.funding_per_startup ?? ''}
+                    onChange={e => setCohortEditData(p => ({ ...p, funding_per_startup: e.target.value ? Number(e.target.value) : null }))}
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Equity Percentage (%)</Label>
+                <Input
+                  type="number"
+                  value={cohortEditData.equity_percentage ?? ''}
+                  onChange={e => setCohortEditData(p => ({ ...p, equity_percentage: e.target.value ? Number(e.target.value) : null }))}
+                />
+              </div>
+              <div className="flex gap-3 pt-2">
+                <Button className="flex-1" onClick={handleSaveCohort} disabled={cohortSaving}>
+                  {cohortSaving ? <RefreshCw className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+                  Save Changes
+                </Button>
+                <Button variant="outline" onClick={() => { setCohortSheetOpen(false); setSelectedCohort(null); }}>
+                  Cancel
+                </Button>
+              </div>
+            </div>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };
 
 // Applications viewer for SFH cohorts
-const SFHApplicationsViewer = ({ cohorts, onRefresh }: { cohorts: Cohort[]; onRefresh: () => void }) => {
+const SFHApplicationsViewer = ({ cohorts, onRefresh, refreshKey }: { cohorts: Cohort[]; onRefresh: () => void; refreshKey: number }) => {
   const { toast } = useToast();
   const [applications, setApplications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchApps = async () => {
+      setLoading(true);
       const cohortIds = cohorts.map(c => c.id);
       const { data } = await supabase
         .from('cohort_applications')
@@ -445,7 +592,7 @@ const SFHApplicationsViewer = ({ cohorts, onRefresh }: { cohorts: Cohort[]; onRe
       setLoading(false);
     };
     fetchApps();
-  }, [cohorts]);
+  }, [cohorts, refreshKey]);
 
   const updateStatus = async (appId: string, status: string) => {
     const { error } = await supabase
