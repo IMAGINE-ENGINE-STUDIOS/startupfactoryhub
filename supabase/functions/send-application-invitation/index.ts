@@ -140,7 +140,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Startup Factory Hub <onboarding@resend.dev>',
+        from: 'Startup Factory Hub <info@startupfactoryhub.com>',
         to: [email],
         subject: `🎉 You've Been Selected! Accept Your Invitation`,
         html,

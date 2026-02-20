@@ -192,7 +192,7 @@ serve(async (req) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            from: 'Startup Factory Hub <onboarding@resend.dev>',
+            from: 'Startup Factory Hub <info@startupfactoryhub.com>',
             to: [user.email],
             subject: `📰 Your Weekly SFH Digest — ${new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`,
             html,
