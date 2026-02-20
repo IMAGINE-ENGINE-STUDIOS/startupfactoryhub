@@ -7,7 +7,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import VideoMeetingDialog from '@/components/VideoMeetingDialog';
 import VillageElectionPanel from '@/components/VillageElectionPanel';
+import VillageDetailPanel from '@/components/VillageDetailPanel';
 import { Crown, Users, Vote, Trophy, Loader2 } from 'lucide-react';
+
 
 interface VillageRoom {
   id: string;
@@ -37,6 +39,8 @@ export default function VillageRooms() {
   const [loading, setLoading] = useState(true);
   const [activeMeeting, setActiveMeeting] = useState<{ link: string; name: string; roomId: string } | null>(null);
   const [electionRoom, setElectionRoom] = useState<{ id: string; name: string } | null>(null);
+  const [detailRoom, setDetailRoom] = useState<VillageRoom | null>(null);
+
 
   const fetchVillageRooms = useCallback(async () => {
     try {
@@ -148,7 +152,8 @@ export default function VillageRooms() {
         {rooms.map(room => (
           <Card
             key={room.id}
-            className="tech-card border-0 relative overflow-hidden"
+            className="tech-card border-0 relative overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5"
+            onClick={() => setDetailRoom(room)}
             style={{ borderTop: '2px solid', borderImage: 'linear-gradient(90deg, hsl(var(--indigo-500, 239 84% 67%)), hsl(var(--violet-500, 263 70% 50%))) 1' }}
           >
             {/* Gradient top accent */}
@@ -196,7 +201,7 @@ export default function VillageRooms() {
               ) : (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <Vote className="h-3 w-3" />
-                  <span>No host yet — call an election!</span>
+                  <span>No host yet — click to explore</span>
                 </div>
               )}
 
@@ -206,7 +211,7 @@ export default function VillageRooms() {
                   <Users className="h-2.5 w-2.5" />
                   <span>{room.participant_count} in room</span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
                   <Button
                     variant="outline"
                     size="sm"
@@ -250,6 +255,17 @@ export default function VillageRooms() {
           roomName={electionRoom.name}
         />
       )}
+
+      {/* Village Detail Panel */}
+      {detailRoom && (
+        <VillageDetailPanel
+          open={!!detailRoom}
+          onOpenChange={(open) => { if (!open) setDetailRoom(null); }}
+          room={detailRoom}
+          onJoin={() => handleJoin(detailRoom)}
+        />
+      )}
     </>
   );
 }
+
