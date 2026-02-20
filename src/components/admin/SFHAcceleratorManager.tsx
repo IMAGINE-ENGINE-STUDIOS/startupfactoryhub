@@ -254,7 +254,7 @@ const SFHAcceleratorManager = () => {
           </div>
           <div>
             <h2 className="text-xl font-bold">{profile.organization_name}</h2>
-            <p className="text-sm text-muted-foreground">MVP Accelerator Program Management</p>
+            <p className="text-sm text-muted-foreground">Cohorts & Program Management</p>
           </div>
           <Badge variant={profile.is_accepting_applications ? 'default' : 'secondary'} className="ml-2">
             {profile.is_accepting_applications ? (
