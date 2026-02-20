@@ -4984,6 +4984,41 @@ export type Database = {
           },
         ]
       }
+      village_staff: {
+        Row: {
+          appointed_by: string
+          created_at: string | null
+          id: string
+          role: string
+          room_id: string
+          user_id: string
+        }
+        Insert: {
+          appointed_by: string
+          created_at?: string | null
+          id?: string
+          role?: string
+          room_id: string
+          user_id: string
+        }
+        Update: {
+          appointed_by?: string
+          created_at?: string | null
+          id?: string
+          role?: string
+          room_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "village_staff_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "live_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       village_votes: {
         Row: {
           candidate_id: string
