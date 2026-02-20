@@ -69,6 +69,7 @@ const SFHAcceleratorManager = () => {
   const [profile, setProfile] = useState<SFHProfile | null>(null);
   const [cohorts, setCohorts] = useState<Cohort[]>([]);
   const [stats, setStats] = useState({ totalApplications: 0, totalStartups: 0 });
+  const [applicationCounts, setApplicationCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<SFHProfile>>({});
@@ -107,10 +108,18 @@ const SFHAcceleratorManager = () => {
       if (cohortsList.length > 0) {
         const cohortIds = cohortsList.map(c => c.id);
 
-        const { count: appCount } = await supabase
+        const { data: appRows } = await supabase
           .from('cohort_applications')
-          .select('*', { count: 'exact', head: true })
+          .select('cohort_id')
           .in('cohort_id', cohortIds);
+
+        const counts: Record<string, number> = {};
+        (appRows || []).forEach(row => {
+          counts[row.cohort_id] = (counts[row.cohort_id] || 0) + 1;
+        });
+        setApplicationCounts(counts);
+
+        const totalApps = (appRows || []).length;
 
         const { count: startupCount } = await supabase
           .from('cohort_startups')
@@ -118,7 +127,7 @@ const SFHAcceleratorManager = () => {
           .in('cohort_id', cohortIds);
 
         setStats({
-          totalApplications: appCount || 0,
+          totalApplications: totalApps,
           totalStartups: startupCount || 0,
         });
       }
@@ -491,6 +500,7 @@ const SFHAcceleratorManager = () => {
             onUpdateCohort={handleUpdateCohort}
             onSelectCohort={handleSelectCohort}
             onDeleteCohort={handleDeleteCohort}
+            applicationCounts={applicationCounts}
           />
         </TabsContent>
 

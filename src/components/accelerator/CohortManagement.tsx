@@ -14,7 +14,8 @@ import {
   Clock,
   Copy,
   ExternalLink,
-  Trash2
+  Trash2,
+  FileText
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -52,6 +53,7 @@ interface CohortManagementProps {
   onUpdateCohort: (cohortId: string, updates: Partial<Cohort>) => Promise<void>;
   onSelectCohort: (cohort: Cohort) => void;
   onDeleteCohort?: (cohortId: string) => Promise<void>;
+  applicationCounts?: Record<string, number>;
 }
 
 export const CohortManagement = ({ 
@@ -59,7 +61,8 @@ export const CohortManagement = ({
   onCreateCohort, 
   onUpdateCohort,
   onSelectCohort,
-  onDeleteCohort
+  onDeleteCohort,
+  applicationCounts = {}
 }: CohortManagementProps) => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -148,10 +151,16 @@ export const CohortManagement = ({
                       {cohort.description || 'No description provided'}
                     </p>
                   </div>
-                  <Badge className={`${getStatusColor(cohort.status)} flex items-center gap-1 shrink-0`}>
-                    {getStatusIcon(cohort.status)}
-                    {formatStatus(cohort.status)}
-                  </Badge>
+                  <div className="flex flex-col items-end gap-1.5 shrink-0">
+                    <Badge className={`${getStatusColor(cohort.status)} flex items-center gap-1`}>
+                      {getStatusIcon(cohort.status)}
+                      {formatStatus(cohort.status)}
+                    </Badge>
+                    <Badge variant="secondary" className="flex items-center gap-1 text-xs">
+                      <FileText className="w-3 h-3" />
+                      {applicationCounts[cohort.id] ?? 0} applied
+                    </Badge>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="flex-1 flex flex-col">
