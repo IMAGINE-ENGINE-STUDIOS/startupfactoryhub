@@ -8,14 +8,25 @@ import {
   Calendar, 
   Users, 
   DollarSign, 
-  Settings,
   Play,
   Pause,
   CheckCircle,
   Clock,
   Copy,
-  ExternalLink
+  ExternalLink,
+  Trash2
 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { CreateCohortDialog } from './CreateCohortDialog';
 import { useToast } from '@/hooks/use-toast';
@@ -40,13 +51,15 @@ interface CohortManagementProps {
   onCreateCohort: (cohort: Partial<Cohort>) => Promise<any>;
   onUpdateCohort: (cohortId: string, updates: Partial<Cohort>) => Promise<void>;
   onSelectCohort: (cohort: Cohort) => void;
+  onDeleteCohort?: (cohortId: string) => Promise<void>;
 }
 
 export const CohortManagement = ({ 
   cohorts, 
   onCreateCohort, 
   onUpdateCohort,
-  onSelectCohort 
+  onSelectCohort,
+  onDeleteCohort
 }: CohortManagementProps) => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const { toast } = useToast();
@@ -232,6 +245,38 @@ export const CohortManagement = ({
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Button>
+                  {onDeleteCohort && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          title="Delete cohort"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Cohort</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to delete <strong>{cohort.name}</strong>? This will permanently remove the cohort along with all its applications and enrolled startups. This action cannot be undone.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                            onClick={() => onDeleteCohort(cohort.id)}
+                          >
+                            Delete Cohort
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
                 </div>
               </CardContent>
             </Card>
