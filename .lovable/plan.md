@@ -1,70 +1,91 @@
 
-## Fixing SFH MVP Accelerator Admin Manager
+# New `/emails` Page — Email Template Manager
 
-### Problems Found
+## Overview
 
-Three distinct issues were identified through code and database analysis:
+Create a dedicated `/emails` route that serves as a full **Email Template Manager** for admins. This is separate from the existing `EmailMonitor` tab in the admin dashboard (which handles sending/monitoring). The new `/emails` page will allow admins to **preview, edit, and test** each of the 4 email templates directly in the browser — without touching the edge function code.
 
 ---
 
-### Issue 1 — Profile Save is Silently Blocked by RLS
+## What Will Be Built
 
-The `accelerator_profiles` table has a Row Level Security (RLS) policy:
+### 1. New Route: `/emails`
+
+Add `/emails` to `src/App.tsx` pointing to a new `EmailTemplates` page. This page will be **admin-only protected**.
+
+### 2. New Page: `src/pages/EmailTemplates.tsx`
+
+A full-page template manager with:
+
+- **Sidebar** listing all 4 email types
+- **Live HTML Preview** (rendered in an iframe) of the selected template
+- **Variable controls panel** to fill in dynamic values and see the preview update in real-time
+- **Send Test Email** button to fire off a real email to any address
+
+### 3. Template Definitions
+
+Each template is defined with its variables and the HTML rendering logic mirrored from the edge functions:
+
+| Template | Variables |
+|---|---|
+| Notification Email | `to`, `title`, `message`, `type` (info/success/warning/error/message/connection/event) |
+| Application Invitation | `email`, `jobTitle`, `companyName`, `token` |
+| Weekly Digest | Preview-only (pulls live data from platform) |
+| Partnership Announcement | `partnerName`, `partnerLogo`, `partnerWebsite`, `partnerDescription`, `benefitsForStartups`, `ctaLabel`, `ctaUrl` |
+
+### 4. UI Structure
+
+```text
++------------------------------------------+
+|  Email Template Manager     [Admin badge] |
++------------+-----------------------------+
+|            |   [Variable Controls]       |
+|  Template  |                             |
+|  Sidebar   |   [Live HTML Preview]       |
+|            |   (iframe, full render)     |
+|  • Notif   |                             |
+|  • Invite  |                             |
+|  • Digest  |   [Send Test Email]         |
+|  • Partner |                             |
++------------+-----------------------------+
 ```
-Users can manage their own accelerator profile: auth.uid() = user_id
-```
-
-The SFH profile is owned by user `45b54179-...` (the SFH account). When an admin logs in and tries to save the profile, their `auth.uid()` does NOT match that `user_id`, so the UPDATE is silently dropped — no error, 0 rows changed, but Supabase reports success.
-
-**Fix:** Add a new RLS policy that also allows users with the `admin` role to update any accelerator profile. This uses the existing `has_role()` database function.
 
 ---
 
-### Issue 2 — "View Details" Button on Cohorts is Disconnected
+## Technical Details
 
-In `CohortManagement`, clicking "View Details" calls `onSelectCohort(cohort)`, which sets the `selectedCohort` state in `SFHAcceleratorManager`. However, **nothing renders based on `selectedCohort`** — there is no drawer, modal, or detail panel wired up to it. The button is a dead end.
+### Files to Create / Modify
 
-**Fix:** Add a `CohortDetailSheet` (slide-over panel) inside `SFHAcceleratorManager` that opens when `selectedCohort` is set. It will display full cohort details and allow editing the cohort's status, dates, and description directly.
+1. **`src/pages/EmailTemplates.tsx`** (new)
+   - Admin-only guard using `useUserRole()`
+   - Left sidebar: 4 template cards (clickable)
+   - Right panel: 2-tab layout — "Preview" and "Variables"
+   - Preview: rendered inside a sandboxed `<iframe srcDoc={...}>`  
+   - Variables: input fields specific to each template type
+   - "Send Test" button calls the appropriate Supabase edge function via `supabase.functions.invoke()`
 
----
+2. **`src/App.tsx`** (modify)
+   - Add `<Route path="/emails" element={<EmailTemplates />} />` with lazy import
 
-### Issue 3 — Applications List Does Not Refresh Properly
+### HTML Preview
 
-`SFHApplicationsViewer` only re-fetches when the `cohorts` prop reference changes. When `onRefresh()` is called (after accepting/rejecting), `fetchData()` re-runs in the parent but the applications list doesn't re-query because `cohorts` hasn't changed identity.
+The HTML for each template will be generated client-side using the **exact same template strings** as the edge functions, but with template variable substitution done in JavaScript. This means the preview is 1:1 accurate with what gets delivered to the inbox.
 
-**Fix:** Add a `refreshKey` counter in `SFHAcceleratorManager` that increments on `onRefresh`, and pass it as a prop to `SFHApplicationsViewer` so its `useEffect` actually fires again.
+For the **Weekly Digest**, the preview will show a mock version with sample data (since it pulls live data from the DB).
 
----
+### Send Test Email
 
-### Changes Required
+When "Send Test" is clicked:
+- Calls the matching edge function via `supabase.functions.invoke()`
+- Shows a success/error toast
+- No page reload needed
 
-#### 1. Database Migration — New RLS Policy for Admin Writes
+### Admin Protection
 
-```sql
--- Allow admins to update any accelerator profile
-CREATE POLICY "Admins can manage all accelerator profiles"
-ON public.accelerator_profiles
-FOR ALL
-TO public
-USING (public.has_role(auth.uid(), 'admin'))
-WITH CHECK (public.has_role(auth.uid(), 'admin'));
-```
-
-This uses the existing `has_role()` security-definer function already in the database, so no new infrastructure is needed.
-
-#### 2. Modify `src/components/admin/SFHAcceleratorManager.tsx`
-
-- Add a `refreshKey` state (number) that increments when `fetchData()` completes. Pass it to `SFHApplicationsViewer` so its `useEffect` dependency triggers correctly.
-- Wire up the `selectedCohort` state: add a `Sheet` component (slide-over) that opens when `selectedCohort !== null`. Inside it, show cohort details and provide an inline form to edit status, dates, funding, and description, calling `handleUpdateCohort` on save.
-- Remove the now-unused `selectedCohort` dead-end.
-- Add a "Close" / "X" button to dismiss the cohort detail sheet by setting `selectedCohort` back to null.
-- In `SFHApplicationsViewer`, add `refreshKey` to the `useEffect` dependency array so re-fetching works.
+Uses the existing `useUserRole()` hook. If the user's role is not `admin`, they are redirected to `/auth`.
 
 ---
 
-### Files to Create/Modify
+## No Database Changes Required
 
-| File | Action | What Changes |
-|---|---|---|
-| Database migration | **Create** | Add admin RLS policy on `accelerator_profiles` |
-| `src/components/admin/SFHAcceleratorManager.tsx` | **Modify** | Fix refresh key, wire up cohort detail sheet, fix disconnected selectedCohort |
+This is purely a frontend page + no new edge functions. All sends go through existing deployed functions.
