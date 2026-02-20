@@ -29,7 +29,9 @@ import {
   ArrowLeft,
   KeyRound,
   FileSignature,
+  AlertTriangle,
 } from "lucide-react";
+import MatrixBackground from "@/components/MatrixBackground";
 
 // ─── Template HTML generators (mirrored from edge functions) ────────────────
 
@@ -39,18 +41,26 @@ function generateNotificationHtml(vars: {
   type: string;
 }) {
   const { title, message, type } = vars;
-  const icon =
-    type === "connection"
-      ? "🤝"
-      : type === "message"
-      ? "💬"
-      : type === "event"
-      ? "📅"
-      : type === "success"
-      ? "✨"
-      : type === "error"
-      ? "⚠️"
-      : "🔔";
+
+  // CSS circle with letter initial instead of emoji
+  const typeInitial =
+    type === "connection" ? "C"
+    : type === "message" ? "M"
+    : type === "event" ? "E"
+    : type === "success" ? "S"
+    : type === "error" ? "!"
+    : "N";
+
+  const iconBg =
+    type === "error" ? "#dc2626"
+    : type === "success" ? "#059669"
+    : type === "connection" ? "#7c3aed"
+    : type === "message" ? "#2563eb"
+    : type === "event" ? "#db2777"
+    : "#0ea270";
+
+  const heroIconHtml = `<div style="width:80px;height:80px;margin:0 auto 20px;background:${iconBg};border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(14,162,112,0.4);font-size:36px;font-weight:800;color:#fff;font-family:monospace;">${typeInitial}</div>`;
+
   const tip =
     type === "connection"
       ? "Building your network is key to startup success. Connect with mentors, investors, and fellow entrepreneurs!"
@@ -76,7 +86,6 @@ function generateNotificationHtml(vars: {
     .header h1 { margin: 0; font-size: 28px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     .tagline { margin-top: 8px; font-size: 14px; opacity: 0.95; font-weight: 500; }
     .hero-section { padding: 32px; text-align: center; background: linear-gradient(180deg, #1a1f35 0%, #0f1419 100%); }
-    .hero-icon { width: 80px; height: 80px; margin: 0 auto 20px; background: linear-gradient(135deg, #0ea270 0%, #0ea270 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; box-shadow: 0 8px 24px rgba(14, 162, 112, 0.4); }
     .content { padding: 0 32px 32px; background: #0f1419; }
     .notification-card { background: #1a1f35; border-radius: 12px; padding: 24px; border: 2px solid rgba(14, 162, 112, 0.2); box-shadow: 0 2px 8px rgba(14, 162, 112, 0.15); }
     .notification-type { display: inline-block; padding: 8px 16px; border-radius: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 16px; }
@@ -109,17 +118,17 @@ function generateNotificationHtml(vars: {
         <div class="tagline">AI-Powered Startup Accelerator Platform</div>
       </div>
       <div class="hero-section">
-        <div class="hero-icon">${icon}</div>
+        ${heroIconHtml}
       </div>
       <div class="content" style="padding-top:24px;">
         <div class="notification-card">
           <span class="notification-type type-${type}">${type}</span>
           <h2 class="title">${title}</h2>
           <div class="message">${message}</div>
-          <a href="https://startupfactoryhub.com/dashboard" class="button">🚀 View on Platform</a>
+          <a href="https://startupfactoryhub.com/dashboard" class="button">View on Platform</a>
         </div>
         <div class="tips-section">
-          <div class="tips-title">💡 Pro Tip</div>
+          <div class="tips-title"><span style="display:inline-block;background:#0ea270;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:1px;margin-right:6px;">TIP</span></div>
           <div class="tips-text">${tip}</div>
         </div>
       </div>
@@ -163,7 +172,7 @@ function generateInvitationHtml(vars: {
     .header p { color: rgba(255,255,255,0.9); font-size: 14px; margin-top: 6px; }
     .hero { background: linear-gradient(180deg,#1a1f35 0%,#0f1419 100%); padding: 32px; text-align: center; }
     .badge { display: inline-block; background: rgba(14,162,112,0.15); border: 1px solid rgba(14,162,112,0.3); color: #0ea270; padding: 8px 20px; border-radius: 50px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
-    .hero-icon { font-size: 64px; margin-bottom: 16px; }
+    .hero-icon-circle { width: 80px; height: 80px; margin: 0 auto 16px; background: linear-gradient(135deg,#0ea270,#059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 800; color: #fff; font-family: monospace; box-shadow: 0 8px 24px rgba(14,162,112,0.4); }
     .hero h2 { color: #fff; font-size: 28px; font-weight: 700; margin-bottom: 8px; }
     .hero p { color: #9ca3af; font-size: 15px; line-height: 1.6; }
     .content { padding: 32px; background: #0f1419; }
@@ -173,6 +182,7 @@ function generateInvitationHtml(vars: {
     .detail-row:last-child { border-bottom: none; }
     .detail-label { color: #9ca3af; font-size: 14px; }
     .detail-value { color: #f3f4f6; font-size: 14px; font-weight: 600; }
+    .status-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #0ea270; margin-right: 6px; vertical-align: middle; }
     .steps { margin-bottom: 24px; }
     .step { display: flex; gap: 16px; margin-bottom: 16px; align-items: flex-start; }
     .step-num { width: 32px; height: 32px; background: #0ea270; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 14px; font-weight: 700; flex-shrink: 0; }
@@ -196,17 +206,17 @@ function generateInvitationHtml(vars: {
         <p>AI-Powered Startup Accelerator Platform</p>
       </div>
       <div class="hero">
-        <div class="badge">🎉 Application Selected</div>
-        <div class="hero-icon">🚀</div>
+        <div class="badge">[ + ] Application Selected</div>
+        <div class="hero-icon-circle">&#10003;</div>
         <h2>You've Been Chosen!</h2>
         <p>Congratulations — your application stood out. You've been selected to move forward.<br>Create your account to access your tasks and begin your journey.</p>
       </div>
       <div class="content">
         <div class="card">
-          <div class="card-title">📋 Application Details</div>
+          <div class="card-title">[&gt;] Application Details</div>
           ${jobTitle ? `<div class="detail-row"><span class="detail-label">Position</span><span class="detail-value">${jobTitle}</span></div>` : ""}
           ${companyName ? `<div class="detail-row"><span class="detail-label">Company</span><span class="detail-value">${companyName}</span></div>` : ""}
-          <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value" style="color:#0ea270">✅ Selected</span></div>
+          <div class="detail-row"><span class="detail-label">Status</span><span class="detail-value"><span class="status-dot"></span>Selected</span></div>
           <div class="detail-row"><span class="detail-label">Invitation Sent To</span><span class="detail-value">${email}</span></div>
         </div>
         <div class="steps">
@@ -214,8 +224,8 @@ function generateInvitationHtml(vars: {
           <div class="step"><div class="step-num">2</div><div class="step-text"><h4>Complete your profile</h4><p>Set up your account with your details and skills</p></div></div>
           <div class="step"><div class="step-num">3</div><div class="step-text"><h4>Start your tasks</h4><p>Access your task list and begin contributing immediately</p></div></div>
         </div>
-        <div class="cta-section"><a href="${invitationUrl}" class="cta-btn">🚀 Accept Invitation & Get Started</a></div>
-        <div class="expiry">⏰ This invitation expires in <strong>48 hours</strong>. Please accept it as soon as possible.</div>
+        <div class="cta-section"><a href="${invitationUrl}" class="cta-btn">Accept Invitation &amp; Get Started</a></div>
+        <div class="expiry"><span style="font-weight:700;margin-right:4px;">[!]</span> This invitation expires in <strong>48 hours</strong>. Please accept it as soon as possible.</div>
         <div class="url-fallback">If the button doesn't work, copy and paste this link:<br>${invitationUrl}</div>
       </div>
       <div class="footer">
@@ -237,6 +247,9 @@ function generateWeeklyDigestHtml() {
     resources: ["Startup Funding Guide 2025", "AI Tools for Entrepreneurs"],
     events: ["Demo Day Q1", "Investor Pitch Night"],
   };
+
+  const sectionAccent = (color: string) =>
+    `<span style="display:inline-block;width:12px;height:12px;background:${color};border-radius:2px;margin-right:8px;vertical-align:middle;"></span>`;
 
   return `<!DOCTYPE html>
 <html>
@@ -279,45 +292,45 @@ function generateWeeklyDigestHtml() {
 <body>
   <div class="wrapper">
     <div class="container">
-      <div class="mock-badge">⚠️ Preview Mode — Sample data shown. Live digest pulls real platform data.</div>
+      <div class="mock-badge"><span style="font-weight:800;margin-right:4px;">[!]</span> Preview Mode — Sample data shown. Live digest pulls real platform data.</div>
       <div class="header">
         <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="SFH" />
         <h1>Startup Factory Hub</h1>
         <p>Your Weekly Platform Digest</p>
       </div>
       <div class="hero">
-        <div class="week-badge">📰 Weekly Digest</div>
-        <h2>Hi ${mockData.recipientName}! Here's what's new 👋</h2>
+        <div class="week-badge">Weekly Digest</div>
+        <h2>Hi ${mockData.recipientName}! Here's what's new</h2>
         <p>${mockData.startups.length + mockData.mentors.length + mockData.investors.length} new members joined the platform this week</p>
       </div>
       <div class="stats-row">
         <div class="stat"><div class="stat-num">${mockData.startups.length}</div><div class="stat-label">Startups</div></div>
         <div class="stat"><div class="stat-num">${mockData.mentors.length}</div><div class="stat-label">Mentors</div></div>
         <div class="stat"><div class="stat-num">${mockData.investors.length}</div><div class="stat-label">Investors</div></div>
-        <div class="stat"><div class="stat-num">${mockData.resources.length + mockData.events.length}</div><div class="stat-label">Resources & Events</div></div>
+        <div class="stat"><div class="stat-num">${mockData.resources.length + mockData.events.length}</div><div class="stat-label">Resources &amp; Events</div></div>
       </div>
       <div class="content">
         <div class="section">
-          <div class="section-header">🚀 New Startups <span class="count">${mockData.startups.length} new</span></div>
+          <div class="section-header">${sectionAccent("#0ea270")}New Startups <span class="count">${mockData.startups.length} new</span></div>
           <div class="section-content">${mockData.startups.map(s => `<div class="item">• ${s}</div>`).join("")}</div>
         </div>
         <div class="section">
-          <div class="section-header">🎓 New Mentors <span class="count">${mockData.mentors.length} new</span></div>
+          <div class="section-header">${sectionAccent("#2563eb")}New Mentors <span class="count">${mockData.mentors.length} new</span></div>
           <div class="section-content">${mockData.mentors.map(m => `<div class="item">• ${m}</div>`).join("")}</div>
         </div>
         <div class="section">
-          <div class="section-header">💰 New Investors <span class="count">${mockData.investors.length} new</span></div>
+          <div class="section-header">${sectionAccent("#d97706")}New Investors <span class="count">${mockData.investors.length} new</span></div>
           <div class="section-content">${mockData.investors.map(i => `<div class="item">• ${i}</div>`).join("")}</div>
         </div>
         <div class="section">
-          <div class="section-header">📚 New Resources <span class="count">${mockData.resources.length} new</span></div>
+          <div class="section-header">${sectionAccent("#7c3aed")}New Resources <span class="count">${mockData.resources.length} new</span></div>
           <div class="section-content">${mockData.resources.map(r => `<div class="item">• ${r}</div>`).join("")}</div>
         </div>
         <div class="section">
-          <div class="section-header">📅 Upcoming Events <span class="count">${mockData.events.length} new</span></div>
+          <div class="section-header">${sectionAccent("#db2777")}Upcoming Events <span class="count">${mockData.events.length} new</span></div>
           <div class="section-content">${mockData.events.map(e => `<div class="item">• ${e}</div>`).join("")}</div>
         </div>
-        <div class="cta-section"><a href="https://startupfactoryhub.com/dashboard" class="cta-btn">🔭 Explore the Platform</a></div>
+        <div class="cta-section"><a href="https://startupfactoryhub.com/dashboard" class="cta-btn">Explore the Platform</a></div>
       </div>
       <div class="footer">
         <p>You're receiving this weekly digest as a member of Startup Factory Hub.</p>
@@ -351,7 +364,7 @@ function generatePartnershipHtml(vars: {
   const benefitsList = benefitsForStartups
     .split("\n")
     .filter((b) => b.trim())
-    .map((b) => `<li>${b.trim()}</li>`)
+    .map((b) => `<li><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#0ea270;flex-shrink:0;margin-right:10px;margin-top:2px;"></span>${b.trim()}</li>`)
     .join("");
 
   return `<!DOCTYPE html>
@@ -374,7 +387,7 @@ function generatePartnershipHtml(vars: {
     .sfh-logo { width: 64px; height: 64px; border-radius: 12px; object-fit: contain; background: rgba(255,255,255,0.05); padding: 4px; }
     .plus { font-size: 28px; color: #0ea270; font-weight: 700; }
     .partner-logo { width: 64px; height: 64px; border-radius: 12px; object-fit: contain; background: rgba(255,255,255,0.05); padding: 4px; }
-    .partner-placeholder { width: 64px; height: 64px; border-radius: 12px; background: rgba(14,162,112,0.2); border: 2px solid rgba(14,162,112,0.4); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+    .partner-placeholder { width: 64px; height: 64px; border-radius: 12px; background: rgba(14,162,112,0.2); border: 2px solid rgba(14,162,112,0.4); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: #0ea270; font-family: monospace; }
     .partnership-banner h2 { color: #f3f4f6; font-size: 24px; font-weight: 800; margin: 16px 0 8px; }
     .partnership-banner p { color: #9ca3af; font-size: 14px; line-height: 1.6; }
     .content { padding: 28px 32px; background: #0f1419; }
@@ -382,9 +395,8 @@ function generatePartnershipHtml(vars: {
     .card-label { color: #0ea270; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
     .card p { color: #d1d5db; font-size: 14px; line-height: 1.7; }
     .benefits-list { list-style: none; }
-    .benefits-list li { color: #d1d5db; font-size: 14px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: flex-start; gap: 10px; }
+    .benefits-list li { color: #d1d5db; font-size: 14px; padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; align-items: flex-start; }
     .benefits-list li:last-child { border-bottom: none; }
-    .benefits-list li::before { content: '✅'; flex-shrink: 0; }
     .cta-section { text-align: center; padding: 12px 0 8px; }
     .cta-btn { display: inline-block; background: linear-gradient(135deg,#0ea270,#059669); color: #fff; text-decoration: none; padding: 15px 40px; border-radius: 12px; font-size: 16px; font-weight: 700; box-shadow: 0 6px 24px rgba(14,162,112,0.4); }
     .footer { background: #0a0f1e; padding: 28px 32px; text-align: center; border-top: 1px solid rgba(14,162,112,0.1); }
@@ -401,25 +413,25 @@ function generatePartnershipHtml(vars: {
         <p>Platform Announcement</p>
       </div>
       <div class="partnership-banner">
-        <div class="partnership-badge">🤝 New Partnership</div>
+        <div class="partnership-badge">[ + ] New Partnership</div>
         <div class="logos-row">
           <img class="sfh-logo" src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="SFH" />
           <span class="plus">×</span>
           ${partnerLogo
             ? `<img class="partner-logo" src="${partnerLogo}" alt="${partnerName}" />`
-            : `<div class="partner-placeholder">🏢</div>`}
+            : `<div class="partner-placeholder">CO</div>`}
         </div>
         <h2>SFH × ${partnerName || "Partner Name"}</h2>
         <p>We're excited to announce a new partnership that brings more value to our community!</p>
       </div>
       <div class="content">
         <div class="card">
-          <div class="card-label">🏢 About ${partnerName || "Partner"}</div>
+          <div class="card-label">About ${partnerName || "Partner"}</div>
           <p>${partnerDescription || "Partner description goes here."}</p>
-          ${partnerWebsite ? `<p style="margin-top:12px"><a href="${partnerWebsite}" style="color:#0ea270;text-decoration:none;font-weight:600;">🌐 Visit their website →</a></p>` : ""}
+          ${partnerWebsite ? `<p style="margin-top:12px"><a href="${partnerWebsite}" style="color:#0ea270;text-decoration:none;font-weight:600;">Visit their website &rarr;</a></p>` : ""}
         </div>
-        ${benefitsList ? `<div class="card"><div class="card-label">🎁 Benefits for You</div><ul class="benefits-list">${benefitsList}</ul></div>` : ""}
-        <div class="cta-section"><a href="${ctaUrl || "https://startupfactoryhub.com/dashboard"}" class="cta-btn">🚀 ${ctaLabel || "Learn More"}</a></div>
+        ${benefitsList ? `<div class="card"><div class="card-label">Benefits for You</div><ul class="benefits-list">${benefitsList}</ul></div>` : ""}
+        <div class="cta-section"><a href="${ctaUrl || "https://startupfactoryhub.com/dashboard"}" class="cta-btn">${ctaLabel || "Learn More"}</a></div>
       </div>
       <div class="footer">
         <p>You're receiving this as a valued member of Startup Factory Hub.</p>
@@ -441,34 +453,38 @@ function generateAuthEmailHtml(vars: {
   const { authType, userEmail, token } = vars;
   const baseUrl = "https://startupfactoryhub.com";
 
-  const configs: Record<string, { subject: string; icon: string; headline: string; body: string; cta: string; actionUrl: string }> = {
+  const configs: Record<string, { subject: string; initial: string; iconBg: string; headline: string; body: string; cta: string; actionUrl: string }> = {
     magiclink: {
-      subject: "🔐 Your Magic Link",
-      icon: "🔐",
+      subject: "Your Magic Link",
+      initial: "M",
+      iconBg: "#0ea270",
       headline: "Sign in to Startup Factory Hub",
       body: "Click the button below to securely sign in. This magic link will expire in 1 hour.",
       cta: "Sign In Securely",
       actionUrl: `${baseUrl}/auth/v1/verify?token=${token || "PREVIEW_TOKEN"}&type=magiclink`,
     },
     signup: {
-      subject: "✨ Verify Your Email",
-      icon: "✨",
+      subject: "Verify Your Email",
+      initial: "V",
+      iconBg: "#2563eb",
       headline: "Welcome! Verify your email to get started",
       body: "Thank you for signing up. Please verify your email address to activate your account and access all platform features.",
       cta: "Verify Email Address",
       actionUrl: `${baseUrl}/auth/v1/verify?token=${token || "PREVIEW_TOKEN"}&type=signup`,
     },
     recovery: {
-      subject: "🔑 Reset Your Password",
-      icon: "🔑",
+      subject: "Reset Your Password",
+      initial: "R",
+      iconBg: "#d97706",
       headline: "Reset your password",
       body: "You requested a password reset for your Startup Factory Hub account. Click below to choose a new password. This link expires in 1 hour.",
       cta: "Reset Password",
       actionUrl: `${baseUrl}/auth/v1/verify?token=${token || "PREVIEW_TOKEN"}&type=recovery`,
     },
     welcome: {
-      subject: "🚀 Welcome to SFH!",
-      icon: "🚀",
+      subject: "Welcome to SFH!",
+      initial: "W",
+      iconBg: "#059669",
       headline: "You're in! Welcome to Startup Factory Hub",
       body: "Your account has been created successfully. Explore the platform, connect with mentors, discover investors, and join an accelerator cohort.",
       cta: "Explore the Platform",
@@ -493,7 +509,7 @@ function generateAuthEmailHtml(vars: {
     .header h1 { color: #fff; font-size: 22px; font-weight: 700; }
     .header p { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 4px; }
     .hero { background: linear-gradient(180deg,#1a1f35 0%,#0f1419 100%); padding: 40px 32px; text-align: center; }
-    .hero-icon { font-size: 56px; margin-bottom: 16px; display: block; }
+    .hero-icon-circle { width: 80px; height: 80px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 800; color: #fff; font-family: monospace; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(14,162,112,0.4); }
     .hero h2 { color: #f3f4f6; font-size: 22px; font-weight: 700; margin-bottom: 10px; }
     .hero p { color: #9ca3af; font-size: 14px; line-height: 1.7; max-width: 420px; margin: 0 auto; }
     .content { padding: 32px; background: #0f1419; }
@@ -519,7 +535,7 @@ function generateAuthEmailHtml(vars: {
         <p>AI-Powered Startup Accelerator Platform</p>
       </div>
       <div class="hero">
-        <span class="hero-icon">${cfg.icon}</span>
+        <div class="hero-icon-circle" style="background:${cfg.iconBg};">${cfg.initial}</div>
         <h2>${cfg.headline}</h2>
         <p>${cfg.body}</p>
       </div>
@@ -527,7 +543,7 @@ function generateAuthEmailHtml(vars: {
         <div class="cta-section">
           <a href="${cfg.actionUrl}" class="cta-btn">${cfg.cta}</a>
         </div>
-        ${authType !== "welcome" ? `<div class="expiry">⏰ This link expires in <strong>1 hour</strong>. If you didn't request this, you can safely ignore this email.</div>` : ""}
+        ${authType !== "welcome" ? `<div class="expiry"><span style="font-weight:800;margin-right:4px;">[!]</span> This link expires in <strong>1 hour</strong>. If you didn't request this, you can safely ignore this email.</div>` : ""}
         <div class="url-fallback">
           <p>If the button doesn't work, copy and paste this link:</p>
           <code>${cfg.actionUrl}</code>
@@ -562,6 +578,9 @@ function generatePdfSignatureHtml(vars: {
     ? "has invited you to edit a PDF document."
     : "has shared a PDF document with you.";
 
+  const iconInitial = accessLevel === "sign" ? "S" : accessLevel === "edit" ? "E" : "V";
+  const iconBg = accessLevel === "sign" ? "#0ea270" : accessLevel === "edit" ? "#2563eb" : "#7c3aed";
+
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -578,7 +597,7 @@ function generatePdfSignatureHtml(vars: {
     .header p { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 4px; }
     .hero { background: linear-gradient(180deg,#1a1f35 0%,#0f1419 100%); padding: 36px 32px; text-align: center; }
     .hero-badge { display: inline-block; background: rgba(14,162,112,0.15); border: 1px solid rgba(14,162,112,0.3); color: #0ea270; padding: 6px 18px; border-radius: 50px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
-    .hero-icon { font-size: 52px; margin-bottom: 12px; display: block; }
+    .hero-icon-circle { width: 72px; height: 72px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 800; color: #fff; font-family: monospace; margin-bottom: 12px; box-shadow: 0 8px 24px rgba(14,162,112,0.4); }
     .hero h2 { color: #f3f4f6; font-size: 20px; font-weight: 700; margin-bottom: 6px; }
     .hero p { color: #9ca3af; font-size: 14px; }
     .content { padding: 28px 32px; background: #0f1419; }
@@ -608,14 +627,14 @@ function generatePdfSignatureHtml(vars: {
         <p>LightPaper Document Suite</p>
       </div>
       <div class="hero">
-        <div class="hero-badge">📄 Document Shared</div>
-        <span class="hero-icon">${accessLevel === "sign" ? "✍️" : accessLevel === "edit" ? "✏️" : "📄"}</span>
+        <div class="hero-badge">Document Shared</div>
+        <div class="hero-icon-circle" style="background:${iconBg};">${iconInitial}</div>
         <h2>${actionText} Request</h2>
         <p><strong style="color:#f3f4f6">${senderName || "Someone"}</strong> ${description}</p>
       </div>
       <div class="content">
         <div class="card">
-          <div class="card-label">📋 Document Details</div>
+          <div class="card-label">Document Details</div>
           <div class="detail-row">
             <span class="detail-label">Document</span>
             <span class="detail-value">${documentTitle || "Untitled Document"}</span>
@@ -632,7 +651,7 @@ function generatePdfSignatureHtml(vars: {
         </div>
         ${message ? `<div class="message-box">"${message}"</div><br/>` : ""}
         <div class="cta-section">
-          <a href="${shareUrl}" class="cta-btn">📄 ${actionText}</a>
+          <a href="${shareUrl}" class="cta-btn">${actionText}</a>
         </div>
         <div class="url-fallback">
           <p>If the button doesn't work, copy and paste this link:</p>
@@ -821,7 +840,11 @@ export default function EmailTemplates() {
           ctaUrl: v.ctaUrl,
         };
       } else if (selected === "auth") {
-        toast({ title: "ℹ️ Auth emails", description: "Auth emails are triggered automatically by Supabase — they cannot be sent manually from here.", variant: "default" });
+        toast({
+          title: "Auth emails",
+          description: "Auth emails are triggered automatically by Supabase — they cannot be sent manually from here.",
+          variant: "default",
+        });
         setSending(false);
         return;
       } else if (selected === "pdf-signature") {
@@ -843,7 +866,7 @@ export default function EmailTemplates() {
       if (error) throw error;
 
       toast({
-        title: "✅ Test email sent!",
+        title: "Test email sent!",
         description: `Check ${toEmail} for the ${currentTemplate.label}.`,
       });
     } catch (err: any) {
@@ -858,384 +881,409 @@ export default function EmailTemplates() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      {/* Top bar */}
-      <header className="border-b border-border bg-card px-6 py-4 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate("/admin")} className="h-8 w-8">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-          <div>
-            <h1 className="text-lg font-bold">Email Template Manager</h1>
-            <p className="text-xs text-muted-foreground">Preview, configure, and test platform email templates</p>
-          </div>
-        </div>
-        <Badge variant="outline" className="gap-1.5 border-primary/40 text-primary">
-          <Shield className="h-3 w-3" /> Admin Only
-        </Badge>
-      </header>
+    <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
+      {/* Matrix background animation */}
+      <MatrixBackground />
 
-      <div className="flex flex-1 overflow-hidden">
-        {/* Sidebar */}
-        <aside className="w-64 border-r border-border bg-card flex flex-col shrink-0 overflow-y-auto">
-          <div className="p-4">
-            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Templates</p>
-            <div className="space-y-1">
-              {TEMPLATES.map((t) => {
-                const Icon = t.icon;
-                const isActive = selected === t.id;
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setSelected(t.id)}
-                    className={`w-full text-left rounded-lg px-3 py-3 transition-colors flex items-start gap-3 ${
-                      isActive
-                        ? "bg-primary/10 border border-primary/30 text-primary"
-                        : "hover:bg-muted text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${isActive ? "text-primary" : ""}`} />
-                    <div>
-                      <p className="text-sm font-medium leading-tight">{t.label}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{t.description}</p>
-                    </div>
-                  </button>
-                );
-              })}
+      {/* Geometric grid overlay */}
+      <div
+        className="absolute inset-0 z-[1] opacity-10 pointer-events-none"
+        style={{
+          backgroundImage: `linear-gradient(hsl(160 84% 39% / 0.08) 1px, transparent 1px),
+                            linear-gradient(90deg, hsl(160 84% 39% / 0.08) 1px, transparent 1px)`,
+          backgroundSize: "40px 40px",
+        }}
+      />
+
+      {/* Radial gradient vignette */}
+      <div
+        className="absolute inset-0 z-[2] pointer-events-none"
+        style={{
+          background: "radial-gradient(ellipse at center, transparent 40%, hsl(var(--background) / 0.6) 100%)",
+        }}
+      />
+
+      {/* Page content */}
+      <div className="relative z-10 flex flex-col flex-1 overflow-hidden">
+        {/* Top bar */}
+        <header className="border-b border-border bg-card/80 backdrop-blur-sm px-6 py-4 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="icon" onClick={() => navigate("/admin")} className="h-8 w-8">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <div>
+              <h1 className="text-lg font-bold">Email Template Manager</h1>
+              <p className="text-xs text-muted-foreground">Preview, configure, and test platform email templates</p>
             </div>
           </div>
-        </aside>
+          <Badge variant="outline" className="gap-1.5 border-primary/40 text-primary">
+            <Shield className="h-3 w-3" /> Admin Only
+          </Badge>
+        </header>
 
-        {/* Main panel */}
-        <main className="flex-1 flex flex-col overflow-hidden">
-          <Tabs defaultValue="preview" className="flex flex-col flex-1 overflow-hidden">
-            {/* Tab bar + Send button */}
-            <div className="border-b border-border bg-card px-6 py-3 flex items-center justify-between shrink-0">
-              <TabsList className="h-9">
-                <TabsTrigger value="preview" className="gap-1.5 text-xs">
-                  <Eye className="h-3.5 w-3.5" /> Preview
-                </TabsTrigger>
-                <TabsTrigger value="variables" className="gap-1.5 text-xs">
-                  <SlidersHorizontal className="h-3.5 w-3.5" /> Variables
-                </TabsTrigger>
-              </TabsList>
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar */}
+          <aside className="w-64 border-r border-border bg-card/80 backdrop-blur-sm flex flex-col shrink-0 overflow-y-auto">
+            <div className="p-4">
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Templates</p>
+              <div className="space-y-1">
+                {TEMPLATES.map((t) => {
+                  const Icon = t.icon;
+                  const isActive = selected === t.id;
+                  return (
+                    <button
+                      key={t.id}
+                      onClick={() => setSelected(t.id)}
+                      className={`w-full text-left rounded-lg px-3 py-3 transition-colors flex items-start gap-3 ${
+                        isActive
+                          ? "bg-primary/10 border border-primary/30 text-primary"
+                          : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      <Icon className={`h-4 w-4 mt-0.5 shrink-0 ${isActive ? "text-primary" : ""}`} />
+                      <div>
+                        <p className="text-sm font-medium leading-tight">{t.label}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 leading-tight">{t.description}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </aside>
 
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2">
-                  <Label className="text-xs text-muted-foreground whitespace-nowrap">Test Recipient</Label>
-                  <Input
-                    type="email"
-                    placeholder="test@example.com"
-                    value={(vars[selected] as any).to || ""}
-                    onChange={(e) => updateVar(selected, "to", e.target.value)}
-                    className="h-8 w-52 text-xs"
+          {/* Main panel */}
+          <main className="flex-1 flex flex-col overflow-hidden">
+            <Tabs defaultValue="preview" className="flex flex-col flex-1 overflow-hidden">
+              {/* Tab bar + Send button */}
+              <div className="border-b border-border bg-card/80 backdrop-blur-sm px-6 py-3 flex items-center justify-between shrink-0">
+                <TabsList className="h-9">
+                  <TabsTrigger value="preview" className="gap-1.5 text-xs">
+                    <Eye className="h-3.5 w-3.5" /> Preview
+                  </TabsTrigger>
+                  <TabsTrigger value="variables" className="gap-1.5 text-xs">
+                    <SlidersHorizontal className="h-3.5 w-3.5" /> Variables
+                  </TabsTrigger>
+                </TabsList>
+
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2">
+                    <Label className="text-xs text-muted-foreground whitespace-nowrap">Test Recipient</Label>
+                    <Input
+                      type="email"
+                      placeholder="test@example.com"
+                      value={(vars[selected] as any).to || ""}
+                      onChange={(e) => updateVar(selected, "to", e.target.value)}
+                      className="h-8 w-52 text-xs"
+                    />
+                  </div>
+                  <Button size="sm" onClick={handleSendTest} disabled={sending} className="gap-1.5">
+                    {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
+                    {sending ? "Sending…" : "Send Test"}
+                  </Button>
+                </div>
+              </div>
+
+              {/* Preview tab */}
+              <TabsContent value="preview" className="flex-1 overflow-hidden m-0 p-0">
+                <div className="h-full w-full bg-muted/30 p-4">
+                  <iframe
+                    key={getPreviewHtml()}
+                    srcDoc={getPreviewHtml()}
+                    sandbox="allow-same-origin"
+                    className="w-full h-full rounded-lg border border-border bg-white shadow-sm"
+                    title={`${currentTemplate.label} Preview`}
                   />
                 </div>
-                <Button size="sm" onClick={handleSendTest} disabled={sending} className="gap-1.5">
-                  {sending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Send className="h-3.5 w-3.5" />}
-                  {sending ? "Sending…" : "Send Test"}
-                </Button>
-              </div>
-            </div>
+              </TabsContent>
 
-            {/* Preview tab */}
-            <TabsContent value="preview" className="flex-1 overflow-hidden m-0 p-0">
-              <div className="h-full w-full bg-muted/30 p-4">
-                <iframe
-                  key={getPreviewHtml()}
-                  srcDoc={getPreviewHtml()}
-                  sandbox="allow-same-origin"
-                  className="w-full h-full rounded-lg border border-border bg-white shadow-sm"
-                  title={`${currentTemplate.label} Preview`}
-                />
-              </div>
-            </TabsContent>
+              {/* Variables tab */}
+              <TabsContent value="variables" className="flex-1 overflow-y-auto m-0 p-6">
+                <div className="max-w-2xl mx-auto space-y-5">
+                  <div>
+                    <h2 className="text-sm font-semibold mb-1">{currentTemplate.label}</h2>
+                    <p className="text-xs text-muted-foreground">{currentTemplate.description}</p>
+                  </div>
 
-            {/* Variables tab */}
-            <TabsContent value="variables" className="flex-1 overflow-y-auto m-0 p-6">
-              <div className="max-w-2xl mx-auto space-y-5">
-                <div>
-                  <h2 className="text-sm font-semibold mb-1">{currentTemplate.label}</h2>
-                  <p className="text-xs text-muted-foreground">{currentTemplate.description}</p>
-                </div>
-
-                <div className="rounded-lg border border-border bg-card p-4 space-y-4">
-                  {/* ── Notification ── */}
-                  {selected === "notification" && (
-                    <>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Notification Type</Label>
-                        <Select
-                          value={vars.notification.type}
-                          onValueChange={(v) => updateVar("notification", "type", v)}
-                        >
-                          <SelectTrigger className="h-9 text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {["info", "success", "warning", "error", "message", "connection", "event"].map((t) => (
-                              <SelectItem key={t} value={t}>{t}</SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Title</Label>
-                        <Input
-                          value={vars.notification.title}
-                          onChange={(e) => updateVar("notification", "title", e.target.value)}
-                          className="h-9 text-sm"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Message</Label>
-                        <Textarea
-                          value={vars.notification.message}
-                          onChange={(e) => updateVar("notification", "message", e.target.value)}
-                          rows={4}
-                          className="text-sm resize-none"
-                        />
-                      </div>
-                    </>
-                  )}
-
-                  {/* ── Invitation ── */}
-                  {selected === "invitation" && (
-                    <>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Applicant Email</Label>
-                        <Input
-                          value={vars.invitation.email}
-                          onChange={(e) => updateVar("invitation", "email", e.target.value)}
-                          className="h-9 text-sm"
-                          placeholder="applicant@example.com"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Job Title</Label>
-                        <Input
-                          value={vars.invitation.jobTitle}
-                          onChange={(e) => updateVar("invitation", "jobTitle", e.target.value)}
-                          className="h-9 text-sm"
-                          placeholder="Frontend Developer Intern"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Company Name</Label>
-                        <Input
-                          value={vars.invitation.companyName}
-                          onChange={(e) => updateVar("invitation", "companyName", e.target.value)}
-                          className="h-9 text-sm"
-                          placeholder="TechNova AI"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Invitation Token</Label>
-                        <Input
-                          value={vars.invitation.token}
-                          onChange={(e) => updateVar("invitation", "token", e.target.value)}
-                          className="h-9 text-sm"
-                          placeholder="abc123xyz"
-                        />
-                        <p className="text-xs text-muted-foreground">Used to construct the invitation URL in the preview.</p>
-                      </div>
-                    </>
-                  )}
-
-                  {/* ── Digest ── */}
-                  {selected === "digest" && (
-                    <div className="py-2 text-center text-sm text-muted-foreground">
-                      <Newspaper className="h-8 w-8 mx-auto mb-3 opacity-30" />
-                      <p className="font-medium">No variables needed</p>
-                      <p className="text-xs mt-1">The Weekly Digest pulls live data from the platform database when sent. The preview shows sample data.</p>
-                    </div>
-                  )}
-
-                  {/* ── Partnership ── */}
-                  {selected === "partnership" && (
-                    <>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Partner Name</Label>
-                        <Input
-                          value={vars.partnership.partnerName}
-                          onChange={(e) => updateVar("partnership", "partnerName", e.target.value)}
-                          className="h-9 text-sm"
-                          placeholder="Acme Ventures"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Partner Logo URL</Label>
-                        <Input
-                          value={vars.partnership.partnerLogo}
-                          onChange={(e) => updateVar("partnership", "partnerLogo", e.target.value)}
-                          className="h-9 text-sm"
-                          placeholder="https://..."
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Partner Website</Label>
-                        <Input
-                          value={vars.partnership.partnerWebsite}
-                          onChange={(e) => updateVar("partnership", "partnerWebsite", e.target.value)}
-                          className="h-9 text-sm"
-                          placeholder="https://..."
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Partner Description</Label>
-                        <Textarea
-                          value={vars.partnership.partnerDescription}
-                          onChange={(e) => updateVar("partnership", "partnerDescription", e.target.value)}
-                          rows={3}
-                          className="text-sm resize-none"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Benefits for Startups <span className="text-muted-foreground">(one per line)</span></Label>
-                        <Textarea
-                          value={vars.partnership.benefitsForStartups}
-                          onChange={(e) => updateVar("partnership", "benefitsForStartups", e.target.value)}
-                          rows={4}
-                          className="text-sm resize-none"
-                          placeholder={"Access to $250K pre-seed funding\nFree co-working space"}
-                        />
-                      </div>
-                      <div className="grid grid-cols-2 gap-4">
+                  <div className="rounded-lg border border-border bg-card p-4 space-y-4">
+                    {/* ── Notification ── */}
+                    {selected === "notification" && (
+                      <>
                         <div className="space-y-1.5">
-                          <Label className="text-xs">CTA Button Label</Label>
+                          <Label className="text-xs">Notification Type</Label>
+                          <Select
+                            value={vars.notification.type}
+                            onValueChange={(v) => updateVar("notification", "type", v)}
+                          >
+                            <SelectTrigger className="h-9 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {["info", "success", "warning", "error", "message", "connection", "event"].map((t) => (
+                                <SelectItem key={t} value={t}>{t}</SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Title</Label>
                           <Input
-                            value={vars.partnership.ctaLabel}
-                            onChange={(e) => updateVar("partnership", "ctaLabel", e.target.value)}
+                            value={vars.notification.title}
+                            onChange={(e) => updateVar("notification", "title", e.target.value)}
                             className="h-9 text-sm"
-                            placeholder="Learn More"
                           />
                         </div>
                         <div className="space-y-1.5">
-                          <Label className="text-xs">CTA URL</Label>
+                          <Label className="text-xs">Message</Label>
+                          <Textarea
+                            value={vars.notification.message}
+                            onChange={(e) => updateVar("notification", "message", e.target.value)}
+                            rows={4}
+                            className="text-sm resize-none"
+                          />
+                        </div>
+                      </>
+                    )}
+
+                    {/* ── Invitation ── */}
+                    {selected === "invitation" && (
+                      <>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Applicant Email</Label>
                           <Input
-                            value={vars.partnership.ctaUrl}
-                            onChange={(e) => updateVar("partnership", "ctaUrl", e.target.value)}
+                            value={vars.invitation.email}
+                            onChange={(e) => updateVar("invitation", "email", e.target.value)}
+                            className="h-9 text-sm"
+                            placeholder="applicant@example.com"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Job Title</Label>
+                          <Input
+                            value={vars.invitation.jobTitle}
+                            onChange={(e) => updateVar("invitation", "jobTitle", e.target.value)}
+                            className="h-9 text-sm"
+                            placeholder="Frontend Developer Intern"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Company Name</Label>
+                          <Input
+                            value={vars.invitation.companyName}
+                            onChange={(e) => updateVar("invitation", "companyName", e.target.value)}
+                            className="h-9 text-sm"
+                            placeholder="TechNova AI"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Invitation Token</Label>
+                          <Input
+                            value={vars.invitation.token}
+                            onChange={(e) => updateVar("invitation", "token", e.target.value)}
+                            className="h-9 text-sm"
+                            placeholder="abc123xyz"
+                          />
+                          <p className="text-xs text-muted-foreground">Used to construct the invitation URL in the preview.</p>
+                        </div>
+                      </>
+                    )}
+
+                    {/* ── Digest ── */}
+                    {selected === "digest" && (
+                      <div className="py-2 text-center text-sm text-muted-foreground">
+                        <Newspaper className="h-8 w-8 mx-auto mb-3 opacity-30" />
+                        <p className="font-medium">No variables needed</p>
+                        <p className="text-xs mt-1">The Weekly Digest pulls live data from the platform database when sent. The preview shows sample data.</p>
+                      </div>
+                    )}
+
+                    {/* ── Partnership ── */}
+                    {selected === "partnership" && (
+                      <>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Partner Name</Label>
+                          <Input
+                            value={vars.partnership.partnerName}
+                            onChange={(e) => updateVar("partnership", "partnerName", e.target.value)}
+                            className="h-9 text-sm"
+                            placeholder="Acme Ventures"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Partner Logo URL</Label>
+                          <Input
+                            value={vars.partnership.partnerLogo}
+                            onChange={(e) => updateVar("partnership", "partnerLogo", e.target.value)}
                             className="h-9 text-sm"
                             placeholder="https://..."
                           />
                         </div>
-                      </div>
-                    </>
-                  )}
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Partner Website</Label>
+                          <Input
+                            value={vars.partnership.partnerWebsite}
+                            onChange={(e) => updateVar("partnership", "partnerWebsite", e.target.value)}
+                            className="h-9 text-sm"
+                            placeholder="https://..."
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Partner Description</Label>
+                          <Textarea
+                            value={vars.partnership.partnerDescription}
+                            onChange={(e) => updateVar("partnership", "partnerDescription", e.target.value)}
+                            rows={3}
+                            className="text-sm resize-none"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Benefits for Startups <span className="text-muted-foreground">(one per line)</span></Label>
+                          <Textarea
+                            value={vars.partnership.benefitsForStartups}
+                            onChange={(e) => updateVar("partnership", "benefitsForStartups", e.target.value)}
+                            rows={4}
+                            className="text-sm resize-none"
+                            placeholder={"Access to $250K pre-seed funding\nFree co-working space"}
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">CTA Button Label</Label>
+                            <Input
+                              value={vars.partnership.ctaLabel}
+                              onChange={(e) => updateVar("partnership", "ctaLabel", e.target.value)}
+                              className="h-9 text-sm"
+                              placeholder="Learn More"
+                            />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">CTA URL</Label>
+                            <Input
+                              value={vars.partnership.ctaUrl}
+                              onChange={(e) => updateVar("partnership", "ctaUrl", e.target.value)}
+                              className="h-9 text-sm"
+                              placeholder="https://..."
+                            />
+                          </div>
+                        </div>
+                      </>
+                    )}
 
-                  {/* ── Auth Emails ── */}
-                  {selected === "auth" && (
-                    <>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Auth Type</Label>
-                        <Select
-                          value={vars.auth.authType}
-                          onValueChange={(v) => updateVar("auth", "authType", v)}
-                        >
-                          <SelectTrigger className="h-9 text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="magiclink">Magic Link</SelectItem>
-                            <SelectItem value="signup">Email Verification (Sign Up)</SelectItem>
-                            <SelectItem value="recovery">Password Reset</SelectItem>
-                            <SelectItem value="welcome">Welcome Email</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">User Email</Label>
-                        <Input
-                          value={vars.auth.userEmail}
-                          onChange={(e) => updateVar("auth", "userEmail", e.target.value)}
-                          className="h-9 text-sm"
-                          placeholder="user@example.com"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Token <span className="text-muted-foreground">(for URL preview)</span></Label>
-                        <Input
-                          value={vars.auth.token}
-                          onChange={(e) => updateVar("auth", "token", e.target.value)}
-                          className="h-9 text-sm"
-                          placeholder="preview-token-abc123"
-                        />
-                      </div>
-                      <div className="rounded-md bg-muted border border-border px-3 py-2.5 text-xs text-muted-foreground">
-                        ⚠️ Auth emails are triggered automatically by Supabase auth events. The "Send Test" button is not applicable here — these are handled via the <code className="font-mono">send-auth-email</code> hook.
-                      </div>
-                    </>
-                  )}
+                    {/* ── Auth Emails ── */}
+                    {selected === "auth" && (
+                      <>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Auth Type</Label>
+                          <Select
+                            value={vars.auth.authType}
+                            onValueChange={(v) => updateVar("auth", "authType", v)}
+                          >
+                            <SelectTrigger className="h-9 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="magiclink">Magic Link</SelectItem>
+                              <SelectItem value="signup">Email Verification (Sign Up)</SelectItem>
+                              <SelectItem value="recovery">Password Reset</SelectItem>
+                              <SelectItem value="welcome">Welcome Email</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">User Email</Label>
+                          <Input
+                            value={vars.auth.userEmail}
+                            onChange={(e) => updateVar("auth", "userEmail", e.target.value)}
+                            className="h-9 text-sm"
+                            placeholder="user@example.com"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Token <span className="text-muted-foreground">(for URL preview)</span></Label>
+                          <Input
+                            value={vars.auth.token}
+                            onChange={(e) => updateVar("auth", "token", e.target.value)}
+                            className="h-9 text-sm"
+                            placeholder="preview-token-abc123"
+                          />
+                        </div>
+                        <div className="rounded-md bg-muted border border-border px-3 py-2.5 text-xs text-muted-foreground flex items-start gap-2">
+                          <AlertTriangle className="h-3.5 w-3.5 text-yellow-500 mt-0.5 shrink-0" />
+                          Auth emails are triggered automatically by Supabase auth events. The "Send Test" button is not applicable here — these are handled via the <code className="font-mono">send-auth-email</code> hook.
+                        </div>
+                      </>
+                    )}
 
-                  {/* ── PDF Signature ── */}
-                  {selected === "pdf-signature" && (
-                    <>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Document Title</Label>
-                        <Input
-                          value={vars["pdf-signature"].documentTitle}
-                          onChange={(e) => updateVar("pdf-signature", "documentTitle", e.target.value)}
-                          className="h-9 text-sm"
-                          placeholder="Startup Equity Agreement"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Sender Name</Label>
-                        <Input
-                          value={vars["pdf-signature"].senderName}
-                          onChange={(e) => updateVar("pdf-signature", "senderName", e.target.value)}
-                          className="h-9 text-sm"
-                          placeholder="Alex Johnson"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Access Level</Label>
-                        <Select
-                          value={vars["pdf-signature"].accessLevel}
-                          onValueChange={(v) => updateVar("pdf-signature", "accessLevel", v)}
-                        >
-                          <SelectTrigger className="h-9 text-sm">
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="view">View</SelectItem>
-                            <SelectItem value="sign">Sign</SelectItem>
-                            <SelectItem value="edit">Edit</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Share Token <span className="text-muted-foreground">(for URL preview)</span></Label>
-                        <Input
-                          value={vars["pdf-signature"].shareToken}
-                          onChange={(e) => updateVar("pdf-signature", "shareToken", e.target.value)}
-                          className="h-9 text-sm"
-                          placeholder="preview-share-token"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <Label className="text-xs">Personal Message <span className="text-muted-foreground">(optional)</span></Label>
-                        <Textarea
-                          value={vars["pdf-signature"].message}
-                          onChange={(e) => updateVar("pdf-signature", "message", e.target.value)}
-                          rows={3}
-                          className="text-sm resize-none"
-                          placeholder="Please review and sign at your earliest convenience."
-                        />
-                      </div>
-                    </>
-                  )}
+                    {/* ── PDF Signature ── */}
+                    {selected === "pdf-signature" && (
+                      <>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Document Title</Label>
+                          <Input
+                            value={vars["pdf-signature"].documentTitle}
+                            onChange={(e) => updateVar("pdf-signature", "documentTitle", e.target.value)}
+                            className="h-9 text-sm"
+                            placeholder="Startup Equity Agreement"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Sender Name</Label>
+                          <Input
+                            value={vars["pdf-signature"].senderName}
+                            onChange={(e) => updateVar("pdf-signature", "senderName", e.target.value)}
+                            className="h-9 text-sm"
+                            placeholder="Alex Johnson"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Access Level</Label>
+                          <Select
+                            value={vars["pdf-signature"].accessLevel}
+                            onValueChange={(v) => updateVar("pdf-signature", "accessLevel", v)}
+                          >
+                            <SelectTrigger className="h-9 text-sm">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="view">View</SelectItem>
+                              <SelectItem value="sign">Sign</SelectItem>
+                              <SelectItem value="edit">Edit</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Share Token <span className="text-muted-foreground">(for URL preview)</span></Label>
+                          <Input
+                            value={vars["pdf-signature"].shareToken}
+                            onChange={(e) => updateVar("pdf-signature", "shareToken", e.target.value)}
+                            className="h-9 text-sm"
+                            placeholder="preview-share-token"
+                          />
+                        </div>
+                        <div className="space-y-1.5">
+                          <Label className="text-xs">Personal Message <span className="text-muted-foreground">(optional)</span></Label>
+                          <Textarea
+                            value={vars["pdf-signature"].message}
+                            onChange={(e) => updateVar("pdf-signature", "message", e.target.value)}
+                            rows={3}
+                            className="text-sm resize-none"
+                            placeholder="Please review and sign at your earliest convenience."
+                          />
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
+                    <span className="font-semibold text-foreground">Edge function: </span>
+                    <code className="font-mono">{currentTemplate.edgeFunction}</code>
+                    <span className="ml-2">— changes here update the live preview instantly. Send Test fires the real function.</span>
+                  </div>
                 </div>
-
-                <div className="rounded-lg border border-border bg-muted/40 px-4 py-3 text-xs text-muted-foreground">
-                  <span className="font-semibold text-foreground">Edge function: </span>
-                  <code className="font-mono">{currentTemplate.edgeFunction}</code>
-                  <span className="ml-2">— changes here update the live preview instantly. Send Test fires the real function.</span>
-                </div>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </main>
+              </TabsContent>
+            </Tabs>
+          </main>
+        </div>
       </div>
     </div>
   );
