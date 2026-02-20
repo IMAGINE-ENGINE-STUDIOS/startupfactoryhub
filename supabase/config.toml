@@ -74,3 +74,9 @@ verify_jwt = false
 
 [functions.national-archives]
 verify_jwt = true
+
+[functions.weekly-digest]
+verify_jwt = false
+
+[functions.send-partnership-announcement]
+verify_jwt = true
