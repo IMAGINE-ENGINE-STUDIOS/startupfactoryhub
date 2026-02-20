@@ -8,7 +8,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import VideoMeetingDialog from '@/components/VideoMeetingDialog';
 import VillageElectionPanel from '@/components/VillageElectionPanel';
 import VillageDetailPanel from '@/components/VillageDetailPanel';
-import { Crown, Users, Vote, Trophy, Loader2 } from 'lucide-react';
+import CreateVillageDialog from '@/components/CreateVillageDialog';
+import { useVillagePaymentVerification } from '@/hooks/useVillagePaymentVerification';
+import { Crown, Users, Vote, Trophy, Loader2, ShoppingBag, Plus } from 'lucide-react';
 
 
 interface VillageRoom {
@@ -19,6 +21,7 @@ interface VillageRoom {
   current_host_id: string | null;
   host_elected_at: string | null;
   participant_count: number;
+  village_type?: 'democratic_republic' | 'merchant_village' | null;
   host?: {
     full_name: string;
     avatar_url: string | null;
@@ -40,6 +43,7 @@ export default function VillageRooms() {
   const [activeMeeting, setActiveMeeting] = useState<{ link: string; name: string; roomId: string } | null>(null);
   const [electionRoom, setElectionRoom] = useState<{ id: string; name: string } | null>(null);
   const [detailRoom, setDetailRoom] = useState<VillageRoom | null>(null);
+  const [createVillageOpen, setCreateVillageOpen] = useState(false);
 
 
   const fetchVillageRooms = useCallback(async () => {
@@ -108,6 +112,9 @@ export default function VillageRooms() {
     return () => { supabase.removeChannel(ch); };
   }, [fetchVillageRooms]);
 
+  // Verify village payment on return from Stripe
+  useVillagePaymentVerification(fetchVillageRooms);
+
   const handleJoin = async (room: VillageRoom) => {
     if (!user) return;
     await supabase.from('live_room_participants').upsert(
@@ -133,19 +140,29 @@ export default function VillageRooms() {
     );
   }
 
-  if (rooms.length === 0) return null;
-
   return (
     <>
       {/* Section header */}
-      <div className="flex items-center gap-3 mb-3">
-        <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
-          <Crown className="h-5 w-5 text-indigo-500" />
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-xl bg-indigo-500/10 flex items-center justify-center">
+            <Crown className="h-5 w-5 text-indigo-500" />
+          </div>
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">Community Villages</h2>
+            <p className="text-xs text-muted-foreground">Permanent open rooms — join or found your own</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">Community Villages</h2>
-          <p className="text-xs text-muted-foreground">Permanent open rooms — democratically hosted</p>
-        </div>
+        {user && (
+          <Button
+            size="sm"
+            className="h-8 text-xs gap-1.5 bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 border-0 text-white"
+            onClick={() => setCreateVillageOpen(true)}
+          >
+            <Plus className="h-3.5 w-3.5" />
+            Found a Village
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
@@ -171,10 +188,17 @@ export default function VillageRooms() {
                   )}
                 </div>
                 <div className="flex flex-col items-end gap-1 shrink-0">
-                  <Badge className="text-[10px] px-1.5 py-0 h-5 bg-indigo-500/10 text-indigo-600 border-0 flex items-center gap-0.5">
-                    <Crown className="h-2.5 w-2.5" />
-                    Village
-                  </Badge>
+                  {room.village_type === 'merchant_village' ? (
+                    <Badge className="text-[10px] px-1.5 py-0 h-5 bg-amber-500/10 text-amber-600 border-0 flex items-center gap-0.5">
+                      <ShoppingBag className="h-2.5 w-2.5" />
+                      Merchant
+                    </Badge>
+                  ) : (
+                    <Badge className="text-[10px] px-1.5 py-0 h-5 bg-indigo-500/10 text-indigo-600 border-0 flex items-center gap-0.5">
+                      <Crown className="h-2.5 w-2.5" />
+                      Democratic
+                    </Badge>
+                  )}
                   {room.active_election && (
                     <Badge className="text-[10px] px-1.5 py-0 h-5 bg-amber-500/10 text-amber-600 border-0 flex items-center gap-0.5 animate-pulse">
                       <Vote className="h-2.5 w-2.5" />
@@ -187,7 +211,12 @@ export default function VillageRooms() {
 
             <CardContent className="pt-0 px-4 pb-3 space-y-3">
               {/* Host info */}
-              {room.host ? (
+              {room.village_type === 'merchant_village' ? (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <ShoppingBag className="h-3 w-3 text-amber-500" />
+                  <span>Merchant Village — no election system</span>
+                </div>
+              ) : room.host ? (
                 <div className="flex items-center gap-1.5 text-xs">
                   <Trophy className="h-3 w-3 text-yellow-500" />
                   <Avatar className="h-4 w-4">
@@ -212,15 +241,17 @@ export default function VillageRooms() {
                   <span>{room.participant_count} in room</span>
                 </div>
                 <div className="flex items-center gap-1.5" onClick={e => e.stopPropagation()}>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="h-7 text-xs px-2 gap-1 border-indigo-500/30 text-indigo-600 hover:bg-indigo-500/10"
-                    onClick={() => setElectionRoom({ id: room.id, name: room.name })}
-                  >
-                    <Vote className="h-3 w-3" />
-                    {room.active_election ? 'Vote' : 'Election'}
-                  </Button>
+                  {room.village_type !== 'merchant_village' && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="h-7 text-xs px-2 gap-1 border-indigo-500/30 text-indigo-600 hover:bg-indigo-500/10"
+                      onClick={() => setElectionRoom({ id: room.id, name: room.name })}
+                    >
+                      <Vote className="h-3 w-3" />
+                      {room.active_election ? 'Vote' : 'Election'}
+                    </Button>
+                  )}
                   <Button
                     size="sm"
                     className="h-7 text-xs px-3 bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 border-0"
@@ -265,7 +296,14 @@ export default function VillageRooms() {
           onJoin={() => handleJoin(detailRoom)}
         />
       )}
+
+      {/* Create Village Dialog */}
+      <CreateVillageDialog
+        open={createVillageOpen}
+        onOpenChange={setCreateVillageOpen}
+      />
     </>
   );
 }
+
 
