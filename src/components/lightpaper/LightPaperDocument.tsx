@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType, ChevronLeft, ChevronRight, Volume2 } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType, ChevronLeft, ChevronRight, Volume2, History as HistoryIcon } from "lucide-react";
 import { addLightPaperMessage } from "./MessageCenter";
 
 // Replace toast with message center - same API surface
@@ -41,6 +41,7 @@ import { AIToolbar } from "./AIToolbar";
 import { PageManagementPanel } from "./PageManagementPanel";
 import { TextReader } from "./TextReader";
 import GeniusAIBubble from "./GeniusAIBubble";
+import { VersionHistoryPanel, DocumentVersion } from "./VersionHistoryPanel";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
@@ -187,6 +188,7 @@ export function LightPaperDocument({
   const [isEditingText, setIsEditingText] = useState(false);
   const [pages, setPages] = useState<string[]>(['']);
   const [showPagePanel, setShowPagePanel] = useState(false);
+  const [showVersionHistory, setShowVersionHistory] = useState(false);
 
   const [editTextLayers, setEditTextLayers] = useState<any[][]>([]); // Per-page text layer items for hybrid editing
   const [editTextViewportSize, setEditTextViewportSize] = useState<{ width: number; height: number } | null>(null);
@@ -825,12 +827,29 @@ export function LightPaperDocument({
     }
   };
 
-  // Save version to database
-  const saveVersionToDatabase = async (html: string) => {
+  // Save version to database with rich metadata
+  const saveVersionToDatabase = async (
+    html: string,
+    changeType: "autosave" | "manual" | "upload" | "restore" | "initial" = "autosave",
+    changeDescription?: string
+  ) => {
     try {
       const user = (await supabase.auth.getUser()).data.user;
       if (!user) return;
       const versionNumber = versions.length;
+
+      // Count words from html
+      const plainText = html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
+      const wordCount = plainText ? plainText.split(" ").filter(Boolean).length : 0;
+
+      // Generate a description if not provided
+      const description = changeDescription ||
+        (changeType === "autosave" ? `Auto-saved at ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}` :
+         changeType === "manual" ? `Saved manually` :
+         changeType === "upload" ? `Uploaded document` :
+         changeType === "restore" ? `Restored from version ${versionNumber}` :
+         `Version ${versionNumber + 1}`);
+
       const {
         data,
         error
@@ -842,14 +861,20 @@ export function LightPaperDocument({
           html,
           font: selectedFont,
           size: selectedSize,
-          darkMode: isDarkMode
+          darkMode: isDarkMode,
+          meta: {
+            change_type: changeType,
+            change_description: description,
+            word_count: wordCount,
+            project_title: projectTitle,
+          }
         },
         version_number: versionNumber,
         is_temporary: true
       }).select().single();
       if (error) throw error;
       if (data) {
-        setVersions([...versions, data]);
+        setVersions(prev => [...prev, data]);
         setCurrentVersionIndex(versions.length);
       }
     } catch (error) {
@@ -909,7 +934,7 @@ export function LightPaperDocument({
       clearTimeout(saveTimeoutRef.current);
     }
     saveTimeoutRef.current = setTimeout(() => {
-      saveVersionToDatabase(html);
+      saveVersionToDatabase(html, "autosave");
     }, 2000); // Save after 2 seconds of inactivity
   };
 
@@ -1736,6 +1761,10 @@ export function LightPaperDocument({
         const content = buildSaveContent();
         await saveProject(projectTitle, "document", content, currentProjectId);
         setLastSaved(new Date());
+        // Log a manual save version entry
+        if (editorRef.current) {
+          await saveVersionToDatabase(editorRef.current.innerHTML, "manual", `Saved: ${projectTitle}`);
+        }
         toast.success("Document saved");
       } catch (error) {
         toast.error("Failed to save document");
@@ -2787,6 +2816,15 @@ export function LightPaperDocument({
               >
                 <FileText className="h-4 w-4" />
               </Button>
+              <Button 
+                variant={showVersionHistory ? "secondary" : "ghost"} 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                onClick={() => setShowVersionHistory(true)} 
+                title="Version History (Time Machine)"
+              >
+                <HistoryIcon className="h-4 w-4" />
+              </Button>
             </div>
 
             {/* Spacer */}
@@ -3776,6 +3814,26 @@ export function LightPaperDocument({
           />
           </div>
         )}
+
+      {/* Version History Panel (Time Machine) */}
+      <VersionHistoryPanel
+        isOpen={showVersionHistory}
+        onClose={() => setShowVersionHistory(false)}
+        projectId={currentProjectId}
+        sessionId={sessionId}
+        currentContent={editorRef.current?.innerHTML || ""}
+        onRestoreVersion={(version: DocumentVersion) => {
+          if (editorRef.current && version.content?.html) {
+            editorRef.current.innerHTML = version.content.html;
+            setDocumentContent(version.content.html);
+            if (version.content.font) setSelectedFont(version.content.font);
+            if (version.content.size) setSelectedSize(version.content.size);
+            if (version.content.darkMode !== undefined) setIsDarkMode(version.content.darkMode);
+            // Log the restore as a new version
+            saveVersionToDatabase(version.content.html, "restore", `Restored from v${version.version_number + 1}`);
+          }
+        }}
+      />
       </div>
       </div>
 
