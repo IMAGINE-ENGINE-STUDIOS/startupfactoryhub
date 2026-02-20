@@ -224,6 +224,26 @@ const SFHAcceleratorManager = () => {
     fetchData();
   };
 
+  const handleDeleteCohort = async (cohortId: string) => {
+    try {
+      // Delete cascading data first
+      await supabase.from('cohort_applications').delete().eq('cohort_id', cohortId);
+      await supabase.from('cohort_startups').delete().eq('cohort_id', cohortId);
+
+      const { error } = await supabase
+        .from('accelerator_cohorts')
+        .delete()
+        .eq('id', cohortId);
+
+      if (error) throw error;
+      toast({ title: 'Cohort deleted successfully' });
+      fetchData();
+    } catch (err) {
+      console.error('Error deleting cohort:', err);
+      toast({ title: 'Error deleting cohort', variant: 'destructive' });
+    }
+  };
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     toast({ title: 'Copied to clipboard!' });
@@ -470,6 +490,7 @@ const SFHAcceleratorManager = () => {
             onCreateCohort={handleCreateCohort}
             onUpdateCohort={handleUpdateCohort}
             onSelectCohort={handleSelectCohort}
+            onDeleteCohort={handleDeleteCohort}
           />
         </TabsContent>
 
