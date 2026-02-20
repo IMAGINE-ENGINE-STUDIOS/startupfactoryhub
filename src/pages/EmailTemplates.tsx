@@ -52,15 +52,6 @@ function generateNotificationHtml(vars: {
 }) {
   const { title, message, type } = vars;
 
-  // CSS circle with letter initial instead of emoji
-  const typeInitial =
-    type === "connection" ? "C"
-    : type === "message" ? "M"
-    : type === "event" ? "E"
-    : type === "success" ? "S"
-    : type === "error" ? "!"
-    : "N";
-
   const iconBg =
     type === "error" ? "#dc2626"
     : type === "success" ? "#059669"
@@ -69,7 +60,21 @@ function generateNotificationHtml(vars: {
     : type === "event" ? "#db2777"
     : "#0ea270";
 
-  const heroIconHtml = `<div style="width:80px;height:80px;margin:0 auto 20px;background:${iconBg};border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(14,162,112,0.4);font-size:36px;font-weight:800;color:#fff;font-family:monospace;">${typeInitial}</div>`;
+  // Inline SVG icons — no letters, no emojis
+  const svgIcon =
+    type === "connection"
+      ? `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3z"/><path d="M8 11c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3z"/><path d="M8 13c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/><path d="M16 13c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2c0-2.66-5.33-4-7-4z"/></svg>`
+    : type === "message"
+      ? `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`
+    : type === "event"
+      ? `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>`
+    : type === "success"
+      ? `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
+    : type === "error"
+      ? `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
+    : `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>`;
+
+  const heroIconHtml = `<div style="width:80px;height:80px;margin:0 auto 20px;background:${iconBg};border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(14,162,112,0.4);">${svgIcon}</div>`;
 
   const tip =
     type === "connection"
@@ -182,7 +187,7 @@ function generateInvitationHtml(vars: {
     .header p { color: rgba(255,255,255,0.9); font-size: 14px; margin-top: 6px; }
     .hero { background: linear-gradient(180deg,#1a1f35 0%,#0f1419 100%); padding: 32px; text-align: center; }
     .badge { display: inline-block; background: rgba(14,162,112,0.15); border: 1px solid rgba(14,162,112,0.3); color: #0ea270; padding: 8px 20px; border-radius: 50px; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
-    .hero-icon-circle { width: 80px; height: 80px; margin: 0 auto 16px; background: linear-gradient(135deg,#0ea270,#059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 800; color: #fff; font-family: monospace; box-shadow: 0 8px 24px rgba(14,162,112,0.4); }
+    .hero-icon-circle { width: 80px; height: 80px; margin: 0 auto 16px; background: linear-gradient(135deg,#0ea270,#059669); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 24px rgba(14,162,112,0.4); }
     .hero h2 { color: #fff; font-size: 28px; font-weight: 700; margin-bottom: 8px; }
     .hero p { color: #9ca3af; font-size: 15px; line-height: 1.6; }
     .content { padding: 32px; background: #0f1419; }
@@ -217,7 +222,7 @@ function generateInvitationHtml(vars: {
       </div>
       <div class="hero">
         <div class="badge">[ + ] Application Selected</div>
-        <div class="hero-icon-circle">&#10003;</div>
+        <div class="hero-icon-circle"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
         <h2>You've Been Chosen!</h2>
         <p>Congratulations — your application stood out. You've been selected to move forward.<br>Create your account to access your tasks and begin your journey.</p>
       </div>
@@ -463,10 +468,18 @@ function generateAuthEmailHtml(vars: {
   const { authType, userEmail, token } = vars;
   const baseUrl = "https://startupfactoryhub.com";
 
-  const configs: Record<string, { subject: string; initial: string; iconBg: string; headline: string; body: string; cta: string; actionUrl: string }> = {
+  // Inline SVG icons per auth type — no letters
+  const authSvgIcon = authType === "magiclink"
+    ? `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 3a3 3 0 0 0-3 3v12a3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3H6a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3V6a3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3h12a3 3 0 0 0 3-3 3 3 0 0 0-3-3z"/></svg>`
+    : authType === "signup"
+    ? `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>`
+    : authType === "recovery"
+    ? `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`
+    : `<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+
+  const configs: Record<string, { subject: string; iconBg: string; headline: string; body: string; cta: string; actionUrl: string }> = {
     magiclink: {
       subject: "Your Magic Link",
-      initial: "M",
       iconBg: "#0ea270",
       headline: "Sign in to Startup Factory Hub",
       body: "Click the button below to securely sign in. This magic link will expire in 1 hour.",
@@ -475,7 +488,6 @@ function generateAuthEmailHtml(vars: {
     },
     signup: {
       subject: "Verify Your Email",
-      initial: "V",
       iconBg: "#2563eb",
       headline: "Welcome! Verify your email to get started",
       body: "Thank you for signing up. Please verify your email address to activate your account and access all platform features.",
@@ -484,7 +496,6 @@ function generateAuthEmailHtml(vars: {
     },
     recovery: {
       subject: "Reset Your Password",
-      initial: "R",
       iconBg: "#d97706",
       headline: "Reset your password",
       body: "You requested a password reset for your Startup Factory Hub account. Click below to choose a new password. This link expires in 1 hour.",
@@ -493,7 +504,6 @@ function generateAuthEmailHtml(vars: {
     },
     welcome: {
       subject: "Welcome to SFH!",
-      initial: "W",
       iconBg: "#059669",
       headline: "You're in! Welcome to Startup Factory Hub",
       body: "Your account has been created successfully. Explore the platform, connect with mentors, discover investors, and join an accelerator cohort.",
@@ -519,7 +529,7 @@ function generateAuthEmailHtml(vars: {
     .header h1 { color: #fff; font-size: 22px; font-weight: 700; }
     .header p { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 4px; }
     .hero { background: linear-gradient(180deg,#1a1f35 0%,#0f1419 100%); padding: 40px 32px; text-align: center; }
-    .hero-icon-circle { width: 80px; height: 80px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 800; color: #fff; font-family: monospace; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(14,162,112,0.4); }
+    .hero-icon-circle { width: 80px; height: 80px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(14,162,112,0.4); }
     .hero h2 { color: #f3f4f6; font-size: 22px; font-weight: 700; margin-bottom: 10px; }
     .hero p { color: #9ca3af; font-size: 14px; line-height: 1.7; max-width: 420px; margin: 0 auto; }
     .content { padding: 32px; background: #0f1419; }
@@ -545,7 +555,7 @@ function generateAuthEmailHtml(vars: {
         <p>AI-Powered Startup Accelerator Platform</p>
       </div>
       <div class="hero">
-        <div class="hero-icon-circle" style="background:${cfg.iconBg};">${cfg.initial}</div>
+        <div class="hero-icon-circle" style="background:${cfg.iconBg};">${authSvgIcon}</div>
         <h2>${cfg.headline}</h2>
         <p>${cfg.body}</p>
       </div>
@@ -588,7 +598,11 @@ function generatePdfSignatureHtml(vars: {
     ? "has invited you to edit a PDF document."
     : "has shared a PDF document with you.";
 
-  const iconInitial = accessLevel === "sign" ? "S" : accessLevel === "edit" ? "E" : "V";
+  const pdfSvgIcon = accessLevel === "sign"
+    ? `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>`
+    : accessLevel === "edit"
+    ? `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`
+    : `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
   const iconBg = accessLevel === "sign" ? "#0ea270" : accessLevel === "edit" ? "#2563eb" : "#7c3aed";
 
   return `<!DOCTYPE html>
@@ -638,7 +652,7 @@ function generatePdfSignatureHtml(vars: {
       </div>
       <div class="hero">
         <div class="hero-badge">Document Shared</div>
-        <div class="hero-icon-circle" style="background:${iconBg};">${iconInitial}</div>
+        <div class="hero-icon-circle" style="background:${iconBg};">${pdfSvgIcon}</div>
         <h2>${actionText} Request</h2>
         <p><strong style="color:#f3f4f6">${senderName || "Someone"}</strong> ${description}</p>
       </div>
@@ -969,7 +983,6 @@ export default function EmailTemplates() {
   }
 
   const currentTemplate = TEMPLATES.find((t) => t.id === selected)!;
-
 
   function getPreviewHtml() {
     if (NOTIFICATION_IDS.includes(selected)) {
