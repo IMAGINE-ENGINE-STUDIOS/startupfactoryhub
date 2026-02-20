@@ -43,6 +43,7 @@ const Hubs = lazy(() => import("./pages/Hubs"));
 const HubsLab = lazy(() => import("./pages/HubsLab"));
 const PublicHubApplication = lazy(() => import("./pages/PublicHubApplication"));
 const MVPProgram = lazy(() => import("./pages/MVPProgram"));
+const EmailTemplates = lazy(() => import("./pages/EmailTemplates"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -108,6 +109,7 @@ const App = () => (
                     <Route path="/hubs-lab" element={<HubsLab />} />
                     <Route path="/hubs/apply" element={<PublicHubApplication />} />
                     <Route path="/mvp-program" element={<MVPProgram />} />
+                    <Route path="/emails" element={<EmailTemplates />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
