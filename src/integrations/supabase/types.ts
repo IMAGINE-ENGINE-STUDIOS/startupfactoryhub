@@ -3154,6 +3154,7 @@ export type Database = {
       }
       live_rooms: {
         Row: {
+          api_cost_multiplier: number | null
           created_at: string | null
           creator_id: string
           current_host_id: string | null
@@ -3167,8 +3168,10 @@ export type Database = {
           name: string
           room_category: string
           updated_at: string | null
+          village_type: Database["public"]["Enums"]["village_type"] | null
         }
         Insert: {
+          api_cost_multiplier?: number | null
           created_at?: string | null
           creator_id: string
           current_host_id?: string | null
@@ -3182,8 +3185,10 @@ export type Database = {
           name: string
           room_category?: string
           updated_at?: string | null
+          village_type?: Database["public"]["Enums"]["village_type"] | null
         }
         Update: {
+          api_cost_multiplier?: number | null
           created_at?: string | null
           creator_id?: string
           current_host_id?: string | null
@@ -3197,6 +3202,7 @@ export type Database = {
           name?: string
           room_category?: string
           updated_at?: string | null
+          village_type?: Database["public"]["Enums"]["village_type"] | null
         }
         Relationships: []
       }
@@ -4984,6 +4990,59 @@ export type Database = {
           },
         ]
       }
+      village_purchases: {
+        Row: {
+          api_cost_multiplier: number
+          base_fee_cents: number
+          completed_at: string | null
+          created_at: string
+          id: string
+          payment_status: string
+          room_id: string | null
+          stripe_payment_intent: string | null
+          stripe_session_id: string | null
+          total_paid_cents: number | null
+          user_id: string
+          village_type: Database["public"]["Enums"]["village_type"]
+        }
+        Insert: {
+          api_cost_multiplier?: number
+          base_fee_cents?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          payment_status?: string
+          room_id?: string | null
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          total_paid_cents?: number | null
+          user_id: string
+          village_type: Database["public"]["Enums"]["village_type"]
+        }
+        Update: {
+          api_cost_multiplier?: number
+          base_fee_cents?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          payment_status?: string
+          room_id?: string | null
+          stripe_payment_intent?: string | null
+          stripe_session_id?: string | null
+          total_paid_cents?: number | null
+          user_id?: string
+          village_type?: Database["public"]["Enums"]["village_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "village_purchases_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "live_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       village_staff: {
         Row: {
           appointed_by: string
@@ -5137,6 +5196,7 @@ export type Database = {
         | "journey_completion"
         | "cohort"
         | "live_room"
+      village_type: "democratic_republic" | "merchant_village"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5294,6 +5354,7 @@ export const Constants = {
         "cohort",
         "live_room",
       ],
+      village_type: ["democratic_republic", "merchant_village"],
     },
   },
 } as const
