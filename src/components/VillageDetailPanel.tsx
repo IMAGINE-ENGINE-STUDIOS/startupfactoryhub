@@ -19,24 +19,27 @@ import {
 /* ─── Village media assets ──────────────────────────────────────────────────── */
 const VILLAGE_MEDIA: Record<string, { images: string[]; video?: string }> = {
   'The Plaza': {
+    // Grand civic squares, colonnade architecture, open public plazas
     images: [
-      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&q=80',
-      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80',
-      'https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=1200&q=80',
+      'https://images.unsplash.com/photo-1555993539-1732b0258235?w=1200&q=80', // grand plaza with columns
+      'https://images.unsplash.com/photo-1467269204594-9661b134dd2b?w=1200&q=80', // classical architecture square
+      'https://images.unsplash.com/photo-1520637836862-4d197d17c55a?w=1200&q=80', // open civic plaza
     ],
   },
   'The Commons': {
+    // Lush communal green spaces, parks, shared gardens
     images: [
-      'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80',
-      'https://images.unsplash.com/photo-1448375240586-882707db888b?w=1200&q=80',
-      'https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=1200&q=80',
+      'https://images.unsplash.com/photo-1501854140801-50d01698950b?w=1200&q=80', // aerial green meadow
+      'https://images.unsplash.com/photo-1585320806297-9794b3e4aaae?w=1200&q=80', // community garden
+      'https://images.unsplash.com/photo-1444492417251-9c84a5fa18e0?w=1200&q=80', // lush park commons
     ],
   },
   'The Agora': {
+    // Bustling ancient agora / modern marketplace, debate forums
     images: [
-      'https://images.unsplash.com/photo-1555992336-03a23c7b20ee?w=1200&q=80',
-      'https://images.unsplash.com/photo-1551958219-acbc71e7e61c?w=1200&q=80',
-      'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1200&q=80',
+      'https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=1200&q=80', // ancient greek ruins agora
+      'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=1200&q=80', // vibrant open-air market crowd
+      'https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?w=1200&q=80', // electric city night forum
     ],
   },
 };
@@ -252,13 +255,7 @@ export default function VillageDetailPanel({ open, onOpenChange, room, onJoin }:
                 </div>
               </div>
 
-              {/* Top-right: close */}
-              <button
-                onClick={() => onOpenChange(false)}
-                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-black/40 flex items-center justify-center text-white hover:bg-black/60 transition-colors"
-              >
-                <X className="h-4 w-4" />
-              </button>
+
 
               {/* Gallery nav */}
               {totalSlides > 1 && (
