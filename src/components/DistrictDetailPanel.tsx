@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import VillageElectionPanel from '@/components/VillageElectionPanel';
+import DistrictElectionPanel from '@/components/DistrictElectionPanel';
 import {
   Crown, Users, Vote, Trophy, Shield, ShieldCheck, UserPlus, X,
   ChevronLeft, ChevronRight, Play, Radio, Loader2, Star
@@ -519,7 +519,7 @@ export default function VillageDetailPanel({ open, onOpenChange, room, onJoin }:
       </Dialog>
 
       {/* Election sub-dialog */}
-      <VillageElectionPanel
+      <DistrictElectionPanel
         open={electionOpen}
         onOpenChange={setElectionOpen}
         roomId={room.id}

@@ -28,7 +28,7 @@ export interface VoteResult {
   vote_count: number;
 }
 
-export const useVillageElections = (roomId: string) => {
+export const useDistrictElections = (roomId: string) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [election, setElection] = useState<VillageElection | null>(null);

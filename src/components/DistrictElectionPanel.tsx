@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
-import { useVillageElections } from '@/hooks/useVillageElections';
+import { useDistrictElections } from '@/hooks/useDistrictElections';
 import { useAuth } from '@/contexts/AuthContext';
 import { Vote, Trophy, Loader2, RefreshCw } from 'lucide-react';
 
@@ -17,9 +17,9 @@ interface VillageElectionPanelProps {
   roomName: string;
 }
 
-export default function VillageElectionPanel({ open, onOpenChange, roomId, roomName }: VillageElectionPanelProps) {
+export default function DistrictElectionPanel({ open, onOpenChange, roomId, roomName }: VillageElectionPanelProps) {
   const { user } = useAuth();
-  const { election, votes, voteResults, participants, userVote, loading, allVoted, callElection, castVote } = useVillageElections(roomId);
+  const { election, votes, voteResults, participants, userVote, loading, allVoted, callElection, castVote } = useDistrictElections(roomId);
   const [selectedCandidate, setSelectedCandidate] = useState<string>('');
   const [submitting, setSubmitting] = useState(false);
 

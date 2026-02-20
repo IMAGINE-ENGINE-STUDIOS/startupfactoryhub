@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
  * On mount, if ?village_created=1&session_id=xxx is in the URL,
  * verify the Stripe session and finalize the village room creation.
  */
-export function useVillagePaymentVerification(onSuccess?: () => void) {
+export function useDistrictPaymentVerification(onSuccess?: () => void) {
   const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const { user } = useAuth();

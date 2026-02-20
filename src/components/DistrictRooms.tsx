@@ -6,15 +6,16 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import VideoMeetingDialog from '@/components/VideoMeetingDialog';
-import VillageElectionPanel from '@/components/VillageElectionPanel';
-import VillageDetailPanel from '@/components/VillageDetailPanel';
-import CreateVillageDialog from '@/components/CreateVillageDialog';
-import VillageGuideDialog from '@/components/VillageGuideDialog';
-import VillageMarketplace from '@/components/VillageMarketplace';
-import { useVillagePaymentVerification } from '@/hooks/useVillagePaymentVerification';
+import DistrictElectionPanel from '@/components/DistrictElectionPanel';
+import DistrictDetailPanel from '@/components/DistrictDetailPanel';
+import CreateDistrictDialog from '@/components/CreateDistrictDialog';
+import DistrictGuideDialog from '@/components/DistrictGuideDialog';
+import DistrictMarketplace from '@/components/DistrictMarketplace';
+import { useDistrictPaymentVerification } from '@/hooks/useDistrictPaymentVerification';
 import { Crown, Users, Vote, Trophy, Loader2, ShoppingBag, Plus, BookOpen, Store } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
-interface VillageRoom {
+interface DistrictRoom {
   id: string;
   name: string;
   description: string | null;
@@ -32,25 +33,26 @@ interface VillageRoom {
   active_election?: boolean;
 }
 
-const VILLAGE_NAMES = ['The Plaza', 'The Commons', 'The Agora'];
-const VILLAGE_EMOJIS: Record<string, string> = {
+const DISTRICT_NAMES = ['The Plaza', 'The Commons', 'The Agora'];
+const DISTRICT_EMOJIS: Record<string, string> = {
   'The Plaza': '🏛️',
   'The Commons': '🌿',
   'The Agora': '⚡',
 };
 
-export default function VillageRooms() {
+export default function DistrictRooms() {
   const { user } = useAuth();
-  const [rooms, setRooms] = useState<VillageRoom[]>([]);
+  const navigate = useNavigate();
+  const [rooms, setRooms] = useState<DistrictRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeMeeting, setActiveMeeting] = useState<{ link: string; name: string; roomId: string } | null>(null);
   const [electionRoom, setElectionRoom] = useState<{ id: string; name: string } | null>(null);
-  const [detailRoom, setDetailRoom] = useState<VillageRoom | null>(null);
-  const [createVillageOpen, setCreateVillageOpen] = useState(false);
+  const [detailRoom, setDetailRoom] = useState<DistrictRoom | null>(null);
+  const [createDistrictOpen, setCreateDistrictOpen] = useState(false);
   const [guideOpen, setGuideOpen] = useState(false);
   const [marketplaceOpen, setMarketplaceOpen] = useState(false);
 
-  const fetchVillageRooms = useCallback(async () => {
+  const fetchDistrictRooms = useCallback(async () => {
     try {
       const { data: roomsData, error } = await supabase
         .from('live_rooms')
@@ -89,7 +91,7 @@ export default function VillageRooms() {
         .eq('status', 'active');
       const electionSet = new Set(elections?.map(e => e.room_id) || []);
 
-      const enriched: VillageRoom[] = roomsData.map(r => ({
+      const enriched: DistrictRoom[] = roomsData.map(r => ({
         ...r,
         host: r.current_host_id ? profileMap.get(r.current_host_id) : undefined,
         participant_count: countMap.get(r.id) || 0,
@@ -98,27 +100,27 @@ export default function VillageRooms() {
 
       setRooms(enriched);
     } catch (e) {
-      console.error('Error fetching village rooms:', e);
+      console.error('Error fetching district rooms:', e);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  useEffect(() => { fetchVillageRooms(); }, [fetchVillageRooms]);
+  useEffect(() => { fetchDistrictRooms(); }, [fetchDistrictRooms]);
 
   useEffect(() => {
     const ch = supabase
-      .channel('village-rooms-realtime')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_rooms' }, fetchVillageRooms)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_room_participants' }, fetchVillageRooms)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'village_elections' }, fetchVillageRooms)
+      .channel('district-rooms-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_rooms' }, fetchDistrictRooms)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'live_room_participants' }, fetchDistrictRooms)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'village_elections' }, fetchDistrictRooms)
       .subscribe();
     return () => { supabase.removeChannel(ch); };
-  }, [fetchVillageRooms]);
+  }, [fetchDistrictRooms]);
 
-  useVillagePaymentVerification(fetchVillageRooms);
+  useDistrictPaymentVerification(fetchDistrictRooms);
 
-  const handleJoin = async (room: VillageRoom) => {
+  const handleJoin = async (room: DistrictRoom) => {
     if (!user) return;
     await supabase.from('live_room_participants').upsert(
       { room_id: room.id, user_id: user.id },
@@ -152,7 +154,7 @@ export default function VillageRooms() {
             <Crown className="h-5 w-5 text-indigo-500" />
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-foreground">Community Villages</h2>
+            <h2 className="text-lg font-semibold text-foreground">Community Districts</h2>
             <p className="text-xs text-muted-foreground">Permanent open rooms — join or found your own</p>
           </div>
         </div>
@@ -179,10 +181,10 @@ export default function VillageRooms() {
             <Button
               size="sm"
               className="h-8 text-xs gap-1.5 bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 border-0 text-white"
-              onClick={() => setCreateVillageOpen(true)}
+              onClick={() => setCreateDistrictOpen(true)}
             >
               <Plus className="h-3.5 w-3.5" />
-              Found a Village
+              Found a District
             </Button>
           )}
         </div>
@@ -202,7 +204,7 @@ export default function VillageRooms() {
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-lg">{VILLAGE_EMOJIS[room.name] || '🏘️'}</span>
+                    <span className="text-lg">{DISTRICT_EMOJIS[room.name] || '🏘️'}</span>
                     <CardTitle className="text-sm font-semibold truncate">{room.name}</CardTitle>
                   </div>
                   {room.description && (
@@ -242,7 +244,7 @@ export default function VillageRooms() {
               {room.village_type === 'merchant_village' ? (
                 <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                   <ShoppingBag className="h-3 w-3 text-amber-500" />
-                  <span>Merchant Village — owner operated</span>
+                  <span>Merchant District — owner operated</span>
                 </div>
               ) : room.host ? (
                 <div className="flex items-center gap-1.5 text-xs">
@@ -316,7 +318,7 @@ export default function VillageRooms() {
 
       {/* Election Dialog */}
       {electionRoom && (
-        <VillageElectionPanel
+        <DistrictElectionPanel
           open={!!electionRoom}
           onOpenChange={(open) => { if (!open) setElectionRoom(null); }}
           roomId={electionRoom.id}
@@ -324,9 +326,9 @@ export default function VillageRooms() {
         />
       )}
 
-      {/* Village Detail Panel */}
+      {/* District Detail Panel */}
       {detailRoom && (
-        <VillageDetailPanel
+        <DistrictDetailPanel
           open={!!detailRoom}
           onOpenChange={(open) => { if (!open) setDetailRoom(null); }}
           room={detailRoom}
@@ -334,20 +336,20 @@ export default function VillageRooms() {
         />
       )}
 
-      {/* Create Village Dialog */}
-      <CreateVillageDialog
-        open={createVillageOpen}
-        onOpenChange={setCreateVillageOpen}
+      {/* Create District Dialog */}
+      <CreateDistrictDialog
+        open={createDistrictOpen}
+        onOpenChange={setCreateDistrictOpen}
       />
 
-      {/* Village Guide */}
-      <VillageGuideDialog
+      {/* District Guide */}
+      <DistrictGuideDialog
         open={guideOpen}
         onOpenChange={setGuideOpen}
       />
 
-      {/* Village Marketplace */}
-      <VillageMarketplace
+      {/* District Marketplace */}
+      <DistrictMarketplace
         open={marketplaceOpen}
         onOpenChange={setMarketplaceOpen}
       />
