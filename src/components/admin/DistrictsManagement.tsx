@@ -218,7 +218,7 @@ export default function VillagesManagement() {
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: '✅ Village updated' });
+      toast({ title: '✅ District updated' });
       setEditRoom(null);
       fetchAll();
     }
@@ -233,7 +233,7 @@ export default function VillagesManagement() {
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: '✅ Host removed', description: 'Village is now host-less until next election.' });
+      toast({ title: '✅ Host removed', description: 'District is now host-less until next election.' });
       setConfirmReset(null);
       fetchAll();
     }
@@ -271,8 +271,8 @@ export default function VillagesManagement() {
             <Crown className="h-5 w-5 text-indigo-500" />
           </div>
           <div>
-            <h2 className="text-xl font-semibold">Village Rooms</h2>
-            <p className="text-sm text-muted-foreground">Full administrative control over community villages</p>
+            <h2 className="text-xl font-semibold">District Rooms</h2>
+            <p className="text-sm text-muted-foreground">Full administrative control over community districts</p>
           </div>
         </div>
         <Button variant="outline" size="sm" onClick={fetchAll} className="gap-2 tech-card border-0">
@@ -396,13 +396,13 @@ export default function VillagesManagement() {
                       <Badge className="bg-amber-500/15 text-amber-600 border-0 text-[10px] ml-auto">HOST</Badge>
                     </div>
                   ) : (
-                    <p className="text-sm text-muted-foreground">No host elected — village awaiting election.</p>
+                    <p className="text-sm text-muted-foreground">No host elected — district awaiting election.</p>
                   )}
                 </div>
               ) : (
                 <div className="rounded-xl border border-amber-500/20 bg-amber-500/5 p-3 flex items-center gap-2">
                   <ShoppingBag className="h-4 w-4 text-amber-500" />
-                  <span className="text-sm text-amber-700">Merchant Village — no election or host system</span>
+                  <span className="text-sm text-amber-700">Merchant District — no election or host system</span>
                 </div>
               )}
 
@@ -518,7 +518,7 @@ export default function VillagesManagement() {
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-1.5">
-              <Label>Village Name</Label>
+              <Label>District Name</Label>
               <Input value={editForm.name} onChange={e => setEditForm(f => ({ ...f, name: e.target.value }))} />
             </div>
             <div className="space-y-1.5">
@@ -554,7 +554,7 @@ export default function VillagesManagement() {
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-muted-foreground py-2">
-            This will remove the current host from the village. The village will be host-less until a new election is held.
+            This will remove the current host from the district. The district will be host-less until a new election is held.
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setConfirmReset(null)}>Cancel</Button>

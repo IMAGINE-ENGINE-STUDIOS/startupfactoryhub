@@ -27,19 +27,19 @@ interface MarketplaceListing {
   };
 }
 
-interface VillageMarketplaceProps {
+interface DistrictMarketplaceProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-export default function VillageMarketplace({ open, onOpenChange }: VillageMarketplaceProps) {
+export default function DistrictMarketplace({ open, onOpenChange }: DistrictMarketplaceProps) {
   const { user } = useAuth();
   const { toast } = useToast();
   const [listings, setListings] = useState<MarketplaceListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [listingView, setListingView] = useState<'browse' | 'sell'>('browse');
-  const [myVillages, setMyVillages] = useState<Array<{ id: string; name: string; village_type: string | null }>>([]);
-  const [selectedVillageId, setSelectedVillageId] = useState('');
+  const [myDistricts, setMyDistricts] = useState<Array<{ id: string; name: string; village_type: string | null }>>([]);
+  const [selectedDistrictId, setSelectedDistrictId] = useState('');
   const [askingPrice, setAskingPrice] = useState('');
   const [listingDesc, setListingDesc] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -68,7 +68,7 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
     }
   };
 
-  const fetchMyVillages = async () => {
+  const fetchMyDistricts = async () => {
     if (!user) return;
     const { data } = await supabase
       .from('live_rooms')
@@ -76,15 +76,15 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
       .eq('room_category', 'village')
       .eq('creator_id', user.id)
       .eq('is_active', true);
-    setMyVillages(data || []);
+    setMyDistricts(data || []);
   };
 
   useEffect(() => {
-    if (open) { fetchListings(); fetchMyVillages(); }
+    if (open) { fetchListings(); fetchMyDistricts(); }
   }, [open]);
 
-  const handleListVillage = async () => {
-    if (!user || !selectedVillageId || !askingPrice) return;
+  const handleListDistrict = async () => {
+    if (!user || !selectedDistrictId || !askingPrice) return;
     const priceCents = Math.round(parseFloat(askingPrice) * 100);
     if (priceCents < 100) {
       toast({ title: 'Minimum price is $1.00', variant: 'destructive' });
@@ -94,7 +94,7 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
     setSubmitting(true);
     try {
       const { error } = await supabase.from('village_marketplace').insert({
-        room_id: selectedVillageId,
+        room_id: selectedDistrictId,
         seller_id: user.id,
         asking_price_cents: priceCents,
         description: listingDesc.trim() || null,
@@ -103,12 +103,11 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
 
       if (error) throw error;
 
-      // Mark village as for sale
-      await supabase.from('live_rooms').update({ for_sale: true, sale_price_cents: priceCents }).eq('id', selectedVillageId);
+      await supabase.from('live_rooms').update({ for_sale: true, sale_price_cents: priceCents }).eq('id', selectedDistrictId);
 
-      toast({ title: '🏪 Village Listed!', description: 'Your village is now on the marketplace.' });
+      toast({ title: '🏪 District Listed!', description: 'Your district is now on the marketplace.' });
       setListingView('browse');
-      setSelectedVillageId('');
+      setSelectedDistrictId('');
       setAskingPrice('');
       setListingDesc('');
       await fetchListings();
@@ -118,9 +117,6 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
       setSubmitting(false);
     }
   };
-
-  const platformCut = (price: number) => price * 0.2;
-  const sellerProceeds = (price: number) => price * 0.8;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -135,8 +131,8 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
                   <Store className="h-5 w-5 text-violet-500" />
                 </div>
                 <div>
-                  <DialogTitle className="text-lg">Village Marketplace</DialogTitle>
-                  <p className="text-xs text-muted-foreground">Buy or sell community villages</p>
+                  <DialogTitle className="text-lg">District Marketplace</DialogTitle>
+                  <p className="text-xs text-muted-foreground">Buy or sell community districts</p>
                 </div>
               </div>
               {user && (
@@ -155,7 +151,7 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
                     className="h-8 text-xs"
                     onClick={() => setListingView('sell')}
                   >
-                    Sell Village
+                    Sell District
                   </Button>
                 </div>
               )}
@@ -167,7 +163,7 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
         <div className="mx-6 mb-3 rounded-lg bg-muted/40 border border-border/50 px-3 py-2 flex items-center gap-2">
           <ShieldCheck className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
           <p className="text-xs text-muted-foreground">
-            Startup Factory Hub retains <strong>20%</strong> of every village sale (or equal share among beneficiaries if larger).
+            Startup Factory Hub retains <strong>20%</strong> of every district sale (or equal share among beneficiaries if larger).
           </p>
         </div>
 
@@ -180,7 +176,7 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
             ) : listings.length === 0 ? (
               <div className="text-center py-12">
                 <Store className="h-10 w-10 text-muted-foreground mx-auto mb-3 opacity-50" />
-                <p className="text-sm text-muted-foreground">No villages for sale right now.</p>
+                <p className="text-sm text-muted-foreground">No districts for sale right now.</p>
                 <p className="text-xs text-muted-foreground mt-1">Check back soon or list your own.</p>
               </div>
             ) : (
@@ -194,7 +190,7 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
                         <div className="flex items-center gap-2">
                           <span className="text-xl">{isMerchant ? '🏪' : '🏛️'}</span>
                           <div>
-                            <p className="font-semibold text-sm">{listing.room?.name || 'Unknown Village'}</p>
+                            <p className="font-semibold text-sm">{listing.room?.name || 'Unknown District'}</p>
                             <div className="flex items-center gap-1 mt-0.5">
                               {isMerchant ? (
                                 <Badge className="text-[10px] px-1.5 py-0 h-4 bg-amber-500/10 text-amber-600 border-0 flex items-center gap-0.5">
@@ -227,10 +223,10 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
                         <Button
                           size="sm"
                           className="h-7 text-xs px-3 bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 border-0"
-                          onClick={() => toast({ title: 'Coming Soon', description: 'Village purchase flow launching soon!' })}
+                          onClick={() => toast({ title: 'Coming Soon', description: 'District purchase flow launching soon!' })}
                         >
                           <DollarSign className="h-3 w-3 mr-1" />
-                          Buy Village
+                          Buy District
                         </Button>
                       </div>
                     </div>
@@ -240,23 +236,23 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
             )
           ) : (
             <div className="space-y-4">
-              {myVillages.length === 0 ? (
+              {myDistricts.length === 0 ? (
                 <div className="text-center py-8">
                   <Crown className="h-8 w-8 text-muted-foreground mx-auto mb-2 opacity-50" />
-                  <p className="text-sm text-muted-foreground">You don't own any villages yet.</p>
-                  <p className="text-xs text-muted-foreground mt-1">Found a village first to list it here.</p>
+                  <p className="text-sm text-muted-foreground">You don't own any districts yet.</p>
+                  <p className="text-xs text-muted-foreground mt-1">Found a district first to list it here.</p>
                 </div>
               ) : (
                 <>
                   <div className="space-y-1.5">
-                    <Label className="text-sm font-medium">Select Your Village</Label>
+                    <Label className="text-sm font-medium">Select Your District</Label>
                     <div className="grid gap-2">
-                      {myVillages.map(v => (
+                      {myDistricts.map(v => (
                         <button
                           key={v.id}
-                          onClick={() => setSelectedVillageId(v.id)}
+                          onClick={() => setSelectedDistrictId(v.id)}
                           className={`text-left p-3 rounded-xl border transition-all text-sm ${
-                            selectedVillageId === v.id
+                            selectedDistrictId === v.id
                               ? 'border-indigo-500/50 bg-indigo-500/10'
                               : 'border-border/50 bg-muted/30 hover:bg-muted/50'
                           }`}
@@ -314,11 +310,11 @@ export default function VillageMarketplace({ open, onOpenChange }: VillageMarket
 
                   <Button
                     className="w-full bg-gradient-to-r from-indigo-500 to-violet-500 hover:from-indigo-600 hover:to-violet-600 border-0 text-white gap-2"
-                    onClick={handleListVillage}
-                    disabled={submitting || !selectedVillageId || !askingPrice}
+                    onClick={handleListDistrict}
+                    disabled={submitting || !selectedDistrictId || !askingPrice}
                   >
                     {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Tag className="h-4 w-4" />}
-                    List Village for Sale
+                    List District for Sale
                   </Button>
                 </>
               )}

@@ -66,11 +66,11 @@ serve(async (req) => {
           price_data: {
             currency: "usd",
             product_data: {
-              name: `Village Creation — ${typeLabel}`,
+              name: `District Creation — ${typeLabel}`,
               description: `Create "${villageName}" as a ${typeLabel}. ${
                 villageType === "merchant_village"
-                  ? "Merchant villages have no election system. API usage is billed at 2× standard rates."
-                  : "Democratic Republic villages feature an election-based governance system."
+                  ? "Merchant districts have no election system. API usage is billed at 2× standard rates."
+                  : "Democratic Republic districts feature an election-based governance system."
               }`,
             },
             unit_amount: 20000, // $200
