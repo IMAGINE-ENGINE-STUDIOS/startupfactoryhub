@@ -51,7 +51,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log(`Sending notification email to ${to}: ${title}`);
 
     const emailResponse = await resend.emails.send({
-      from: "Startup Factory Hub <notifications@resend.dev>",
+      from: "Startup Factory Hub <onboarding@resend.dev>",
       to: [to],
       subject: `[Startup Factory Hub] ${title}`,
       html: `
