@@ -882,6 +882,9 @@ export default function EmailTemplates() {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col relative overflow-hidden">
+      {/* Dark base layer so matrix renders on black, not the blue theme background */}
+      <div className="absolute inset-0 bg-black z-0" />
+
       {/* Matrix background animation */}
       <MatrixBackground />
 
