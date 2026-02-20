@@ -39,7 +39,7 @@ serve(async (req) => {
     const user = userData.user;
     logStep("User authenticated", { userId: user.id, email: user.email });
 
-    const { villageName, villageDescription, villageType } = await req.json();
+    const { villageName, villageDescription, villageType, isPrivate, joinFeeCents, govFundCents } = await req.json();
     if (!villageName || !villageType) throw new Error("villageName and villageType are required");
     if (!["democratic_republic", "merchant_village"].includes(villageType)) {
       throw new Error("Invalid villageType");
@@ -55,6 +55,7 @@ serve(async (req) => {
 
     const apiMultiplier = villageType === "merchant_village" ? 2.0 : 1.0;
     const typeLabel = villageType === "democratic_republic" ? "Democratic Republic" : "Merchant Village";
+    const privateMode = villageType === "merchant_village" && isPrivate === true;
 
     // $200 base fee = 20000 cents
     const session = await stripe.checkout.sessions.create({
@@ -86,6 +87,9 @@ serve(async (req) => {
         village_description: villageDescription || "",
         village_type: villageType,
         api_cost_multiplier: String(apiMultiplier),
+        is_private: privateMode ? "true" : "false",
+        join_fee_cents: String(joinFeeCents || 100),
+        gov_fund_cents: String(govFundCents || 100),
       },
     });
 

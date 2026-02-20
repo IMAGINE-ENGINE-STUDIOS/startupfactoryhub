@@ -3160,13 +3160,21 @@ export type Database = {
           current_host_id: string | null
           description: string | null
           expires_at: string | null
+          for_sale: boolean | null
+          government_fund_cents: number | null
           host_elected_at: string | null
           id: string
+          invitation_code: string | null
           is_active: boolean | null
+          is_private: boolean | null
           is_public: boolean
+          join_fee_cents: number | null
           meeting_link: string
+          membership_fee_cents: number | null
           name: string
           room_category: string
+          sale_initiated_by: string | null
+          sale_price_cents: number | null
           updated_at: string | null
           village_type: Database["public"]["Enums"]["village_type"] | null
         }
@@ -3177,13 +3185,21 @@ export type Database = {
           current_host_id?: string | null
           description?: string | null
           expires_at?: string | null
+          for_sale?: boolean | null
+          government_fund_cents?: number | null
           host_elected_at?: string | null
           id?: string
+          invitation_code?: string | null
           is_active?: boolean | null
+          is_private?: boolean | null
           is_public?: boolean
+          join_fee_cents?: number | null
           meeting_link: string
+          membership_fee_cents?: number | null
           name: string
           room_category?: string
+          sale_initiated_by?: string | null
+          sale_price_cents?: number | null
           updated_at?: string | null
           village_type?: Database["public"]["Enums"]["village_type"] | null
         }
@@ -3194,13 +3210,21 @@ export type Database = {
           current_host_id?: string | null
           description?: string | null
           expires_at?: string | null
+          for_sale?: boolean | null
+          government_fund_cents?: number | null
           host_elected_at?: string | null
           id?: string
+          invitation_code?: string | null
           is_active?: boolean | null
+          is_private?: boolean | null
           is_public?: boolean
+          join_fee_cents?: number | null
           meeting_link?: string
+          membership_fee_cents?: number | null
           name?: string
           room_category?: string
+          sale_initiated_by?: string | null
+          sale_price_cents?: number | null
           updated_at?: string | null
           village_type?: Database["public"]["Enums"]["village_type"] | null
         }
@@ -4990,6 +5014,100 @@ export type Database = {
           },
         ]
       }
+      village_marketplace: {
+        Row: {
+          asking_price_cents: number
+          buyer_id: string | null
+          created_at: string | null
+          description: string | null
+          id: string
+          platform_cut_percent: number | null
+          room_id: string
+          seller_id: string
+          sold_at: string | null
+          status: string | null
+          stripe_session_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          asking_price_cents: number
+          buyer_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          platform_cut_percent?: number | null
+          room_id: string
+          seller_id: string
+          sold_at?: string | null
+          status?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          asking_price_cents?: number
+          buyer_id?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          platform_cut_percent?: number | null
+          room_id?: string
+          seller_id?: string
+          sold_at?: string | null
+          status?: string | null
+          stripe_session_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "village_marketplace_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "live_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      village_member_payments: {
+        Row: {
+          amount_cents: number
+          created_at: string | null
+          id: string
+          paid_at: string | null
+          payment_status: string | null
+          room_id: string
+          stripe_session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_status?: string | null
+          room_id: string
+          stripe_session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string | null
+          id?: string
+          paid_at?: string | null
+          payment_status?: string | null
+          room_id?: string
+          stripe_session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "village_member_payments_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "live_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       village_purchases: {
         Row: {
           api_cost_multiplier: number
@@ -5036,6 +5154,38 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "village_purchases_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "live_rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      village_sale_votes: {
+        Row: {
+          created_at: string | null
+          id: string
+          room_id: string
+          vote: boolean
+          voter_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          room_id: string
+          vote: boolean
+          voter_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          room_id?: string
+          vote?: boolean
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "village_sale_votes_room_id_fkey"
             columns: ["room_id"]
             isOneToOne: false
             referencedRelation: "live_rooms"
