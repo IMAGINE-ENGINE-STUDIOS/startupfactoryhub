@@ -10,14 +10,14 @@ import { useDistrictElections } from '@/hooks/useDistrictElections';
 import { useAuth } from '@/contexts/AuthContext';
 import { Vote, Trophy, Loader2, RefreshCw } from 'lucide-react';
 
-interface VillageElectionPanelProps {
+interface DistrictElectionPanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   roomId: string;
   roomName: string;
 }
 
-export default function DistrictElectionPanel({ open, onOpenChange, roomId, roomName }: VillageElectionPanelProps) {
+export default function DistrictElectionPanel({ open, onOpenChange, roomId, roomName }: DistrictElectionPanelProps) {
   const { user } = useAuth();
   const { election, votes, voteResults, participants, userVote, loading, allVoted, callElection, castVote } = useDistrictElections(roomId);
   const [selectedCandidate, setSelectedCandidate] = useState<string>('');
@@ -42,10 +42,10 @@ export default function DistrictElectionPanel({ open, onOpenChange, roomId, room
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Vote className="h-5 w-5 text-indigo-500" />
-            Village Election — {roomName}
+            District Election — {roomName}
           </DialogTitle>
           <DialogDescription>
-            Vote for who should host this Village room. The winner needs more than 2 votes to be elected.
+            Vote for who should host this District room. The winner needs more than 2 votes to be elected.
           </DialogDescription>
         </DialogHeader>
 

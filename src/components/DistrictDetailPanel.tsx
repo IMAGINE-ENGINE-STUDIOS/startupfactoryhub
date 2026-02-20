@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 
 
-/* ─── Village media assets ──────────────────────────────────────────────────── */
-const VILLAGE_MEDIA: Record<string, { images: string[]; video?: string }> = {
+/* ─── District media assets ─────────────────────────────────────────────────── */
+const DISTRICT_MEDIA: Record<string, { images: string[]; video?: string }> = {
   'The Plaza': {
     // Grand civic squares, colonnade architecture, open public plazas
     images: [
@@ -44,7 +44,7 @@ const VILLAGE_MEDIA: Record<string, { images: string[]; video?: string }> = {
   },
 };
 
-const VILLAGE_EMOJIS: Record<string, string> = {
+const DISTRICT_EMOJIS: Record<string, string> = {
   'The Plaza': '🏛️',
   'The Commons': '🌿',
   'The Agora': '⚡',
@@ -78,7 +78,7 @@ interface StaffMember {
   profile?: { full_name: string; avatar_url: string | null };
 }
 
-interface VillageDetailPanelProps {
+interface DistrictDetailPanelProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   room: {
@@ -95,12 +95,12 @@ interface VillageDetailPanelProps {
 }
 
 /* ─── Component ─────────────────────────────────────────────────────────────── */
-export default function VillageDetailPanel({ open, onOpenChange, room, onJoin }: VillageDetailPanelProps) {
+export default function DistrictDetailPanel({ open, onOpenChange, room, onJoin }: DistrictDetailPanelProps) {
   const { user } = useAuth();
   const { toast } = useToast();
 
   /* Gallery state */
-  const media = VILLAGE_MEDIA[room.name] || { images: [] };
+  const media = DISTRICT_MEDIA[room.name] || { images: [] };
   const [slide, setSlide] = useState(0);
   const totalSlides = media.images.length;
 
@@ -175,7 +175,7 @@ export default function VillageDetailPanel({ open, onOpenChange, room, onJoin }:
   useEffect(() => {
     if (!open) return;
     const ch = supabase
-      .channel(`village-detail-${room.id}`)
+      .channel(`district-detail-${room.id}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'village_staff', filter: `room_id=eq.${room.id}` }, fetchStaff)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'live_room_participants', filter: `room_id=eq.${room.id}` }, fetchParticipants)
       .subscribe();
@@ -240,12 +240,12 @@ export default function VillageDetailPanel({ open, onOpenChange, room, onJoin }:
 
               {/* Top-left: title */}
               <div className="absolute top-4 left-5 flex items-center gap-2">
-                <span className="text-2xl">{VILLAGE_EMOJIS[room.name] || '🏘️'}</span>
+                <span className="text-2xl">{DISTRICT_EMOJIS[room.name] || '🏘️'}</span>
                 <div>
                   <h2 className="text-white text-xl font-bold leading-tight">{room.name}</h2>
                   <div className="flex items-center gap-2 mt-0.5">
                     <Badge className="bg-indigo-500/80 text-white border-0 text-[10px] px-2 py-0 h-4">
-                      Village
+                      District
                     </Badge>
                     <Badge className="bg-emerald-500/80 text-white border-0 text-[10px] px-2 py-0 h-4 flex items-center gap-1">
                       <Radio className="h-2 w-2 animate-pulse" />
@@ -304,7 +304,7 @@ export default function VillageDetailPanel({ open, onOpenChange, room, onJoin }:
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1">
                     <p className="text-muted-foreground text-sm leading-relaxed">
-                      {room.description || 'A permanent community village room.'}
+                      {room.description || 'A permanent community district room.'}
                     </p>
                     <div className="flex items-center gap-4 mt-3">
                       <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -335,7 +335,7 @@ export default function VillageDetailPanel({ open, onOpenChange, room, onJoin }:
                       onClick={() => { onJoin(); onOpenChange(false); }}
                     >
                       <Play className="h-4 w-4" />
-                      Join Village
+                      Join District
                     </Button>
                   </div>
                 </div>
@@ -347,7 +347,7 @@ export default function VillageDetailPanel({ open, onOpenChange, room, onJoin }:
                       <Trophy className="h-4 w-4 text-amber-500" />
                     </div>
                     <div>
-                      <h3 className="text-sm font-semibold">Village Committee</h3>
+                      <h3 className="text-sm font-semibold">District Committee</h3>
                       <p className="text-xs text-muted-foreground">Democratically elected leadership</p>
                     </div>
                   </div>
@@ -382,8 +382,8 @@ export default function VillageDetailPanel({ open, onOpenChange, room, onJoin }:
                             {room.host
                               ? hostAbsent
                                 ? '⚠️ Currently absent — staff has authority'
-                                : '✅ Present and active'
-                              : 'Call an election to elect a Village Host'}
+                              : '✅ Present and active'
+                              : 'Call an election to elect a District Host'}
                           </p>
                         </div>
                       </div>
@@ -507,7 +507,7 @@ export default function VillageDetailPanel({ open, onOpenChange, room, onJoin }:
                     <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3 flex items-start gap-2">
                       <ShieldCheck className="h-4 w-4 text-amber-500 mt-0.5 shrink-0" />
                       <p className="text-xs text-amber-700 dark:text-amber-300">
-                        The host is currently absent. As a <strong>{currentStaff?.role}</strong>, you have moderation authority in this village.
+                        The host is currently absent. As a <strong>{currentStaff?.role}</strong>, you have moderation authority in this district.
                       </p>
                     </div>
                   )}

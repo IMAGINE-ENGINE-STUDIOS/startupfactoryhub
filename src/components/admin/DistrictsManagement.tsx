@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 /* ─── Types ─────────────────────────────────────────────────────────────────── */
-interface VillageRoom {
+interface DistrictRoom {
   id: string;
   name: string;
   description: string | null;
@@ -67,19 +67,19 @@ const ROLE_COLORS: Record<string, string> = {
   archivist: 'text-violet-500 bg-violet-500/10',
 };
 
-const VILLAGE_EMOJIS: Record<string, string> = {
+const DISTRICT_EMOJIS: Record<string, string> = {
   'The Plaza': '🏛️',
   'The Commons': '🌿',
   'The Agora': '⚡',
 };
 
-export default function VillagesManagement() {
+export default function DistrictsManagement() {
   const { toast } = useToast();
-  const [rooms, setRooms] = useState<VillageRoom[]>([]);
+  const [rooms, setRooms] = useState<DistrictRoom[]>([]);
   const [staffMap, setStaffMap] = useState<Record<string, StaffMember[]>>({});
   const [electionsMap, setElectionsMap] = useState<Record<string, Election[]>>({});
   const [loading, setLoading] = useState(true);
-  const [editRoom, setEditRoom] = useState<VillageRoom | null>(null);
+  const [editRoom, setEditRoom] = useState<DistrictRoom | null>(null);
   const [editForm, setEditForm] = useState({ name: '', description: '', meeting_link: '' });
   const [saving, setSaving] = useState(false);
   const [confirmReset, setConfirmReset] = useState<string | null>(null); // roomId to reset host
@@ -137,7 +137,7 @@ export default function VillagesManagement() {
         creator_name: creatorMap.get(p.user_id) || 'Unknown',
       }));
 
-      const enriched: VillageRoom[] = roomsData.map(r => ({
+      const enriched: DistrictRoom[] = roomsData.map(r => ({
         ...r,
         village_type: r.village_type as 'democratic_republic' | 'merchant_village' | null,
         api_cost_multiplier: r.api_cost_multiplier ?? 1.0,
@@ -202,7 +202,7 @@ export default function VillagesManagement() {
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
   /* ── Edit room info ── */
-  const openEdit = (room: VillageRoom) => {
+  const openEdit = (room: DistrictRoom) => {
     setEditRoom(room);
     setEditForm({ name: room.name, description: room.description || '', meeting_link: room.meeting_link });
   };
@@ -295,7 +295,7 @@ export default function VillagesManagement() {
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">{VILLAGE_EMOJIS[room.name] || '🏘️'}</span>
+                  <span className="text-3xl">{DISTRICT_EMOJIS[room.name] || '🏘️'}</span>
                   <div>
                     <div className="flex items-center gap-2">
                       <CardTitle className="text-lg">{room.name}</CardTitle>

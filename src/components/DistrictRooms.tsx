@@ -168,6 +168,7 @@ export default function DistrictRooms() {
             <BookOpen className="h-3.5 w-3.5" />
             Guide
           </Button>
+          {/* Marketplace button hidden for now
           <Button
             size="sm"
             variant="ghost"
@@ -177,6 +178,7 @@ export default function DistrictRooms() {
             <Store className="h-3.5 w-3.5" />
             Marketplace
           </Button>
+          */}
           {user && (
             <Button
               size="sm"
