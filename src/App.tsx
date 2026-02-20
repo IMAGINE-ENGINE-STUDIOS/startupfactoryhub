@@ -42,6 +42,7 @@ const DeckPublic = lazy(() => import("./pages/DeckPublic"));
 const Hubs = lazy(() => import("./pages/Hubs"));
 const HubsLab = lazy(() => import("./pages/HubsLab"));
 const PublicHubApplication = lazy(() => import("./pages/PublicHubApplication"));
+const MVPProgram = lazy(() => import("./pages/MVPProgram"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -106,6 +107,7 @@ const App = () => (
                     <Route path="/hubs" element={<Hubs />} />
                     <Route path="/hubs-lab" element={<HubsLab />} />
                     <Route path="/hubs/apply" element={<PublicHubApplication />} />
+                    <Route path="/mvp-program" element={<MVPProgram />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
