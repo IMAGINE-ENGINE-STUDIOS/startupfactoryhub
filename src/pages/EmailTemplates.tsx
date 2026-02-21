@@ -515,13 +515,13 @@ function generateWeeklyWelcomeHtml() {
 
         <div class="partners-row">
           <div class="partner-card">
-            <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/iwg-logo.jpg" alt="IWG" />
+            <img src="https://startupfactoryhub.com/images/iwg-logo.jpg" alt="IWG" />
             <div class="name">IWG</div>
             <div class="stat">5,800+</div>
             <div class="stat-label">Locations Worldwide</div>
           </div>
           <div class="partner-card">
-            <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/hsbc-logo.png" alt="HSBC" />
+            <img src="https://startupfactoryhub.com/images/hsbc-logo.png" alt="HSBC" />
             <div class="name">HSBC Innovation Banking</div>
             <div class="stat">130+</div>
             <div class="stat-label">Locations Worldwide</div>
