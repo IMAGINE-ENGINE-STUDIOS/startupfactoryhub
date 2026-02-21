@@ -521,7 +521,7 @@ function generateWeeklyWelcomeHtml() {
             <div class="stat-label">Locations Worldwide</div>
           </div>
           <div class="partner-card">
-            <img src="https://startupfactoryhub.lovable.app/images/iwg-logo.png" alt="IWG" style="height:40px;max-width:120px;object-fit:contain;margin-bottom:8px;" />
+            <img src="https://logo.clearbit.com/iwgplc.com" alt="IWG" style="height:40px;max-width:120px;object-fit:contain;margin-bottom:8px;" />
             <div class="name">IWG</div>
             <div class="stat">5,800+</div>
             <div class="stat-label">Locations Worldwide</div>
