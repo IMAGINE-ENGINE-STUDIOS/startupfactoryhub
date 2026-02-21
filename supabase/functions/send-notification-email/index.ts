@@ -14,6 +14,7 @@ interface NotificationEmailRequest {
   title: string;
   message: string;
   type: string;
+  recipientName?: string;
   actorName?: string;
   actorAvatarUrl?: string;
   actorRole?: string;
@@ -77,7 +78,7 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { to, title, message, type, actorName, actorAvatarUrl, actorRole }: NotificationEmailRequest = await req.json();
+    const { to, title, message, type, recipientName, actorName, actorAvatarUrl, actorRole }: NotificationEmailRequest = await req.json();
 
     console.log(`Sending notification email to ${to}: ${title}`);
 
@@ -347,6 +348,7 @@ const handler = async (req: Request): Promise<Response> => {
                     ${actorCardHtml}
                     
                     <h2 class="title">${title}</h2>
+                    ${recipientName ? `<div class="message" style="color:#e5e7eb;font-size:16px;margin-bottom:8px;">Hi <strong>${recipientName}</strong>,</div>` : ''}
                     <div class="message">${message}</div>
                     <a href="https://startupfactoryhub.com/dashboard" class="button">
                       🚀 View on Platform
