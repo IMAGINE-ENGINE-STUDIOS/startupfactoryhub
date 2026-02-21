@@ -1,26 +1,16 @@
 
-
-# Move Community Districts Between Shorts and "Share Your Journey"
+# Remove "Open in New Tab" Button from Live Room Post Cards
 
 ## What Changes
-The Districts section will appear directly after the Shorts carousel and before the "Share your journey" post composer in the Social tab feed. Currently it appears after the 4th post in the feed -- this moves it up to the correct position.
+Remove the "Open in new tab" button (the ExternalLink icon button) from the `LiveRoomPostCard.tsx` component. The "Rejoin Meeting" / "Join" button works correctly, so only the broken external link button needs to be deleted.
 
 ## Technical Details
 
-### File: `src/components/UnifiedCommunityFeed.tsx`
+### File: `src/components/LiveRoomPostCard.tsx`
 
-1. **Move interstitial rendering location**: Instead of injecting `interstitialContent` inside the posts loop (after post index N), render it immediately after the `<ShortsCarousel />` component and before the "Share your journey" `<Card>` section.
+1. **Remove the ExternalLink button** (lines 284-292) -- the icon button with `onClick={openExternalLink}` and title "Open in new tab"
+2. **Keep the Copy link button** next to it (lines 275-283) -- that one stays
+3. **Remove the `openExternalLink` function** if it exists and is no longer used elsewhere
+4. **Remove the `ExternalLink` icon import** if no longer used
 
-2. **Layout order will become**:
-   - Shorts Carousel
-   - interstitialContent (DistrictRooms)
-   - "Share your journey" post composer
-   - Posts feed
-
-3. **Remove the `wrapWithInterstitial` helper** from the posts mapping loop since the interstitial is no longer injected between posts.
-
-4. **Keep the `interstitialContent` and `interstitialAfterIndex` props** (the prop is still used, just rendered in a different spot; `interstitialAfterIndex` becomes unused but harmless to keep for backward compatibility).
-
-### No changes to dashboard files
-All five dashboards (Student, Mentor, Advisor, Investor, Accelerator) already pass `<DistrictRooms />` as `interstitialContent` -- they remain unchanged.
-
+No other files need changes. The "Join Video Call" / "Rejoin Meeting" button in `VideoConferencing.tsx` remains untouched.
