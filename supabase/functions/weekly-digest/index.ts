@@ -118,13 +118,13 @@ function buildDigestHtml(recipientName: string, data: {
         ${total === 0 ? '<div style="text-align:center;color:#6b7280;padding:24px;font-size:14px;">🌙 A quiet week — but big things are coming!</div>' : ''}
 
         <div class="cta-section">
-          <a href="https://startupfactoryhub.lovable.app/dashboard" class="cta-btn">🔭 Explore the Platform</a>
+          <a href="https://startupfactoryhub.com" class="cta-btn">🔭 Explore the Platform</a>
         </div>
       </div>
 
       <div class="footer">
         <p>You're receiving this weekly digest as a member of Startup Factory Hub.</p>
-        <p style="margin-top:8px">© 2025 <a href="https://startupfactoryhub.lovable.app">Startup Factory Hub</a> · All rights reserved</p>
+        <p style="margin-top:8px">© 2025 <a href="https://startupfactoryhub.com">Startup Factory Hub</a> · All rights reserved</p>
       </div>
     </div>
   </div>

@@ -141,7 +141,7 @@ function generateNotificationHtml(vars: {
           <span class="notification-type type-${type}">${type}</span>
           <h2 class="title">${title}</h2>
           <div class="message">${message}</div>
-          <a href="https://startupfactoryhub.com/dashboard" class="button">View on Platform</a>
+          <a href="https://startupfactoryhub.com" class="button">View on Platform</a>
         </div>
         <div class="tips-section">
           <div class="tips-title"><span style="display:inline-block;background:#0ea270;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;letter-spacing:1px;margin-right:6px;">TIP</span></div>
@@ -346,7 +346,7 @@ function generateWeeklyDigestHtml() {
           <div class="section-header">${sectionAccent("#db2777")}Upcoming Events <span class="count">${mockData.events.length} new</span></div>
           <div class="section-content">${mockData.events.map(e => `<div class="item">• ${e}</div>`).join("")}</div>
         </div>
-        <div class="cta-section"><a href="https://startupfactoryhub.com/dashboard" class="cta-btn">Explore the Platform</a></div>
+        <div class="cta-section"><a href="https://startupfactoryhub.com" class="cta-btn">Explore the Platform</a></div>
       </div>
       <div class="footer">
         <p>You're receiving this weekly digest as a member of Startup Factory Hub.</p>
@@ -447,7 +447,7 @@ function generatePartnershipHtml(vars: {
           ${partnerWebsite ? `<p style="margin-top:12px"><a href="${partnerWebsite}" style="color:#0ea270;text-decoration:none;font-weight:600;">Visit their website &rarr;</a></p>` : ""}
         </div>
         ${benefitsList ? `<div class="card"><div class="card-label">Benefits for You</div><ul class="benefits-list">${benefitsList}</ul></div>` : ""}
-        <div class="cta-section"><a href="${ctaUrl || "https://startupfactoryhub.com/dashboard"}" class="cta-btn">${ctaLabel || "Learn More"}</a></div>
+        <div class="cta-section"><a href="${ctaUrl || "https://startupfactoryhub.com"}" class="cta-btn">${ctaLabel || "Learn More"}</a></div>
       </div>
       <div class="footer">
         <p>You're receiving this as a valued member of Startup Factory Hub.</p>
@@ -1047,7 +1047,7 @@ const defaultVars = {
     benefitsForStartups:
       "Access to $250K pre-seed funding\nFree co-working space for 3 months\nDedicated startup coach",
     ctaLabel: "Learn More",
-    ctaUrl: "https://startupfactoryhub.com/dashboard",
+    ctaUrl: "https://startupfactoryhub.com",
   },
   auth: {
     to: "",
