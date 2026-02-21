@@ -159,11 +159,11 @@ const MentorDashboard = () => {
           </div>
 
           <TabsContent value="social" className="space-y-4">
-            <UnifiedCommunityFeed showCreatePost={true} />
-            <DistrictRooms />
+            <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
+            <DistrictRooms />
             <LiveRooms />
           </TabsContent>
 

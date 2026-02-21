@@ -69,10 +69,14 @@ interface FeedPost {
 interface UnifiedCommunityFeedProps {
   showCreatePost?: boolean;
   limit?: number;
+  interstitialContent?: React.ReactNode;
+  interstitialAfterIndex?: number;
 }
 export default function UnifiedCommunityFeed({
   showCreatePost = true,
-  limit = 10
+  limit = 10,
+  interstitialContent,
+  interstitialAfterIndex = 3
 }: UnifiedCommunityFeedProps) {
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [newPost, setNewPost] = useState('');
@@ -863,15 +867,22 @@ export default function UnifiedCommunityFeed({
 
       {/* Posts Grid */}
       <div className="space-y-4">
-        {posts.map(post => {
+        {posts.map((post, index) => {
         const isJourneyCompletion = post.post_type === 'journey_completion';
         const isCohortPost = post.post_type === 'cohort' && post.cohort_data;
         const isLiveRoomPost = post.post_type === 'live_room' && post.room_data;
         const isEventPost = post.post_type === 'event' && post.event_data;
         
+        const wrapWithInterstitial = (element: React.ReactNode) => {
+          if (interstitialContent && index === interstitialAfterIndex) {
+            return <>{element}<div key={`interstitial-${index}`}>{interstitialContent}</div></>;
+          }
+          return element;
+        };
+        
         // Render live room posts with special LiveRoomPostCard (same format as CohortPostCard)
         if (isLiveRoomPost) {
-          return (
+          return wrapWithInterstitial(
             <LiveRoomPostCard
               key={post.id}
               post={{
@@ -897,7 +908,7 @@ export default function UnifiedCommunityFeed({
         
         // Render cohort posts with special CohortPostCard
         if (isCohortPost) {
-          return (
+          return wrapWithInterstitial(
             <CohortPostCard
               key={post.id}
               post={{
@@ -923,7 +934,7 @@ export default function UnifiedCommunityFeed({
 
         // Render event posts with special EventPostCard
         if (isEventPost) {
-          return (
+          return wrapWithInterstitial(
             <EventPostCard
               key={post.id}
               post={{
@@ -949,7 +960,7 @@ export default function UnifiedCommunityFeed({
           );
         }
 
-        return isJourneyCompletion ? <motion.div key={post.id} initial={{
+        return wrapWithInterstitial(isJourneyCompletion ? <motion.div key={post.id} initial={{
           scale: 0.95,
           opacity: 0
         }} animate={{
@@ -1255,8 +1266,9 @@ export default function UnifiedCommunityFeed({
                   </div>
                 </div>
               </CardContent>
-            </Card>;
+            </Card>);
       })}
+        
         
         {/* Infinite Scroll Trigger */}
         {hasMore && posts.length > 0 && <div ref={loadMoreRef} className="py-8 flex justify-center">
