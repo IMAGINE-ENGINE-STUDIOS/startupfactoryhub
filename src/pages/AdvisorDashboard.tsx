@@ -314,11 +314,11 @@ export default function AdvisorDashboard() {
           </div>
 
           <TabsContent value="social" className="space-y-4">
-            <UnifiedCommunityFeed />
-            <DistrictRooms />
+            <UnifiedCommunityFeed interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
+            <DistrictRooms />
             <LiveRooms />
           </TabsContent>
 
