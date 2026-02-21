@@ -12,8 +12,11 @@ import CreateDistrictDialog from '@/components/CreateDistrictDialog';
 import DistrictGuideDialog from '@/components/DistrictGuideDialog';
 import DistrictMarketplace from '@/components/DistrictMarketplace';
 import { useDistrictPaymentVerification } from '@/hooks/useDistrictPaymentVerification';
-import { Crown, Users, Vote, Trophy, Loader2, ShoppingBag, Plus, BookOpen, Store } from 'lucide-react';
+import { Crown, Users, Vote, Trophy, Loader2, ShoppingBag, Plus, BookOpen, Store, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useUserRole } from '@/hooks/useUserRole';
+import { useToast } from '@/hooks/use-toast';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface DistrictRoom {
   id: string;
@@ -43,6 +46,9 @@ const DISTRICT_EMOJIS: Record<string, string> = {
 export default function DistrictRooms() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { role } = useUserRole();
+  const { toast } = useToast();
+  const isAdmin = role === 'admin';
   const [rooms, setRooms] = useState<DistrictRoom[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeMeeting, setActiveMeeting] = useState<{ link: string; name: string; roomId: string } | null>(null);
@@ -137,6 +143,21 @@ export default function DistrictRooms() {
     setActiveMeeting(null);
   };
 
+  const handleAdminDeleteDistrict = async (roomId: string, roomName: string) => {
+    try {
+      const { error } = await supabase
+        .from('live_rooms')
+        .update({ is_active: false })
+        .eq('id', roomId);
+      if (error) throw error;
+      setRooms(prev => prev.filter(r => r.id !== roomId));
+      toast({ title: 'District removed', description: `"${roomName}" has been removed from the feed.` });
+    } catch (e) {
+      console.error('Error deleting district:', e);
+      toast({ title: 'Error', description: 'Failed to delete district', variant: 'destructive' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-8">
@@ -213,7 +234,40 @@ export default function DistrictRooms() {
                     <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{room.description}</p>
                   )}
                 </div>
-                <div className="flex flex-col items-end gap-1 shrink-0">
+                <div className="flex items-start gap-1 shrink-0">
+                  {isAdmin && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                          onClick={e => e.stopPropagation()}
+                          title="Delete district"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent onClick={e => e.stopPropagation()}>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete District</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Are you sure you want to remove "{room.name}" from the feed? This will deactivate the district.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={() => handleAdminDeleteDistrict(room.id, room.name)}
+                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                  <div className="flex flex-col items-end gap-1">
                   {room.village_type === 'merchant_village' ? (
                     <Badge className="text-[10px] px-1.5 py-0 h-5 bg-amber-500/10 text-amber-600 border-0 flex items-center gap-0.5">
                       <ShoppingBag className="h-2.5 w-2.5" />
@@ -237,6 +291,7 @@ export default function DistrictRooms() {
                       Election Live
                     </Badge>
                   )}
+                </div>
                 </div>
               </div>
             </CardHeader>
