@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format } from 'date-fns';
-import { Video, Radio, Users, Heart, MessageCircle, Share, Bookmark, Copy, ExternalLink } from 'lucide-react';
+import { Video, Radio, Users, Heart, MessageCircle, Share, Bookmark, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import VideoMeetingDialog from '@/components/VideoMeetingDialog';
@@ -153,11 +153,6 @@ export default function LiveRoomPostCard({
     }
   };
 
-  const openExternalLink = () => {
-    if (meetingLink) {
-      window.open(meetingLink, '_blank');
-    }
-  };
 
   if (!roomData) return null;
 
@@ -280,15 +275,6 @@ export default function LiveRoomPostCard({
                     className="border-red-500/30 hover:border-red-500/50"
                   >
                     <Copy className="w-4 h-4" />
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    size="icon"
-                    onClick={openExternalLink}
-                    title="Open in new tab"
-                    className="border-red-500/30 hover:border-red-500/50"
-                  >
-                    <ExternalLink className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
