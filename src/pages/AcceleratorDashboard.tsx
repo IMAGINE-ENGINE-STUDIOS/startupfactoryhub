@@ -395,7 +395,6 @@ const AcceleratorDashboard = () => {
           <TabsContent value="social" className="space-y-6">
             <UnifiedCommunityFeed showCreatePost={true} />
             <DistrictRooms />
-            <LiveRooms />
           </TabsContent>
 
           {/* Network Tab */}
@@ -465,6 +464,7 @@ const AcceleratorDashboard = () => {
 
           {/* Meetings Tab - Two Column Layout (Startup Dashboard Style) */}
           <TabsContent value="meetings" className="space-y-6">
+            <LiveRooms />
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 rounded-xl bg-emerald-500/10 flex items-center justify-center">
