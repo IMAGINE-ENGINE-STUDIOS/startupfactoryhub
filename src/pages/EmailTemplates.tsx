@@ -552,7 +552,7 @@ function generateWeeklyWelcomeHtml() {
         </div>
 
         <div class="cta-section">
-          <a href="https://startupfactoryhub.com/dashboard" class="cta-btn">🚀 Go to Resource Dashboard</a>
+          <a href="https://startupfactoryhub.com" class="cta-btn">🚀 Go to Resource Dashboard</a>
         </div>
       </div>
 
