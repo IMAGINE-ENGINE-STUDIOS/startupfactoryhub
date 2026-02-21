@@ -379,8 +379,7 @@ const Dashboard = () => {
           {/* Social Tab */}
           {activeTab === "social" && (
             <TabsContent value="social" className="space-y-4">
-              <UnifiedCommunityFeed showCreatePost={true} />
-              <DistrictRooms />
+              <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
             </TabsContent>
           )}
 
