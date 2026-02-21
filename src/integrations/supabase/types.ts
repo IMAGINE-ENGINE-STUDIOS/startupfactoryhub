@@ -5307,6 +5307,9 @@ export type Database = {
       send_notification_email:
         | {
             Args: {
+              actor_avatar_url?: string
+              actor_name?: string
+              actor_role?: string
               notification_message: string
               notification_title: string
               notification_type: string
@@ -5322,6 +5325,7 @@ export type Database = {
               notification_message: string
               notification_title: string
               notification_type: string
+              recipient_name?: string
               user_email: string
             }
             Returns: undefined
