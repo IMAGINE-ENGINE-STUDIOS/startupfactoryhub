@@ -97,7 +97,7 @@ serve(async (req) => {
             <div class="stat-label">Available Region</div>
           </div>
           <div class="partner-card">
-            <img src="https://logo.clearbit.com/iwgplc.com" alt="IWG" style="height:40px;max-width:120px;object-fit:contain;margin-bottom:8px;" />
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4a/IWG_logo.svg/300px-IWG_logo.svg.png" alt="IWG" style="height:40px;max-width:120px;object-fit:contain;margin-bottom:8px;" />
             <div class="name">IWG</div>
             <div class="stat">130+</div>
             <div class="stat-label">Countries Worldwide</div>
