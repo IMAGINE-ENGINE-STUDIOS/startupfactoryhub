@@ -790,6 +790,9 @@ export default function UnifiedCommunityFeed({
       {/* Shorts Carousel */}
       <ShortsCarousel onCreateShort={handleCreateShort} newShort={newShortForCarousel} />
 
+      {/* Community Districts interstitial */}
+      {interstitialContent}
+
       {/* Create Post */}
       {showCreatePost && <Card className="tech-card border-0">
           <CardHeader>
@@ -873,16 +876,9 @@ export default function UnifiedCommunityFeed({
         const isLiveRoomPost = post.post_type === 'live_room' && post.room_data;
         const isEventPost = post.post_type === 'event' && post.event_data;
         
-        const wrapWithInterstitial = (element: React.ReactNode) => {
-          if (interstitialContent && index === interstitialAfterIndex) {
-            return <>{element}<div key={`interstitial-${index}`}>{interstitialContent}</div></>;
-          }
-          return element;
-        };
-        
         // Render live room posts with special LiveRoomPostCard (same format as CohortPostCard)
         if (isLiveRoomPost) {
-          return wrapWithInterstitial(
+          return (
             <LiveRoomPostCard
               key={post.id}
               post={{
@@ -908,7 +904,7 @@ export default function UnifiedCommunityFeed({
         
         // Render cohort posts with special CohortPostCard
         if (isCohortPost) {
-          return wrapWithInterstitial(
+          return (
             <CohortPostCard
               key={post.id}
               post={{
@@ -934,7 +930,7 @@ export default function UnifiedCommunityFeed({
 
         // Render event posts with special EventPostCard
         if (isEventPost) {
-          return wrapWithInterstitial(
+          return (
             <EventPostCard
               key={post.id}
               post={{
@@ -960,7 +956,7 @@ export default function UnifiedCommunityFeed({
           );
         }
 
-        return wrapWithInterstitial(isJourneyCompletion ? <motion.div key={post.id} initial={{
+        return isJourneyCompletion ? <motion.div key={post.id} initial={{
           scale: 0.95,
           opacity: 0
         }} animate={{
@@ -1266,7 +1262,7 @@ export default function UnifiedCommunityFeed({
                   </div>
                 </div>
               </CardContent>
-            </Card>);
+            </Card>;
       })}
         
         
