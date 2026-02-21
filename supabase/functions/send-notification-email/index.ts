@@ -14,6 +14,9 @@ interface NotificationEmailRequest {
   title: string;
   message: string;
   type: string;
+  actorName?: string;
+  actorAvatarUrl?: string;
+  actorRole?: string;
 }
 
 // Helper function to log API usage
@@ -28,7 +31,7 @@ async function logApiUsage(serviceName: string, endpoint: string, success: boole
         service_name: serviceName,
         endpoint: endpoint,
         request_count: 1,
-        estimated_cost: 0.001, // Resend ~$0.001 per email
+        estimated_cost: 0.001,
         metadata: { 
           timestamp: new Date().toISOString(),
           success: success
@@ -40,15 +43,45 @@ async function logApiUsage(serviceName: string, endpoint: string, success: boole
   }
 }
 
+function getInitials(name: string): string {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
+function buildActorCardHtml(actorName?: string, actorAvatarUrl?: string, actorRole?: string): string {
+  if (!actorName) return '';
+  
+  const initials = getInitials(actorName);
+  const avatarHtml = actorAvatarUrl
+    ? `<img src="${actorAvatarUrl}" alt="${actorName}" style="width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid rgba(14,162,112,0.4);" />`
+    : `<div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0ea270,#059669);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;font-weight:700;border:2px solid rgba(14,162,112,0.4);">${initials}</div>`;
+  
+  const roleBadge = actorRole
+    ? `<span style="display:inline-block;background:rgba(14,162,112,0.15);color:#0ea270;padding:2px 10px;border-radius:50px;font-size:11px;font-weight:600;text-transform:capitalize;margin-left:8px;">${actorRole}</span>`
+    : '';
+
+  return `
+    <div style="display:flex;align-items:center;gap:14px;padding:16px 20px;margin-bottom:16px;background:rgba(14,162,112,0.06);border-radius:12px;border:1px solid rgba(14,162,112,0.15);">
+      <div style="flex-shrink:0;">
+        ${avatarHtml}
+      </div>
+      <div>
+        <div style="color:#f3f4f6;font-size:15px;font-weight:700;">${actorName}${roleBadge}</div>
+        <div style="color:#9ca3af;font-size:12px;margin-top:2px;">triggered this notification</div>
+      </div>
+    </div>`;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { to, title, message, type }: NotificationEmailRequest = await req.json();
+    const { to, title, message, type, actorName, actorAvatarUrl, actorRole }: NotificationEmailRequest = await req.json();
 
     console.log(`Sending notification email to ${to}: ${title}`);
+
+    const actorCardHtml = buildActorCardHtml(actorName, actorAvatarUrl, actorRole);
 
     const emailResponse = await resend.emails.send({
       from: "Startup Factory Hub <info@startupfactoryhub.com>",
@@ -310,9 +343,12 @@ const handler = async (req: Request): Promise<Response> => {
                 <div class="content">
                   <div class="notification-card">
                     <span class="notification-type type-${type}">${type}</span>
+                    
+                    ${actorCardHtml}
+                    
                     <h2 class="title">${title}</h2>
                     <div class="message">${message}</div>
-                    <a href="${Deno.env.get('SUPABASE_URL')?.replace('https://zqiihhmdsdgwdcwmryym.supabase.co', 'https://lovable.app')}/dashboard" class="button">
+                    <a href="https://startupfactoryhub.lovable.app/dashboard" class="button">
                       🚀 View on Platform
                     </a>
                   </div>

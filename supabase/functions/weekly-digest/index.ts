@@ -6,6 +6,10 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+function getInitials(name: string): string {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+}
+
 function buildDigestHtml(recipientName: string, data: {
   newStartups: any[],
   newMentors: any[],
@@ -17,13 +21,27 @@ function buildDigestHtml(recipientName: string, data: {
   const { newStartups, newMentors, newInvestors, newAccelerators, newResources, newEvents } = data;
   const total = newStartups.length + newMentors.length + newInvestors.length + newAccelerators.length;
 
-  const renderSection = (emoji: string, title: string, items: any[], nameKey = 'full_name') => {
+  const renderMemberItem = (item: any) => {
+    const name = item.full_name || item.name || item.title || 'Unknown';
+    const avatarUrl = item.avatar_url;
+    const avatarHtml = avatarUrl
+      ? `<img src="${avatarUrl}" alt="${name}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1px solid rgba(14,162,112,0.3);flex-shrink:0;" />`
+      : `<div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0ea270,#059669);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0;">${getInitials(name)}</div>`;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);">${avatarHtml}<span style="color:#d1d5db;font-size:13px;">${name}</span></div>`;
+  };
+
+  const renderResourceItem = (item: any) => {
+    const name = item.title || 'Unknown';
+    return `<div class="item">• ${name}</div>`;
+  };
+
+  const renderSection = (emoji: string, title: string, items: any[], isMembers = true) => {
     if (!items.length) return '';
     return `
     <div class="section">
       <div class="section-header">${emoji} ${title} <span class="count">${items.length} new</span></div>
       <div class="section-content">
-        ${items.slice(0, 5).map(i => `<div class="item">• ${i[nameKey] || i.name || i.title || 'Unknown'}</div>`).join('')}
+        ${items.slice(0, 5).map(i => isMembers ? renderMemberItem(i) : renderResourceItem(i)).join('')}
         ${items.length > 5 ? `<div class="item-more">+${items.length - 5} more</div>` : ''}
       </div>
     </div>`;
@@ -95,8 +113,8 @@ function buildDigestHtml(recipientName: string, data: {
         ${renderSection('🎓', 'New Mentors', newMentors)}
         ${renderSection('💰', 'New Investors', newInvestors)}
         ${renderSection('🏢', 'New Accelerators', newAccelerators)}
-        ${renderSection('📚', 'New Resources', newResources, 'title')}
-        ${renderSection('📅', 'Upcoming Events', newEvents, 'title')}
+        ${renderSection('📚', 'New Resources', newResources, false)}
+        ${renderSection('📅', 'Upcoming Events', newEvents, false)}
         ${total === 0 ? '<div style="text-align:center;color:#6b7280;padding:24px;font-size:14px;">🌙 A quiet week — but big things are coming!</div>' : ''}
 
         <div class="cta-section">
@@ -130,10 +148,10 @@ serve(async (req) => {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    // Fetch new members by role
+    // Fetch new members by role — now including avatar_url
     const { data: newRoles } = await supabase
       .from('user_roles')
-      .select('role, user_id, profiles(full_name)')
+      .select('role, user_id, profiles(full_name, avatar_url)')
       .gte('created_at', oneWeekAgo);
 
     const newStartups = (newRoles || []).filter(u => u.role === 'startup').map(u => (u.profiles as any) || {});
@@ -179,7 +197,6 @@ serve(async (req) => {
     let sent = 0;
     let errors = 0;
 
-    // Send digest to each user (batched to avoid rate limits)
     for (const user of allUsers) {
       if (!user.email) continue;
 
@@ -206,7 +223,6 @@ serve(async (req) => {
           console.error(`Failed to send to ${user.email}:`, await res.text());
         }
 
-        // Small delay to avoid Resend rate limits
         await new Promise(r => setTimeout(r, 100));
       } catch (err) {
         errors++;

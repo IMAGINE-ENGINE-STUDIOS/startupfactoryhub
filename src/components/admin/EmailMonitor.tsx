@@ -65,6 +65,9 @@ const EmailMonitor = () => {
   const [notifTitle, setNotifTitle] = useState('Test Notification from SFH Admin');
   const [notifMessage, setNotifMessage] = useState('This is a test notification email sent from the Startup Factory Hub admin dashboard.');
   const [notifType, setNotifType] = useState('info');
+  const [notifActorName, setNotifActorName] = useState('');
+  const [notifActorAvatar, setNotifActorAvatar] = useState('');
+  const [notifActorRole, setNotifActorRole] = useState('');
 
   // Invitation fields
   const [inviteTo, setInviteTo] = useState('');
@@ -95,7 +98,12 @@ const EmailMonitor = () => {
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke('send-notification-email', {
-        body: { to: notifTo, title: notifTitle, message: notifMessage, type: notifType },
+        body: { 
+          to: notifTo, title: notifTitle, message: notifMessage, type: notifType,
+          ...(notifActorName && { actorName: notifActorName }),
+          ...(notifActorAvatar && { actorAvatarUrl: notifActorAvatar }),
+          ...(notifActorRole && { actorRole: notifActorRole }),
+        },
       });
       if (error) throw error;
       addResult(true, `Notification → ${notifTo}`, `Type: ${notifType} | ${notifTitle}`);
@@ -249,6 +257,20 @@ const EmailMonitor = () => {
                   <div className="space-y-1">
                     <Label>Message *</Label>
                     <Textarea value={notifMessage} onChange={e => setNotifMessage(e.target.value)} rows={3} className="tech-card border-0" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <Label>Actor Name <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                      <Input value={notifActorName} onChange={e => setNotifActorName(e.target.value)} placeholder="e.g. John Doe" className="tech-card border-0" />
+                    </div>
+                    <div className="space-y-1">
+                      <Label>Actor Role <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                      <Input value={notifActorRole} onChange={e => setNotifActorRole(e.target.value)} placeholder="e.g. mentor, investor" className="tech-card border-0" />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label>Actor Avatar URL <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                    <Input value={notifActorAvatar} onChange={e => setNotifActorAvatar(e.target.value)} placeholder="https://..." className="tech-card border-0" />
                   </div>
                 </>
               )}
