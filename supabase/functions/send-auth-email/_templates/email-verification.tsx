@@ -63,7 +63,7 @@ export const EmailVerificationEmail = ({
               </Text>
 
               <Link
-                href={`${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to || app_url}`}
+                href={`${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to || 'https://startupfactoryhub.com/profile-setup'}`}
                 style={button}
               >
                 {isEmailChange ? "✉️ Confirm Email Change" : "✨ Verify Email & Get Started"}
@@ -102,9 +102,9 @@ export const EmailVerificationEmail = ({
           <Section style={footer}>
             <Text style={footerText}>Questions? We're here to help!</Text>
             <div style={footerLinks}>
-              <Link href={`${app_url}/help`} style={footerLink}>Help Center</Link>
+              <Link href="https://startupfactoryhub.com/help" style={footerLink}>Help Center</Link>
               <span style={footerSeparator}>•</span>
-              <Link href={`${app_url}/privacy`} style={footerLink}>Privacy Policy</Link>
+              <Link href="https://startupfactoryhub.com/privacy" style={footerLink}>Privacy Policy</Link>
             </div>
             <Text style={copyright}>
               © 2025 Startup Factory Hub. All rights reserved.<br />
