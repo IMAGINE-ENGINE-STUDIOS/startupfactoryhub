@@ -93,14 +93,14 @@ serve(async (req) => {
           <div class="partner-card">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/HSBC_logo_%282018%29.svg/300px-HSBC_logo_%282018%29.svg.png" alt="HSBC" style="height:40px;max-width:120px;object-fit:contain;margin-bottom:8px;" />
             <div class="name">HSBC Innovation Banking</div>
-            <div class="stat">130+</div>
-            <div class="stat-label">Locations Worldwide</div>
+            <div class="stat">USA</div>
+            <div class="stat-label">Available Region</div>
           </div>
           <div class="partner-card">
             <img src="https://logo.clearbit.com/iwgplc.com" alt="IWG" style="height:40px;max-width:120px;object-fit:contain;margin-bottom:8px;" />
             <div class="name">IWG</div>
-            <div class="stat">5,800+</div>
-            <div class="stat-label">Locations Worldwide</div>
+            <div class="stat">130+</div>
+            <div class="stat-label">Countries Worldwide</div>
           </div>
         </div>
       </div>
@@ -108,12 +108,12 @@ serve(async (req) => {
       <div class="content">
         <div class="card">
           <div class="card-label">🏢 Office Spaces Through IWG</div>
-          <p>Through our subscription program, you now have access to <strong>5,800+ flexible workspaces worldwide</strong> via IWG (International Workplace Group). Whether you need a hot desk, private office, or meeting room — we've got you covered in cities across the globe.</p>
+          <p>Through our subscription program, you now have access to <strong>flexible workspaces across 130+ countries worldwide</strong> via IWG (International Workplace Group). Whether you need a hot desk, private office, or meeting room — we've got you covered in cities across the globe.</p>
         </div>
 
         <div class="card">
           <div class="card-label">🏦 Free Banking with HSBC</div>
-          <p>We've partnered with <strong>HSBC Innovation Banking</strong> to offer <strong>free banking accounts</strong> to our startup community! Access world-class banking services designed specifically for startups and scaling businesses across <strong>130+ locations</strong>.</p>
+          <p>We've partnered with <strong>HSBC Innovation Banking</strong> to offer <strong>free banking accounts</strong> to our startup community! Access world-class banking services designed specifically for startups and scaling businesses, currently available in the <strong>USA</strong>.</p>
         </div>
 
         <div class="card">

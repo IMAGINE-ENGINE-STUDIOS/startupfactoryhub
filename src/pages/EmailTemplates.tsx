@@ -514,18 +514,18 @@ function generateWeeklyWelcomeHtml() {
         <p>Hi <strong>Member</strong>, this week we've partnered with <strong>IWG</strong> and <strong>HSBC</strong> to bring you incredible workspace and banking benefits!</p>
 
         <div class="partners-row">
-          <div class="partner-card">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/HSBC_logo_%282018%29.svg/300px-HSBC_logo_%282018%29.svg.png" alt="HSBC" style="height:40px;max-width:120px;object-fit:contain;margin-bottom:8px;" />
-            <div class="name">HSBC Innovation Banking</div>
-            <div class="stat">130+</div>
-            <div class="stat-label">Locations Worldwide</div>
-          </div>
-          <div class="partner-card">
-            <img src="https://logo.clearbit.com/iwgplc.com" alt="IWG" style="height:40px;max-width:120px;object-fit:contain;margin-bottom:8px;" />
-            <div class="name">IWG</div>
-            <div class="stat">5,800+</div>
-            <div class="stat-label">Locations Worldwide</div>
-          </div>
+             <div class="partner-card">
+             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/HSBC_logo_%282018%29.svg/300px-HSBC_logo_%282018%29.svg.png" alt="HSBC" style="height:40px;max-width:120px;object-fit:contain;margin-bottom:8px;" />
+             <div class="name">HSBC Innovation Banking</div>
+             <div class="stat">USA</div>
+             <div class="stat-label">Available Region</div>
+           </div>
+           <div class="partner-card">
+             <img src="https://logo.clearbit.com/iwgplc.com" alt="IWG" style="height:40px;max-width:120px;object-fit:contain;margin-bottom:8px;" />
+             <div class="name">IWG</div>
+             <div class="stat">130+</div>
+             <div class="stat-label">Countries Worldwide</div>
+           </div>
         </div>
       </div>
 
