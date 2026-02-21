@@ -84,7 +84,7 @@ export const WelcomeEmail = ({
               </div>
             </div>
 
-            <Link href={`${app_url}/dashboard`} style={button}>
+            <Link href="https://startupfactoryhub.com/dashboard" style={button}>
               🚀 Explore Your Dashboard
             </Link>
 
@@ -122,9 +122,9 @@ export const WelcomeEmail = ({
                 Need help getting started? Check out our comprehensive help center or reach out to our support team. We're here to ensure your success!
               </Text>
               <div style={supportLinks}>
-                <Link href={`${app_url}/help`} style={supportLink}>📖 Help Center</Link>
-                <Link href={`${app_url}/guide`} style={supportLink}>🎯 Platform Guide</Link>
-                <Link href={`${app_url}/community`} style={supportLink}>💬 Community Forums</Link>
+                <Link href="https://startupfactoryhub.com/help" style={supportLink}>📖 Help Center</Link>
+                <Link href="https://startupfactoryhub.com/guide" style={supportLink}>🎯 Platform Guide</Link>
+                <Link href="https://startupfactoryhub.com/community" style={supportLink}>💬 Community Forums</Link>
               </div>
             </div>
           </div>
@@ -138,19 +138,17 @@ export const WelcomeEmail = ({
           <div style={socialSection}>
             <Text style={socialText}>Follow us on social media:</Text>
             <div style={socialLinks}>
-              <Link href="#" style={socialLink}>𝕏 Twitter</Link>
+              <Link href="https://www.linkedin.com/company/startup-factory-hub" style={socialLink}>in LinkedIn</Link>
               <span style={socialSeparator}>•</span>
-              <Link href="#" style={socialLink}>in LinkedIn</Link>
-              <span style={socialSeparator}>•</span>
-              <Link href="#" style={socialLink}>f Facebook</Link>
+              <Link href="mailto:info@startupfactoryhub.com" style={socialLink}>📧 Contact</Link>
             </div>
           </div>
           <div style={footerLinks}>
-            <Link href={`${app_url}/about`} style={footerLink}>About Us</Link>
+            <Link href="https://startupfactoryhub.com/about" style={footerLink}>About Us</Link>
             <span style={footerSeparator}>•</span>
-            <Link href={`${app_url}/privacy`} style={footerLink}>Privacy Policy</Link>
+            <Link href="https://startupfactoryhub.com/privacy" style={footerLink}>Privacy Policy</Link>
             <span style={footerSeparator}>•</span>
-            <Link href={`${app_url}/terms`} style={footerLink}>Terms of Service</Link>
+            <Link href="https://startupfactoryhub.com/terms" style={footerLink}>Terms of Service</Link>
           </div>
           <Text style={copyright}>
             © 2025 Startup Factory Hub. All rights reserved.<br />

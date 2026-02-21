@@ -348,7 +348,7 @@ const handler = async (req: Request): Promise<Response> => {
                     
                     <h2 class="title">${title}</h2>
                     <div class="message">${message}</div>
-                    <a href="https://startupfactoryhub.lovable.app/dashboard" class="button">
+                    <a href="https://startupfactoryhub.com/dashboard" class="button">
                       🚀 View on Platform
                     </a>
                   </div>
@@ -366,17 +366,15 @@ const handler = async (req: Request): Promise<Response> => {
 
                 <div class="footer">
                   <div class="footer-text">Connect with us on social media</div>
-                  <div class="social-links">
-                    <a href="#" class="social-link">𝕏</a>
-                    <a href="#" class="social-link">in</a>
-                    <a href="#" class="social-link">f</a>
-                    <a href="#" class="social-link">📧</a>
-                  </div>
-                  <div class="footer-links">
-                    <a href="#" class="footer-link">Help Center</a>
-                    <a href="#" class="footer-link">Privacy Policy</a>
-                    <a href="#" class="footer-link">Unsubscribe</a>
-                  </div>
+                   <div class="social-links">
+                     <a href="https://www.linkedin.com/company/startup-factory-hub" class="social-link">in</a>
+                     <a href="mailto:info@startupfactoryhub.com" class="social-link">📧</a>
+                   </div>
+                   <div class="footer-links">
+                     <a href="https://startupfactoryhub.com/help" class="footer-link">Help Center</a>
+                     <a href="https://startupfactoryhub.com/privacy" class="footer-link">Privacy Policy</a>
+                     <a href="https://startupfactoryhub.com/settings" class="footer-link">Unsubscribe</a>
+                   </div>
                   <div class="copyright">
                     © 2025 Startup Factory Hub. All rights reserved.<br>
                     Empowering startups with AI-driven innovation

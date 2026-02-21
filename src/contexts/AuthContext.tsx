@@ -59,7 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string, fullName: string, role: string) => {
-    const redirectUrl = `${window.location.origin}/profile-setup`;
+    const redirectUrl = 'https://startupfactoryhub.com/profile-setup';
     
     // Role is now created server-side via database trigger
     const { error } = await supabase.auth.signUp({

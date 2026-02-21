@@ -37,7 +37,7 @@ serve(async (req: Request) => {
     } = emailData;
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
-    const appUrl = supabaseUrl.replace("https://zqiihhmdsdgwdcwmryym.supabase.co", "https://lovable.app");
+    const appUrl = "https://startupfactoryhub.com";
 
     let html: string;
     let subject: string;
