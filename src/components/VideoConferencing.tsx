@@ -5,13 +5,13 @@ import { Video, Loader2 } from 'lucide-react';
 
 interface VideoConferencingProps {
   roomUrl?: string;
-  persistentRoomUrl?: string;  // Stored room URL from database
+  persistentRoomUrl?: string; // Stored room URL from database
   userId?: string;
   hostId?: string;
   userName?: string;
   meetingTitle?: string;
   onLeave?: () => void;
-  onRoomCreated?: (url: string) => void;  // Callback when new room is created
+  onRoomCreated?: (url: string) => void; // Callback when new room is created
   autoJoin?: boolean;
   eventId?: string;
 }
@@ -30,7 +30,7 @@ export default function VideoConferencing({
   onLeave,
   onRoomCreated,
   autoJoin = false,
-  eventId,
+  eventId
 }: VideoConferencingProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [activeRoomUrl, setActiveRoomUrl] = useState(persistentRoomUrl || roomUrl);
@@ -42,7 +42,7 @@ export default function VideoConferencing({
 
   const handleJoin = async () => {
     setIsLoading(true);
-    
+
     // Check if we already have a valid persistent room URL
     if (isValidWherebyUrl(persistentRoomUrl)) {
       setActiveRoomUrl(persistentRoomUrl);
@@ -50,7 +50,7 @@ export default function VideoConferencing({
       setIsLoading(false);
       return;
     }
-    
+
     // Create a new persistent room (10-year expiration handled by edge function)
     try {
       const response = await fetch(
@@ -59,22 +59,22 @@ export default function VideoConferencing({
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI',
+            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpxaWloaG1kc2Rnd2Rjd21yeXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg0MTAyMDcsImV4cCI6MjA3Mzk4NjIwN30.ppEJAvP7mVrX-6uXA1_AlaJEDHPBcb297irRyBBT3YI'
           },
           body: JSON.stringify({
-            roomName: eventId ? `event-${eventId}` : meetingTitle ? `meet-${meetingTitle.substring(0, 15).replace(/\s+/g, '-')}` : `room-${Date.now()}`,
-          }),
+            roomName: eventId ? `event-${eventId}` : meetingTitle ? `meet-${meetingTitle.substring(0, 15).replace(/\s+/g, '-')}` : `room-${Date.now()}`
+          })
         }
       );
-      
+
       if (!response.ok) {
         throw new Error('Failed to create meeting room');
       }
-      
+
       const data = await response.json();
       setActiveRoomUrl(data.roomUrl);
       openInNewTab(data.roomUrl);
-      
+
       // Notify parent to save the new room URL to database
       if (onRoomCreated && data.roomUrl) {
         onRoomCreated(data.roomUrl);
@@ -94,18 +94,18 @@ export default function VideoConferencing({
     <Card className="relative overflow-hidden bg-secondary/5 h-full flex flex-col">
       <div className="flex-1 relative rounded-lg overflow-hidden" style={{ minHeight: '300px' }}>
         {/* Loading State */}
-        {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-background/95 z-10">
+        {isLoading &&
+        <div className="absolute inset-0 flex items-center justify-center bg-background/95 z-10">
             <div className="text-center space-y-4">
               <Loader2 className="h-12 w-12 animate-spin mx-auto text-primary" />
               <p className="text-lg font-semibold">Connecting to meeting...</p>
             </div>
           </div>
-        )}
+        }
 
         {/* Join / Re-join State */}
-        {!isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
+        {!isLoading &&
+        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
             <div className="text-center space-y-6 p-8">
               <div className="relative">
                 <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full"></div>
@@ -118,32 +118,32 @@ export default function VideoConferencing({
                 <p className="text-muted-foreground max-w-md">
                   {meetingTitle || 'Video Meeting'}
                 </p>
-                {userName && (
-                  <p className="text-sm text-muted-foreground">
+                {userName &&
+              <p className="text-sm text-muted-foreground">
                     Joining as: <span className="font-medium text-foreground">{userName}</span>
                   </p>
-                )}
-                {activeRoomUrl && (
-                  <p className="text-xs text-muted-foreground">
+              }
+                {activeRoomUrl &&
+              <p className="text-xs text-muted-foreground">
                     The meeting opened in a new tab
                   </p>
-                )}
+              }
               </div>
               <div className="flex flex-col gap-3 items-center">
                 <Button size="lg" onClick={handleJoin} className="gap-2 px-8">
                   <Video className="h-5 w-5" />
                   {activeRoomUrl ? 'Rejoin Meeting' : 'Join Video Call'}
                 </Button>
-                {activeRoomUrl && (
-                  <Button variant="outline" size="sm" onClick={() => openInNewTab(activeRoomUrl)}>
-                    Open in New Tab Again
-                  </Button>
-                )}
+                {activeRoomUrl
+
+
+
+              }
               </div>
             </div>
           </div>
-        )}
+        }
       </div>
-    </Card>
-  );
+    </Card>);
+
 }
