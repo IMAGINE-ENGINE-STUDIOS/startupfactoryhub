@@ -26,7 +26,7 @@ serve(async (req) => {
       partnerDescription,
       benefitsForStartups,
       ctaLabel = 'Learn More',
-      ctaUrl = 'https://startupfactoryhub.lovable.app/dashboard',
+      ctaUrl = 'https://startupfactoryhub.com',
       targetEmails, // optional: send only to specific emails, otherwise sends to all users
     } = await req.json();
 
@@ -133,7 +133,7 @@ serve(async (req) => {
 
       <div class="footer">
         <p>You're receiving this as a valued member of Startup Factory Hub.</p>
-        <p style="margin-top:8px">© 2025 <a href="https://startupfactoryhub.lovable.app">Startup Factory Hub</a> · All rights reserved</p>
+        <p style="margin-top:8px">© 2025 <a href="https://startupfactoryhub.com">Startup Factory Hub</a> · All rights reserved</p>
       </div>
     </div>
   </div>

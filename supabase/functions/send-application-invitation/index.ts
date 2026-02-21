@@ -15,7 +15,7 @@ serve(async (req) => {
     if (!RESEND_API_KEY) throw new Error('RESEND_API_KEY not configured');
 
     const { email, token, applicationId, jobTitle, companyName } = await req.json();
-    const origin = req.headers.get('origin') || 'https://startupfactoryhub.lovable.app';
+    const origin = req.headers.get('origin') || 'https://startupfactoryhub.com';
     const invitationUrl = `${origin}/accept-invitation?token=${token}`;
 
     const html = `
@@ -126,7 +126,7 @@ serve(async (req) => {
 
       <div class="footer">
         <p>This invitation was sent to <strong>${email}</strong>.</p>
-        <p style="margin-top:8px">© 2025 Startup Factory Hub · <a href="https://startupfactoryhub.lovable.app">startupfactoryhub.lovable.app</a></p>
+        <p style="margin-top:8px">© 2025 Startup Factory Hub · <a href="https://startupfactoryhub.com">startupfactoryhub.com</a></p>
       </div>
     </div>
   </div>

@@ -350,7 +350,7 @@ const handler = async (req: Request): Promise<Response> => {
                     <h2 class="title">${title}</h2>
                     ${recipientName ? `<div class="message" style="color:#e5e7eb;font-size:16px;margin-bottom:8px;">Hi <strong>${recipientName}</strong>,</div>` : ''}
                     <div class="message">${message}</div>
-                    <a href="https://startupfactoryhub.com/dashboard" class="button">
+                    <a href="https://startupfactoryhub.com" class="button">
                       🚀 View on Platform
                     </a>
                   </div>
