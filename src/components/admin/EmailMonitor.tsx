@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import {
   Mail, Send, CheckCircle, XCircle, Loader2, Bell, Users,
   Handshake, Calendar, UserCheck, RefreshCw, Zap, AlertCircle,
-  Search, UserPlus, CheckCheck, Filter
+  Search, UserPlus, CheckCheck, Filter, Rocket
 } from 'lucide-react';
 
 const EMAIL_TYPES = [
@@ -41,6 +41,12 @@ const EMAIL_TYPES = [
     label: 'Partnership Announcement',
     icon: <Handshake className="h-4 w-4" />,
     desc: 'Announce a new partner to all users or specific emails',
+  },
+  {
+    id: 'weekly-welcome',
+    label: 'Weekly Welcome',
+    icon: <Rocket className="h-4 w-4" />,
+    desc: 'Welcome email with IWG & HSBC partnership highlights',
   },
 ];
 
@@ -212,6 +218,18 @@ const EmailMonitor = () => {
         addResult(false, 'Weekly Digest', err.message);
         toast({ title: 'Failed', description: err.message, variant: 'destructive' });
       }
+    } else if (activeType === 'weekly-welcome') {
+      try {
+        const { data, error } = await supabase.functions.invoke('send-weekly-welcome', {
+          body: { targetEmails: recipients },
+        });
+        if (error) throw error;
+        addResult(true, `Weekly Welcome → ${recipients.length} recipients`, `Sent: ${data?.sent || 0}, Errors: ${data?.errors || 0}`);
+        toast({ title: '✅ Weekly Welcome sent!', description: `Delivered to ${data?.sent || 0} recipients` });
+      } catch (err: any) {
+        addResult(false, 'Weekly Welcome', err.message);
+        toast({ title: 'Failed', description: err.message, variant: 'destructive' });
+      }
     } else if (activeType === 'partnership') {
       if (!partnerName || !partnerDesc) {
         toast({ title: 'Partner name & description are required', variant: 'destructive' });
@@ -270,7 +288,7 @@ const EmailMonitor = () => {
       </div>
 
       {/* Email Type Selector */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {EMAIL_TYPES.map(t => (
           <Card key={t.id} className={`tech-card border-0 cursor-pointer transition-all ${activeType === t.id ? 'ring-2 ring-primary' : ''}`}
             onClick={() => setActiveType(t.id)}>
@@ -486,6 +504,23 @@ const EmailMonitor = () => {
                     <div className="flex items-center gap-2 text-yellow-400 text-sm">
                       <AlertCircle className="h-4 w-4" />
                       This action sends emails to all users — use carefully.
+                    </div>
+                  </div>
+                )}
+
+                {/* Weekly Welcome */}
+                {activeType === 'weekly-welcome' && (
+                  <div className="rounded-lg bg-primary/5 border border-primary/20 p-4 space-y-2">
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <Rocket className="h-4 w-4" />
+                      Weekly Welcome — IWG & HSBC Partnership
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Sends the branded welcome email featuring IWG office spaces (130+ countries) and HSBC Innovation Banking (free accounts in USA) to your selected recipients.
+                    </p>
+                    <div className="flex items-center gap-2 text-yellow-400 text-sm">
+                      <AlertCircle className="h-4 w-4" />
+                      Emails will be personalized with each recipient's name.
                     </div>
                   </div>
                 )}
