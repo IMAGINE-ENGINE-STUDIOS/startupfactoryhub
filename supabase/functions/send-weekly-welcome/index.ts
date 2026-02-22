@@ -54,8 +54,8 @@ serve(async (req) => {
     .hero-badge { display: inline-block; background: rgba(14,162,112,0.15); border: 1px solid rgba(14,162,112,0.4); color: #0ea270; padding: 6px 20px; border-radius: 50px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 20px; }
     .hero h2 { color: #f3f4f6; font-size: 24px; font-weight: 800; margin-bottom: 8px; }
     .hero p { color: #9ca3af; font-size: 14px; line-height: 1.6; }
-    .partners-row { display: flex; align-items: center; justify-content: center; gap: 24px; margin: 28px 0 20px; flex-wrap: wrap; }
-    .partner-card { background: rgba(255,255,255,0.06); border-radius: 14px; padding: 16px 24px; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+    .partners-row { display: flex; align-items: stretch; justify-content: space-between; gap: 16px; margin: 28px 0 20px; }
+    .partner-card { background: rgba(255,255,255,0.06); border-radius: 14px; padding: 20px 24px; text-align: center; border: 1px solid rgba(255,255,255,0.1); flex: 1; min-width: 0; }
     .partner-card img { height: 40px; max-width: 120px; object-fit: contain; margin-bottom: 8px; }
     .partner-card .name { color: #e5e7eb; font-size: 13px; font-weight: 600; }
     .partner-card .stat { color: #0ea270; font-size: 20px; font-weight: 800; margin-top: 4px; }
@@ -91,13 +91,17 @@ serve(async (req) => {
 
         <div class="partners-row">
           <div class="partner-card">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/HSBC_logo_%282018%29.svg/300px-HSBC_logo_%282018%29.svg.png" alt="HSBC" style="height:40px;max-width:120px;object-fit:contain;margin-bottom:8px;" />
+            <div style="width:120px;height:44px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/HSBC_logo_%282018%29.svg/300px-HSBC_logo_%282018%29.svg.png" alt="HSBC" style="height:40px;max-width:120px;object-fit:contain;" />
+            </div>
             <div class="name">HSBC Innovation Banking</div>
             <div class="stat">USA</div>
             <div class="stat-label">Available Region</div>
           </div>
           <div class="partner-card">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/IWG_logo.svg/320px-IWG_logo.svg.png" alt="IWG" style="height:40px;max-width:120px;object-fit:contain;margin-bottom:8px;" />
+            <div style="width:120px;height:44px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:8px;padding:4px 8px;">
+              <img src="https://cdn.brandfetch.io/idFdo8vOzz/w/512/h/114/theme/light/logo.png" alt="IWG" style="height:32px;max-width:110px;object-fit:contain;" />
+            </div>
             <div class="name">IWG</div>
             <div class="stat">130+</div>
             <div class="stat-label">Countries Worldwide</div>
