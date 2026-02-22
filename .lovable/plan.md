@@ -1,61 +1,34 @@
 
-# Add Subscription Tab to All User Profiles
+
+# Add Tier Descriptions, Target Audience, and Feature Lists to Subscription Cards
 
 ## Overview
-Add a new "Subscription" subtab to every user profile view (Startup, Investor, Advisor, Student, Accelerator) where users can view their current subscription status, upgrade/downgrade plans, and manage billing through Stripe Customer Portal.
+Update the subscription tier cards in `ProfileSubscriptionTab.tsx` to include detailed descriptions, "best for" audience info, and bullet-point feature lists for each tier -- matching the content you provided.
 
-## What will be built
+## Changes
 
-### 1. Shared SubscriptionTab Component
-A single reusable `ProfileSubscriptionTab` component used across all profile views. It will display:
-- Current plan name, status badge (active/free/cancelled), and renewal date
-- Tier cards showing all membership plans with the user's current plan highlighted
-- "Manage Subscription" button (opens Stripe Customer Portal for existing subscribers)
-- "Upgrade" / "Get Started" buttons for non-subscribers (opens Stripe Checkout)
-- "Refresh Status" button to re-check membership from Stripe
+### 1. Add tier content data to `TIER_CONFIG`
+Each tier gets three new fields:
+- **description** -- short paragraph about the tier
+- **bestFor** -- who the tier is ideal for
+- **features** -- array of included features as bullet points
 
-### 2. Customer Portal Edge Function
-A new `customer-portal` edge function so users can manage billing, cancel, or change payment method directly through Stripe.
+| Tier | Description | Best For | Features |
+|------|------------|----------|----------|
+| Community (Self-Paced) | Full digital access, virtual events, community, and mentor interactions. | Remote-first teams or early MVP-stage founders | Full resource library, Mentor sessions (virtual), Startup physical hub community access |
+| Self-Paced + Office | Adds local IWG coworking space access (1 country) to the community plan. | Founders needing flexible workspace + virtual resources | All community features, Local coworking access (1 country), Mentor + event access, Eligible for Accelerated Tier |
+| Global Access | All platform features + unlimited office global access (130+ countries, 5,600+ sites). | Globally distributed teams, traveling founders | All features + global private office access, Eligible for Accelerated Tier |
+| Corporate | Designed for corporate innovation teams and growth-stage startups with teams across regions. | Scale-ups or corporate venture units | All features + team dashboard, Unlimited travel (11 countries), Global coworking access, Soft Landing optional ($5,000), Accelerated Tier if eligible |
 
-### 3. Profile View Updates
-Add a "Subscription" tab to these 5 profile views:
-- **StartupProfileView** (has Tabs already -- add 4th tab)
-- **CompanyProfileManager** (has Tabs already -- add 4th tab)
-- **InvestorProfileView** (has Tabs already -- add 4th tab)
-- **AcceleratorProfileView** (has Tabs already -- add 4th tab)
-- **StudentProfileView** (no Tabs -- wrap existing content and add Subscription tab)
-- **AdvisorProfileView** (no Tabs -- wrap existing content and add Subscription tab)
+### 2. Update card layout in `ProfileSubscriptionTab.tsx`
+Between the price and the action button, add:
+- A short description paragraph (text-xs, muted)
+- A "Best for:" line (text-xs, semi-bold)
+- A feature list with small check icons
 
----
+The card will grow taller to fit the content, keeping the action button pinned at the bottom via flex layout.
 
-## Technical Details
+### File Modified
+- `src/components/ProfileSubscriptionTab.tsx` -- Add description/bestFor/features to `TIER_CONFIG` and render them inside each tier card
 
-### New Files
-1. **`src/components/ProfileSubscriptionTab.tsx`** -- Shared subscription management component
-   - Calls `check-membership` edge function to get current tier/status
-   - Displays current plan with visual highlight
-   - Shows all available tiers from `MEMBERSHIP_TIERS` constant
-   - Subscribe button calls `create-membership-checkout`
-   - Manage button calls new `customer-portal` edge function
-   - Auto-refreshes status on mount
-
-2. **`supabase/functions/customer-portal/index.ts`** -- Stripe Customer Portal session creator
-   - Authenticates user, finds Stripe customer by email
-   - Creates billing portal session and returns URL
-   - Uses existing `STRIPE_SECRET_KEY` secret
-
-### Modified Files
-- **`src/components/InvestorProfileView.tsx`** -- Add Subscription TabsTrigger + TabsContent, update grid-cols-3 to grid-cols-4
-- **`src/components/AcceleratorProfileView.tsx`** -- Add Subscription TabsTrigger + TabsContent, update grid-cols-3 to grid-cols-4
-- **`src/components/CompanyProfileManager.tsx`** -- Add Subscription TabsTrigger + TabsContent, update grid-cols-3 to grid-cols-4
-- **`src/components/StartupProfileView.tsx`** -- Add Subscription TabsTrigger + TabsContent, update grid-cols-3 to grid-cols-4
-- **`src/components/StudentProfileView.tsx`** -- Add Tabs wrapper with "Profile" and "Subscription" tabs
-- **`src/components/AdvisorProfileView.tsx`** -- Add Tabs wrapper with "Profile" and "Subscription" tabs
-
-### Data Flow
-The component uses existing infrastructure:
-- `check-membership` edge function (already exists) to fetch current tier
-- `create-membership-checkout` edge function (already exists) for Stripe Checkout
-- `customer-portal` edge function (new) for subscription management
-- `MEMBERSHIP_TIERS` constant (already exists) for tier definitions
-- `user_subscriptions` table (already exists) for persisted subscription data
+No other files are changed. The existing UI structure, styling, and functionality (upgrade/downgrade/manage buttons, glow effects, current plan highlight) remain untouched.
