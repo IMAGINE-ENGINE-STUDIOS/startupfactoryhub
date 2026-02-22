@@ -2322,18 +2322,46 @@ export function LightPaperDocument({
   const movePage = (from: number, to: number) => {
     saveCurrentPageContent();
     
-    const newPages = [...pages];
-    const [movedPage] = newPages.splice(from - 1, 1);
-    newPages.splice(to - 1, 0, movedPage);
+    // Helper to reorder any array by moving element from one index to another
+    const reorderArray = <T,>(arr: T[], fromIdx: number, toIdx: number): T[] => {
+      const newArr = [...arr];
+      const [moved] = newArr.splice(fromIdx, 1);
+      newArr.splice(toIdx, 0, moved);
+      return newArr;
+    };
+
+    const fromIdx = from - 1;
+    const toIdx = to - 1;
+
+    // Reorder native pages
+    const newPages = reorderArray(pages, fromIdx, toIdx);
     setPages(newPages);
+
+    // Reorder view mode images (PDF/DOCX rendered pages)
+    if (viewModeImages.length > 0) {
+      setViewModeImages(reorderArray(viewModeImages, fromIdx, toIdx));
+    }
+
+    // Reorder edit text layers (PDF hybrid edit spans)
+    if (editTextLayers.length > 0) {
+      setEditTextLayers(reorderArray(editTextLayers, fromIdx, toIdx));
+    }
+
+    // Reorder DOCX editable pages
+    if (docxEditablePages.length > 0) {
+      setDocxEditablePages(reorderArray(docxEditablePages, fromIdx, toIdx));
+    }
     
     // Update current page to follow the moved page
     if (currentPage === from) {
       setCurrentPage(to);
+      setVisiblePage(to);
     } else if (from < to && currentPage > from && currentPage <= to) {
       setCurrentPage(currentPage - 1);
+      setVisiblePage(currentPage - 1);
     } else if (from > to && currentPage >= to && currentPage < from) {
       setCurrentPage(currentPage + 1);
+      setVisiblePage(currentPage + 1);
     }
     
     // Reload the editor with the current page's content after move
