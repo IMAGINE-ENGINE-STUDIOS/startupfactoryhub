@@ -5304,32 +5304,19 @@ export type Database = {
           updated_at: string
         }[]
       }
-      send_notification_email:
-        | {
-            Args: {
-              actor_avatar_url?: string
-              actor_name?: string
-              actor_role?: string
-              notification_message: string
-              notification_title: string
-              notification_type: string
-              user_email: string
-            }
-            Returns: undefined
-          }
-        | {
-            Args: {
-              actor_avatar_url?: string
-              actor_name?: string
-              actor_role?: string
-              notification_message: string
-              notification_title: string
-              notification_type: string
-              recipient_name?: string
-              user_email: string
-            }
-            Returns: undefined
-          }
+      send_notification_email: {
+        Args: {
+          actor_avatar_url?: string
+          actor_name?: string
+          actor_role?: string
+          notification_message: string
+          notification_title: string
+          notification_type: string
+          recipient_name?: string
+          user_email: string
+        }
+        Returns: undefined
+      }
       update_user_online_status: {
         Args: { p_is_online: boolean; p_user_id: string }
         Returns: undefined
