@@ -127,9 +127,11 @@ const PublicResources = () => {
     };
   }, [refetchResources, selectedResource?.id]);
 
-  // Handle deep-link to specific resource
+  // Handle deep-link to specific resource or search query
   useEffect(() => {
     const resourceId = searchParams.get('id');
+    const searchQuery = searchParams.get('search');
+    
     if (resourceId && resources) {
       const resource = resources.find(r => r.id === resourceId);
       if (resource) {
@@ -142,6 +144,11 @@ const PublicResources = () => {
           });
         }
       }
+    }
+    
+    // Auto-apply search from URL params
+    if (searchQuery && !search) {
+      setSearch(searchQuery);
     }
   }, [searchParams, resources]);
 

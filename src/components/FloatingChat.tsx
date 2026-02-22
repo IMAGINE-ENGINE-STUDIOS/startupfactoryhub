@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -122,6 +123,7 @@ export default function FloatingChat() {
   const { user } = useAuth();
   const { role } = useUserRole();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [activeTab, setActiveTab] = useState<'messages' | 'ai'>('messages');
@@ -448,18 +450,20 @@ Help the user filter by role, industry, or skills. Use markdown formatting.`;
     if (toolId === 'resources') {
       // Build resource context with direct links
       const resourceContext = resources?.map(r => 
-        `- **${r.title}** (${r.resource_type.replace(/_/g, ' ')})${r.city ? ` — ${r.city}${r.country ? ', ' + r.country : ''}` : ''} → [Open on Map](/resources?id=${r.id})${r.website_url ? ` | [Website](${r.website_url})` : ''}`
+        `- **${r.title}** (${r.resource_type.replace(/_/g, ' ')})${r.city ? ` — ${r.city}${r.country ? ', ' + r.country : ''}` : ''} | ID: ${r.id}${r.website_url ? ` | Website: ${r.website_url}` : ''}`
       ).join('\n') || 'No resources loaded yet.';
 
-      return `You are **Genius AI** giving QUICK, DIRECT answers about platform resources.
+      return `You are **Genius AI** that AUTOMATICALLY opens the 3D Resource Map for the user.
 
-RULES:
-1. Give SHORT answers — no long explanations. Be concise like Quick mode.
-2. ALWAYS include a direct clickable link to the resource on the 3D map: [Resource Name](/resources?id=RESOURCE_ID)
-3. If user asks about a category (e.g. "coworking in Miami"), list matching resources with links.
-4. If only one match, give one line + link. If multiple, bullet list with links.
-5. If no match found, say so briefly and suggest the full map: [Browse All Resources](/resources)
-6. Use markdown for links. Keep responses under 300 characters when possible.
+CRITICAL RULES:
+1. Your FIRST line MUST be a NAV command in this EXACT format: <!--NAV:/resources?search=SEARCH_TERM&id=BEST_MATCH_RESOURCE_ID-->
+   - "search" = the city, location, or keyword the user asked about (e.g. "NYC", "Miami coworking")
+   - "id" = the ID of the BEST matching resource from the list below. Pick the closest match to what the user asked.
+   - If NO good match exists, omit "id": <!--NAV:/resources?search=SEARCH_TERM-->
+2. After the NAV command, write a SHORT 1-2 sentence summary: "🗺️ Opening the map to [location/resource]..."
+3. If multiple matches, mention the top 2-3 briefly after the nav command.
+4. NEVER show raw links. The map opens AUTOMATICALLY.
+5. Keep total response under 200 characters (excluding the NAV tag).
 
 AVAILABLE RESOURCES:
 ${resourceContext}
@@ -533,6 +537,13 @@ You can help with:
 
     setAiMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsAiLoading(true);
+
+    // Auto-switch to resources tool if user asks about finding offices, coworking, map, etc.
+    const resourceIntentPattern = /\b(find|search|look for|where|show me|office|coworking|lab|workspace|hub|resource|map|venue|accelerator|incubator)\b.*\b(in|at|near|around|nyc|new york|miami|london|tokyo|paris|berlin|sf|san francisco|la|los angeles|chicago|boston|dubai|singapore|city|country|location)\b|\b(in|at|near|around|nyc|new york|miami|london|tokyo|paris|berlin|sf|san francisco|la|los angeles|chicago|boston|dubai|singapore)\b.*\b(office|coworking|lab|workspace|hub|resource|venue|accelerator|incubator)\b|\b(find me|show me|search for|look for|get me)\b.*\b(office|coworking|lab|workspace|hub|resource|venue|accelerator|incubator)\b/i;
+    if (!activeTool && resourceIntentPattern.test(userMessage)) {
+      const resTool = ALL_TOOLS.find(t => t.id === 'resources');
+      if (resTool) setActiveTool(resTool);
+    }
 
     try {
       const allMsgs = [...aiMessages, { role: 'user' as const, content: userMessage }];
@@ -622,8 +633,26 @@ You can help with:
         } catch {}
       }
 
-      // Auto-save chat log after each AI response
+      // Auto-navigate if response contains NAV command
       if (fullText) {
+        const navMatch = fullText.match(/<!--NAV:(\/[^>]+)-->/);
+        if (navMatch) {
+          const navPath = navMatch[1];
+          // Remove NAV tag from displayed message
+          const cleanText = fullText.replace(/<!--NAV:[^>]+-->\n?/, '');
+          setAiMessages(prev => {
+            const updated = [...prev];
+            updated[updated.length - 1] = { role: 'assistant', content: cleanText };
+            return updated;
+          });
+          // Navigate after a short delay so user sees the message
+          setTimeout(() => {
+            navigate(navPath);
+          }, 800);
+          fullText = cleanText;
+        }
+
+        // Auto-save chat log after each AI response
         const allMsgsWithResponse = [...allMsgs, { role: 'assistant' as const, content: fullText }];
         const chatTitle = userMessage.slice(0, 60) || 'Chat';
         saveChatLog.mutate({ title: chatTitle, messages: allMsgsWithResponse, tool_used: activeTool?.id || 'general' });
