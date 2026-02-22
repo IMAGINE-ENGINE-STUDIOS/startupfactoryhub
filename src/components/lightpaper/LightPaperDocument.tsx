@@ -3542,12 +3542,14 @@ export function LightPaperDocument({
                     suppressContentEditableWarning
                     className="docx-editable-page"
                     style={{
-                      width: '100%',
+                      width: `${getPageDimensions().width}cm`,
                       minHeight: `${getPageDimensions().height}cm`,
                       outline: 'none',
                       cursor: editMode ? 'text' : 'default',
                       pointerEvents: editMode ? 'auto' : 'none',
                       userSelect: editMode ? 'auto' : 'none',
+                      overflow: 'hidden',
+                      boxSizing: 'border-box',
                     }}
                     dangerouslySetInnerHTML={{ __html: pageHtml }}
                   />
