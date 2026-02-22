@@ -1,55 +1,106 @@
 
 
-## Fix PDF Edit Mode
+## Genius AI Improvements Plan
 
-### Problem Analysis
+This plan covers 6 interconnected improvements to the Genius AI system in LightPaper and the global FloatingChat bubble.
 
-After thorough code review, PDF edit mode has the correct state management (console logs confirm `editMode` toggles and `editTextLayers` load). The issue is likely in the **rendering/alignment** of text overlay spans. Three probable causes identified:
+---
 
-### Root Causes
+### 1. Task Registry Log (new UI in LightPaper toolbar)
 
-1. **Scale factor mismatch**: When toggling from View to Edit mode via the Edit button, `parseDocumentForEditing` is called and returns `metadata.dimensions` (PDF viewport size). However, the `editTextViewportSize` state may not match the actual rendered image size on screen, causing text spans to be misaligned (shifted or wrong size), making them appear "not working."
+Add a small "AI Log" button to the LightPaper toolbar area that opens a panel showing all Genius AI tasks:
+- Each entry shows: task title, status (in-progress / done / failed), timestamp, page count, preset used
+- Tasks persist in `localStorage` (keyed per user) so they survive reload/logout
+- Completed tasks show download buttons for the generated content
+- New file: `src/components/lightpaper/GeniusTaskRegistry.tsx`
+- State management via a shared store or context that GeniusAIBubble writes to
 
-2. **Overlay container sizing**: The text overlay container uses `className="absolute inset-0"` inside a `height: auto` page container. If the image hasn't fully loaded when edit mode activates, the overlay could have zero height, hiding all text spans.
+### 2. Animated Progress Bar with Page Count
 
-3. **Page container `overflow: hidden`**: The `.page` CSS class sets `overflow: hidden`. While `.page.view-mode-page` overrides to `overflow: visible`, the `margin-bottom: 0` inline style could still affect layout.
+During chapter generation (`generating-chapters` phase), replace the simple progress bar in GeniusAIBubble with:
+- A more prominent animated progress bar (gradient with shimmer animation)
+- Show "Chapter X of Y" with estimated page count from `chapterOutlines[i].estimatedPages`
+- Show total pages targeted: sum of all `estimatedPages`
+- Progress bar also visible in the Task Registry panel
 
-### Implementation Plan
+### 3. Real-time Word-by-Word Streaming into Document
 
-**File: `src/components/lightpaper/LightPaperDocument.tsx`**
+Currently, Genius AI buffers the entire chapter response then calls `onInsertText(chapterHtml)` all at once. Change to:
+- Use `onStreamingChunk` prop (already defined but unused) during chapter generation
+- Modify `callAI` to accept an `onChunk` callback
+- Each SSE token gets converted to HTML and appended to the document in real-time via `onStreamingChunk`
+- User sees words appearing one-by-one as the AI writes
+- Final flush still calls `onInsertText` with the complete chapter for state consistency
 
-1. **Fix the overlay container to use image dimensions directly** instead of relying on `inset-0`:
-   - Instead of `className="absolute inset-0"`, set explicit `width: 100%` and `height: 100%` with `top: 0; left: 0; position: absolute`
-   - This ensures the overlay always matches the image size
+### 4. Clickable Selection Buttons for AI Questions
 
-2. **Add debug logging to the edit text layer rendering** to verify:
-   - Log `pageCssWidthPx`, `vpW`, and `sf` (scale factor) values
-   - Log how many text spans are being rendered for each page
-   - This will help confirm whether spans are created but invisible vs not created at all
+When Genius AI asks clarifying questions with options like "A) Academic B) Casual C) Business":
+- Parse the AI response to detect option patterns (A/B/C or numbered options)
+- Render them as clickable buttons instead of plain text
+- Clicking a button auto-sends that selection as the user's reply
+- Larger, better-looking typography for the question text (bump from `text-xs` to `text-sm`/`text-base`)
+- File: `src/components/lightpaper/GeniusAIBubble.tsx` -- modify the conversation rendering section
 
-3. **Ensure `editTextViewportSize` is set before rendering spans**:
-   - In the Edit toggle handler (around line 2714), add a check that `editTextViewportSize` is set from `result.metadata.dimensions`
-   - If dimensions are missing, compute from `getPageDimensions()` as fallback and log a warning
+### 5. Replace FloatingChat Bubble with Genius AI Logo + Integrate AI Tab
 
-4. **Fix potential race condition**: When the edit mode toggle calls `parseDocumentForEditing`, the `setEditTextLayers` and `setEditTextViewportSize` state updates happen asynchronously. If `editMode` is set to `true` before the viewport size is updated, the first render could use a stale/fallback viewport, causing misalignment. Fix by batching these state updates or ensuring viewport is set first.
+**FloatingChat changes** (`src/components/FloatingChat.tsx`):
+- Replace the `MessageSquare` icon in the toggle button with the Genius AI logo image (`genius-ai-logo.png`)
+- Rename the "AI" tab to "Genius AI" and use the Genius AI logo instead of `Brain` icon
+- Replace the `ai-chatbot` edge function call with `lightpaper-genius` edge function for consistency
+- Use streaming responses (same SSE approach as GeniusAIBubble) instead of the current non-streaming `invoke`
+- Render AI responses with markdown support using `react-markdown`
+- This makes the floating chat bubble serve as a unified Genius AI interface across the entire app
+
+### 6. AI Notifications for Document Completion
+
+When a Genius AI task finishes (all chapters written or single document done):
+- Send a notification via the Message Center (`addLightPaperMessage`)
+- Also push a toast notification (`sonner`) with "Document ready" message
+- If the FloatingChat is open on the AI tab, show a notification badge on the messages tab indicating "Document ready in LightPaper"
+- Store completion status in the Task Registry so user can see it even after page reload
+
+---
 
 ### Technical Details
 
-The scale factor calculation:
+**Files to create:**
+- `src/components/lightpaper/GeniusTaskRegistry.tsx` -- Task log panel component with registry button
+
+**Files to modify:**
+- `src/components/lightpaper/GeniusAIBubble.tsx`:
+  - Add task registry integration (write task entries on start/progress/completion)
+  - Enhanced progress bar with shimmer animation and page count
+  - Word-by-word streaming: modify `callAI` to stream chunks, call `onStreamingChunk` per token during generation
+  - Parse clarification responses to render clickable option buttons
+  - Bump typography sizes in conversation view
+- `src/components/lightpaper/LightPaperDocument.tsx`:
+  - Add GeniusTaskRegistry button in toolbar
+  - Wire up `onStreamingChunk` to append HTML tokens to the editor in real-time
+- `src/components/FloatingChat.tsx`:
+  - Replace bubble icon with Genius AI logo
+  - Replace AI tab icon and label
+  - Switch AI backend from `ai-chatbot` to `lightpaper-genius`
+  - Add streaming SSE support for AI responses
+  - Add markdown rendering for AI messages
+  - Add notification badge for document completion events
+
+**Task Registry data structure (localStorage):**
 ```text
-pageCssWidthPx = getPageDimensions().width * CM_TO_PX
-                 (e.g., 21cm * 37.795 = 793.7px for A4)
-
-vpW = editTextViewportSize.width
-      (e.g., 612 PDF points for letter-size)
-
-sf = pageCssWidthPx / vpW
-     (e.g., 793.7 / 612 = 1.297)
+{
+  id: string,
+  title: string,
+  preset: string,
+  status: "in-progress" | "done" | "failed",
+  progress: { current: number, total: number },
+  targetPages: number,
+  createdAt: string,
+  completedAt?: string,
+  content?: string  // stored HTML for re-loading
+}
 ```
 
-If `editTextViewportSize` is null/undefined, the fallback uses `pageCssWidthPx` for both, making `sf = 1.0`. But PDF text coordinates are in PDF points (typically 612x792 for letter), so `sf = 1.0` would render everything at wrong positions. This is the most likely cause.
-
-### Files to Modify
-
-- `src/components/lightpaper/LightPaperDocument.tsx` — Fix overlay rendering, add debug logging, ensure viewport size is set correctly before enabling edit mode
+**Streaming changes in callAI:**
+- Add optional `onChunk?: (token: string) => void` parameter
+- Call `onChunk(c)` inside the SSE parse loop alongside `fullText += c`
+- In `generateChaptersFrom`, pass a chunk handler that calls `onStreamingChunk` with incremental HTML conversion
 
