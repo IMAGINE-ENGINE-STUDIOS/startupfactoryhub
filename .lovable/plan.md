@@ -1,31 +1,46 @@
 
 
-# Enable Email Notifications for Messages
+# Fix Message Email Notifications
 
 ## Problem
-The `notify_new_message()` database function exists and is fully implemented (creates in-app notification + sends email via `send-notification-email` edge function), but no trigger is attached to the messages table to fire it when a new message is sent.
+The `send_notification_email()` database function calls `net.http_post()` but the URL is NULL because `current_setting('app.settings.supabase_url', true)` and `current_setting('app.settings.service_role_key', true)` are not configured, causing the "null value in column url" error.
 
 ## Solution
-Create a database trigger on the `messages` table that calls `notify_new_message()` after every new message INSERT.
+Update the `send_notification_email()` function to use the known Supabase project URL directly instead of relying on unconfigured database settings. Also ensure the trigger exists on the messages table.
 
 ## Technical Details
 
-### Database Migration
-Create a trigger on the `public.messages` table:
+### Step 1: Database Migration
+Run a single migration that:
+
+1. Sets the required database configuration values so all notification functions work:
+```sql
+ALTER ROLE authenticator SET app.settings.supabase_url = 'https://zqiihhmdsdgwdcwmryym.supabase.co';
+ALTER ROLE authenticator SET app.settings.service_role_key = '<service_role_key from vault>';
+```
+
+OR (simpler and more reliable) replace the `send_notification_email` function to hardcode the project URL and retrieve the service role key from the Supabase vault:
 
 ```sql
-CREATE TRIGGER on_new_message
+CREATE OR REPLACE FUNCTION public.send_notification_email(...)
+  -- Use hardcoded URL: 'https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/send-notification-email'
+  -- Use: current_setting('supabase_admin.service_role_key', true)
+  --   or read from vault
+```
+
+2. Ensure the `on_new_message` trigger exists:
+```sql
+CREATE TRIGGER IF NOT EXISTS on_new_message
   AFTER INSERT ON public.messages
   FOR EACH ROW
   EXECUTE FUNCTION public.notify_new_message();
 ```
 
-This single migration is all that's needed -- the `notify_new_message()` function already:
-- Looks up sender name and avatar from `profiles`
-- Looks up receiver email and name from `profiles`
-- Inserts a notification record for the receiver
-- Calls `send_notification_email()` to deliver the branded email
+### Step 2: No Frontend Code Changes
+The existing messaging UI and edge function remain untouched -- only the database-level URL resolution is being fixed.
 
-### No Code Changes Required
-The existing messaging UI and backend logic remain untouched. The trigger simply connects the existing function to the table event.
+### Why This Fixes It
+- The `send_notification_email` function currently builds the edge function URL from `app.settings.supabase_url`, which is NULL
+- By providing the actual URL, `net.http_post` will receive a valid URL and successfully call the `send-notification-email` edge function
+- The edge function then uses the RESEND_API_KEY (already configured) to deliver the email
 
