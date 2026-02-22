@@ -80,3 +80,6 @@ verify_jwt = false
 
 [functions.send-partnership-announcement]
 verify_jwt = true
+
+[functions.daily-activity-digest]
+verify_jwt = false

@@ -800,7 +800,100 @@ function generatePdfSignatureHtml(vars: {
 </html>`;
 }
 
+function generateDailyDigestHtml() {
+  const mockActivity = {
+    likes: [
+      { name: 'Sarah Chen', detail: 'liked your post' },
+      { name: 'Marcus Williams', detail: 'liked your post' },
+      { name: 'Jordan Park', detail: 'liked your post' },
+    ],
+    comments: [
+      { name: 'Alex Johnson', detail: 'commented: "Great insights on fundraising!"' },
+      { name: 'Lisa Wang', detail: 'commented: "This is really helpful, thanks!"' },
+    ],
+    bookmarks: [
+      { name: 'David Kim', detail: 'bookmarked your post' },
+    ],
+    shares: [
+      { name: 'Emma Torres', detail: 'shared your post' },
+    ],
+    followers: [
+      { name: 'Chris Patel', detail: 'started following you' },
+      { name: 'Nina Rodriguez', detail: 'started following you' },
+    ],
+    messages: 4,
+    connections: [
+      { name: 'Raj Kapoor', detail: 'wants to connect with you' },
+    ],
+  };
+
+  const renderActorRow = (name: string, detail: string) => {
+    const initials = name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+    return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.04);"><div style="width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,#0ea270,#059669);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700;flex-shrink:0;">${initials}</div><span style="color:#d1d5db;font-size:13px;"><strong style="color:#f3f4f6;">${name}</strong> ${detail}</span></div>`;
+  };
+
+  const renderSection = (emoji: string, title: string, count: number, content: string) => {
+    if (count === 0) return '';
+    return `<div style="background:#1a1f35;border-radius:12px;border:1px solid rgba(14,162,112,0.15);margin-bottom:16px;overflow:hidden;"><div style="padding:14px 20px;font-size:14px;font-weight:700;color:#f3f4f6;background:rgba(14,162,112,0.08);border-bottom:1px solid rgba(14,162,112,0.1);">${emoji} ${title} <span style="display:inline-block;background:#0ea270;color:#fff;padding:2px 10px;border-radius:50px;font-size:11px;font-weight:700;margin-left:8px;">${count}</span></div><div style="padding:12px 20px;">${content}</div></div>`;
+  };
+
+  const totalActivity = mockActivity.likes.length + mockActivity.comments.length + mockActivity.bookmarks.length + mockActivity.shares.length + mockActivity.followers.length + mockActivity.messages + mockActivity.connections.length;
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; background: #0a0f1e; padding: 20px; }
+    .wrapper { max-width: 600px; margin: 0 auto; }
+    .container { background: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 40px rgba(16,185,129,0.15); }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="container">
+      <div style="background:linear-gradient(135deg,#0ea270 0%,#059669 100%);padding:40px 32px;text-align:center;">
+        <img src="https://zqiihhmdsdgwdcwmryym.supabase.co/storage/v1/object/public/company-logos/StartupfactoryHubLogo.png" alt="SFH" style="width:70px;height:70px;border-radius:14px;margin-bottom:14px;" />
+        <h1 style="color:#fff;font-size:24px;font-weight:700;">Startup Factory Hub</h1>
+        <p style="color:rgba(255,255,255,0.85);font-size:13px;margin-top:4px;">Your Daily Activity Summary</p>
+      </div>
+      <div style="background:#1a1f35;padding:28px 32px;text-align:center;">
+        <div style="display:inline-block;background:rgba(14,162,112,0.15);border:1px solid rgba(14,162,112,0.3);color:#0ea270;padding:6px 18px;border-radius:50px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;">Daily Digest</div>
+        <h2 style="color:#f3f4f6;font-size:22px;font-weight:700;margin-bottom:6px;">Hi Member! Here's your activity 👋</h2>
+        <p style="color:#9ca3af;font-size:14px;">${totalActivity} interactions on your content today</p>
+      </div>
+      <div style="display:flex;gap:0;border-bottom:1px solid rgba(14,162,112,0.15);">
+        <div style="flex:1;padding:20px 16px;text-align:center;background:#0f1419;border-right:1px solid rgba(14,162,112,0.1);"><div style="font-size:28px;font-weight:800;color:#0ea270;">${mockActivity.likes.length}</div><div style="font-size:11px;color:#6b7280;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;">Likes</div></div>
+        <div style="flex:1;padding:20px 16px;text-align:center;background:#0f1419;border-right:1px solid rgba(14,162,112,0.1);"><div style="font-size:28px;font-weight:800;color:#0ea270;">${mockActivity.comments.length}</div><div style="font-size:11px;color:#6b7280;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;">Comments</div></div>
+        <div style="flex:1;padding:20px 16px;text-align:center;background:#0f1419;border-right:1px solid rgba(14,162,112,0.1);"><div style="font-size:28px;font-weight:800;color:#0ea270;">${mockActivity.followers.length}</div><div style="font-size:11px;color:#6b7280;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;">Followers</div></div>
+        <div style="flex:1;padding:20px 16px;text-align:center;background:#0f1419;"><div style="font-size:28px;font-weight:800;color:#0ea270;">${mockActivity.messages}</div><div style="font-size:11px;color:#6b7280;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px;">Messages</div></div>
+      </div>
+      <div style="padding:24px 32px;background:#0f1419;">
+        ${renderSection('❤️', 'New Likes', mockActivity.likes.length, mockActivity.likes.map(l => renderActorRow(l.name, l.detail)).join(''))}
+        ${renderSection('💬', 'New Comments', mockActivity.comments.length, mockActivity.comments.map(c => renderActorRow(c.name, c.detail)).join(''))}
+        ${renderSection('🔖', 'New Bookmarks', mockActivity.bookmarks.length, mockActivity.bookmarks.map(b => renderActorRow(b.name, b.detail)).join(''))}
+        ${renderSection('🔄', 'Shares', mockActivity.shares.length, mockActivity.shares.map(s => renderActorRow(s.name, s.detail)).join(''))}
+        ${renderSection('👤', 'New Followers', mockActivity.followers.length, mockActivity.followers.map(f => renderActorRow(f.name, f.detail)).join(''))}
+        ${renderSection('✉️', 'New Messages', mockActivity.messages, '<div style="color:#d1d5db;font-size:13px;padding:6px 0;">You received <strong style="color:#0ea270;">4</strong> new messages.</div>')}
+        ${renderSection('🤝', 'Connection Requests', mockActivity.connections.length, mockActivity.connections.map(c => renderActorRow(c.name, c.detail)).join(''))}
+        <div style="text-align:center;padding:24px 0 8px;">
+          <a href="https://startupfactoryhub.com" style="display:inline-block;background:linear-gradient(135deg,#0ea270,#059669);color:#fff;text-decoration:none;padding:14px 36px;border-radius:10px;font-size:15px;font-weight:700;box-shadow:0 6px 20px rgba(14,162,112,0.4);">View Your Feed</a>
+        </div>
+      </div>
+      <div style="background:#0a0f1e;padding:28px 32px;text-align:center;border-top:1px solid rgba(14,162,112,0.1);">
+        <p style="color:#6b7280;font-size:12px;line-height:1.6;">You're receiving this daily digest because you had activity on Startup Factory Hub.</p>
+        <p style="color:#6b7280;font-size:12px;margin-top:8px;">© 2025 <a href="https://startupfactoryhub.com" style="color:#0ea270;text-decoration:none;">Startup Factory Hub</a> · <a href="https://www.linkedin.com/company/startup-factory-hub/?viewAsMember=true" style="color:#0ea270;text-decoration:none;">LinkedIn</a> · All rights reserved</p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
 // ─── Template config ────────────────────────────────────────────────────────
+
 
 const TEMPLATES = [
   // ── Notification-based (all use send-notification-email) ──
@@ -942,6 +1035,14 @@ const TEMPLATES = [
     edgeFunction: "send-pdf-signature-request",
     trigger: "manual",
   },
+  {
+    id: "daily-digest",
+    label: "Daily Activity Digest",
+    icon: TrendingUp,
+    description: "Daily summary of likes, comments, bookmarks, shares, followers & messages",
+    edgeFunction: "daily-activity-digest",
+    trigger: "pg_cron daily 7:00 AM EST",
+  },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
@@ -1066,6 +1167,9 @@ const defaultVars = {
   "weekly-welcome": {
     to: "",
   },
+  "daily-digest": {
+    to: "",
+  },
 };
 
 // ─── Template group helpers ──────────────────────────────────────────────────
@@ -1117,6 +1221,7 @@ export default function EmailTemplates() {
     if (selected === "partnership") return generatePartnershipHtml(vars.partnership);
     if (selected === "pdf-signature") return generatePdfSignatureHtml(vars["pdf-signature"]);
     if (selected === "weekly-welcome") return generateWeeklyWelcomeHtml();
+    if (selected === "daily-digest") return generateDailyDigestHtml();
     return "";
   }
 
@@ -1177,6 +1282,8 @@ export default function EmailTemplates() {
           accessLevel: v.accessLevel,
         };
       } else if (selected === "weekly-welcome") {
+        payload = { targetEmails: [toEmail] };
+      } else if (selected === "daily-digest") {
         payload = { targetEmails: [toEmail] };
       }
 
@@ -1525,7 +1632,15 @@ export default function EmailTemplates() {
                       </div>
                     )}
 
-                    {/* ── Partnership ── */}
+                    {/* ── Daily Digest ── */}
+                    {selected === "daily-digest" && (
+                      <div className="py-2 text-center text-sm text-muted-foreground">
+                        <TrendingUp className="h-8 w-8 mx-auto mb-3 opacity-30" />
+                        <p className="font-medium">No variables needed</p>
+                        <p className="text-xs mt-1">The Daily Digest queries activity from the last 24 hours and sends personalized summaries. Runs daily at 7:00 AM EST via pg_cron.</p>
+                      </div>
+                    )}
+
                     {selected === "partnership" && (
                       <>
                         <div className="space-y-1.5">
