@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useResources } from '@/hooks/useResources';
 import ReactMarkdown from 'react-markdown';
 import geniusAILogo from '@/assets/genius-ai-logo.png';
 
@@ -138,6 +139,7 @@ export default function FloatingChat() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [activeTool, setActiveTool] = useState<ToolItem | null>(null);
   const [showToolMenu, setShowToolMenu] = useState(false);
+  const { data: resources } = useResources();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiMessagesEndRef = useRef<HTMLDivElement>(null);
@@ -431,16 +433,25 @@ Help the user filter by role, industry, or skills. Use markdown formatting.`;
     }
 
     if (toolId === 'resources') {
-      return `You are **Genius AI** guiding the user to platform resources.
-You can point users to:
-- Coworking Spaces (on the 3D Resource Map at /resources)
-- Government Grants
-- Accelerator Programs
-- Technology Transfer Offices
-- Labs & Research Facilities
-- Events
-Provide direct navigation guidance. The resource map is at /resources with a 3D globe view.
-Use markdown formatting.`;
+      // Build resource context with direct links
+      const resourceContext = resources?.map(r => 
+        `- **${r.title}** (${r.resource_type.replace(/_/g, ' ')})${r.city ? ` — ${r.city}${r.country ? ', ' + r.country : ''}` : ''} → [Open on Map](/resources?id=${r.id})${r.website_url ? ` | [Website](${r.website_url})` : ''}`
+      ).join('\n') || 'No resources loaded yet.';
+
+      return `You are **Genius AI** giving QUICK, DIRECT answers about platform resources.
+
+RULES:
+1. Give SHORT answers — no long explanations. Be concise like Quick mode.
+2. ALWAYS include a direct clickable link to the resource on the 3D map: [Resource Name](/resources?id=RESOURCE_ID)
+3. If user asks about a category (e.g. "coworking in Miami"), list matching resources with links.
+4. If only one match, give one line + link. If multiple, bullet list with links.
+5. If no match found, say so briefly and suggest the full map: [Browse All Resources](/resources)
+6. Use markdown for links. Keep responses under 300 characters when possible.
+
+AVAILABLE RESOURCES:
+${resourceContext}
+
+Resource categories: Office, Lab, Venue, Perk, Chamber of Commerce, Technology Transfer, Community, Government Grant, Accelerator/Incubator, Entrepreneur Center, University, Coworking, Investor Network, Human Capital, Event, Banking, National Archives.`;
     }
 
     // Default Genius mode
