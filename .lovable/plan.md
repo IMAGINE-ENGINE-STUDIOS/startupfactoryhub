@@ -1,74 +1,55 @@
 
 
-## Daily Activity Digest Email
+## Fix PDF Edit Mode
 
-### Overview
-Create a new edge function `daily-activity-digest` that sends each user a personalized daily summary of engagement on their posts (likes, comments, bookmarks, shares) and any new followers, scheduled to run every day at 7:00 AM EST (12:00 UTC).
+### Problem Analysis
 
-### What Gets Included
-For each user who had activity in the last 24 hours:
-- New likes on their posts (count + who liked)
-- New comments on their posts (count + who commented)
-- New bookmarks on their posts
-- New shares of their posts
-- New followers (if applicable)
-- New messages received (count)
-- New connection requests
+After thorough code review, PDF edit mode has the correct state management (console logs confirm `editMode` toggles and `editTextLayers` load). The issue is likely in the **rendering/alignment** of text overlay spans. Three probable causes identified:
 
-Users with zero activity in the last 24 hours will NOT receive an email (no spam).
+### Root Causes
 
-### Implementation Steps
+1. **Scale factor mismatch**: When toggling from View to Edit mode via the Edit button, `parseDocumentForEditing` is called and returns `metadata.dimensions` (PDF viewport size). However, the `editTextViewportSize` state may not match the actual rendered image size on screen, causing text spans to be misaligned (shifted or wrong size), making them appear "not working."
 
-**Step 1: Create the `daily-activity-digest` edge function**
-- New file: `supabase/functions/daily-activity-digest/index.ts`
-- Queries `post_likes`, `post_comments`, `post_bookmarks`, `feed_posts` (shares), `messages`, and `connections` for activity in the last 24 hours
-- Groups activity by post owner (the user who receives the digest)
-- Builds a branded HTML email matching the existing SFH green theme
-- Sends via Resend API to each user who had activity
-- Skips users with no activity
+2. **Overlay container sizing**: The text overlay container uses `className="absolute inset-0"` inside a `height: auto` page container. If the image hasn't fully loaded when edit mode activates, the overlay could have zero height, hiding all text spans.
 
-**Step 2: Set up a pg_cron job for 7:00 AM EST daily**
-- 7:00 AM EST = 12:00 UTC
-- Cron expression: `0 12 * * *`
-- Uses `net.http_post` to invoke the edge function daily
-- Executed via SQL insert (not migration, since it contains project-specific URLs/keys)
+3. **Page container `overflow: hidden`**: The `.page` CSS class sets `overflow: hidden`. While `.page.view-mode-page` overrides to `overflow: visible`, the `margin-bottom: 0` inline style could still affect layout.
 
-**Step 3: Add the template to the Email Templates page**
-- Add a "Daily Activity Digest" entry in the Email Templates page (`src/pages/EmailTemplates.tsx`) so admins can preview it
-- Trigger label: `pg_cron daily 7:00 AM EST`
+### Implementation Plan
+
+**File: `src/components/lightpaper/LightPaperDocument.tsx`**
+
+1. **Fix the overlay container to use image dimensions directly** instead of relying on `inset-0`:
+   - Instead of `className="absolute inset-0"`, set explicit `width: 100%` and `height: 100%` with `top: 0; left: 0; position: absolute`
+   - This ensures the overlay always matches the image size
+
+2. **Add debug logging to the edit text layer rendering** to verify:
+   - Log `pageCssWidthPx`, `vpW`, and `sf` (scale factor) values
+   - Log how many text spans are being rendered for each page
+   - This will help confirm whether spans are created but invisible vs not created at all
+
+3. **Ensure `editTextViewportSize` is set before rendering spans**:
+   - In the Edit toggle handler (around line 2714), add a check that `editTextViewportSize` is set from `result.metadata.dimensions`
+   - If dimensions are missing, compute from `getPageDimensions()` as fallback and log a warning
+
+4. **Fix potential race condition**: When the edit mode toggle calls `parseDocumentForEditing`, the `setEditTextLayers` and `setEditTextViewportSize` state updates happen asynchronously. If `editMode` is set to `true` before the viewport size is updated, the first render could use a stale/fallback viewport, causing misalignment. Fix by batching these state updates or ensuring viewport is set first.
 
 ### Technical Details
 
-**Edge Function Logic:**
-```
-1. Query all post_likes created in last 24h, join with feed_posts to get post owner
-2. Query all post_comments created in last 24h, join with feed_posts to get post owner
-3. Query all post_bookmarks created in last 24h, join with feed_posts to get post owner
-4. Query feed_posts with shared_post_id set, created in last 24h
-5. Group all activity by receiving user_id
-6. For each user with activity > 0:
-   - Build personalized HTML digest
-   - Send via Resend
-7. Skip users with no activity
+The scale factor calculation:
+```text
+pageCssWidthPx = getPageDimensions().width * CM_TO_PX
+                 (e.g., 21cm * 37.795 = 793.7px for A4)
+
+vpW = editTextViewportSize.width
+      (e.g., 612 PDF points for letter-size)
+
+sf = pageCssWidthPx / vpW
+     (e.g., 793.7 / 612 = 1.297)
 ```
 
-**Cron Job SQL (to run in SQL Editor):**
-```sql
-SELECT cron.schedule(
-  'daily-activity-digest',
-  '0 12 * * *',
-  $$ SELECT net.http_post(
-    url := 'https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/daily-activity-digest',
-    headers := '{"Content-Type":"application/json","Authorization":"Bearer <anon_key>"}'::jsonb,
-    body := '{}'::jsonb
-  ) AS request_id; $$
-);
-```
+If `editTextViewportSize` is null/undefined, the fallback uses `pageCssWidthPx` for both, making `sf = 1.0`. But PDF text coordinates are in PDF points (typically 612x792 for letter), so `sf = 1.0` would render everything at wrong positions. This is the most likely cause.
 
-**Email Template Design:**
-- Same SFH branded header with logo
-- "Your Daily Activity Summary" hero section
-- Sections for each activity type with counts and actor names/avatars
-- CTA button to "View Your Feed"
-- Same footer as other emails
+### Files to Modify
+
+- `src/components/lightpaper/LightPaperDocument.tsx` — Fix overlay rendering, add debug logging, ensure viewport size is set correctly before enabling edit mode
 
