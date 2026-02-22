@@ -99,8 +99,10 @@ serve(async (req) => {
             <div class="stat-label">Available Region</div>
           </div>
           <div class="partner-card">
-            <div style="width:120px;height:44px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:8px;padding:4px 8px;">
-              <img src="https://cdn.brandfetch.io/idFdo8vOzz/w/512/h/114/theme/light/logo.png" alt="IWG" style="height:32px;max-width:110px;object-fit:contain;" />
+            <div style="width:120px;height:44px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;">
+              <div style="background:#fff;border-radius:8px;padding:8px 16px;display:inline-block;">
+                <span style="font-size:20px;font-weight:900;color:#1a1a2e;letter-spacing:2px;">IWG</span>
+              </div>
             </div>
             <div class="name">IWG</div>
             <div class="stat">130+</div>
