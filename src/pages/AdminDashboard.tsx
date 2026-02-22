@@ -22,7 +22,8 @@ import {
   AlertTriangle,
   Rocket,
   Mail,
-  Crown
+  Crown,
+  CreditCard
 } from 'lucide-react';
 
 // Admin components
@@ -43,6 +44,7 @@ import HubApplicationsManagement from '@/components/admin/HubApplicationsManagem
 import SFHAcceleratorManager from '@/components/admin/SFHAcceleratorManager';
 import EmailMonitor from '@/components/admin/EmailMonitor';
 import DistrictsManagement from '@/components/admin/DistrictsManagement';
+import SubscriptionsManagement from '@/components/admin/SubscriptionsManagement';
 
 
 const AdminDashboard = () => {
@@ -190,6 +192,10 @@ const AdminDashboard = () => {
               <Crown className="h-4 w-4" />
               <span className="hidden lg:inline">Districts</span>
             </TabsTrigger>
+            <TabsTrigger value="subscriptions" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <CreditCard className="h-4 w-4" />
+              <span className="hidden lg:inline">Subscriptions</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
@@ -209,6 +215,7 @@ const AdminDashboard = () => {
           <TabsContent value="sfh-program"><SFHAcceleratorManager /></TabsContent>
           <TabsContent value="emails"><EmailMonitor /></TabsContent>
           <TabsContent value="districts"><DistrictsManagement /></TabsContent>
+          <TabsContent value="subscriptions"><SubscriptionsManagement /></TabsContent>
         </Tabs>
       </main>
     </div>
