@@ -2712,10 +2712,17 @@ export function LightPaperDocument({
                       toast.info('Loading text layers for editing...');
                       try {
                         const result = await parseDocumentForEditing(originalFile);
-                        if (result.textLayers && result.textLayers.length > 0) {
+                         if (result.textLayers && result.textLayers.length > 0) {
                           setEditTextLayers(result.textLayers);
+                          // Set viewport size BEFORE enabling edit mode to avoid stale render
                           if (result.metadata?.dimensions) {
                             setEditTextViewportSize(result.metadata.dimensions);
+                            console.log('[Edit Toggle] Viewport set from metadata:', result.metadata.dimensions);
+                          } else {
+                            const pageDims = getPageDimensions();
+                            const fallbackVp = { width: pageDims.width * CM_TO_PX, height: pageDims.height * CM_TO_PX };
+                            setEditTextViewportSize(fallbackVp);
+                            console.warn('[Edit Toggle] No metadata dimensions, using fallback:', fallbackVp);
                           }
                           setEditMode(true);
                           toast.success('Edit mode ready — click text to edit');
@@ -2877,10 +2884,16 @@ export function LightPaperDocument({
                       toast.info('Loading text layers for editing...');
                       try {
                         const result = await parseDocumentForEditing(originalFile);
-                        if (result.textLayers && result.textLayers.length > 0) {
+                         if (result.textLayers && result.textLayers.length > 0) {
                           setEditTextLayers(result.textLayers);
                           if (result.metadata?.dimensions) {
                             setEditTextViewportSize(result.metadata.dimensions);
+                            console.log('[Mobile Edit Toggle] Viewport set from metadata:', result.metadata.dimensions);
+                          } else {
+                            const pageDims = getPageDimensions();
+                            const fallbackVp = { width: pageDims.width * CM_TO_PX, height: pageDims.height * CM_TO_PX };
+                            setEditTextViewportSize(fallbackVp);
+                            console.warn('[Mobile Edit Toggle] No metadata dimensions, using fallback:', fallbackVp);
                           }
                           setEditMode(true);
                           toast.success('Edit mode ready — click text to edit');
@@ -3433,8 +3446,12 @@ export function LightPaperDocument({
                    {/* Hybrid Edit Mode: Editable text layer over the image */}
                    {editMode && editTextLayers[index] && editTextLayers[index].length > 0 && (
                      <div 
-                       className="absolute inset-0" 
                        style={{ 
+                         position: 'absolute',
+                         top: 0,
+                         left: 0,
+                         width: '100%',
+                         height: '100%',
                          pointerEvents: 'none',
                          zIndex: 10,
                        }}
@@ -3445,6 +3462,8 @@ export function LightPaperDocument({
                          const vp = editTextViewportSize || fallbackVp;
                          const vpW = vp.width;
                          const sf = pageCssWidthPx / vpW;
+                         
+                         console.log(`[PDF Edit] Page ${index}: pageCssWidthPx=${pageCssWidthPx.toFixed(1)}, vpW=${vpW.toFixed(1)}, sf=${sf.toFixed(4)}, spans=${editTextLayers[index].length}, hasViewportSize=${!!editTextViewportSize}`);
                          
                          return editTextLayers[index].map((item: any, textIdx: number) => (
                            <span
@@ -4070,12 +4089,19 @@ export function LightPaperDocument({
                           setCurrentPage(1);
                           setVisiblePage(1);
                           setUploadSource(metadata?.uploadMode || (parsed.mode === 'hybrid' ? 'edit' : 'view'));
-                          if (parsed.mode === 'hybrid' && parsed.textLayers) {
+                           if (parsed.mode === 'hybrid' && parsed.textLayers) {
                             setEditTextLayers(parsed.textLayers);
-                            setEditMode(true);
+                            // Set viewport size BEFORE enabling edit mode
                             if (parsed.metadata?.dimensions) {
                               setEditTextViewportSize(parsed.metadata.dimensions);
+                              console.log('[Upload] Viewport set from metadata:', parsed.metadata.dimensions);
+                            } else {
+                              const pageDims = getPageDimensions();
+                              const fallbackVp = { width: pageDims.width * CM_TO_PX, height: pageDims.height * CM_TO_PX };
+                              setEditTextViewportSize(fallbackVp);
+                              console.warn('[Upload] No metadata dimensions, using fallback:', fallbackVp);
                             }
+                            setEditMode(true);
                           }
                           if (editorRef.current) editorRef.current.innerHTML = '';
                           setDocumentContent('');
