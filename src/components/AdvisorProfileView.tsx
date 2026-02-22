@@ -13,7 +13,9 @@ import { Switch } from '@/components/ui/switch';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import AvailabilityManager from '@/components/AvailabilityManager';
 import AvatarUpload from '@/components/AvatarUpload';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Briefcase, GraduationCap, Award, MapPin, Globe, Linkedin, Edit, Save, Plus, X, Star, Users, Calendar, TrendingUp, Settings as SettingsIcon, ChevronDown, FileText } from 'lucide-react';
+import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ResumeUpload from '@/components/ResumeUpload';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -192,6 +194,13 @@ export default function AdvisorProfileView() {
       </div>;
   }
   return <div className="space-y-6">
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="subscription">Subscription</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile" className="space-y-6">
       {/* Header Section */}
       <Card className="tech-card border-0">
         <CardContent className="p-8">
@@ -567,6 +576,12 @@ export default function AdvisorProfileView() {
             </div>
           </CardContent>
         </Card>}
+        </TabsContent>
+
+        <TabsContent value="subscription" className="space-y-4">
+          <ProfileSubscriptionTab />
+        </TabsContent>
+      </Tabs>
     </div>;
 }
 

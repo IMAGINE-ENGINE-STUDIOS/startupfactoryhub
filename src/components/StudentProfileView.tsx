@@ -12,6 +12,7 @@ import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import AvatarUpload from '@/components/AvatarUpload';
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import ResumeUpload from '@/components/ResumeUpload';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Linkedin,
   Globe,
@@ -21,6 +22,7 @@ import {
   Plus,
   FileText
 } from 'lucide-react';
+import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 
 export default function StudentProfileView() {
   const { user } = useAuth();
@@ -201,6 +203,13 @@ export default function StudentProfileView() {
 
   return (
     <div className="space-y-6 pb-8">
+      <Tabs defaultValue="profile" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-2 max-w-md">
+          <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="subscription">Subscription</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="profile" className="space-y-6">
       {/* Profile Header Card */}
       <Card className="overflow-hidden tech-card border-0 bg-gradient-to-br from-primary/5 via-background to-accent/5">
         <div className="relative h-32 bg-gradient-to-r from-primary/20 to-accent/20" />
@@ -528,6 +537,12 @@ export default function StudentProfileView() {
           <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="subscription" className="space-y-4">
+          <ProfileSubscriptionTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
