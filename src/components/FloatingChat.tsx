@@ -8,12 +8,14 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useResources } from '@/hooks/useResources';
 import ReactMarkdown from 'react-markdown';
 import geniusAILogo from '@/assets/genius-ai-logo.png';
+import { useGeniusMemory, useSaveMemory, useDeleteMemory, useGeniusChatLogs, useSaveChatLog, useDeleteChatLog, isLearnIntent, extractMemoryFromContext } from '@/hooks/useGeniusMemory';
+import type { ChatLog } from '@/hooks/useGeniusMemory';
 
 interface Message {
   id: string;
@@ -139,7 +141,18 @@ export default function FloatingChat() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [activeTool, setActiveTool] = useState<ToolItem | null>(null);
   const [showToolMenu, setShowToolMenu] = useState(false);
+  const [currentChatLogId, setCurrentChatLogId] = useState<string | null>(null);
+  const [showChatHistory, setShowChatHistory] = useState(false);
+  const [showMemoryPanel, setShowMemoryPanel] = useState(false);
   const { data: resources } = useResources();
+  
+  // Memory & chat log hooks
+  const { data: memoryItems = [] } = useGeniusMemory();
+  const saveMemory = useSaveMemory();
+  const deleteMemory = useDeleteMemory();
+  const { data: chatLogs = [] } = useGeniusChatLogs();
+  const saveChatLog = useSaveChatLog();
+  const deleteChatLog = useDeleteChatLog();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiMessagesEndRef = useRef<HTMLDivElement>(null);
@@ -454,6 +467,11 @@ ${resourceContext}
 Resource categories: Office, Lab, Venue, Perk, Chamber of Commerce, Technology Transfer, Community, Government Grant, Accelerator/Incubator, Entrepreneur Center, University, Coworking, Investor Network, Human Capital, Event, Banking, National Archives.`;
     }
 
+    // Build memory context string
+    const memoryContext = memoryItems.length > 0
+      ? `\n\nUSER'S SAVED KNOWLEDGE (use this context when relevant):\n${memoryItems.slice(0, 20).map(m => `- [${m.category}] ${m.title}: ${m.content.slice(0, 200)}`).join('\n')}`
+      : '';
+
     // Default Genius mode
     return `You are **Genius AI**, a helpful assistant on the Imagine Startup Factory platform.
 
@@ -463,6 +481,7 @@ RULES:
 3. STRICT COMPLIANCE: Follow user instructions EXACTLY for word counts, paragraph counts, etc.
 4. Do NOT include images unless explicitly asked.
 5. Be concise, friendly, and actionable. Use markdown formatting.
+6. If user says "learn this", "remember this", "save this" — confirm what you saved to their knowledge memory.
 
 You can help with:
 - 📄 Document creation (research papers, business plans, pitch decks, etc.)
@@ -472,7 +491,8 @@ You can help with:
 - 👥 Finding contacts and connections
 - 💼 Exploring jobs and opportunities
 - 🌍 Navigating platform resources and the 3D map
-- 🧠 Market intelligence and startup insights`;
+- 🧠 Market intelligence and startup insights
+- 💾 Memory — say "learn this" to save knowledge for future reference${memoryContext}`;
   };
 
   /** Streaming AI call using lightpaper-genius edge function */
@@ -489,6 +509,28 @@ You can help with:
 
     const userMessage = aiInput.trim();
     setAiInput('');
+    
+    // Handle "learn this" intent
+    if (isLearnIntent(userMessage)) {
+      const memory = extractMemoryFromContext(aiMessages);
+      if (memory) {
+        saveMemory.mutate({ title: memory.title, content: memory.content, category: activeTool?.id || 'general', source: 'conversation' });
+        setAiMessages(prev => [...prev, 
+          { role: 'user', content: userMessage },
+          { role: 'assistant', content: `🧠 **Saved to memory!**\n\n"${memory.title}"\n\nI'll remember this for future conversations. You can view all saved knowledge in the + menu → 📚 Memory.` }
+        ]);
+        setIsAiLoading(false);
+        return;
+      } else {
+        setAiMessages(prev => [...prev, 
+          { role: 'user', content: userMessage },
+          { role: 'assistant', content: `🧠 Nothing to save yet — ask me something first, then say "learn this" to save my response to your memory.` }
+        ]);
+        setIsAiLoading(false);
+        return;
+      }
+    }
+
     setAiMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsAiLoading(true);
 
@@ -578,6 +620,13 @@ You can help with:
             });
           }
         } catch {}
+      }
+
+      // Auto-save chat log after each AI response
+      if (fullText) {
+        const allMsgsWithResponse = [...allMsgs, { role: 'assistant' as const, content: fullText }];
+        const chatTitle = userMessage.slice(0, 60) || 'Chat';
+        saveChatLog.mutate({ title: chatTitle, messages: allMsgsWithResponse, tool_used: activeTool?.id || 'general' });
       }
 
     } catch (error: any) {
@@ -1034,7 +1083,89 @@ You can help with:
 
                           {/* Tool Dropdown Menu */}
                           {showToolMenu && (
-                            <div className="absolute bottom-12 left-0 w-56 rounded-xl bg-popover border border-border shadow-xl max-h-[320px] overflow-auto z-50 animate-in slide-in-from-bottom-2 duration-200">
+                            <div className="absolute bottom-12 left-0 w-64 rounded-xl bg-popover border border-border shadow-xl max-h-[380px] overflow-auto z-50 animate-in slide-in-from-bottom-2 duration-200">
+                              {/* Chat History section */}
+                              <div>
+                                <button
+                                  type="button"
+                                  onClick={() => { setShowChatHistory(!showChatHistory); }}
+                                  className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-popover/95 backdrop-blur-sm border-b border-border/50 hover:bg-accent/50 transition-colors"
+                                >
+                                  <span>🕐 Chat History ({chatLogs.length})</span>
+                                  <Clock className="h-3 w-3" />
+                                </button>
+                                {showChatHistory && (
+                                  <div className="max-h-[120px] overflow-auto">
+                                    {chatLogs.length === 0 ? (
+                                      <p className="px-3 py-2 text-[10px] text-muted-foreground">No conversations yet</p>
+                                    ) : (
+                                      chatLogs.slice(0, 10).map(log => (
+                                        <div key={log.id} className="flex items-center gap-2 px-3 py-1.5 hover:bg-accent transition-colors group">
+                                          <button
+                                            type="button"
+                                            onClick={() => {
+                                              setAiMessages((log as ChatLog).messages || []);
+                                              setCurrentChatLogId(log.id);
+                                              setShowToolMenu(false);
+                                              setShowChatHistory(false);
+                                            }}
+                                            className="flex-1 text-left text-xs text-foreground truncate"
+                                          >
+                                            {log.title}
+                                          </button>
+                                          <span className="text-[9px] text-muted-foreground shrink-0">
+                                            {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
+                                          </span>
+                                          <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); deleteChatLog.mutate(log.id); }}
+                                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all shrink-0"
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </button>
+                                        </div>
+                                      ))
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Memory section */}
+                              <div>
+                                <button
+                                  type="button"
+                                  onClick={() => setShowMemoryPanel(!showMemoryPanel)}
+                                  className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-popover/95 backdrop-blur-sm border-b border-border/50 hover:bg-accent/50 transition-colors"
+                                >
+                                  <span>📚 Memory ({memoryItems.length})</span>
+                                  <BookOpen className="h-3 w-3" />
+                                </button>
+                                {showMemoryPanel && (
+                                  <div className="max-h-[120px] overflow-auto">
+                                    {memoryItems.length === 0 ? (
+                                      <p className="px-3 py-2 text-[10px] text-muted-foreground">Say "learn this" to save knowledge</p>
+                                    ) : (
+                                      memoryItems.slice(0, 10).map(item => (
+                                        <div key={item.id} className="flex items-center gap-2 px-3 py-1.5 hover:bg-accent transition-colors group">
+                                          <div className="flex-1 min-w-0">
+                                            <p className="text-xs text-foreground truncate">{item.title}</p>
+                                            <p className="text-[9px] text-muted-foreground truncate">{item.content.slice(0, 60)}</p>
+                                          </div>
+                                          <button
+                                            type="button"
+                                            onClick={(e) => { e.stopPropagation(); deleteMemory.mutate(item.id); }}
+                                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all shrink-0"
+                                          >
+                                            <Trash2 className="h-3 w-3" />
+                                          </button>
+                                        </div>
+                                      ))
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Tool categories */}
                               {Object.entries(groupedTools).map(([category, tools]) => (
                                 <div key={category}>
                                   <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-popover/95 backdrop-blur-sm border-b border-border/50">
@@ -1058,17 +1189,27 @@ You can help with:
                                   ))}
                                 </div>
                               ))}
-                              {/* Clear selection */}
-                              {activeTool && (
+                              {/* New chat + Clear */}
+                              <div className="border-t border-border/50">
                                 <button
                                   type="button"
-                                  onClick={() => { setActiveTool(null); setShowToolMenu(false); }}
-                                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-muted-foreground hover:bg-accent transition-colors border-t border-border/50"
+                                  onClick={() => { setAiMessages([]); setCurrentChatLogId(null); setActiveTool(null); setShowToolMenu(false); }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-primary hover:bg-accent transition-colors"
                                 >
-                                  <X className="h-3.5 w-3.5" />
-                                  <span>Clear selection</span>
+                                  <Plus className="h-3.5 w-3.5" />
+                                  <span>New conversation</span>
                                 </button>
-                              )}
+                                {activeTool && (
+                                  <button
+                                    type="button"
+                                    onClick={() => { setActiveTool(null); setShowToolMenu(false); }}
+                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-muted-foreground hover:bg-accent transition-colors"
+                                  >
+                                    <X className="h-3.5 w-3.5" />
+                                    <span>Clear tool selection</span>
+                                  </button>
+                                )}
+                              </div>
                             </div>
                           )}
                         </div>
