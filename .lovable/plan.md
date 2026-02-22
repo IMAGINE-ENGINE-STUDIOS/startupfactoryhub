@@ -1,46 +1,74 @@
 
 
-# Fix Message Email Notifications
+## Daily Activity Digest Email
 
-## Problem
-The `send_notification_email()` database function calls `net.http_post()` but the URL is NULL because `current_setting('app.settings.supabase_url', true)` and `current_setting('app.settings.service_role_key', true)` are not configured, causing the "null value in column url" error.
+### Overview
+Create a new edge function `daily-activity-digest` that sends each user a personalized daily summary of engagement on their posts (likes, comments, bookmarks, shares) and any new followers, scheduled to run every day at 7:00 AM EST (12:00 UTC).
 
-## Solution
-Update the `send_notification_email()` function to use the known Supabase project URL directly instead of relying on unconfigured database settings. Also ensure the trigger exists on the messages table.
+### What Gets Included
+For each user who had activity in the last 24 hours:
+- New likes on their posts (count + who liked)
+- New comments on their posts (count + who commented)
+- New bookmarks on their posts
+- New shares of their posts
+- New followers (if applicable)
+- New messages received (count)
+- New connection requests
 
-## Technical Details
+Users with zero activity in the last 24 hours will NOT receive an email (no spam).
 
-### Step 1: Database Migration
-Run a single migration that:
+### Implementation Steps
 
-1. Sets the required database configuration values so all notification functions work:
-```sql
-ALTER ROLE authenticator SET app.settings.supabase_url = 'https://zqiihhmdsdgwdcwmryym.supabase.co';
-ALTER ROLE authenticator SET app.settings.service_role_key = '<service_role_key from vault>';
+**Step 1: Create the `daily-activity-digest` edge function**
+- New file: `supabase/functions/daily-activity-digest/index.ts`
+- Queries `post_likes`, `post_comments`, `post_bookmarks`, `feed_posts` (shares), `messages`, and `connections` for activity in the last 24 hours
+- Groups activity by post owner (the user who receives the digest)
+- Builds a branded HTML email matching the existing SFH green theme
+- Sends via Resend API to each user who had activity
+- Skips users with no activity
+
+**Step 2: Set up a pg_cron job for 7:00 AM EST daily**
+- 7:00 AM EST = 12:00 UTC
+- Cron expression: `0 12 * * *`
+- Uses `net.http_post` to invoke the edge function daily
+- Executed via SQL insert (not migration, since it contains project-specific URLs/keys)
+
+**Step 3: Add the template to the Email Templates page**
+- Add a "Daily Activity Digest" entry in the Email Templates page (`src/pages/EmailTemplates.tsx`) so admins can preview it
+- Trigger label: `pg_cron daily 7:00 AM EST`
+
+### Technical Details
+
+**Edge Function Logic:**
+```
+1. Query all post_likes created in last 24h, join with feed_posts to get post owner
+2. Query all post_comments created in last 24h, join with feed_posts to get post owner
+3. Query all post_bookmarks created in last 24h, join with feed_posts to get post owner
+4. Query feed_posts with shared_post_id set, created in last 24h
+5. Group all activity by receiving user_id
+6. For each user with activity > 0:
+   - Build personalized HTML digest
+   - Send via Resend
+7. Skip users with no activity
 ```
 
-OR (simpler and more reliable) replace the `send_notification_email` function to hardcode the project URL and retrieve the service role key from the Supabase vault:
-
+**Cron Job SQL (to run in SQL Editor):**
 ```sql
-CREATE OR REPLACE FUNCTION public.send_notification_email(...)
-  -- Use hardcoded URL: 'https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/send-notification-email'
-  -- Use: current_setting('supabase_admin.service_role_key', true)
-  --   or read from vault
+SELECT cron.schedule(
+  'daily-activity-digest',
+  '0 12 * * *',
+  $$ SELECT net.http_post(
+    url := 'https://zqiihhmdsdgwdcwmryym.supabase.co/functions/v1/daily-activity-digest',
+    headers := '{"Content-Type":"application/json","Authorization":"Bearer <anon_key>"}'::jsonb,
+    body := '{}'::jsonb
+  ) AS request_id; $$
+);
 ```
 
-2. Ensure the `on_new_message` trigger exists:
-```sql
-CREATE TRIGGER IF NOT EXISTS on_new_message
-  AFTER INSERT ON public.messages
-  FOR EACH ROW
-  EXECUTE FUNCTION public.notify_new_message();
-```
-
-### Step 2: No Frontend Code Changes
-The existing messaging UI and edge function remain untouched -- only the database-level URL resolution is being fixed.
-
-### Why This Fixes It
-- The `send_notification_email` function currently builds the edge function URL from `app.settings.supabase_url`, which is NULL
-- By providing the actual URL, `net.http_post` will receive a valid URL and successfully call the `send-notification-email` edge function
-- The edge function then uses the RESEND_API_KEY (already configured) to deliver the email
+**Email Template Design:**
+- Same SFH branded header with logo
+- "Your Daily Activity Summary" hero section
+- Sections for each activity type with counts and actor names/avatars
+- CTA button to "View Your Feed"
+- Same footer as other emails
 
