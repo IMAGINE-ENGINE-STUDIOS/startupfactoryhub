@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2 } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, ChevronDown, Plus, Zap } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 import ReactMarkdown from 'react-markdown';
@@ -69,6 +69,9 @@ export default function FloatingChat() {
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
   const [aiInput, setAiInput] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [aiMode, setAiMode] = useState<'genius' | 'quick'>('genius');
+  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
+  const [showPresetDropdown, setShowPresetDropdown] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiMessagesEndRef = useRef<HTMLDivElement>(null);
@@ -275,6 +278,39 @@ export default function FloatingChat() {
     fetchMessages(userId);
   };
 
+  const CHAT_PRESETS = [
+    { id: 'general', name: 'General', icon: '💬' },
+    { id: 'startup', name: 'Startup Advice', icon: '🚀' },
+    { id: 'funding', name: 'Funding Guide', icon: '💰' },
+    { id: 'mentorship', name: 'Mentorship', icon: '🎓' },
+    { id: 'writing', name: 'Writing Tips', icon: '✍️' },
+    { id: 'legal', name: 'Legal Q&A', icon: '⚖️' },
+  ];
+
+  const getSystemOverride = () => {
+    if (aiMode === 'quick') {
+      return `You are **Genius AI** in QUICK mode. RULES:
+1. Give the SHORTEST possible answer. Yes, No, or a few words.
+2. MAXIMUM 240 characters total in your response. NEVER exceed this.
+3. If the user's intent is a yes/no question, answer ONLY "Yes" or "No" — nothing else.
+4. If it needs a short explanation, keep it under 240 characters.
+5. No markdown, no formatting, no bullet points. Just plain text.
+6. Be direct and decisive. No hedging, no "it depends" unless truly necessary.`;
+    }
+
+    const presetInstructions: Record<string, string> = {
+      general: 'You help users with startup advice, funding guidance, mentorship questions, document writing tips, and general queries.',
+      startup: 'You are a startup advisor. Focus on business strategy, product-market fit, scaling, team building, and common startup pitfalls.',
+      funding: 'You are a funding expert. Help with fundraising strategies, investor relations, pitch decks, valuation, and funding rounds.',
+      mentorship: 'You are a mentorship guide. Help with career development, skill building, networking, and professional growth.',
+      writing: 'You are a writing coach. Help with document structure, tone, clarity, persuasive writing, and professional communication.',
+      legal: 'You provide general legal guidance for startups. Help with incorporation, IP, contracts, compliance. Always recommend consulting a lawyer for specific advice.',
+    };
+
+    const preset = selectedPreset || 'general';
+    return `You are **Genius AI**, a helpful assistant on the Imagine Startup Factory platform. ${presetInstructions[preset] || presetInstructions.general} Be concise, friendly, and actionable. Use markdown formatting.`;
+  };
+
   /** Streaming AI call using lightpaper-genius edge function */
   const sendAiMessage = async () => {
     if (!aiInput.trim() || isAiLoading) return;
@@ -296,7 +332,7 @@ export default function FloatingChat() {
       const allMessages = [...aiMessages, { role: 'user' as const, content: userMessage }];
       const messagesPayload = allMessages.map(m => ({ role: m.role, content: m.content }));
 
-      const systemOverride = `You are **Genius AI**, a helpful assistant on the Imagine Startup Factory platform. You help users with startup advice, funding guidance, mentorship questions, document writing tips, and general queries. Be concise, friendly, and actionable. Use markdown formatting.`;
+      const systemOverride = getSystemOverride();
 
       const resp = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
@@ -644,15 +680,87 @@ export default function FloatingChat() {
                 </TabsContent>
 
                 <TabsContent value="ai" className="flex-1 flex flex-col min-h-0 mt-0 data-[state=active]:flex data-[state=inactive]:hidden">
+                  {/* Mode selector: Genius AI / QUICK */}
+                  <div className="flex items-center gap-1.5 px-3 pt-2 pb-1 shrink-0">
+                    <button
+                      onClick={() => setAiMode('genius')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                        aiMode === 'genius'
+                          ? 'bg-primary text-primary-foreground shadow-md'
+                          : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                      }`}
+                    >
+                      <img src={geniusAILogo} alt="" className="h-3.5 w-3.5 rounded-full object-cover" />
+                      Genius
+                    </button>
+                    <button
+                      onClick={() => setAiMode('quick')}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                        aiMode === 'quick'
+                          ? 'bg-amber-500 text-white shadow-md'
+                          : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                      }`}
+                    >
+                      <Zap className="h-3.5 w-3.5" />
+                      Quick
+                    </button>
+                  </div>
+
+                  {/* Preset selector (only in Genius mode) */}
+                  {aiMode === 'genius' && (
+                    <div className="px-3 pb-1 shrink-0 relative">
+                      <button
+                        onClick={() => setShowPresetDropdown(!showPresetDropdown)}
+                        className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs bg-muted/30 hover:bg-muted/50 transition-colors text-foreground"
+                      >
+                        <span>{CHAT_PRESETS.find(p => p.id === (selectedPreset || 'general'))?.icon} {CHAT_PRESETS.find(p => p.id === (selectedPreset || 'general'))?.name || 'General'}</span>
+                        <ChevronDown className={`h-3 w-3 transition-transform ${showPresetDropdown ? 'rotate-180' : ''}`} />
+                      </button>
+                      {showPresetDropdown && (
+                        <div className="absolute left-3 right-3 mt-1 z-10 rounded-lg bg-popover border border-border shadow-lg max-h-[180px] overflow-auto">
+                          {CHAT_PRESETS.map(preset => (
+                            <button
+                              key={preset.id}
+                              onClick={() => { setSelectedPreset(preset.id); setShowPresetDropdown(false); }}
+                              className={`w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-accent transition-colors ${
+                                (selectedPreset || 'general') === preset.id ? 'bg-accent' : ''
+                              }`}
+                            >
+                              <span>{preset.icon}</span> {preset.name}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* QUICK mode hint */}
+                  {aiMode === 'quick' && (
+                    <div className="px-3 pb-1 shrink-0">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px]">
+                        <Zap className="h-3 w-3" />
+                        Yes/No or short answers only (max 240 chars)
+                      </div>
+                    </div>
+                  )}
+
                   <ScrollArea className="flex-1 p-3">
                     {aiMessages.length === 0 && (
                       <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground px-4">
                         <div className="relative inline-block mb-4">
                           <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full"></div>
-                          <img src={geniusAILogo} alt="Genius AI" className="relative h-14 w-14 rounded-full object-cover opacity-70" />
+                          {aiMode === 'quick' ? (
+                            <Zap className="relative h-14 w-14 text-amber-500 opacity-70" />
+                          ) : (
+                            <img src={geniusAILogo} alt="Genius AI" className="relative h-14 w-14 rounded-full object-cover opacity-70" />
+                          )}
                         </div>
-                        <p className="text-base font-semibold mb-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">How can I help you today?</p>
-                        <p className="text-xs text-muted-foreground/70">Ask me about your startup, funding, mentorship, or writing!</p>
+                        <p className="text-base font-semibold mb-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
+                          {aiMode === 'quick' ? 'Quick answers mode' : 'How can I help you today?'}
+                        </p>
+                        <p className="text-xs text-muted-foreground/70">
+                          {aiMode === 'quick' ? 'Ask yes/no questions or get short answers instantly' : 'Ask me about your startup, funding, mentorship, or writing!'}
+                        </p>
                       </div>
                     )}
                     
@@ -702,7 +810,7 @@ export default function FloatingChat() {
                       <Input
                         value={aiInput}
                         onChange={(e) => setAiInput(e.target.value)}
-                        placeholder="✨ Ask Genius AI..."
+                        placeholder={aiMode === 'quick' ? '⚡ Ask a quick question...' : '✨ Ask Genius AI...'}
                         disabled={isAiLoading}
                         className="text-sm rounded-full border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm px-4"
                       />
@@ -710,7 +818,9 @@ export default function FloatingChat() {
                         type="submit" 
                         size="icon" 
                         disabled={isAiLoading || !aiInput.trim()} 
-                        className="shrink-0 rounded-full h-10 w-10 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:scale-100 bg-gradient-to-r from-primary to-primary/80"
+                        className={`shrink-0 rounded-full h-10 w-10 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:scale-100 ${
+                          aiMode === 'quick' ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-primary to-primary/80'
+                        }`}
                       >
                         <Send className="h-4 w-4" />
                       </Button>
