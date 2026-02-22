@@ -164,6 +164,7 @@ export function LightPaperDocument({
   const [showShortcutsDialog, setShowShortcutsDialog] = useState(false);
   const [searchMatches, setSearchMatches] = useState<number[]>([]);
   const [currentSearchIndex, setCurrentSearchIndex] = useState(0);
+  const [currentSearchQuery, setCurrentSearchQuery] = useState('');
   const [showComments, setShowComments] = useState(false);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [editMode, setEditMode] = useState(false);
@@ -1161,11 +1162,29 @@ export function LightPaperDocument({
     { key: '/', ctrl: true, handler: (e) => { e.preventDefault(); setShowShortcutsDialog(true); }, description: 'Shortcuts' },
   ], true);
 
-  // Search functionality
+  // Search functionality — works across native editor, DOCX editable pages, and PDF text layers
   const handleSearch = (query: string, options: { caseSensitive: boolean; wholeWord: boolean }) => {
-    if (!editorRef.current) return;
+    let content = '';
     
-    const content = editorRef.current.textContent || '';
+    // Gather searchable text based on current mode
+    if (viewMode && editTextLayers.length > 0) {
+      // PDF view/edit mode: search across all text layer spans
+      content = editTextLayers.flat().map((item: any) => item.text || '').join(' ');
+    } else if (viewMode && docxEditablePages.length > 0) {
+      // DOCX view mode with editable pages
+      const tempDiv = document.createElement('div');
+      docxEditablePages.forEach(page => { tempDiv.innerHTML += page; });
+      content = tempDiv.textContent || '';
+    } else if (editorRef.current) {
+      // Native editor mode
+      content = editorRef.current.textContent || '';
+    }
+
+    if (!content) {
+      toast.info("No searchable content found");
+      return;
+    }
+    
     const searchContent = options.caseSensitive ? content : content.toLowerCase();
     const searchQuery = options.caseSensitive ? query : query.toLowerCase();
     
@@ -1175,51 +1194,116 @@ export function LightPaperDocument({
     while (true) {
       index = searchContent.indexOf(searchQuery, index);
       if (index === -1) break;
+      
+      if (options.wholeWord) {
+        const before = index > 0 ? searchContent[index - 1] : ' ';
+        const after = index + searchQuery.length < searchContent.length ? searchContent[index + searchQuery.length] : ' ';
+        if (/\w/.test(before) || /\w/.test(after)) {
+          index += 1;
+          continue;
+        }
+      }
+      
       matches.push(index);
       index += searchQuery.length;
     }
     
     setSearchMatches(matches);
     setCurrentSearchIndex(0);
+    setCurrentSearchQuery(query);
     
     if (matches.length > 0) {
       highlightSearchMatch(matches[0], query.length);
-      toast.success(`Found ${matches.length} matches`);
+      toast.success(`Found ${matches.length} match${matches.length > 1 ? 'es' : ''}`);
     } else {
       toast.info("No matches found");
     }
   };
 
-  const highlightSearchMatch = (index: number, length: number) => {
-    if (!editorRef.current) return;
+  const highlightSearchMatch = (matchIndex: number, length: number) => {
+    // For native editor: use TreeWalker to find and select the text node at the offset
+    if (editorRef.current && !viewMode) {
+      const walker = document.createTreeWalker(editorRef.current, NodeFilter.SHOW_TEXT);
+      let charCount = 0;
+      let node: Node | null;
+      
+      while ((node = walker.nextNode())) {
+        const nodeLen = (node.textContent || '').length;
+        if (charCount + nodeLen > matchIndex) {
+          const offset = matchIndex - charCount;
+          try {
+            const range = document.createRange();
+            range.setStart(node, offset);
+            range.setEnd(node, Math.min(offset + length, nodeLen));
+            const selection = window.getSelection();
+            selection?.removeAllRanges();
+            selection?.addRange(range);
+            
+            // Scroll the matched text into view
+            const rect = range.getBoundingClientRect();
+            const container = editorRef.current.closest('.overflow-auto');
+            if (container && rect) {
+              const containerRect = container.getBoundingClientRect();
+              if (rect.top < containerRect.top || rect.bottom > containerRect.bottom) {
+                const tempSpan = document.createElement('span');
+                range.insertNode(tempSpan);
+                tempSpan.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                tempSpan.parentNode?.removeChild(tempSpan);
+              }
+            }
+          } catch (e) {
+            console.warn('[Search] Could not select match:', e);
+          }
+          return;
+        }
+        charCount += nodeLen;
+      }
+    }
     
-    const text = editorRef.current.textContent || '';
-    const beforeMatch = text.substring(0, index);
-    const match = text.substring(index, index + length);
-    const afterMatch = text.substring(index + length);
-    
-    const highlightedHTML = `${beforeMatch}<mark style="background-color: yellow;">${match}</mark>${afterMatch}`;
-    const selection = window.getSelection();
-    const range = document.createRange();
-    
-    // Scroll to the match
-    editorRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // For PDF text layers: highlight the matching span
+    if (viewMode && editTextLayers.length > 0) {
+      // Remove previous highlights
+      document.querySelectorAll('.pdf-search-highlight').forEach(el => {
+        (el as HTMLElement).style.outline = '';
+        (el as HTMLElement).style.backgroundColor = '';
+        el.classList.remove('pdf-search-highlight');
+      });
+      
+      // Find which span contains this character offset
+      let charCount = 0;
+      for (let pageIdx = 0; pageIdx < editTextLayers.length; pageIdx++) {
+        for (let spanIdx = 0; spanIdx < editTextLayers[pageIdx].length; spanIdx++) {
+          const text = editTextLayers[pageIdx][spanIdx].text || '';
+          if (charCount + text.length > matchIndex) {
+            // Found the span — highlight it
+            const selector = `[data-original-text="${CSS.escape(text)}"]`;
+            const el = document.querySelector(selector);
+            if (el) {
+              (el as HTMLElement).style.outline = '2px solid hsl(var(--primary))';
+              (el as HTMLElement).style.backgroundColor = 'rgba(255, 255, 0, 0.3)';
+              el.classList.add('pdf-search-highlight');
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            return;
+          }
+          charCount += text.length + 1; // +1 for the space join
+        }
+      }
+    }
   };
 
   const goToNextMatch = () => {
     if (searchMatches.length === 0) return;
     const nextIndex = (currentSearchIndex + 1) % searchMatches.length;
     setCurrentSearchIndex(nextIndex);
-    const query = editorRef.current?.textContent?.substring(searchMatches[nextIndex], searchMatches[nextIndex] + 10) || '';
-    highlightSearchMatch(searchMatches[nextIndex], query.length);
+    highlightSearchMatch(searchMatches[nextIndex], currentSearchQuery.length);
   };
 
   const goToPreviousMatch = () => {
     if (searchMatches.length === 0) return;
     const prevIndex = (currentSearchIndex - 1 + searchMatches.length) % searchMatches.length;
     setCurrentSearchIndex(prevIndex);
-    const query = editorRef.current?.textContent?.substring(searchMatches[prevIndex], searchMatches[prevIndex] + 10) || '';
-    highlightSearchMatch(searchMatches[prevIndex], query.length);
+    highlightSearchMatch(searchMatches[prevIndex], currentSearchQuery.length);
   };
 
   const execCommand = (command: string, value?: string) => {
