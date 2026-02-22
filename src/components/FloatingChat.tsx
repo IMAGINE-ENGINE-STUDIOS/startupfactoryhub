@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, ChevronDown, Plus, Zap } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 import ReactMarkdown from 'react-markdown';
@@ -48,6 +48,73 @@ interface AIMessage {
   content: string;
 }
 
+// ─── Tool / Preset definitions ───────────────────────────────────────────────
+
+interface ToolItem {
+  id: string;
+  name: string;
+  icon: string;
+  category: 'quick' | 'document' | 'ai-tools' | 'actions';
+  systemHint: string;
+}
+
+const ALL_TOOLS: ToolItem[] = [
+  // Quick mode
+  { id: 'quick', name: 'Quick Answer', icon: '⚡', category: 'quick',
+    systemHint: 'QUICK' },
+
+  // Document presets (from LightPaper)
+  { id: 'research', name: 'Research Paper', icon: '🔬', category: 'document',
+    systemHint: 'Write a formal academic research paper with APA style, citations, and deep analysis.' },
+  { id: 'executive-summary', name: 'Executive Summary', icon: '📊', category: 'document',
+    systemHint: 'Write a concise, high-impact executive summary with key findings, metrics, and recommendations.' },
+  { id: 'pitch', name: 'Pitch Deck Script', icon: '🎯', category: 'document',
+    systemHint: 'Write a compelling startup pitch narrative, investor-ready with data points and market statistics.' },
+  { id: 'business-plan', name: 'Business Plan', icon: '💼', category: 'document',
+    systemHint: 'Write a comprehensive, investor-ready business plan with market analysis and financial projections.' },
+  { id: 'book', name: 'Book / Chapter', icon: '📖', category: 'document',
+    systemHint: 'Write a book chapter with engaging narrative, proper structure, and 3000-5000 words per chapter.' },
+  { id: 'novel', name: 'Novel / Fiction', icon: '✍️', category: 'document',
+    systemHint: 'Write creative fiction with rich characters, vivid scenes, natural dialogue, and compelling plot.' },
+  { id: 'movie-script', name: 'Movie Script', icon: '🎬', category: 'document',
+    systemHint: 'Write in proper screenplay format with scene headings, action lines, and industry-standard formatting.' },
+  { id: 'legal', name: 'Legal Document', icon: '⚖️', category: 'document',
+    systemHint: 'Write formal legal documents with proper terminology, numbered clauses, and standard provisions.' },
+  { id: 'blog', name: 'Blog / Article', icon: '📝', category: 'document',
+    systemHint: 'Write an engaging blog post with compelling headline, SEO-friendly structure, and call-to-action.' },
+  { id: 'report', name: 'Technical Report', icon: '📋', category: 'document',
+    systemHint: 'Write a detailed technical report with data tables, findings, and actionable recommendations.' },
+  { id: 'letter', name: 'Formal Letter', icon: '✉️', category: 'document',
+    systemHint: 'Write a formal letter with proper letterhead, salutation, body paragraphs, and signature block.' },
+  { id: 'free', name: 'Free Writing', icon: '🌟', category: 'document',
+    systemHint: 'Write freely based on the user request. Adapt tone, style, and format to match needs.' },
+
+  // AI Tools
+  { id: 'analytics', name: 'My Analytics', icon: '📈', category: 'ai-tools',
+    systemHint: 'ANALYTICS: You have access to the user analytics data. Explain metrics, trends, and provide insights.' },
+  { id: 'intelligence', name: 'Market Intelligence', icon: '🧠', category: 'ai-tools',
+    systemHint: 'INTELLIGENCE: Provide market analysis, trending companies, industry insights, and competitive analysis.' },
+
+  // Actions
+  { id: 'create-post', name: 'Create Post', icon: '📢', category: 'actions',
+    systemHint: 'ACTION: Help user draft a social feed post. Ask what they want to post about, then generate the content.' },
+  { id: 'create-meeting', name: 'Book Meeting', icon: '📅', category: 'actions',
+    systemHint: 'ACTION: Help user create a meeting link or book a meeting. Ask for details: who, when, topic.' },
+  { id: 'contacts', name: 'My Contacts', icon: '👥', category: 'actions',
+    systemHint: 'ACTION: Help user find or manage contacts from their connections and network.' },
+  { id: 'jobs', name: 'Jobs & Opportunities', icon: '💼', category: 'actions',
+    systemHint: 'ACTION: Summarize current job opportunities, internships, and open positions available on the platform.' },
+  { id: 'resources', name: 'Resources & Map', icon: '🌍', category: 'actions',
+    systemHint: 'ACTION: Guide user to resources available on the platform. Provide direct links to the 3D resource map.' },
+];
+
+const CATEGORY_LABELS: Record<string, string> = {
+  'quick': '⚡ Quick',
+  'document': '📄 Documents',
+  'ai-tools': '🧠 AI Tools',
+  'actions': '🚀 Actions',
+};
+
 export default function FloatingChat() {
   const { user } = useAuth();
   const { role } = useUserRole();
@@ -69,19 +136,29 @@ export default function FloatingChat() {
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
   const [aiInput, setAiInput] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [aiMode, setAiMode] = useState<'genius' | 'quick'>('genius');
-  const [selectedPreset, setSelectedPreset] = useState<string | null>(null);
-  const [showPresetDropdown, setShowPresetDropdown] = useState(false);
+  const [activeTool, setActiveTool] = useState<ToolItem | null>(null);
+  const [showToolMenu, setShowToolMenu] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiMessagesEndRef = useRef<HTMLDivElement>(null);
+  const toolMenuRef = useRef<HTMLDivElement>(null);
+
+  // Close tool menu on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (toolMenuRef.current && !toolMenuRef.current.contains(e.target as Node)) {
+        setShowToolMenu(false);
+      }
+    };
+    if (showToolMenu) document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showToolMenu]);
 
   // Listen for document-ready events from Genius AI
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       setDocReadyBadge(true);
-      // Also add a notification message in AI chat
       setAiMessages(prev => [...prev, {
         role: 'assistant',
         content: `📄 **Document ready!** "${detail?.title || 'Your document'}" has been generated and inserted into LightPaper.`
@@ -278,17 +355,10 @@ export default function FloatingChat() {
     fetchMessages(userId);
   };
 
-  const CHAT_PRESETS = [
-    { id: 'general', name: 'General', icon: '💬' },
-    { id: 'startup', name: 'Startup Advice', icon: '🚀' },
-    { id: 'funding', name: 'Funding Guide', icon: '💰' },
-    { id: 'mentorship', name: 'Mentorship', icon: '🎓' },
-    { id: 'writing', name: 'Writing Tips', icon: '✍️' },
-    { id: 'legal', name: 'Legal Q&A', icon: '⚖️' },
-  ];
-
   const getSystemOverride = () => {
-    if (aiMode === 'quick') {
+    const toolId = activeTool?.id;
+
+    if (toolId === 'quick') {
       return `You are **Genius AI** in QUICK mode. RULES:
 1. Give the SHORTEST possible answer. Yes, No, or a few words.
 2. MAXIMUM 240 characters total in your response. NEVER exceed this.
@@ -298,17 +368,100 @@ export default function FloatingChat() {
 6. Be direct and decisive. No hedging, no "it depends" unless truly necessary.`;
     }
 
-    const presetInstructions: Record<string, string> = {
-      general: 'You help users with startup advice, funding guidance, mentorship questions, document writing tips, and general queries.',
-      startup: 'You are a startup advisor. Focus on business strategy, product-market fit, scaling, team building, and common startup pitfalls.',
-      funding: 'You are a funding expert. Help with fundraising strategies, investor relations, pitch decks, valuation, and funding rounds.',
-      mentorship: 'You are a mentorship guide. Help with career development, skill building, networking, and professional growth.',
-      writing: 'You are a writing coach. Help with document structure, tone, clarity, persuasive writing, and professional communication.',
-      legal: 'You provide general legal guidance for startups. Help with incorporation, IP, contracts, compliance. Always recommend consulting a lawyer for specific advice.',
-    };
+    // Document presets
+    const docTool = ALL_TOOLS.find(t => t.id === toolId && t.category === 'document');
+    if (docTool) {
+      return `You are **Genius AI**, a document writing assistant.
 
-    const preset = selectedPreset || 'general';
-    return `You are **Genius AI**, a helpful assistant on the Imagine Startup Factory platform. ${presetInstructions[preset] || presetInstructions.general} Be concise, friendly, and actionable. Use markdown formatting.`;
+RULES:
+1. If the request is vague, ask 2-3 SHORT multiple choice questions. Use format: "A) Option B) Option C) Option". NEVER ask free-text questions.
+2. Ask ALL clarifying questions in ONE step, not spread across multiple messages.
+3. Do NOT write any document until user says "go", "yes", "write it", "proceed" or selects options.
+4. When confirmed, write the FULL document — extensive, thorough, 2000+ words minimum.
+5. Use Markdown with headings, bold, tables, lists.
+6. STRICT COMPLIANCE: Follow user instructions EXACTLY. If they say "1 paragraph" write EXACTLY 1 paragraph. If they say "200 words" write EXACTLY 200 words.
+7. Do NOT include [IMAGE: description] tags or any image placeholders unless the user explicitly asks for images.
+
+CONTEXT: ${docTool.systemHint}`;
+    }
+
+    // AI Tools
+    if (toolId === 'analytics') {
+      return `You are **Genius AI** with full access to the user's analytics dashboard.
+You can explain their profile views, connections, followers, following, posts, comments, likes, engagement score, and historical trends.
+When the user asks about their analytics, provide detailed insights, trends, and actionable recommendations.
+Use markdown formatting. Be data-driven and specific.`;
+    }
+
+    if (toolId === 'intelligence') {
+      return `You are **Genius AI** with access to market intelligence.
+Provide market analysis, trending companies, industry insights, competitive analysis, and startup ecosystem data.
+Be specific, cite trends, and provide actionable insights. Use markdown formatting.`;
+    }
+
+    // Actions
+    if (toolId === 'create-post') {
+      return `You are **Genius AI** helping the user create a social post for the platform feed.
+Ask what they want to post about using simple multiple choice: "A) Option B) Option".
+Ask ALL questions in ONE step. Then generate the post content.
+Keep posts engaging, professional, and suitable for a startup community.
+Use markdown formatting.`;
+    }
+
+    if (toolId === 'create-meeting') {
+      return `You are **Genius AI** helping the user book a meeting.
+Ask for meeting details using simple multiple choice where possible:
+- Who to meet with
+- When (suggest time slots)
+- Meeting type: A) Video Call B) In-Person C) Phone
+- Topic/agenda
+Ask ALL questions in ONE step. Then confirm the booking details.`;
+    }
+
+    if (toolId === 'contacts') {
+      return `You are **Genius AI** helping the user manage their contacts and connections.
+You can help find contacts, suggest connections, and provide networking advice.
+Ask what they need using simple multiple choice options.`;
+    }
+
+    if (toolId === 'jobs') {
+      return `You are **Genius AI** helping the user explore jobs and opportunities on the platform.
+Summarize available positions, internships, and opportunities.
+Help the user filter by role, industry, or skills. Use markdown formatting.`;
+    }
+
+    if (toolId === 'resources') {
+      return `You are **Genius AI** guiding the user to platform resources.
+You can point users to:
+- Coworking Spaces (on the 3D Resource Map at /resources)
+- Government Grants
+- Accelerator Programs
+- Technology Transfer Offices
+- Labs & Research Facilities
+- Events
+Provide direct navigation guidance. The resource map is at /resources with a 3D globe view.
+Use markdown formatting.`;
+    }
+
+    // Default Genius mode
+    return `You are **Genius AI**, a helpful assistant on the Imagine Startup Factory platform.
+
+RULES:
+1. If the request is vague, ask 2-3 SHORT multiple choice questions. Format: "A) Option B) Option C) Option". NEVER ask free-text questions.
+2. Ask ALL clarifying questions in ONE step.
+3. STRICT COMPLIANCE: Follow user instructions EXACTLY for word counts, paragraph counts, etc.
+4. Do NOT include images unless explicitly asked.
+5. Be concise, friendly, and actionable. Use markdown formatting.
+
+You can help with:
+- 📄 Document creation (research papers, business plans, pitch decks, etc.)
+- 📈 Analytics & insights about the user's profile and engagement
+- 📢 Creating social posts for the feed
+- 📅 Booking meetings and managing calendar
+- 👥 Finding contacts and connections
+- 💼 Exploring jobs and opportunities
+- 🌍 Navigating platform resources and the 3D map
+- 🧠 Market intelligence and startup insights`;
   };
 
   /** Streaming AI call using lightpaper-genius edge function */
@@ -329,8 +482,8 @@ export default function FloatingChat() {
     setIsAiLoading(true);
 
     try {
-      const allMessages = [...aiMessages, { role: 'user' as const, content: userMessage }];
-      const messagesPayload = allMessages.map(m => ({ role: m.role, content: m.content }));
+      const allMsgs = [...aiMessages, { role: 'user' as const, content: userMessage }];
+      const messagesPayload = allMsgs.map(m => ({ role: m.role, content: m.content }));
 
       const systemOverride = getSystemOverride();
 
@@ -358,13 +511,11 @@ export default function FloatingChat() {
       }
       if (!resp.ok || !resp.body) throw new Error("Stream failed");
 
-      // Stream the response
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let textBuffer = "";
       let fullText = "";
 
-      // Add placeholder message
       setAiMessages(prev => [...prev, { role: 'assistant', content: '' }]);
 
       while (true) {
@@ -441,6 +592,30 @@ export default function FloatingChat() {
     u.full_name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // Parse options from AI response for clickable buttons
+  const parseOptions = (text: string): { label: string; value: string }[] | null => {
+    const lines = text.split('\n');
+    const options: { label: string; value: string }[] = [];
+    for (const line of lines) {
+      const match = line.match(/^([A-D])\)\s*(.+)/);
+      if (match) {
+        options.push({ label: match[2].trim(), value: `${match[1]}) ${match[2].trim()}` });
+      }
+    }
+    return options.length >= 2 ? options : null;
+  };
+
+  const lastAssistantMsg = aiMessages.length > 0 ? aiMessages[aiMessages.length - 1] : null;
+  const lastMsgOptions = lastAssistantMsg?.role === 'assistant' ? parseOptions(lastAssistantMsg.content) : null;
+  const hideInput = lastMsgOptions && !isAiLoading;
+
+  // Group tools by category
+  const groupedTools = ALL_TOOLS.reduce((acc, tool) => {
+    if (!acc[tool.category]) acc[tool.category] = [];
+    acc[tool.category].push(tool);
+    return acc;
+  }, {} as Record<string, ToolItem[]>);
+
   return (
     <>
       {/* Chat Toggle Button — Genius AI Logo */}
@@ -471,6 +646,11 @@ export default function FloatingChat() {
                 <>
                   <img src={geniusAILogo} alt="Genius AI" className="h-5 w-5 rounded-full object-cover" />
                   <h3 className="font-semibold text-sm">Genius AI</h3>
+                  {activeTool && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
+                      {activeTool.icon} {activeTool.name}
+                    </Badge>
+                  )}
                 </>
               ) : (
                 <>
@@ -680,66 +860,35 @@ export default function FloatingChat() {
                 </TabsContent>
 
                 <TabsContent value="ai" className="flex-1 flex flex-col min-h-0 mt-0 data-[state=active]:flex data-[state=inactive]:hidden">
-                  {/* Mode selector: Genius AI / QUICK */}
-                  <div className="flex items-center gap-1.5 px-3 pt-2 pb-1 shrink-0">
-                    <button
-                      onClick={() => setAiMode('genius')}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
-                        aiMode === 'genius'
-                          ? 'bg-primary text-primary-foreground shadow-md'
-                          : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                      }`}
-                    >
-                      <img src={geniusAILogo} alt="" className="h-3.5 w-3.5 rounded-full object-cover" />
-                      Genius
-                    </button>
-                    <button
-                      onClick={() => setAiMode('quick')}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
-                        aiMode === 'quick'
-                          ? 'bg-amber-500 text-white shadow-md'
-                          : 'bg-muted/50 text-muted-foreground hover:bg-muted'
-                      }`}
-                    >
-                      <Zap className="h-3.5 w-3.5" />
-                      Quick
-                    </button>
-                  </div>
-
-                  {/* Preset selector (only in Genius mode) */}
-                  {aiMode === 'genius' && (
-                    <div className="px-3 pb-1 shrink-0 relative">
-                      <button
-                        onClick={() => setShowPresetDropdown(!showPresetDropdown)}
-                        className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-xs bg-muted/30 hover:bg-muted/50 transition-colors text-foreground"
-                      >
-                        <span>{CHAT_PRESETS.find(p => p.id === (selectedPreset || 'general'))?.icon} {CHAT_PRESETS.find(p => p.id === (selectedPreset || 'general'))?.name || 'General'}</span>
-                        <ChevronDown className={`h-3 w-3 transition-transform ${showPresetDropdown ? 'rotate-180' : ''}`} />
-                      </button>
-                      {showPresetDropdown && (
-                        <div className="absolute left-3 right-3 mt-1 z-10 rounded-lg bg-popover border border-border shadow-lg max-h-[180px] overflow-auto">
-                          {CHAT_PRESETS.map(preset => (
-                            <button
-                              key={preset.id}
-                              onClick={() => { setSelectedPreset(preset.id); setShowPresetDropdown(false); }}
-                              className={`w-full flex items-center gap-2 px-3 py-2 text-xs text-foreground hover:bg-accent transition-colors ${
-                                (selectedPreset || 'general') === preset.id ? 'bg-accent' : ''
-                              }`}
-                            >
-                              <span>{preset.icon}</span> {preset.name}
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                  {/* Active tool indicator */}
+                  {activeTool && activeTool.id !== 'quick' && (
+                    <div className="px-3 pt-1 pb-1 shrink-0">
+                      <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-primary/10 text-xs">
+                        <span className="font-medium">{activeTool.icon} {activeTool.name}</span>
+                        <button
+                          onClick={() => setActiveTool(null)}
+                          className="text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
                     </div>
                   )}
 
-                  {/* QUICK mode hint */}
-                  {aiMode === 'quick' && (
-                    <div className="px-3 pb-1 shrink-0">
-                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px]">
-                        <Zap className="h-3 w-3" />
-                        Yes/No or short answers only (max 240 chars)
+                  {/* Quick mode indicator */}
+                  {activeTool?.id === 'quick' && (
+                    <div className="px-3 pt-1 pb-1 shrink-0">
+                      <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-amber-500/10 text-[10px]">
+                        <span className="flex items-center gap-1 text-amber-600 dark:text-amber-400">
+                          <Zap className="h-3 w-3" />
+                          Quick mode — Yes/No or short answers (max 240 chars)
+                        </span>
+                        <button
+                          onClick={() => setActiveTool(null)}
+                          className="text-muted-foreground hover:text-foreground transition-colors"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
                       </div>
                     </div>
                   )}
@@ -749,44 +898,88 @@ export default function FloatingChat() {
                       <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground px-4">
                         <div className="relative inline-block mb-4">
                           <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full"></div>
-                          {aiMode === 'quick' ? (
-                            <Zap className="relative h-14 w-14 text-amber-500 opacity-70" />
-                          ) : (
-                            <img src={geniusAILogo} alt="Genius AI" className="relative h-14 w-14 rounded-full object-cover opacity-70" />
-                          )}
+                          <img src={geniusAILogo} alt="Genius AI" className="relative h-14 w-14 rounded-full object-cover opacity-70" />
                         </div>
                         <p className="text-base font-semibold mb-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">
-                          {aiMode === 'quick' ? 'Quick answers mode' : 'How can I help you today?'}
+                          How can I help you today?
                         </p>
-                        <p className="text-xs text-muted-foreground/70">
-                          {aiMode === 'quick' ? 'Ask yes/no questions or get short answers instantly' : 'Ask me about your startup, funding, mentorship, or writing!'}
+                        <p className="text-xs text-muted-foreground/70 mb-3">
+                          Tap <Plus className="inline h-3 w-3" /> to select a tool or just ask anything!
                         </p>
+                        {/* Quick tool chips */}
+                        <div className="flex flex-wrap gap-1.5 justify-center">
+                          {[
+                            { id: 'quick', icon: '⚡', label: 'Quick' },
+                            { id: 'business-plan', icon: '💼', label: 'Business Plan' },
+                            { id: 'analytics', icon: '📈', label: 'Analytics' },
+                            { id: 'create-post', icon: '📢', label: 'Post' },
+                            { id: 'jobs', icon: '💼', label: 'Jobs' },
+                          ].map(chip => (
+                            <button
+                              key={chip.id}
+                              onClick={() => {
+                                const tool = ALL_TOOLS.find(t => t.id === chip.id);
+                                if (tool) setActiveTool(tool);
+                              }}
+                              className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-muted/50 hover:bg-muted text-foreground transition-colors"
+                            >
+                              {chip.icon} {chip.label}
+                            </button>
+                          ))}
+                        </div>
                       </div>
                     )}
                     
                     <div className="space-y-3">
-                      {aiMessages.map((message, index) => (
-                        <div
-                          key={index}
-                          className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-3`}
-                        >
-                          <div
-                            className={`max-w-[85%] rounded-3xl px-4 py-3 shadow-md transition-all duration-300 hover:shadow-lg ${
-                              message.role === 'user'
-                                ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md'
-                                : 'bg-gradient-to-br from-muted to-muted/80 backdrop-blur-sm rounded-bl-md'
-                            }`}
-                          >
-                            {message.role === 'assistant' ? (
-                              <div className="prose prose-sm max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
-                                <ReactMarkdown>{message.content}</ReactMarkdown>
+                      {aiMessages.map((message, index) => {
+                        const isLast = index === aiMessages.length - 1;
+                        const msgOptions = message.role === 'assistant' && isLast ? parseOptions(message.content) : null;
+
+                        return (
+                          <div key={index}>
+                            <div
+                              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-1`}
+                            >
+                              <div
+                                className={`max-w-[85%] rounded-3xl px-4 py-3 shadow-md transition-all duration-300 hover:shadow-lg ${
+                                  message.role === 'user'
+                                    ? 'bg-gradient-to-br from-primary to-primary/80 text-primary-foreground rounded-br-md'
+                                    : 'bg-gradient-to-br from-muted to-muted/80 backdrop-blur-sm rounded-bl-md'
+                                }`}
+                              >
+                                {message.role === 'assistant' ? (
+                                  <div className="prose prose-sm max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                                    <ReactMarkdown>{message.content}</ReactMarkdown>
+                                  </div>
+                                ) : (
+                                  <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
+                                )}
                               </div>
-                            ) : (
-                              <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
+                            </div>
+
+                            {/* Clickable option buttons */}
+                            {msgOptions && !isAiLoading && (
+                              <div className="flex flex-wrap gap-1.5 mt-2 ml-2">
+                                {msgOptions.map((opt, oi) => (
+                                  <button
+                                    key={oi}
+                                    onClick={() => {
+                                      setAiInput(opt.value);
+                                      setTimeout(() => {
+                                        const form = document.getElementById('genius-ai-form');
+                                        if (form) form.dispatchEvent(new Event('submit', { bubbles: true }));
+                                      }, 50);
+                                    }}
+                                    className="px-3 py-1.5 rounded-full text-xs font-medium bg-primary/10 hover:bg-primary/20 text-foreground border border-primary/20 hover:border-primary/40 transition-all duration-200 cursor-pointer hover:scale-105"
+                                  >
+                                    {opt.label}
+                                  </button>
+                                ))}
+                              </div>
                             )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                       
                       {isAiLoading && aiMessages[aiMessages.length - 1]?.role !== 'assistant' && (
                         <div className="flex justify-start mb-3">
@@ -799,32 +992,101 @@ export default function FloatingChat() {
                     </div>
                   </ScrollArea>
                   
-                  <div className="border-t border-border/50 p-4 shrink-0 bg-gradient-to-t from-primary/5 to-transparent">
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        sendAiMessage();
-                      }}
-                      className="flex gap-2"
-                    >
-                      <Input
-                        value={aiInput}
-                        onChange={(e) => setAiInput(e.target.value)}
-                        placeholder={aiMode === 'quick' ? '⚡ Ask a quick question...' : '✨ Ask Genius AI...'}
-                        disabled={isAiLoading}
-                        className="text-sm rounded-full border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm px-4"
-                      />
-                      <Button 
-                        type="submit" 
-                        size="icon" 
-                        disabled={isAiLoading || !aiInput.trim()} 
-                        className={`shrink-0 rounded-full h-10 w-10 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:scale-100 ${
-                          aiMode === 'quick' ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-primary to-primary/80'
-                        }`}
+                  <div className="border-t border-border/50 p-3 shrink-0 bg-gradient-to-t from-primary/5 to-transparent">
+                    {/* Show select hint when options available */}
+                    {hideInput ? (
+                      <p className="text-center text-xs text-muted-foreground py-2">
+                        👆 Select an option above to continue
+                      </p>
+                    ) : (
+                      <form
+                        id="genius-ai-form"
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          sendAiMessage();
+                        }}
+                        className="flex items-center gap-1.5"
                       >
-                        <Send className="h-4 w-4" />
-                      </Button>
-                    </form>
+                        {/* + Tool Menu Button */}
+                        <div className="relative" ref={toolMenuRef}>
+                          <button
+                            type="button"
+                            onClick={() => setShowToolMenu(!showToolMenu)}
+                            className={`shrink-0 h-10 w-10 rounded-full flex items-center justify-center transition-all duration-200 ${
+                              showToolMenu
+                                ? 'bg-primary text-primary-foreground rotate-45'
+                                : 'bg-muted/50 hover:bg-muted text-foreground'
+                            }`}
+                          >
+                            <Plus className="h-5 w-5" />
+                          </button>
+
+                          {/* Tool Dropdown Menu */}
+                          {showToolMenu && (
+                            <div className="absolute bottom-12 left-0 w-56 rounded-xl bg-popover border border-border shadow-xl max-h-[320px] overflow-auto z-50 animate-in slide-in-from-bottom-2 duration-200">
+                              {Object.entries(groupedTools).map(([category, tools]) => (
+                                <div key={category}>
+                                  <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-popover/95 backdrop-blur-sm border-b border-border/50">
+                                    {CATEGORY_LABELS[category] || category}
+                                  </div>
+                                  {tools.map(tool => (
+                                    <button
+                                      key={tool.id}
+                                      type="button"
+                                      onClick={() => {
+                                        setActiveTool(tool);
+                                        setShowToolMenu(false);
+                                      }}
+                                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs text-foreground hover:bg-accent transition-colors cursor-pointer ${
+                                        activeTool?.id === tool.id ? 'bg-accent' : ''
+                                      }`}
+                                    >
+                                      <span className="text-sm">{tool.icon}</span>
+                                      <span>{tool.name}</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              ))}
+                              {/* Clear selection */}
+                              {activeTool && (
+                                <button
+                                  type="button"
+                                  onClick={() => { setActiveTool(null); setShowToolMenu(false); }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-muted-foreground hover:bg-accent transition-colors border-t border-border/50"
+                                >
+                                  <X className="h-3.5 w-3.5" />
+                                  <span>Clear selection</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        <Input
+                          value={aiInput}
+                          onChange={(e) => setAiInput(e.target.value)}
+                          placeholder={
+                            activeTool?.id === 'quick'
+                              ? '⚡ Ask a quick question...'
+                              : activeTool
+                              ? `✨ ${activeTool.name}...`
+                              : '✨ Ask Genius AI...'
+                          }
+                          disabled={isAiLoading}
+                          className="text-sm rounded-full border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm px-4"
+                        />
+                        <Button 
+                          type="submit" 
+                          size="icon" 
+                          disabled={isAiLoading || !aiInput.trim()} 
+                          className={`shrink-0 rounded-full h-10 w-10 shadow-md hover:shadow-lg transition-all duration-300 hover:scale-110 disabled:opacity-50 disabled:scale-100 ${
+                            activeTool?.id === 'quick' ? 'bg-gradient-to-r from-amber-500 to-orange-500' : 'bg-gradient-to-r from-primary to-primary/80'
+                          }`}
+                        >
+                          <Send className="h-4 w-4" />
+                        </Button>
+                      </form>
+                    )}
                   </div>
                 </TabsContent>
               </Tabs>
