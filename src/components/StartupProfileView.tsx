@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Building, Users, TrendingUp, DollarSign, Globe, MapPin, FileText, ExternalLink } from 'lucide-react';
+import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 
 interface StartupProfileViewProps {
   company: {
@@ -136,10 +137,11 @@ export default function StartupProfileView({ company }: StartupProfileViewProps)
 
       {/* Details */}
       <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 max-w-2xl">
+        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="details">Company Details</TabsTrigger>
           <TabsTrigger value="deck">Pitch Deck</TabsTrigger>
+          <TabsTrigger value="subscription">Subscription</TabsTrigger>
         </TabsList>
 
         <TabsContent value="about" className="space-y-4">
@@ -230,6 +232,10 @@ export default function StartupProfileView({ company }: StartupProfileViewProps)
               )}
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="subscription" className="space-y-4">
+          <ProfileSubscriptionTab />
         </TabsContent>
       </Tabs>
     </div>
