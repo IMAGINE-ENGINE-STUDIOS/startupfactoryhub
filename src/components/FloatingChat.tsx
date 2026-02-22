@@ -8,9 +8,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Bot, Sparkles, Loader2, Brain } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
+import ReactMarkdown from 'react-markdown';
+import geniusAILogo from '@/assets/genius-ai-logo.png';
 
 interface Message {
   id: string;
@@ -61,15 +63,30 @@ export default function FloatingChat() {
   const [allUsers, setAllUsers] = useState<Profile[]>([]);
   const [showNewChat, setShowNewChat] = useState(false);
   const [totalUnread, setTotalUnread] = useState(0);
+  const [docReadyBadge, setDocReadyBadge] = useState(false);
   
   // AI Assistant state
   const [aiMessages, setAiMessages] = useState<AIMessage[]>([]);
   const [aiInput, setAiInput] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiMessagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Listen for document-ready events from Genius AI
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setDocReadyBadge(true);
+      // Also add a notification message in AI chat
+      setAiMessages(prev => [...prev, {
+        role: 'assistant',
+        content: `📄 **Document ready!** "${detail?.title || 'Your document'}" has been generated and inserted into LightPaper.`
+      }]);
+    };
+    window.addEventListener('genius-document-ready', handler);
+    return () => window.removeEventListener('genius-document-ready', handler);
+  }, []);
 
   useEffect(() => {
     if (user) {
@@ -107,7 +124,6 @@ export default function FloatingChat() {
       setSelectedConversation(userId);
       fetchMessages(userId);
       
-      // Fetch user profile if not already in the list
       const existingUser = allUsers.find(u => u.user_id === userId);
       if (!existingUser && userId) {
         const { data } = await supabase
@@ -259,13 +275,14 @@ export default function FloatingChat() {
     fetchMessages(userId);
   };
 
+  /** Streaming AI call using lightpaper-genius edge function */
   const sendAiMessage = async () => {
     if (!aiInput.trim() || isAiLoading) return;
     
     if (!user) {
       toast({
         title: "Sign In Required",
-        description: "Please sign in to use AI Assistant",
+        description: "Please sign in to use Genius AI",
       });
       return;
     }
@@ -276,49 +293,102 @@ export default function FloatingChat() {
     setIsAiLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('ai-chatbot', {
-        body: { 
-          message: userMessage,
-          conversationId,
-          userRole: role || 'startup'
-        }
-      });
+      const allMessages = [...aiMessages, { role: 'user' as const, content: userMessage }];
+      const messagesPayload = allMessages.map(m => ({ role: m.role, content: m.content }));
 
-      if (error) {
-        if (error.message?.includes('Rate limit')) {
-          toast({
-            title: "Rate Limit Exceeded",
-            description: "Too many requests. Please wait a moment and try again.",
-            variant: "destructive",
-          });
-          return;
+      const systemOverride = `You are **Genius AI**, a helpful assistant on the Imagine Startup Factory platform. You help users with startup advice, funding guidance, mentorship questions, document writing tips, and general queries. Be concise, friendly, and actionable. Use markdown formatting.`;
+
+      const resp = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/lightpaper-genius`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ messages: messagesPayload, systemOverride }),
         }
-        
-        if (error.message?.includes('credits exhausted') || error.message?.includes('Payment required')) {
-          toast({
-            title: "AI Credits Exhausted",
-            description: "Please add credits to your workspace to continue using AI features.",
-            variant: "destructive",
-          });
-          return;
+      );
+
+      if (resp.status === 429) {
+        toast({ title: "Rate Limit", description: "Too many requests. Please wait.", variant: "destructive" });
+        setAiMessages(prev => prev.slice(0, -1));
+        return;
+      }
+      if (resp.status === 402) {
+        toast({ title: "Credits Exhausted", description: "Please add credits to continue.", variant: "destructive" });
+        setAiMessages(prev => prev.slice(0, -1));
+        return;
+      }
+      if (!resp.ok || !resp.body) throw new Error("Stream failed");
+
+      // Stream the response
+      const reader = resp.body.getReader();
+      const decoder = new TextDecoder();
+      let textBuffer = "";
+      let fullText = "";
+
+      // Add placeholder message
+      setAiMessages(prev => [...prev, { role: 'assistant', content: '' }]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        textBuffer += decoder.decode(value, { stream: true });
+
+        let newlineIndex: number;
+        while ((newlineIndex = textBuffer.indexOf("\n")) !== -1) {
+          let line = textBuffer.slice(0, newlineIndex);
+          textBuffer = textBuffer.slice(newlineIndex + 1);
+          if (line.endsWith("\r")) line = line.slice(0, -1);
+          if (line.startsWith(":") || line.trim() === "") continue;
+          if (!line.startsWith("data: ")) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === "[DONE]") break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const c = parsed.choices?.[0]?.delta?.content;
+            if (c) {
+              fullText += c;
+              setAiMessages(prev => {
+                const updated = [...prev];
+                updated[updated.length - 1] = { role: 'assistant', content: fullText };
+                return updated;
+              });
+            }
+          } catch {
+            textBuffer = line + "\n" + textBuffer;
+            break;
+          }
         }
-        
-        throw error;
       }
 
-      if (!conversationId) {
-        setConversationId(data.conversationId);
+      // Flush remaining
+      for (const raw of textBuffer.split("\n")) {
+        if (!raw || raw.startsWith(":") || raw.trim() === "") continue;
+        if (!raw.startsWith("data: ")) continue;
+        const jsonStr = raw.slice(6).trim();
+        if (jsonStr === "[DONE]") continue;
+        try {
+          const c = JSON.parse(jsonStr).choices?.[0]?.delta?.content;
+          if (c) {
+            fullText += c;
+            setAiMessages(prev => {
+              const updated = [...prev];
+              updated[updated.length - 1] = { role: 'assistant', content: fullText };
+              return updated;
+            });
+          }
+        } catch {}
       }
 
-      setAiMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
     } catch (error: any) {
-      console.error('Error calling AI:', error);
+      console.error('Error calling Genius AI:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to get AI response. Please try again.",
+        description: error.message || "Failed to get AI response.",
         variant: "destructive",
       });
-      
       setAiMessages(prev => prev.slice(0, -1));
     } finally {
       setIsAiLoading(false);
@@ -337,19 +407,19 @@ export default function FloatingChat() {
 
   return (
     <>
-      {/* Chat Toggle Button */}
+      {/* Chat Toggle Button — Genius AI Logo */}
       {!isOpen && (
         <Button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-3xl z-50 transition-all duration-300 hover:scale-110 bg-gradient-to-br from-primary to-primary/80"
+          className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 h-14 w-14 rounded-full shadow-2xl hover:shadow-3xl z-50 transition-all duration-300 hover:scale-110 bg-gradient-to-br from-primary to-primary/80 p-0 overflow-hidden"
           size="icon"
         >
-          <MessageSquare className="h-6 w-6" />
-          {totalUnread > 0 && (
+          <img src={geniusAILogo} alt="Genius AI" className="h-9 w-9 rounded-full object-cover" />
+          {(totalUnread > 0 || docReadyBadge) && (
             <Badge 
               className="absolute -top-1 -right-1 h-6 w-6 flex items-center justify-center p-0 rounded-full bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg animate-pulse"
             >
-              {totalUnread}
+              {totalUnread > 0 ? totalUnread : '!'}
             </Badge>
           )}
         </Button>
@@ -363,7 +433,8 @@ export default function FloatingChat() {
             <div className="flex items-center gap-2">
               {activeTab === 'ai' ? (
                 <>
-                  <Brain className="h-5 w-5 text-primary" />
+                  <img src={geniusAILogo} alt="Genius AI" className="h-5 w-5 rounded-full object-cover" />
+                  <h3 className="font-semibold text-sm">Genius AI</h3>
                 </>
               ) : (
                 <>
@@ -400,7 +471,7 @@ export default function FloatingChat() {
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
-                onClick={() => setIsOpen(false)}
+                onClick={() => { setIsOpen(false); setDocReadyBadge(false); }}
               >
                 <X className="h-3.5 w-3.5" />
               </Button>
@@ -410,13 +481,18 @@ export default function FloatingChat() {
           {!isMinimized && (
             <>
               {/* Tab Navigation */}
-              <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'messages' | 'ai')} className="flex-1 flex flex-col min-h-0">
+              <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v as 'messages' | 'ai'); if (v === 'ai') setDocReadyBadge(false); }} className="flex-1 flex flex-col min-h-0">
                 <TabsList className="grid w-full grid-cols-2 mt-2 mb-2 mx-2 shrink-0">
-                  <TabsTrigger value="messages" className="gap-1 text-xs px-1 sm:px-2 min-w-0">
+                  <TabsTrigger value="messages" className="gap-1 text-xs px-1 sm:px-2 min-w-0 relative">
                     <MessageSquare className="h-3.5 w-3.5 shrink-0" />
+                    <span className="hidden sm:inline">Messages</span>
+                    {docReadyBadge && activeTab !== 'messages' && (
+                      <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                    )}
                   </TabsTrigger>
                   <TabsTrigger value="ai" className="gap-1 text-xs px-1 sm:px-2 min-w-0">
-                    <Brain className="h-3.5 w-3.5 shrink-0" />
+                    <img src={geniusAILogo} alt="" className="h-3.5 w-3.5 rounded-full object-cover shrink-0" />
+                    <span className="hidden sm:inline">Genius AI</span>
                   </TabsTrigger>
                 </TabsList>
 
@@ -573,10 +649,10 @@ export default function FloatingChat() {
                       <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground px-4">
                         <div className="relative inline-block mb-4">
                           <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full"></div>
-                          <Brain className="relative h-14 w-14 opacity-50 text-primary" />
+                          <img src={geniusAILogo} alt="Genius AI" className="relative h-14 w-14 rounded-full object-cover opacity-70" />
                         </div>
                         <p className="text-base font-semibold mb-2 bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent">How can I help you today?</p>
-                        <p className="text-xs text-muted-foreground/70">Ask me about your startup, funding, mentorship, or learning!</p>
+                        <p className="text-xs text-muted-foreground/70">Ask me about your startup, funding, mentorship, or writing!</p>
                       </div>
                     )}
                     
@@ -593,12 +669,18 @@ export default function FloatingChat() {
                                 : 'bg-gradient-to-br from-muted to-muted/80 backdrop-blur-sm rounded-bl-md'
                             }`}
                           >
-                            <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
+                            {message.role === 'assistant' ? (
+                              <div className="prose prose-sm max-w-none text-sm leading-relaxed [&>*:first-child]:mt-0 [&>*:last-child]:mb-0">
+                                <ReactMarkdown>{message.content}</ReactMarkdown>
+                              </div>
+                            ) : (
+                              <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
+                            )}
                           </div>
                         </div>
                       ))}
                       
-                      {isAiLoading && (
+                      {isAiLoading && aiMessages[aiMessages.length - 1]?.role !== 'assistant' && (
                         <div className="flex justify-start mb-3">
                           <div className="bg-gradient-to-br from-muted to-muted/80 rounded-3xl rounded-bl-md px-4 py-3 shadow-md backdrop-blur-sm">
                             <Loader2 className="h-5 w-5 animate-spin text-primary" />
@@ -620,7 +702,7 @@ export default function FloatingChat() {
                       <Input
                         value={aiInput}
                         onChange={(e) => setAiInput(e.target.value)}
-                        placeholder="🤖 Ask me anything..."
+                        placeholder="✨ Ask Genius AI..."
                         disabled={isAiLoading}
                         className="text-sm rounded-full border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm px-4"
                       />
