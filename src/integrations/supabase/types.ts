@@ -2263,6 +2263,75 @@ export type Database = {
         }
         Relationships: []
       }
+      genius_ai_chat_logs: {
+        Row: {
+          created_at: string
+          id: string
+          is_pinned: boolean | null
+          messages: Json
+          title: string
+          tool_used: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_pinned?: boolean | null
+          messages?: Json
+          title?: string
+          tool_used?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_pinned?: boolean | null
+          messages?: Json
+          title?: string
+          tool_used?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      genius_ai_memory: {
+        Row: {
+          category: string | null
+          content: string
+          created_at: string
+          id: string
+          source: string | null
+          tags: string[] | null
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          content: string
+          created_at?: string
+          id?: string
+          source?: string | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          content?: string
+          created_at?: string
+          id?: string
+          source?: string | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       hub_applications: {
         Row: {
           admin_notes: string | null
