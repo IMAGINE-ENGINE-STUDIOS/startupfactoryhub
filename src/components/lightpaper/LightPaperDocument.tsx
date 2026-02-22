@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType, ChevronLeft, ChevronRight, Volume2, History as HistoryIcon } from "lucide-react";
+import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, AlignJustify, List, ListOrdered, Undo, Redo, Save, Strikethrough, Calculator, Image, Palette, Moon, Sun, Highlighter, PenLine, Download, FileText, Search, Keyboard, MessageSquare, Users, WifiOff, Wifi, Upload, ZoomIn, ZoomOut, Maximize2, Eye, Edit3, Plus, Pipette, FlipHorizontal, FileType, ChevronLeft, ChevronRight, Volume2, History as HistoryIcon, BookOpen } from "lucide-react";
 import { addLightPaperMessage } from "./MessageCenter";
 
 // Replace toast with message center - same API surface
@@ -41,6 +41,7 @@ import { AIToolbar } from "./AIToolbar";
 import { PageManagementPanel } from "./PageManagementPanel";
 import { TextReader } from "./TextReader";
 import GeniusAIBubble from "./GeniusAIBubble";
+import { GeniusTaskRegistry } from "./GeniusTaskRegistry";
 import { VersionHistoryPanel, DocumentVersion } from "./VersionHistoryPanel";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -190,6 +191,7 @@ export function LightPaperDocument({
   const [pages, setPages] = useState<string[]>(['']);
   const [showPagePanel, setShowPagePanel] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
+  const [showTaskRegistry, setShowTaskRegistry] = useState(false);
 
   const [editTextLayers, setEditTextLayers] = useState<any[][]>([]); // Per-page text layer items for hybrid editing
   const [editTextViewportSize, setEditTextViewportSize] = useState<{ width: number; height: number } | null>(null);
@@ -2944,6 +2946,15 @@ export function LightPaperDocument({
               >
                 <HistoryIcon className="h-4 w-4" />
               </Button>
+              <Button 
+                variant={showTaskRegistry ? "secondary" : "ghost"} 
+                size="sm" 
+                className="h-8 w-8 p-0" 
+                onClick={() => setShowTaskRegistry(true)} 
+                title="AI Task Log"
+              >
+                <BookOpen className="h-4 w-4" />
+              </Button>
             </div>
 
             {/* Spacer */}
@@ -3845,6 +3856,13 @@ export function LightPaperDocument({
                   triggerPosition={geniusBubblePos}
                   isDarkMode={isDarkMode}
                   onDismiss={() => setGeniusBubblePos(null)}
+                  onStreamingChunk={(chunk) => {
+                    // Real-time word-by-word streaming into editor
+                    if (editorRef.current && !viewMode) {
+                      editorRef.current.innerHTML += chunk;
+                      editorRef.current.scrollTop = editorRef.current.scrollHeight;
+                    }
+                  }}
                   onInsertText={(html) => {
                     // Handle uploaded PDF files (viewMode) — create overlay text box with content
                     if (viewMode && viewModeImages.length > 0) {
@@ -3932,6 +3950,21 @@ export function LightPaperDocument({
             </div>
           )}
         </div>
+
+        {/* Genius AI Task Registry */}
+        <GeniusTaskRegistry
+          isOpen={showTaskRegistry}
+          onClose={() => setShowTaskRegistry(false)}
+          isDarkMode={isDarkMode}
+          onLoadContent={(html) => {
+            if (editorRef.current) {
+              editorRef.current.innerHTML += html;
+              setDocumentContent(editorRef.current.innerHTML);
+            }
+            setShowTaskRegistry(false);
+            toast.success("Content loaded from task log");
+          }}
+        />
 
         {/* Comments Sidebar */}
         {showComments && currentProjectId && (
