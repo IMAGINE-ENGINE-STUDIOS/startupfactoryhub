@@ -1,6 +1,12 @@
 import { motion } from "framer-motion";
 import { Check, Star, Zap, Crown, Building, Rocket, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { MEMBERSHIP_TIERS } from "@/lib/membership-tiers";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 const tiers = [
   {
@@ -110,6 +116,47 @@ const tiers = [
 ];
 
 const MembershipTiers = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [loadingTier, setLoadingTier] = useState<string | null>(null);
+
+  const handleSubscribe = async (tier: typeof tiers[number]) => {
+    if (tier.name === "Free" || tier.name === "In-Person Cohort") return;
+
+    if (!user) {
+      toast.info("Please sign in to subscribe");
+      navigate("/auth");
+      return;
+    }
+
+    const tierKey = tier.name === "Community" ? "community"
+      : tier.name === "Self-Paced + Office" ? "self_paced_office"
+      : tier.name === "Global Access" ? "global_access"
+      : tier.name === "Corporate" ? "corporate"
+      : null;
+
+    if (!tierKey) return;
+
+    const membershipTier = MEMBERSHIP_TIERS[tierKey];
+    if (!membershipTier?.price_id) return;
+
+    setLoadingTier(tier.name);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-membership-checkout', {
+        body: { priceId: membershipTier.price_id },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, '_blank');
+      }
+    } catch (err: any) {
+      toast.error("Failed to start checkout: " + err.message);
+    } finally {
+      setLoadingTier(null);
+    }
+  };
+
   return (
     <section className="relative py-32 overflow-hidden">
       {/* Background */}
@@ -188,8 +235,10 @@ const MembershipTiers = () => {
                 <Button 
                   className={`w-full ${tier.popular ? 'bg-gradient-to-r from-primary to-teal-400 hover:from-primary/90 hover:to-teal-400/90' : ''}`}
                   variant={tier.popular ? "default" : "outline"}
+                  onClick={() => handleSubscribe(tier)}
+                  disabled={loadingTier === tier.name || tier.name === "Free"}
                 >
-                  Get Started
+                  {loadingTier === tier.name ? "Loading..." : tier.name === "Free" ? "Current Plan" : tier.name === "In-Person Cohort" ? "Apply Now" : "Get Started"}
                 </Button>
               </div>
             </motion.div>
