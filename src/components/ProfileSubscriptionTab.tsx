@@ -16,26 +16,38 @@ interface MembershipStatus {
   cancel_at_period_end?: boolean;
 }
 
-const TIER_CONFIG: Record<string, { icon: typeof Zap; gradient: string; glow: string }> = {
+const TIER_CONFIG: Record<string, { icon: typeof Zap; gradient: string; glow: string; description: string; bestFor: string; features: string[] }> = {
   community: {
     icon: Zap,
     gradient: 'from-blue-500 to-cyan-500',
     glow: 'shadow-blue-500/20',
+    description: 'Full digital access, virtual events, community, and mentor interactions.',
+    bestFor: 'Remote-first teams or early MVP-stage founders',
+    features: ['Full resource library', 'Mentor sessions (virtual)', 'Startup physical hub community access'],
   },
   self_paced_office: {
     icon: Building,
     gradient: 'from-primary to-teal-400',
     glow: 'shadow-primary/20',
+    description: 'Adds local IWG coworking space access (1 country) to the community plan.',
+    bestFor: 'Founders needing flexible workspace + virtual resources',
+    features: ['All community features', 'Local coworking access (1 country)', 'Mentor + event access', 'Eligible for Accelerated Tier'],
   },
   global_access: {
     icon: Crown,
     gradient: 'from-purple-500 to-pink-500',
     glow: 'shadow-purple-500/20',
+    description: 'All platform features + unlimited office global access (130+ countries, 5,600+ sites).',
+    bestFor: 'Globally distributed teams, traveling founders',
+    features: ['All features + global private office access', 'Eligible for Accelerated Tier'],
   },
   corporate: {
     icon: Users,
     gradient: 'from-orange-500 to-red-500',
     glow: 'shadow-orange-500/20',
+    description: 'Designed for corporate innovation teams and growth-stage startups with teams across regions.',
+    bestFor: 'Scale-ups or corporate venture units',
+    features: ['All features + team dashboard', 'Unlimited travel (11 countries)', 'Global coworking access', 'Soft Landing optional ($5,000)', 'Accelerated Tier if eligible'],
   },
 };
 
@@ -207,6 +219,25 @@ export default function ProfileSubscriptionTab() {
                     <span className="text-2xl font-bold text-foreground">${tier.price}</span>
                     <span className="text-xs text-muted-foreground">/mo</span>
                   </div>
+
+                  {/* Description */}
+                  <p className="text-xs text-muted-foreground mb-3">{config.description}</p>
+
+                  {/* Best For */}
+                  <p className="text-xs mb-3">
+                    <span className="font-semibold text-foreground">Best for: </span>
+                    <span className="text-muted-foreground">{config.bestFor}</span>
+                  </p>
+
+                  {/* Features */}
+                  <ul className="space-y-1.5 mb-4">
+                    {config.features.map((feature, i) => (
+                      <li key={i} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                        <Check className="h-3 w-3 mt-0.5 text-primary shrink-0" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
 
                   {/* Spacer */}
                   <div className="flex-1" />
