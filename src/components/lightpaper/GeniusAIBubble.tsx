@@ -560,7 +560,7 @@ Summary to expand: ${chapter.summary}
 IMPORTANT:
 - Write at least 3000-5000 words for this chapter
 - Use the format template provided
-- Include [IMAGE: description] tags where illustrations would enhance the content
+- Do NOT include [IMAGE: description] tags unless the user explicitly asked for images
 - Be thorough, detailed, and professional
 - This is chapter ${i + 1} of ${chapterOutlines.length}
 - Do NOT include other chapters, only this one`;
@@ -1028,49 +1028,67 @@ IMPORTANT:
             </div>
           )}
 
-          {/* Input area */}
-          {phase !== "outline-review" && phase !== "generating-chapters" && (
-            <div className="px-4 pb-3 pt-1 flex-shrink-0">
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault();
-                    handleSubmit();
+          {/* Input area — hidden when last assistant message has selectable options */}
+          {phase !== "outline-review" && phase !== "generating-chapters" && (() => {
+            // Check if the last assistant message has clickable options — if so, hide text input
+            const lastAssistant = [...conversation].reverse().find(m => m.role === "assistant");
+            const hasOptions = lastAssistant ? !!parseOptions(lastAssistant.content) : false;
+            const showTextInput = !hasOptions || phase === "stopped" || phase === "input";
+
+            // If options are present and phase is conversation, only show a hint
+            if (hasOptions && phase === "conversation") {
+              return (
+                <div className="px-4 pb-3 pt-1 flex-shrink-0">
+                  <p className={`text-xs ${fg} opacity-40 text-center`}>
+                    👆 Select an option above to continue
+                  </p>
+                </div>
+              );
+            }
+
+            return (
+              <div className="px-4 pb-3 pt-1 flex-shrink-0">
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      handleSubmit();
+                    }
+                  }}
+                  placeholder={
+                    phase === "stopped"
+                      ? "Adjust instructions for remaining chapters, then Resume..."
+                      : selectedPreset
+                      ? `Describe your ${selectedPreset.name.toLowerCase()}... (mention page count for long docs)`
+                      : "Ask anything, or describe a document to write..."
                   }
-                }}
-                placeholder={
-                  phase === "stopped"
-                    ? "Adjust instructions for remaining chapters, then Resume..."
-                    : selectedPreset
-                    ? `Describe your ${selectedPreset.name.toLowerCase()}... (mention page count for long docs)`
-                    : "Ask anything, or describe a document to write..."
-                }
-                disabled={phase === "loading"}
-                className={`w-full bg-transparent ${fg} text-sm placeholder:opacity-40 resize-none outline-none border-none`}
-                rows={3}
-                style={{ caretColor: "#10b981" }}
-              />
-              <div className="flex items-center justify-between mt-2">
-                <span className={`text-[10px] ${fg} opacity-30`}>
-                  {phase === "stopped" ? "⏸ Stopped — edit or resume" : selectedPreset ? `${selectedPreset.icon} ${selectedPreset.name}` : "Shift+Enter for new line"}
-                </span>
-                <button
-                  onClick={handleSubmit}
-                  disabled={phase === "loading" || !input.trim()}
-                  className="h-8 w-8 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 flex items-center justify-center disabled:opacity-40 transition-all"
-                >
-                  {phase === "loading" ? (
-                    <Loader2 className="h-4 w-4 text-white animate-spin" />
-                  ) : (
-                    <Send className="h-3.5 w-3.5 text-white" />
-                  )}
-                </button>
+                  disabled={phase === "loading"}
+                  className={`w-full bg-transparent ${fg} text-sm placeholder:opacity-40 resize-none outline-none border-none`}
+                  rows={3}
+                  style={{ caretColor: "#10b981" }}
+                />
+                <div className="flex items-center justify-between mt-2">
+                  <span className={`text-[10px] ${fg} opacity-30`}>
+                    {phase === "stopped" ? "⏸ Stopped — edit or resume" : selectedPreset ? `${selectedPreset.icon} ${selectedPreset.name}` : "Shift+Enter for new line"}
+                  </span>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={phase === "loading" || !input.trim()}
+                    className="h-8 w-8 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 flex items-center justify-center disabled:opacity-40 transition-all"
+                  >
+                    {phase === "loading" ? (
+                      <Loader2 className="h-4 w-4 text-white animate-spin" />
+                    ) : (
+                      <Send className="h-3.5 w-3.5 text-white" />
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
       )}
 
@@ -1109,22 +1127,27 @@ function buildSystemPrompt(preset: Preset | null): string {
   const base = `You are **Genius AI**, a writing assistant in LightPaper.
 
 CRITICAL RULES:
-1. If the user's request is vague, ask 2-3 SHORT clarifying questions (one line each). Offer multiple-choice options when possible (e.g., "A) Academic  B) Casual  C) Business"). Keep questions under 15 words each.
+1. If the user's request is vague, ask 2-3 SHORT clarifying questions (one line each). ALWAYS use multiple-choice options (e.g., "A) Academic  B) Casual  C) Business"). NEVER ask open-ended or free-text questions — every question MUST have selectable A/B/C/D options. Keep questions under 15 words each.
 2. NEVER write the document until the user explicitly says "go", "write it", "proceed", "yes", etc.
 3. When the user confirms, write the FULL document immediately — do NOT ask more questions.
-4. WRITE EXTENSIVELY:
+4. STRICT COMPLIANCE — Follow user instructions EXACTLY:
+   - If user says "1 paragraph" → write EXACTLY 1 paragraph, no more, no less.
+   - If user says "200 words" → write EXACTLY 200 words. Count them. Not 199, not 201.
+   - If user says "3 pages" → write exactly 3 pages worth of content.
+   - Word counts, paragraph counts, and page counts are HARD constraints. Never approximate.
+5. WRITE EXTENSIVELY only when NO specific length is given:
    - Short docs: 2000-4000 words
    - Medium docs: 5000-10000 words
    - Long docs (books): First provide OUTLINE, then write chapters on approval
-5. Use Markdown: # ## ### headings, **bold**, *italic*, tables, bullet points, ---
-6. Use [IMAGE: description] for image placeholders.
-7. For 10+ sections: Provide outline first as:
+6. Use Markdown: # ## ### headings, **bold**, *italic*, tables, bullet points, ---
+7. Do NOT include [IMAGE: description] tags or any image placeholders UNLESS the user explicitly asks for images.
+8. For 10+ sections: Provide outline first as:
    OUTLINE:
    1. Chapter Title | Summary
    2. Chapter Title | Summary
-8. Your questions appear in a chat bubble — keep them SHORT and conversational, not formal paragraphs.
-9. You can also: summarize, translate, proofread, brainstorm, analyze — based on user request.
-10. DOCUMENT FORMATTING — ALWAYS include these elements:
+9. Your questions appear in a chat bubble — keep them SHORT and conversational, not formal paragraphs.
+10. You can also: summarize, translate, proofread, brainstorm, analyze — based on user request.
+11. DOCUMENT FORMATTING — ALWAYS include these elements:
     - **Header**: Start EVERY document with the document title as H1, followed by the date and author/organization placeholder on a separate line (e.g., "*Date: January 15, 2026 | Author: [Your Name]*")
     - **Introduction**: Begin with a clear introduction paragraph stating the purpose and scope of the document
     - **Conclusion**: End EVERY document with a proper "## Conclusion" section that summarizes key points, provides final thoughts, and includes next steps or recommendations
