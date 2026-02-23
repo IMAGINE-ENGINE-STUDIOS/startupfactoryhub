@@ -543,18 +543,6 @@ const Dashboard = () => {
           {activeTab === "profile" &&
         <TabsContent value="profile" className="space-y-4">
               <CompanyProfileManager />
-              
-              <Card className="tech-card border-0">
-                
-
-
-
-
-
-                
-
-
-              </Card>
             </TabsContent>
         }
 
