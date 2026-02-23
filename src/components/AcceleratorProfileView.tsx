@@ -29,6 +29,7 @@ import { useToast } from '@/hooks/use-toast';
 import AvatarUpload from './AvatarUpload';
 import AddStartupToPortfolioDialog from './accelerator/AddStartupToPortfolioDialog';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
+import ProfilePostsMosaic from './ProfilePostsMosaic';
 
 const INDUSTRIES = ['Technology', 'Healthcare', 'Fintech', 'E-commerce', 'AI/ML', 'SaaS', 'Biotech', 'Clean Energy', 'Education', 'Real Estate'];
 const PROGRAM_DURATIONS = ['8 weeks', '10 weeks', '12 weeks', '16 weeks', '6 months', '12 months'];
@@ -591,10 +592,11 @@ export default function AcceleratorProfileView() {
 
       {/* Details */}
       <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+        <TabsList className="grid w-full grid-cols-5 max-w-3xl">
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="program">Program Details</TabsTrigger>
           <TabsTrigger value="alumni">Alumni</TabsTrigger>
+          <TabsTrigger value="posts">Your Posts</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
         </TabsList>
 
@@ -894,6 +896,17 @@ export default function AcceleratorProfileView() {
             </CardContent>
           </Card>
         </TabsContent>
+        <TabsContent value="posts" className="space-y-4">
+          <Card className="tech-card border-0">
+            <CardHeader>
+              <CardTitle>Your Posts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProfilePostsMosaic userId={profile?.user_id || ''} isOwnProfile={true} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="subscription" className="space-y-4">
           <ProfileSubscriptionTab />
         </TabsContent>

@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import InvestorAvailabilityManager from './InvestorAvailabilityManager';
 import AvatarUpload from './AvatarUpload';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
+import ProfilePostsMosaic from './ProfilePostsMosaic';
 
 const STAGES = ['Pre-Seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'IPO'];
 const INDUSTRIES = ['Technology', 'Healthcare', 'Fintech', 'E-commerce', 'AI/ML', 'SaaS', 'Biotech', 'Clean Energy', 'Education', 'Real Estate'];
@@ -397,10 +398,11 @@ export default function InvestorProfileView() {
 
       {/* Details */}
       <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+        <TabsList className="grid w-full grid-cols-5 max-w-3xl">
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="preferences">Investment Focus</TabsTrigger>
           <TabsTrigger value="availability">Availability</TabsTrigger>
+          <TabsTrigger value="posts">Your Posts</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
         </TabsList>
 
@@ -639,6 +641,17 @@ export default function InvestorProfileView() {
             </CardHeader>
             <CardContent>
               <InvestorAvailabilityManager />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="posts" className="space-y-4">
+          <Card className="tech-card border-0">
+            <CardHeader>
+              <CardTitle>Your Posts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProfilePostsMosaic userId={profile?.user_id || ''} isOwnProfile={true} />
             </CardContent>
           </Card>
         </TabsContent>
