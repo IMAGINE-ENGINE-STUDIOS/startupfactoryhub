@@ -204,8 +204,9 @@ export default function StudentProfileView() {
   return (
     <div className="space-y-6 pb-8">
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
+        <TabsList className="grid w-full grid-cols-3 max-w-lg">
           <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="posts">Your Posts</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
         </TabsList>
 
@@ -528,15 +529,17 @@ export default function StudentProfileView() {
         </CardContent>
       </Card>
 
-      {/* Your Posts Section */}
-      <Card className="border-0 shadow-lg">
-        <CardHeader>
-          <CardTitle>Your Posts</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
-        </CardContent>
-      </Card>
+        </TabsContent>
+
+        <TabsContent value="posts" className="space-y-4">
+          <Card className="border-0 shadow-lg">
+            <CardHeader>
+              <CardTitle>Your Posts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="subscription" className="space-y-4">

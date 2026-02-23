@@ -17,6 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Briefcase, GraduationCap, Award, MapPin, Globe, Linkedin, Edit, Save, Plus, X, Star, Users, Calendar, TrendingUp, Settings as SettingsIcon, ChevronDown, FileText } from 'lucide-react';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ResumeUpload from '@/components/ResumeUpload';
+import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -195,8 +196,9 @@ export default function AdvisorProfileView() {
   }
   return <div className="space-y-6">
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2 max-w-md">
+        <TabsList className="grid w-full grid-cols-3 max-w-lg">
           <TabsTrigger value="profile">Profile</TabsTrigger>
+          <TabsTrigger value="posts">Your Posts</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
         </TabsList>
 
@@ -576,6 +578,17 @@ export default function AdvisorProfileView() {
             </div>
           </CardContent>
         </Card>}
+        </TabsContent>
+
+        <TabsContent value="posts" className="space-y-4">
+          <Card className="tech-card border-0">
+            <CardHeader>
+              <CardTitle>Your Posts</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ProfilePostsMosaic userId={profile?.user_id || ''} isOwnProfile={true} />
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="subscription" className="space-y-4">
