@@ -82,7 +82,7 @@ const Dashboard = () => {
   const [createPitchDialogOpen, setCreatePitchDialogOpen] = useState(false);
   const [companyId, setCompanyId] = useState<string>('');
   const [companyName, setCompanyName] = useState<string>('');
-  const [connectedInvestors, setConnectedInvestors] = useState<Array<{id: string, name: string}>>([]);
+  const [connectedInvestors, setConnectedInvestors] = useState<Array<{id: string;name: string;}>>([]);
   const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | undefined>();
 
@@ -104,55 +104,55 @@ const Dashboard = () => {
   const fetchPitchMeetings = async () => {
     if (!user) return;
 
-    const { data, error } = await supabase
-      .from('pitch_meetings')
-      .select(`
+    const { data, error } = await supabase.
+    from('pitch_meetings').
+    select(`
         *,
         company:companies(name, logo_url)
-      `)
-      .eq('startup_id', user.id)
-      .order('scheduled_date', { ascending: true });
+      `).
+    eq('startup_id', user.id).
+    order('scheduled_date', { ascending: true });
 
     if (!error && data) {
       // Fetch investor profiles separately
-      const investorIds = [...new Set(data.map(m => m.investor_id))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, full_name, avatar_url')
-        .in('user_id', investorIds);
+      const investorIds = [...new Set(data.map((m) => m.investor_id))];
+      const { data: profiles } = await supabase.
+      from('profiles').
+      select('user_id, full_name, avatar_url').
+      in('user_id', investorIds);
 
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
-      
-      const enrichedData = data.map(meeting => ({
+      const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
+
+      const enrichedData = data.map((meeting) => ({
         ...meeting,
         investor: profileMap.get(meeting.investor_id) || { full_name: 'Unknown', avatar_url: null }
       }));
-      
+
       setPitchMeetings(enrichedData);
     }
   };
 
   const handleAcceptPitch = async (pitchId: string) => {
     try {
-      const { error } = await supabase
-        .from('pitch_meetings')
-        .update({ status: 'scheduled' })
-        .eq('id', pitchId);
+      const { error } = await supabase.
+      from('pitch_meetings').
+      update({ status: 'scheduled' }).
+      eq('id', pitchId);
 
       if (error) throw error;
 
       toast({
         title: 'Pitch Accepted',
-        description: 'The investor has been notified',
+        description: 'The investor has been notified'
       });
 
-      const meeting = pitchMeetings.find(m => m.id === pitchId);
+      const meeting = pitchMeetings.find((m) => m.id === pitchId);
       if (meeting) {
         await supabase.from('notifications').insert({
           user_id: meeting.investor_id,
           title: 'Pitch Meeting Accepted',
           message: `Your pitch meeting request has been accepted`,
-          type: 'success',
+          type: 'success'
         });
       }
 
@@ -162,32 +162,32 @@ const Dashboard = () => {
       toast({
         title: 'Error',
         description: 'Failed to accept pitch meeting',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   };
 
   const handleRejectPitch = async (pitchId: string) => {
     try {
-      const { error } = await supabase
-        .from('pitch_meetings')
-        .update({ status: 'cancelled' })
-        .eq('id', pitchId);
+      const { error } = await supabase.
+      from('pitch_meetings').
+      update({ status: 'cancelled' }).
+      eq('id', pitchId);
 
       if (error) throw error;
 
       toast({
         title: 'Pitch Declined',
-        description: 'The investor has been notified',
+        description: 'The investor has been notified'
       });
 
-      const meeting = pitchMeetings.find(m => m.id === pitchId);
+      const meeting = pitchMeetings.find((m) => m.id === pitchId);
       if (meeting) {
         await supabase.from('notifications').insert({
           user_id: meeting.investor_id,
           title: 'Pitch Meeting Declined',
           message: `Your pitch meeting request was declined`,
-          type: 'info',
+          type: 'info'
         });
       }
 
@@ -197,63 +197,63 @@ const Dashboard = () => {
       toast({
         title: 'Error',
         description: 'Failed to decline pitch meeting',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   };
 
   const handleOutcomeChange = async (pitchId: string, outcome: string | null) => {
     try {
-      const { error } = await supabase
-        .from('pitch_meetings')
-        .update({ outcome })
-        .eq('id', pitchId);
+      const { error } = await supabase.
+      from('pitch_meetings').
+      update({ outcome }).
+      eq('id', pitchId);
 
       if (error) throw error;
 
       toast({
         title: 'Outcome Updated',
-        description: `Pitch marked as "${outcome?.replace('_', ' ') || 'unmarked'}"`,
+        description: `Pitch marked as "${outcome?.replace('_', ' ') || 'unmarked'}"`
       });
 
-      setPitchMeetings(prev => 
-        prev.map(m => m.id === pitchId ? { ...m, outcome } : m)
+      setPitchMeetings((prev) =>
+      prev.map((m) => m.id === pitchId ? { ...m, outcome } : m)
       );
     } catch (error) {
       console.error('Error updating outcome:', error);
       toast({
         title: 'Error',
         description: 'Failed to update pitch outcome',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   };
 
   const fetchCompanyInfo = async () => {
     if (!user) return;
-    
-    const { data } = await supabase
-      .from('companies')
-      .select('id, name')
-      .eq('user_id', user.id)
-      .maybeSingle();
-      
+
+    const { data } = await supabase.
+    from('companies').
+    select('id, name').
+    eq('user_id', user.id).
+    maybeSingle();
+
     if (data) {
       setCompanyId(data.id);
       setCompanyName(data.name);
-      
-      // Fetch connected investors who have invested
-      const { data: investments } = await supabase
-        .from('investments')
-        .select('investor_id, profiles(full_name)')
-        .eq('company_id', data.id)
-        .eq('status', 'active');
 
-      const investors = (investments || []).map(inv => ({
+      // Fetch connected investors who have invested
+      const { data: investments } = await supabase.
+      from('investments').
+      select('investor_id, profiles(full_name)').
+      eq('company_id', data.id).
+      eq('status', 'active');
+
+      const investors = (investments || []).map((inv) => ({
         id: inv.investor_id,
         name: inv.profiles ? (inv.profiles as any).full_name || 'Investor' : 'Investor'
       }));
-      
+
       setConnectedInvestors(investors);
     }
   };
@@ -299,22 +299,22 @@ const Dashboard = () => {
         <div className="mb-6 sm:mb-8">
           {/* Mobile: Only Avatar */}
           <div className="md:hidden flex justify-start mb-4">
-            <RoleBasedAvatar 
-              avatarUrl={profileWithRole?.avatar_url} 
-              role={profileWithRole?.role || 'startup'} 
-              fallbackText={user?.email || 'U'} 
-              className="h-16 w-16" 
-            />
+            <RoleBasedAvatar
+            avatarUrl={profileWithRole?.avatar_url}
+            role={profileWithRole?.role || 'startup'}
+            fallbackText={user?.email || 'U'}
+            className="h-16 w-16" />
+
           </div>
           
           {/* Desktop: Full Welcome Section */}
           <div className="hidden md:flex items-center space-x-4">
-            <RoleBasedAvatar 
-              avatarUrl={profileWithRole?.avatar_url} 
-              role={profileWithRole?.role || 'startup'} 
-              fallbackText={user?.email || 'U'} 
-              className="h-16 w-16" 
-            />
+            <RoleBasedAvatar
+            avatarUrl={profileWithRole?.avatar_url}
+            role={profileWithRole?.role || 'startup'}
+            fallbackText={user?.email || 'U'}
+            className="h-16 w-16" />
+
             <div className="flex-1 min-w-0">
               <h1 className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent truncate">
                 Welcome, {profileWithRole?.full_name || 'Startup'}
@@ -377,15 +377,15 @@ const Dashboard = () => {
           </div>
 
           {/* Social Tab */}
-          {activeTab === "social" && (
-            <TabsContent value="social" className="space-y-4">
+          {activeTab === "social" &&
+        <TabsContent value="social" className="space-y-4">
               <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
             </TabsContent>
-          )}
+        }
 
           {/* Journey Tab */}
-          {activeTab === "journey" && (
-            <TabsContent value="journey" className="space-y-4">
+          {activeTab === "journey" &&
+        <TabsContent value="journey" className="space-y-4">
               <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -398,11 +398,11 @@ const Dashboard = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-          )}
+        }
 
           {/* Calendar Tab */}
-          {activeTab === "calendar" && (
-            <TabsContent value="calendar" className="space-y-4">
+          {activeTab === "calendar" &&
+        <TabsContent value="calendar" className="space-y-4">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
@@ -419,28 +419,28 @@ const Dashboard = () => {
                     <Users className="h-4 w-4" />
                     <span>Schedule Mentoring Session</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    onClick={() => {
-                      if (connectedInvestors.length === 0) {
-                        toast({
-                          title: 'No Connected Investors',
-                          description: 'Connect with investors first to schedule pitch meetings',
-                          variant: 'destructive',
-                        });
-                      } else {
-                        setCreatePitchDialogOpen(true);
-                      }
-                    }} 
-                    className="gap-2"
-                    disabled={connectedInvestors.length === 0}
-                  >
+                  <DropdownMenuItem
+                  onClick={() => {
+                    if (connectedInvestors.length === 0) {
+                      toast({
+                        title: 'No Connected Investors',
+                        description: 'Connect with investors first to schedule pitch meetings',
+                        variant: 'destructive'
+                      });
+                    } else {
+                      setCreatePitchDialogOpen(true);
+                    }
+                  }}
+                  className="gap-2"
+                  disabled={connectedInvestors.length === 0}>
+
                     <Briefcase className="h-4 w-4" />
                     <span>Book Pitch Meeting</span>
-                    {connectedInvestors.length > 0 && (
-                      <Badge variant="secondary" className="ml-auto">
+                    {connectedInvestors.length > 0 &&
+                  <Badge variant="secondary" className="ml-auto">
                         {connectedInvestors.length}
                       </Badge>
-                    )}
+                  }
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -458,23 +458,23 @@ const Dashboard = () => {
                 <CardContent>
                   <ScrollArea className="w-full">
                     <div className="flex gap-4 pb-4">
-                      {upcomingEvents.slice(0, 6).map(event => (
-                        <div 
-                          key={event.id} 
-                          className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]" 
-                          onClick={() => {
-                            setSelectedEvent(event);
-                            setShowEventDetails(true);
-                          }}
-                        >
+                      {upcomingEvents.slice(0, 6).map((event) =>
+                  <div
+                    key={event.id}
+                    className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]"
+                    onClick={() => {
+                      setSelectedEvent(event);
+                      setShowEventDetails(true);
+                    }}>
+
                           <div className="relative overflow-hidden rounded-lg border hover:border-primary transition-all">
-                            {event.banner_url ? (
-                              <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" />
-                            ) : (
-                              <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
+                            {event.banner_url ?
+                      <img src={event.banner_url} alt={event.title} className="w-full h-48 object-cover group-hover:scale-105 transition-transform" /> :
+
+                      <div className="w-full h-48 bg-gradient-to-br from-purple-500/20 to-purple-500/5 flex items-center justify-center">
                                 <CalendarIcon className="h-16 w-16 text-purple-500/30" />
                               </div>
-                            )}
+                      }
                             <div className="p-4 min-h-[120px] flex flex-col">
                               <h3 className="font-semibold mb-2 line-clamp-1">{event.title}</h3>
                               <div className="space-y-1 text-sm text-muted-foreground flex-1">
@@ -482,24 +482,24 @@ const Dashboard = () => {
                                   <Clock className="h-3 w-3" />
                                   {format(parseISO(event.start_date), 'MMM d, h:mm a')}
                                 </div>
-                                {event.location && (
-                                  <div className="flex items-center gap-2">
+                                {event.location &&
+                          <div className="flex items-center gap-2">
                                     <MapPin className="h-3 w-3" />
-                                    {event.location.startsWith('http') ? (
-                                      <a 
-                                        href={event.location}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="text-primary hover:underline line-clamp-1"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
+                                    {event.location.startsWith('http') ?
+                            <a
+                              href={event.location}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline line-clamp-1"
+                              onClick={(e) => e.stopPropagation()}>
+
                                         {event.location}
-                                      </a>
-                                    ) : (
-                                      <span className="line-clamp-1">{event.location}</span>
-                                    )}
+                                      </a> :
+
+                            <span className="line-clamp-1">{event.location}</span>
+                            }
                                   </div>
-                                )}
+                          }
                                 <div className="flex items-center gap-2">
                                   <Users className="h-3 w-3" />
                                   {event.attendees} attending
@@ -509,39 +509,39 @@ const Dashboard = () => {
                             </div>
                           </div>
                         </div>
-                      ))}
+                  )}
                     </div>
                     <ScrollBar orientation="horizontal" />
                   </ScrollArea>
                 </CardContent>
               </Card>}
             
-            <UnifiedCalendar 
-              showCreateButton={false} 
-              userRole="startup"
-              onItemClick={item => {
-                if (item.type === 'event') {
-                  setSelectedEvent(item);
-                  setShowEventDetails(true);
-                } else if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
-                  window.open(item.meeting_link, '_blank');
-                }
-              }} 
-              filterTypes={['event', 'session', 'pitch']} 
-            />
+            <UnifiedCalendar
+            showCreateButton={false}
+            userRole="startup"
+            onItemClick={(item) => {
+              if (item.type === 'event') {
+                setSelectedEvent(item);
+                setShowEventDetails(true);
+              } else if ((item.type === 'session' || item.type === 'pitch') && item.meeting_link) {
+                window.open(item.meeting_link, '_blank');
+              }
+            }}
+            filterTypes={['event', 'session', 'pitch']} />
+
             </TabsContent>
-          )}
+        }
 
           {/* Network Tab */}
-          {activeTab === "network" && (
-            <TabsContent value="network" className="space-y-4">
+          {activeTab === "network" &&
+        <TabsContent value="network" className="space-y-4">
               <MatchingSystem />
             </TabsContent>
-          )}
+        }
 
           {/* Profile Tab */}
-          {activeTab === "profile" && (
-            <TabsContent value="profile" className="space-y-4">
+          {activeTab === "profile" &&
+        <TabsContent value="profile" className="space-y-4">
               <CompanyProfileManager />
               
               <Card className="tech-card border-0">
@@ -551,16 +551,16 @@ const Dashboard = () => {
                     Your Posts
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
-                </CardContent>
+                
+
+
               </Card>
             </TabsContent>
-          )}
+        }
 
           {/* Jobs Tab */}
-          {activeTab === "jobs" && (
-            <TabsContent value="jobs" className="space-y-4">
+          {activeTab === "jobs" &&
+        <TabsContent value="jobs" className="space-y-4">
               <Tabs defaultValue="opportunities" className="w-full">
                 <TabsList className="grid w-full max-w-lg grid-cols-3 mb-6">
                   <TabsTrigger value="opportunities">
@@ -587,53 +587,53 @@ const Dashboard = () => {
                 </TabsContent>
               </Tabs>
             </TabsContent>
-          )}
+        }
 
           {/* Learn Tab */}
-          {activeTab === "learn" && (
-            <TabsContent value="learn" className="space-y-4">
+          {activeTab === "learn" &&
+        <TabsContent value="learn" className="space-y-4">
               <EducationalResources />
             </TabsContent>
-          )}
+        }
 
           {/* Analytics Tab */}
-          {activeTab === "analytics" && (
-            <TabsContent value="analytics" className="space-y-4">
+          {activeTab === "analytics" &&
+        <TabsContent value="analytics" className="space-y-4">
               <AnalyticsDashboard />
             </TabsContent>
-          )}
+        }
 
           {/* Intelligence Tab */}
-          {activeTab === "intelligence" && (
-            <TabsContent value="intelligence" className="space-y-4">
+          {activeTab === "intelligence" &&
+        <TabsContent value="intelligence" className="space-y-4">
               <IntelligenceHub />
             </TabsContent>
-          )}
+        }
 
           {/* Tools Tab */}
-          {activeTab === "tools" && (
-            <TabsContent value="tools" className="space-y-4">
+          {activeTab === "tools" &&
+        <TabsContent value="tools" className="space-y-4">
               
               <AIFeaturesHub />
             </TabsContent>
-          )}
+        }
 
           {/* Meetings Tab */}
           {activeTab === "meetings" && (() => {
-            // Activity-first helpers
-            const incomingCount = pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length;
-            const sentCount = pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length;
-            const upcomingCount = pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length;
-            const pastPitchCount = pitchMeetings.filter(m => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).length;
+          // Activity-first helpers
+          const incomingCount = pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.investor_id).length;
+          const sentCount = pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.startup_id).length;
+          const upcomingCount = pitchMeetings.filter((m) => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length;
+          const pastPitchCount = pitchMeetings.filter((m) => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).length;
 
-            type Section = { key: string; hasContent: boolean; element: JSX.Element };
+          type Section = {key: string;hasContent: boolean;element: JSX.Element;};
 
-            const pitchSections: Section[] = [
-              {
-                key: 'incoming',
-                hasContent: incomingCount > 0,
-                element: (
-                  <Collapsible key="incoming" defaultOpen className="tech-card rounded-xl border-0">
+          const pitchSections: Section[] = [
+          {
+            key: 'incoming',
+            hasContent: incomingCount > 0,
+            element:
+            <Collapsible key="incoming" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
@@ -650,26 +650,26 @@ const Dashboard = () => {
                       </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
-                      {incomingCount === 0 ? (
-                        <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                      {incomingCount === 0 ?
+                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
                           <p className="text-sm text-muted-foreground">No incoming requests</p>
+                        </div> :
+
+                <div className="grid gap-3">
+                          {pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.investor_id).map((meeting) =>
+                  <PitchMeetingCard key={meeting.id} meeting={meeting} variant="incoming" viewerType="startup" onAccept={handleAcceptPitch} onReject={handleRejectPitch} />
+                  )}
                         </div>
-                      ) : (
-                        <div className="grid gap-3">
-                          {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).map((meeting) => (
-                            <PitchMeetingCard key={meeting.id} meeting={meeting} variant="incoming" viewerType="startup" onAccept={handleAcceptPitch} onReject={handleRejectPitch} />
-                          ))}
-                        </div>
-                      )}
+                }
                     </CollapsibleContent>
                   </Collapsible>
-                ),
-              },
-              {
-                key: 'sent',
-                hasContent: sentCount > 0,
-                element: (
-                  <Collapsible key="sent" defaultOpen className="tech-card rounded-xl border-0">
+
+          },
+          {
+            key: 'sent',
+            hasContent: sentCount > 0,
+            element:
+            <Collapsible key="sent" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -686,26 +686,26 @@ const Dashboard = () => {
                       </div>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
-                      {sentCount === 0 ? (
-                        <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                      {sentCount === 0 ?
+                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
                           <p className="text-sm text-muted-foreground">No pending requests</p>
+                        </div> :
+
+                <div className="grid gap-3">
+                          {pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.startup_id).map((meeting) =>
+                  <PitchMeetingCard key={meeting.id} meeting={meeting} variant="sent" viewerType="startup" />
+                  )}
                         </div>
-                      ) : (
-                        <div className="grid gap-3">
-                          {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).map((meeting) => (
-                            <PitchMeetingCard key={meeting.id} meeting={meeting} variant="sent" viewerType="startup" />
-                          ))}
-                        </div>
-                      )}
+                }
                     </CollapsibleContent>
                   </Collapsible>
-                ),
-              },
-              {
-                key: 'upcoming',
-                hasContent: upcomingCount > 0,
-                element: (
-                  <Collapsible key="upcoming" defaultOpen className="tech-card rounded-xl border-0">
+
+          },
+          {
+            key: 'upcoming',
+            hasContent: upcomingCount > 0,
+            element:
+            <Collapsible key="upcoming" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -719,28 +719,28 @@ const Dashboard = () => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
-                      {upcomingCount === 0 ? (
-                        <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                      {upcomingCount === 0 ?
+                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
                           <p className="text-sm text-muted-foreground">No upcoming pitches</p>
+                        </div> :
+
+                <div className="grid gap-3">
+                          {pitchMeetings.filter((m) => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).
+                  sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime()).
+                  map((meeting) =>
+                  <PitchMeetingCard key={meeting.id} meeting={meeting} variant="upcoming" viewerType="startup" onJoin={setActiveVideoUrl} />
+                  )}
                         </div>
-                      ) : (
-                        <div className="grid gap-3">
-                          {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date())
-                            .sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime())
-                            .map((meeting) => (
-                              <PitchMeetingCard key={meeting.id} meeting={meeting} variant="upcoming" viewerType="startup" onJoin={setActiveVideoUrl} />
-                            ))}
-                        </div>
-                      )}
+                }
                     </CollapsibleContent>
                   </Collapsible>
-                ),
-              },
-              {
-                key: 'past',
-                hasContent: pastPitchCount > 0,
-                element: (
-                  <Collapsible key="past" defaultOpen className="tech-card rounded-xl border-0">
+
+          },
+          {
+            key: 'past',
+            hasContent: pastPitchCount > 0,
+            element:
+            <Collapsible key="past" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
@@ -754,31 +754,31 @@ const Dashboard = () => {
                       <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
                     <CollapsibleContent className="px-4 pb-4">
-                      {pastPitchCount === 0 ? (
-                        <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
+                      {pastPitchCount === 0 ?
+                <div className="rounded-xl border border-dashed border-border bg-muted/20 p-6 min-h-[100px] flex items-center justify-center">
                           <p className="text-sm text-muted-foreground">No past meetings</p>
+                        </div> :
+
+                <div className="grid gap-3">
+                          {pitchMeetings.filter((m) => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).
+                  sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime()).
+                  map((meeting) =>
+                  <PitchMeetingCard key={meeting.id} meeting={meeting} variant="past" viewerType="startup" onOutcomeChange={handleOutcomeChange} />
+                  )}
                         </div>
-                      ) : (
-                        <div className="grid gap-3">
-                          {pitchMeetings.filter(m => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date())
-                            .sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime())
-                            .map((meeting) => (
-                              <PitchMeetingCard key={meeting.id} meeting={meeting} variant="past" viewerType="startup" onOutcomeChange={handleOutcomeChange} />
-                            ))}
-                        </div>
-                      )}
+                }
                     </CollapsibleContent>
                   </Collapsible>
-                ),
-              },
-            ].sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
 
-            const mentorSections: Section[] = [
-              {
-                key: 'pending-offers',
-                hasContent: false, // StartupMentorshipOffers fetches its own data — default to false, will naturally sort after active
-                element: (
-                  <Collapsible key="pending-offers" defaultOpen className="tech-card rounded-xl border-0">
+          }].
+          sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
+
+          const mentorSections: Section[] = [
+          {
+            key: 'pending-offers',
+            hasContent: false, // StartupMentorshipOffers fetches its own data — default to false, will naturally sort after active
+            element:
+            <Collapsible key="pending-offers" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
@@ -795,13 +795,13 @@ const Dashboard = () => {
                       <StartupMentorshipOffers onOfferHandled={fetchPitchMeetings} />
                     </CollapsibleContent>
                   </Collapsible>
-                ),
-              },
-              {
-                key: 'active-mentors',
-                hasContent: true, // Active mentors is a priority section — always show first in mentorship column
-                element: (
-                  <Collapsible key="active-mentors" defaultOpen className="tech-card rounded-xl border-0">
+
+          },
+          {
+            key: 'active-mentors',
+            hasContent: true, // Active mentors is a priority section — always show first in mentorship column
+            element:
+            <Collapsible key="active-mentors" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -818,13 +818,13 @@ const Dashboard = () => {
                       <StartupActiveMentors onJoin={setActiveVideoUrl} />
                     </CollapsibleContent>
                   </Collapsible>
-                ),
-              },
-              {
-                key: 'upcoming-sessions',
-                hasContent: false,
-                element: (
-                  <Collapsible key="upcoming-sessions" defaultOpen className="tech-card rounded-xl border-0">
+
+          },
+          {
+            key: 'upcoming-sessions',
+            hasContent: false,
+            element:
+            <Collapsible key="upcoming-sessions" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
@@ -841,13 +841,13 @@ const Dashboard = () => {
                       <StartupMentoringSessions type="upcoming" onJoin={setActiveVideoUrl} />
                     </CollapsibleContent>
                   </Collapsible>
-                ),
-              },
-              {
-                key: 'past-sessions',
-                hasContent: false,
-                element: (
-                  <Collapsible key="past-sessions" defaultOpen className="tech-card rounded-xl border-0">
+
+          },
+          {
+            key: 'past-sessions',
+            hasContent: false,
+            element:
+            <Collapsible key="past-sessions" defaultOpen className="tech-card rounded-xl border-0">
                     <CollapsibleTrigger className="flex items-center justify-between w-full p-4 hover:bg-muted/50 transition-colors rounded-xl group">
                       <div className="flex items-center gap-2.5">
                         <div className="h-8 w-8 rounded-lg bg-muted/50 flex items-center justify-center">
@@ -864,12 +864,12 @@ const Dashboard = () => {
                       <StartupMentoringSessions type="past" onSessionUpdated={fetchPitchMeetings} />
                     </CollapsibleContent>
                   </Collapsible>
-                ),
-              },
-            ].sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
 
-            return (
-              <TabsContent value="meetings" className="space-y-6">
+          }].
+          sort((a, b) => Number(b.hasContent) - Number(a.hasContent));
+
+          return (
+            <TabsContent value="meetings" className="space-y-6">
                 {/* Live Rooms + Village Rooms — always first */}
                 <LiveRooms />
 
@@ -885,7 +885,7 @@ const Dashboard = () => {
                         <p className="text-xs text-muted-foreground">Manage meetings with investors</p>
                       </div>
                     </div>
-                    {pitchSections.map(s => s.element)}
+                    {pitchSections.map((s) => s.element)}
                   </div>
 
                   {/* Right Column: Mentorship — activity sorted */}
@@ -899,21 +899,21 @@ const Dashboard = () => {
                         <p className="text-xs text-muted-foreground">Your mentor & advisor network</p>
                       </div>
                     </div>
-                    {mentorSections.map(s => s.element)}
+                    {mentorSections.map((s) => s.element)}
                   </div>
                 </div>
-              </TabsContent>
-            );
-          })()}
+              </TabsContent>);
+
+        })()}
 
           {/* Resources Tab */}
-          {activeTab === "resources" && (
-            <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{ height: 'calc(100vh - 12rem)', minHeight: '500px' }}>
+          {activeTab === "resources" &&
+        <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{ height: 'calc(100vh - 12rem)', minHeight: '500px' }}>
               <div className="absolute inset-0">
                 <GlobalResourcesMap />
               </div>
             </TabsContent>
-          )}
+        }
         </Tabs>
       </div>
 
@@ -921,25 +921,25 @@ const Dashboard = () => {
       <FloatingChat />
 
       {/* Video Meeting Dialog */}
-      {activeVideoUrl && (
-        <div className="fixed inset-0 z-50 bg-background">
+      {activeVideoUrl &&
+    <div className="fixed inset-0 z-50 bg-background">
           <div className="relative w-full h-full">
-            <Button 
-              variant="outline" 
-              className="absolute top-4 right-4 z-10"
-              onClick={() => setActiveVideoUrl(undefined)}
-            >
+            <Button
+          variant="outline"
+          className="absolute top-4 right-4 z-10"
+          onClick={() => setActiveVideoUrl(undefined)}>
+
               <X className="h-4 w-4 mr-2" />
               Leave Meeting
             </Button>
             <iframe
-              src={activeVideoUrl}
-              allow="camera; microphone; fullscreen; speaker; display-capture"
-              className="w-full h-full"
-            />
+          src={activeVideoUrl}
+          allow="camera; microphone; fullscreen; speaker; display-capture"
+          className="w-full h-full" />
+
           </div>
         </div>
-      )}
+    }
 
       {/* Dialogs */}
       <CreateEventDialog open={createEventDialogOpen} onOpenChange={setCreateEventDialogOpen} onEventCreated={() => {
@@ -951,14 +951,14 @@ const Dashboard = () => {
       {selectedEvent && <EventDetailsDialog event={selectedEvent} open={showEventDetails} onOpenChange={setShowEventDetails} onEventUpdated={() => {
       setShowEventDetails(false);
     }} />}
-      {companyId && companyName && (
-        <CreatePitchMeetingDialog
-          open={createPitchDialogOpen}
-          onOpenChange={setCreatePitchDialogOpen}
-          companyId={companyId}
-          companyName={companyName}
-        />
-      )}
+      {companyId && companyName &&
+    <CreatePitchMeetingDialog
+      open={createPitchDialogOpen}
+      onOpenChange={setCreatePitchDialogOpen}
+      companyId={companyId}
+      companyName={companyName} />
+
+    }
     </div>;
 };
 export default Dashboard;
