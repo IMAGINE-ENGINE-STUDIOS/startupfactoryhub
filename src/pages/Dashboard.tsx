@@ -545,12 +545,12 @@ const Dashboard = () => {
               <CompanyProfileManager />
               
               <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <MessageCircle className="h-5 w-5" />
-                    Your Posts
-                  </CardTitle>
-                </CardHeader>
+                
+
+
+
+
+
                 
 
 
