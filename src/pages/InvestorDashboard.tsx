@@ -11,7 +11,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useSearchParams } from 'react-router-dom';
-import { DollarSign, TrendingUp, Building, Target, Users, Calendar as CalendarIcon, ExternalLink, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Presentation, LineChart, Globe, Bell, Video } from 'lucide-react';
+import { DollarSign, TrendingUp, Building, Target, Users, Calendar as CalendarIcon, ExternalLink, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Presentation, LineChart, Globe, Bell, Video, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import DistrictRooms from '@/components/DistrictRooms';
 import LiveRooms from '@/components/LiveRooms';
@@ -40,6 +50,7 @@ import { useEvents } from '@/hooks/useEvents';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 interface Investment {
   id: string;
+  investment_id?: string;
   name: string;
   description: string;
   stage: string;
@@ -69,6 +80,8 @@ export default function InvestorDashboard() {
   const [showPortfolioDialog, setShowPortfolioDialog] = useState(false);
   const [selectedExternalInvestment, setSelectedExternalInvestment] = useState<any>(null);
   const [showExternalDialog, setShowExternalDialog] = useState(false);
+  const [deleteInvestmentDialogOpen, setDeleteInvestmentDialogOpen] = useState(false);
+  const [investmentToDelete, setInvestmentToDelete] = useState<any>(null);
   const {
     user
   } = useAuth();
@@ -440,7 +453,7 @@ export default function InvestorDashboard() {
         const isExternal = !inv.company_id && inv.external_company_name;
         return {
           id: inv.company_id || inv.id,
-          // Use investment id for external companies
+          investment_id: inv.id,
           name: isExternal ? inv.external_company_name : inv.companies?.name || 'Unknown Company',
           description: inv.companies?.description || '',
           stage: inv.companies?.stage || 'External',
@@ -457,6 +470,35 @@ export default function InvestorDashboard() {
       setInvestments(formattedInvestments);
     }
   };
+
+  const handleDeleteInvestment = async () => {
+    if (!investmentToDelete?.investment_id) return;
+    try {
+      const { error } = await supabase
+        .from('investments')
+        .delete()
+        .eq('id', investmentToDelete.investment_id);
+      if (error) throw error;
+      toast({
+        title: "Investment Removed",
+        description: `${investmentToDelete.name} has been removed from your portfolio.`,
+      });
+      fetchInvestments();
+      fetchInvestorProfile();
+      fetchPortfolioValuations();
+    } catch (err) {
+      console.error('Error deleting investment:', err);
+      toast({
+        title: "Error",
+        description: "Failed to remove investment. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteInvestmentDialogOpen(false);
+      setInvestmentToDelete(null);
+    }
+  };
+
   const fetchOpportunities = async () => {
     if (!user) return;
 
@@ -704,6 +746,14 @@ export default function InvestorDashboard() {
                         }
                       }}>
                               View Details
+                            </Button>
+                            <Button size="sm" variant="ghost" className="w-full mt-1 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={(e) => {
+                              e.stopPropagation();
+                              setInvestmentToDelete(investment);
+                              setDeleteInvestmentDialogOpen(true);
+                            }}>
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Remove
                             </Button>
                           </CardContent>
                         </Card>;
@@ -1033,5 +1083,22 @@ export default function InvestorDashboard() {
             </div>}
         </DialogContent>
       </Dialog>
+      {/* Delete Investment Confirmation Dialog */}
+      <AlertDialog open={deleteInvestmentDialogOpen} onOpenChange={setDeleteInvestmentDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Investment?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will remove {investmentToDelete?.name} from your portfolio. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteInvestment} className="bg-destructive hover:bg-destructive/90">
+              Remove
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 }
