@@ -28,6 +28,7 @@ import InvestorAvailabilityManager from './InvestorAvailabilityManager';
 import AvatarUpload from './AvatarUpload';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ProfilePostsMosaic from './ProfilePostsMosaic';
+import ProfilePayoutsTab from './ProfilePayoutsTab';
 
 const STAGES = ['Pre-Seed', 'Seed', 'Series A', 'Series B', 'Series C', 'Growth', 'IPO'];
 const INDUSTRIES = ['Technology', 'Healthcare', 'Fintech', 'E-commerce', 'AI/ML', 'SaaS', 'Biotech', 'Clean Energy', 'Education', 'Real Estate'];
@@ -398,12 +399,13 @@ export default function InvestorProfileView() {
 
       {/* Details */}
       <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 max-w-3xl">
+        <TabsList className="grid w-full grid-cols-6 max-w-4xl">
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="preferences">Investment Focus</TabsTrigger>
           <TabsTrigger value="availability">Availability</TabsTrigger>
           <TabsTrigger value="posts">Your Posts</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
+          <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="about" className="space-y-4">
@@ -658,6 +660,10 @@ export default function InvestorProfileView() {
 
         <TabsContent value="subscription" className="space-y-4">
           <ProfileSubscriptionTab />
+        </TabsContent>
+
+        <TabsContent value="payouts" className="space-y-4">
+          <ProfilePayoutsTab />
         </TabsContent>
       </Tabs>
     </div>

@@ -18,6 +18,7 @@ import { Briefcase, GraduationCap, Award, MapPin, Globe, Linkedin, Edit, Save, P
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ResumeUpload from '@/components/ResumeUpload';
 import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
+import ProfilePayoutsTab from './ProfilePayoutsTab';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
@@ -196,10 +197,11 @@ export default function AdvisorProfileView() {
   }
   return <div className="space-y-6">
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 max-w-lg">
+        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="posts">Your Posts</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
+          <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -593,6 +595,10 @@ export default function AdvisorProfileView() {
 
         <TabsContent value="subscription" className="space-y-4">
           <ProfileSubscriptionTab />
+        </TabsContent>
+
+        <TabsContent value="payouts" className="space-y-4">
+          <ProfilePayoutsTab />
         </TabsContent>
       </Tabs>
     </div>;
