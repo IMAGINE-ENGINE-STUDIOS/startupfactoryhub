@@ -93,7 +93,7 @@ export default function StudentDashboard() {
         {/* Main Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+            <TabsList className="inline-flex w-full whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Social</span>
