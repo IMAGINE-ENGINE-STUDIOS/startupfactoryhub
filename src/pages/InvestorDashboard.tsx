@@ -560,14 +560,10 @@ export default function InvestorDashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-9 max-w-7xl whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-8 max-w-7xl whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Social</span>
-              </TabsTrigger>
-              <TabsTrigger value="meetings" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Video className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Meetings</span>
               </TabsTrigger>
               <TabsTrigger value="network" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Network className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -578,8 +574,8 @@ export default function InvestorDashboard() {
                 <span className="hidden md:inline text-sm">Portfolio</span>
               </TabsTrigger>
               <TabsTrigger value="pitches" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Briefcase className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Pitches</span>
+                <Video className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Meetings</span>
                 {pendingPitchesCount > 0}
               </TabsTrigger>
               <TabsTrigger value="calendar" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
@@ -736,6 +732,9 @@ export default function InvestorDashboard() {
 
           {/* Pitches Tab - Reorganized into 4 sections */}
           <TabsContent value="pitches" className="space-y-8">
+            {/* Live Rooms */}
+            <LiveRooms />
+
             {/* 1. Incoming Pitch Requests (from startups TO investor) */}
             <div className="space-y-3 sm:space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -916,9 +915,6 @@ export default function InvestorDashboard() {
             <UnifiedCommunityFeed interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
           </TabsContent>
 
-          <TabsContent value="meetings" className="space-y-4">
-            <LiveRooms />
-          </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
             <AnalyticsDashboard />
