@@ -23,6 +23,7 @@ import {
   FileText
 } from 'lucide-react';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
+import ProfilePayoutsTab from './ProfilePayoutsTab';
 
 export default function StudentProfileView() {
   const { user } = useAuth();
@@ -204,10 +205,11 @@ export default function StudentProfileView() {
   return (
     <div className="space-y-6 pb-8">
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 max-w-lg">
+        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="posts">Your Posts</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
+          <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
@@ -544,6 +546,10 @@ export default function StudentProfileView() {
 
         <TabsContent value="subscription" className="space-y-4">
           <ProfileSubscriptionTab />
+        </TabsContent>
+
+        <TabsContent value="payouts" className="space-y-4">
+          <ProfilePayoutsTab />
         </TabsContent>
       </Tabs>
     </div>
