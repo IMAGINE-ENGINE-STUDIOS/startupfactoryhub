@@ -33,6 +33,8 @@ interface Event {
   max_attendees: number | null;
   is_virtual: boolean | null;
   organizer_id: string;
+  ticket_price_cents?: number;
+  is_paid?: boolean;
 }
 
 const PublicEventRegistration = () => {
@@ -274,6 +276,11 @@ const PublicEventRegistration = () => {
               )}
             </div>
             <CardTitle className="text-2xl">{event.title}</CardTitle>
+            {event.is_paid && event.ticket_price_cents && event.ticket_price_cents > 0 && (
+              <Badge variant="secondary" className="bg-primary/20 text-primary border-primary/30 w-fit">
+                Ticket: ${(event.ticket_price_cents / 100).toFixed(2)} + 10% fee
+              </Badge>
+            )}
             {event.description && (
               <CardDescription className="text-base mt-2 whitespace-pre-wrap">
                 {event.description}
@@ -308,7 +315,8 @@ const PublicEventRegistration = () => {
         </Card>
 
         {/* Registration Form */}
-        {!isEventPast && !isFull ? (
+        {/* Registration Form - only for free events or when not paid */}
+        {!isEventPast && !isFull && (!event.is_paid || !event.ticket_price_cents || event.ticket_price_cents <= 0) ? (
           <Card>
             <CardHeader>
               <CardTitle>Register for This Event</CardTitle>
@@ -426,7 +434,7 @@ const PublicEventRegistration = () => {
               <p className="text-muted-foreground">This event has already ended.</p>
             </CardContent>
           </Card>
-        ) : (
+        ) : isFull ? (
           <Card>
             <CardContent className="py-8 text-center">
               <p className="text-muted-foreground">
@@ -434,7 +442,22 @@ const PublicEventRegistration = () => {
               </p>
             </CardContent>
           </Card>
-        )}
+        ) : event.is_paid && event.ticket_price_cents && event.ticket_price_cents > 0 ? (
+          <Card>
+            <CardContent className="py-8 text-center space-y-4">
+              <p className="text-lg font-semibold">This is a paid event</p>
+              <p className="text-muted-foreground">
+                Ticket price: ${(event.ticket_price_cents / 100).toFixed(2)} + ${(Math.round(event.ticket_price_cents * 0.10) / 100).toFixed(2)} platform fee
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Please log in to purchase a ticket.
+              </p>
+              <Link to="/auth">
+                <Button size="lg">Log In to Buy Ticket</Button>
+              </Link>
+            </CardContent>
+          </Card>
+        ) : null}
 
         {/* Footer */}
         <p className="text-center text-sm text-muted-foreground mt-8">

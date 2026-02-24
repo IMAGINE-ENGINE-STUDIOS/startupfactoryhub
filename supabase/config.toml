@@ -92,3 +92,9 @@ verify_jwt = false
 
 [functions.delete-account]
 verify_jwt = false
+
+[functions.create-event-payment]
+verify_jwt = false
+
+[functions.verify-event-payment]
+verify_jwt = false

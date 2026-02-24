@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar, MapPin, Users, Clock, UserPlus, Check, X, Video, Pencil, ExternalLink, Copy, Link as LinkIcon } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, UserPlus, Check, X, Video, Pencil, ExternalLink, Copy, Link as LinkIcon, Loader2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import VideoConferencing from './VideoConferencing';
@@ -22,10 +22,12 @@ interface Event {
   start_date: string;
   end_date: string;
   location: string | null;
-  meeting_room_url?: string | null;  // Persistent Whereby room URL
+  meeting_room_url?: string | null;
   organizer_id: string;
   max_attendees: number | null;
   external_registration_url?: string | null;
+  ticket_price_cents?: number;
+  is_paid?: boolean;
   profiles?: {
     full_name: string;
   };
@@ -48,6 +50,8 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
   const [userProfile, setUserProfile] = useState<any>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [persistentRoomUrl, setPersistentRoomUrl] = useState<string | null>(event.meeting_room_url || null);
+  const [hasPaidTicket, setHasPaidTicket] = useState(false);
+  const [buyingTicket, setBuyingTicket] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
 
@@ -57,11 +61,44 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
       fetchAttendees();
       fetchUserProfile();
       fetchEventRoomUrl();
+      if (event.is_paid && event.ticket_price_cents && event.ticket_price_cents > 0) {
+        checkTicketPayment();
+      }
       if (user?.id === event.organizer_id) {
         fetchAllUsers();
       }
     }
   }, [open, event.id]);
+
+  const checkTicketPayment = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('event_payments')
+      .select('id')
+      .eq('event_id', event.id)
+      .eq('user_id', user.id)
+      .eq('payment_status', 'paid')
+      .maybeSingle();
+    setHasPaidTicket(!!data);
+  };
+
+  const handleBuyTicket = async () => {
+    if (!user) return;
+    setBuyingTicket(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-event-payment', {
+        body: { eventId: event.id }
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err: any) {
+      toast({ title: 'Payment error', description: err.message || 'Failed to start payment', variant: 'destructive' });
+    } finally {
+      setBuyingTicket(false);
+    }
+  };
 
   // Fetch the persistent room URL from database
   const fetchEventRoomUrl = async () => {
@@ -515,8 +552,43 @@ export function EventDetailsDialog({ open, onOpenChange, event, onEventUpdated }
             </div>
           )}
 
-          {/* Action Buttons */}
-          {user && !isOrganizer && (
+          {/* Paid Event Ticket Section */}
+          {event.is_paid && event.ticket_price_cents && event.ticket_price_cents > 0 && user && !isOrganizer && !hasPaidTicket && (
+            <div className="pt-4 border-t space-y-3">
+              <div className="bg-muted/50 rounded-lg p-4">
+                <p className="text-sm font-medium mb-1">Ticket Price</p>
+                <p className="text-lg font-bold">
+                  ${(event.ticket_price_cents / 100).toFixed(2)}
+                  <span className="text-sm font-normal text-muted-foreground ml-2">
+                    + ${(Math.round(event.ticket_price_cents * 0.10) / 100).toFixed(2)} platform fee
+                  </span>
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Total: ${((event.ticket_price_cents + Math.round(event.ticket_price_cents * 0.10)) / 100).toFixed(2)}
+                </p>
+              </div>
+              <Button
+                onClick={handleBuyTicket}
+                disabled={buyingTicket || (!!isFull)}
+                className="w-full"
+                size="lg"
+              >
+                {buyingTicket ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : isFull ? (
+                  'Event Full'
+                ) : (
+                  `Buy Ticket — $${((event.ticket_price_cents + Math.round(event.ticket_price_cents * 0.10)) / 100).toFixed(2)}`
+                )}
+              </Button>
+            </div>
+          )}
+
+          {/* Action Buttons - Show for free events OR if user already paid */}
+          {user && !isOrganizer && (!event.is_paid || hasPaidTicket) && (
             <div className="flex gap-2 pt-4 border-t">
               <Button
                 onClick={() => updateAttendance('going')}

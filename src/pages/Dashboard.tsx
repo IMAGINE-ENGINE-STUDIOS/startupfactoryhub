@@ -42,6 +42,7 @@ import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useStartupAnalytics } from '@/hooks/useStartupAnalytics';
 import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
 import { useEvents } from '@/hooks/useEvents';
+import { useEventPaymentVerification } from '@/hooks/useEventPaymentVerification';
 import { useUserRole } from '@/hooks/useUserRole';
 import { format, parseISO } from 'date-fns';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
@@ -72,8 +73,10 @@ const Dashboard = () => {
   const analytics = useStartupAnalytics();
   const roadmapProgress = useRoadmapProgress();
   const {
-    upcomingEvents
+    upcomingEvents,
+    refetch: refetchEvents
   } = useEvents();
+  useEventPaymentVerification(refetchEvents);
   const navigate = useNavigate();
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
