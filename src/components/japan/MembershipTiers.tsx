@@ -49,10 +49,10 @@ const tiers = [
     period: "/month",
     icon: Building,
     target: "Founders needing flexible workspace + virtual resources",
-    description: "Adds local IWG coworking space access (1 country) to the community plan",
+    description: "Adds local Startup Factory HUB coworking space access (1 country) to the community plan",
     features: [
       "All Community features",
-      "Local coworking access (1 country)",
+      "Local Startup Factory HUB coworking access (1 country)",
       "Mentor + event access",
       "Eligible for Accelerated Tier",
     ],
