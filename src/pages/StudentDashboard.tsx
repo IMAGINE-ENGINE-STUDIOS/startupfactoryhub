@@ -142,7 +142,6 @@ export default function StudentDashboard() {
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
-            <DistrictRooms />
             <LiveRooms />
           </TabsContent>
 

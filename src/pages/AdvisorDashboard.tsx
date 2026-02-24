@@ -318,7 +318,6 @@ export default function AdvisorDashboard() {
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
-            <DistrictRooms />
             <LiveRooms />
           </TabsContent>
 
