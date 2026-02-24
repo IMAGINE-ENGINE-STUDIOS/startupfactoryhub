@@ -1,130 +1,95 @@
 
 
-## Stripe Payments for Events + 10% Commission on Events and Districts
+## Payouts Management Tab + Event Payment Flow Polish
 
-**Clarification:** Subscriptions are 100% yours -- no commission. The 10% platform commission only applies to user-sold products: **paid events** (ticket sales) and **district creation**.
-
----
-
-### 1. Database Changes
-
-**Add columns to `events` table:**
-- `ticket_price_cents` (bigint, default 0) -- ticket price set by the event organizer in cents
-- `is_paid` (boolean, default false) -- quick flag for filtering
-
-**Create `event_payments` table:**
-- `id` (uuid, PK, default gen_random_uuid())
-- `event_id` (uuid, FK to events)
-- `user_id` (uuid, FK to profiles)
-- `stripe_session_id` (text)
-- `amount_cents` (bigint) -- total charged to user (base + 10%)
-- `platform_fee_cents` (bigint) -- the 10% portion
-- `payment_status` (text, default 'pending')
-- `created_at` (timestamptz, default now())
-- `completed_at` (timestamptz, nullable)
-- RLS: users can read their own payments
+### Overview
+Add a new "Payouts" sub-tab to all 5 profile views (Student, Startup, Investor, Advisor/Mentor, Accelerator) that shows earnings from events and districts. Also ensure the paid event registration flow is fully gated.
 
 ---
 
-### 2. Event Creation -- Add Ticket Price
+### 1. New Component: `ProfilePayoutsTab.tsx`
 
-**File: `src/components/CreateEventDialog.tsx`**
-- Add a "Ticket Price (USD)" number input below "Maximum Attendees"
-- Helper text: "Leave at $0 for free events. A 10% platform fee will be charged to attendees on paid events."
-- On submit, store `ticket_price_cents` (price * 100) and `is_paid` (true if price > 0)
+Create a new shared component that displays:
+- **Earnings Summary Cards**: Total earnings, platform fees paid, net earnings (from events + districts)
+- **Event Earnings Table**: Lists all events the user organized that had paid tickets, showing ticket count sold, total revenue, platform fee, and net payout per event
+- **District Earnings Section**: (Future-ready placeholder) -- currently districts pay creation fees TO the platform, so this section will note "No district payouts yet" or show district creation payments made
+- Data source: Query `event_payments` joined with `events` where `events.organizer_id = current user` and `payment_status = 'paid'`
 
----
-
-### 3. New Edge Function: `create-event-payment`
-
-- Receives `{ eventId }` from an authenticated user
-- Looks up the event to get `ticket_price_cents` and `organizer_id`
-- Calculates total: `Math.round(ticket_price_cents * 1.10)` (10% fee added)
-- Creates a Stripe Checkout session (mode: "payment") with `price_data`
-- Inserts a pending record into `event_payments`
-- Returns the checkout URL
+The component will:
+- Aggregate `amount_cents` and `platform_fee_cents` from `event_payments` for events the user organizes
+- Show a table with columns: Event Name, Tickets Sold, Gross Revenue, Platform Fee (10%), Net Payout
+- Display a summary card at the top with totals
 
 ---
 
-### 4. New Edge Function: `verify-event-payment`
+### 2. Add "Payouts" Tab to All Profile Views
 
-- Receives `{ sessionId }` from frontend after Stripe redirect
-- Retrieves the Stripe session, checks `payment_status === 'paid'`
-- Updates `event_payments` record to `paid`
-- Auto-registers the user as `going` in `event_attendees`
-- Returns success with event ID
+Add a new `TabsTrigger` and `TabsContent` for "Payouts" in each profile view, placed after the "Subscription" tab:
 
----
+**Files to modify:**
+- `src/components/StudentProfileView.tsx` -- add tab (grid-cols-3 becomes grid-cols-4)
+- `src/components/StartupProfileView.tsx` -- add tab
+- `src/components/InvestorProfileView.tsx` -- add tab
+- `src/components/AdvisorProfileView.tsx` -- add tab
+- `src/components/AcceleratorProfileView.tsx` -- add tab
 
-### 5. Event Details -- Payment Gate for Paid Events
-
-**File: `src/components/EventDetailsDialog.tsx`**
-- If event has `ticket_price_cents > 0`:
-  - Show ticket price (e.g., "$25.00 + $2.50 platform fee")
-  - Replace the Going/Maybe/Can't Go buttons with a "Buy Ticket -- $27.50" button
-  - The button calls `create-event-payment`, then redirects to Stripe Checkout
-  - After payment (via URL param `?ticket_paid=1&session_id=...`), verify and show attendance status
-- If user already has a paid `event_payments` record for this event, show the normal RSVP status
-- Free events remain completely unchanged
+Each file gets:
+- Import `ProfilePayoutsTab`
+- New `<TabsTrigger value="payouts">Payouts</TabsTrigger>`
+- New `<TabsContent value="payouts"><ProfilePayoutsTab /></TabsContent>`
 
 ---
 
-### 6. Public Event Registration -- Show Price
+### 3. Verify Event Payment Gate (Already Implemented)
 
-**File: `src/pages/PublicEventRegistration.tsx`**
-- Display ticket price on the event header card if `ticket_price_cents > 0`
-- For paid events, show a "Buy Ticket" button instead of the free registration form
-- The button redirects to Stripe Checkout via `create-event-payment`
+The current implementation already:
+- Shows "Buy Ticket" button for paid events in `EventDetailsDialog.tsx` (line 556-588)
+- Only shows RSVP buttons after payment is confirmed (line 591)
+- Gates external registration page for paid events (line 445-459 in `PublicEventRegistration.tsx`)
+- Checks `hasPaidTicket` state via `event_payments` table query
 
----
-
-### 7. Update useEvents Hook
-
-**File: `src/hooks/useEvents.ts`**
-- Add `ticket_price_cents` and `is_paid` to the `Event` interface
+No changes needed here -- the gate is working correctly.
 
 ---
 
-### 8. District Creation -- Add 10% Fee
+### 4. Public Event Registration Sync
 
-**File: `supabase/functions/create-village-payment/index.ts`**
-- Change `unit_amount` from `20000` ($200) to `22000` ($220)
-- Update the product description to mention the platform fee
-- The extra $20 is the 10% platform commission
+The public registration page (`PublicEventRegistration.tsx`) already:
+- Shows ticket price badge (line 279-283)
+- Blocks free registration form for paid events (line 319)
+- Shows "Log In to Buy Ticket" for paid events (line 445-459)
 
----
-
-### 9. Config Updates
-
-**File: `supabase/config.toml`**
-- Add entries for new edge functions:
-  - `[functions.create-event-payment]` verify_jwt = false
-  - `[functions.verify-event-payment]` verify_jwt = false
+No additional changes needed.
 
 ---
 
-### What Does NOT Change
+### Technical Details
 
-- **Subscriptions** (`create-membership-checkout`, `check-membership`): No changes. 100% of subscription revenue goes to you.
-- **Cohort payments**: No changes to the existing accelerator cohort payment system.
+**New file:**
+- `src/components/ProfilePayoutsTab.tsx`
 
----
+**Modified files (5 profile views):**
+- `src/components/StudentProfileView.tsx`
+- `src/components/StartupProfileView.tsx`
+- `src/components/InvestorProfileView.tsx`
+- `src/components/AdvisorProfileView.tsx`
+- `src/components/AcceleratorProfileView.tsx`
 
-### Fee Summary
+**Database:** No schema changes needed. The `event_payments` table already has all required columns (`event_id`, `user_id`, `amount_cents`, `platform_fee_cents`, `payment_status`).
 
-```text
-Events:
-  Organizer sets ticket price (e.g. $50.00)
-  Platform adds 10% fee
-  Attendee pays: $55.00
-  Platform keeps: $5.00
-
-Districts:
-  Base creation fee: $200.00
-  Platform 10% fee: $20.00
-  User pays: $220.00
-
-Subscriptions:
-  No commission -- 100% revenue to you
+**Query for payouts:**
+```sql
+SELECT 
+  e.id, e.title, e.start_date, e.ticket_price_cents,
+  COUNT(ep.id) as tickets_sold,
+  SUM(ep.amount_cents) as gross_revenue,
+  SUM(ep.platform_fee_cents) as total_platform_fee
+FROM events e
+LEFT JOIN event_payments ep ON ep.event_id = e.id AND ep.payment_status = 'paid'
+WHERE e.organizer_id = :current_user_id AND e.is_paid = true
+GROUP BY e.id
+ORDER BY e.start_date DESC
 ```
+
+This will be implemented using Supabase client queries (two queries: one for user's paid events, one for associated payments, then aggregated in JS).
 
