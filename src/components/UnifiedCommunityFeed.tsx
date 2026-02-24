@@ -39,6 +39,9 @@ interface FeedPost {
     is_virtual?: boolean;
     banner_url?: string;
     max_attendees?: number;
+    external_registration_url?: string;
+    ticket_price_cents?: number;
+    is_paid?: boolean;
   } | null;
   media_urls?: string[] | null;
   shared_post_id?: string | null;
@@ -266,7 +269,10 @@ export default function UnifiedCommunityFeed({
             location: eventInfo.location,
             is_virtual: eventInfo.is_virtual,
             banner_url: eventInfo.banner_url,
-            max_attendees: eventInfo.max_attendees
+            max_attendees: eventInfo.max_attendees,
+            external_registration_url: eventInfo.external_registration_url,
+            ticket_price_cents: eventInfo.ticket_price_cents,
+            is_paid: eventInfo.is_paid,
           };
         }
       }
