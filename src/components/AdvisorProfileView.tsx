@@ -196,7 +196,7 @@ export default function AdvisorProfileView() {
   }
   return <div className="space-y-6">
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="flex w-full overflow-x-auto whitespace-nowrap max-w-lg">
+        <TabsList className="grid w-full grid-cols-3 max-w-lg">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="posts">Your Posts</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>

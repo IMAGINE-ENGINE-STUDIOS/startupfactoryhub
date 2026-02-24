@@ -398,7 +398,7 @@ export default function InvestorProfileView() {
 
       {/* Details */}
       <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className="flex w-full overflow-x-auto whitespace-nowrap max-w-3xl">
+        <TabsList className="grid w-full grid-cols-5 max-w-3xl">
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="preferences">Investment Focus</TabsTrigger>
           <TabsTrigger value="availability">Availability</TabsTrigger>
