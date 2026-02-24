@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { format, differenceInDays, differenceInHours, isPast } from 'date-fns';
-import { Calendar, MapPin, Users, Clock, Heart, MessageCircle, Share, Bookmark, Video, Check, HelpCircle, X, ExternalLink } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, Heart, MessageCircle, Share, Bookmark, Video, Check, HelpCircle, X, ExternalLink, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
@@ -21,6 +21,8 @@ interface EventData {
   banner_url?: string;
   max_attendees?: number;
   external_registration_url?: string;
+  ticket_price_cents?: number;
+  is_paid?: boolean;
 }
 
 interface EventPostCardProps {
@@ -63,6 +65,8 @@ export const EventPostCard = ({
   const [rsvpStatus, setRsvpStatus] = useState<'going' | 'maybe' | 'declined' | null>(null);
   const [attendeeCount, setAttendeeCount] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [hasPaidTicket, setHasPaidTicket] = useState(false);
+  const [buyingTicket, setBuyingTicket] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
   const eventData = post.event_data;
@@ -71,6 +75,9 @@ export const EventPostCard = ({
     if (eventData?.event_id) {
       fetchRSVPStatus();
       fetchAttendeeCount();
+      if (eventData.is_paid && eventData.ticket_price_cents && eventData.ticket_price_cents > 0) {
+        checkTicketPayment();
+      }
     }
   }, [eventData?.event_id, user?.id]);
 
@@ -99,6 +106,39 @@ export const EventPostCard = ({
       .eq('status', 'going');
     
     setAttendeeCount(count || 0);
+  };
+
+  const checkTicketPayment = async () => {
+    if (!user?.id || !eventData?.event_id) return;
+    const { data } = await supabase
+      .from('event_payments')
+      .select('id')
+      .eq('event_id', eventData.event_id)
+      .eq('user_id', user.id)
+      .eq('payment_status', 'paid')
+      .maybeSingle();
+    setHasPaidTicket(!!data);
+  };
+
+  const handleBuyTicket = async () => {
+    if (!user) {
+      toast({ title: 'Please log in to buy a ticket', variant: 'destructive' });
+      return;
+    }
+    setBuyingTicket(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-event-payment', {
+        body: { eventId: eventData.event_id }
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.location.href = data.url;
+      }
+    } catch (err: any) {
+      toast({ title: 'Payment error', description: err.message || 'Failed to start payment', variant: 'destructive' });
+    } finally {
+      setBuyingTicket(false);
+    }
   };
 
   const handleRSVP = async (status: 'going' | 'maybe' | 'declined') => {
@@ -277,6 +317,13 @@ export const EventPostCard = ({
               )}
             </div>
 
+            {/* Ticket Price Badge for paid events */}
+            {eventData.is_paid && eventData.ticket_price_cents && eventData.ticket_price_cents > 0 && (
+              <Badge variant="outline" className="bg-primary/10 text-primary border-primary/30 w-fit text-sm py-1 px-3">
+                🎫 Ticket: ${(eventData.ticket_price_cents / 100).toFixed(2)} + ${(Math.round(eventData.ticket_price_cents * 0.10) / 100).toFixed(2)} fee
+              </Badge>
+            )}
+
             {/* External Registration Link */}
             {eventData.external_registration_url && !isEventPast && (
               <a
@@ -304,8 +351,41 @@ export const EventPostCard = ({
               </Button>
             )}
 
-            {/* RSVP Buttons */}
-            {!isEventPast && (
+            {/* Buy Ticket Button for paid events (not yet paid) */}
+            {!isEventPast && eventData.is_paid && eventData.ticket_price_cents && eventData.ticket_price_cents > 0 && !hasPaidTicket && user && (
+              <Button
+                onClick={handleBuyTicket}
+                disabled={buyingTicket}
+                className="w-full mt-4"
+                size="lg"
+              >
+                {buyingTicket ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Processing...
+                  </>
+                ) : (
+                  `Buy Ticket — $${((eventData.ticket_price_cents + Math.round(eventData.ticket_price_cents * 0.10)) / 100).toFixed(2)}`
+                )}
+              </Button>
+            )}
+
+            {/* Login prompt for paid events when not logged in */}
+            {!isEventPast && eventData.is_paid && eventData.ticket_price_cents && eventData.ticket_price_cents > 0 && !user && (
+              <p className="text-sm text-muted-foreground text-center mt-2">
+                Log in to purchase a ticket for this event.
+              </p>
+            )}
+
+            {/* Paid ticket confirmed badge */}
+            {eventData.is_paid && hasPaidTicket && (
+              <Badge className="bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/30 w-fit">
+                <Check className="w-3 h-3 mr-1" /> Ticket Purchased
+              </Badge>
+            )}
+
+            {/* RSVP Buttons - show for free events OR if user already paid */}
+            {!isEventPast && (!eventData.is_paid || hasPaidTicket) && (
               <div className="flex flex-wrap gap-2 mt-4">
                 <Button 
                   variant={rsvpStatus === 'going' ? 'default' : 'outline'}
