@@ -37,9 +37,9 @@ const TIER_CONFIG: Record<string, { icon: typeof Zap; gradient: string; glow: st
     icon: Crown,
     gradient: 'from-purple-500 to-pink-500',
     glow: 'shadow-purple-500/20',
-    description: 'All platform features + unlimited office global access (130+ countries, 5,600+ sites).',
+    description: 'All platform features + unlimited office global access across Startup Factory Hub network (130+ countries, 5,600+ sites).',
     bestFor: 'Globally distributed teams, traveling founders',
-    features: ['All features + global private office access', 'Eligible for Accelerated Tier'],
+    features: ['All features + global private office access across Startup Factory Hub network', 'Eligible for Accelerated Tier'],
   },
   corporate: {
     icon: Users,
