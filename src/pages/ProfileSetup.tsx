@@ -11,10 +11,11 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Building, MapPin, Users, DollarSign, Target, Plus, X } from "lucide-react";
+import { Building, MapPin, Users, DollarSign, Target, Plus, X, Trash2 } from "lucide-react";
 import AvatarUpload from "@/components/AvatarUpload";
 import CompanyLogoUpload from "@/components/CompanyLogoUpload";
 import { PasswordChangeDialog } from "@/components/PasswordChangeDialog";
+import { DeleteAccountDialog } from "@/components/DeleteAccountDialog";
 
 type UserRole = 'startup' | 'advisor' | 'investor' | 'student' | 'mentor' | 'accelerator';
 
@@ -25,6 +26,7 @@ const ProfileSetup = () => {
   const [currentSkill, setCurrentSkill] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingExistingRole, setCheckingExistingRole] = useState(true);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [formData, setFormData] = useState({
     company_name: "",
     organization_name: "",
@@ -740,6 +742,30 @@ const ProfileSetup = () => {
             </div>
           </CardContent>
         </Card>
+
+        {/* Delete Account Section */}
+        <Card className="border-destructive/30 mt-6">
+          <CardContent className="pt-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-semibold text-destructive">Delete Account</h3>
+                <p className="text-sm text-muted-foreground">
+                  Permanently delete your account and all associated data. This action cannot be undone.
+                </p>
+              </div>
+              <Button 
+                variant="destructive" 
+                onClick={() => setDeleteDialogOpen(true)}
+                className="shrink-0"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Account
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <DeleteAccountDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} />
       </div>
     </div>
   );
