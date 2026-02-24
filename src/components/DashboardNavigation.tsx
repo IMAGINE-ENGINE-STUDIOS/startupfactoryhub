@@ -37,10 +37,12 @@ import {
   FileText,
   Brain,
   BookOpen,
-  KeyRound
+  KeyRound,
+  Trash2
 } from "lucide-react";
 import RecommendationPopup from "./RecommendationPopup";
 import { PasswordChangeDialog } from "./PasswordChangeDialog";
+import { DeleteAccountDialog } from "./DeleteAccountDialog";
 
 const DashboardNavigation = () => {
   const navigate = useNavigate();
@@ -50,6 +52,7 @@ const DashboardNavigation = () => {
   const [recommendationCount, setRecommendationCount] = useState(0);
   const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
   const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   const handleRecommendationsLoad = (count: number) => {
     if (count > 0 && count !== recommendationCount) {
@@ -173,6 +176,10 @@ const DashboardNavigation = () => {
                     <KeyRound className="mr-2 h-4 w-4" />
                     <span>Change Password</span>
                   </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setDeleteDialogOpen(true)} className="text-destructive focus:text-destructive">
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    <span>Delete Account</span>
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleLogout}>
                     <LogOut className="mr-2 h-4 w-4" />
@@ -217,6 +224,9 @@ const DashboardNavigation = () => {
       
       {/* Password Change Dialog */}
       <PasswordChangeDialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen} />
+      
+      {/* Delete Account Dialog */}
+      <DeleteAccountDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen} />
     </>
   );
 };
