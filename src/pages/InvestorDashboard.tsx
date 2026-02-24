@@ -90,7 +90,7 @@ export default function InvestorDashboard() {
     upcomingEvents
   } = useEvents();
   useEffect(() => {
-    const pending = pitchMeetings.filter(m => m.status === 'pending').length;
+    const pending = pitchMeetings.filter((m) => m.status === 'pending').length;
     setPendingPitchesCount(pending);
   }, [pitchMeetings]);
   useEffect(() => {
@@ -114,7 +114,7 @@ export default function InvestorDashboard() {
       event: 'UPDATE',
       schema: 'public',
       table: 'companies'
-    }, payload => {
+    }, (payload) => {
       // Check if the updated company is in our portfolio
       if (companyIds.includes(payload.new.id)) {
         // Refresh investments to get latest data
@@ -177,7 +177,7 @@ export default function InvestorDashboard() {
     }
 
     // Get company IDs for platform companies only
-    const companyIds = investmentData.filter(i => i.company_id).map(i => i.company_id);
+    const companyIds = investmentData.filter((i) => i.company_id).map((i) => i.company_id);
 
     // Get latest valuations for each platform company
     let latestValuations: Record<string, any> = {};
@@ -189,7 +189,7 @@ export default function InvestorDashboard() {
       });
 
       // Group valuations by company and get latest
-      valuations?.forEach(v => {
+      valuations?.forEach((v) => {
         if (!latestValuations[v.company_id]) {
           latestValuations[v.company_id] = v;
         }
@@ -197,7 +197,7 @@ export default function InvestorDashboard() {
     }
 
     // Combine with investment data
-    const portfolioData = investmentData.map(inv => ({
+    const portfolioData = investmentData.map((inv) => ({
       ...inv,
       latestValuation: inv.company_id ? latestValuations[inv.company_id]?.valuation_amount || inv.valuation_at_investment || 0 : inv.valuation_at_investment || 0 // External companies use initial valuation
     }));
@@ -226,12 +226,12 @@ export default function InvestorDashboard() {
     });
     if (!error && data) {
       // Fetch startup profiles separately
-      const startupIds = [...new Set(data.map(m => m.startup_id))];
+      const startupIds = [...new Set(data.map((m) => m.startup_id))];
       const {
         data: profiles
       } = await supabase.from('profiles').select('user_id, full_name, avatar_url').in('user_id', startupIds);
-      const profileMap = new Map(profiles?.map(p => [p.user_id, p]) || []);
-      const enrichedData = data.map(meeting => ({
+      const profileMap = new Map(profiles?.map((p) => [p.user_id, p]) || []);
+      const enrichedData = data.map((meeting) => ({
         ...meeting,
         startup: profileMap.get(meeting.startup_id) || {
           full_name: 'Unknown',
@@ -255,7 +255,7 @@ export default function InvestorDashboard() {
       });
 
       // Send notification to startup
-      const meeting = pitchMeetings.find(m => m.id === pitchId);
+      const meeting = pitchMeetings.find((m) => m.id === pitchId);
       if (meeting) {
         await supabase.from('notifications').insert({
           user_id: meeting.startup_id,
@@ -288,7 +288,7 @@ export default function InvestorDashboard() {
       });
 
       // Send notification to startup
-      const meeting = pitchMeetings.find(m => m.id === pitchId);
+      const meeting = pitchMeetings.find((m) => m.id === pitchId);
       if (meeting) {
         await supabase.from('notifications').insert({
           user_id: meeting.startup_id,
@@ -319,7 +319,7 @@ export default function InvestorDashboard() {
         title: 'Outcome Updated',
         description: `Pitch marked as "${outcome?.replace('_', ' ') || 'unmarked'}"`
       });
-      setPitchMeetings(prev => prev.map(m => m.id === pitchId ? {
+      setPitchMeetings((prev) => prev.map((m) => m.id === pitchId ? {
         ...m,
         outcome
       } : m));
@@ -464,7 +464,7 @@ export default function InvestorDashboard() {
     const {
       data: existingInvestments
     } = await supabase.from('investments').select('company_id').eq('investor_id', user.id);
-    const investedCompanyIds = existingInvestments?.map(i => i.company_id) || [];
+    const investedCompanyIds = existingInvestments?.map((i) => i.company_id) || [];
     const {
       data,
       error
@@ -499,7 +499,7 @@ export default function InvestorDashboard() {
     if (!portfolioValuations.length || !investorProfile?.total_invested) return '0.0%';
     let totalInvested = 0;
     let totalCurrentValue = 0;
-    portfolioValuations.forEach(inv => {
+    portfolioValuations.forEach((inv) => {
       totalInvested += inv.amount || 0;
 
       // Calculate current value based on equity % and latest valuation
@@ -560,41 +560,45 @@ export default function InvestorDashboard() {
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
-            <TabsList className="flex w-full whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
-              <TabsTrigger value="social" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+            <TabsList className="inline-flex w-auto lg:grid lg:w-full lg:grid-cols-9 max-w-7xl whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
+              <TabsTrigger value="social" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Social</span>
               </TabsTrigger>
-              <TabsTrigger value="network" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+              <TabsTrigger value="meetings" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Video className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Meetings</span>
+              </TabsTrigger>
+              <TabsTrigger value="network" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Network className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Network</span>
               </TabsTrigger>
-              <TabsTrigger value="portfolio" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+              <TabsTrigger value="portfolio" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Building className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Portfolio</span>
               </TabsTrigger>
-              <TabsTrigger value="pitches" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Video className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Meetings</span>
+              <TabsTrigger value="pitches" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Briefcase className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Pitches</span>
                 {pendingPitchesCount > 0}
               </TabsTrigger>
-              <TabsTrigger value="calendar" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+              <TabsTrigger value="calendar" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <CalendarIcon className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Calendar</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+              <TabsTrigger value="analytics" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <BarChart className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Analytics</span>
               </TabsTrigger>
-              <TabsTrigger value="intelligence" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+              <TabsTrigger value="intelligence" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Brain className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Intelligence</span>
               </TabsTrigger>
-              <TabsTrigger value="tools" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+              <TabsTrigger value="tools" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Wrench className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Tools</span>
               </TabsTrigger>
-              <TabsTrigger value="resources" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+              <TabsTrigger value="resources" className="flex-shrink-0 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Resources</span>
               </TabsTrigger>
@@ -640,7 +644,7 @@ export default function InvestorDashboard() {
                     <p className="text-sm">Click "Record Investment" to add your first investment</p>
                   </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {investments.map((investment: any) => {
-                  const portfolioItem = portfolioValuations.find(p => p.company_id === investment.id);
+                  const portfolioItem = portfolioValuations.find((p) => p.company_id === investment.id);
                   const currentValue = portfolioItem?.equity_percentage && portfolioItem?.latestValuation ? portfolioItem.latestValuation * portfolioItem.equity_percentage / 100 : investment.funding_amount;
                   const investedAmount = portfolioItem?.amount || investment.funding_amount || 0;
                   const roi = investedAmount > 0 ? (currentValue - investedAmount) / investedAmount * 100 : 0;
@@ -732,9 +736,6 @@ export default function InvestorDashboard() {
 
           {/* Pitches Tab - Reorganized into 4 sections */}
           <TabsContent value="pitches" className="space-y-8">
-            {/* Live Rooms */}
-            <LiveRooms />
-
             {/* 1. Incoming Pitch Requests (from startups TO investor) */}
             <div className="space-y-3 sm:space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
@@ -747,15 +748,15 @@ export default function InvestorDashboard() {
                     <p className="text-xs sm:text-sm text-muted-foreground truncate">Startup pitch meeting requests</p>
                   </div>
                 </div>
-                {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length > 0 && <Badge className="bg-amber-500 text-white w-fit text-xs">
-                    {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length} pending
+                {pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.startup_id).length > 0 && <Badge className="bg-amber-500 text-white w-fit text-xs">
+                    {pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.startup_id).length} pending
                   </Badge>}
               </div>
-              {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).length === 0 ? <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+              {pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.startup_id).length === 0 ? <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
                   <Briefcase className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
                   <p className="text-muted-foreground">No incoming pitch requests</p>
                 </div> : <div className="grid gap-4">
-                  {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.startup_id).map(meeting => <PitchMeetingCard key={meeting.id} meeting={meeting} variant="incoming" viewerType="investor" onAccept={handleAcceptPitch} onReject={handleRejectPitch} />)}
+                  {pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.startup_id).map((meeting) => <PitchMeetingCard key={meeting.id} meeting={meeting} variant="incoming" viewerType="investor" onAccept={handleAcceptPitch} onReject={handleRejectPitch} />)}
                 </div>}
             </div>
 
@@ -771,15 +772,15 @@ export default function InvestorDashboard() {
                     <p className="text-xs sm:text-sm text-muted-foreground truncate">Your pitch requests to startups</p>
                   </div>
                 </div>
-                {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && <Badge variant="secondary" className="w-fit text-xs">
-                    {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length} pending
+                {pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.investor_id).length > 0 && <Badge variant="secondary" className="w-fit text-xs">
+                    {pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.investor_id).length} pending
                   </Badge>}
               </div>
-              {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).length === 0 ? <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+              {pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.investor_id).length === 0 ? <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
                   <Clock className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
                   <p className="text-muted-foreground">No pending sent requests</p>
                 </div> : <div className="grid gap-4">
-                  {pitchMeetings.filter(m => m.status === 'pending' && m.host_id === m.investor_id).map(meeting => <PitchMeetingCard key={meeting.id} meeting={meeting} variant="sent" viewerType="investor" />)}
+                  {pitchMeetings.filter((m) => m.status === 'pending' && m.host_id === m.investor_id).map((meeting) => <PitchMeetingCard key={meeting.id} meeting={meeting} variant="sent" viewerType="investor" />)}
                 </div>}
             </div>
 
@@ -794,11 +795,11 @@ export default function InvestorDashboard() {
                   <p className="text-xs sm:text-sm text-muted-foreground truncate">Confirmed pitch meetings</p>
                 </div>
               </div>
-              {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length === 0 ? <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+              {pitchMeetings.filter((m) => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).length === 0 ? <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
                   <CalendarIcon className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
                   <p className="text-muted-foreground">No upcoming pitch meetings</p>
                 </div> : <div className="grid gap-4">
-                  {pitchMeetings.filter(m => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime()).map(meeting => <PitchMeetingCard key={meeting.id} meeting={meeting} variant="upcoming" viewerType="investor" onJoin={setActiveVideoUrl} />)}
+                  {pitchMeetings.filter((m) => m.status === 'scheduled' && new Date(m.scheduled_date) >= new Date()).sort((a, b) => new Date(a.scheduled_date).getTime() - new Date(b.scheduled_date).getTime()).map((meeting) => <PitchMeetingCard key={meeting.id} meeting={meeting} variant="upcoming" viewerType="investor" onJoin={setActiveVideoUrl} />)}
                 </div>}
             </div>
 
@@ -813,11 +814,11 @@ export default function InvestorDashboard() {
                   <p className="text-xs sm:text-sm text-muted-foreground truncate">Completed meetings history</p>
                 </div>
               </div>
-              {pitchMeetings.filter(m => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).length === 0 ? <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
+              {pitchMeetings.filter((m) => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).length === 0 ? <div className="text-center py-12 rounded-xl border border-dashed border-muted-foreground/20">
                   <Clock className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
                   <p className="text-muted-foreground">No past pitch meetings</p>
                 </div> : <div className="grid gap-4">
-                  {pitchMeetings.filter(m => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime()).map(meeting => <PitchMeetingCard key={meeting.id} meeting={meeting} variant="past" viewerType="investor" onOutcomeChange={handleOutcomeChange} />)}
+                  {pitchMeetings.filter((m) => (m.status === 'scheduled' || m.status === 'completed') && new Date(m.scheduled_date) < new Date()).sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime()).map((meeting) => <PitchMeetingCard key={meeting.id} meeting={meeting} variant="past" viewerType="investor" onOutcomeChange={handleOutcomeChange} />)}
                 </div>}
             </div>
           </TabsContent>
@@ -848,7 +849,7 @@ export default function InvestorDashboard() {
                 <CardContent>
                   <ScrollArea className="w-full">
                     <div className="flex gap-4 pb-4">
-                      {upcomingEvents.slice(0, 6).map(event => <div key={event.id} className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]" onClick={() => {
+                      {upcomingEvents.slice(0, 6).map((event) => <div key={event.id} className="group cursor-pointer flex-shrink-0 w-[300px] sm:w-[350px]" onClick={() => {
                     setSelectedEvent(event);
                     setShowEventDetails(true);
                   }}>
@@ -865,7 +866,7 @@ export default function InvestorDashboard() {
                                 </div>
                                 {event.location && <div className="flex items-center gap-2">
                                     <MapPin className="h-3 w-3" />
-                                    {event.location.startsWith('http') ? <a href={event.location} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline line-clamp-1" onClick={e => e.stopPropagation()}>
+                                    {event.location.startsWith('http') ? <a href={event.location} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline line-clamp-1" onClick={(e) => e.stopPropagation()}>
                                         {event.location}
                                       </a> : <span className="line-clamp-1">{event.location}</span>}
                                   </div>}
@@ -885,7 +886,7 @@ export default function InvestorDashboard() {
               </Card>}
             
             {/* Unified Calendar - IN MIDDLE */}
-            <UnifiedCalendar showCreateButton={false} userRole="investor" filterTypes={['event', 'session', 'pitch']} onItemClick={item => {
+            <UnifiedCalendar showCreateButton={false} userRole="investor" filterTypes={['event', 'session', 'pitch']} onItemClick={(item) => {
             if (item.type === 'event') {
               setSelectedEvent(item);
               setShowEventDetails(true);
@@ -898,23 +899,27 @@ export default function InvestorDashboard() {
           <TabsContent value="profile" className="space-y-4">
             <InvestorProfileView />
             
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5" />
-                  Your Posts
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
-              </CardContent>
-            </Card>
+            
+
+
+
+
+
+
+
+
+
+
           </TabsContent>
 
           <TabsContent value="social" className="space-y-4">
             <UnifiedCommunityFeed interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
           </TabsContent>
 
+          <TabsContent value="meetings" className="space-y-4">
+            <DistrictRooms />
+            <LiveRooms />
+          </TabsContent>
 
           <TabsContent value="analytics" className="space-y-4">
             <AnalyticsDashboard />
@@ -936,7 +941,7 @@ export default function InvestorDashboard() {
         </Tabs>
 
         {/* Video Conferencing Dialog */}
-        <Dialog open={!!activeVideoUrl} onOpenChange={open => !open && setActiveVideoUrl(undefined)}>
+        <Dialog open={!!activeVideoUrl} onOpenChange={(open) => !open && setActiveVideoUrl(undefined)}>
           <DialogContent className="max-w-5xl h-[80vh]">
             <DialogHeader>
               <DialogTitle>Video Conference</DialogTitle>
@@ -972,13 +977,13 @@ export default function InvestorDashboard() {
     }} />}
 
       {/* Platform Company Profile Dialog */}
-      <StartupProfileDialog company={selectedPortfolioCompany} open={showPortfolioDialog} onOpenChange={open => {
+      <StartupProfileDialog company={selectedPortfolioCompany} open={showPortfolioDialog} onOpenChange={(open) => {
       setShowPortfolioDialog(open);
       if (!open) setSelectedPortfolioCompany(null);
     }} />
 
       {/* External Investment Details Dialog */}
-      <Dialog open={showExternalDialog} onOpenChange={open => {
+      <Dialog open={showExternalDialog} onOpenChange={(open) => {
       setShowExternalDialog(open);
       if (!open) setSelectedExternalInvestment(null);
     }}>
