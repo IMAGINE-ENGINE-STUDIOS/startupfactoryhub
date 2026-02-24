@@ -65,10 +65,10 @@ const tiers = [
     period: "/month",
     icon: Crown,
     target: "Globally distributed teams, traveling founders",
-    description: "All platform features + unlimited global office access (130+ countries, 5,600+ sites)",
+    description: "All platform features + unlimited office global access across Startup Factory Hub network (130+ countries, 5,600+ sites)",
     features: [
       "All platform features",
-      "Global private office access",
+      "Global private office access across Startup Factory Hub network",
       "130+ countries, 5,600+ sites",
       "Eligible for Accelerated Tier",
     ],
