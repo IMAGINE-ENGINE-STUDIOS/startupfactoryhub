@@ -140,7 +140,7 @@ export default function PitchDeckUpload({ companyId, currentDeckUrl, onUploadCom
   };
 
   return (
-    <Card className="border-border/50">
+    <Card className="tech-card border-0">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <FileText className="h-5 w-5 text-primary" />
@@ -197,7 +197,7 @@ export default function PitchDeckUpload({ companyId, currentDeckUrl, onUploadCom
           <div>
             <Label 
               htmlFor="deck-upload" 
-              className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-border/50 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
+              className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-primary/30 rounded-lg cursor-pointer hover:bg-muted/50 transition-colors"
             >
               {uploading ? (
                 <>
