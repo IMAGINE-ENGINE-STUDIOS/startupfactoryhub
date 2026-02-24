@@ -52,16 +52,23 @@ async function fetchJson(url: string, apiKey: string): Promise<any> {
 function mapRecord(hit: any) {
   // The catalog API v2 nests data differently — handle multiple possible structures
   const src = hit._source || hit.source || hit || {};
+  // Primary data lives in src.record for v2 API responses
+  const rec = src.record || {};
 
-  // Title can be in many places
+  console.log('mapRecord src keys:', Object.keys(src).join(', '));
+  console.log('mapRecord rec keys:', Object.keys(rec).join(', '));
+
+  // Title
   const title =
+    rec.title ||
     src.title ||
     src.description?.title ||
-    src.record?.title ||
     'Untitled Record';
 
   // Date
   const date =
+    rec.coverageDates?.proposableQualifiableDate ||
+    rec.dateNote ||
     src.date ||
     src.coverageDates?.proposableQualifiableDate ||
     src.description?.coverageDates?.proposableQualifiableDate ||
@@ -71,6 +78,7 @@ function mapRecord(hit: any) {
 
   // Creator
   const creatingOrgs =
+    rec.creatingOrganizations ||
     src.creatingOrganizations ||
     src.description?.creatingOrganizations ||
     [];
@@ -78,6 +86,8 @@ function mapRecord(hit: any) {
 
   // Description text
   const description =
+    rec.scopeAndContentNote ||
+    rec.generalNote ||
     src.scopeAndContentNote ||
     src.description?.scopeAndContentNote ||
     src.generalNote ||
@@ -87,13 +97,14 @@ function mapRecord(hit: any) {
 
   // Level / type
   const type =
+    rec.levelOfDescription ||
     src.levelOfDescription ||
     src.description?.levelOfDescription ||
     src.type ||
     'Record';
 
   // Digital objects
-  const rawObjects = src.digitalObjects || src.description?.digitalObjects || [];
+  const rawObjects = rec.digitalObjects || src.digitalObjects || src.description?.digitalObjects || [];
   const digitalObjects = rawObjects.map((obj: any) => ({
     id: obj.objectId || obj.id || String(Math.random()),
     thumbnailUrl: obj.thumbnailUrl || obj.thumbnail || null,
@@ -102,9 +113,7 @@ function mapRecord(hit: any) {
     title: obj.objectDescription || obj.description || obj.title || null,
   }));
 
-  const naId = src.naId || hit._id || hit.id || '';
-
-  console.log('mapRecord raw src keys:', Object.keys(src).join(', '));
+  const naId = rec.naId || src.naId || hit._id || hit.id || '';
 
   return {
     id: String(naId),
@@ -114,14 +123,14 @@ function mapRecord(hit: any) {
     date,
     creator,
     description,
-    series: src.series?.title || src.description?.series?.title || null,
-    accessLevel: src.accessLevel || 'public',
+    series: rec.series?.title || src.series?.title || src.description?.series?.title || null,
+    accessLevel: rec.accessLevel || src.accessLevel || 'public',
     thumbnailUrl: digitalObjects[0]?.thumbnailUrl || null,
     digitalObjects,
     url: `https://catalog.archives.gov/id/${naId}`,
-    scopeAndContentNote: src.scopeAndContentNote || src.description?.scopeAndContentNote || null,
-    arrangementNote: src.arrangementNote || src.description?.arrangementNote || null,
-    accessRestriction: src.accessRestriction?.status || src.description?.accessRestriction?.status || null,
+    scopeAndContentNote: rec.scopeAndContentNote || src.scopeAndContentNote || src.description?.scopeAndContentNote || null,
+    arrangementNote: rec.arrangementNote || src.arrangementNote || src.description?.arrangementNote || null,
+    accessRestriction: rec.accessRestriction?.status || src.accessRestriction?.status || src.description?.accessRestriction?.status || null,
   };
 }
 
