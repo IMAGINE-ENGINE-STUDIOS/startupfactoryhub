@@ -876,7 +876,6 @@ export default function InvestorDashboard() {
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
-            <DistrictRooms />
             <LiveRooms />
 
             {/* Pitches Section */}
