@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://startupfactoryhub.com/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>
+  <url><loc>https://startupfactoryhub.com/about</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://startupfactoryhub.com/blog</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+  <url><loc>https://startupfactoryhub.com/sponsorship</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://startupfactoryhub.com/partners</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://startupfactoryhub.com/resources</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://startupfactoryhub.com/lightpaper</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://startupfactoryhub.com/guidelines</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://startupfactoryhub.com/overview</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://startupfactoryhub.com/hubs</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://startupfactoryhub.com/japan-accelerator</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://startupfactoryhub.com/join/mentor</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://startupfactoryhub.com/join/advisor</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://startupfactoryhub.com/mvp-program</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://startupfactoryhub.com/privacy-policy</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://startupfactoryhub.com/terms-of-service</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://startupfactoryhub.com/cookie-policy</loc><changefreq>yearly</changefreq><priority>0.5</priority></url>
+</urlset>
