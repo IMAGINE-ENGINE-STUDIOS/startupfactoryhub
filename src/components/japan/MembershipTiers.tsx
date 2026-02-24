@@ -38,6 +38,7 @@ const tiers = [
       "Community & mentor interactions",
       "Full resource library access",
       "AI tools (limited)",
+      "Local Startup Factory HUB coworking space access (1 country)",
     ],
     color: "from-blue-500 to-cyan-500",
     popular: false,
