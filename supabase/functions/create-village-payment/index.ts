@@ -57,7 +57,7 @@ serve(async (req) => {
     const typeLabel = villageType === "democratic_republic" ? "Democratic Republic" : "Merchant Village";
     const privateMode = villageType === "merchant_village" && isPrivate === true;
 
-    // $200 base fee = 20000 cents
+    // $200 base fee + 10% platform commission = $220 = 22000 cents
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email!,
@@ -67,13 +67,13 @@ serve(async (req) => {
             currency: "usd",
             product_data: {
               name: `District Creation — ${typeLabel}`,
-              description: `Create "${villageName}" as a ${typeLabel}. ${
+              description: `Create "${villageName}" as a ${typeLabel}. Base fee: $200 + 10% platform fee ($20). ${
                 villageType === "merchant_village"
                   ? "Merchant districts have no election system. API usage is billed at 2× standard rates."
                   : "Democratic Republic districts feature an election-based governance system."
               }`,
             },
-            unit_amount: 20000, // $200
+            unit_amount: 22000, // $220 ($200 + 10% platform fee)
           },
           quantity: 1,
         },

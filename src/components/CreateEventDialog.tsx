@@ -35,7 +35,8 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
     max_attendees: '',
     banner_url: '',
     post_to_feed: true,
-    external_registration_url: ''
+    external_registration_url: '',
+    ticket_price: ''
   });
   
   // Geocoding state
@@ -194,11 +195,14 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         }
       }
 
+      const ticketPriceCents = formData.ticket_price ? Math.round(parseFloat(formData.ticket_price) * 100) : 0;
+      const isPaidEvent = ticketPriceCents > 0;
+
       const { data: eventData, error } = await supabase.from('events').insert({
         title: formData.title,
         description: formData.description,
         location: meetingLocation || null,
-        meeting_room_url: isOnlineEvent && meetingLocation ? meetingLocation : null,  // Store persistent room URL
+        meeting_room_url: isOnlineEvent && meetingLocation ? meetingLocation : null,
         start_date: startDateTime.toISOString(),
         end_date: endDateTime.toISOString(),
         max_attendees: formData.max_attendees ? parseInt(formData.max_attendees) : null,
@@ -211,6 +215,8 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         city: !isOnlineEvent && selectedCoords ? selectedCoords.city : null,
         country: !isOnlineEvent && selectedCoords ? selectedCoords.country : null,
         external_registration_url: formData.external_registration_url || null,
+        ticket_price_cents: ticketPriceCents,
+        is_paid: isPaidEvent,
       } as any).select().single();
 
       if (error) throw error;
@@ -256,7 +262,8 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
         max_attendees: '',
         banner_url: '',
         post_to_feed: true,
-        external_registration_url: ''
+        external_registration_url: '',
+        ticket_price: ''
       });
       setIsOnlineEvent(false);
       setSelectedCoords(null);
@@ -474,6 +481,23 @@ export function CreateEventDialog({ open, onOpenChange, onEventCreated }: Create
               onChange={e => setFormData(prev => ({ ...prev, max_attendees: e.target.value }))}
               placeholder="Leave empty for unlimited"
             />
+          </div>
+
+          {/* Ticket Price */}
+          <div className="space-y-2">
+            <Label htmlFor="ticket_price">Ticket Price (USD)</Label>
+            <Input
+              id="ticket_price"
+              type="number"
+              min="0"
+              step="0.01"
+              value={formData.ticket_price}
+              onChange={e => setFormData(prev => ({ ...prev, ticket_price: e.target.value }))}
+              placeholder="0.00 (free)"
+            />
+            <p className="text-xs text-muted-foreground">
+              Leave at $0 for free events. A 10% platform fee will be charged to attendees on paid events.
+            </p>
           </div>
 
           {/* External Registration URL */}

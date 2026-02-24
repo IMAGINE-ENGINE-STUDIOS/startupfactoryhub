@@ -2095,6 +2095,50 @@ export type Database = {
           },
         ]
       }
+      event_payments: {
+        Row: {
+          amount_cents: number
+          completed_at: string | null
+          created_at: string
+          event_id: string
+          id: string
+          payment_status: string
+          platform_fee_cents: number
+          stripe_session_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents?: number
+          completed_at?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          payment_status?: string
+          platform_fee_cents?: number
+          stripe_session_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          completed_at?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          payment_status?: string
+          platform_fee_cents?: number
+          stripe_session_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_payments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           banner_url: string | null
@@ -2106,6 +2150,7 @@ export type Database = {
           external_registration_url: string | null
           host_id: string | null
           id: string
+          is_paid: boolean
           is_public: boolean | null
           is_virtual: boolean | null
           latitude: number | null
@@ -2115,6 +2160,7 @@ export type Database = {
           meeting_room_url: string | null
           organizer_id: string
           start_date: string
+          ticket_price_cents: number
           title: string
           updated_at: string | null
         }
@@ -2128,6 +2174,7 @@ export type Database = {
           external_registration_url?: string | null
           host_id?: string | null
           id?: string
+          is_paid?: boolean
           is_public?: boolean | null
           is_virtual?: boolean | null
           latitude?: number | null
@@ -2137,6 +2184,7 @@ export type Database = {
           meeting_room_url?: string | null
           organizer_id: string
           start_date: string
+          ticket_price_cents?: number
           title: string
           updated_at?: string | null
         }
@@ -2150,6 +2198,7 @@ export type Database = {
           external_registration_url?: string | null
           host_id?: string | null
           id?: string
+          is_paid?: boolean
           is_public?: boolean | null
           is_virtual?: boolean | null
           latitude?: number | null
@@ -2159,6 +2208,7 @@ export type Database = {
           meeting_room_url?: string | null
           organizer_id?: string
           start_date?: string
+          ticket_price_cents?: number
           title?: string
           updated_at?: string | null
         }
