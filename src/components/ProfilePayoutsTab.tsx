@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { DollarSign, TrendingUp, Percent, Calendar, Gift } from 'lucide-react';
+import { Gift } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { format } from 'date-fns';
 import PayoutAccountSetup from './PayoutAccountSetup';
+import PayoutEarningsOverview from './payouts/PayoutEarningsOverview';
+import PayoutEventEarnings from './payouts/PayoutEventEarnings';
+import PayoutWithdrawalHistory from './payouts/PayoutWithdrawalHistory';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
@@ -26,11 +26,13 @@ export default function ProfilePayoutsTab() {
   const [earnings, setEarnings] = useState<EventEarning[]>([]);
   const [loading, setLoading] = useState(true);
   const [referralAccount, setReferralAccount] = useState<any>(null);
+  const [totalWithdrawn, setTotalWithdrawn] = useState(0);
 
   useEffect(() => {
     if (user?.id) {
       fetchEarnings();
       fetchReferralAccount();
+      fetchWithdrawnTotal();
     }
   }, [user?.id]);
 
@@ -44,10 +46,19 @@ export default function ProfilePayoutsTab() {
     setReferralAccount(data);
   };
 
+  const fetchWithdrawnTotal = async () => {
+    if (!user?.id) return;
+    const { data } = await supabase
+      .from('payout_requests')
+      .select('amount_cents, status')
+      .eq('user_id', user.id)
+      .in('status', ['pending', 'processing', 'completed']);
+    setTotalWithdrawn((data || []).reduce((sum, w) => sum + (w.amount_cents || 0), 0));
+  };
+
   const fetchEarnings = async () => {
     if (!user?.id) return;
     setLoading(true);
-
     try {
       const { data: events } = await supabase
         .from('events')
@@ -78,7 +89,7 @@ export default function ProfilePayoutsTab() {
         earningsMap.set(p.event_id, existing);
       });
 
-      const result: EventEarning[] = events.map(e => {
+      setEarnings(events.map(e => {
         const agg = earningsMap.get(e.id) || { tickets: 0, gross: 0, fees: 0 };
         return {
           eventId: e.id,
@@ -90,9 +101,7 @@ export default function ProfilePayoutsTab() {
           platformFee: agg.fees,
           netPayout: agg.gross - agg.fees,
         };
-      });
-
-      setEarnings(result);
+      }));
     } catch (err) {
       console.error('Error fetching earnings:', err);
     } finally {
@@ -105,6 +114,9 @@ export default function ProfilePayoutsTab() {
   const totalGross = earnings.reduce((sum, e) => sum + e.grossRevenue, 0);
   const totalFees = earnings.reduce((sum, e) => sum + e.platformFee, 0);
   const totalNet = totalGross - totalFees;
+  const referralEarnings = referralAccount?.total_earned_cents || 0;
+  const allTimeNet = totalNet + referralEarnings;
+  const availableBalance = allTimeNet - totalWithdrawn;
 
   if (loading) {
     return (
@@ -119,6 +131,15 @@ export default function ProfilePayoutsTab() {
       {/* Payout Account Setup */}
       <PayoutAccountSetup />
 
+      {/* Earnings Overview */}
+      <PayoutEarningsOverview
+        totalGross={totalGross + referralEarnings}
+        totalFees={totalFees}
+        totalNet={allTimeNet}
+        totalWithdrawn={totalWithdrawn}
+        availableBalance={availableBalance}
+      />
+
       {/* Referral Earnings Quick Link */}
       <Card className="tech-card border-0">
         <CardContent className="p-6">
@@ -128,10 +149,9 @@ export default function ProfilePayoutsTab() {
               <div>
                 <p className="font-medium">Referral Program</p>
                 <p className="text-sm text-muted-foreground">
-                  {referralAccount 
+                  {referralAccount
                     ? `${referralAccount.total_referrals || 0} referrals · ${formatCents(referralAccount.total_earned_cents || 0)} earned`
-                    : 'Earn 20% commission on referred subscriptions'
-                  }
+                    : 'Earn 20% commission on referred subscriptions'}
                 </p>
               </div>
             </div>
@@ -144,97 +164,11 @@ export default function ProfilePayoutsTab() {
         </CardContent>
       </Card>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="tech-card border-0">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Gross Revenue</p>
-                <p className="text-2xl font-bold text-foreground">{formatCents(totalGross)}</p>
-              </div>
-              <DollarSign className="h-8 w-8 text-green-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="tech-card border-0">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Platform Fees (10%)</p>
-                <p className="text-2xl font-bold text-foreground">{formatCents(totalFees)}</p>
-              </div>
-              <Percent className="h-8 w-8 text-orange-500" />
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="tech-card border-0">
-          <CardContent className="p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">Net Payout</p>
-                <p className="text-2xl font-bold text-foreground">{formatCents(totalNet)}</p>
-              </div>
-              <TrendingUp className="h-8 w-8 text-primary" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
       {/* Event Earnings Table */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
-            Event Earnings
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {earnings.length === 0 ? (
-            <div className="text-center py-12">
-              <DollarSign className="h-12 w-12 mx-auto mb-3 text-muted-foreground opacity-30" />
-              <p className="text-muted-foreground">No paid events yet</p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Create a paid event to start earning revenue
-              </p>
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Event</TableHead>
-                  <TableHead className="text-right">Ticket Price</TableHead>
-                  <TableHead className="text-right">Sold</TableHead>
-                  <TableHead className="text-right">Gross</TableHead>
-                  <TableHead className="text-right">Fee (10%)</TableHead>
-                  <TableHead className="text-right">Net Payout</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {earnings.map(e => (
-                  <TableRow key={e.eventId}>
-                    <TableCell>
-                      <div>
-                        <p className="font-medium">{e.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {e.startDate ? format(new Date(e.startDate), 'MMM d, yyyy') : 'TBD'}
-                        </p>
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">{formatCents(e.ticketPriceCents)}</TableCell>
-                    <TableCell className="text-right">{e.ticketsSold}</TableCell>
-                    <TableCell className="text-right">{formatCents(e.grossRevenue)}</TableCell>
-                    <TableCell className="text-right text-orange-500">{formatCents(e.platformFee)}</TableCell>
-                    <TableCell className="text-right font-medium">{formatCents(e.netPayout)}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+      <PayoutEventEarnings earnings={earnings} />
+
+      {/* Withdrawal History */}
+      <PayoutWithdrawalHistory />
 
       {/* District Earnings Placeholder */}
       <Card className="tech-card border-0">
