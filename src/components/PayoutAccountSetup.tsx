@@ -1,11 +1,18 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Banknote, ExternalLink, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+import { Banknote, CheckCircle2, AlertCircle, Loader2, RefreshCw } from "lucide-react";
+import { loadConnectAndInitialize } from "@stripe/connect-js";
+import {
+  ConnectComponentsProvider,
+  ConnectAccountOnboarding,
+} from "@stripe/react-connect-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+
+const STRIPE_PUBLISHABLE_KEY = "pk_live_51T3QFRK5N1RcUVuYCFbUOosd9Iifkie3l7u9obIM42uDZsuq9p08i1E5wVOV4TAlBXVAtDZO24wJUq3Z4HioJDTM00h0emHQSl";
 
 interface PayoutInfo {
   has_payout_account: boolean;
@@ -21,7 +28,9 @@ export default function PayoutAccountSetup() {
   const { toast } = useToast();
   const [payoutInfo, setPayoutInfo] = useState<PayoutInfo | null>(null);
   const [loading, setLoading] = useState(true);
-  const [connecting, setConnecting] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [stripeConnectInstance, setStripeConnectInstance] = useState<any>(null);
+  const [connectLoading, setConnectLoading] = useState(false);
   const [withdrawing, setWithdrawing] = useState(false);
 
   useEffect(() => {
@@ -40,22 +49,47 @@ export default function PayoutAccountSetup() {
     }
   };
 
-  const handleConnectAccount = async () => {
-    setConnecting(true);
+  const fetchClientSecret = useCallback(async () => {
+    const { data, error } = await supabase.functions.invoke("create-account-session", {
+      body: { country: "US" },
+    });
+    if (error || !data?.client_secret) {
+      throw new Error(error?.message || "Failed to create account session");
+    }
+    return data.client_secret;
+  }, []);
+
+  const handleStartOnboarding = async () => {
+    setConnectLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-payout-account", {
-        body: { country: "US" },
+      const instance = loadConnectAndInitialize({
+        publishableKey: STRIPE_PUBLISHABLE_KEY,
+        fetchClientSecret,
+        appearance: {
+          overlays: "dialog",
+          variables: {
+            colorPrimary: "#6366f1",
+            borderRadius: "12px",
+          },
+        },
       });
-      if (error) throw error;
-      if (data?.url) {
-        window.open(data.url, "_blank");
-        toast({ title: "Stripe Connect", description: "Complete your onboarding in the new tab." });
-      }
+      setStripeConnectInstance(instance);
+      setShowOnboarding(true);
     } catch (err: any) {
+      console.error("Error initializing Stripe Connect:", err);
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
-      setConnecting(false);
+      setConnectLoading(false);
     }
+  };
+
+  const handleOnboardingExit = () => {
+    setShowOnboarding(false);
+    setStripeConnectInstance(null);
+    // Refresh payout info after exiting
+    setLoading(true);
+    fetchPayoutInfo();
+    toast({ title: "Onboarding updated", description: "Your payout account status has been refreshed." });
   };
 
   const handleWithdraw = async () => {
@@ -98,38 +132,63 @@ export default function PayoutAccountSetup() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {payoutInfo?.has_payout_account ? (
+          {payoutInfo?.has_payout_account && payoutInfo.account_status === "active" ? (
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {payoutInfo.account_status === "active" ? (
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                ) : (
-                  <AlertCircle className="h-5 w-5 text-orange-500" />
-                )}
+                <CheckCircle2 className="h-5 w-5 text-green-500" />
                 <div>
                   <p className="font-medium">Stripe Connect</p>
                   <p className="text-sm text-muted-foreground">
-                    Status: <Badge variant={payoutInfo.account_status === "active" ? "default" : "secondary"}>
-                      {payoutInfo.account_status}
-                    </Badge>
+                    Status: <Badge variant="default">Active</Badge>
                   </p>
                 </div>
               </div>
-              {payoutInfo.account_status !== "active" && (
-                <Button variant="outline" size="sm" onClick={handleConnectAccount} disabled={connecting}>
-                  {connecting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ExternalLink className="h-4 w-4 mr-2" />}
-                  Complete Setup
-                </Button>
-              )}
+              <Button variant="outline" size="sm" onClick={handleStartOnboarding} disabled={connectLoading}>
+                {connectLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RefreshCw className="h-4 w-4 mr-2" />}
+                Update Info
+              </Button>
+            </div>
+          ) : payoutInfo?.has_payout_account ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <AlertCircle className="h-5 w-5 text-orange-500" />
+                  <div>
+                    <p className="font-medium">Stripe Connect</p>
+                    <p className="text-sm text-muted-foreground">
+                      Status: <Badge variant="secondary">{payoutInfo.account_status}</Badge>
+                    </p>
+                  </div>
+                </div>
+                {!showOnboarding && (
+                  <Button variant="outline" size="sm" onClick={handleStartOnboarding} disabled={connectLoading}>
+                    {connectLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                    Complete Setup
+                  </Button>
+                )}
+              </div>
             </div>
           ) : (
             <div className="text-center py-4">
               <Banknote className="h-10 w-10 mx-auto mb-3 text-muted-foreground opacity-40" />
               <p className="text-muted-foreground mb-3">Connect a Stripe account to receive payouts from events, districts, and referrals.</p>
-              <Button onClick={handleConnectAccount} disabled={connecting}>
-                {connecting ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <ExternalLink className="h-4 w-4 mr-2" />}
-                Connect Stripe Account
-              </Button>
+              {!showOnboarding && (
+                <Button onClick={handleStartOnboarding} disabled={connectLoading}>
+                  {connectLoading ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}
+                  Connect Stripe Account
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Embedded Onboarding */}
+          {showOnboarding && stripeConnectInstance && (
+            <div className="mt-4 border rounded-xl overflow-hidden bg-background">
+              <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
+                <ConnectAccountOnboarding
+                  onExit={handleOnboardingExit}
+                />
+              </ConnectComponentsProvider>
             </div>
           )}
         </CardContent>
@@ -160,9 +219,9 @@ export default function PayoutAccountSetup() {
               </div>
             </div>
             {payoutInfo.available_balance_cents > 0 && payoutInfo.account_status === "active" && (
-              <Button 
-                className="w-full" 
-                onClick={handleWithdraw} 
+              <Button
+                className="w-full"
+                onClick={handleWithdraw}
                 disabled={withdrawing}
               >
                 {withdrawing ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : null}

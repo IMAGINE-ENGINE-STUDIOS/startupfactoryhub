@@ -113,3 +113,6 @@ verify_jwt = false
 
 [functions.request-withdrawal]
 verify_jwt = false
+
+[functions.create-account-session]
+verify_jwt = false
