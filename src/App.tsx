@@ -45,6 +45,8 @@ const PublicHubApplication = lazy(() => import("./pages/PublicHubApplication"));
 const MVPProgram = lazy(() => import("./pages/MVPProgram"));
 const EmailTemplates = lazy(() => import("./pages/EmailTemplates"));
 const DistrictDashboard = lazy(() => import("./pages/DistrictDashboard"));
+const ReferralProgram = lazy(() => import("./pages/ReferralProgram"));
+const ReferralRedirect = lazy(() => import("./pages/ReferralRedirect"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -112,6 +114,8 @@ const App = () => (
                     <Route path="/mvp-program" element={<MVPProgram />} />
                     <Route path="/emails" element={<EmailTemplates />} />
                     <Route path="/district/:districtId" element={<DistrictDashboard />} />
+                    <Route path="/referral" element={<ReferralProgram />} />
+                    <Route path="/ref/:code" element={<ReferralRedirect />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

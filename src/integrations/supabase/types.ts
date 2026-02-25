@@ -3687,6 +3687,69 @@ export type Database = {
         }
         Relationships: []
       }
+      payout_accounts: {
+        Row: {
+          account_status: string
+          country: string | null
+          created_at: string
+          id: string
+          stripe_connect_account_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          account_status?: string
+          country?: string | null
+          created_at?: string
+          id?: string
+          stripe_connect_account_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          account_status?: string
+          country?: string | null
+          created_at?: string
+          id?: string
+          stripe_connect_account_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      payout_requests: {
+        Row: {
+          amount_cents: number
+          completed_at: string | null
+          created_at: string
+          id: string
+          source: string
+          status: string
+          stripe_transfer_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          source?: string
+          status?: string
+          stripe_transfer_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          source?: string
+          status?: string
+          stripe_transfer_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       pdf_comment_replies: {
         Row: {
           comment_id: string | null
@@ -4248,6 +4311,118 @@ export type Database = {
             columns: ["job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_accounts: {
+        Row: {
+          created_at: string
+          id: string
+          referral_code: string
+          total_clicks: number
+          total_earned_cents: number
+          total_referrals: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referral_code: string
+          total_clicks?: number
+          total_earned_cents?: number
+          total_referrals?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referral_code?: string
+          total_clicks?: number
+          total_earned_cents?: number
+          total_referrals?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referral_clicks: {
+        Row: {
+          created_at: string
+          id: string
+          ip_hash: string | null
+          referral_code: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          referral_code: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          ip_hash?: string | null
+          referral_code?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_clicks_referral_code_fkey"
+            columns: ["referral_code"]
+            isOneToOne: false
+            referencedRelation: "referral_accounts"
+            referencedColumns: ["referral_code"]
+          },
+        ]
+      }
+      referral_conversions: {
+        Row: {
+          commission_cents: number
+          created_at: string
+          id: string
+          paid_at: string | null
+          referred_user_id: string
+          referrer_id: string
+          status: string
+          stripe_subscription_id: string | null
+          subscription_amount_cents: number
+          subscription_tier: string | null
+        }
+        Insert: {
+          commission_cents?: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          referred_user_id: string
+          referrer_id: string
+          status?: string
+          stripe_subscription_id?: string | null
+          subscription_amount_cents?: number
+          subscription_tier?: string | null
+        }
+        Update: {
+          commission_cents?: number
+          created_at?: string
+          id?: string
+          paid_at?: string | null
+          referred_user_id?: string
+          referrer_id?: string
+          status?: string
+          stripe_subscription_id?: string | null
+          subscription_amount_cents?: number
+          subscription_tier?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_conversions_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "referral_accounts"
             referencedColumns: ["id"]
           },
         ]

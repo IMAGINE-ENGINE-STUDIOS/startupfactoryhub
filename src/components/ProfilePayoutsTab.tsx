@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { DollarSign, TrendingUp, Percent, Calendar } from 'lucide-react';
+import { DollarSign, TrendingUp, Percent, Calendar, Gift } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
+import PayoutAccountSetup from './PayoutAccountSetup';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 
 interface EventEarning {
   eventId: string;
@@ -22,17 +25,30 @@ export default function ProfilePayoutsTab() {
   const { user } = useAuth();
   const [earnings, setEarnings] = useState<EventEarning[]>([]);
   const [loading, setLoading] = useState(true);
+  const [referralAccount, setReferralAccount] = useState<any>(null);
 
   useEffect(() => {
-    if (user?.id) fetchEarnings();
+    if (user?.id) {
+      fetchEarnings();
+      fetchReferralAccount();
+    }
   }, [user?.id]);
+
+  const fetchReferralAccount = async () => {
+    if (!user?.id) return;
+    const { data } = await supabase
+      .from('referral_accounts')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    setReferralAccount(data);
+  };
 
   const fetchEarnings = async () => {
     if (!user?.id) return;
     setLoading(true);
 
     try {
-      // Get user's paid events
       const { data: events } = await supabase
         .from('events')
         .select('id, title, start_date, ticket_price_cents')
@@ -46,7 +62,6 @@ export default function ProfilePayoutsTab() {
         return;
       }
 
-      // Get payments for those events
       const eventIds = events.map(e => e.id);
       const { data: payments } = await supabase
         .from('event_payments')
@@ -54,7 +69,6 @@ export default function ProfilePayoutsTab() {
         .in('event_id', eventIds)
         .eq('payment_status', 'paid');
 
-      // Aggregate per event
       const earningsMap = new Map<string, { tickets: number; gross: number; fees: number }>();
       (payments || []).forEach(p => {
         const existing = earningsMap.get(p.event_id) || { tickets: 0, gross: 0, fees: 0 };
@@ -102,6 +116,34 @@ export default function ProfilePayoutsTab() {
 
   return (
     <div className="space-y-6">
+      {/* Payout Account Setup */}
+      <PayoutAccountSetup />
+
+      {/* Referral Earnings Quick Link */}
+      <Card className="tech-card border-0">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Gift className="h-6 w-6 text-primary" />
+              <div>
+                <p className="font-medium">Referral Program</p>
+                <p className="text-sm text-muted-foreground">
+                  {referralAccount 
+                    ? `${referralAccount.total_referrals || 0} referrals · ${formatCents(referralAccount.total_earned_cents || 0)} earned`
+                    : 'Earn 20% commission on referred subscriptions'
+                  }
+                </p>
+              </div>
+            </div>
+            <Link to="/referral">
+              <Button variant="outline" size="sm">
+                {referralAccount ? 'View Dashboard' : 'Join Program'}
+              </Button>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card className="tech-card border-0">

@@ -7,7 +7,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, fullName: string, role: string) => Promise<{ error: any }>;
+  signUp: (email: string, password: string, fullName: string, role: string, referralCode?: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
   loading: boolean;
 }
@@ -58,19 +58,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error };
   };
 
-  const signUp = async (email: string, password: string, fullName: string, role: string) => {
+  const signUp = async (email: string, password: string, fullName: string, role: string, referralCode?: string) => {
     const redirectUrl = 'https://startupfactoryhub.com/profile-setup';
     
-    // Role is now created server-side via database trigger
+    const metadata: Record<string, string> = {
+      full_name: fullName,
+      role: role,
+    };
+    if (referralCode) {
+      metadata.referred_by = referralCode;
+    }
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: {
-          full_name: fullName,
-          role: role,
-        }
+        data: metadata,
       }
     });
 
