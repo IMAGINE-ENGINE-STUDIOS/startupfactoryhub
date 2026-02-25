@@ -18,6 +18,7 @@ import { useUserRole } from '@/hooks/useUserRole';
 import { INDUSTRIES, getIndustryLabel, normalizeIndustry } from '@/lib/constants';
 import { useRealtime } from '@/hooks/useRealtime';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
+import ProfilePayoutsTab from './ProfilePayoutsTab';
 import ProfilePostsMosaic from './ProfilePostsMosaic';
 
 export default function CompanyProfileManager() {
@@ -548,12 +549,13 @@ export default function CompanyProfileManager() {
 
       {/* Details */}
       <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 max-w-3xl">
+        <TabsList className="grid w-full grid-cols-6 max-w-3xl">
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="deck">Pitch Deck</TabsTrigger>
           <TabsTrigger value="posts">Your Posts</TabsTrigger>
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
+          <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="about" className="space-y-4">
@@ -630,6 +632,10 @@ export default function CompanyProfileManager() {
 
         <TabsContent value="subscription" className="space-y-4">
           <ProfileSubscriptionTab />
+        </TabsContent>
+
+        <TabsContent value="payouts" className="space-y-4">
+          <ProfilePayoutsTab />
         </TabsContent>
       </Tabs>
     </div>
