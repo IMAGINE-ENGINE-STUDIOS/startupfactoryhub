@@ -4317,9 +4317,16 @@ export type Database = {
       }
       referral_accounts: {
         Row: {
+          admin_notes: string | null
+          application_message: string | null
           created_at: string
           id: string
+          payout_status: string | null
           referral_code: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          stripe_connect_account_id: string | null
           total_clicks: number
           total_earned_cents: number
           total_referrals: number
@@ -4327,9 +4334,16 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
+          application_message?: string | null
           created_at?: string
           id?: string
+          payout_status?: string | null
           referral_code: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          stripe_connect_account_id?: string | null
           total_clicks?: number
           total_earned_cents?: number
           total_referrals?: number
@@ -4337,9 +4351,16 @@ export type Database = {
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
+          application_message?: string | null
           created_at?: string
           id?: string
+          payout_status?: string | null
           referral_code?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          stripe_connect_account_id?: string | null
           total_clicks?: number
           total_earned_cents?: number
           total_referrals?: number
@@ -4353,6 +4374,7 @@ export type Database = {
           created_at: string
           id: string
           ip_hash: string | null
+          link_id: string | null
           referral_code: string
           user_agent: string | null
         }
@@ -4360,6 +4382,7 @@ export type Database = {
           created_at?: string
           id?: string
           ip_hash?: string | null
+          link_id?: string | null
           referral_code: string
           user_agent?: string | null
         }
@@ -4367,10 +4390,18 @@ export type Database = {
           created_at?: string
           id?: string
           ip_hash?: string | null
+          link_id?: string | null
           referral_code?: string
           user_agent?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "referral_clicks_link_id_fkey"
+            columns: ["link_id"]
+            isOneToOne: false
+            referencedRelation: "referral_links"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "referral_clicks_referral_code_fkey"
             columns: ["referral_code"]
@@ -4421,6 +4452,50 @@ export type Database = {
           {
             foreignKeyName: "referral_conversions_referrer_id_fkey"
             columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "referral_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_links: {
+        Row: {
+          account_id: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          referral_code: string
+          total_clicks: number
+          total_conversions: number
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          referral_code: string
+          total_clicks?: number
+          total_conversions?: number
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          referral_code?: string
+          total_clicks?: number
+          total_conversions?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_links_account_id_fkey"
+            columns: ["account_id"]
             isOneToOne: false
             referencedRelation: "referral_accounts"
             referencedColumns: ["id"]

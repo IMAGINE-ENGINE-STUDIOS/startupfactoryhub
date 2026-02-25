@@ -36,6 +36,9 @@ serve(async (req) => {
     const user = userData.user;
     if (!user) throw new Error("User not authenticated");
 
+    const body = await req.json().catch(() => ({}));
+    const applicationMessage = body.application_message || null;
+
     // Check if user already has a referral account
     const { data: existing } = await supabase
       .from("referral_accounts")
@@ -45,11 +48,13 @@ serve(async (req) => {
 
     if (existing) {
       return new Response(JSON.stringify({
+        id: existing.id,
         referral_code: existing.referral_code,
-        referral_link: `https://startupfactoryhub.com/ref/${existing.referral_code}`,
+        status: existing.status,
         total_clicks: existing.total_clicks,
         total_referrals: existing.total_referrals,
         total_earned_cents: existing.total_earned_cents,
+        payout_status: existing.payout_status,
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -69,20 +74,37 @@ serve(async (req) => {
       attempts++;
     }
 
+    // Create account with PENDING status - requires admin approval
     const { data: newAccount, error: insertError } = await supabase
       .from("referral_accounts")
-      .insert({ user_id: user.id, referral_code: referralCode })
+      .insert({ 
+        user_id: user.id, 
+        referral_code: referralCode,
+        status: 'pending',
+        application_message: applicationMessage,
+      })
       .select()
       .single();
 
     if (insertError) throw new Error(`Insert error: ${insertError.message}`);
 
+    // Create default referral link
+    await supabase
+      .from("referral_links")
+      .insert({
+        account_id: newAccount.id,
+        referral_code: referralCode,
+        label: 'Default',
+      });
+
     return new Response(JSON.stringify({
+      id: newAccount.id,
       referral_code: newAccount.referral_code,
-      referral_link: `https://startupfactoryhub.com/ref/${newAccount.referral_code}`,
+      status: 'pending',
       total_clicks: 0,
       total_referrals: 0,
       total_earned_cents: 0,
+      payout_status: 'not_connected',
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
