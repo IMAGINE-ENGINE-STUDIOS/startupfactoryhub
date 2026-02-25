@@ -98,3 +98,18 @@ verify_jwt = false
 
 [functions.verify-event-payment]
 verify_jwt = false
+
+[functions.create-referral-account]
+verify_jwt = false
+
+[functions.track-referral-click]
+verify_jwt = false
+
+[functions.create-payout-account]
+verify_jwt = false
+
+[functions.check-payout-account]
+verify_jwt = false
+
+[functions.request-withdrawal]
+verify_jwt = false

@@ -79,6 +79,57 @@ serve(async (req) => {
       cancel_at_period_end: sub.cancel_at_period_end,
     }, { onConflict: "user_id" });
 
+    // Process referral conversion if user was referred
+    try {
+      const referredBy = user.user_metadata?.referred_by;
+      if (referredBy) {
+        // Check if conversion already exists for this user
+        const { data: existingConversion } = await supabaseClient
+          .from("referral_conversions")
+          .select("id")
+          .eq("referred_user_id", user.id)
+          .maybeSingle();
+
+        if (!existingConversion) {
+          // Find the referrer's account
+          const { data: referrerAccount } = await supabaseClient
+            .from("referral_accounts")
+            .select("id, user_id, total_referrals, total_earned_cents")
+            .eq("referral_code", referredBy)
+            .maybeSingle();
+
+          if (referrerAccount) {
+            // Calculate subscription amount from price
+            const priceAmount = sub.items.data[0].price.unit_amount || 0;
+            const commissionCents = Math.floor(priceAmount * 0.2); // 20% commission
+
+            // Create conversion record
+            await supabaseClient.from("referral_conversions").insert({
+              referrer_id: referrerAccount.id,
+              referred_user_id: user.id,
+              subscription_tier: tier,
+              subscription_amount_cents: priceAmount,
+              commission_cents: commissionCents,
+              status: "pending",
+              stripe_subscription_id: sub.id,
+            });
+
+            // Update referrer stats
+            await supabaseClient
+              .from("referral_accounts")
+              .update({
+                total_referrals: (referrerAccount.total_referrals || 0) + 1,
+                total_earned_cents: (referrerAccount.total_earned_cents || 0) + commissionCents,
+              })
+              .eq("id", referrerAccount.id);
+          }
+        }
+      }
+    } catch (refError) {
+      console.error("Referral processing error:", refError);
+      // Don't fail the main response for referral errors
+    }
+
     return new Response(JSON.stringify({
       subscribed: true,
       tier,
