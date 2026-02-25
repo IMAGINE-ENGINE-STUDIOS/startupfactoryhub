@@ -500,8 +500,9 @@ You can help with:
   };
 
   /** Streaming AI call using lightpaper-genius edge function */
-  const sendAiMessage = async () => {
-    if (!aiInput.trim() || isAiLoading) return;
+  const sendAiMessage = async (overrideInput?: string) => {
+    const inputToUse = overrideInput ?? aiInput;
+    if (!inputToUse.trim() || isAiLoading) return;
     
     if (!user) {
       toast({
@@ -511,7 +512,7 @@ You can help with:
       return;
     }
 
-    const userMessage = aiInput.trim();
+    const userMessage = inputToUse.trim();
     setAiInput('');
     
     // Handle "learn this" intent
@@ -1053,11 +1054,7 @@ You can help with:
                                   <button
                                     key={oi}
                                     onClick={() => {
-                                      setAiInput(opt.value);
-                                      setTimeout(() => {
-                                        const form = document.getElementById('genius-ai-form');
-                                        if (form) form.dispatchEvent(new Event('submit', { bubbles: true }));
-                                      }, 50);
+                                      sendAiMessage(opt.value);
                                     }}
                                     className="px-3 py-1.5 rounded-full text-xs font-medium bg-primary/10 hover:bg-primary/20 text-foreground border border-primary/20 hover:border-primary/40 transition-all duration-200 cursor-pointer hover:scale-105"
                                   >
