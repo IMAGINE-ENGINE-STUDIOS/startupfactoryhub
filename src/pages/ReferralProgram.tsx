@@ -110,8 +110,8 @@ export default function ReferralProgram() {
             <h1 className="text-4xl sm:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               Earn 20% Commission
             </h1>
-            <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Refer new members to Startup Factory Hub and earn 20% of their first month's subscription fee. 
+             <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Refer new members to Startup Factory Hub and earn a one-time 20% commission on their first month's subscription only. 
               Share your unique link, track conversions, and withdraw your earnings anytime.
             </p>
 
@@ -130,7 +130,7 @@ export default function ReferralProgram() {
               {[
                 { icon: Link2, title: "Get Your Link", desc: "Join the program and get a unique referral link to share with your network." },
                 { icon: Users, title: "Refer Members", desc: "When someone signs up and subscribes through your link, you earn a commission." },
-                { icon: DollarSign, title: "Get Paid", desc: "Earn 20% of the first month's subscription. Withdraw to your bank anytime." },
+                { icon: DollarSign, title: "Get Paid", desc: "Earn a one-time 20% commission on the first month's subscription only. Withdraw to your bank anytime." },
               ].map((step, i) => (
                 <Card key={i} className="tech-card border-0 text-left">
                   <CardContent className="pt-6">
@@ -158,7 +158,7 @@ export default function ReferralProgram() {
                     <TableRow>
                       <TableHead>Plan</TableHead>
                       <TableHead className="text-right">Monthly Price</TableHead>
-                      <TableHead className="text-right">Your Commission (20%)</TableHead>
+                      <TableHead className="text-right">One-Time Commission (20%)</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
