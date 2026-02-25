@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Home, Mail, Lock, User, UserCheck } from 'lucide-react';
+import { Home, Mail, Lock, User, UserCheck, Users } from 'lucide-react';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { signInSchema, signUpSchema } from '@/lib/validations';
@@ -336,6 +336,55 @@ export default function Auth() {
                 </form>
               </TabsContent>
             </Tabs>
+
+            {/* Demo Account Quick Login */}
+            <div className="mt-6 pt-4 border-t border-border">
+              <p className="text-xs text-muted-foreground text-center mb-3 flex items-center justify-center gap-1">
+                <Users className="h-3 w-3" />
+                Quick Demo Login
+              </p>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: 'Startup', email: 'demo-startup@startupfactoryhub.com' },
+                  { label: 'Investor', email: 'demo-investor@startupfactoryhub.com' },
+                  { label: 'Mentor', email: 'demo-mentor@startupfactoryhub.com' },
+                  { label: 'Advisor', email: 'demo-advisor@startupfactoryhub.com' },
+                  { label: 'Student', email: 'demo-student@startupfactoryhub.com' },
+                  { label: 'Accelerator', email: 'demo-accelerator@startupfactoryhub.com' },
+                  { label: 'Referral Partner', email: 'demo-referral@startupfactoryhub.com' },
+                  { label: 'Admin', email: 'demo-admin@startupfactoryhub.com' },
+                ].map((demo) => (
+                  <Button
+                    key={demo.email}
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="text-xs h-8"
+                    disabled={loading}
+                    onClick={async () => {
+                      setLoading(true);
+                      const { error } = await signIn(demo.email, 'Demo123!');
+                      if (error) {
+                        toast({
+                          title: "Demo login failed",
+                          description: "Run the demo accounts setup first.",
+                          variant: "destructive",
+                        });
+                      } else {
+                        toast({ title: `Logged in as ${demo.label}` });
+                        navigate('/dashboard');
+                      }
+                      setLoading(false);
+                    }}
+                  >
+                    {demo.label}
+                  </Button>
+                ))}
+              </div>
+              <p className="text-[10px] text-muted-foreground text-center mt-2">
+                Password: Demo123!
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

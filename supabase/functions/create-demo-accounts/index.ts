@@ -52,6 +52,12 @@ const demoAccounts = [
     role: "admin",
     fullName: "Ricardo Font",
     customPassword: "12345678"
+  },
+  {
+    email: "demo-referral@startupfactoryhub.com",
+    role: "startup",
+    fullName: "Demo Referral Partner",
+    isReferralPartner: true
   }
 ];
 
@@ -151,6 +157,34 @@ serve(async (req) => {
             industry: "Technology",
             stage: "seed"
           }, { onConflict: "user_id" });
+        }
+
+        // Create referral partner account if flagged
+        if ((account as any).isReferralPartner) {
+          await supabase.from("referral_accounts").upsert({
+            user_id: userId,
+            status: "approved",
+            application_message: "Demo referral partner account",
+            reviewed_at: new Date().toISOString(),
+            approved_at: new Date().toISOString()
+          }, { onConflict: "user_id" });
+
+          // Create a default referral link
+          const { data: refAccount } = await supabase
+            .from("referral_accounts")
+            .select("id")
+            .eq("user_id", userId)
+            .single();
+
+          if (refAccount) {
+            const code = "SFH-DEMO-" + Math.random().toString(36).substring(2, 8).toUpperCase();
+            await supabase.from("referral_links").upsert({
+              account_id: refAccount.id,
+              referral_code: code,
+              label: "Demo Link",
+              is_active: true
+            }, { onConflict: "referral_code" });
+          }
         }
 
         results.push({ email: account.email, status: "created", role: account.role });
