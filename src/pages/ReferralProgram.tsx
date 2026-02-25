@@ -3,8 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Gift, Link2, Copy, Check, Users, MousePointerClick, DollarSign, ArrowRight, TrendingUp } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Gift, Link2, Copy, Check, Users, MousePointerClick, DollarSign, ArrowRight, TrendingUp, Plus, Clock, XCircle, Trash2, ExternalLink } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -18,10 +20,15 @@ export default function ReferralProgram() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [referralAccount, setReferralAccount] = useState<any>(null);
+  const [referralLinks, setReferralLinks] = useState<any[]>([]);
   const [conversions, setConversions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [joining, setJoining] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [copied, setCopied] = useState<string | null>(null);
+  const [applicationMessage, setApplicationMessage] = useState("");
+  const [newLinkLabel, setNewLinkLabel] = useState("");
+  const [createLinkOpen, setCreateLinkOpen] = useState(false);
+  const [creatingLink, setCreatingLink] = useState(false);
 
   useEffect(() => {
     if (user) fetchReferralData();
@@ -40,6 +47,13 @@ export default function ReferralProgram() {
       setReferralAccount(data);
 
       if (data) {
+        const { data: links } = await supabase
+          .from("referral_links")
+          .select("*")
+          .eq("account_id", data.id)
+          .order("created_at", { ascending: true });
+        setReferralLinks(links || []);
+
         const { data: convs } = await supabase
           .from("referral_conversions")
           .select("*")
@@ -54,22 +68,19 @@ export default function ReferralProgram() {
     }
   };
 
-  const handleJoinProgram = async () => {
+  const handleApply = async () => {
     if (!user) {
       navigate("/auth");
       return;
     }
     setJoining(true);
     try {
-      const { data, error } = await supabase.functions.invoke("create-referral-account");
-      if (error) throw error;
-      setReferralAccount({
-        referral_code: data.referral_code,
-        total_clicks: data.total_clicks,
-        total_referrals: data.total_referrals,
-        total_earned_cents: data.total_earned_cents,
+      const { data, error } = await supabase.functions.invoke("create-referral-account", {
+        body: { application_message: applicationMessage },
       });
-      toast({ title: "Welcome to the Referral Program!", description: "Your unique referral link is ready." });
+      if (error) throw error;
+      setReferralAccount(data);
+      toast({ title: "Application Submitted!", description: "Your application is under review. We'll notify you once approved." });
     } catch (err: any) {
       toast({ title: "Error", description: err.message, variant: "destructive" });
     } finally {
@@ -77,23 +88,83 @@ export default function ReferralProgram() {
     }
   };
 
-  const copyLink = () => {
-    const link = `https://startupfactoryhub.com/ref/${referralAccount.referral_code}`;
-    navigator.clipboard.writeText(link);
-    setCopied(true);
+  const generateCode = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+    let code = "SFH-";
+    for (let i = 0; i < 8; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  };
+
+  const createNewLink = async () => {
+    if (!newLinkLabel.trim() || !referralAccount) return;
+    setCreatingLink(true);
+    try {
+      const code = generateCode();
+      const { error } = await supabase
+        .from("referral_links")
+        .insert({
+          account_id: referralAccount.id,
+          referral_code: code,
+          label: newLinkLabel.trim(),
+        });
+      if (error) throw error;
+      toast({ title: "Link created!", description: `New referral link "${newLinkLabel}" is ready.` });
+      setNewLinkLabel("");
+      setCreateLinkOpen(false);
+      fetchReferralData();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setCreatingLink(false);
+    }
+  };
+
+  const deleteLink = async (linkId: string) => {
+    if (referralLinks.length <= 1) {
+      toast({ title: "Cannot delete", description: "You must have at least one referral link.", variant: "destructive" });
+      return;
+    }
+    try {
+      const { error } = await supabase.from("referral_links").delete().eq("id", linkId);
+      if (error) throw error;
+      toast({ title: "Link deleted" });
+      fetchReferralData();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
+  };
+
+  const copyLink = (code: string) => {
+    navigator.clipboard.writeText(`https://startupfactoryhub.com/ref/${code}`);
+    setCopied(code);
     toast({ title: "Link copied!", description: "Share it with your network." });
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(null), 2000);
+  };
+
+  const connectPayoutAccount = async () => {
+    try {
+      const { data, error } = await supabase.functions.invoke("create-payout-account", {
+        body: { account_type: "referral" },
+      });
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    }
   };
 
   const formatCents = (c: number) => `$${(c / 100).toFixed(2)}`;
 
-  // Public landing view
+  // Public landing / application view
   if (!user || !referralAccount) {
     return (
       <div className="min-h-screen relative overflow-hidden">
         <MatrixBackground />
         <div className="relative z-10">
-          {/* Header */}
           <div className="container mx-auto px-4 py-6">
             <Link to="/" className="flex items-center gap-3">
               <img src={logo} alt="SFH" className="w-8 h-8 glow-effect" />
@@ -101,36 +172,56 @@ export default function ReferralProgram() {
             </Link>
           </div>
 
-          {/* Hero */}
           <div className="container mx-auto px-4 py-16 sm:py-24 text-center max-w-4xl">
             <Badge className="mb-6 bg-primary/10 text-primary border-primary/30 text-sm px-4 py-1">
               <Gift className="h-4 w-4 mr-2" />
-              Referral Program
+              Referral Partner Program
             </Badge>
             <h1 className="text-4xl sm:text-6xl font-bold mb-6 bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent">
               Earn 20% Commission
             </h1>
-             <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Refer new members to Startup Factory Hub and earn a one-time 20% commission on their first month's subscription only. 
-              Share your unique link, track conversions, and withdraw your earnings anytime.
+            <p className="text-lg sm:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Apply to become a referral partner. Once approved, share your unique links, track conversions, 
+              and earn a one-time 20% commission on the first month's subscription of every referred member.
             </p>
 
-            <Button 
-              size="lg" 
-              className="hover-glow text-lg px-8 py-6" 
-              onClick={handleJoinProgram}
-              disabled={joining}
-            >
-              {joining ? "Setting up..." : user ? "Join the Referral Program" : "Sign Up to Start Earning"}
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            {user ? (
+              <Card className="tech-card border-0 max-w-lg mx-auto text-left">
+                <CardHeader>
+                  <CardTitle className="text-lg">Apply to Join</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground mb-2">Tell us why you'd like to become a referral partner (optional)</p>
+                    <Textarea
+                      value={applicationMessage}
+                      onChange={(e) => setApplicationMessage(e.target.value)}
+                      placeholder="e.g. I run a startup community with 5,000+ members..."
+                      rows={4}
+                    />
+                  </div>
+                  <Button className="w-full hover-glow" onClick={handleApply} disabled={joining}>
+                    {joining ? "Submitting..." : "Submit Application"}
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                  <p className="text-xs text-muted-foreground text-center">
+                    Applications are reviewed by our team. You'll be notified once approved.
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <Button size="lg" className="hover-glow text-lg px-8 py-6" onClick={() => navigate("/auth")}>
+                Sign Up to Apply
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            )}
 
             {/* How it works */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
               {[
-                { icon: Link2, title: "Get Your Link", desc: "Join the program and get a unique referral link to share with your network." },
-                { icon: Users, title: "Refer Members", desc: "When someone signs up and subscribes through your link, you earn a commission." },
-                { icon: DollarSign, title: "Get Paid", desc: "Earn a one-time 20% commission on the first month's subscription only. Withdraw to your bank anytime." },
+                { icon: Link2, title: "Apply & Get Approved", desc: "Submit your application. Once approved by our team, you get access to create referral links." },
+                { icon: Users, title: "Share & Refer", desc: "Create multiple tracking links for different campaigns. Share them with your network." },
+                { icon: DollarSign, title: "Get Paid", desc: "Earn a one-time 20% commission on the first month's subscription only. Connect your bank to withdraw." },
               ].map((step, i) => (
                 <Card key={i} className="tech-card border-0 text-left">
                   <CardContent className="pt-6">
@@ -184,7 +275,67 @@ export default function ReferralProgram() {
     );
   }
 
-  // Dashboard view for enrolled users
+  // Pending status
+  if (referralAccount.status === "pending") {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <MatrixBackground />
+        <div className="relative z-10">
+          <div className="container mx-auto px-4 py-6">
+            <Link to="/" className="flex items-center gap-3">
+              <img src={logo} alt="SFH" className="w-8 h-8 glow-effect" />
+              <span className="font-bold bg-gradient-primary bg-clip-text text-transparent">STARTUP FACTORY HUB</span>
+            </Link>
+          </div>
+          <div className="container mx-auto px-4 py-16 text-center max-w-lg">
+            <div className="tech-card p-8 rounded-2xl">
+              <Clock className="h-16 w-16 text-yellow-500 mx-auto mb-4" />
+              <h1 className="text-2xl font-bold mb-2">Application Under Review</h1>
+              <p className="text-muted-foreground mb-6">
+                Your referral partner application has been submitted and is being reviewed by our team. 
+                We'll notify you once a decision is made.
+              </p>
+              <Link to="/dashboard">
+                <Button variant="outline">Back to Dashboard</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Rejected status
+  if (referralAccount.status === "rejected") {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <MatrixBackground />
+        <div className="relative z-10">
+          <div className="container mx-auto px-4 py-6">
+            <Link to="/" className="flex items-center gap-3">
+              <img src={logo} alt="SFH" className="w-8 h-8 glow-effect" />
+              <span className="font-bold bg-gradient-primary bg-clip-text text-transparent">STARTUP FACTORY HUB</span>
+            </Link>
+          </div>
+          <div className="container mx-auto px-4 py-16 text-center max-w-lg">
+            <div className="tech-card p-8 rounded-2xl">
+              <XCircle className="h-16 w-16 text-destructive mx-auto mb-4" />
+              <h1 className="text-2xl font-bold mb-2">Application Not Approved</h1>
+              <p className="text-muted-foreground mb-6">
+                Unfortunately, your referral partner application was not approved at this time. 
+                Please contact support if you have questions.
+              </p>
+              <Link to="/dashboard">
+                <Button variant="outline">Back to Dashboard</Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Approved partner dashboard
   return (
     <div className="min-h-screen relative overflow-hidden">
       <MatrixBackground />
@@ -200,30 +351,30 @@ export default function ReferralProgram() {
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold flex items-center gap-2">
               <Gift className="h-6 w-6 text-primary" />
-              Referral Dashboard
+              Referral Partner Dashboard
             </h1>
-            <Link to="/dashboard">
-              <Button variant="outline" size="sm">Back to Dashboard</Button>
-            </Link>
+            <div className="flex gap-2">
+              <Link to="/dashboard">
+                <Button variant="outline" size="sm">Back to Dashboard</Button>
+              </Link>
+            </div>
           </div>
 
-          {/* Referral Link */}
-          <Card className="tech-card border-0">
-            <CardContent className="pt-6">
-              <p className="text-sm text-muted-foreground mb-2">Your unique referral link</p>
-              <div className="flex gap-2">
-                <Input
-                  readOnly
-                  value={`https://startupfactoryhub.com/ref/${referralAccount.referral_code}`}
-                  className="font-mono text-sm"
-                />
-                <Button onClick={copyLink} variant="outline" className="shrink-0">
-                  {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-                  {copied ? "Copied!" : "Copy"}
+          {/* Payout Connection Banner */}
+          {referralAccount.payout_status !== "connected" && (
+            <Card className="border-yellow-500/30 bg-yellow-500/5">
+              <CardContent className="p-4 flex items-center justify-between">
+                <div>
+                  <p className="font-medium text-yellow-600">Connect your payout account</p>
+                  <p className="text-sm text-muted-foreground">Link your bank account via Stripe to receive commission payouts.</p>
+                </div>
+                <Button onClick={connectPayoutAccount} size="sm">
+                  <ExternalLink className="h-4 w-4 mr-1" />
+                  Connect Account
                 </Button>
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -262,6 +413,67 @@ export default function ReferralProgram() {
             </Card>
           </div>
 
+          {/* Referral Links */}
+          <Card className="tech-card border-0">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <Link2 className="h-5 w-5" />
+                Your Referral Links
+              </CardTitle>
+              <Dialog open={createLinkOpen} onOpenChange={setCreateLinkOpen}>
+                <DialogTrigger asChild>
+                  <Button size="sm">
+                    <Plus className="h-4 w-4 mr-1" /> New Link
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Create New Referral Link</DialogTitle>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-2">Label (e.g. "Twitter Bio", "Newsletter", "YouTube")</p>
+                      <Input
+                        value={newLinkLabel}
+                        onChange={(e) => setNewLinkLabel(e.target.value)}
+                        placeholder="Enter a label for this link"
+                      />
+                    </div>
+                    <Button className="w-full" onClick={createNewLink} disabled={creatingLink || !newLinkLabel.trim()}>
+                      {creatingLink ? "Creating..." : "Create Link"}
+                    </Button>
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {referralLinks.map((link) => (
+                  <div key={link.id} className="flex items-center gap-3 bg-muted/30 p-3 rounded-lg">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm">{link.label}</p>
+                      <p className="text-xs font-mono text-muted-foreground truncate">
+                        https://startupfactoryhub.com/ref/{link.referral_code}
+                      </p>
+                      <div className="flex gap-3 mt-1 text-xs text-muted-foreground">
+                        <span>{link.total_clicks} clicks</span>
+                        <span>{link.total_conversions} conversions</span>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => copyLink(link.referral_code)}>
+                      {copied === link.referral_code ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                    </Button>
+                    {referralLinks.length > 1 && (
+                      <Button variant="ghost" size="sm" onClick={() => deleteLink(link.id)} className="text-destructive hover:text-destructive">
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Conversions */}
           <Card className="tech-card border-0">
             <CardHeader>
@@ -271,7 +483,7 @@ export default function ReferralProgram() {
               {conversions.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Users className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                  <p>No conversions yet. Share your link to start earning!</p>
+                  <p>No conversions yet. Share your links to start earning!</p>
                 </div>
               ) : (
                 <Table>

@@ -23,7 +23,8 @@ import {
   Rocket,
   Mail,
   Crown,
-  CreditCard
+  CreditCard,
+  Gift
 } from 'lucide-react';
 
 // Admin components
@@ -45,6 +46,7 @@ import SFHAcceleratorManager from '@/components/admin/SFHAcceleratorManager';
 import EmailMonitor from '@/components/admin/EmailMonitor';
 import DistrictsManagement from '@/components/admin/DistrictsManagement';
 import SubscriptionsManagement from '@/components/admin/SubscriptionsManagement';
+import ReferralPartnersManagement from '@/components/admin/ReferralPartnersManagement';
 
 
 const AdminDashboard = () => {
@@ -196,6 +198,10 @@ const AdminDashboard = () => {
               <CreditCard className="h-4 w-4" />
               <span className="hidden lg:inline">Subscriptions</span>
             </TabsTrigger>
+            <TabsTrigger value="referral-partners" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <Gift className="h-4 w-4" />
+              <span className="hidden lg:inline">Referrals</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
@@ -216,6 +222,7 @@ const AdminDashboard = () => {
           <TabsContent value="emails"><EmailMonitor /></TabsContent>
           <TabsContent value="districts"><DistrictsManagement /></TabsContent>
           <TabsContent value="subscriptions"><SubscriptionsManagement /></TabsContent>
+          <TabsContent value="referral-partners"><ReferralPartnersManagement /></TabsContent>
         </Tabs>
       </main>
     </div>
