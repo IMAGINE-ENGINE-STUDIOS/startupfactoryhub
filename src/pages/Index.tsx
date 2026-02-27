@@ -19,7 +19,7 @@ const Index = () => {
       <CommunitySection />
       <AIAssistantPreview />
       <PartnersCarousel />
-      <TeamSection />
+      {/* <TeamSection /> */}
       <NasdaqFeature />
       <Footer />
     </div>
