@@ -1,9 +1,7 @@
 import { motion } from "framer-motion";
 import teamKhalia from "@/assets/team-khalia.jpg";
 import teamRicardo from "@/assets/team-ricardo.jpg";
-import teamSteven from "@/assets/team-steven.png";
 import teamPablo from "@/assets/team-pablo.jpg";
-import teamGary from "@/assets/team-gary.png";
 
 
 const teamMembers = [
@@ -20,22 +18,10 @@ const teamMembers = [
     image: teamRicardo,
   },
   {
-    name: "Steven Lidgreen",
-    role: "Managing Partner",
-    location: "SFH Tokyo",
-    image: teamSteven,
-  },
-  {
     name: "Pablo Duenas",
     role: "Managing Partner",
     location: "SFH Chile",
     image: teamPablo,
-  },
-  {
-    name: "Gary Jinks",
-    role: "Strategic Advisor",
-    location: null,
-    image: teamGary,
   },
 ];
 
