@@ -12,7 +12,7 @@ export const MEMBERSHIP_TIERS = {
     price_id: "price_1T5gbKK5N1RcUVuY9hOEPizG",
   },
   self_paced_office: {
-    name: "Self-Paced + Office",
+    name: "Self-Paced + Desk",
     price: 550,
     product_id: "prod_U3oENLbFqHIiRA",
     price_id: "price_1T5gbrK5N1RcUVuYcLTffimY",
