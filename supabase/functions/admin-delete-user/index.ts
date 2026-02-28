@@ -21,33 +21,39 @@ Deno.serve(async (req) => {
       });
     }
 
-    const token = authHeader.replace("Bearer ", "");
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
-    // Use service role client to validate the token - more reliable than anon key
-    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
+    // Use anon client with user's auth header to validate JWT via getClaims
+    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
     });
 
-    const { data: { user: callerUser }, error: callerError } = await adminClient.auth.getUser(token);
-    if (callerError || !callerUser) {
-      console.error("Auth validation failed:", callerError?.message || "No user found");
-      return new Response(JSON.stringify({ error: "Unauthorized", details: callerError?.message }), {
+    const token = authHeader.replace("Bearer ", "");
+    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
+    if (claimsError || !claimsData?.claims?.sub) {
+      console.error("JWT validation failed:", claimsError?.message || "No claims found");
+      return new Response(JSON.stringify({ error: "Unauthorized", details: claimsError?.message }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    console.log("Caller authenticated:", callerUser.email);
+    const callerId = claimsData.claims.sub;
+    const callerEmail = claimsData.claims.email;
+    console.log("Caller authenticated:", callerEmail);
 
-    // Check if caller is admin (reuse adminClient from above)
+    // Create admin client for privileged operations
+    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
 
     // Check if caller is admin
     const { data: roleData } = await adminClient
       .from("user_roles")
       .select("role")
-      .eq("user_id", callerUser.id)
+      .eq("user_id", callerId)
       .eq("role", "admin")
       .maybeSingle();
 
@@ -68,14 +74,14 @@ Deno.serve(async (req) => {
     }
 
     // Prevent admin from deleting themselves
-    if (targetUserId === callerUser.id) {
+    if (targetUserId === callerId) {
       return new Response(JSON.stringify({ error: "Cannot delete your own account from admin panel" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    console.log(`Admin ${callerUser.id} deleting user ${targetUserId}`);
+    console.log(`Admin ${callerId} deleting user ${targetUserId}`);
 
     // Delete user data from all related tables (order matters for FK constraints)
     const tablesToClean = [
@@ -193,7 +199,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`User ${targetUserId} permanently deleted by admin ${callerUser.id}`);
+    console.log(`User ${targetUserId} permanently deleted by admin ${callerId}`);
 
     return new Response(
       JSON.stringify({ success: true, message: "User permanently deleted" }),
