@@ -14,33 +14,34 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
+      console.error("No authorization header provided");
       return new Response(JSON.stringify({ error: "No authorization header" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
+    const token = authHeader.replace("Bearer ", "");
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-    const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Verify the calling user
-    const userClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: authHeader } },
+    // Use service role client to validate the token - more reliable than anon key
+    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    const { data: { user: callerUser }, error: callerError } = await userClient.auth.getUser();
+    const { data: { user: callerUser }, error: callerError } = await adminClient.auth.getUser(token);
     if (callerError || !callerUser) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      console.error("Auth validation failed:", callerError?.message || "No user found");
+      return new Response(JSON.stringify({ error: "Unauthorized", details: callerError?.message }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Create admin client
-    const adminClient = createClient(supabaseUrl, serviceRoleKey, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
+    console.log("Caller authenticated:", callerUser.email);
+
+    // Check if caller is admin (reuse adminClient from above)
 
     // Check if caller is admin
     const { data: roleData } = await adminClient

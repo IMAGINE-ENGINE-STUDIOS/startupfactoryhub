@@ -128,3 +128,9 @@ verify_jwt = false
 
 [functions.fetch-eventbrite]
 verify_jwt = false
+
+[functions.admin-delete-user]
+verify_jwt = false
+
+[functions.admin-delete-feed-post]
+verify_jwt = false
