@@ -20,6 +20,8 @@ import UserProfileDialog from '@/components/UserProfileDialog';
 import { CohortPostCard } from '@/components/CohortPostCard';
 import LiveRoomPostCard from '@/components/LiveRoomPostCard';
 import { EventPostCard } from '@/components/EventPostCard';
+import LinkedInShareDialog from '@/components/LinkedInShareDialog';
+import { Linkedin } from 'lucide-react';
 interface FeedPost {
   id: string;
   content: string;
@@ -97,6 +99,9 @@ export default function UnifiedCommunityFeed({
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
   const [newShortForCarousel, setNewShortForCarousel] = useState<any>(null);
+  const [linkedInShareOpen, setLinkedInShareOpen] = useState(false);
+  const [linkedInShareContent, setLinkedInShareContent] = useState('');
+  const [linkedInShareImage, setLinkedInShareImage] = useState<string | undefined>();
   const {
     user
   } = useAuth();
@@ -113,6 +118,11 @@ export default function UnifiedCommunityFeed({
   const handleUserClick = (userId: string) => {
     setSelectedUserId(userId);
     setIsProfileDialogOpen(true);
+  };
+  const openLinkedInShare = (post: FeedPost) => {
+    setLinkedInShareContent(post.content || '');
+    setLinkedInShareImage(post.media_urls?.[0] || undefined);
+    setLinkedInShareOpen(true);
   };
   useEffect(() => {
     fetchPosts();
@@ -1036,6 +1046,9 @@ export default function UnifiedCommunityFeed({
                           <Repeat2 className="h-4 w-4 mr-1 sm:mr-2" />
                           <span className="text-xs sm:text-sm hidden sm:inline">Repost</span>
                         </Button>
+                        <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-[#0077B5] px-2" onClick={() => openLinkedInShare(post)} title="Share to LinkedIn">
+                          <Linkedin className="h-4 w-4" />
+                        </Button>
                         <Button variant="ghost" size="sm" className={`text-muted-foreground hover:text-primary px-2 ml-auto ${bookmarkedPosts.has(post.id) ? 'text-primary' : ''}`} onClick={() => toggleBookmark(post.id)}>
                           <Bookmark className={`h-4 w-4 ${bookmarkedPosts.has(post.id) ? 'fill-current' : ''}`} />
                         </Button>
@@ -1177,6 +1190,9 @@ export default function UnifiedCommunityFeed({
                       <Repeat2 className="h-4 w-4 mr-1 sm:mr-2" />
                       <span className="text-xs sm:text-sm hidden sm:inline">Repost</span>
                     </Button>
+                    <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-[#0077B5] px-2" onClick={() => openLinkedInShare(post)} title="Share to LinkedIn">
+                      <Linkedin className="h-4 w-4" />
+                    </Button>
                     <Button variant="ghost" size="sm" className={`text-muted-foreground hover:text-primary px-2 ${bookmarkedPosts.has(post.id) ? 'text-primary' : ''}`} onClick={() => toggleBookmark(post.id)}>
                       <Bookmark className={`h-4 w-4 ${bookmarkedPosts.has(post.id) ? 'fill-current' : ''}`} />
                     </Button>
@@ -1296,5 +1312,13 @@ export default function UnifiedCommunityFeed({
 
       {/* User Profile Dialog */}
       <UserProfileDialog userId={selectedUserId} open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen} />
+
+      {/* LinkedIn Share Dialog */}
+      <LinkedInShareDialog
+        open={linkedInShareOpen}
+        onOpenChange={setLinkedInShareOpen}
+        postContent={linkedInShareContent}
+        postImageUrl={linkedInShareImage}
+      />
     </div>;
 }

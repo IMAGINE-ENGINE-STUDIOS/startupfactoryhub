@@ -116,3 +116,12 @@ verify_jwt = false
 
 [functions.create-account-session]
 verify_jwt = false
+
+[functions.linkedin-auth]
+verify_jwt = false
+
+[functions.linkedin-callback]
+verify_jwt = false
+
+[functions.linkedin-post]
+verify_jwt = false
