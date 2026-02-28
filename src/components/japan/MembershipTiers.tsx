@@ -27,7 +27,7 @@ const tiers = [
   },
   {
     name: "Community",
-    price: "$300",
+    price: "$350",
     period: "/month",
     icon: Zap,
     target: "Early MVP-stage founders",
@@ -45,7 +45,7 @@ const tiers = [
   },
   {
     name: "Self-Paced + Office",
-    price: "$500",
+    price: "$550",
     period: "/month",
     icon: Building,
     target: "Founders needing flexible workspace + virtual resources",

@@ -1160,11 +1160,11 @@ export default function Deck() {
                   <Award className="h-5 w-5" /> Subscription Tiers
                 </h3>
                 <div className="space-y-2 text-sm text-slate-300 print:text-gray-600">
-                  <div className="flex justify-between"><span>Early Stage</span><span className="text-emerald-400">$300/mo</span></div>
-                  <div className="flex justify-between"><span>Build Stage</span><span className="text-emerald-400">$500/mo</span></div>
+                  <div className="flex justify-between"><span>Early Stage</span><span className="text-emerald-400">$350/mo</span></div>
+                  <div className="flex justify-between"><span>Build Stage</span><span className="text-emerald-400">$550/mo</span></div>
                   <div className="flex justify-between"><span>Growth Stage</span><span className="text-emerald-400">$950/mo</span></div>
                   <div className="flex justify-between"><span>Scale Stage</span><span className="text-emerald-400">$1,500/mo</span></div>
-                  <div className="flex justify-between border-t border-emerald-500/30 pt-2 mt-2"><span className="font-medium">Blended ARPU</span><span className="text-emerald-400 font-bold">$750/mo</span></div>
+                  <div className="flex justify-between border-t border-emerald-500/30 pt-2 mt-2"><span className="font-medium">Blended ARPU</span><span className="text-emerald-400 font-bold">$813/mo</span></div>
                 </div>
               </TechCard>
               
