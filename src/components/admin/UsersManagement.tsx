@@ -78,6 +78,8 @@ const UsersManagement = () => {
   const [selectedUser, setSelectedUser] = useState<UserWithProfile | null>(null);
   const [showUserDialog, setShowUserDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<UserWithProfile | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [roleSpecificData, setRoleSpecificData] = useState<RoleSpecificData>({});
   const [loadingRoleData, setLoadingRoleData] = useState(false);
 
@@ -236,6 +238,42 @@ const UsersManagement = () => {
       description: "User suspension requires backend admin privileges.",
       variant: "destructive"
     });
+  };
+
+  const handleDeleteUser = (user: UserWithProfile) => {
+    setUserToDelete(user);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!userToDelete) return;
+    setDeleting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('admin-delete-user', {
+        body: { targetUserId: userToDelete.id },
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      toast({
+        title: "User Deleted",
+        description: `${userToDelete.full_name || userToDelete.email} has been permanently deleted.`,
+      });
+
+      setUsers(prev => prev.filter(u => u.id !== userToDelete.id));
+    } catch (error: any) {
+      console.error('Delete user error:', error);
+      toast({
+        title: "Delete Failed",
+        description: error.message || "Failed to delete user",
+        variant: "destructive"
+      });
+    } finally {
+      setDeleting(false);
+      setShowDeleteDialog(false);
+      setUserToDelete(null);
+    }
   };
 
   const handleExportCSV = () => {
@@ -414,7 +452,7 @@ const UsersManagement = () => {
                             <Ban className="h-4 w-4 mr-2" />
                             Suspend User
                           </DropdownMenuItem>
-                          <DropdownMenuItem className="text-red-500">
+                          <DropdownMenuItem onClick={() => handleDeleteUser(user)} className="text-red-500">
                             <Trash2 className="h-4 w-4 mr-2" />
                             Delete User
                           </DropdownMenuItem>
@@ -712,6 +750,49 @@ const UsersManagement = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={(open) => {
+        if (!open) {
+          setShowDeleteDialog(false);
+          setUserToDelete(null);
+        }
+      }}>
+        <AlertDialogContent className="tech-card border-0">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-red-500">⚠️ Permanently Delete User</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>You are about to permanently delete:</p>
+              <p className="font-semibold text-foreground">
+                {userToDelete?.full_name || 'Unknown'} ({userToDelete?.email})
+              </p>
+              <p className="text-red-400">
+                This will remove the user's account, profile, posts, messages, connections, and ALL associated data. This action cannot be undone.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDeleteUser}
+              disabled={deleting}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {deleting ? (
+                <>
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Permanently
+                </>
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
