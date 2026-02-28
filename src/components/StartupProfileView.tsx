@@ -138,12 +138,12 @@ export default function StartupProfileView({ company }: StartupProfileViewProps)
 
       {/* Details */}
       <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5 max-w-3xl">
-          <TabsTrigger value="about">About</TabsTrigger>
-          <TabsTrigger value="details">Company Details</TabsTrigger>
-          <TabsTrigger value="deck">Pitch Deck</TabsTrigger>
-          <TabsTrigger value="subscription">Subscription</TabsTrigger>
-          <TabsTrigger value="payouts">Payouts</TabsTrigger>
+        <TabsList className="flex w-full max-w-3xl overflow-x-auto scrollbar-hide whitespace-nowrap">
+          <TabsTrigger value="about" className="flex-1">About</TabsTrigger>
+          <TabsTrigger value="details" className="flex-1">Company Details</TabsTrigger>
+          <TabsTrigger value="deck" className="flex-1">Pitch Deck</TabsTrigger>
+          <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>
+          <TabsTrigger value="payouts" className="flex-1">Payouts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="about" className="space-y-4">
