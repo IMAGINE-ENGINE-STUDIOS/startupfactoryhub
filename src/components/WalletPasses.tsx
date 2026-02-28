@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Plane, Building, CreditCard, Globe } from 'lucide-react';
+import { Wallet, Plane, Building, Globe, Eye, EyeOff, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -15,6 +15,8 @@ import frontierPassImg from '@/assets/frontier-pass.webp';
 import sfhPassImg from '@/assets/sfh-pass.png';
 import SoftLandingRequestDialog from '@/components/SoftLandingRequestDialog';
 
+const FRONTIER_BOOKING_URL = 'https://booking.flyfrontier.com/FrontierMiles/GoWildSignup?_ga=2.125927374.2135620265.1772270212-2039149194.1772270211&_gac=1.183458260.1772273523.Cj0KCQiAwYrNBhDcARIsAGo3u32mNyqqe-uI2l0iOVAa0s9X_nKB4dKSpaXoj604XXI-F7W_a3L0Qx4aAu6UEALw_wcB';
+
 interface Pass {
   id: string;
   title: string;
@@ -26,6 +28,7 @@ interface Pass {
   gradient: string;
   image?: string;
   action?: React.ReactNode;
+  onClick?: () => void;
 }
 
 export default function WalletPasses({ className }: { className?: string }) {
@@ -33,33 +36,37 @@ export default function WalletPasses({ className }: { className?: string }) {
   const { user } = useAuth();
   const [frontierApproved, setFrontierApproved] = useState(false);
   const [frontierRequested, setFrontierRequested] = useState(false);
+  const [frontierCredentials, setFrontierCredentials] = useState<{ username: string; password: string } | null>(null);
+  const [showFrontierPassword, setShowFrontierPassword] = useState(false);
   const [requesting, setRequesting] = useState(false);
-  const [softLandingRequest, setSoftLandingRequest] = useState<any>(null);
+  const [softLandingRequests, setSoftLandingRequests] = useState<any[]>([]);
   const [softLandingDialogOpen, setSoftLandingDialogOpen] = useState(false);
 
   useEffect(() => {
     if (!user || !isSubscribed) return;
     const checkStatuses = async () => {
-      // Check frontier status (corporate only)
       if (tier === 'corporate') {
         const { data } = await supabase
           .from('flight_pass_requests')
-          .select('status')
+          .select('status, frontier_username, frontier_password')
           .eq('user_id', user.id)
           .maybeSingle();
         if (data) {
           setFrontierApproved(data.status === 'approved');
           setFrontierRequested(true);
+          if (data.status === 'approved' && data.frontier_username && data.frontier_password) {
+            setFrontierCredentials({ username: data.frontier_username, password: data.frontier_password });
+          }
         }
       }
-      // Check soft landing request
+      // Fetch all soft landing requests for this user
       const { data: slData } = await supabase
         .from('soft_landing_requests')
         .select('*')
         .eq('user_id', user.id)
-        .maybeSingle();
+        .order('created_at', { ascending: false });
       if (slData) {
-        setSoftLandingRequest(slData);
+        setSoftLandingRequests(slData);
       }
     };
     checkStatuses();
@@ -91,6 +98,41 @@ export default function WalletPasses({ className }: { className?: string }) {
       details: 'Unlimited travel to 11 countries. Pay only ticket taxes.',
       gradient: 'from-emerald-600 to-teal-500',
       image: frontierPassImg,
+      onClick: () => window.open(FRONTIER_BOOKING_URL, '_blank'),
+      action: frontierCredentials ? (
+        <div className="w-full mt-2 space-y-1.5 p-2 rounded-lg border border-emerald-500/20 bg-emerald-500/5">
+          <p className="text-[10px] font-medium text-emerald-600">Your Frontier Credentials</p>
+          <div className="text-[11px] space-y-1">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Username:</span>
+              <span className="font-mono text-foreground">{frontierCredentials.username}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Password:</span>
+              <div className="flex items-center gap-1">
+                <span className="font-mono text-foreground">
+                  {showFrontierPassword ? frontierCredentials.password : '••••••••'}
+                </span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowFrontierPassword(!showFrontierPassword); }}
+                  className="p-0.5 hover:bg-muted rounded"
+                >
+                  {showFrontierPassword ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                </button>
+              </div>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full h-6 text-[10px] mt-1 border-emerald-500/30 text-emerald-600"
+            onClick={(e) => { e.stopPropagation(); window.open(FRONTIER_BOOKING_URL, '_blank'); }}
+          >
+            <ExternalLink className="h-3 w-3 mr-1" />
+            Book on Frontier
+          </Button>
+        </div>
+      ) : undefined,
     });
   }
 
@@ -118,12 +160,12 @@ export default function WalletPasses({ className }: { className?: string }) {
     });
   }
 
-  // Soft Landing — show for all subscribers, different pricing
+  // Soft Landing — show for all subscribers with request button
   if (isSubscribed) {
     const isCorporate = tier === 'corporate';
     const price = isCorporate ? '$5,000' : '$7,500';
-    const hasActiveRequest = softLandingRequest && ['pending', 'in_progress'].includes(softLandingRequest.status);
-    const isCompleted = softLandingRequest?.status === 'completed';
+    const activeRequests = softLandingRequests.filter(r => ['pending', 'in_progress'].includes(r.status));
+    const completedRequests = softLandingRequests.filter(r => r.status === 'completed');
 
     passes.push({
       id: 'soft-landing',
@@ -134,24 +176,27 @@ export default function WalletPasses({ className }: { className?: string }) {
       active: true,
       details: `Corporate registration, legal address, documents & legal advice. Expand to Japan, USA, Europe, Chile or Venezuela.${isCorporate ? ' Corporate discount applied.' : ''}`,
       gradient: 'from-violet-600 to-purple-500',
-      action: hasActiveRequest ? (
-        <Badge variant="outline" className="text-[10px] border-yellow-500/50 text-yellow-600">
-          {softLandingRequest.status === 'pending' ? 'Pending Review' : 'In Progress'}
-          {softLandingRequest.target_country ? ` — ${softLandingRequest.target_country}` : ''}
-        </Badge>
-      ) : isCompleted ? (
-        <Badge variant="outline" className="text-[10px] border-green-500/50 text-green-600">
-          Completed — {softLandingRequest.target_country}
-        </Badge>
-      ) : (
-        <Button
-          size="sm"
-          variant="outline"
-          className="text-[10px] h-6 px-2"
-          onClick={() => setSoftLandingDialogOpen(true)}
-        >
-          Request Service
-        </Button>
+      action: (
+        <div className="w-full space-y-1.5">
+          {activeRequests.map(r => (
+            <Badge key={r.id} variant="outline" className="text-[10px] border-yellow-500/50 text-yellow-600 mr-1">
+              {r.status === 'pending' ? 'Pending' : 'In Progress'} — {r.target_country}
+            </Badge>
+          ))}
+          {completedRequests.map(r => (
+            <Badge key={r.id} variant="outline" className="text-[10px] border-green-500/50 text-green-600 mr-1">
+              Completed — {r.target_country}
+            </Badge>
+          ))}
+          <Button
+            size="sm"
+            variant="outline"
+            className="text-[10px] h-6 px-2"
+            onClick={(e) => { e.stopPropagation(); setSoftLandingDialogOpen(true); }}
+          >
+            Request for Another Country
+          </Button>
+        </div>
       ),
     });
   }
@@ -188,7 +233,6 @@ export default function WalletPasses({ className }: { className?: string }) {
               </div>
             ) : null}
 
-            {/* Frontier pass request CTA for corporate users who haven't requested yet */}
             {isSubscribed && tier === 'corporate' && !frontierRequested && (
               <div className="rounded-xl border border-dashed border-emerald-500/50 p-4 text-center space-y-2">
                 <Plane className="h-8 w-8 mx-auto text-emerald-500" />
@@ -205,7 +249,6 @@ export default function WalletPasses({ className }: { className?: string }) {
               </div>
             )}
 
-            {/* Pending status */}
             {isSubscribed && tier === 'corporate' && frontierRequested && !frontierApproved && (
               <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 text-center space-y-1">
                 <Plane className="h-8 w-8 mx-auto text-yellow-500" />
@@ -214,21 +257,16 @@ export default function WalletPasses({ className }: { className?: string }) {
               </div>
             )}
 
-            {/* Apple Wallet-style pass cards */}
             {passes.map((pass) => (
               <div
                 key={pass.id}
-                className="rounded-2xl overflow-hidden shadow-lg"
+                className={cn('rounded-2xl overflow-hidden shadow-lg', pass.onClick && 'cursor-pointer hover:shadow-xl transition-shadow')}
                 style={{ minHeight: pass.image ? '200px' : undefined }}
+                onClick={pass.onClick}
               >
-                {/* Card image header */}
                 {pass.image && (
                   <div className="relative w-full h-36 overflow-hidden">
-                    <img
-                      src={pass.image}
-                      alt={pass.title}
-                      className="w-full h-full object-cover"
-                    />
+                    <img src={pass.image} alt={pass.title} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
                     <div className="absolute bottom-2 left-3 right-3">
                       <Badge className="bg-white/20 backdrop-blur-sm text-white border-0 text-[10px]">
@@ -237,12 +275,9 @@ export default function WalletPasses({ className }: { className?: string }) {
                     </div>
                   </div>
                 )}
-                {/* Card body */}
                 <div className={cn(
                   'p-4 space-y-2',
-                  pass.image
-                    ? 'bg-gradient-to-b from-card to-background'
-                    : `bg-gradient-to-r ${pass.gradient} p-[1px]`
+                  pass.image ? 'bg-gradient-to-b from-card to-background' : `bg-gradient-to-r ${pass.gradient} p-[1px]`
                 )}>
                   {!pass.image && (
                     <div className="rounded-[11px] bg-background p-4 space-y-2">
@@ -256,18 +291,14 @@ export default function WalletPasses({ className }: { className?: string }) {
                             <p className="text-xs text-muted-foreground">{pass.subtitle}</p>
                           </div>
                         </div>
-                        <Badge variant="secondary" className="text-[10px] shrink-0">
-                          {pass.tier}
-                        </Badge>
+                        <Badge variant="secondary" className="text-[10px] shrink-0">{pass.tier}</Badge>
                       </div>
                       <p className="text-xs text-muted-foreground">{pass.details}</p>
-                      <div className="flex items-center justify-between gap-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                          <span className="text-[10px] font-medium text-green-600">Active</span>
-                        </div>
-                        {pass.action}
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[10px] font-medium text-green-600">Active</span>
                       </div>
+                      {pass.action}
                     </div>
                   )}
                   {pass.image && (
@@ -282,13 +313,11 @@ export default function WalletPasses({ className }: { className?: string }) {
                         </div>
                       </div>
                       <p className="text-xs text-muted-foreground">{pass.details}</p>
-                      <div className="flex items-center justify-between gap-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                          <span className="text-[10px] font-medium text-green-600">Active</span>
-                        </div>
-                        {pass.action}
+                      <div className="flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[10px] font-medium text-green-600">Active</span>
                       </div>
+                      {pass.action}
                     </>
                   )}
                 </div>
@@ -310,7 +339,7 @@ export default function WalletPasses({ className }: { className?: string }) {
         open={softLandingDialogOpen}
         onOpenChange={setSoftLandingDialogOpen}
         isCorporate={tier === 'corporate'}
-        onSuccess={(data) => setSoftLandingRequest(data)}
+        onSuccess={(data) => setSoftLandingRequests(prev => [data, ...prev])}
       />
     </>
   );
