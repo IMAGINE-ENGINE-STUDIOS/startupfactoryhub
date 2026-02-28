@@ -84,8 +84,8 @@ export default function Auth() {
     }
 
     setLoading(true);
-    // Use current origin so the link works from any environment (preview, published, custom domain)
-    const resetRedirectUrl = `${window.location.origin}/reset-password`;
+    // Always use the public production domain for password reset redirect
+    const resetRedirectUrl = 'https://startupfactoryhub.com/reset-password';
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: resetRedirectUrl,
     });
