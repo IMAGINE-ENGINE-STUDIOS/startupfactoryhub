@@ -7,15 +7,15 @@ export const MEMBERSHIP_TIERS = {
   },
   community: {
     name: "Community",
-    price: 300,
-    product_id: "prod_U1XG9MJn2KVcpW",
-    price_id: "price_1T3UBmF2pD6kfaGMbqWQ17Jw",
+    price: 350,
+    product_id: "prod_U3oDmSPMy4Lher",
+    price_id: "price_1T5gbKK5N1RcUVuY9hOEPizG",
   },
   self_paced_office: {
     name: "Self-Paced + Office",
-    price: 500,
-    product_id: "prod_U1XHGc8mHzhFhJ",
-    price_id: "price_1T3UDQF2pD6kfaGMS4i4kbGj",
+    price: 550,
+    product_id: "prod_U3oENLbFqHIiRA",
+    price_id: "price_1T5gbrK5N1RcUVuYcLTffimY",
   },
   global_access: {
     name: "Global Access",

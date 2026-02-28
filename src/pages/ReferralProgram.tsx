@@ -254,8 +254,8 @@ export default function ReferralProgram() {
                   </TableHeader>
                   <TableBody>
                     {[
-                      { plan: "Community", price: 30000 },
-                      { plan: "Self-Paced + Office", price: 50000 },
+                      { plan: "Community", price: 35000 },
+                      { plan: "Self-Paced + Office", price: 55000 },
                       { plan: "Global Access", price: 95000 },
                       { plan: "Corporate", price: 150000 },
                     ].map((tier) => (
