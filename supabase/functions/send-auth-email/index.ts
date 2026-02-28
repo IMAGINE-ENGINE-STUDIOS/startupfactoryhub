@@ -27,6 +27,7 @@ serve(async (req: Request) => {
 
   try {
     const payload = await req.text();
+    console.log("Raw payload received:", payload);
     
     // Parse the payload directly - Supabase auth hooks don't use standardwebhooks format
     const emailData = JSON.parse(payload);
@@ -35,6 +36,14 @@ serve(async (req: Request) => {
       user,
       email_data: { token, token_hash, redirect_to, email_action_type },
     } = emailData;
+
+    console.log("Parsed email data:", JSON.stringify({
+      email_action_type,
+      user_email: user?.email,
+      token: token ?? "UNDEFINED",
+      token_hash: token_hash ?? "UNDEFINED",
+      redirect_to: redirect_to ?? "UNDEFINED",
+    }));
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const appUrl = "https://startupfactoryhub.com";
@@ -111,19 +120,23 @@ serve(async (req: Request) => {
         subject = "🚀 Welcome to Startup Factory Hub!";
     }
 
-    const { error } = await resend.emails.send({
+    console.log(`Sending email from: Startup Factory Hub <info@startupfactoryhub.com> to: ${user.email}`);
+
+    const resendResponse = await resend.emails.send({
       from: "Startup Factory Hub <info@startupfactoryhub.com>",
       to: [user.email],
       subject: subject,
       html: html,
     });
 
-    if (error) {
-      console.error("Resend error:", error);
-      throw error;
+    console.log("Resend full response:", JSON.stringify(resendResponse));
+
+    if (resendResponse.error) {
+      console.error("Resend error:", JSON.stringify(resendResponse.error));
+      throw resendResponse.error;
     }
 
-    console.log(`Auth email sent successfully to ${user.email}: ${email_action_type}`);
+    console.log(`Auth email sent successfully to ${user.email}: ${email_action_type}, id: ${resendResponse.data?.id}`);
 
     return new Response(
       JSON.stringify({ success: true }),
