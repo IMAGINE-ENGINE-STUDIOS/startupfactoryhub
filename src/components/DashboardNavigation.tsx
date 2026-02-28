@@ -132,7 +132,7 @@ const DashboardNavigation = () => {
                     )}
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-96 p-0" align="end">
+                <PopoverContent className="w-96 p-0 bg-background border-border backdrop-blur-none" align="end">
                   <div className="p-4 border-b">
                     <div className="flex items-center gap-2">
                       <Brain className="h-5 w-5 text-primary" />
@@ -156,7 +156,7 @@ const DashboardNavigation = () => {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuContent className="w-56 bg-background border-border backdrop-blur-none" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">

@@ -69,7 +69,7 @@ export function DashboardHeader() {
               )}
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-[calc(100vw-2rem)] sm:w-96 p-0" align="center">
+          <PopoverContent className="w-[calc(100vw-2rem)] sm:w-96 p-0 bg-background border-border backdrop-blur-none" align="center">
             <div className="p-3 sm:p-4 border-b">
               <div className="flex items-center gap-2">
                 <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
