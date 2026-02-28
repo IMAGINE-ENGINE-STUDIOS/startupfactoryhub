@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
+import MyBookings from './MyBookings';
+import { useMembershipStatus } from '@/hooks/useMembershipStatus';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +37,7 @@ const INDUSTRIES = ['Technology', 'Healthcare', 'Fintech', 'E-commerce', 'AI/ML'
 
 export default function InvestorProfileView() {
   const { profile, loading: profileLoading } = useProfileWithRole();
+  const { isSubscribed } = useMembershipStatus();
   const { toast } = useToast();
 
   const [isEditing, setIsEditing] = useState(false);
@@ -399,11 +402,12 @@ export default function InvestorProfileView() {
 
       {/* Details */}
       <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 max-w-4xl">
+        <TabsList className={`grid w-full max-w-4xl ${isSubscribed ? 'grid-cols-7' : 'grid-cols-6'}`}>
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="preferences">Investment Focus</TabsTrigger>
           <TabsTrigger value="availability">Availability</TabsTrigger>
           <TabsTrigger value="posts">Your Posts</TabsTrigger>
+          {isSubscribed && <TabsTrigger value="bookings">My Bookings</TabsTrigger>}
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
           <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
@@ -657,6 +661,12 @@ export default function InvestorProfileView() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {isSubscribed && (
+          <TabsContent value="bookings" className="space-y-4">
+            <MyBookings />
+          </TabsContent>
+        )}
 
         <TabsContent value="subscription" className="space-y-4">
           <ProfileSubscriptionTab />

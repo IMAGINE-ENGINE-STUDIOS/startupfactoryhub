@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import MyBookings from './MyBookings';
+import { useMembershipStatus } from '@/hooks/useMembershipStatus';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,6 +31,7 @@ export default function StudentProfileView() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { profile } = useProfileWithRole();
+  const { isSubscribed } = useMembershipStatus();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [studentProfile, setStudentProfile] = useState<any>(null);
@@ -205,9 +208,10 @@ export default function StudentProfileView() {
   return (
     <div className="space-y-6 pb-8">
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+        <TabsList className={`grid w-full max-w-2xl ${isSubscribed ? 'grid-cols-5' : 'grid-cols-4'}`}>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="posts">Your Posts</TabsTrigger>
+          {isSubscribed && <TabsTrigger value="bookings">My Bookings</TabsTrigger>}
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
           <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
@@ -543,6 +547,12 @@ export default function StudentProfileView() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {isSubscribed && (
+          <TabsContent value="bookings" className="space-y-4">
+            <MyBookings />
+          </TabsContent>
+        )}
 
         <TabsContent value="subscription" className="space-y-4">
           <ProfileSubscriptionTab />
