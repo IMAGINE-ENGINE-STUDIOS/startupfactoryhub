@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import frontierPassImg from '@/assets/frontier-pass.webp';
 import sfhPassImg from '@/assets/sfh-pass.png';
+import softLandingPassImg from '@/assets/soft-landing-pass.webp';
 import SoftLandingRequestDialog from '@/components/SoftLandingRequestDialog';
 
 const FRONTIER_BOOKING_URL = 'https://booking.flyfrontier.com/FrontierMiles/GoWildSignup?_ga=2.125927374.2135620265.1772270212-2039149194.1772270211&_gac=1.183458260.1772273523.Cj0KCQiAwYrNBhDcARIsAGo3u32mNyqqe-uI2l0iOVAa0s9X_nKB4dKSpaXoj604XXI-F7W_a3L0Qx4aAu6UEALw_wcB';
@@ -175,6 +176,7 @@ export default function WalletPasses({ className }: { className?: string }) {
       tier: isCorporate ? 'Corporate' : 'Standard',
       active: true,
       details: `Corporate registration, legal address, documents & legal advice. Expand to Japan, USA, Europe, Chile or Venezuela.${isCorporate ? ' Corporate discount applied.' : ''}`,
+      image: softLandingPassImg,
       gradient: 'from-violet-600 to-purple-500',
       action: (
         <div className="w-full space-y-1.5">
