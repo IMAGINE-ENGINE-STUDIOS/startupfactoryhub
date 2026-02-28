@@ -940,26 +940,27 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       el.style.cssText = `
         width: ${markerSize}px;
         height: ${markerSize}px;
+        min-width: ${markerSize}px;
+        min-height: ${markerSize}px;
+        max-width: ${markerSize}px;
+        max-height: ${markerSize}px;
         cursor: pointer;
-        position: relative;
       `;
       
       const markerEl = document.createElement('div');
       markerEl.style.cssText = `
-        width: 100%;
-        height: 100%;
+        width: ${markerSize}px;
+        height: ${markerSize}px;
+        min-width: ${markerSize}px;
+        min-height: ${markerSize}px;
+        max-width: ${markerSize}px;
+        max-height: ${markerSize}px;
         background: ${ws.image_url ? `url(${ws.image_url}) center/cover,` : ''} linear-gradient(135deg, #0d9488, #14b8a6);
         border: 3px solid white;
         border-radius: 50%;
         box-shadow: 0 4px 12px rgba(13, 148, 136, 0.5);
       `;
       el.appendChild(markerEl);
-      
-      // Badge
-      const badge = document.createElement('div');
-      badge.innerHTML = '🏢';
-      badge.style.cssText = `position: absolute; top: -6px; right: -6px; font-size: 12px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));`;
-      el.appendChild(badge);
       
       el.addEventListener('click', () => {
         setSelectedWorkspace(ws);
@@ -970,7 +971,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         }
       });
       
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center', offset: [0, 0] })
         .setLngLat([ws.longitude, ws.latitude])
         .addTo(map.current!);
       
