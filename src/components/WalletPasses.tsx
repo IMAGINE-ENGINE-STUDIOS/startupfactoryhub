@@ -171,7 +171,7 @@ export default function WalletPasses({ className }: { className?: string }) {
       icon: <Landmark className="h-5 w-5" />,
       tier: 'All Members',
       active: true,
-      details: 'Open a free HSBC Innovation Banking account. Email to get started.',
+      details: 'Open a free HSBC Innovation Banking account. Email and indicate you are a Startup Factory Hub account holder.',
       gradient: 'from-red-600 to-red-500',
       image: hsbcPassImg,
       action: (
