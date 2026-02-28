@@ -13,6 +13,60 @@ import { format, parseISO, formatDistanceToNow } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
+// Admin step-line component matching user's MyBookings view
+function AdminBookingStepLine({ status }: { status: string }) {
+  const steps = [
+    { key: 'pending', label: 'Pending' },
+    { key: 'confirmed', label: 'Active' },
+    { key: 'needs_action', label: 'Updating' },
+    { key: 'cancelled', label: 'Cancelled' },
+  ];
+
+  const activeIndex = steps.findIndex(s => s.key === status);
+
+  return (
+    <div className="flex items-center w-full gap-0 py-2 px-1">
+      {steps.map((step, i) => {
+        const isActive = i === activeIndex;
+        const isPast = i < activeIndex;
+        const isCancelledStep = step.key === 'cancelled';
+
+        let dotColor = 'bg-muted-foreground/20';
+        let textColor = 'text-muted-foreground/50';
+
+        if (isActive) {
+          dotColor = isCancelledStep ? 'bg-red-500' : step.key === 'needs_action' ? 'bg-orange-500' : step.key === 'pending' ? 'bg-amber-500' : 'bg-emerald-500';
+          textColor = isCancelledStep ? 'text-red-500' : step.key === 'needs_action' ? 'text-orange-500' : step.key === 'pending' ? 'text-amber-500' : 'text-emerald-500';
+        } else if (isPast) {
+          dotColor = 'bg-emerald-500/60';
+          textColor = 'text-emerald-600/60';
+        }
+
+        return (
+          <div key={step.key} className="flex items-center flex-1 last:flex-none">
+            <div className="flex flex-col items-center gap-0.5">
+              <div className={cn(
+                "w-2.5 h-2.5 rounded-full transition-all duration-300 shrink-0",
+                dotColor,
+                isActive && "ring-3 ring-current/10 w-3 h-3"
+              )} />
+              <span className={cn("text-[9px] font-medium whitespace-nowrap", textColor)}>
+                {step.label}
+              </span>
+            </div>
+            {i < steps.length - 1 && (
+              <div className={cn(
+                "h-[2px] flex-1 mx-1 rounded-full transition-all",
+                isPast ? 'bg-emerald-500/40' : 'bg-muted-foreground/15'
+              )} />
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
 const TIER_CONFIG: Record<string, { label: string; icon: React.ReactNode; spaceType: string; badgeClass: string }> = {
   community: { label: 'Community', icon: <Users className="h-3 w-3" />, spaceType: 'Community Space', badgeClass: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
   self_paced: { label: 'Self-Paced', icon: <Monitor className="h-3 w-3" />, spaceType: 'Desk', badgeClass: 'bg-violet-500/10 text-violet-600 border-violet-500/20' },
@@ -243,6 +297,11 @@ export default function WorkspaceBookingsManagement() {
                             <ShieldAlert className="h-3 w-3" /> Not Subscribed
                           </Badge>
                         )}
+                      </div>
+
+                      {/* Status step-line */}
+                      <div className="pl-12">
+                        <AdminBookingStepLine status={booking.status} />
                       </div>
 
                       {/* Details rows */}
