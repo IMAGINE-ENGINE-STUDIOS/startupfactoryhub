@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Calendar as CalendarIcon, MapPin, Users, Clock, Video, User, Building, MoreVertical, Pencil, Trash2 } from 'lucide-react';
+import { Calendar as CalendarIcon, MapPin, Users, Clock, Video, User, Building, MoreVertical, Pencil, Trash2, Rocket } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { EditEventDialog } from '@/components/EditEventDialog';
 
@@ -27,7 +27,7 @@ import { useMentorAvailability } from '@/hooks/useMentorAvailability';
 import { cn } from '@/lib/utils';
 import CreatePitchMeetingDialog from '@/components/CreatePitchMeetingDialog';
 
-type CalendarItemType = 'event' | 'session' | 'availability' | 'pitch';
+type CalendarItemType = 'event' | 'session' | 'availability' | 'pitch' | 'accelerator';
 
 interface CalendarItem {
   id: string;
@@ -63,7 +63,7 @@ export default function UnifiedCalendar({
   showCreateButton = true, 
   onCreateEvent,
   onItemClick,
-  filterTypes = ['event', 'session', 'availability', 'pitch'],
+  filterTypes = ['event', 'session', 'availability', 'pitch', 'accelerator'],
   userRole,
   onCreatePitchClick,
   connectedInvestors
@@ -76,6 +76,7 @@ export default function UnifiedCalendar({
   const [deleteEventId, setDeleteEventId] = useState<string | null>(null);
   const [showPitchDialog, setShowPitchDialog] = useState(false);
   const [userCompany, setUserCompany] = useState<any>(null);
+  const [acceleratorCohorts, setAcceleratorCohorts] = useState<any[]>([]);
   const { user } = useAuth();
   const { sessions } = useMentoringSessions();
   const { availability } = useMentorAvailability();
@@ -84,25 +85,17 @@ export default function UnifiedCalendar({
   useEffect(() => {
     fetchEvents();
     fetchPitchMeetings();
+    fetchAcceleratorCohorts();
     if (userRole === 'startup') {
       fetchUserCompany();
     }
 
-    // Real-time subscription for events, pitch meetings, and attendees
     const channel = supabase
       .channel('unified-calendar-changes')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => {
-        console.log('Event change detected, refreshing...');
-        fetchEvents();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'pitch_meetings' }, () => {
-        console.log('Pitch meeting change detected, refreshing...');
-        fetchPitchMeetings();
-      })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_attendees' }, () => {
-        console.log('Event attendee change detected, refreshing...');
-        fetchEvents(); // Refetch to update attendee counts
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'events' }, () => fetchEvents())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'pitch_meetings' }, () => fetchPitchMeetings())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'event_attendees' }, () => fetchEvents())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'accelerator_cohorts' }, () => fetchAcceleratorCohorts())
       .subscribe();
 
     return () => {
@@ -212,6 +205,21 @@ export default function UnifiedCalendar({
       .maybeSingle();
 
     setUserCompany(data);
+  };
+
+  const fetchAcceleratorCohorts = async () => {
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await supabase
+      .from('accelerator_cohorts')
+      .select('*, accelerator_profiles(organization_name, logo_url, user_id)')
+      .in('status', ['applications_open', 'in_progress'])
+      .gte('start_date', today);
+
+    if (error) {
+      console.error('Error fetching accelerator cohorts:', error);
+      return;
+    }
+    setAcceleratorCohorts(data || []);
   };
 
   const handleEditEvent = (item: CalendarItem) => {
@@ -353,6 +361,32 @@ export default function UnifiedCalendar({
       });
     }
 
+    // Add accelerator cohort dates
+    if (filterTypes.includes('accelerator')) {
+      acceleratorCohorts.forEach(cohort => {
+        if (cohort.start_date) {
+          items.push({
+            id: `accel-start-${cohort.id}`,
+            type: 'accelerator',
+            title: `Program Starts: ${cohort.name}`,
+            description: cohort.accelerator_profiles?.organization_name,
+            start_date: parseISO(cohort.start_date),
+            end_date: parseISO(cohort.start_date),
+          });
+        }
+        if (cohort.application_deadline) {
+          items.push({
+            id: `accel-deadline-${cohort.id}`,
+            type: 'accelerator',
+            title: `Deadline: ${cohort.name}`,
+            description: cohort.accelerator_profiles?.organization_name,
+            start_date: parseISO(cohort.application_deadline),
+            end_date: parseISO(cohort.application_deadline),
+          });
+        }
+      });
+    }
+
     return items.sort((a, b) => a.start_date.getTime() - b.start_date.getTime());
   };
 
@@ -383,6 +417,8 @@ export default function UnifiedCalendar({
         return 'bg-green-500/10 text-green-500 border-green-500/20';
       case 'pitch':
         return 'bg-orange-500/10 text-orange-500 border-orange-500/20';
+      case 'accelerator':
+        return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
       default:
         return 'bg-muted text-muted-foreground';
     }
@@ -398,6 +434,8 @@ export default function UnifiedCalendar({
         return <Clock className="h-4 w-4" />;
       case 'pitch':
         return <Users className="h-4 w-4" />;
+      case 'accelerator':
+        return <Rocket className="h-4 w-4" />;
     }
   };
 
@@ -447,6 +485,10 @@ export default function UnifiedCalendar({
         <Badge variant="outline" className={getItemTypeColor('pitch')}>
           <Users className="h-3 w-3 mr-1" />
           Pitch Meetings
+        </Badge>
+        <Badge variant="outline" className={getItemTypeColor('accelerator')}>
+          <Rocket className="h-3 w-3 mr-1" />
+          Accelerator Programs
         </Badge>
       </div>
 

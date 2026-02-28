@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { DashboardHeader } from '@/components/DashboardHeader';
@@ -23,18 +24,23 @@ import FloatingChat from '@/components/FloatingChat';
 import CreateSessionDialog from '@/components/CreateSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
-import { Calendar as CalendarIcon, Plus, Clock, MapPin, Users, MessageCircle, UserCircle, Network, BookOpen, Briefcase, BarChart, Brain, Wrench, Globe, Video } from 'lucide-react';
+import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
+import { Calendar as CalendarIcon, Plus, Clock, MapPin, Users, MessageCircle, UserCircle, Network, BookOpen, Briefcase, BarChart, Brain, Wrench, Globe, Video, Rocket, ExternalLink } from 'lucide-react';
 import { useEvents } from '@/hooks/useEvents';
 import { format, parseISO } from 'date-fns';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import DistrictRooms from '@/components/DistrictRooms';
 import LiveRooms from '@/components/LiveRooms';
+import { getIndustryLabel } from '@/lib/constants';
 export default function StudentDashboard() {
   const [createSessionDialogOpen, setCreateSessionDialogOpen] = useState(false);
   const [createEventDialogOpen, setCreateEventDialogOpen] = useState(false);
   const [showEventDetails, setShowEventDetails] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  const [openCohorts, setOpenCohorts] = useState<any[]>([]);
+  const [selectedCohort, setSelectedCohort] = useState<any>(null);
+  const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(urlTab || "social");
@@ -51,6 +57,21 @@ export default function StudentDashboard() {
       setSearchParams({});
     }
   }, [urlTab, activeTab, setSearchParams]);
+
+  // Fetch open accelerator cohorts
+  useEffect(() => {
+    const fetchOpenCohorts = async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const { data } = await supabase
+        .from('accelerator_cohorts')
+        .select('*, accelerator_profiles(organization_name, logo_url, user_id, external_link)')
+        .eq('status', 'applications_open')
+        .gte('start_date', today)
+        .order('application_deadline', { ascending: true });
+      setOpenCohorts(data || []);
+    };
+    fetchOpenCohorts();
+  }, []);
 
   // Redirect if wrong role
   useEffect(() => {
@@ -239,6 +260,123 @@ export default function StudentDashboard() {
                   </ScrollArea>
                 </CardContent>
               </Card>}
+
+            {/* Upcoming Accelerator Programs */}
+            {openCohorts.length > 0 && (
+              <Card className="tech-card border-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Rocket className="h-5 w-5 text-emerald-500" />
+                    Upcoming Accelerator Programs
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-4 pb-4">
+                      {openCohorts.map(cohort => {
+                        const spotsLeft = (cohort.max_startups || 0) - (cohort.current_startups || 0);
+                        return (
+                          <div key={cohort.id} className="flex-shrink-0 w-[320px] sm:w-[380px]">
+                            <div className="rounded-lg border hover:border-emerald-500/50 transition-all p-4 space-y-3 h-full flex flex-col">
+                              <div className="flex items-start gap-3">
+                                {cohort.accelerator_profiles?.logo_url ? (
+                                  <img src={cohort.accelerator_profiles.logo_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                                ) : (
+                                  <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                    <Rocket className="h-5 w-5 text-emerald-500" />
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold line-clamp-1">{cohort.name}</h3>
+                                  <p className="text-xs text-muted-foreground line-clamp-1">
+                                    {cohort.accelerator_profiles?.organization_name}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {cohort.description && (
+                                <p className="text-xs text-muted-foreground line-clamp-2">{cohort.description}</p>
+                              )}
+
+                              <div className="space-y-1 text-xs text-muted-foreground">
+                                {cohort.start_date && (
+                                  <div className="flex items-center gap-2">
+                                    <CalendarIcon className="h-3 w-3" />
+                                    Starts: {format(parseISO(cohort.start_date), 'MMM d, yyyy')}
+                                  </div>
+                                )}
+                                {cohort.application_deadline && (
+                                  <div className="flex items-center gap-2">
+                                    <Clock className="h-3 w-3 text-orange-500" />
+                                    Deadline: {format(parseISO(cohort.application_deadline), 'MMM d, yyyy')}
+                                  </div>
+                                )}
+                                {cohort.max_startups && (
+                                  <div className="flex items-center gap-2">
+                                    <Users className="h-3 w-3" />
+                                    {spotsLeft > 0 ? `${spotsLeft} spots left` : 'Full'}
+                                  </div>
+                                )}
+                              </div>
+
+                              {cohort.focus_industries && cohort.focus_industries.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {cohort.focus_industries.slice(0, 3).map((ind: string) => (
+                                    <Badge key={ind} variant="outline" className="text-[10px] px-1.5 py-0">
+                                      {getIndustryLabel(ind)}
+                                    </Badge>
+                                  ))}
+                                  {cohort.focus_industries.length > 3 && (
+                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                                      +{cohort.focus_industries.length - 3}
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+
+                              <div className="flex gap-2 mt-auto pt-2">
+                                <Button
+                                  size="sm"
+                                  className="flex-1 gap-1"
+                                  onClick={() => {
+                                    setSelectedCohort({
+                                      cohort_id: cohort.id,
+                                      name: cohort.name,
+                                      description: cohort.description,
+                                      deadline: cohort.application_deadline,
+                                      funding: cohort.funding_per_startup,
+                                      equity: cohort.equity_percentage,
+                                      enrollment_fee: cohort.enrollment_fee,
+                                      industries: cohort.focus_industries,
+                                      accelerator_name: cohort.accelerator_profiles?.organization_name,
+                                      accelerator_logo: cohort.accelerator_profiles?.logo_url,
+                                    });
+                                    setShowApplicationDialog(true);
+                                  }}
+                                >
+                                  <Rocket className="h-3 w-3" />
+                                  Apply
+                                </Button>
+                                {cohort.accelerator_profiles?.external_link && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => window.open(cohort.accelerator_profiles.external_link, '_blank')}
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            )}
             
             <UnifiedCalendar 
               showCreateButton={false} 
@@ -249,7 +387,7 @@ export default function StudentDashboard() {
                   setShowEventDetails(true);
                 }
               }} 
-              filterTypes={['event', 'session', 'availability']} 
+              filterTypes={['event', 'session', 'availability', 'accelerator']} 
             />
           </TabsContent>
 
@@ -282,5 +420,11 @@ export default function StudentDashboard() {
       {selectedEvent && <EventDetailsDialog event={selectedEvent} open={showEventDetails} onOpenChange={setShowEventDetails} onEventUpdated={() => {
       setShowEventDetails(false);
     }} />}
+      <CohortApplicationDialog
+        open={showApplicationDialog}
+        onOpenChange={setShowApplicationDialog}
+        cohortData={selectedCohort}
+        onApplicationSubmitted={() => setShowApplicationDialog(false)}
+      />
     </div>;
 }

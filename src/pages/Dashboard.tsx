@@ -530,7 +530,7 @@ const Dashboard = () => {
                 window.open(item.meeting_link, '_blank');
               }
             }}
-            filterTypes={['event', 'session', 'pitch']} />
+            filterTypes={['event', 'session', 'pitch', 'accelerator']} />
 
             </TabsContent>
         }

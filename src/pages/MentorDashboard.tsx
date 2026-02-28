@@ -295,7 +295,7 @@ const MentorDashboard = () => {
             } else if (item.type === 'session' && item.meeting_link) {
               setActiveVideoSession(item);
             }
-          }} filterTypes={['event', 'session', 'availability']} />
+          }} filterTypes={['event', 'session', 'availability', 'accelerator']} />
 
           </TabsContent>
 
