@@ -371,9 +371,29 @@ export default function WorkspaceBookingsManagement() {
                           </Button>
                         </>
                       )}
-                      {booking.status !== 'pending' && (
-                        <Button size="sm" variant="ghost" className="text-xs" onClick={() => openAction(booking, booking.status === 'cancelled' ? 'confirm' : 'cancel')}>
-                          Change Status
+                      {booking.status === 'confirmed' && (
+                        <>
+                          <Button size="sm" variant="outline" className="text-orange-600 border-orange-500/30 hover:bg-orange-500/10" onClick={() => openAction(booking, 'flag')}>
+                            <AlertTriangle className="h-3.5 w-3.5 mr-1" /> Update
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-red-600 border-red-500/30 hover:bg-red-500/10" onClick={() => openAction(booking, 'cancel')}>
+                            <X className="h-3.5 w-3.5 mr-1" /> Cancel
+                          </Button>
+                        </>
+                      )}
+                      {booking.status === 'needs_action' && (
+                        <>
+                          <Button size="sm" variant="outline" className="text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => openAction(booking, 'confirm')}>
+                            <Check className="h-3.5 w-3.5 mr-1" /> Approve
+                          </Button>
+                          <Button size="sm" variant="outline" className="text-red-600 border-red-500/30 hover:bg-red-500/10" onClick={() => openAction(booking, 'cancel')}>
+                            <X className="h-3.5 w-3.5 mr-1" /> Cancel
+                          </Button>
+                        </>
+                      )}
+                      {booking.status === 'cancelled' && (
+                        <Button size="sm" variant="outline" className="text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => openAction(booking, 'confirm')}>
+                          <Check className="h-3.5 w-3.5 mr-1" /> Re-approve
                         </Button>
                       )}
                     </div>
