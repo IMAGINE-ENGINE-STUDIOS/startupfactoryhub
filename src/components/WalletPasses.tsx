@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Plane, Building, Globe, Eye, EyeOff, ExternalLink } from 'lucide-react';
+import { Wallet, Plane, Building, Globe, Eye, EyeOff, ExternalLink, Landmark, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import frontierPassImg from '@/assets/frontier-pass.webp';
 import sfhPassImg from '@/assets/sfh-pass.png';
 import softLandingPassImg from '@/assets/soft-landing-pass.webp';
+import hsbcPassImg from '@/assets/hsbc-pass.jpg';
 import SoftLandingRequestDialog from '@/components/SoftLandingRequestDialog';
 
 const FRONTIER_BOOKING_URL = 'https://booking.flyfrontier.com/FrontierMiles/GoWildSignup?_ga=2.125927374.2135620265.1772270212-2039149194.1772270211&_gac=1.183458260.1772273523.Cj0KCQiAwYrNBhDcARIsAGo3u32mNyqqe-uI2l0iOVAa0s9X_nKB4dKSpaXoj604XXI-F7W_a3L0Qx4aAu6UEALw_wcB';
@@ -158,6 +159,35 @@ export default function WalletPasses({ className }: { className?: string }) {
       details: 'Access coworking spaces worldwide.',
       gradient: 'from-primary to-accent',
       image: sfhPassImg,
+    });
+  }
+
+  // HSBC Banking Pass — All paid tiers, free
+  if (isSubscribed) {
+    passes.push({
+      id: 'hsbc-banking',
+      title: 'HSBC Innovation Banking',
+      subtitle: 'Free Business Account',
+      icon: <Landmark className="h-5 w-5" />,
+      tier: 'All Members',
+      active: true,
+      details: 'Open a free HSBC Innovation Banking account. Email to get started.',
+      gradient: 'from-red-600 to-red-500',
+      image: hsbcPassImg,
+      action: (
+        <Button
+          size="sm"
+          variant="outline"
+          className="w-full h-7 text-[11px] mt-1 border-red-500/30 text-red-600"
+          onClick={(e) => {
+            e.stopPropagation();
+            window.location.href = 'mailto:safi.keshvargar@us.hsbc.com?subject=HSBC%20Innovation%20Banking%20Account%20-%20Startup%20Factory%20Hub%20Member';
+          }}
+        >
+          <Mail className="h-3 w-3 mr-1" />
+          Email to Create Account
+        </Button>
+      ),
     });
   }
 
