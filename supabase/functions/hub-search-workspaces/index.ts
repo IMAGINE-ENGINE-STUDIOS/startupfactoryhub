@@ -40,7 +40,7 @@ const MOCK_WORKSPACES = [
   },
   {
     id: "ws-sf-regus-1",
-    name: "Regus One Market Plaza",
+    name: "Startup Factory Hub One Market Plaza",
     address: "1 Market Street, Steuart Tower",
     city: "San Francisco",
     country: "United States",
@@ -199,7 +199,7 @@ const MOCK_WORKSPACES = [
   },
   {
     id: "ws-tokyo-regus-1",
-    name: "Regus Shibuya Mark City",
+    name: "Startup Factory Hub Shibuya Mark City",
     address: "1-12-1 Dogenzaka, Shibuya-ku",
     city: "Tokyo",
     country: "Japan",
@@ -277,7 +277,7 @@ const MOCK_WORKSPACES = [
   // Dubai
   {
     id: "ws-dubai-regus-1",
-    name: "Regus Burj Khalifa",
+    name: "Startup Factory Hub Burj Khalifa",
     address: "1 Sheikh Mohammed bin Rashid Blvd",
     city: "Dubai",
     country: "United Arab Emirates",

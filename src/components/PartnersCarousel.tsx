@@ -9,7 +9,7 @@ const PARTNERS = [
   { name: "F6S", logo: "/partners/f6s-logo.png", tier: "Startup" },
   { name: "TradingView", logo: "https://www.tradingview.com/static/images/logo-tradingview.svg", tier: "Finance" },
   { name: "IWG", logo: "/partners/iwg-logo.png", tier: "Workspace" },
-  { name: "Regus", logo: "/partners/regus-logo.png", tier: "Workspace" },
+  { name: "Startup Factory Hub", logo: "/partners/regus-logo.png", tier: "Workspace" },
   { name: "HSBC Innovation Banking", logo: "/partners/hsbc-logo.png", tier: "Banking" },
   { name: "Advantary Capital Partners", logo: "/partners/advantary-logo.jpg", tier: "Investment" },
   { name: "Lehigh University", logo: "/lehigh-university-logo.png", tier: "Academic" },
