@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Workspace } from '@/hooks/useHubsSearch';
 import { useMembershipStatus } from '@/hooks/useMembershipStatus';
+import { useAuth } from '@/contexts/AuthContext';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -39,6 +41,7 @@ const DURATION_OPTIONS = [
 ];
 
 export const RegusBookingModal = ({ workspace, open, onOpenChange }: RegusBookingModalProps) => {
+  const { user } = useAuth();
   const { tier } = useMembershipStatus();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -48,6 +51,20 @@ export const RegusBookingModal = ({ workspace, open, onOpenChange }: RegusBookin
   const [carouselApi, setCarouselApi] = useState<CarouselApi>();
   const [currentSlide, setCurrentSlide] = useState(0);
   const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
+
+  const { data: companyName } = useQuery({
+    queryKey: ['user-company-name', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await supabase
+        .from('companies')
+        .select('name')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      return data?.name || null;
+    },
+    enabled: !!user,
+  });
 
   const allImages = useMemo(() => {
     const imgs: string[] = [];
@@ -216,6 +233,12 @@ export const RegusBookingModal = ({ workspace, open, onOpenChange }: RegusBookin
                 <MapPin className="h-3 w-3" />
                 {workspace.address}, {workspace.city}
               </div>
+              {companyName && (
+                <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                  <Building2 className="h-3 w-3" />
+                  <span>Booking for: <span className="font-medium text-foreground">{companyName}</span></span>
+                </div>
+              )}
               <div className="flex flex-wrap gap-1 mt-2">
                 {workspace.workspace_types.map((type) => (
                   <Badge key={type} variant="outline" className="text-xs capitalize bg-white/10 border-white/30">
