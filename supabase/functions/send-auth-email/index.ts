@@ -121,7 +121,7 @@ serve(async (req: Request) => {
     }
 
     // Log the confirmation URL that will be in the email
-    const confirmationUrl = `${supabaseUrl}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(redirect_to || 'https://startupfactoryhub.com/reset-password')}`;
+    const confirmationUrl = `${supabaseUrl}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(redirect_to || appUrl + '/reset-password')}`;
     console.log("Generated confirmation URL:", confirmationUrl);
     console.log(`Sending email from: Startup Factory Hub <info@startupfactoryhub.com> to: ${user.email}`);
 
