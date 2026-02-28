@@ -41,6 +41,7 @@ import {
   GraduationCap,
   TrendingUp,
   Building2,
+  Landmark,
 } from "lucide-react";
 import MatrixBackground from "@/components/MatrixBackground";
 
@@ -892,8 +893,46 @@ function generateDailyDigestHtml() {
 </html>`;
 }
 
-// ─── Template config ────────────────────────────────────────────────────────
+// ─── HSBC Intro HTML ────────────────────────────────────────────────────────
 
+function generateHsbcIntroHtml(vars: {
+  userName: string;
+  companyName: string;
+  industry: string;
+  stage: string;
+  location: string;
+  website: string;
+  userEmail: string;
+  description: string;
+}) {
+  return `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto; padding: 20px;">
+  <div style="border-bottom: 3px solid #DB0011; padding-bottom: 16px; margin-bottom: 24px;">
+    <h2 style="margin: 0; color: #333;">Introduction — Startup Factory Hub Member</h2>
+  </div>
+  <p>Hi Safi,</p>
+  <p>Hope you're doing well! I wanted to introduce <strong>${vars.userName}</strong>, a member of the Startup Factory Hub community, who's interested in opening an HSBC Innovation Banking account.</p>
+  <p>Here's a quick overview:</p>
+  <table style="width: 100%; border-collapse: collapse; margin: 16px 0;">
+    <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px 12px; font-weight: bold; color: #555; width: 140px;">Name</td><td style="padding: 8px 12px;">${vars.userName}</td></tr>
+    <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px 12px; font-weight: bold; color: #555;">Company</td><td style="padding: 8px 12px;">${vars.companyName}</td></tr>
+    <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px 12px; font-weight: bold; color: #555;">Industry</td><td style="padding: 8px 12px;">${vars.industry}</td></tr>
+    <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px 12px; font-weight: bold; color: #555;">Stage</td><td style="padding: 8px 12px;">${vars.stage}</td></tr>
+    ${vars.location ? `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px 12px; font-weight: bold; color: #555;">Location</td><td style="padding: 8px 12px;">${vars.location}</td></tr>` : ""}
+    ${vars.website ? `<tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px 12px; font-weight: bold; color: #555;">Website</td><td style="padding: 8px 12px;"><a href="${vars.website}" style="color: #DB0011;">${vars.website}</a></td></tr>` : ""}
+    <tr style="border-bottom: 1px solid #eee;"><td style="padding: 8px 12px; font-weight: bold; color: #555;">Email</td><td style="padding: 8px 12px;"><a href="mailto:${vars.userEmail}" style="color: #DB0011;">${vars.userEmail}</a></td></tr>
+  </table>
+  ${vars.description ? `<p><strong>About the company:</strong> ${vars.description}</p>` : ""}
+  <p>They're part of our global startup community and would love to explore what HSBC Innovation Banking can offer. I'll let you two take it from here!</p>
+  <p>Best regards,<br/><strong>Startup Factory Hub</strong><br/><a href="https://startupfactoryhub.com" style="color: #DB0011;">startupfactoryhub.com</a></p>
+  <div style="margin-top: 32px; padding-top: 16px; border-top: 1px solid #eee; font-size: 12px; color: #999;">This is an automated introduction sent on behalf of a Startup Factory Hub member.</div>
+</body>
+</html>`;
+}
+
+// ─── Template config ────────────────────────────────────────────────────────
 
 const TEMPLATES = [
   // ── Notification-based (all use send-notification-email) ──
@@ -1043,6 +1082,14 @@ const TEMPLATES = [
     edgeFunction: "daily-activity-digest",
     trigger: "pg_cron daily 7:00 AM EST",
   },
+  {
+    id: "hsbc-intro",
+    label: "HSBC Banking Introduction",
+    icon: Landmark,
+    description: "Automated intro email to HSBC Innovation Banking — sent on member request",
+    edgeFunction: "send-hsbc-intro",
+    trigger: "user wallet action",
+  },
 ] as const;
 
 type TemplateId = (typeof TEMPLATES)[number]["id"];
@@ -1170,6 +1217,17 @@ const defaultVars = {
   "daily-digest": {
     to: "",
   },
+  "hsbc-intro": {
+    to: "",
+    userName: "Jordan Park",
+    companyName: "TechNova AI",
+    industry: "Artificial Intelligence",
+    stage: "Seed",
+    location: "San Francisco, CA",
+    website: "https://technova.ai",
+    userEmail: "jordan@technova.ai",
+    description: "AI-powered analytics platform helping startups make data-driven decisions.",
+  },
 };
 
 // ─── Template group helpers ──────────────────────────────────────────────────
@@ -1222,6 +1280,7 @@ export default function EmailTemplates() {
     if (selected === "pdf-signature") return generatePdfSignatureHtml(vars["pdf-signature"]);
     if (selected === "weekly-welcome") return generateWeeklyWelcomeHtml();
     if (selected === "daily-digest") return generateDailyDigestHtml();
+    if (selected === "hsbc-intro") return generateHsbcIntroHtml(vars["hsbc-intro"]);
     return "";
   }
 
@@ -1640,6 +1699,51 @@ export default function EmailTemplates() {
                         <p className="text-xs mt-1">The Daily Digest queries activity from the last 24 hours and sends personalized summaries. Runs daily at 7:00 AM EST via pg_cron.</p>
                       </div>
                     )}
+
+                    {/* ── HSBC Intro ── */}
+                    {selected === "hsbc-intro" && (() => {
+                      const v = vars["hsbc-intro"];
+                      return (
+                        <>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Member Name</Label>
+                            <Input value={v.userName} onChange={(e) => updateVar("hsbc-intro", "userName", e.target.value)} className="h-9 text-sm" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Company Name</Label>
+                            <Input value={v.companyName} onChange={(e) => updateVar("hsbc-intro", "companyName", e.target.value)} className="h-9 text-sm" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Industry</Label>
+                            <Input value={v.industry} onChange={(e) => updateVar("hsbc-intro", "industry", e.target.value)} className="h-9 text-sm" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Stage</Label>
+                            <Input value={v.stage} onChange={(e) => updateVar("hsbc-intro", "stage", e.target.value)} className="h-9 text-sm" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Location</Label>
+                            <Input value={v.location} onChange={(e) => updateVar("hsbc-intro", "location", e.target.value)} className="h-9 text-sm" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Website</Label>
+                            <Input value={v.website} onChange={(e) => updateVar("hsbc-intro", "website", e.target.value)} className="h-9 text-sm" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Member Email</Label>
+                            <Input value={v.userEmail} onChange={(e) => updateVar("hsbc-intro", "userEmail", e.target.value)} className="h-9 text-sm" />
+                          </div>
+                          <div className="space-y-1.5">
+                            <Label className="text-xs">Company Description</Label>
+                            <Textarea value={v.description} onChange={(e) => updateVar("hsbc-intro", "description", e.target.value)} rows={2} className="text-sm resize-none" />
+                          </div>
+                          <div className="rounded-md bg-muted border border-border px-3 py-2.5 text-xs text-muted-foreground flex items-start gap-2">
+                            <Landmark className="h-3.5 w-3.5 text-red-500 mt-0.5 shrink-0" />
+                            This email is sent automatically when a member clicks "Request Account Introduction" on their HSBC wallet pass. It goes to safi.keshvargar@us.hsbc.com with the member CC'd.
+                          </div>
+                        </>
+                      );
+                    })()}
 
                     {selected === "partnership" && (
                       <>
