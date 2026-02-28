@@ -38,7 +38,8 @@ import {
   Brain,
   BookOpen,
   KeyRound,
-  Trash2
+  Trash2,
+  Wallet
 } from "lucide-react";
 import RecommendationPopup from "./RecommendationPopup";
 import { PasswordChangeDialog } from "./PasswordChangeDialog";
@@ -115,14 +116,14 @@ const DashboardNavigation = () => {
             </div>
 
             {/* Right Side */}
-            <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="flex items-center space-x-1 sm:space-x-3">
               {/* Search - Hidden on smallest screens */}
               <Button variant="ghost" size="sm" className="hidden sm:flex">
                 <Search className="w-4 h-4" />
               </Button>
 
               {/* Wallet Passes */}
-              <WalletPasses />
+              <WalletPasses className="hidden sm:flex" />
 
               {/* AI Recommendations */}
               <Popover>
@@ -198,30 +199,31 @@ const DashboardNavigation = () => {
 
       {/* Mobile Bottom Navigation */}
       <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 tech-card border-t-2 border-accent/30 pb-safe rounded-t-2xl">
-        <div className="grid grid-cols-3 gap-2 px-4 py-4">
+        <div className="grid grid-cols-4 gap-1 px-3 py-3">
           <Button
             variant="ghost"
-            className="flex flex-col items-center justify-center gap-1.5 h-16 rounded-xl tech-card border-0 hover:bg-primary/20 hover:shadow-[var(--pulse-glow)] transition-all duration-300"
+            className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl tech-card border-0 hover:bg-primary/20 hover:shadow-[var(--pulse-glow)] transition-all duration-300"
             onClick={() => navigate("/dashboard")}
           >
-            <Home className="w-7 h-7 text-primary" />
-            <span className="text-xs font-medium">Home</span>
+            <Home className="w-6 h-6 text-primary" />
+            <span className="text-[10px] font-medium">Home</span>
           </Button>
           <Button
             variant="ghost"
-            className="flex flex-col items-center justify-center gap-1.5 h-16 rounded-xl tech-card border-0 hover:bg-primary/20 hover:shadow-[var(--pulse-glow)] transition-all duration-300"
+            className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl tech-card border-0 hover:bg-primary/20 hover:shadow-[var(--pulse-glow)] transition-all duration-300"
             onClick={() => navigate("/guidelines")}
           >
-            <Brain className="w-7 h-7 text-primary" />
-            <span className="text-xs font-medium">AI Tips</span>
+            <Brain className="w-6 h-6 text-primary" />
+            <span className="text-[10px] font-medium">AI Tips</span>
           </Button>
+          <WalletPasses className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl tech-card border-0 hover:bg-primary/20 hover:shadow-[var(--pulse-glow)] transition-all duration-300 sm:hidden" />
           <Button
             variant="ghost"
-            className="flex flex-col items-center justify-center gap-1.5 h-16 rounded-xl tech-card border-0 hover:bg-primary/20 hover:shadow-[var(--pulse-glow)] transition-all duration-300"
+            className="flex flex-col items-center justify-center gap-1.5 h-14 rounded-xl tech-card border-0 hover:bg-primary/20 hover:shadow-[var(--pulse-glow)] transition-all duration-300"
             onClick={() => navigate("/guidelines")}
           >
-            <BookOpen className="w-7 h-7 text-primary" />
-            <span className="text-xs font-medium">Help</span>
+            <BookOpen className="w-6 h-6 text-primary" />
+            <span className="text-[10px] font-medium">Help</span>
           </Button>
         </div>
       </div>
