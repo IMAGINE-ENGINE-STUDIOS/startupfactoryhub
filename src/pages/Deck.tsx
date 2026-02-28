@@ -1512,7 +1512,7 @@ export default function Deck() {
                 { name: "F6S", logo: "/partners/f6s-logo.png" },
                 { name: "Flippa", logo: "/partners/flippa-logo.png" },
                 { name: "IWG", logo: "/partners/iwg-logo.png" },
-                { name: "Regus", logo: "/partners/regus-logo.png" },
+                { name: "Startup Factory Hub", logo: "/partners/regus-logo.png" },
                 { name: "Advantary Capital", logo: "/partners/advantary-logo.jpg" },
                 { name: "Lovable", logo: "/partners/lovable-logo.png" },
                 { name: "Lehigh University", logo: "/lehigh-university-logo.png" },

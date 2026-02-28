@@ -167,7 +167,7 @@ const FEATURED_PARTNERS = [
     tier: "Investment Partner"
   },
   {
-    name: "Regus",
+    name: "Startup Factory Hub",
     logo: "https://www.regus.com/favicon.ico",
     tier: "Workspace Partner"
   }

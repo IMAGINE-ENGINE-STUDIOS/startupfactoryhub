@@ -1414,7 +1414,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                       </div>
                       <h4 className="font-semibold">Subscription Required</h4>
                       <p className="text-xs text-muted-foreground px-2">
-                        Subscribe to any SFH plan to unlock access to Regus workspaces across 130+ countries and 5,600+ locations.
+                        Subscribe to any SFH plan to unlock access to Startup Factory Hub workspaces across 130+ countries and 5,600+ locations.
                       </p>
                       <Button
                         size="sm"

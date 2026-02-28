@@ -120,7 +120,7 @@ export default function WorkspaceBookingsManagement() {
             Workspace Bookings
           </h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Manage Regus workspace booking requests
+            Manage Startup Factory Hub workspace booking requests
             {pendingCount > 0 && (
               <Badge className="ml-2 bg-amber-500/10 text-amber-600 border-amber-500/20 border">{pendingCount} pending</Badge>
             )}
