@@ -111,17 +111,13 @@ export default function WorkspaceBookingsManagement() {
       const userIds = [...new Set((data || []).map(b => b.user_id))];
       const venueIds = [...new Set((data || []).map(b => b.venue_id).filter(Boolean))];
 
-      // Fetch profiles, venue locations, and subscription status in parallel
-      const [profilesResult, venuesResult, subsResult] = await Promise.all([
+      // Fetch profiles and venue locations in parallel
+      const [profilesResult, venuesResult] = await Promise.all([
         userIds.length > 0
           ? supabase.from('profiles').select('user_id, full_name, email').in('user_id', userIds)
           : { data: [] },
         venueIds.length > 0
           ? supabase.from('regus_locations').select('id, name, address, city, country, office_type').in('id', venueIds)
-          : { data: [] },
-        // Check active subscriptions from user_subscriptions table
-        userIds.length > 0
-          ? supabase.from('user_subscriptions').select('user_id, tier, status, current_period_end').in('user_id', userIds)
           : { data: [] },
       ]);
 
@@ -131,19 +127,24 @@ export default function WorkspaceBookingsManagement() {
       if (venuesResult.data) {
         setVenueMap(Object.fromEntries(venuesResult.data.map((v: any) => [v.id, v])));
       }
-      // Build subscription verification map
-      const subMap: Record<string, boolean> = {};
-      if (subsResult.data) {
-        for (const s of subsResult.data as any[]) {
-          const isActive = s.status === 'active' && (!s.current_period_end || new Date(s.current_period_end) > new Date());
-          subMap[s.user_id] = isActive;
+
+      // Check subscription status via edge function (uses Stripe + platform owner bypass)
+      if (userIds.length > 0) {
+        try {
+          const { data: subsData, error: subsError } = await supabase.functions.invoke('admin-check-subscriptions', {
+            body: { user_ids: userIds },
+          });
+          if (!subsError && subsData) {
+            const subMap: Record<string, boolean> = {};
+            for (const uid of userIds) {
+              subMap[uid] = subsData[uid]?.subscribed === true;
+            }
+            setSubscriptionMap(subMap);
+          }
+        } catch (err) {
+          console.error('Error checking subscriptions:', err);
         }
       }
-      // For users not in subscribers table, mark as unverified
-      for (const uid of userIds) {
-        if (!(uid in subMap)) subMap[uid] = false;
-      }
-      setSubscriptionMap(subMap);
 
       setBookings(data || []);
     } catch (err) {
