@@ -20,23 +20,35 @@ export default function ResetPassword() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if we have recovery tokens in the URL hash
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const type = hashParams.get('type');
-    const accessToken = hashParams.get('access_token');
-    const refreshToken = hashParams.get('refresh_token');
-
-    // Also check query params (some flows use query params instead)
     const queryParams = new URLSearchParams(window.location.search);
-    const errorParam = queryParams.get('error');
-    const errorDescription = queryParams.get('error_description');
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
 
+    // Check for errors
+    const errorParam = queryParams.get('error') || hashParams.get('error');
+    const errorDescription = queryParams.get('error_description') || hashParams.get('error_description');
     if (errorParam) {
       setError(errorDescription || 'The reset link is invalid or has expired. Please request a new one.');
       return;
     }
 
-    // If we have tokens in the hash, set the session manually
+    // PKCE flow: Supabase redirects with ?code= query param
+    const code = queryParams.get('code');
+    if (code) {
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          console.error('Error exchanging code for session:', error);
+          setError('The reset link is invalid or has expired. Please request a new one.');
+        } else {
+          setSessionReady(true);
+        }
+      });
+      return;
+    }
+
+    // Legacy/implicit flow: tokens in hash
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+    const type = hashParams.get('type');
     if (accessToken && refreshToken && type === 'recovery') {
       supabase.auth.setSession({
         access_token: accessToken,
@@ -52,17 +64,16 @@ export default function ResetPassword() {
       return;
     }
 
-    // Listen for the PASSWORD_RECOVERY event
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    // Listen for PASSWORD_RECOVERY event (fallback)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'PASSWORD_RECOVERY') {
         setSessionReady(true);
       }
     });
 
-    // Also check if we already have a session (event may have fired before mount)
+    // Check existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        // We have a session, likely from the recovery flow
         setSessionReady(true);
       }
     });
