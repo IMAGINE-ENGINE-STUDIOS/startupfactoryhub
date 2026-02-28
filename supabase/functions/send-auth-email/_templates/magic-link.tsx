@@ -55,7 +55,7 @@ export const MagicLinkEmail = ({
             </Text>
 
             <Link
-              href={`${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to || 'https://startupfactoryhub.com/dashboard'}`}
+              href={`${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(redirect_to || 'https://startupfactoryhub.com/dashboard')}`}
               style={button}
             >
               🚀 Log In to Platform
