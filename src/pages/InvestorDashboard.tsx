@@ -845,7 +845,7 @@ export default function InvestorDashboard() {
               </Card>}
             
             {/* Unified Calendar - IN MIDDLE */}
-            <UnifiedCalendar showCreateButton={false} userRole="investor" filterTypes={['event', 'session', 'pitch']} onItemClick={(item) => {
+            <UnifiedCalendar showCreateButton={false} userRole="investor" filterTypes={['event', 'session', 'pitch', 'accelerator']} onItemClick={(item) => {
             if (item.type === 'event') {
               setSelectedEvent(item);
               setShowEventDetails(true);

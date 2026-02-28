@@ -901,7 +901,7 @@ const AcceleratorDashboard = () => {
               </Card>
             )}
 
-            <UnifiedCalendar userRole="accelerator" />
+            <UnifiedCalendar userRole="accelerator" filterTypes={['event', 'session', 'availability', 'pitch', 'accelerator']} />
           </TabsContent>
 
           {/* Analytics Tab */}
