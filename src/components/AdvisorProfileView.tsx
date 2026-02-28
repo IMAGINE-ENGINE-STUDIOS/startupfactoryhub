@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
 import { useAdvisorProfile } from '@/hooks/useAdvisorProfile';
+import MyBookings from './MyBookings';
+import { useMembershipStatus } from '@/hooks/useMembershipStatus';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,6 +29,7 @@ export default function AdvisorProfileView() {
     profile,
     loading: profileLoading
   } = useProfileWithRole();
+  const { isSubscribed } = useMembershipStatus();
   const {
     experiences,
     education,
@@ -197,9 +200,10 @@ export default function AdvisorProfileView() {
   }
   return <div className="space-y-6">
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4 max-w-2xl">
+        <TabsList className={`grid w-full max-w-2xl ${isSubscribed ? 'grid-cols-5' : 'grid-cols-4'}`}>
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="posts">Your Posts</TabsTrigger>
+          {isSubscribed && <TabsTrigger value="bookings">My Bookings</TabsTrigger>}
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
           <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
@@ -592,6 +596,12 @@ export default function AdvisorProfileView() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {isSubscribed && (
+          <TabsContent value="bookings" className="space-y-4">
+            <MyBookings />
+          </TabsContent>
+        )}
 
         <TabsContent value="subscription" className="space-y-4">
           <ProfileSubscriptionTab />

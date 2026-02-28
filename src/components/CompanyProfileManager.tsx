@@ -13,6 +13,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import PitchDeckUpload from './PitchDeckUpload';
 import CompanyLogoUpload from './CompanyLogoUpload';
+import MyBookings from './MyBookings';
+import { useMembershipStatus } from '@/hooks/useMembershipStatus';
 import AvatarUpload from './AvatarUpload';
 import { useUserRole } from '@/hooks/useUserRole';
 import { INDUSTRIES, getIndustryLabel, normalizeIndustry } from '@/lib/constants';
@@ -22,6 +24,7 @@ import ProfilePayoutsTab from './ProfilePayoutsTab';
 import ProfilePostsMosaic from './ProfilePostsMosaic';
 
 export default function CompanyProfileManager() {
+  const { isSubscribed } = useMembershipStatus();
   const [company, setCompany] = useState<any>(null);
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -549,11 +552,12 @@ export default function CompanyProfileManager() {
 
       {/* Details */}
       <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-6 max-w-3xl">
+        <TabsList className={`grid w-full max-w-3xl ${isSubscribed ? 'grid-cols-7' : 'grid-cols-6'}`}>
           <TabsTrigger value="about">About</TabsTrigger>
           <TabsTrigger value="details">Details</TabsTrigger>
           <TabsTrigger value="deck">Pitch Deck</TabsTrigger>
           <TabsTrigger value="posts">Your Posts</TabsTrigger>
+          {isSubscribed && <TabsTrigger value="bookings">My Bookings</TabsTrigger>}
           <TabsTrigger value="subscription">Subscription</TabsTrigger>
           <TabsTrigger value="payouts">Payouts</TabsTrigger>
         </TabsList>
@@ -629,6 +633,12 @@ export default function CompanyProfileManager() {
             </CardContent>
           </Card>
         </TabsContent>
+
+        {isSubscribed && (
+          <TabsContent value="bookings" className="space-y-4">
+            <MyBookings />
+          </TabsContent>
+        )}
 
         <TabsContent value="subscription" className="space-y-4">
           <ProfileSubscriptionTab />
