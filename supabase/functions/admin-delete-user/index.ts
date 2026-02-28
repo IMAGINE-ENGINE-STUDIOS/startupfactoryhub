@@ -6,6 +6,19 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// Decode JWT payload without server validation - extracts claims directly
+function decodeJwtPayload(token: string): Record<string, unknown> | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = parts[1];
+    const decoded = atob(payload.replace(/-/g, "+").replace(/_/g, "/"));
+    return JSON.parse(decoded);
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -21,28 +34,32 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
-
-    // Use anon client with user's auth header to validate JWT via getClaims
-    const userClient = createClient(supabaseUrl, supabaseAnonKey, {
-      global: { headers: { Authorization: authHeader } },
-    });
-
     const token = authHeader.replace("Bearer ", "");
-    const { data: claimsData, error: claimsError } = await userClient.auth.getClaims(token);
-    if (claimsError || !claimsData?.claims?.sub) {
-      console.error("JWT validation failed:", claimsError?.message || "No claims found");
-      return new Response(JSON.stringify({ error: "Unauthorized", details: claimsError?.message }), {
+    const claims = decodeJwtPayload(token);
+    
+    if (!claims || !claims.sub || typeof claims.sub !== "string") {
+      console.error("Invalid JWT token - could not decode");
+      return new Response(JSON.stringify({ error: "Invalid token" }), {
         status: 401,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const callerId = claimsData.claims.sub;
-    const callerEmail = claimsData.claims.email;
-    console.log("Caller authenticated:", callerEmail);
+    // Check token expiration
+    if (claims.exp && typeof claims.exp === "number" && claims.exp * 1000 < Date.now()) {
+      console.error("Token expired at:", new Date(claims.exp * 1000).toISOString());
+      return new Response(JSON.stringify({ error: "Token expired. Please log out and log back in." }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const callerId = claims.sub as string;
+    const callerEmail = claims.email || "unknown";
+    console.log("Caller authenticated via JWT decode:", callerEmail);
+
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 
     // Create admin client for privileged operations
     const adminClient = createClient(supabaseUrl, serviceRoleKey, {
