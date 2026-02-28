@@ -8,8 +8,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { CalendarIcon, Clock, Building2, Check, X, AlertTriangle, RefreshCw, User, Users, Monitor, DoorOpen, Crown } from 'lucide-react';
-import { format, parseISO } from 'date-fns';
+import { CalendarIcon, Clock, Building2, Check, X, AlertTriangle, RefreshCw, User, Users, Monitor, DoorOpen, Crown, MapPin, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { format, parseISO, formatDistanceToNow } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -36,6 +36,8 @@ export default function WorkspaceBookingsManagement() {
   const [actionType, setActionType] = useState<'confirm' | 'flag' | 'cancel' | null>(null);
   const [saving, setSaving] = useState(false);
   const [userMap, setUserMap] = useState<Record<string, any>>({});
+  const [venueMap, setVenueMap] = useState<Record<string, any>>({});
+  const [subscriptionMap, setSubscriptionMap] = useState<Record<string, boolean>>({});
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -52,17 +54,42 @@ export default function WorkspaceBookingsManagement() {
       const { data, error } = await query;
       if (error) throw error;
 
-      // Enrich with user names
       const userIds = [...new Set((data || []).map(b => b.user_id))];
-      if (userIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('user_id, full_name, email')
-          .in('user_id', userIds);
-        if (profiles) {
-          setUserMap(Object.fromEntries(profiles.map(p => [p.user_id, p])));
+      const venueIds = [...new Set((data || []).map(b => b.venue_id).filter(Boolean))];
+
+      // Fetch profiles, venue locations, and subscription status in parallel
+      const [profilesResult, venuesResult, subsResult] = await Promise.all([
+        userIds.length > 0
+          ? supabase.from('profiles').select('user_id, full_name, email').in('user_id', userIds)
+          : { data: [] },
+        venueIds.length > 0
+          ? supabase.from('regus_locations').select('id, name, address, city, country, office_type').in('id', venueIds)
+          : { data: [] },
+        // Check active subscriptions from user_subscriptions table
+        userIds.length > 0
+          ? supabase.from('user_subscriptions').select('user_id, tier, status, current_period_end').in('user_id', userIds)
+          : { data: [] },
+      ]);
+
+      if (profilesResult.data) {
+        setUserMap(Object.fromEntries(profilesResult.data.map((p: any) => [p.user_id, p])));
+      }
+      if (venuesResult.data) {
+        setVenueMap(Object.fromEntries(venuesResult.data.map((v: any) => [v.id, v])));
+      }
+      // Build subscription verification map
+      const subMap: Record<string, boolean> = {};
+      if (subsResult.data) {
+        for (const s of subsResult.data as any[]) {
+          const isActive = s.status === 'active' && (!s.current_period_end || new Date(s.current_period_end) > new Date());
+          subMap[s.user_id] = isActive;
         }
       }
+      // For users not in subscribers table, mark as unverified
+      for (const uid of userIds) {
+        if (!(uid in subMap)) subMap[uid] = false;
+      }
+      setSubscriptionMap(subMap);
 
       setBookings(data || []);
     } catch (err) {
@@ -75,7 +102,6 @@ export default function WorkspaceBookingsManagement() {
   useEffect(() => {
     fetchBookings();
 
-    // Real-time sync so admin sees updates live
     const channel = supabase
       .channel('admin-bookings-realtime')
       .on('postgres_changes', {
@@ -185,11 +211,15 @@ export default function WorkspaceBookingsManagement() {
             const config = STATUS_CONFIG[booking.status] || STATUS_CONFIG.pending;
             const profile = userMap[booking.user_id];
             const tierInfo = TIER_CONFIG[booking.subscription_tier] || TIER_CONFIG.community;
+            const venue = venueMap[booking.venue_id];
+            const isSubscribed = subscriptionMap[booking.user_id] === true;
+
             return (
               <Card key={booking.id} className="tech-card border-0">
                 <CardContent className="p-4 sm:p-5">
-                  <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-                    <div className="flex-1 space-y-2">
+                  <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-3">
+                    <div className="flex-1 space-y-2.5">
+                      {/* Header row: venue + status + tier */}
                       <div className="flex items-center gap-3 flex-wrap">
                         <div className="h-9 w-9 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0">
                           <Building2 className="h-4 w-4 text-teal-500" />
@@ -203,13 +233,38 @@ export default function WorkspaceBookingsManagement() {
                           {tierInfo.icon}
                           {tierInfo.spaceType}
                         </Badge>
+                        {/* Subscription verification badge */}
+                        {isSubscribed ? (
+                          <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 border text-xs shrink-0 flex items-center gap-1">
+                            <ShieldCheck className="h-3 w-3" /> Subscribed
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-red-500/10 text-red-600 border-red-500/20 border text-xs shrink-0 flex items-center gap-1">
+                            <ShieldAlert className="h-3 w-3" /> Not Subscribed
+                          </Badge>
+                        )}
                       </div>
 
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground pl-12">
+                      {/* Details rows */}
+                      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-muted-foreground pl-12">
                         <div className="flex items-center gap-1">
                           <User className="h-3 w-3" />
                           {profile?.full_name || 'Unknown'} ({profile?.email || ''})
                         </div>
+                        {/* Location */}
+                        <div className="flex items-center gap-1">
+                          <MapPin className="h-3 w-3 text-teal-500" />
+                          {venue ? `${venue.city}, ${venue.country}` : booking.venue_name}
+                        </div>
+                        {venue?.address && (
+                          <div className="flex items-center gap-1 text-muted-foreground/70">
+                            {venue.address}
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-x-5 gap-y-1.5 text-xs text-muted-foreground pl-12">
+                        {/* Booking date & time */}
                         <div className="flex items-center gap-1">
                           <CalendarIcon className="h-3 w-3" />
                           {format(parseISO(booking.from_datetime), 'MMM d, yyyy')}
@@ -217,6 +272,10 @@ export default function WorkspaceBookingsManagement() {
                         <div className="flex items-center gap-1">
                           <Clock className="h-3 w-3" />
                           {format(parseISO(booking.from_datetime), 'HH:mm')} – {format(parseISO(booking.to_datetime), 'HH:mm')}
+                        </div>
+                        {/* Request time */}
+                        <div className="flex items-center gap-1 text-muted-foreground/70 italic">
+                          Requested {formatDistanceToNow(parseISO(booking.created_at), { addSuffix: true })}
                         </div>
                       </div>
 
@@ -230,9 +289,16 @@ export default function WorkspaceBookingsManagement() {
                           <span className="font-medium">Admin note:</span> {booking.admin_notes}
                         </p>
                       )}
+                      {/* Warn admin if user is not subscribed */}
+                      {!isSubscribed && booking.status === 'pending' && (
+                        <p className="text-xs text-red-500 pl-12 flex items-center gap-1 font-medium">
+                          <AlertTriangle className="h-3 w-3" />
+                          This user does not have an active subscription — verify before approving.
+                        </p>
+                      )}
                     </div>
 
-                    <div className="flex items-center gap-2 pl-12 lg:pl-0">
+                    <div className="flex items-center gap-2 pl-12 lg:pl-0 shrink-0">
                       {booking.status === 'pending' && (
                         <>
                           <Button size="sm" variant="outline" className="text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => openAction(booking, 'confirm')}>
@@ -276,11 +342,36 @@ export default function WorkspaceBookingsManagement() {
 
           {actionBooking && (
             <div className="space-y-4">
-              <div className="rounded-lg bg-muted/50 p-3 space-y-1 text-sm">
+              <div className="rounded-lg bg-muted/50 p-3 space-y-1.5 text-sm">
                 <p className="font-medium">{actionBooking.venue_name}</p>
+                {venueMap[actionBooking.venue_id] && (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {venueMap[actionBooking.venue_id].city}, {venueMap[actionBooking.venue_id].country}
+                  </p>
+                )}
                 <p className="text-xs text-muted-foreground">
                   {userMap[actionBooking.user_id]?.full_name || 'User'} • {format(parseISO(actionBooking.from_datetime), 'MMM d, yyyy HH:mm')}
                 </p>
+                <div className="flex items-center gap-2 pt-1">
+                  {(() => {
+                    const ti = TIER_CONFIG[actionBooking.subscription_tier] || TIER_CONFIG.community;
+                    return (
+                      <Badge className={cn("border text-xs flex items-center gap-1", ti.badgeClass)}>
+                        {ti.icon} {ti.spaceType}
+                      </Badge>
+                    );
+                  })()}
+                  {subscriptionMap[actionBooking.user_id] ? (
+                    <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 border text-xs flex items-center gap-1">
+                      <ShieldCheck className="h-3 w-3" /> Verified
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-red-500/10 text-red-600 border-red-500/20 border text-xs flex items-center gap-1">
+                      <ShieldAlert className="h-3 w-3" /> Not Subscribed
+                    </Badge>
+                  )}
+                </div>
               </div>
 
               <div className="space-y-2">
