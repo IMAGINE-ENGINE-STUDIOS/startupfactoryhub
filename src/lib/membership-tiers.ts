@@ -18,7 +18,7 @@ export const MEMBERSHIP_TIERS = {
     price_id: "price_1T5gbrK5N1RcUVuYcLTffimY",
   },
   global_access: {
-    name: "Global Access",
+    name: "Global Access + Office",
     price: 950,
     product_id: "prod_U1XQ4HPzkYzTHB",
     price_id: "price_1T3ULCF2pD6kfaGMDTRp9hAU",
