@@ -112,7 +112,7 @@ serve(async (req: Request) => {
     }
 
     const { error } = await resend.emails.send({
-      from: "Startup Factory Hub <onboarding@resend.dev>",
+      from: "Startup Factory Hub <info@startupfactoryhub.com>",
       to: [user.email],
       subject: subject,
       html: html,
