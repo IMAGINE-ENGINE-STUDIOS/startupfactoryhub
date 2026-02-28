@@ -552,14 +552,14 @@ export default function CompanyProfileManager() {
 
       {/* Details */}
       <Tabs defaultValue="about" className="space-y-6">
-        <TabsList className={`grid w-full max-w-3xl ${isSubscribed ? 'grid-cols-7' : 'grid-cols-6'}`}>
-          <TabsTrigger value="about">About</TabsTrigger>
-          <TabsTrigger value="details">Details</TabsTrigger>
-          <TabsTrigger value="deck">Pitch Deck</TabsTrigger>
-          <TabsTrigger value="posts">Your Posts</TabsTrigger>
-          {isSubscribed && <TabsTrigger value="bookings">My Bookings</TabsTrigger>}
-          <TabsTrigger value="subscription">Subscription</TabsTrigger>
-          <TabsTrigger value="payouts">Payouts</TabsTrigger>
+        <TabsList className="flex w-full max-w-3xl overflow-x-auto scrollbar-hide whitespace-nowrap">
+          <TabsTrigger value="about" className="flex-1">About</TabsTrigger>
+          <TabsTrigger value="details" className="flex-1">Details</TabsTrigger>
+          <TabsTrigger value="deck" className="flex-1">Pitch Deck</TabsTrigger>
+          <TabsTrigger value="posts" className="flex-1">Your Posts</TabsTrigger>
+          {isSubscribed && <TabsTrigger value="bookings" className="flex-1">My Bookings</TabsTrigger>}
+          <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>
+          <TabsTrigger value="payouts" className="flex-1">Payouts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="about" className="space-y-4">
