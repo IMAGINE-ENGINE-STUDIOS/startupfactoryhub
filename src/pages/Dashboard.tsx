@@ -402,18 +402,7 @@ const Dashboard = () => {
           {/* Social Tab */}
           {activeTab === "social" &&
         <TabsContent value="social" className="space-y-4">
-              <Tabs defaultValue="feed" className="w-full">
-                <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
-                  <TabsTrigger value="feed">Feed</TabsTrigger>
-                  <TabsTrigger value="your-posts">Your Posts</TabsTrigger>
-                </TabsList>
-                <TabsContent value="feed">
-                  <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
-                </TabsContent>
-                <TabsContent value="your-posts">
-                  {user ? <ProfilePostsMosaic userId={user.id} isOwnProfile={true} /> : null}
-                </TabsContent>
-              </Tabs>
+              <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
             </TabsContent>
         }
 
