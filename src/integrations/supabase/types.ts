@@ -2142,12 +2142,16 @@ export type Database = {
       events: {
         Row: {
           banner_url: string | null
+          category: string | null
           city: string | null
           country: string | null
           created_at: string | null
           description: string | null
           end_date: string
+          external_id: string | null
           external_registration_url: string | null
+          external_source: string | null
+          external_url: string | null
           host_id: string | null
           id: string
           is_paid: boolean
@@ -2166,12 +2170,16 @@ export type Database = {
         }
         Insert: {
           banner_url?: string | null
+          category?: string | null
           city?: string | null
           country?: string | null
           created_at?: string | null
           description?: string | null
           end_date: string
+          external_id?: string | null
           external_registration_url?: string | null
+          external_source?: string | null
+          external_url?: string | null
           host_id?: string | null
           id?: string
           is_paid?: boolean
@@ -2190,12 +2198,16 @@ export type Database = {
         }
         Update: {
           banner_url?: string | null
+          category?: string | null
           city?: string | null
           country?: string | null
           created_at?: string | null
           description?: string | null
           end_date?: string
+          external_id?: string | null
           external_registration_url?: string | null
+          external_source?: string | null
+          external_url?: string | null
           host_id?: string | null
           id?: string
           is_paid?: boolean

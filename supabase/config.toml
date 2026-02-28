@@ -125,3 +125,6 @@ verify_jwt = false
 
 [functions.linkedin-post]
 verify_jwt = false
+
+[functions.fetch-eventbrite]
+verify_jwt = false
