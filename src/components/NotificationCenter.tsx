@@ -160,7 +160,7 @@ export default function NotificationCenter({ className }: NotificationCenterProp
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-80 p-0" align="center">
+      <PopoverContent className="w-[calc(100vw-2rem)] sm:w-80 p-0 bg-background border-border backdrop-blur-none" align="center">
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">Notifications</h3>
           <div className="flex items-center gap-2">
