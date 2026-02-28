@@ -43,6 +43,8 @@ export default function WalletPasses({ className }: { className?: string }) {
   const [requesting, setRequesting] = useState(false);
   const [softLandingRequests, setSoftLandingRequests] = useState<any[]>([]);
   const [softLandingDialogOpen, setSoftLandingDialogOpen] = useState(false);
+  const [hsbcSending, setHsbcSending] = useState(false);
+  const [hsbcSent, setHsbcSent] = useState(false);
 
   useEffect(() => {
     if (!user || !isSubscribed) return;
@@ -171,7 +173,7 @@ export default function WalletPasses({ className }: { className?: string }) {
       icon: <Landmark className="h-5 w-5" />,
       tier: 'All Members',
       active: true,
-      details: 'Open a free HSBC Innovation Banking account. Email and indicate you are a Startup Factory Hub account holder.',
+      details: 'Free HSBC Innovation Banking account for all Startup Factory Hub members. We will send an introduction email on your behalf.',
       gradient: 'from-red-600 to-red-500',
       image: hsbcPassImg,
       action: (
@@ -179,13 +181,23 @@ export default function WalletPasses({ className }: { className?: string }) {
           size="sm"
           variant="outline"
           className="w-full h-7 text-[11px] mt-1 border-red-500/30 text-red-600"
-          onClick={(e) => {
+          disabled={hsbcSending || hsbcSent}
+          onClick={async (e) => {
             e.stopPropagation();
-            window.location.href = 'mailto:safi.keshvargar@us.hsbc.com?subject=HSBC%20Innovation%20Banking%20Account%20-%20Startup%20Factory%20Hub%20Member';
+            setHsbcSending(true);
+            try {
+              const { error } = await supabase.functions.invoke('send-hsbc-intro');
+              if (error) throw error;
+              setHsbcSent(true);
+            } catch (err) {
+              console.error('HSBC intro error:', err);
+            } finally {
+              setHsbcSending(false);
+            }
           }}
         >
           <Mail className="h-3 w-3 mr-1" />
-          Email to Create Account
+          {hsbcSent ? 'Introduction Sent ✓' : hsbcSending ? 'Sending...' : 'Request Account Introduction'}
         </Button>
       ),
     });
