@@ -617,6 +617,11 @@ export default function UnifiedCommunityFeed({
           title: 'Success',
           description: 'Post link copied to clipboard!'
         });
+        // Also prompt LinkedIn sharing
+        const post = posts.find(p => p.id === postId);
+        if (post) {
+          openLinkedInShare(post);
+        }
       }
     } catch (error) {
       toast({
