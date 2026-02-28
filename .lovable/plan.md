@@ -1,41 +1,71 @@
 
 
-## Plan: Add Upcoming Accelerators Section & Sync to Unified Calendar
+## Plan: Subscription-Gated Regus Workspace in Resource Map
 
-### What we're doing
-1. Add a horizontal scrollable "Upcoming Accelerator Programs" section in the Calendar tab (below Upcoming Events), showing cohorts with `applications_open` status — styled like the attached screenshot (program name, description, dates, deadline, spots left, industries, apply button).
-2. Add `'accelerator'` as a new `CalendarItemType` in UnifiedCalendar so accelerator deadlines and start dates appear as calendar dots/items across all dashboard tabs that use the calendar.
+### What This Does
+When a user subscribes to any paid SFH tier via Stripe, the "Workplace" category in the Resource Map unlocks, showing Regus locations globally. Subscribers can book workspaces without payment (internal request). If subscription lapses, access locks again. Admins approve/reject bookings, and users see booking status in their dashboard.
 
-### Files to modify
+### Implementation Steps
 
-**1. `src/components/UnifiedCalendar.tsx`**
-- Add `'accelerator'` to the `CalendarItemType` union type
-- Add state for accelerator cohorts (`acceleratorCohorts`)
-- Add `fetchAcceleratorCohorts()` — query `accelerator_cohorts` joined with `accelerator_profiles` where `status = 'applications_open'` or `start_date >= now()`
-- Subscribe to `accelerator_cohorts` changes in the realtime channel
-- In `getAllItems()`, add accelerator items: one item per cohort for `start_date` (labeled "Program Starts: {name}") and one for `application_deadline` (labeled "Deadline: {name}")
-- Add accelerator legend badge (emerald color) and icon (Rocket)
-- Add color mapping for `'accelerator'` type in `getItemTypeColor` and `getItemTypeIcon`
+#### 1. Database: Create `regus_locations` table
+- Fields: `id`, `name`, `address`, `city`, `country`, `latitude`, `longitude`, `office_type` (text), `capacity`, `amenities` (text[]), `image_url`, `images` (text[]), `videos` (text[]), `rating` (numeric), `is_active` (boolean, default true), `created_at`
+- RLS: authenticated users can SELECT active locations
 
-**2. `src/pages/StudentDashboard.tsx`** (Calendar tab)
-- Import `CohortApplicationDialog`, `Rocket`, `useState` for application dialog
-- Add state for fetched open cohorts and selected cohort
-- Add `useEffect` to fetch cohorts with `status = 'applications_open'` joined with `accelerator_profiles`
-- Below the Upcoming Events card, add a new "Upcoming Accelerator Programs" card with a horizontal `ScrollArea`, each card showing:
-  - Program name, truncated description
-  - Start date, deadline, spots left (`max_startups - current_startups`)
-  - Industry badges
-  - "Apply via Account" button → opens `CohortApplicationDialog`
-  - External link button → opens public application URL
-- Update `filterTypes` prop to include `'accelerator'`
+#### 2. Database: Add `admin_notes` column to `hub_bookings`
+- `ALTER TABLE hub_bookings ADD COLUMN admin_notes text;`
+- Ensure status values support: `pending`, `confirmed`, `needs_action`, `cancelled`
 
-**3. Other dashboards using UnifiedCalendar** (startup, mentor, investor, accelerator, advisor)
-- Add `'accelerator'` to their `filterTypes` arrays so accelerator dates appear on all calendars
+#### 3. Seed Regus Locations
+- Insert 50-100 global Regus office locations (major cities across US, Europe, Asia, LATAM) via SQL insert
 
-### Technical details
+#### 4. Create `useMembershipStatus` hook
+- Calls `check-membership` edge function
+- Returns `{ isSubscribed, tier, status, loading }`
+- Cached via React Query (60s stale time)
+- Checks for `active` status; `past_due`/`canceled` = not subscribed
 
-- Query: `supabase.from('accelerator_cohorts').select('*, accelerator_profiles(organization_name, logo_url, user_id)').in('status', ['applications_open', 'in_progress']).gte('start_date', today)`
-- Calendar item type color: `bg-emerald-500/10 text-emerald-500 border-emerald-500/20`
-- The accelerator card in the calendar tab will match the screenshot style: dark card with program title, description, dates, spots, industry badges, and apply button
-- No changes to existing UI components or styles beyond what's specified
+#### 5. Create `useRegusLocations` hook
+- Fetches from `regus_locations` table with filters (city, country, office_type, search)
+- Returns data shaped as `Workspace[]` to reuse existing HubsLab components
+
+#### 6. Add "Workplace" category to `GlobalResourcesMap.tsx` RESOURCE_CONFIG
+- New entry: `workplace: { icon: Building2, color: '#0d9488', label: 'Workplace' }`
+- When selected:
+  - **Not subscribed**: Show lock overlay with "Subscribe to unlock Regus workspaces" CTA
+  - **Subscribed**: Replace resource list with HubsLab-style UI:
+    - Workspace type sub-filters (Hot Desk, Private Office, Meeting Room, Coworking, Event Space)
+    - `HubsWorkspaceCard` components in compact mode
+    - Map markers switch to Regus locations
+    - Clicking marker/card opens `HubsDetailPanel`
+    - "Book Now" opens `RegusBookingModal`
+
+#### 7. Create `RegusBookingModal` component
+- Fork of `HubsBookingModal` but:
+  - **No price display, no Stripe redirect**
+  - Submit inserts into `hub_bookings` with `status: 'pending'`, `provider: 'regus'`
+  - Same media carousel, date/time picker, duration selector, notes
+  - Success: "Booking request submitted — pending admin confirmation"
+
+#### 8. Subscription lockout logic
+- `useMembershipStatus` also checks `past_due`/`canceled` from Stripe via `check-membership`
+- If inactive: hide Regus markers, show lock on Workplace category, disable booking
+- On subscription activation: immediately unlock (React Query refetch)
+
+#### 9. User Dashboard: "My Bookings" section
+- Add booking list in user profile/dashboard
+- Query `hub_bookings` for current user, display with status badges:
+  - Pending (yellow), Confirmed (green), Needs Action (orange), Cancelled (red)
+
+#### 10. Admin: Workspace Bookings management
+- Add a booking management section in admin dashboard
+- List pending Regus bookings with approve (→ confirmed), flag (→ needs_action), reject (→ cancelled) actions
+- Admin can add `admin_notes`
+
+### Technical Details
+
+- **Subscription tiers** already mapped in `check-membership` edge function (TIER_MAP with 4 product IDs)
+- **All paid tiers** (community, self_paced_office, global_access, corporate) unlock Workplace
+- `user_subscriptions` table already exists and is upserted by `check-membership`
+- Reuse existing `HubsWorkspaceCard`, `HubsDetailPanel`, `HubsBookingModal` components — only fork the booking modal to remove payment
+- `ResourceType` union in `useResources.ts` needs `workplace` added
 
