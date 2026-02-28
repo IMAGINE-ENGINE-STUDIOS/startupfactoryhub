@@ -69,11 +69,6 @@ export const EmailVerificationEmail = ({
                 {isEmailChange ? "✉️ Confirm Email Change" : "✨ Verify Email & Get Started"}
               </Link>
 
-              <div style={divider} />
-
-              <Text style={codeLabel}>Or use this verification code:</Text>
-              <code style={code}>{token}</code>
-
               {!isEmailChange && (
                 <div style={welcomeSection}>
                   <Text style={welcomeTitle}>🎉 What's Next?</Text>
