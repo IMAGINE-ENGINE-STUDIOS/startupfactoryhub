@@ -84,8 +84,11 @@ export default function Auth() {
     }
 
     setLoading(true);
+    // Use the published production URL for password reset redirect
+    // This ensures the link in the email always goes to a stable, whitelisted URL
+    const resetRedirectUrl = 'https://startupfactoryhub.lovable.app/reset-password';
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: resetRedirectUrl,
     });
     
     if (error) {
