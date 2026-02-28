@@ -2483,6 +2483,7 @@ export type Database = {
       }
       hub_bookings: {
         Row: {
+          admin_notes: string | null
           created_at: string
           currency: string | null
           from_datetime: string
@@ -2501,6 +2502,7 @@ export type Database = {
           workspace_type: string
         }
         Insert: {
+          admin_notes?: string | null
           created_at?: string
           currency?: string | null
           from_datetime: string
@@ -2519,6 +2521,7 @@ export type Database = {
           workspace_type: string
         }
         Update: {
+          admin_notes?: string | null
           created_at?: string
           currency?: string | null
           from_datetime?: string
@@ -4549,6 +4552,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      regus_locations: {
+        Row: {
+          address: string
+          amenities: string[] | null
+          capacity: number | null
+          city: string
+          country: string
+          created_at: string
+          id: string
+          image_url: string | null
+          images: string[] | null
+          is_active: boolean
+          latitude: number
+          longitude: number
+          name: string
+          office_type: string
+          rating: number | null
+          updated_at: string
+          videos: string[] | null
+        }
+        Insert: {
+          address: string
+          amenities?: string[] | null
+          capacity?: number | null
+          city: string
+          country: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          images?: string[] | null
+          is_active?: boolean
+          latitude: number
+          longitude: number
+          name: string
+          office_type?: string
+          rating?: number | null
+          updated_at?: string
+          videos?: string[] | null
+        }
+        Update: {
+          address?: string
+          amenities?: string[] | null
+          capacity?: number | null
+          city?: string
+          country?: string
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          images?: string[] | null
+          is_active?: boolean
+          latitude?: number
+          longitude?: number
+          name?: string
+          office_type?: string
+          rating?: number | null
+          updated_at?: string
+          videos?: string[] | null
+        }
+        Relationships: []
       }
       resource_bookmarks: {
         Row: {
