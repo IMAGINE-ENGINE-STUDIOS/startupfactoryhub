@@ -27,6 +27,7 @@ import StartupActiveMentors from '@/components/StartupActiveMentors';
 import StartupMentoringSessions from '@/components/StartupMentoringSessions';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X, Rocket, ExternalLink } from "lucide-react";
+import MyBookings from '@/components/MyBookings';
 import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
 import { getIndustryLabel } from '@/lib/constants';
 import LiveRooms from '@/components/LiveRooms';
@@ -401,7 +402,22 @@ const Dashboard = () => {
           {/* Social Tab */}
           {activeTab === "social" &&
         <TabsContent value="social" className="space-y-4">
-              <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
+              <Tabs defaultValue="feed" className="w-full">
+                <TabsList className="grid w-full max-w-md grid-cols-3 mb-6">
+                  <TabsTrigger value="feed">Feed</TabsTrigger>
+                  <TabsTrigger value="your-posts">Your Posts</TabsTrigger>
+                  <TabsTrigger value="my-bookings">My Bookings</TabsTrigger>
+                </TabsList>
+                <TabsContent value="feed">
+                  <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
+                </TabsContent>
+                <TabsContent value="your-posts">
+                  {user ? <ProfilePostsMosaic userId={user.id} isOwnProfile={true} /> : null}
+                </TabsContent>
+                <TabsContent value="my-bookings">
+                  <MyBookings />
+                </TabsContent>
+              </Tabs>
             </TabsContent>
         }
 
