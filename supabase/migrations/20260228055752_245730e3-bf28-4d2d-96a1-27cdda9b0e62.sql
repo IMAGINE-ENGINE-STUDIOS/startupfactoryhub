@@ -1,0 +1,1 @@
+UPDATE profiles SET full_name = 'Startup Factory HUB Admin' WHERE email = 'demo-admin@startupfactoryhub.com';
