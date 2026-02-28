@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { Wallet, Plane, Building, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,7 +8,11 @@ import {
 } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { useMembershipStatus } from '@/hooks/useMembershipStatus';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import frontierPassImg from '@/assets/frontier-pass.webp';
+import sfhPassImg from '@/assets/sfh-pass.png';
 
 interface Pass {
   id: string;
@@ -18,24 +23,58 @@ interface Pass {
   active: boolean;
   details: string;
   gradient: string;
+  image?: string;
 }
 
 export default function WalletPasses({ className }: { className?: string }) {
   const { isSubscribed, tier } = useMembershipStatus();
+  const { user } = useAuth();
+  const [frontierApproved, setFrontierApproved] = useState(false);
+  const [frontierRequested, setFrontierRequested] = useState(false);
+  const [requesting, setRequesting] = useState(false);
+
+  useEffect(() => {
+    if (!user || !isSubscribed || tier !== 'corporate') return;
+    const checkFrontierStatus = async () => {
+      const { data } = await supabase
+        .from('flight_pass_requests')
+        .select('status')
+        .eq('user_id', user.id)
+        .maybeSingle();
+      if (data) {
+        setFrontierApproved(data.status === 'approved');
+        setFrontierRequested(true);
+      }
+    };
+    checkFrontierStatus();
+  }, [user, isSubscribed, tier]);
+
+  const requestFrontierPass = async () => {
+    if (!user) return;
+    setRequesting(true);
+    const { error } = await supabase
+      .from('flight_pass_requests')
+      .insert({ user_id: user.id, tier: 'corporate' });
+    if (!error) {
+      setFrontierRequested(true);
+    }
+    setRequesting(false);
+  };
 
   const passes: Pass[] = [];
 
-  // Frontier Airlines Pass — Corporate tier only
-  if (isSubscribed && tier === 'corporate') {
+  // Frontier Airlines Pass — Corporate tier only, approved by admin
+  if (isSubscribed && tier === 'corporate' && frontierApproved) {
     passes.push({
       id: 'frontier-airlines',
-      title: 'Frontier Airlines Pass',
-      subtitle: 'Unlimited Travel — Pay Only Taxes',
+      title: 'Frontier Airlines',
+      subtitle: 'GoWild! All-You-Can-Fly',
       icon: <Plane className="h-5 w-5" />,
       tier: 'Corporate',
       active: true,
-      details: 'Travel to 11 countries. Only pay ticket taxes.',
+      details: 'Unlimited travel to 11 countries. Pay only ticket taxes.',
       gradient: 'from-emerald-600 to-teal-500',
+      image: frontierPassImg,
     });
   }
 
@@ -52,13 +91,14 @@ export default function WalletPasses({ className }: { className?: string }) {
 
     passes.push({
       id: 'coworking',
-      title: 'Startup Factory Hub Pass',
+      title: 'Startup Factory Hub',
       subtitle: coworkingLabel + ' — Global Network',
       icon: <Building className="h-5 w-5" />,
       tier: tier.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
       active: true,
       details: 'Access coworking spaces worldwide.',
       gradient: 'from-primary to-accent',
+      image: sfhPassImg,
     });
   }
 
@@ -75,8 +115,6 @@ export default function WalletPasses({ className }: { className?: string }) {
       gradient: 'from-violet-600 to-purple-500',
     });
   }
-
-  
 
   return (
     <Popover>
@@ -100,24 +138,96 @@ export default function WalletPasses({ className }: { className?: string }) {
             Your active membership passes & benefits
           </p>
         </div>
-        <div className="p-3 space-y-3 max-h-[400px] overflow-y-auto">
-          {passes.length === 0 ? (
+        <div className="p-3 space-y-3 max-h-[500px] overflow-y-auto">
+          {passes.length === 0 && !frontierRequested ? (
             <div className="py-8 text-center text-muted-foreground">
               <Wallet className="h-10 w-10 mx-auto mb-2 opacity-40" />
               <p className="text-sm font-medium">No active passes</p>
               <p className="text-xs mt-1">Subscribe to a plan to unlock passes</p>
             </div>
-          ) : (
-            passes.map((pass) => (
-              <div
-                key={pass.id}
-                className={cn(
-                  'relative rounded-xl overflow-hidden bg-gradient-to-r p-[1px]',
-                  pass.gradient
-                )}
+          ) : null}
+
+          {/* Frontier pass request CTA for corporate users who haven't requested yet */}
+          {isSubscribed && tier === 'corporate' && !frontierRequested && (
+            <div className="rounded-xl border border-dashed border-emerald-500/50 p-4 text-center space-y-2">
+              <Plane className="h-8 w-8 mx-auto text-emerald-500" />
+              <p className="text-sm font-semibold">Frontier Airlines GoWild! Pass</p>
+              <p className="text-xs text-muted-foreground">Request your unlimited travel pass. Admin will set up your account and approve it.</p>
+              <Button
+                size="sm"
+                className="bg-emerald-600 hover:bg-emerald-700"
+                onClick={requestFrontierPass}
+                disabled={requesting}
               >
-                <div className="rounded-[11px] bg-background p-4 space-y-2">
-                  <div className="flex items-start justify-between">
+                {requesting ? 'Requesting...' : 'Request Pass'}
+              </Button>
+            </div>
+          )}
+
+          {/* Pending status */}
+          {isSubscribed && tier === 'corporate' && frontierRequested && !frontierApproved && (
+            <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-4 text-center space-y-1">
+              <Plane className="h-8 w-8 mx-auto text-yellow-500" />
+              <p className="text-sm font-semibold">Frontier Pass — Pending Approval</p>
+              <p className="text-xs text-muted-foreground">Your pass is being set up. The admin will approve it once your Frontier account is ready.</p>
+            </div>
+          )}
+
+          {/* Apple Wallet-style pass cards */}
+          {passes.map((pass) => (
+            <div
+              key={pass.id}
+              className="rounded-2xl overflow-hidden shadow-lg"
+              style={{ minHeight: pass.image ? '200px' : undefined }}
+            >
+              {/* Card image header */}
+              {pass.image && (
+                <div className="relative w-full h-36 overflow-hidden">
+                  <img
+                    src={pass.image}
+                    alt={pass.title}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+                  <div className="absolute bottom-2 left-3 right-3">
+                    <Badge className="bg-white/20 backdrop-blur-sm text-white border-0 text-[10px]">
+                      {pass.tier}
+                    </Badge>
+                  </div>
+                </div>
+              )}
+              {/* Card body */}
+              <div className={cn(
+                'p-4 space-y-2',
+                pass.image
+                  ? 'bg-gradient-to-b from-card to-background'
+                  : `bg-gradient-to-r ${pass.gradient} p-[1px]`
+              )}>
+                {!pass.image && (
+                  <div className="rounded-[11px] bg-background p-4 space-y-2">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className={cn('p-1.5 rounded-lg bg-gradient-to-r text-white', pass.gradient)}>
+                          {pass.icon}
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm text-foreground leading-tight">{pass.title}</p>
+                          <p className="text-xs text-muted-foreground">{pass.subtitle}</p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="text-[10px] shrink-0">
+                        {pass.tier}
+                      </Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{pass.details}</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-[10px] font-medium text-green-600">Active</span>
+                    </div>
+                  </div>
+                )}
+                {pass.image && (
+                  <>
                     <div className="flex items-center gap-2">
                       <div className={cn('p-1.5 rounded-lg bg-gradient-to-r text-white', pass.gradient)}>
                         {pass.icon}
@@ -127,18 +237,23 @@ export default function WalletPasses({ className }: { className?: string }) {
                         <p className="text-xs text-muted-foreground">{pass.subtitle}</p>
                       </div>
                     </div>
-                    <Badge variant="secondary" className="text-[10px] shrink-0">
-                      {pass.tier}
-                    </Badge>
-                  </div>
-                  <p className="text-xs text-muted-foreground">{pass.details}</p>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-[10px] font-medium text-green-600">Active</span>
-                  </div>
-                </div>
+                    <p className="text-xs text-muted-foreground">{pass.details}</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-[10px] font-medium text-green-600">Active</span>
+                    </div>
+                  </>
+                )}
               </div>
-            ))
+            </div>
+          ))}
+
+          {passes.length === 0 && frontierRequested && !frontierApproved && !isSubscribed && (
+            <div className="py-8 text-center text-muted-foreground">
+              <Wallet className="h-10 w-10 mx-auto mb-2 opacity-40" />
+              <p className="text-sm font-medium">No active passes</p>
+              <p className="text-xs mt-1">Subscribe to a plan to unlock passes</p>
+            </div>
           )}
         </div>
       </PopoverContent>
