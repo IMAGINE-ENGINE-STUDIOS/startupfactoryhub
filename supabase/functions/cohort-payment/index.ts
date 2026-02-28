@@ -70,7 +70,7 @@ serve(async (req) => {
     // Get cohort details for price creation
     const { data: cohort, error: cohortError } = await supabaseClient
       .from('accelerator_cohorts')
-      .select('name, stripe_price_id, stripe_product_id, payment_type, payment_duration_months')
+      .select('name, stripe_price_id, stripe_product_id, payment_type, payment_duration_months, accelerator_id')
       .eq('id', cohortId)
       .single();
 
@@ -81,15 +81,20 @@ serve(async (req) => {
 
     const isMonthly = paymentType === 'monthly';
     
-    // Calculate platform fee - add 10% to the price
+    // SFH's own accelerator ID - no commission for platform-owned programs
+    const SFH_ACCELERATOR_ID = 'abd41d15-f707-4e36-b2f5-3a08d7b7b13a';
+    const isPlatformOwned = cohort.accelerator_id === SFH_ACCELERATOR_ID;
+    
+    // Calculate platform fee - add 10% to the price (skip for platform-owned programs)
     const feeAmountInCents = enrollmentFee; // Already in cents
-    const platformFeeInCents = Math.round(feeAmountInCents * PLATFORM_FEE_PERCENTAGE);
+    const platformFeeInCents = isPlatformOwned ? 0 : Math.round(feeAmountInCents * PLATFORM_FEE_PERCENTAGE);
     const totalAmountInCents = feeAmountInCents + platformFeeInCents;
 
     logStep("Fee calculation", {
       originalFee: feeAmountInCents,
       platformFee: platformFeeInCents,
       totalAmount: totalAmountInCents,
+      isPlatformOwned,
       isMonthly,
       durationMonths: isMonthly ? durationMonths : 1
     });

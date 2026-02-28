@@ -51,6 +51,7 @@ interface OpenCohort {
   funding_per_startup: number | null;
   equity_percentage: number | null;
   focus_industries: string[] | null;
+  enrollment_fee: number | null;
   status: string;
 }
 
@@ -103,7 +104,7 @@ export default function MVPProgram() {
           .single(),
         supabase
           .from('accelerator_cohorts')
-          .select('id,name,description,start_date,end_date,application_deadline,max_startups,current_startups,funding_per_startup,equity_percentage,focus_industries,status')
+          .select('id,name,description,start_date,end_date,application_deadline,max_startups,current_startups,funding_per_startup,equity_percentage,focus_industries,enrollment_fee,status')
           .eq('accelerator_id', SFH_ACCELERATOR_ID)
           .in('status', ['upcoming', 'applications_open'])
           .order('start_date', { ascending: true }),
@@ -292,6 +293,12 @@ export default function MVPProgram() {
                       <Users className="h-4 w-4 text-blue-400 shrink-0" />
                       {cohort.max_startups - cohort.current_startups} spots left
                     </div>
+                    {cohort.enrollment_fee && cohort.enrollment_fee > 0 && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <DollarSign className="h-4 w-4 text-amber-400 shrink-0" />
+                        ${(cohort.enrollment_fee / 100).toLocaleString()} application fee
+                      </div>
+                    )}
                   </div>
 
                   {/* industries */}

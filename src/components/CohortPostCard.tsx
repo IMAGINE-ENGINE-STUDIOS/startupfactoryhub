@@ -16,6 +16,7 @@ interface CohortData {
   deadline?: string;
   funding?: number;
   equity?: number;
+  enrollment_fee?: number;
   industries?: string[];
   accelerator_name?: string;
   accelerator_logo?: string;
@@ -155,6 +156,12 @@ export const CohortPostCard = ({
                   <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-500/10 text-purple-500 border border-purple-500/20">
                     <Percent className="w-4 h-4" />
                     <span className="font-medium">{cohortData.equity}% equity</span>
+                  </div>
+                )}
+                {cohortData.enrollment_fee && cohortData.enrollment_fee > 0 && (
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                    <DollarSign className="w-4 h-4" />
+                    <span className="font-medium">${(cohortData.enrollment_fee / 100).toLocaleString()} fee</span>
                   </div>
                 )}
               </div>

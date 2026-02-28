@@ -36,6 +36,7 @@ interface CohortDetails {
   funding_per_startup: number | null;
   equity_percentage: number | null;
   focus_industries: string[] | null;
+  enrollment_fee: number | null;
   accelerator: {
     organization_name: string;
     logo_url: string | null;
@@ -105,6 +106,7 @@ export default function PublicCohortApplication() {
           funding_per_startup,
           equity_percentage,
           focus_industries,
+          enrollment_fee,
           accelerator:accelerator_profiles(
             organization_name,
             logo_url,
@@ -272,6 +274,12 @@ export default function PublicCohortApplication() {
               <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-purple-500/10 text-purple-500">
                 <Percent className="w-4 h-4" />
                 <span className="font-medium">{cohort.equity_percentage}% equity</span>
+              </div>
+            )}
+            {cohort.enrollment_fee && cohort.enrollment_fee > 0 && (
+              <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-500/10 text-blue-500">
+                <DollarSign className="w-4 h-4" />
+                <span className="font-medium">${(cohort.enrollment_fee / 100).toLocaleString()} application fee</span>
               </div>
             )}
           </div>

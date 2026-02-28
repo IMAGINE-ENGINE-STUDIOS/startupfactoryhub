@@ -21,6 +21,7 @@ interface CohortData {
   deadline?: string;
   funding?: number;
   equity?: number;
+  enrollment_fee?: number;
   industries?: string[];
   accelerator_name?: string;
   accelerator_logo?: string;
@@ -197,6 +198,12 @@ export const CohortApplicationDialog = ({
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Percent className="w-3 h-3" />
                   {cohortData.equity}% equity
+                </Badge>
+              )}
+              {cohortData.enrollment_fee && cohortData.enrollment_fee > 0 && (
+                <Badge variant="outline" className="flex items-center gap-1 text-blue-500">
+                  <DollarSign className="w-3 h-3" />
+                  ${(cohortData.enrollment_fee / 100).toLocaleString()} application fee
                 </Badge>
               )}
             </div>
