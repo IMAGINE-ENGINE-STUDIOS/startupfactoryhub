@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Workspace } from '@/hooks/useHubsSearch';
+import { useMembershipStatus } from '@/hooks/useMembershipStatus';
 import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -38,6 +39,7 @@ const DURATION_OPTIONS = [
 ];
 
 export const RegusBookingModal = ({ workspace, open, onOpenChange }: RegusBookingModalProps) => {
+  const { tier } = useMembershipStatus();
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
   const [selectedTime, setSelectedTime] = useState<string>('09:00');
@@ -105,6 +107,7 @@ export const RegusBookingModal = ({ workspace, open, onOpenChange }: RegusBookin
         notes: notes || null,
         price: null,
         currency: 'USD',
+        subscription_tier: tier || 'community',
       });
 
       if (error) throw error;

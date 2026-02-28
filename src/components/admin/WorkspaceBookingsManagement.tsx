@@ -8,9 +8,17 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { CalendarIcon, Clock, Building2, Check, X, AlertTriangle, RefreshCw, User } from 'lucide-react';
+import { CalendarIcon, Clock, Building2, Check, X, AlertTriangle, RefreshCw, User, Users, Monitor, DoorOpen, Crown } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+
+const TIER_CONFIG: Record<string, { label: string; icon: React.ReactNode; spaceType: string; badgeClass: string }> = {
+  community: { label: 'Community', icon: <Users className="h-3 w-3" />, spaceType: 'Community Space', badgeClass: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
+  self_paced: { label: 'Self-Paced', icon: <Monitor className="h-3 w-3" />, spaceType: 'Desk', badgeClass: 'bg-violet-500/10 text-violet-600 border-violet-500/20' },
+  global_access: { label: 'Global Access', icon: <DoorOpen className="h-3 w-3" />, spaceType: 'Office', badgeClass: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
+  corporate: { label: 'Corporate', icon: <Crown className="h-3 w-3" />, spaceType: 'Premium Office', badgeClass: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
+};
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   pending: { label: 'Pending', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
@@ -66,6 +74,20 @@ export default function WorkspaceBookingsManagement() {
 
   useEffect(() => {
     fetchBookings();
+
+    // Real-time sync so admin sees updates live
+    const channel = supabase
+      .channel('admin-bookings-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'hub_bookings',
+      }, () => {
+        fetchBookings();
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [statusFilter]);
 
   const handleAction = async () => {
@@ -162,12 +184,13 @@ export default function WorkspaceBookingsManagement() {
           {bookings.map(booking => {
             const config = STATUS_CONFIG[booking.status] || STATUS_CONFIG.pending;
             const profile = userMap[booking.user_id];
+            const tierInfo = TIER_CONFIG[booking.subscription_tier] || TIER_CONFIG.community;
             return (
               <Card key={booking.id} className="tech-card border-0">
                 <CardContent className="p-4 sm:p-5">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                     <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 flex-wrap">
                         <div className="h-9 w-9 rounded-lg bg-teal-500/10 flex items-center justify-center shrink-0">
                           <Building2 className="h-4 w-4 text-teal-500" />
                         </div>
@@ -176,6 +199,10 @@ export default function WorkspaceBookingsManagement() {
                           <p className="text-xs text-muted-foreground">{booking.workspace_type}</p>
                         </div>
                         <Badge className={`${config.className} border text-xs shrink-0`}>{config.label}</Badge>
+                        <Badge className={cn("border text-xs shrink-0 flex items-center gap-1", tierInfo.badgeClass)}>
+                          {tierInfo.icon}
+                          {tierInfo.spaceType}
+                        </Badge>
                       </div>
 
                       <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground pl-12">

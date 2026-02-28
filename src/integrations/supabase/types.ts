@@ -2494,6 +2494,7 @@ export type Database = {
           provider: string
           provider_booking_id: string | null
           status: string
+          subscription_tier: string | null
           to_datetime: string
           updated_at: string
           user_id: string
@@ -2513,6 +2514,7 @@ export type Database = {
           provider?: string
           provider_booking_id?: string | null
           status?: string
+          subscription_tier?: string | null
           to_datetime: string
           updated_at?: string
           user_id: string
@@ -2532,6 +2534,7 @@ export type Database = {
           provider?: string
           provider_booking_id?: string | null
           status?: string
+          subscription_tier?: string | null
           to_datetime?: string
           updated_at?: string
           user_id?: string

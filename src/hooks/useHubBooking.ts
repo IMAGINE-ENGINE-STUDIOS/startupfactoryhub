@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMembershipStatus } from '@/hooks/useMembershipStatus';
 import { toast } from '@/hooks/use-toast';
 
 export interface BookingDetails {
@@ -34,6 +35,7 @@ export interface Booking {
 
 export const useHubBooking = () => {
   const { user } = useAuth();
+  const { tier } = useMembershipStatus();
   const queryClient = useQueryClient();
 
   const createBooking = useMutation({
@@ -54,6 +56,7 @@ export const useHubBooking = () => {
           currency: details.currency || 'USD',
           status: 'pending',
           notes: details.notes,
+          subscription_tier: tier || 'community',
         })
         .select()
         .single();
