@@ -300,9 +300,14 @@ export const RegusBookingModal = ({ workspace, open, onOpenChange }: RegusBookin
             </Button>
           </div>
 
-          <p className="text-xs text-center text-muted-foreground">
-            Booking requests are confirmed by our team within 24 hours
-          </p>
+          <div className="space-y-1.5 p-3 rounded-xl bg-muted/50 border border-border">
+            <p className="text-xs text-muted-foreground text-center">
+              ⏰ Reservations must be made at least <span className="font-semibold text-foreground">48 hours in advance</span>.
+            </p>
+            <p className="text-xs text-muted-foreground text-center">
+              All bookings are <span className="font-semibold text-foreground">subject to availability</span> and confirmed by our team.
+            </p>
+          </div>
         </div>
       </DialogContent>
     </Dialog>
