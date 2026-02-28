@@ -23,7 +23,7 @@ const TIER_CONFIG: Record<string, { icon: typeof Zap; gradient: string; glow: st
     glow: 'shadow-blue-500/20',
     description: 'Full digital access, virtual events, community, and mentor interactions.',
     bestFor: 'Remote-first teams or early MVP-stage founders',
-    features: ['Full resource library', 'Mentor sessions (virtual)', 'Startup physical hub community access', 'Local Startup Factory HUB coworking space access (1 country)'],
+    features: ['Full resource library', 'Mentor sessions (virtual)', 'Startup physical hub community access', 'Local Startup Factory HUB coworking space access all locations (community space access only)'],
   },
   self_paced_office: {
     icon: Building,
