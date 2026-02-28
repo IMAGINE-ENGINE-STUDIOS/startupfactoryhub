@@ -29,9 +29,9 @@ const TIER_CONFIG: Record<string, { icon: typeof Zap; gradient: string; glow: st
     icon: Building,
     gradient: 'from-primary to-teal-400',
     glow: 'shadow-primary/20',
-    description: 'Adds local Startup Factory HUB coworking space access (1 country) to the community plan.',
+    description: 'Adds local Startup Factory HUB Desk coworking access all locations to the community plan.',
     bestFor: 'Founders needing flexible workspace + virtual resources',
-    features: ['All community features', 'Local Startup Factory HUB coworking access (1 country)', 'Mentor + event access', 'Eligible for Accelerated Tier'],
+    features: ['All community features', 'Local Startup Factory HUB Desk coworking access all locations', 'Mentor + event access', 'Eligible for Accelerated Tier'],
   },
   global_access: {
     icon: Crown,
