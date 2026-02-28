@@ -11,12 +11,13 @@ import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 // Status steps in order
-const STEPS = ['pending', 'confirmed', 'cancelled'] as const;
+const STEPS = ['pending', 'confirmed', 'completed', 'cancelled'] as const;
 
 const STEP_CONFIG: Record<string, { label: string; icon: string; color: string }> = {
   pending: { label: 'Pending', icon: '⏳', color: 'text-amber-500' },
   confirmed: { label: 'Active', icon: '✅', color: 'text-emerald-500' },
   needs_action: { label: 'Updating', icon: '⚠️', color: 'text-orange-500' },
+  completed: { label: 'Completed', icon: '✔️', color: 'text-blue-500' },
   cancelled: { label: 'Cancelled', icon: '❌', color: 'text-red-500' },
 };
 
@@ -52,7 +53,7 @@ function BookingStepLine({ status }: { status: string }) {
   const steps = [
     { key: 'pending', label: 'Pending' },
     { key: 'confirmed', label: 'Active' },
-    { key: 'needs_action', label: 'Updating' },
+    { key: 'completed', label: 'Completed' },
     { key: 'cancelled', label: 'Cancelled' },
   ];
 
@@ -72,8 +73,8 @@ function BookingStepLine({ status }: { status: string }) {
         let textColor = 'text-muted-foreground/50';
 
         if (isActive) {
-          dotColor = isCancelledStep ? 'bg-red-500' : step.key === 'needs_action' ? 'bg-orange-500' : 'bg-emerald-500';
-          textColor = isCancelledStep ? 'text-red-500' : step.key === 'needs_action' ? 'text-orange-500' : 'text-emerald-500';
+          dotColor = isCancelledStep ? 'bg-red-500' : step.key === 'needs_action' ? 'bg-orange-500' : step.key === 'completed' ? 'bg-blue-500' : step.key === 'pending' ? 'bg-amber-500' : 'bg-emerald-500';
+          textColor = isCancelledStep ? 'text-red-500' : step.key === 'needs_action' ? 'text-orange-500' : step.key === 'completed' ? 'text-blue-500' : step.key === 'pending' ? 'text-amber-500' : 'text-emerald-500';
         } else if (isPast) {
           dotColor = 'bg-emerald-500/60';
           lineColor = 'bg-emerald-500/40';

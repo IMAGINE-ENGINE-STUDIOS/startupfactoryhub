@@ -18,7 +18,7 @@ function AdminBookingStepLine({ status }: { status: string }) {
   const steps = [
     { key: 'pending', label: 'Pending' },
     { key: 'confirmed', label: 'Active' },
-    { key: 'needs_action', label: 'Updating' },
+    { key: 'completed', label: 'Completed' },
     { key: 'cancelled', label: 'Cancelled' },
   ];
 
@@ -35,8 +35,8 @@ function AdminBookingStepLine({ status }: { status: string }) {
         let textColor = 'text-muted-foreground/50';
 
         if (isActive) {
-          dotColor = isCancelledStep ? 'bg-red-500' : step.key === 'needs_action' ? 'bg-orange-500' : step.key === 'pending' ? 'bg-amber-500' : 'bg-emerald-500';
-          textColor = isCancelledStep ? 'text-red-500' : step.key === 'needs_action' ? 'text-orange-500' : step.key === 'pending' ? 'text-amber-500' : 'text-emerald-500';
+          dotColor = isCancelledStep ? 'bg-red-500' : step.key === 'needs_action' ? 'bg-orange-500' : step.key === 'completed' ? 'bg-blue-500' : step.key === 'pending' ? 'bg-amber-500' : 'bg-emerald-500';
+          textColor = isCancelledStep ? 'text-red-500' : step.key === 'needs_action' ? 'text-orange-500' : step.key === 'completed' ? 'text-blue-500' : step.key === 'pending' ? 'text-amber-500' : 'text-emerald-500';
         } else if (isPast) {
           dotColor = 'bg-emerald-500/60';
           textColor = 'text-emerald-600/60';
@@ -78,6 +78,7 @@ const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
   pending: { label: 'Pending', className: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
   confirmed: { label: 'Confirmed', className: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
   needs_action: { label: 'Needs Action', className: 'bg-orange-500/10 text-orange-600 border-orange-500/20' },
+  completed: { label: 'Completed', className: 'bg-blue-500/10 text-blue-600 border-blue-500/20' },
   cancelled: { label: 'Cancelled', className: 'bg-red-500/10 text-red-600 border-red-500/20' },
 };
 
@@ -239,6 +240,7 @@ export default function WorkspaceBookingsManagement() {
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="confirmed">Confirmed</SelectItem>
               <SelectItem value="needs_action">Needs Action</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
@@ -396,6 +398,11 @@ export default function WorkspaceBookingsManagement() {
                         <Button size="sm" variant="outline" className="text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10" onClick={() => openAction(booking, 'confirm')}>
                           <Check className="h-3.5 w-3.5 mr-1" /> Re-approve
                         </Button>
+                      )}
+                      {booking.status === 'completed' && (
+                        <Badge className="bg-blue-500/10 text-blue-600 border-blue-500/20 border text-xs">
+                          Completed
+                        </Badge>
                       )}
                     </div>
                   </div>
