@@ -35,6 +35,20 @@ serve(async (req) => {
     const user = userData.user;
     if (!user?.email) throw new Error("User not authenticated");
 
+    // Platform owner override - full access without Stripe check
+    const PLATFORM_OWNER_EMAILS = ["ceo@imagineengine.space"];
+    if (PLATFORM_OWNER_EMAILS.includes(user.email.toLowerCase())) {
+      return new Response(JSON.stringify({
+        subscribed: true,
+        tier: "corporate",
+        product_id: "platform_owner",
+        subscription_end: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+        cancel_at_period_end: false,
+      }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2025-08-27.basil",
     });
