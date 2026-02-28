@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
+import { MEMBERSHIP_TIERS } from "@/lib/membership-tiers";
 import MatrixBackground from "@/components/MatrixBackground";
 import logo from "@/assets/logo.png";
 
@@ -254,10 +255,10 @@ export default function ReferralProgram() {
                   </TableHeader>
                   <TableBody>
                     {[
-                      { plan: "Community", price: 35000 },
-                      { plan: "Self-Paced + Office", price: 55000 },
-                      { plan: "Global Access", price: 95000 },
-                      { plan: "Corporate", price: 150000 },
+                      { plan: MEMBERSHIP_TIERS.community.name, price: MEMBERSHIP_TIERS.community.price * 100 },
+                      { plan: MEMBERSHIP_TIERS.self_paced_office.name, price: MEMBERSHIP_TIERS.self_paced_office.price * 100 },
+                      { plan: MEMBERSHIP_TIERS.global_access.name, price: MEMBERSHIP_TIERS.global_access.price * 100 },
+                      { plan: MEMBERSHIP_TIERS.corporate.name, price: MEMBERSHIP_TIERS.corporate.price * 100 },
                     ].map((tier) => (
                       <TableRow key={tier.plan}>
                         <TableCell className="font-medium">{tier.plan}</TableCell>
