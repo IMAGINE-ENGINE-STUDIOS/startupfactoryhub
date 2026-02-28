@@ -45,6 +45,7 @@ interface Cohort {
   funding_per_startup: number | null;
   equity_percentage: number | null;
   focus_industries: string[] | null;
+  enrollment_fee: number | null;
 }
 
 interface CohortManagementProps {
@@ -194,6 +195,12 @@ export const CohortManagement = ({
                         : 'N/A'}
                     </span>
                   </div>
+                  {cohort.enrollment_fee && cohort.enrollment_fee > 0 && (
+                    <div className="flex items-center gap-2 text-sm col-span-2">
+                      <DollarSign className="w-4 h-4 text-amber-500 shrink-0" />
+                      <span className="font-medium">${(cohort.enrollment_fee / 100).toLocaleString()} application fee</span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Industries */}
