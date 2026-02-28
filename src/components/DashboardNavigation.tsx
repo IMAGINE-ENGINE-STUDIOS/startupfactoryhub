@@ -43,6 +43,7 @@ import {
 import RecommendationPopup from "./RecommendationPopup";
 import { PasswordChangeDialog } from "./PasswordChangeDialog";
 import { DeleteAccountDialog } from "./DeleteAccountDialog";
+import WalletPasses from "./WalletPasses";
 
 const DashboardNavigation = () => {
   const navigate = useNavigate();
@@ -119,6 +120,9 @@ const DashboardNavigation = () => {
               <Button variant="ghost" size="sm" className="hidden sm:flex">
                 <Search className="w-4 h-4" />
               </Button>
+
+              {/* Wallet Passes */}
+              <WalletPasses />
 
               {/* AI Recommendations */}
               <Popover>
