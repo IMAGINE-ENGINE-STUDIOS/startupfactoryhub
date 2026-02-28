@@ -936,7 +936,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     regusLocations.forEach(ws => {
       const markerSize = 36;
       const el = document.createElement('div');
-      el.style.cssText = `width: ${markerSize}px; height: ${markerSize}px; cursor: pointer; position: relative;`;
+      el.style.cssText = `width: ${markerSize}px; height: ${markerSize}px; cursor: pointer; position: relative; transform: translate(-50%, -50%);`;
       
       const markerEl = document.createElement('div');
       markerEl.style.cssText = `
