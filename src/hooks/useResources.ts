@@ -20,6 +20,7 @@ export type ResourceType =
   | 'event'
   | 'banking'
   | 'national_archives'
+  | 'workplace'
   | 'other';
 
 export type LocationType = 'physical' | 'online' | 'hybrid';
