@@ -3242,6 +3242,42 @@ export type Database = {
           },
         ]
       }
+      linkedin_tokens: {
+        Row: {
+          access_token: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          linkedin_name: string | null
+          linkedin_sub: string | null
+          refresh_token: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          access_token: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          linkedin_name?: string | null
+          linkedin_sub?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          access_token?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          linkedin_name?: string | null
+          linkedin_sub?: string | null
+          refresh_token?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       live_room_participants: {
         Row: {
           id: string
