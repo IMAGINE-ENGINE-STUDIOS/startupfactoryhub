@@ -15,18 +15,69 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [sessionReady, setSessionReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Listen for the PASSWORD_RECOVERY event from the magic link
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    // Check if we have recovery tokens in the URL hash
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = hashParams.get('type');
+    const accessToken = hashParams.get('access_token');
+    const refreshToken = hashParams.get('refresh_token');
+
+    // Also check query params (some flows use query params instead)
+    const queryParams = new URLSearchParams(window.location.search);
+    const errorParam = queryParams.get('error');
+    const errorDescription = queryParams.get('error_description');
+
+    if (errorParam) {
+      setError(errorDescription || 'The reset link is invalid or has expired. Please request a new one.');
+      return;
+    }
+
+    // If we have tokens in the hash, set the session manually
+    if (accessToken && refreshToken && type === 'recovery') {
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      }).then(({ error }) => {
+        if (error) {
+          console.error('Error setting recovery session:', error);
+          setError('The reset link is invalid or has expired. Please request a new one.');
+        } else {
+          setSessionReady(true);
+        }
+      });
+      return;
+    }
+
+    // Listen for the PASSWORD_RECOVERY event
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setSessionReady(true);
       }
     });
 
-    return () => subscription.unsubscribe();
+    // Also check if we already have a session (event may have fired before mount)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        // We have a session, likely from the recovery flow
+        setSessionReady(true);
+      }
+    });
+
+    // Timeout after 15 seconds
+    const timeout = setTimeout(() => {
+      if (!sessionReady) {
+        setError('The reset link appears to be invalid or has expired. Please request a new password reset.');
+      }
+    }, 15000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeout);
+    };
   }, []);
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -48,10 +99,16 @@ export default function ResetPassword() {
     if (error) {
       toast({ title: 'Error', description: error.message, variant: 'destructive' });
     } else {
-      toast({ title: '✅ Password updated!', description: 'Your password has been reset. Redirecting to dashboard...' });
-      setTimeout(() => navigate('/dashboard'), 2000);
+      toast({ title: '✅ Password updated!', description: 'Your password has been reset. Redirecting to sign in...' });
+      // Sign out after password reset so user logs in with new password
+      await supabase.auth.signOut();
+      setTimeout(() => navigate('/auth'), 2000);
     }
     setLoading(false);
+  };
+
+  const handleRequestNewReset = () => {
+    navigate('/auth');
   };
 
   return (
@@ -67,11 +124,18 @@ export default function ResetPassword() {
               RESET YOUR PASSWORD
             </CardTitle>
             <CardDescription>
-              {sessionReady ? 'Enter your new password below.' : 'Verifying your reset link...'}
+              {error ? 'Something went wrong' : sessionReady ? 'Enter your new password below.' : 'Verifying your reset link...'}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {!sessionReady ? (
+            {error ? (
+              <div className="text-center py-6 space-y-4">
+                <p className="text-sm text-destructive">{error}</p>
+                <Button onClick={handleRequestNewReset} className="w-full hover-glow">
+                  Back to Sign In
+                </Button>
+              </div>
+            ) : !sessionReady ? (
               <div className="text-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
                 <p className="text-sm text-muted-foreground">Please wait while we verify your reset link...</p>
