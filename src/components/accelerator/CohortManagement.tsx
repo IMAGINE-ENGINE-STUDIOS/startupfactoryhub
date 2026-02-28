@@ -15,7 +15,8 @@ import {
   Copy,
   ExternalLink,
   Trash2,
-  FileText
+  FileText,
+  Rocket
 } from 'lucide-react';
 import {
   AlertDialog,
@@ -54,6 +55,7 @@ interface CohortManagementProps {
   onUpdateCohort: (cohortId: string, updates: Partial<Cohort>) => Promise<void>;
   onSelectCohort: (cohort: Cohort) => void;
   onDeleteCohort?: (cohortId: string) => Promise<void>;
+  onPostToFeed?: (cohort: Cohort) => Promise<void>;
   applicationCounts?: Record<string, number>;
 }
 
@@ -63,6 +65,7 @@ export const CohortManagement = ({
   onUpdateCohort,
   onSelectCohort,
   onDeleteCohort,
+  onPostToFeed,
   applicationCounts = {}
 }: CohortManagementProps) => {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -261,6 +264,20 @@ export const CohortManagement = ({
                   >
                     <ExternalLink className="w-4 h-4" />
                   </Button>
+                  {onPostToFeed && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-primary hover:text-primary hover:bg-primary/10"
+                      title="Post cohort to feed"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onPostToFeed(cohort);
+                      }}
+                    >
+                      <Rocket className="w-4 h-4" />
+                    </Button>
+                  )}
                   {onDeleteCohort && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>

@@ -259,6 +259,51 @@ const SFHAcceleratorManager = () => {
     toast({ title: 'Copied to clipboard!' });
   };
 
+  const handlePostCohortToFeed = async (cohort: Cohort) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: 'You must be logged in', variant: 'destructive' });
+        return;
+      }
+
+      const applicationUrl = `${window.location.origin}/cohorts/${cohort.id}/apply`;
+
+      const cohortData = {
+        cohort_id: cohort.id,
+        name: cohort.name,
+        description: cohort.description,
+        deadline: cohort.application_deadline,
+        funding: cohort.funding_per_startup,
+        equity: cohort.equity_percentage,
+        enrollment_fee: cohort.enrollment_fee,
+        industries: cohort.focus_industries,
+        accelerator_name: profile?.organization_name || 'SFH Accelerator',
+        accelerator_logo: profile?.logo_url,
+        accelerator_id: SFH_ACCELERATOR_ID,
+        application_url: applicationUrl,
+      };
+
+      const content = `🚀 New Cohort: ${cohort.name}\n\n${cohort.description || 'Apply now to join our accelerator program!'}`;
+
+      const { error } = await supabase
+        .from('feed_posts')
+        .insert({
+          user_id: user.id,
+          post_type: 'cohort' as any,
+          content,
+          cohort_data: cohortData,
+        });
+
+      if (error) throw error;
+
+      toast({ title: 'Cohort posted to community feed!' });
+    } catch (error) {
+      console.error('Error posting cohort to feed:', error);
+      toast({ title: 'Error posting to feed', variant: 'destructive' });
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -501,6 +546,7 @@ const SFHAcceleratorManager = () => {
             onUpdateCohort={handleUpdateCohort}
             onSelectCohort={handleSelectCohort}
             onDeleteCohort={handleDeleteCohort}
+            onPostToFeed={handlePostCohortToFeed}
             applicationCounts={applicationCounts}
           />
         </TabsContent>
