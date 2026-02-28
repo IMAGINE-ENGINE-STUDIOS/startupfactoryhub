@@ -50,7 +50,9 @@ import {
   Share2,
   Satellite,
   Map,
-  Layers
+  Layers,
+  Lock,
+  Star
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -67,6 +69,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useEventsForMap, MapEvent } from '@/hooks/useEventsForMap';
 import { format } from 'date-fns';
+import { useMembershipStatus } from '@/hooks/useMembershipStatus';
+import { useRegusLocations, RegusFilters } from '@/hooks/useRegusLocations';
+import { HubsWorkspaceCard } from '@/components/hubs/HubsWorkspaceCard';
+import { HubsDetailPanel } from '@/components/hubs/HubsDetailPanel';
+import { RegusBookingModal } from '@/components/hubs/RegusBookingModal';
+import { Workspace, WorkspaceType } from '@/hooks/useHubsSearch';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
@@ -108,6 +116,7 @@ const RESOURCE_CONFIG: Record<ResourceType, { icon: any; color: string; label: s
   event: { icon: CalendarDays, color: '#f43f5e', label: 'Events' },
   banking: { icon: Banknote, color: '#dc2626', label: 'Banking' },
   national_archives: { icon: Landmark, color: '#7c3aed', label: 'National Archives' },
+  workplace: { icon: Building2, color: '#0d9488', label: 'Workplace' },
   other: { icon: MapPin, color: '#64748b', label: 'Other' },
 };
 
@@ -137,8 +146,29 @@ export const GlobalResourcesMap = () => {
   const [isPerksExpanded, setIsPerksExpanded] = useState(true);
   const [isOnlineResourcesExpanded, setIsOnlineResourcesExpanded] = useState(false);
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
+  const regusMarkers = useRef<mapboxgl.Marker[]>([]);
   const [userEventStatus, setUserEventStatus] = useState<string | null>(null);
   const [isUpdatingRsvp, setIsUpdatingRsvp] = useState(false);
+  
+  // Workplace (Regus) state
+  const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
+  const [bookingWorkspace, setBookingWorkspace] = useState<Workspace | null>(null);
+  const [showBookingModal, setShowBookingModal] = useState(false);
+  const [regusSearch, setRegusSearch] = useState('');
+  const [regusOfficeType, setRegusOfficeType] = useState<string | null>(null);
+  
+  // Membership status for subscription gating
+  const { isSubscribed, tier, loading: membershipLoading } = useMembershipStatus();
+  
+  // Regus locations (only fetch when workplace selected AND subscribed)
+  const regusFilters: RegusFilters = {
+    search: regusSearch || undefined,
+    officeType: regusOfficeType || undefined,
+  };
+  const { data: regusLocations, isLoading: regusLoading } = useRegusLocations(
+    regusFilters, 
+    selectedType === 'workplace' && isSubscribed
+  );
   
   // Ref to store current resources for click handler (avoids stale closure)
   const resourcesRef = useRef<Resource[] | undefined>(undefined);
@@ -892,6 +922,69 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     }
   }, [resources]);
 
+  // Add Regus workspace markers to map
+  useEffect(() => {
+    if (!map.current) return;
+    
+    // Clear existing Regus markers
+    regusMarkers.current.forEach(marker => marker.remove());
+    regusMarkers.current = [];
+    
+    // Only show when workplace is selected and subscribed
+    if (selectedType !== 'workplace' || !isSubscribed || !regusLocations) return;
+    
+    regusLocations.forEach(ws => {
+      const markerSize = 36;
+      const el = document.createElement('div');
+      el.style.cssText = `width: ${markerSize}px; height: ${markerSize}px; cursor: pointer; position: relative;`;
+      
+      const markerEl = document.createElement('div');
+      markerEl.style.cssText = `
+        width: 100%; height: 100%;
+        background: ${ws.image_url ? `url(${ws.image_url}) center/cover,` : ''} linear-gradient(135deg, #0d9488, #14b8a6);
+        border: 3px solid white;
+        border-radius: 50%;
+        box-shadow: 0 4px 12px rgba(13, 148, 136, 0.5);
+        transition: all 0.2s;
+      `;
+      el.appendChild(markerEl);
+      
+      // Badge
+      const badge = document.createElement('div');
+      badge.innerHTML = '🏢';
+      badge.style.cssText = `position: absolute; top: -6px; right: -6px; font-size: 12px; filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));`;
+      el.appendChild(badge);
+      
+      el.addEventListener('mouseenter', () => {
+        markerEl.style.transform = 'scale(1.15)';
+        markerEl.style.boxShadow = '0 6px 20px rgba(13, 148, 136, 0.7)';
+      });
+      el.addEventListener('mouseleave', () => {
+        markerEl.style.transform = 'scale(1)';
+        markerEl.style.boxShadow = '0 4px 12px rgba(13, 148, 136, 0.5)';
+      });
+      
+      el.addEventListener('click', () => {
+        setSelectedWorkspace(ws);
+        setSelectedResource(null);
+        setSelectedEvent(null);
+        if (map.current) {
+          map.current.flyTo({ center: [ws.longitude, ws.latitude], zoom: 14, duration: 2000 });
+        }
+      });
+      
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([ws.longitude, ws.latitude])
+        .addTo(map.current!);
+      
+      regusMarkers.current.push(marker);
+    });
+    
+    return () => {
+      regusMarkers.current.forEach(marker => marker.remove());
+      regusMarkers.current = [];
+    };
+  }, [regusLocations, selectedType, isSubscribed]);
 
 
   // Add event markers to map
@@ -1272,7 +1365,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                 <Button
                   variant={selectedType === null ? 'default' : 'ghost'}
                   size="sm"
-                  onClick={() => setSelectedType(null)}
+                  onClick={() => { setSelectedType(null); setSelectedWorkspace(null); }}
                   className={cn(
                     "w-full justify-start gap-2 rounded-xl backdrop-blur-xl",
                     selectedType === null ? "bg-primary/90" : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
@@ -1285,12 +1378,13 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                   const config = RESOURCE_CONFIG[type];
                   const Icon = config.icon;
                   const isSelected = selectedType === type;
+                  const isWorkplace = type === 'workplace';
                   return (
                     <Button
                       key={type}
                       variant="ghost"
                       size="sm"
-                      onClick={() => setSelectedType(type)}
+                      onClick={() => { setSelectedType(type); setSelectedResource(null); setSelectedEvent(null); setSelectedWorkspace(null); }}
                       className={cn(
                         "w-full justify-start gap-2 rounded-xl backdrop-blur-xl",
                         isSelected 
@@ -1303,47 +1397,161 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     >
                       <Icon className="w-4 h-4" />
                       {config.label}
+                      {isWorkplace && !isSubscribed && (
+                        <Lock className="w-3 h-3 ml-auto text-muted-foreground" />
+                      )}
                     </Button>
                   );
                 })}
               </div>
               
-              {/* Journey Step Filter */}
-              <div className="mt-4 pt-4 border-t border-white/20">
-                <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Journey Stage</h3>
-                <div className="space-y-1">
-                  <Button
-                    variant={selectedJourneyStep === null ? 'default' : 'ghost'}
-                    size="sm"
-                    onClick={() => setSelectedJourneyStep(null)}
-                    className={cn(
-                      "w-full justify-start gap-2 rounded-xl backdrop-blur-xl",
-                      selectedJourneyStep === null ? "bg-primary/90" : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
-                    )}
-                  >
-                    All Stages
-                  </Button>
-                  {JOURNEY_STEPS.filter(s => s.value !== 'all').map((step) => (
+              {/* Workplace Panel - replaces Journey Stage when workplace selected */}
+              {selectedType === 'workplace' ? (
+                <div className="mt-4 pt-4 border-t border-white/20">
+                  {!isSubscribed ? (
+                    /* Lock overlay for non-subscribers */
+                    <div className="text-center py-6 space-y-3">
+                      <div className="w-16 h-16 mx-auto rounded-2xl bg-muted/20 flex items-center justify-center">
+                        <Lock className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                      <h4 className="font-semibold">Subscription Required</h4>
+                      <p className="text-xs text-muted-foreground px-2">
+                        Subscribe to any SFH plan to unlock access to Regus workspaces across 130+ countries and 5,600+ locations.
+                      </p>
+                      <Button
+                        size="sm"
+                        className="w-full gap-2 rounded-xl"
+                        onClick={() => {
+                          // Navigate to subscription page
+                          window.location.href = '/dashboard';
+                        }}
+                      >
+                        <Star className="w-4 h-4" />
+                        View Plans
+                      </Button>
+                    </div>
+                  ) : (
+                    /* Subscribed: show workspace filters and cards */
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Office Type</h3>
+                      <div className="flex flex-wrap gap-1">
+                        {[
+                          { value: null, label: 'All' },
+                          { value: 'hot_desk', label: 'Hot Desk' },
+                          { value: 'private_office', label: 'Private' },
+                          { value: 'meeting_room', label: 'Meeting' },
+                          { value: 'coworking', label: 'Coworking' },
+                        ].map((opt) => (
+                          <Button
+                            key={opt.value || 'all'}
+                            size="sm"
+                            variant={regusOfficeType === opt.value ? 'default' : 'ghost'}
+                            onClick={() => setRegusOfficeType(opt.value)}
+                            className={cn(
+                              "text-xs rounded-lg px-2 py-1 h-7",
+                              regusOfficeType === opt.value 
+                                ? "bg-primary/90" 
+                                : "bg-white/5 hover:bg-white/10"
+                            )}
+                          >
+                            {opt.label}
+                          </Button>
+                        ))}
+                      </div>
+                      
+                      {/* Search within workspaces */}
+                      <div className="relative">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground" />
+                        <Input
+                          placeholder="Search city or name..."
+                          value={regusSearch}
+                          onChange={(e) => setRegusSearch(e.target.value)}
+                          className="pl-8 h-8 text-xs bg-white/10 dark:bg-black/20 border-white/30 rounded-xl"
+                        />
+                      </div>
+
+                      {/* Results count */}
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs bg-teal-500/20 border-teal-500/50 text-teal-400">
+                          {regusLoading ? '...' : `${regusLocations?.length || 0} locations`}
+                        </Badge>
+                      </div>
+
+                      {/* Workspace cards */}
+                      <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                        {regusLoading ? (
+                          <div className="flex items-center justify-center py-6">
+                            <Loader2 className="w-5 h-5 animate-spin text-muted-foreground" />
+                          </div>
+                        ) : regusLocations?.length === 0 ? (
+                          <p className="text-xs text-muted-foreground text-center py-4">No workspaces found</p>
+                        ) : (
+                          regusLocations?.map((ws) => (
+                            <HubsWorkspaceCard
+                              key={ws.id}
+                              workspace={ws}
+                              isSelected={selectedWorkspace?.id === ws.id}
+                              onSelect={() => {
+                                setSelectedWorkspace(ws);
+                                if (map.current && ws.latitude && ws.longitude) {
+                                  map.current.flyTo({
+                                    center: [ws.longitude, ws.latitude],
+                                    zoom: 14,
+                                    duration: 2000,
+                                  });
+                                }
+                              }}
+                              onBook={() => {
+                                setBookingWorkspace(ws);
+                                setShowBookingModal(true);
+                              }}
+                              compact
+                            />
+                          ))
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                /* Journey Step Filter - normal categories */
+                <div className="mt-4 pt-4 border-t border-white/20">
+                  <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide">Journey Stage</h3>
+                  <div className="space-y-1">
                     <Button
-                      key={step.value}
-                      variant="ghost"
+                      variant={selectedJourneyStep === null ? 'default' : 'ghost'}
                       size="sm"
-                      onClick={() => setSelectedJourneyStep(step.value)}
+                      onClick={() => setSelectedJourneyStep(null)}
                       className={cn(
-                        "w-full justify-start gap-2 rounded-xl backdrop-blur-xl text-left",
-                        selectedJourneyStep === step.value
-                          ? "bg-white/20 dark:bg-black/30 border-l-4 border-primary" 
-                          : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
+                        "w-full justify-start gap-2 rounded-xl backdrop-blur-xl",
+                        selectedJourneyStep === null ? "bg-primary/90" : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
                       )}
                     >
-                      {step.label}
+                      All Stages
                     </Button>
-                  ))}
+                    {JOURNEY_STEPS.filter(s => s.value !== 'all').map((step) => (
+                      <Button
+                        key={step.value}
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedJourneyStep(step.value)}
+                        className={cn(
+                          "w-full justify-start gap-2 rounded-xl backdrop-blur-xl text-left",
+                          selectedJourneyStep === step.value
+                            ? "bg-white/20 dark:bg-black/30 border-l-4 border-primary" 
+                            : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
+                        )}
+                      >
+                        {step.label}
+                      </Button>
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
             </ScrollArea>
             
             {/* Add Resource Button - directly after categories */}
+            {selectedType !== 'workplace' && (
             <Button 
               onClick={() => setShowAddDialog(true)} 
               className="w-full gap-2 backdrop-blur-xl bg-primary/90 hover:bg-primary border border-white/20 rounded-2xl mt-4 flex-shrink-0"
@@ -1351,6 +1559,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
               <Plus className="w-4 h-4" />
               Add Resource
             </Button>
+            )}
           </div>
         </div>
       </div>
@@ -1956,6 +2165,25 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         onStartTracking={startTracking}
         onStopTracking={stopTracking}
         userColor={userColor}
+      />
+
+      {/* Regus Workspace Detail Panel */}
+      {selectedType === 'workplace' && (
+        <HubsDetailPanel
+          workspace={selectedWorkspace}
+          onClose={() => setSelectedWorkspace(null)}
+          onBook={(ws) => {
+            setBookingWorkspace(ws);
+            setShowBookingModal(true);
+          }}
+        />
+      )}
+
+      {/* Regus Booking Modal (no payment) */}
+      <RegusBookingModal
+        workspace={bookingWorkspace}
+        open={showBookingModal}
+        onOpenChange={setShowBookingModal}
       />
     </div>
   );
