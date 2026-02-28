@@ -76,17 +76,26 @@ export default function WalletPasses({ className }: { className?: string }) {
     });
   }
 
+  const isMobileNav = className?.includes('flex-col');
+
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className={cn('relative', className)}>
-          <Wallet className="w-4 h-4" />
-          {passes.length > 0 && (
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[10px] flex items-center justify-center text-primary-foreground">
-              {passes.length}
-            </span>
-          )}
-        </Button>
+        {isMobileNav ? (
+          <button className={cn(className)}>
+            <Wallet className="w-6 h-6 text-primary" />
+            <span className="text-[10px] font-medium">Wallet</span>
+          </button>
+        ) : (
+          <Button variant="ghost" size="sm" className={cn('relative', className)}>
+            <Wallet className="w-4 h-4" />
+            {passes.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-primary rounded-full text-[10px] flex items-center justify-center text-primary-foreground">
+                {passes.length}
+              </span>
+            )}
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-80 sm:w-96 p-0 bg-background border-border backdrop-blur-none" align="end">
         <div className="p-4 border-b">
