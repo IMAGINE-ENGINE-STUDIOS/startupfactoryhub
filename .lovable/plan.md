@@ -1,71 +1,38 @@
 
 
-## Plan: Subscription-Gated Regus Workspace in Resource Map
+## Diagnosis
 
-### What This Does
-When a user subscribes to any paid SFH tier via Stripe, the "Workplace" category in the Resource Map unlocks, showing Regus locations globally. Subscribers can book workspaces without payment (internal request). If subscription lapses, access locks again. Admins approve/reject bookings, and users see booking status in their dashboard.
+There are **two separate issues**:
 
-### Implementation Steps
+### Issue 1: Verification email for startupfactoryhub@gmail.com
+The auth logs show `user_repeated_signup` — this account **already exists and is already verified** (confirmed on 2025-11-27). Supabase does NOT send a new verification email for repeated signups of an already-confirmed account. You need to **delete this user first**, then sign up fresh to trigger a new verification email.
 
-#### 1. Database: Create `regus_locations` table
-- Fields: `id`, `name`, `address`, `city`, `country`, `latitude`, `longitude`, `office_type` (text), `capacity`, `amenities` (text[]), `image_url`, `images` (text[]), `videos` (text[]), `rating` (numeric), `is_active` (boolean, default true), `created_at`
-- RLS: authenticated users can SELECT active locations
+### Issue 2: Emails not arriving / "false tokens"
+The `send-auth-email` hook IS being triggered (confirmed: recovery for ceo@imagineengine.space ran successfully). The problem is likely that **Resend is not delivering the emails** because:
 
-#### 2. Database: Add `admin_notes` column to `hub_bookings`
-- `ALTER TABLE hub_bookings ADD COLUMN admin_notes text;`
-- Ensure status values support: `pending`, `confirmed`, `needs_action`, `cancelled`
+- The function sends from `info@startupfactoryhub.com`
+- But `startupfactoryhub.com` is **not configured as an email domain** in this workspace
+- If the domain is not verified in Resend's dashboard, emails either silently fail or land in spam
+- On Resend's free tier without a verified domain, you can only send from `onboarding@resend.dev` and only to your own verified email
 
-#### 3. Seed Regus Locations
-- Insert 50-100 global Regus office locations (major cities across US, Europe, Asia, LATAM) via SQL insert
+### Plan
 
-#### 4. Create `useMembershipStatus` hook
-- Calls `check-membership` edge function
-- Returns `{ isSubscribed, tier, status, loading }`
-- Cached via React Query (60s stale time)
-- Checks for `active` status; `past_due`/`canceled` = not subscribed
+1. **Verify Resend domain configuration**
+   - You need to log into [Resend dashboard](https://resend.com) and verify that `startupfactoryhub.com` is added and DNS records (SPF, DKIM, DMARC) are configured
+   - If the domain is NOT verified in Resend, emails sent from `info@startupfactoryhub.com` will silently fail
 
-#### 5. Create `useRegusLocations` hook
-- Fetches from `regus_locations` table with filters (city, country, office_type, search)
-- Returns data shaped as `Workspace[]` to reuse existing HubsLab components
+2. **Add error logging to the edge function**
+   - Update `send-auth-email/index.ts` to log the full Resend API response (including any error details) so we can see exactly what Resend returns
+   - Log the `from` address and `to` address for debugging
 
-#### 6. Add "Workplace" category to `GlobalResourcesMap.tsx` RESOURCE_CONFIG
-- New entry: `workplace: { icon: Building2, color: '#0d9488', label: 'Workplace' }`
-- When selected:
-  - **Not subscribed**: Show lock overlay with "Subscribe to unlock Regus workspaces" CTA
-  - **Subscribed**: Replace resource list with HubsLab-style UI:
-    - Workspace type sub-filters (Hot Desk, Private Office, Meeting Room, Coworking, Event Space)
-    - `HubsWorkspaceCard` components in compact mode
-    - Map markers switch to Regus locations
-    - Clicking marker/card opens `HubsDetailPanel`
-    - "Book Now" opens `RegusBookingModal`
+3. **Fix the "false tokens" issue**
+   - Add logging to capture the incoming `token` and `token_hash` values from the hook payload to verify they're not undefined/null
+   - If tokens are coming through as `undefined`, the template will render "false" literally
 
-#### 7. Create `RegusBookingModal` component
-- Fork of `HubsBookingModal` but:
-  - **No price display, no Stripe redirect**
-  - Submit inserts into `hub_bookings` with `status: 'pending'`, `provider: 'regus'`
-  - Same media carousel, date/time picker, duration selector, notes
-  - Success: "Booking request submitted — pending admin confirmation"
+4. **Delete and re-register startupfactoryhub@gmail.com**
+   - Use the admin delete user feature to remove the existing account
+   - Sign up again to trigger a fresh verification email
 
-#### 8. Subscription lockout logic
-- `useMembershipStatus` also checks `past_due`/`canceled` from Stripe via `check-membership`
-- If inactive: hide Regus markers, show lock on Workplace category, disable booking
-- On subscription activation: immediately unlock (React Query refetch)
-
-#### 9. User Dashboard: "My Bookings" section
-- Add booking list in user profile/dashboard
-- Query `hub_bookings` for current user, display with status badges:
-  - Pending (yellow), Confirmed (green), Needs Action (orange), Cancelled (red)
-
-#### 10. Admin: Workspace Bookings management
-- Add a booking management section in admin dashboard
-- List pending Regus bookings with approve (→ confirmed), flag (→ needs_action), reject (→ cancelled) actions
-- Admin can add `admin_notes`
-
-### Technical Details
-
-- **Subscription tiers** already mapped in `check-membership` edge function (TIER_MAP with 4 product IDs)
-- **All paid tiers** (community, self_paced_office, global_access, corporate) unlock Workplace
-- `user_subscriptions` table already exists and is upserted by `check-membership`
-- Reuse existing `HubsWorkspaceCard`, `HubsDetailPanel`, `HubsBookingModal` components — only fork the booking modal to remove payment
-- `ResourceType` union in `useResources.ts` needs `workplace` added
+### Immediate action required from you
+- **Check your Resend dashboard** at [resend.com/domains](https://resend.com/domains) — is `startupfactoryhub.com` listed and verified there? If not, that's the root cause. You need to add the domain and configure DNS records in your domain registrar.
 
