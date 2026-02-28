@@ -4892,6 +4892,75 @@ export type Database = {
           },
         ]
       }
+      soft_landing_requests: {
+        Row: {
+          additional_notes: string | null
+          admin_notes: string | null
+          annual_revenue: string | null
+          business_registration_number: string | null
+          company_description: string | null
+          company_industry: string | null
+          company_name: string
+          company_website: string | null
+          created_at: string
+          expansion_goals: string | null
+          id: string
+          is_corporate_subscriber: boolean
+          number_of_employees: string | null
+          price_cents: number
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          target_country: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          additional_notes?: string | null
+          admin_notes?: string | null
+          annual_revenue?: string | null
+          business_registration_number?: string | null
+          company_description?: string | null
+          company_industry?: string | null
+          company_name: string
+          company_website?: string | null
+          created_at?: string
+          expansion_goals?: string | null
+          id?: string
+          is_corporate_subscriber?: boolean
+          number_of_employees?: string | null
+          price_cents?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          target_country: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          additional_notes?: string | null
+          admin_notes?: string | null
+          annual_revenue?: string | null
+          business_registration_number?: string | null
+          company_description?: string | null
+          company_industry?: string | null
+          company_name?: string
+          company_website?: string | null
+          created_at?: string
+          expansion_goals?: string | null
+          id?: string
+          is_corporate_subscriber?: boolean
+          number_of_employees?: string | null
+          price_cents?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          target_country?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       startup_advisor_assignments: {
         Row: {
           advisor_id: string

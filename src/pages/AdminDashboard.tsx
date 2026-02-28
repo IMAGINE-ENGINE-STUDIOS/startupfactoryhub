@@ -51,6 +51,7 @@ import SubscriptionsManagement from '@/components/admin/SubscriptionsManagement'
 import ReferralPartnersManagement from '@/components/admin/ReferralPartnersManagement';
 import WorkspaceBookingsManagement from '@/components/admin/WorkspaceBookingsManagement';
 import FlightsManagement from '@/components/admin/FlightsManagement';
+import SoftLandingManagement from '@/components/admin/SoftLandingManagement';
 
 
 const AdminDashboard = () => {
@@ -214,6 +215,10 @@ const AdminDashboard = () => {
               <Plane className="h-4 w-4" />
               <span className="hidden lg:inline">Flights</span>
             </TabsTrigger>
+            <TabsTrigger value="soft-landing" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <Globe className="h-4 w-4" />
+              <span className="hidden lg:inline">Soft Landing</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
@@ -237,6 +242,7 @@ const AdminDashboard = () => {
           <TabsContent value="referral-partners"><ReferralPartnersManagement /></TabsContent>
           <TabsContent value="workspace-bookings"><WorkspaceBookingsManagement /></TabsContent>
           <TabsContent value="flights"><FlightsManagement /></TabsContent>
+          <TabsContent value="soft-landing"><SoftLandingManagement /></TabsContent>
         </Tabs>
       </main>
     </div>
