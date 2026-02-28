@@ -208,12 +208,12 @@ export default function StudentProfileView() {
   return (
     <div className="space-y-6 pb-8">
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className={`grid w-full max-w-2xl ${isSubscribed ? 'grid-cols-5' : 'grid-cols-4'}`}>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="posts">Your Posts</TabsTrigger>
-          {isSubscribed && <TabsTrigger value="bookings">My Bookings</TabsTrigger>}
-          <TabsTrigger value="subscription">Subscription</TabsTrigger>
-          <TabsTrigger value="payouts">Payouts</TabsTrigger>
+        <TabsList className="flex w-full max-w-2xl overflow-x-auto scrollbar-hide whitespace-nowrap">
+          <TabsTrigger value="profile" className="flex-1">Profile</TabsTrigger>
+          <TabsTrigger value="posts" className="flex-1">Your Posts</TabsTrigger>
+          {isSubscribed && <TabsTrigger value="bookings" className="flex-1">My Bookings</TabsTrigger>}
+          <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>
+          <TabsTrigger value="payouts" className="flex-1">Payouts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">

@@ -200,19 +200,19 @@ export default function AdvisorProfileView() {
   }
   return <div className="space-y-6">
       <Tabs defaultValue="profile" className="space-y-6">
-        <TabsList className={`grid w-full max-w-2xl ${isSubscribed ? 'grid-cols-5' : 'grid-cols-4'}`}>
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="posts">Your Posts</TabsTrigger>
-          {isSubscribed && <TabsTrigger value="bookings">My Bookings</TabsTrigger>}
-          <TabsTrigger value="subscription">Subscription</TabsTrigger>
-          <TabsTrigger value="payouts">Payouts</TabsTrigger>
+        <TabsList className="flex w-full max-w-2xl overflow-x-auto scrollbar-hide whitespace-nowrap">
+          <TabsTrigger value="profile" className="flex-1">Profile</TabsTrigger>
+          <TabsTrigger value="posts" className="flex-1">Your Posts</TabsTrigger>
+          {isSubscribed && <TabsTrigger value="bookings" className="flex-1">My Bookings</TabsTrigger>}
+          <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>
+          <TabsTrigger value="payouts" className="flex-1">Payouts</TabsTrigger>
         </TabsList>
 
         <TabsContent value="profile" className="space-y-6">
       {/* Header Section */}
-      <Card className="tech-card border-0">
-        <CardContent className="p-8">
-          <div className="flex items-start space-x-6">
+      <Card className="tech-card border-0 overflow-hidden">
+        <CardContent className="p-4 sm:p-8">
+          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
             {isEditing ? <AvatarUpload currentAvatarUrl={profile?.avatar_url} size="lg" userRole="advisor" showGradientBorder onUploadComplete={(url) => { toast({ title: 'Avatar updated successfully' }); }} /> : <Avatar className="h-20 w-20">
                 <AvatarImage src={profile?.avatar_url || ''} alt={profile?.full_name} />
                 <AvatarFallback className="bg-gradient-primary text-primary-foreground text-2xl">
