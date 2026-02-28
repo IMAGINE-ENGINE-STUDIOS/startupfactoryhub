@@ -62,6 +62,7 @@ interface Cohort {
   funding_per_startup: number | null;
   equity_percentage: number | null;
   focus_industries: string[] | null;
+  enrollment_fee: number | null;
 }
 
 const SFHAcceleratorManager = () => {
