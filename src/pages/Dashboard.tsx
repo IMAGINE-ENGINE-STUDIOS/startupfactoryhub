@@ -26,7 +26,9 @@ import StartupMentorshipOffers from '@/components/StartupMentorshipOffers';
 import StartupActiveMentors from '@/components/StartupActiveMentors';
 import StartupMentoringSessions from '@/components/StartupMentoringSessions';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
-import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X } from "lucide-react";
+import { Plus, Target, Calendar as CalendarIcon, Clock, MapPin, Users, MessageCircle, Network, Map as MapIcon, Briefcase, GraduationCap, BarChart, Brain, Wrench, ChevronDown, Presentation, Sparkles, History, Globe, Bell, X, Rocket, ExternalLink } from "lucide-react";
+import { CohortApplicationDialog } from '@/components/accelerator/CohortApplicationDialog';
+import { getIndustryLabel } from '@/lib/constants';
 import LiveRooms from '@/components/LiveRooms';
 import DistrictRooms from '@/components/DistrictRooms';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -88,7 +90,9 @@ const Dashboard = () => {
   const [connectedInvestors, setConnectedInvestors] = useState<Array<{id: string;name: string;}>>([]);
   const [pitchMeetings, setPitchMeetings] = useState<any[]>([]);
   const [activeVideoUrl, setActiveVideoUrl] = useState<string | undefined>();
-
+  const [openCohorts, setOpenCohorts] = useState<any[]>([]);
+  const [selectedCohort, setSelectedCohort] = useState<any>(null);
+  const [showApplicationDialog, setShowApplicationDialog] = useState(false);
   // Redirect if wrong role
   useEffect(() => {
     if (!roleLoading && role && role !== 'startup') {
@@ -103,6 +107,21 @@ const Dashboard = () => {
       fetchPitchMeetings();
     }
   }, [user]);
+
+  // Fetch open accelerator cohorts
+  useEffect(() => {
+    const fetchOpenCohorts = async () => {
+      const today = new Date().toISOString().split('T')[0];
+      const { data } = await supabase
+        .from('accelerator_cohorts')
+        .select('*, accelerator_profiles(organization_name, logo_url, user_id, external_link)')
+        .eq('status', 'applications_open')
+        .gte('start_date', today)
+        .order('application_deadline', { ascending: true });
+      setOpenCohorts(data || []);
+    };
+    fetchOpenCohorts();
+  }, []);
 
   const fetchPitchMeetings = async () => {
     if (!user) return;
@@ -519,6 +538,143 @@ const Dashboard = () => {
                 </CardContent>
               </Card>}
             
+            {/* Upcoming Accelerator Programs */}
+            {openCohorts.length > 0 && (
+              <Card className="tech-card border-0">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Rocket className="h-5 w-5 text-emerald-500" />
+                    Upcoming Accelerator Programs
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ScrollArea className="w-full">
+                    <div className="flex gap-4 pb-4">
+                      {openCohorts.map(cohort => {
+                        const spotsLeft = (cohort.max_startups || 0) - (cohort.current_startups || 0);
+                        return (
+                          <div key={cohort.id} className="flex-shrink-0 w-[320px] sm:w-[380px]">
+                            <div className="rounded-lg border hover:border-emerald-500/50 transition-all p-4 space-y-3 h-full flex flex-col cursor-pointer"
+                              onClick={() => {
+                                setSelectedCohort({
+                                  cohort_id: cohort.id,
+                                  name: cohort.name,
+                                  description: cohort.description,
+                                  deadline: cohort.application_deadline,
+                                  funding: cohort.funding_per_startup,
+                                  equity: cohort.equity_percentage,
+                                  enrollment_fee: cohort.enrollment_fee,
+                                  industries: cohort.focus_industries,
+                                  accelerator_name: cohort.accelerator_profiles?.organization_name,
+                                  accelerator_logo: cohort.accelerator_profiles?.logo_url,
+                                });
+                                setShowApplicationDialog(true);
+                              }}
+                            >
+                              <div className="flex items-start gap-3">
+                                {cohort.accelerator_profiles?.logo_url ? (
+                                  <img src={cohort.accelerator_profiles.logo_url} alt="" className="h-10 w-10 rounded-lg object-cover" />
+                                ) : (
+                                  <div className="h-10 w-10 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                    <Rocket className="h-5 w-5 text-emerald-500" />
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <h3 className="font-semibold line-clamp-1">{cohort.name}</h3>
+                                  <p className="text-xs text-muted-foreground line-clamp-1">
+                                    {cohort.accelerator_profiles?.organization_name}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {cohort.description && (
+                                <p className="text-xs text-muted-foreground line-clamp-2">{cohort.description}</p>
+                              )}
+
+                              <div className="space-y-1 text-xs text-muted-foreground">
+                                {cohort.start_date && (
+                                  <div className="flex items-center gap-2">
+                                    <CalendarIcon className="h-3 w-3" />
+                                    Starts: {format(parseISO(cohort.start_date), 'MMM d, yyyy')}
+                                  </div>
+                                )}
+                                {cohort.application_deadline && (
+                                  <div className="flex items-center gap-2">
+                                    <Clock className="h-3 w-3 text-orange-500" />
+                                    Deadline: {format(parseISO(cohort.application_deadline), 'MMM d, yyyy')}
+                                  </div>
+                                )}
+                                {cohort.max_startups && (
+                                  <div className="flex items-center gap-2">
+                                    <Users className="h-3 w-3" />
+                                    {spotsLeft > 0 ? `${spotsLeft} spots left` : 'Full'}
+                                  </div>
+                                )}
+                              </div>
+
+                              {cohort.focus_industries && cohort.focus_industries.length > 0 && (
+                                <div className="flex flex-wrap gap-1">
+                                  {cohort.focus_industries.slice(0, 3).map((ind: string) => (
+                                    <Badge key={ind} variant="outline" className="text-[10px] px-1.5 py-0">
+                                      {getIndustryLabel(ind)}
+                                    </Badge>
+                                  ))}
+                                  {cohort.focus_industries.length > 3 && (
+                                    <Badge variant="outline" className="text-[10px] px-1.5 py-0">
+                                      +{cohort.focus_industries.length - 3}
+                                    </Badge>
+                                  )}
+                                </div>
+                              )}
+
+                              <div className="flex gap-2 mt-auto pt-2">
+                                <Button
+                                  size="sm"
+                                  className="flex-1 gap-1"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedCohort({
+                                      cohort_id: cohort.id,
+                                      name: cohort.name,
+                                      description: cohort.description,
+                                      deadline: cohort.application_deadline,
+                                      funding: cohort.funding_per_startup,
+                                      equity: cohort.equity_percentage,
+                                      enrollment_fee: cohort.enrollment_fee,
+                                      industries: cohort.focus_industries,
+                                      accelerator_name: cohort.accelerator_profiles?.organization_name,
+                                      accelerator_logo: cohort.accelerator_profiles?.logo_url,
+                                    });
+                                    setShowApplicationDialog(true);
+                                  }}
+                                >
+                                  <Rocket className="h-3 w-3" />
+                                  Apply
+                                </Button>
+                                {cohort.accelerator_profiles?.external_link && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      window.open(cohort.accelerator_profiles.external_link, '_blank');
+                                    }}
+                                  >
+                                    <ExternalLink className="h-3 w-3" />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <ScrollBar orientation="horizontal" />
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+            )}
+
             <UnifiedCalendar
             showCreateButton={false}
             userRole="startup"
@@ -950,6 +1106,12 @@ const Dashboard = () => {
       companyName={companyName} />
 
     }
+      <CohortApplicationDialog
+        open={showApplicationDialog}
+        onOpenChange={setShowApplicationDialog}
+        cohortData={selectedCohort}
+        onApplicationSubmitted={() => setShowApplicationDialog(false)}
+      />
     </div>;
 };
 export default Dashboard;
