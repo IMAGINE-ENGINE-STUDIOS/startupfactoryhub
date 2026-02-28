@@ -24,7 +24,8 @@ import {
   Mail,
   Crown,
   CreditCard,
-  Gift
+  Gift,
+  Building
 } from 'lucide-react';
 
 // Admin components
@@ -47,6 +48,7 @@ import EmailMonitor from '@/components/admin/EmailMonitor';
 import DistrictsManagement from '@/components/admin/DistrictsManagement';
 import SubscriptionsManagement from '@/components/admin/SubscriptionsManagement';
 import ReferralPartnersManagement from '@/components/admin/ReferralPartnersManagement';
+import WorkspaceBookingsManagement from '@/components/admin/WorkspaceBookingsManagement';
 
 
 const AdminDashboard = () => {
@@ -202,6 +204,10 @@ const AdminDashboard = () => {
               <Gift className="h-4 w-4" />
               <span className="hidden lg:inline">Referrals</span>
             </TabsTrigger>
+            <TabsTrigger value="workspace-bookings" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <Building className="h-4 w-4" />
+              <span className="hidden lg:inline">Bookings</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
@@ -223,6 +229,7 @@ const AdminDashboard = () => {
           <TabsContent value="districts"><DistrictsManagement /></TabsContent>
           <TabsContent value="subscriptions"><SubscriptionsManagement /></TabsContent>
           <TabsContent value="referral-partners"><ReferralPartnersManagement /></TabsContent>
+          <TabsContent value="workspace-bookings"><WorkspaceBookingsManagement /></TabsContent>
         </Tabs>
       </main>
     </div>
