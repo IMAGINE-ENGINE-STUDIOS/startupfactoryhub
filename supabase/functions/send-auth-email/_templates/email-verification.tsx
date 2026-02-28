@@ -63,7 +63,7 @@ export const EmailVerificationEmail = ({
               </Text>
 
               <Link
-                href={`${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to || 'https://startupfactoryhub.com/profile-setup'}`}
+                href={`${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${redirect_to || 'https://startupfactoryhub.com/verify-email'}`}
                 style={button}
               >
                 {isEmailChange ? "✉️ Confirm Email Change" : "✨ Verify Email & Get Started"}

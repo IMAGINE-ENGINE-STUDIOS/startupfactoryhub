@@ -48,6 +48,7 @@ const DistrictDashboard = lazy(() => import("./pages/DistrictDashboard"));
 const ReferralProgram = lazy(() => import("./pages/ReferralProgram"));
 const ReferralRedirect = lazy(() => import("./pages/ReferralRedirect"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -85,6 +86,7 @@ const App = () => (
                     <Route path="/" element={<Index />} />
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/reset-password" element={<ResetPassword />} />
+                    <Route path="/verify-email" element={<VerifyEmail />} />
                     <Route path="/profile-setup" element={<ProfileSetup />} />
                     <Route path="/dashboard" element={<DashboardRouter />} />
                     <Route path="/tools" element={<Tools />} />
