@@ -12,6 +12,7 @@ import {
 import RecommendationPopup from "@/components/RecommendationPopup";
 import { StartupPerksButton } from "@/components/StartupPerksButton";
 import { GlobalClock } from "@/components/GlobalClock";
+import WalletPasses from "@/components/WalletPasses";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
@@ -52,6 +53,8 @@ export function DashboardHeader() {
         </Button>
         
         <NotificationCenter className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10" />
+        
+        <WalletPasses className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10" />
         
         <Popover>
           <PopoverTrigger asChild>
