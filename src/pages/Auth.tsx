@@ -142,22 +142,12 @@ export default function Auth() {
       return;
     }
     
-    // Automatically sign in after successful signup
-    const { error: signInError } = await signIn(email, password);
-    
-    if (signInError) {
-      toast({
-        title: "Account created!",
-        description: "Please sign in with your new credentials.",
-      });
-      clearForm();
-    } else {
-      toast({
-        title: "Welcome!",
-        description: "Your account has been created and you're now signed in.",
-      });
-      navigate('/dashboard');
-    }
+    // Show verification message instead of auto-login
+    toast({
+      title: "✉️ Check your email!",
+      description: "We've sent a verification link to " + email + ". Please verify your email before signing in.",
+    });
+    clearForm();
     
     setLoading(false);
   };
