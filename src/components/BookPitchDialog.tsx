@@ -245,17 +245,6 @@ export default function BookPitchDialog({
                 This investor hasn't connected with {companyName} yet.
               </p>
             </div>
-          ) : availability.length === 0 ? (
-            <div className="text-center py-8">
-              <CalendarIcon className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-40" />
-              <h3 className="text-lg font-semibold mb-2">No Schedule Configured</h3>
-              <p className="text-muted-foreground mb-4">
-                {investorName} hasn't configured their availability schedule yet.
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Please ask them to set up their availability in their profile settings before booking a pitch.
-              </p>
-            </div>
           ) : (
             <>
               <div>
