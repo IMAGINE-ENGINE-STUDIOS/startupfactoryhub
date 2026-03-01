@@ -66,6 +66,13 @@ export const PasswordResetEmail = ({
               🔑 Reset Password
             </Link>
 
+            <Text style={fallbackText}>
+              If the button above doesn't work, copy and paste this link into your browser:
+            </Text>
+            <Text style={fallbackLink}>
+              {`${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(redirect_to)}`}
+            </Text>
+
             <div style={securitySection}>
               <Text style={securityTitle}>🔒 Security Recommendations</Text>
               <Text style={securityText}>
@@ -228,6 +235,21 @@ const button = {
   display: "block",
   padding: "14px 32px",
   boxShadow: "0 4px 16px rgba(16, 185, 129, 0.3)",
+};
+
+const fallbackText = {
+  color: "#6b7280",
+  fontSize: "12px",
+  margin: "16px 0 4px 0",
+  textAlign: "center" as const,
+};
+
+const fallbackLink = {
+  color: "#10b981",
+  fontSize: "11px",
+  wordBreak: "break-all" as const,
+  margin: "0 0 16px 0",
+  textAlign: "center" as const,
 };
 
 const divider = {
