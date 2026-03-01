@@ -59,8 +59,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signUp = async (email: string, password: string, fullName: string, role: string, referralCode?: string) => {
-    const redirectUrl = `${window.location.origin}/verify-email`;
-    
     const metadata: Record<string, string> = {
       full_name: fullName,
       role: role,
@@ -73,7 +71,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       email,
       password,
       options: {
-        emailRedirectTo: redirectUrl,
         data: metadata,
       }
     });

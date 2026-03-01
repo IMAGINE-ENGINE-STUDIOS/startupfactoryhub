@@ -126,7 +126,6 @@ export default function Auth() {
     const { error } = await signUp(email, password, fullName, role, referralCode);
     
     if (error) {
-      // Handle specific error cases
       if (error.message?.includes('already registered')) {
         toast({
           title: "Account exists",
@@ -144,12 +143,11 @@ export default function Auth() {
       return;
     }
     
-    // Show verification message instead of auto-login
     toast({
-      title: "✉️ Check your email!",
-      description: "We've sent a verification link to " + email + ". Please verify your email before signing in.",
+      title: "Welcome!",
+      description: "Your account has been created successfully.",
     });
-    clearForm();
+    navigate('/dashboard');
     
     setLoading(false);
   };
