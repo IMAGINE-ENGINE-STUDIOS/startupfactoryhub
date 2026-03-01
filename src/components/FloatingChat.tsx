@@ -657,6 +657,43 @@ You can help with:
         const allMsgsWithResponse = [...allMsgs, { role: 'assistant' as const, content: fullText }];
         const chatTitle = userMessage.slice(0, 60) || 'Chat';
         saveChatLog.mutate({ title: chatTitle, messages: allMsgsWithResponse, tool_used: activeTool?.id || 'general' });
+
+        // If this was a document-category tool, open the result in LightPaper as a new editable file
+        const isDocTool = activeTool && ALL_TOOLS.find(t => t.id === activeTool.id && t.category === 'document');
+        if (isDocTool && fullText.length > 200) {
+          // Convert markdown to simple HTML for the editor
+          const docTitle = activeTool.name + ' — ' + userMessage.slice(0, 40);
+          const markdownToHtml = (md: string) => {
+            return md
+              .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+              .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+              .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+              .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+              .replace(/\*(.+?)\*/g, '<em>$1</em>')
+              .replace(/^\- (.+)$/gm, '<li>$1</li>')
+              .replace(/(<li>.*<\/li>\n?)+/g, (match) => `<ul>${match}</ul>`)
+              .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+              .replace(/\n{2,}/g, '</p><p style="font-size: 12pt; line-height: 1.6;">')
+              .replace(/\n/g, '<br/>')
+              .replace(/^/, '<p style="font-size: 12pt; line-height: 1.6;">')
+              .replace(/$/, '</p>');
+          };
+          const htmlContent = markdownToHtml(fullText);
+
+          // Dispatch event for LightPaper to pick up
+          window.dispatchEvent(new CustomEvent('genius-open-in-lightpaper', {
+            detail: { content: htmlContent, title: docTitle }
+          }));
+
+          // Navigate to LightPaper
+          setTimeout(() => navigate('/lightpaper'), 300);
+
+          // Notify user in chat
+          setAiMessages(prev => [...prev, {
+            role: 'assistant',
+            content: `📄 **Document opened in LightPaper!** You can now fully edit "${docTitle}" in the workspace.`
+          }]);
+        }
       }
 
     } catch (error: any) {

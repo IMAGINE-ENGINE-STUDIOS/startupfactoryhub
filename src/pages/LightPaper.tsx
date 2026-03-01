@@ -61,6 +61,24 @@ export default function LightPaper() {
     restoreLastProject();
   }, [user]);
 
+  // Listen for Genius AI document-ready event to open generated docs
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.content && detail?.title) {
+        // Clear selected project so it opens as a NEW document
+        setSelectedProject(null);
+        setUploadedContent({
+          content: detail.content,
+          title: detail.title,
+        });
+        setActiveTab('document');
+      }
+    };
+    window.addEventListener('genius-open-in-lightpaper', handler);
+    return () => window.removeEventListener('genius-open-in-lightpaper', handler);
+  }, []);
+
   // Keyboard shortcut for quick navigation (Ctrl+K or Cmd+K)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
