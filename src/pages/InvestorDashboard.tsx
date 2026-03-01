@@ -380,19 +380,34 @@ export default function InvestorDashboard() {
       const {
         data: profile
       } = await supabase.from('profiles').select('full_name').eq('user_id', user.id).single();
-      const investorName = profile?.full_name || 'An investor';
+
+      const { data: userRoles } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user.id);
+
+      const primaryRole = userRoles?.[0]?.role || 'investor';
+      const userName = profile?.full_name || 'Someone';
+
+      const roleLabels: Record<string, string> = {
+        investor: 'Investor Interest',
+        mentor: 'Mentor Interest',
+        advisor: 'Advisor Interest',
+        accelerator: 'Accelerator Interest',
+      };
+      const roleLabel = roleLabels[primaryRole] || 'Interest';
 
       // Create notification for the startup owner
       await supabase.from('notifications').insert({
         user_id: company.user_id,
         type: 'investment_interest',
-        title: 'New Investor Interest',
-        message: `${investorName} has expressed interest in ${companyName}`,
+        title: `New ${roleLabel}`,
+        message: `${userName} has expressed interest in ${companyName}`,
         data: {
           investor_id: user.id,
           company_id: companyId,
           company_name: companyName,
-          investor_name: investorName
+          investor_name: userName
         }
       });
       toast({
