@@ -242,11 +242,15 @@ export default function StartupActiveMentors({ onSessionScheduled, onJoin }: Sta
       });
     });
 
-    // Add accelerator-assigned mentors
+    // Only add accelerator-assigned mentors if they have an active mentorship_relationship
     acceleratorMentorAssignments.forEach((assignment) => {
-      // Skip if already added from direct relationships
+      // Skip if already added from direct relationships (which are already filtered by active status)
       if (allMentors.some(m => m.mentor_id === assignment.mentor_id)) return;
       
+      // Skip if no active mentorship_relationship exists (must be accepted via pending offer)
+      const hasActiveRelationship = relationships?.some(r => r.mentor_id === assignment.mentor_id);
+      if (!hasActiveRelationship) return;
+
       const profile = profileMap.get(assignment.mentor_id);
       if (!profile || !profile.full_name) return;
       
@@ -265,11 +269,14 @@ export default function StartupActiveMentors({ onSessionScheduled, onJoin }: Sta
       });
     });
 
-    // Add accelerator-assigned advisors
+    // Only add accelerator-assigned advisors if they have an active mentorship_relationship
     acceleratorAdvisorAssignments.forEach((assignment) => {
-      // Skip if already added
       if (allMentors.some(m => m.mentor_id === assignment.advisor_id)) return;
       
+      // Skip if no active mentorship_relationship exists (must be accepted via pending offer)
+      const hasActiveRelationship = relationships?.some(r => r.mentor_id === assignment.advisor_id);
+      if (!hasActiveRelationship) return;
+
       const profile = profileMap.get(assignment.advisor_id);
       if (!profile || !profile.full_name) return;
       
