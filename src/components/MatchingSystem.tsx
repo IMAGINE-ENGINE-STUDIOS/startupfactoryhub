@@ -1128,10 +1128,6 @@ export default function MatchingSystem() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      {/* Network Search Engine */}
-      <NetworkSearchEngine />
-
       <Tabs defaultValue="mentors" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5 max-w-xl">
           <TabsTrigger value="mentors">Mentors</TabsTrigger>
@@ -1140,6 +1136,9 @@ export default function MatchingSystem() {
           <TabsTrigger value="startups">Startups</TabsTrigger>
           <TabsTrigger value="mynetwork">Network</TabsTrigger>
         </TabsList>
+
+        {/* Network Search Engine - integrated below tabs */}
+        <NetworkSearchEngine />
 
         <TabsContent value="mentors" className="space-y-4">
           <Card className="tech-card border-0">
