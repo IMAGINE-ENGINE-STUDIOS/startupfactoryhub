@@ -139,13 +139,11 @@ serve(async (req: Request) => {
 
     console.log(`Auth email sent successfully to ${user.email}: ${email_action_type}, id: ${resendResponse.data?.id}`);
 
-    return new Response(
-      JSON.stringify({ success: true }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
-      }
-    );
+    // Return empty 200 - required by Supabase Auth Hook to suppress default email
+    return new Response(null, {
+      status: 200,
+      headers: corsHeaders,
+    });
   } catch (error: any) {
     console.error("Error in send-auth-email function:", error);
     return new Response(
