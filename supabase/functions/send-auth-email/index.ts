@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@4.0.0";
+import { Webhook } from "https://esm.sh/standardwebhooks@1.0.0";
 import { renderAsync } from "npm:@react-email/components@0.0.22";
 import React from "npm:react@18.3.1";
 import { MagicLinkEmail } from "./_templates/magic-link.tsx";
@@ -25,10 +26,23 @@ serve(async (req: Request) => {
 
   try {
     const payload = await req.text();
-    console.log("Raw payload received:", payload);
-    
-    // Parse the payload directly - Supabase auth hooks don't use standardwebhooks format
-    const emailData = JSON.parse(payload);
+    console.log("Raw payload received (first 200 chars):", payload.substring(0, 200));
+
+    // Verify the webhook signature using Standard Webhooks
+    const hookSecret = Deno.env.get("SEND_AUTH_EMAIL_HOOK_SECRET");
+    let emailData: any;
+
+    if (hookSecret) {
+      const secretKey = hookSecret.replace("v1,whsec_", "");
+      const headers = Object.fromEntries(req.headers);
+      const wh = new Webhook(secretKey);
+      emailData = wh.verify(payload, headers) as any;
+      console.log("Webhook signature verified successfully");
+    } else {
+      // Fallback: parse without verification (not recommended for production)
+      console.warn("SEND_AUTH_EMAIL_HOOK_SECRET not set, skipping webhook verification");
+      emailData = JSON.parse(payload);
+    }
 
     const {
       user,
@@ -38,18 +52,21 @@ serve(async (req: Request) => {
     console.log("Parsed email data:", JSON.stringify({
       email_action_type,
       user_email: user?.email,
-      token: token ?? "UNDEFINED",
-      token_hash: token_hash ?? "UNDEFINED",
+      token: token ? "PRESENT" : "UNDEFINED",
+      token_hash: token_hash ? "PRESENT" : "UNDEFINED",
       redirect_to: redirect_to ?? "UNDEFINED",
     }));
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL") ?? "";
     const appUrl = "https://startupfactoryhub.com";
 
+    // Determine the correct redirect for each email type
+    const resetRedirect = redirect_to || `${appUrl}/reset-password`;
+    const verifyRedirect = redirect_to || `${appUrl}/verify-email`;
+
     let html: string;
     let subject: string;
 
-    // Determine which template to use based on email_action_type
     switch (email_action_type) {
       case "magiclink":
         html = await renderAsync(
@@ -58,7 +75,7 @@ serve(async (req: Request) => {
             app_url: appUrl,
             token,
             token_hash,
-            redirect_to,
+            redirect_to: redirect_to || appUrl,
             email_action_type,
           })
         );
@@ -73,7 +90,7 @@ serve(async (req: Request) => {
             app_url: appUrl,
             token,
             token_hash,
-            redirect_to,
+            redirect_to: verifyRedirect,
             email_action_type,
           })
         );
@@ -87,7 +104,7 @@ serve(async (req: Request) => {
             app_url: appUrl,
             token,
             token_hash,
-            redirect_to,
+            redirect_to: resetRedirect,
             email_action_type,
           })
         );
@@ -101,7 +118,7 @@ serve(async (req: Request) => {
             app_url: appUrl,
             token,
             token_hash,
-            redirect_to,
+            redirect_to: redirect_to || appUrl,
             email_action_type,
           })
         );
@@ -118,10 +135,7 @@ serve(async (req: Request) => {
         subject = "🚀 Welcome to Startup Factory Hub!";
     }
 
-    // Log the confirmation URL that will be in the email
-    const confirmationUrl = `${supabaseUrl}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(redirect_to || appUrl + '/reset-password')}`;
-    console.log("Generated confirmation URL:", confirmationUrl);
-    console.log(`Sending email from: Startup Factory Hub <info@startupfactoryhub.com> to: ${user.email}`);
+    console.log(`Sending ${email_action_type} email to: ${user.email}`);
 
     const resendResponse = await resend.emails.send({
       from: "Startup Factory Hub <info@startupfactoryhub.com>",
@@ -130,7 +144,7 @@ serve(async (req: Request) => {
       html: html,
     });
 
-    console.log("Resend full response:", JSON.stringify(resendResponse));
+    console.log("Resend response:", JSON.stringify(resendResponse));
 
     if (resendResponse.error) {
       console.error("Resend error:", JSON.stringify(resendResponse.error));
