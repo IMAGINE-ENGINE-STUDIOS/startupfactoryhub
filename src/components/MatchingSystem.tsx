@@ -11,6 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useNotifications } from '@/hooks/useNotifications';
 import StartupBrowser from './StartupBrowser';
 import NetworkBrowser from './NetworkBrowser';
+import NetworkSearchEngine from './NetworkSearchEngine';
 
 interface Match {
   id: string;
@@ -1128,20 +1129,8 @@ export default function MatchingSystem() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <Card className="tech-card border-0">
-        <CardHeader>
-          <CardTitle className="flex items-center space-x-2">
-            <Users className="h-6 w-6 text-primary" />
-            <span>Smart Matching System</span>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Our AI-powered matching system connects you with the right people based on your profile, 
-            industry, stage, and goals. Scores reflect actual compatibility based on your criteria.
-          </p>
-        </CardContent>
-      </Card>
+      {/* Network Search Engine */}
+      <NetworkSearchEngine />
 
       <Tabs defaultValue="mentors" className="space-y-6">
         <TabsList className="grid w-full grid-cols-5 max-w-xl">
