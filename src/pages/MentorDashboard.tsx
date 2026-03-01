@@ -131,10 +131,6 @@ const MentorDashboard = () => {
                 <Briefcase className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Jobs</span>
               </TabsTrigger>
-              <TabsTrigger value="mentees" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Users className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Mentees</span>
-              </TabsTrigger>
               <TabsTrigger value="calendar" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <CalendarIcon className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Calendar</span>
@@ -164,6 +160,37 @@ const MentorDashboard = () => {
 
           <TabsContent value="meetings" className="space-y-4">
             <LiveRooms />
+            <MenteeSessions onJoinMeeting={(link, sessionData) => setActiveVideoSession(sessionData)} />
+            <MentorshipRequests />
+            <ActiveMenteesCards mentees={activeMentees} onScheduleSession={(menteeId) => {
+              setSelectedMenteeId(menteeId);
+              setCreateSessionDialogOpen(true);
+            }} onMessage={menteeId => navigate('/messages')} />
+            <MentorOffersBoard />
+            <MentorSessionHistory showStats={false} />
+            {pastMentees && pastMentees.length > 0 && <Card className="tech-card border-0">
+                <CardHeader>
+                  <CardTitle>Past Mentees</CardTitle>
+                  <CardDescription>Previous mentorship relationships</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {pastMentees.map(mentee => <div key={mentee.id} className="flex items-center gap-3 p-3 rounded-lg border">
+                        <Avatar>
+                          <AvatarImage src={mentee.mentee.avatar_url} />
+                          <AvatarFallback>{mentee.mentee.full_name?.[0] || 'M'}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <p className="font-medium">{mentee.mentee.full_name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {mentee.companies?.name || 'No company info'}
+                          </p>
+                        </div>
+                        <Badge variant="secondary">Completed</Badge>
+                      </div>)}
+                  </div>
+                </CardContent>
+              </Card>}
           </TabsContent>
 
           <TabsContent value="profile" className="space-y-6">
@@ -191,46 +218,6 @@ const MentorDashboard = () => {
             <AdvisorJobTaskViewer />
           </TabsContent>
 
-          <TabsContent value="mentees" className="space-y-6">
-            <MenteeSessions onJoinMeeting={(link, sessionData) => setActiveVideoSession(sessionData)} />
-            <MentorshipRequests />
-            
-            {/* Active Mentees with Expandable History */}
-            <ActiveMenteesCards mentees={activeMentees} onScheduleSession={(menteeId) => {
-              setSelectedMenteeId(menteeId);
-              setCreateSessionDialogOpen(true);
-            }} onMessage={menteeId => navigate('/messages')} />
-            
-            <MentorOffersBoard />
-            
-            {/* Session History with Ratings */}
-            <MentorSessionHistory showStats={false} />
-            
-            {/* Past Mentees Section */}
-            {pastMentees && pastMentees.length > 0 && <Card className="tech-card border-0">
-                <CardHeader>
-                  <CardTitle>Past Mentees</CardTitle>
-                  <CardDescription>Previous mentorship relationships</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {pastMentees.map(mentee => <div key={mentee.id} className="flex items-center gap-3 p-3 rounded-lg border">
-                        <Avatar>
-                          <AvatarImage src={mentee.mentee.avatar_url} />
-                          <AvatarFallback>{mentee.mentee.full_name?.[0] || 'M'}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1">
-                          <p className="font-medium">{mentee.mentee.full_name}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {mentee.companies?.name || 'No company info'}
-                          </p>
-                        </div>
-                        <Badge variant="secondary">Completed</Badge>
-                      </div>)}
-                  </div>
-                </CardContent>
-              </Card>}
-          </TabsContent>
 
           <TabsContent value="calendar" className="space-y-6">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">

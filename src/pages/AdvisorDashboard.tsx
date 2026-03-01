@@ -286,10 +286,6 @@ export default function AdvisorDashboard() {
                 <Briefcase className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Jobs</span>
               </TabsTrigger>
-              <TabsTrigger value="mentees" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Users className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Mentees</span>
-              </TabsTrigger>
               <TabsTrigger value="calendar" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <CalendarIcon className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Calendar</span>
@@ -319,37 +315,7 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="meetings" className="space-y-4">
             <LiveRooms />
-          </TabsContent>
-
-          <TabsContent value="profile" className="space-y-4">
-            <AdvisorProfileView />
-            
-            <Card className="tech-card border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Your Posts
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="network" className="space-y-4">
-            <MatchingSystem />
-          </TabsContent>
-
-          <TabsContent value="jobs" className="space-y-4">
-            <UnifiedJobsBoard />
-            <AdvisorJobTaskViewer />
-          </TabsContent>
-
-          <TabsContent value="mentees" className="space-y-4">
             <MenteeSessions onJoinMeeting={(link, sessionData) => setActiveVideoSession(sessionData)} />
-            
-            {/* Today's Sessions */}
             {todaySessions.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -379,8 +345,6 @@ export default function AdvisorDashboard() {
                   </div>
                 </CardContent>
               </Card>}
-
-            {/* Pending Requests */}
             {pendingRequests.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
@@ -419,7 +383,6 @@ export default function AdvisorDashboard() {
                                   </>}
                               </div>
                             </div>
-
                             <div className="flex flex-col gap-2 md:w-48 flex-shrink-0">
                               {request.companies && <Button variant="outline" size="sm" className="w-full" onClick={() => {
                           setSelectedStartup(request.companies);
@@ -443,17 +406,11 @@ export default function AdvisorDashboard() {
                   </div>
                 </CardContent>
               </Card>}
-
-            {/* Active Mentees */}
             <ActiveMenteesCards mentees={activeMentees} onScheduleSession={(menteeId) => {
               setSelectedMenteeId(menteeId);
               setCreateSessionDialogOpen(true);
             }} onMessage={menteeId => navigate('/messages')} />
-
-            {/* Session History with Ratings */}
             <MentorSessionHistory showStats={false} />
-
-            {/* Past Mentees Section */}
             {pastMentees && pastMentees.length > 0 && <Card className="tech-card border-0">
                 <CardHeader>
                   <CardTitle>Past Mentees</CardTitle>
@@ -477,10 +434,34 @@ export default function AdvisorDashboard() {
                   </div>
                 </CardContent>
               </Card>}
-
-            {/* New Mentorship Opportunities - Using shared component */}
             <MentorOffersBoard />
           </TabsContent>
+
+          <TabsContent value="profile" className="space-y-4">
+            <AdvisorProfileView />
+            
+            <Card className="tech-card border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="h-5 w-5" />
+                  Your Posts
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="network" className="space-y-4">
+            <MatchingSystem />
+          </TabsContent>
+
+          <TabsContent value="jobs" className="space-y-4">
+            <UnifiedJobsBoard />
+            <AdvisorJobTaskViewer />
+          </TabsContent>
+
 
           <TabsContent value="calendar" className="space-y-4">
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2 mb-4">
