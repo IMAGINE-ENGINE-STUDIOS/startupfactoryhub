@@ -60,15 +60,11 @@ export const PasswordResetEmail = ({
 
             <Link
               href={`${supabase_url}/auth/v1/verify?token=${token_hash}&type=${email_action_type}&redirect_to=${encodeURIComponent(redirect_to)}`}
+              target="_blank"
               style={button}
             >
               🔑 Reset Password
             </Link>
-
-            <div style={divider} />
-
-            <Text style={codeLabel}>Or use this reset code:</Text>
-            <code style={code}>{token}</code>
 
             <div style={securitySection}>
               <Text style={securityTitle}>🔒 Security Recommendations</Text>
