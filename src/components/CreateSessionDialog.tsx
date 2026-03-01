@@ -180,10 +180,9 @@ export default function CreateSessionDialog({ open, onOpenChange, onSessionCreat
 
       if (profileError) throw profileError;
 
-      // Combine data - only show mentors with availability
+      // Combine data - show all mentors/advisors regardless of availability
       let mentorOptions: MentorOption[] = profiles
-        ?.filter(profile => mentorsWithAvailability.has(profile.user_id))
-        .map(profile => {
+        ?.map(profile => {
           const mentorProfile = mentorData?.find(m => m.user_id === profile.user_id);
           return {
             user_id: profile.user_id,
