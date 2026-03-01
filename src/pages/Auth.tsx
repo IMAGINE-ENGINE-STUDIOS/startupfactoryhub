@@ -143,11 +143,12 @@ export default function Auth() {
       return;
     }
     
+    // Show verification message instead of auto-login
     toast({
-      title: "Welcome!",
-      description: "Your account has been created successfully.",
+      title: "✉️ Check your email!",
+      description: "We've sent a verification link to " + email + ". Please verify your email before signing in.",
     });
-    navigate('/dashboard');
+    clearForm();
     
     setLoading(false);
   };
