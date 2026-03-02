@@ -1,0 +1,1 @@
+UPDATE public.accelerator_cohorts SET enrollment_fee = 350000 WHERE id = 'c26208e7-0926-4f60-8694-6a4fec729949';
