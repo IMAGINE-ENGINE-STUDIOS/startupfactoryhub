@@ -1,16 +1,16 @@
 import { EarthLayerCard } from './EarthLayerCard';
-import { EarthLayer } from '@/hooks/useEarthIntelligence';
+import { EarthDataset } from '@/hooks/useEarthIntelligence';
 
 interface EarthCategorySectionProps {
   icon: React.ReactNode;
   title: string;
-  layers: EarthLayer[];
+  datasets: EarthDataset[];
   onToggle: (id: string) => void;
   onOpacity: (id: string, opacity: number) => void;
 }
 
-export const EarthCategorySection = ({ icon, title, layers, onToggle, onOpacity }: EarthCategorySectionProps) => {
-  if (layers.length === 0) return null;
+export const EarthCategorySection = ({ icon, title, datasets, onToggle, onOpacity }: EarthCategorySectionProps) => {
+  if (datasets.length === 0) return null;
   return (
     <div>
       <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
@@ -18,10 +18,10 @@ export const EarthCategorySection = ({ icon, title, layers, onToggle, onOpacity 
         {title}
       </h3>
       <div className="space-y-3">
-        {layers.map((layer) => (
+        {datasets.map((dataset) => (
           <EarthLayerCard
-            key={layer.id}
-            layer={layer}
+            key={dataset.id}
+            dataset={dataset}
             onToggle={onToggle}
             onOpacity={onOpacity}
           />
