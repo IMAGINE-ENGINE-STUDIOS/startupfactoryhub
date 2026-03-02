@@ -13,68 +13,23 @@ serve(async (req) => {
   try {
     const { latmin, latmax, lonmin, lonmax } = await req.json();
 
-    const AISHUB_USERNAME = Deno.env.get('AISHUB_USERNAME');
-    if (!AISHUB_USERNAME) {
+    const AISSTREAM_API_KEY = Deno.env.get('AISSTREAM_API_KEY');
+    if (!AISSTREAM_API_KEY) {
       // Return demo data when no API key configured
       return new Response(JSON.stringify({
         demo: true,
-        message: 'AISHub username not configured. Showing demo vessels.',
+        message: 'AISStream API key not configured. Showing demo vessels.',
         vessels: generateDemoVessels(latmin, latmax, lonmin, lonmax),
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const url = new URL('https://data.aishub.net/ws.php');
-    url.searchParams.set('username', AISHUB_USERNAME);
-    url.searchParams.set('format', '1'); // AIS format
-    url.searchParams.set('output', 'json');
-    url.searchParams.set('compress', '0'); // no compression for edge fn
-    if (latmin != null) url.searchParams.set('latmin', String(latmin));
-    if (latmax != null) url.searchParams.set('latmax', String(latmax));
-    if (lonmin != null) url.searchParams.set('lonmin', String(lonmin));
-    if (lonmax != null) url.searchParams.set('lonmax', String(lonmax));
-
-    const response = await fetch(url.toString());
-    if (!response.ok) {
-      throw new Error(`AISHub API returned ${response.status}: ${await response.text()}`);
-    }
-
-    const data = await response.json();
-
-    // AISHub returns array: [metadata, vessels[]]
-    let vessels: any[] = [];
-    if (Array.isArray(data) && data.length >= 2) {
-      const meta = data[0];
-      if (meta.ERROR === false && Array.isArray(data[1])) {
-        vessels = data[1].map((v: any) => ({
-          mmsi: v.MMSI,
-          name: v.NAME?.trim() || null,
-          type: v.TYPE,
-          latitude: v.LATITUDE,
-          longitude: v.LONGITUDE,
-          cog: v.COG, // course over ground (0.1 deg)
-          sog: v.SOG, // speed over ground (0.1 knots)
-          heading: v.HEADING,
-          navstat: v.NAVSTAT,
-          imo: v.IMO,
-          callsign: v.CALLSIGN?.trim() || null,
-          dest: v.DEST?.trim() || null,
-          eta: v.ETA,
-          draught: v.DRAUGHT,
-          a: v.A, b: v.B, c: v.C, d: v.D, // ship dimensions
-          time: v.TIME,
-        }));
-      } else if (meta.ERROR_MESSAGE) {
-        return new Response(JSON.stringify({
-          error: true,
-          message: meta.ERROR_MESSAGE,
-          vessels: [],
-        }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-    }
+    // Use aisstream.io WebSocket to collect vessels for ~3 seconds
+    const vessels = await fetchFromAISStream(
+      AISSTREAM_API_KEY,
+      latmin, latmax, lonmin, lonmax
+    );
 
     return new Response(JSON.stringify({
       demo: false,
@@ -97,6 +52,129 @@ serve(async (req) => {
   }
 });
 
+async function fetchFromAISStream(
+  apiKey: string,
+  latmin: number, latmax: number,
+  lonmin: number, lonmax: number
+): Promise<any[]> {
+  return new Promise((resolve, reject) => {
+    const vessels = new Map<number, any>();
+    const COLLECT_DURATION = 4000; // collect for 4 seconds
+
+    let ws: WebSocket;
+    let timeout: ReturnType<typeof setTimeout>;
+
+    try {
+      ws = new WebSocket("wss://stream.aisstream.io/v0/stream");
+    } catch (err) {
+      reject(new Error('Failed to connect to AISStream WebSocket'));
+      return;
+    }
+
+    const cleanup = () => {
+      clearTimeout(timeout);
+      try { ws.close(); } catch (_) { /* ignore */ }
+    };
+
+    timeout = setTimeout(() => {
+      cleanup();
+      resolve(Array.from(vessels.values()));
+    }, COLLECT_DURATION);
+
+    ws.onopen = () => {
+      const subscriptionMessage = {
+        Apikey: apiKey,
+        BoundingBoxes: [[[latmin, lonmin], [latmax, lonmax]]],
+        FilterMessageTypes: ["PositionReport", "ShipStaticData"],
+      };
+      ws.send(JSON.stringify(subscriptionMessage));
+    };
+
+    ws.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        const meta = msg.MetaData;
+        if (!meta) return;
+
+        const mmsi = meta.MMSI;
+        const existing = vessels.get(mmsi) || {};
+
+        if (msg.MessageType === 'PositionReport') {
+          const pos = msg.Message?.PositionReport;
+          if (!pos) return;
+          vessels.set(mmsi, {
+            ...existing,
+            mmsi,
+            name: meta.ShipName?.trim() || existing.name || null,
+            type: meta.ShipType ?? existing.type ?? 0,
+            latitude: pos.Latitude,
+            longitude: pos.Longitude,
+            cog: Math.round(pos.Cog * 10),  // store as 0.1 deg units
+            sog: Math.round(pos.Sog * 10),  // store as 0.1 knots
+            heading: pos.TrueHeading === 511 ? 0 : pos.TrueHeading,
+            navstat: pos.NavigationalStatus ?? 15,
+            imo: existing.imo ?? 0,
+            callsign: existing.callsign ?? null,
+            dest: existing.dest ?? null,
+            eta: existing.eta ?? null,
+            draught: existing.draught ?? 0,
+            a: existing.a ?? 0, b: existing.b ?? 0,
+            c: existing.c ?? 0, d: existing.d ?? 0,
+            time: meta.time_utc || new Date().toISOString(),
+          });
+        } else if (msg.MessageType === 'ShipStaticData') {
+          const sd = msg.Message?.ShipStaticData;
+          if (!sd) return;
+          vessels.set(mmsi, {
+            ...existing,
+            mmsi,
+            name: sd.Name?.trim() || meta.ShipName?.trim() || existing.name || null,
+            type: sd.Type ?? existing.type ?? 0,
+            imo: sd.ImoNumber ?? existing.imo ?? 0,
+            callsign: sd.CallSign?.trim() || existing.callsign || null,
+            dest: sd.Destination?.trim() || existing.dest || null,
+            eta: sd.Eta ? `${sd.Eta.Month}/${sd.Eta.Day} ${sd.Eta.Hour}:${sd.Eta.Minute}` : existing.eta || null,
+            draught: sd.MaximumStaticDraught ?? existing.draught ?? 0,
+            a: sd.Dimension?.A ?? existing.a ?? 0,
+            b: sd.Dimension?.B ?? existing.b ?? 0,
+            c: sd.Dimension?.C ?? existing.c ?? 0,
+            d: sd.Dimension?.D ?? existing.d ?? 0,
+            latitude: existing.latitude ?? meta.latitude,
+            longitude: existing.longitude ?? meta.longitude,
+            cog: existing.cog ?? 0,
+            sog: existing.sog ?? 0,
+            heading: existing.heading ?? 0,
+            navstat: existing.navstat ?? 15,
+            time: meta.time_utc || existing.time || new Date().toISOString(),
+          });
+        }
+
+        // Cap at 200 vessels to keep response reasonable
+        if (vessels.size >= 200) {
+          cleanup();
+          resolve(Array.from(vessels.values()));
+        }
+      } catch (_) {
+        // ignore parse errors
+      }
+    };
+
+    ws.onerror = (err) => {
+      cleanup();
+      if (vessels.size > 0) {
+        resolve(Array.from(vessels.values()));
+      } else {
+        reject(new Error('AISStream WebSocket error'));
+      }
+    };
+
+    ws.onclose = () => {
+      clearTimeout(timeout);
+      resolve(Array.from(vessels.values()));
+    };
+  });
+}
+
 // Generate demo vessels for when no API key is configured
 function generateDemoVessels(latmin: number, latmax: number, lonmin: number, lonmax: number) {
   const vesselNames = [
@@ -105,7 +183,7 @@ function generateDemoVessels(latmin: number, latmax: number, lonmin: number, lon
     'OCEAN HARMONY', 'SEA EXPLORER', 'HARBOR MASTER', 'WIND DANCER',
     'DEEP BLUE', 'CORAL PRINCESS', 'IRON WOLF', 'GOLDEN HORIZON'
   ];
-  const types = [70, 71, 72, 73, 80, 30, 31, 36, 37, 52, 60]; // cargo, tanker, fishing, tug, passenger
+  const types = [70, 71, 72, 73, 80, 30, 31, 36, 37, 52, 60];
   const count = Math.min(50, Math.floor(Math.random() * 30) + 10);
   const vessels = [];
 
