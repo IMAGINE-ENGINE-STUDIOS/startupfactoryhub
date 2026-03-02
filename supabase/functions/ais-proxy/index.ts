@@ -15,7 +15,6 @@ serve(async (req) => {
 
     const AISSTREAM_API_KEY = Deno.env.get('AISSTREAM_API_KEY');
     if (!AISSTREAM_API_KEY) {
-      // Return demo data when no API key configured
       return new Response(JSON.stringify({
         demo: true,
         message: 'AISStream API key not configured. Showing demo vessels.',
@@ -25,11 +24,14 @@ serve(async (req) => {
       });
     }
 
-    // Use aisstream.io WebSocket to collect vessels for ~3 seconds
+    console.log(`Fetching AIS data for bbox: ${latmin},${lonmin} to ${latmax},${lonmax}`);
+
     const vessels = await fetchFromAISStream(
       AISSTREAM_API_KEY,
       latmin, latmax, lonmin, lonmax
     );
+
+    console.log(`Collected ${vessels.length} vessels from AISStream`);
 
     return new Response(JSON.stringify({
       demo: false,
@@ -59,14 +61,16 @@ async function fetchFromAISStream(
 ): Promise<any[]> {
   return new Promise((resolve, reject) => {
     const vessels = new Map<number, any>();
-    const COLLECT_DURATION = 4000; // collect for 4 seconds
+    const COLLECT_DURATION = 6000; // collect for 6 seconds
 
     let ws: WebSocket;
     let timeout: ReturnType<typeof setTimeout>;
+    let connected = false;
 
     try {
       ws = new WebSocket("wss://stream.aisstream.io/v0/stream");
     } catch (err) {
+      console.error('WebSocket creation failed:', err);
       reject(new Error('Failed to connect to AISStream WebSocket'));
       return;
     }
@@ -77,26 +81,43 @@ async function fetchFromAISStream(
     };
 
     timeout = setTimeout(() => {
+      console.log(`Timeout reached. Collected ${vessels.size} vessels. Connected: ${connected}`);
       cleanup();
       resolve(Array.from(vessels.values()));
     }, COLLECT_DURATION);
 
     ws.onopen = () => {
+      connected = true;
+      console.log('AISStream WebSocket connected');
+      // aisstream.io expects BoundingBoxes as array of [[min_lat, min_lon], [max_lat, max_lon]]
+      // and the key field as "APIKey" (capital K)
       const subscriptionMessage = {
         Apikey: apiKey,
         BoundingBoxes: [[[latmin, lonmin], [latmax, lonmax]]],
-        FilterMessageTypes: ["PositionReport", "ShipStaticData"],
+        FilterMessageTypes: ["PositionReport"],
       };
+      console.log('Sending subscription:', JSON.stringify(subscriptionMessage));
       ws.send(JSON.stringify(subscriptionMessage));
     };
 
     ws.onmessage = (event) => {
       try {
-        const msg = JSON.parse(event.data);
-        const meta = msg.MetaData;
+        const msg = JSON.parse(typeof event.data === 'string' ? event.data : '{}');
+        
+        // Check for error responses
+        if (msg.ERROR) {
+          console.error('AISStream error:', msg.ERROR);
+          cleanup();
+          reject(new Error(`AISStream error: ${msg.ERROR}`));
+          return;
+        }
+
+        const meta = msg.MetaData || msg.Metadata;
         if (!meta) return;
 
         const mmsi = meta.MMSI;
+        if (!mmsi) return;
+        
         const existing = vessels.get(mmsi) || {};
 
         if (msg.MessageType === 'PositionReport') {
@@ -109,9 +130,9 @@ async function fetchFromAISStream(
             type: meta.ShipType ?? existing.type ?? 0,
             latitude: pos.Latitude,
             longitude: pos.Longitude,
-            cog: Math.round(pos.Cog * 10),  // store as 0.1 deg units
-            sog: Math.round(pos.Sog * 10),  // store as 0.1 knots
-            heading: pos.TrueHeading === 511 ? 0 : pos.TrueHeading,
+            cog: Math.round((pos.Cog ?? 0) * 10),
+            sog: Math.round((pos.Sog ?? 0) * 10),
+            heading: pos.TrueHeading === 511 ? 0 : (pos.TrueHeading ?? 0),
             navstat: pos.NavigationalStatus ?? 15,
             imo: existing.imo ?? 0,
             callsign: existing.callsign ?? null,
@@ -122,60 +143,38 @@ async function fetchFromAISStream(
             c: existing.c ?? 0, d: existing.d ?? 0,
             time: meta.time_utc || new Date().toISOString(),
           });
-        } else if (msg.MessageType === 'ShipStaticData') {
-          const sd = msg.Message?.ShipStaticData;
-          if (!sd) return;
-          vessels.set(mmsi, {
-            ...existing,
-            mmsi,
-            name: sd.Name?.trim() || meta.ShipName?.trim() || existing.name || null,
-            type: sd.Type ?? existing.type ?? 0,
-            imo: sd.ImoNumber ?? existing.imo ?? 0,
-            callsign: sd.CallSign?.trim() || existing.callsign || null,
-            dest: sd.Destination?.trim() || existing.dest || null,
-            eta: sd.Eta ? `${sd.Eta.Month}/${sd.Eta.Day} ${sd.Eta.Hour}:${sd.Eta.Minute}` : existing.eta || null,
-            draught: sd.MaximumStaticDraught ?? existing.draught ?? 0,
-            a: sd.Dimension?.A ?? existing.a ?? 0,
-            b: sd.Dimension?.B ?? existing.b ?? 0,
-            c: sd.Dimension?.C ?? existing.c ?? 0,
-            d: sd.Dimension?.D ?? existing.d ?? 0,
-            latitude: existing.latitude ?? meta.latitude,
-            longitude: existing.longitude ?? meta.longitude,
-            cog: existing.cog ?? 0,
-            sog: existing.sog ?? 0,
-            heading: existing.heading ?? 0,
-            navstat: existing.navstat ?? 15,
-            time: meta.time_utc || existing.time || new Date().toISOString(),
-          });
         }
 
-        // Cap at 200 vessels to keep response reasonable
-        if (vessels.size >= 200) {
+        // Cap at 300 vessels
+        if (vessels.size >= 300) {
+          console.log('Vessel cap reached (300)');
           cleanup();
           resolve(Array.from(vessels.values()));
         }
-      } catch (_) {
-        // ignore parse errors
+      } catch (e) {
+        console.error('Parse error:', e);
       }
     };
 
     ws.onerror = (err) => {
+      console.error('WebSocket error:', err);
       cleanup();
       if (vessels.size > 0) {
         resolve(Array.from(vessels.values()));
       } else {
-        reject(new Error('AISStream WebSocket error'));
+        reject(new Error('AISStream WebSocket connection error'));
       }
     };
 
-    ws.onclose = () => {
+    ws.onclose = (ev) => {
+      console.log(`WebSocket closed: code=${ev.code} reason=${ev.reason}`);
       clearTimeout(timeout);
       resolve(Array.from(vessels.values()));
     };
   });
 }
 
-// Generate demo vessels for when no API key is configured
+// Demo vessels fallback
 function generateDemoVessels(latmin: number, latmax: number, lonmin: number, lonmax: number) {
   const vesselNames = [
     'EVER GIVEN', 'MAERSK SEALAND', 'MSC OSCAR', 'COSCO SHIPPING VIRGO',
