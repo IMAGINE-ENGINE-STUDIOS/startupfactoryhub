@@ -54,7 +54,6 @@ interface GISControlPanelProps {
   aisVesselCount?: number;
   aisTotalCount?: number;
   aisLastFetch?: Date | null;
-  aisIsDemo?: boolean;
   aisError?: string | null;
   aisFilters?: AISFilters;
   onAISFiltersChange?: (f: AISFilters) => void;
@@ -95,7 +94,6 @@ export const GISControlPanel = ({
   aisVesselCount = 0,
   aisTotalCount = 0,
   aisLastFetch = null,
-  aisIsDemo = false,
   aisError = null,
   aisFilters,
   onAISFiltersChange,
@@ -315,7 +313,6 @@ export const GISControlPanel = ({
                 vesselCount={aisVesselCount}
                 totalCount={aisTotalCount}
                 lastFetch={aisLastFetch}
-                isDemo={aisIsDemo}
                 error={aisError}
                 filters={aisFilters || { vesselType: 'all', minSpeed: 0, maxSpeed: 50, onlyInAOI: false }}
                 onFiltersChange={onAISFiltersChange || (() => {})}

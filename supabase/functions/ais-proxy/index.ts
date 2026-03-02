@@ -5,13 +5,17 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+function clamp(val: number, min: number, max: number): number {
+  return Math.max(min, Math.min(max, val));
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { latmin, latmax, lonmin, lonmax } = await req.json();
+    let { latmin, latmax, lonmin, lonmax } = await req.json();
 
     const AISSTREAM_API_KEY = Deno.env.get('AISSTREAM_API_KEY');
     if (!AISSTREAM_API_KEY) {
@@ -25,6 +29,28 @@ serve(async (req) => {
       });
     }
 
+    // Clamp coordinates to valid ranges
+    latmin = clamp(latmin, -90, 90);
+    latmax = clamp(latmax, -90, 90);
+    lonmin = clamp(lonmin, -180, 180);
+    lonmax = clamp(lonmax, -180, 180);
+
+    // Cap bounding box to max ~20° span for denser results
+    const latSpan = latmax - latmin;
+    const lonSpan = lonmax - lonmin;
+    const MAX_SPAN = 20;
+
+    if (latSpan > MAX_SPAN) {
+      const latCenter = (latmin + latmax) / 2;
+      latmin = clamp(latCenter - MAX_SPAN / 2, -90, 90);
+      latmax = clamp(latCenter + MAX_SPAN / 2, -90, 90);
+    }
+    if (lonSpan > MAX_SPAN) {
+      const lonCenter = (lonmin + lonmax) / 2;
+      lonmin = clamp(lonCenter - MAX_SPAN / 2, -180, 180);
+      lonmax = clamp(lonCenter + MAX_SPAN / 2, -180, 180);
+    }
+
     console.log(`Fetching AIS data for bbox: ${latmin},${lonmin} to ${latmax},${lonmax}`);
 
     const vessels = await fetchFromAISStream(
@@ -35,7 +61,6 @@ serve(async (req) => {
     console.log(`Collected ${vessels.length} vessels from AISStream`);
 
     return new Response(JSON.stringify({
-      demo: false,
       vessels,
       count: vessels.length,
     }), {
@@ -62,11 +87,32 @@ async function fetchFromAISStream(
 ): Promise<any[]> {
   return new Promise((resolve, reject) => {
     const vessels = new Map<number, any>();
-    const COLLECT_DURATION = 6000; // collect for 6 seconds
+    const COLLECT_DURATION = 15000; // collect for 15 seconds
+    const CONNECT_TIMEOUT = 5000; // 5s to establish connection
 
     let ws: WebSocket;
     let timeout: ReturnType<typeof setTimeout>;
+    let connectTimeout: ReturnType<typeof setTimeout>;
     let connected = false;
+    let resolved = false;
+
+    const safeResolve = (result: any[]) => {
+      if (resolved) return;
+      resolved = true;
+      clearTimeout(timeout);
+      clearTimeout(connectTimeout);
+      try { ws.close(); } catch (_) { /* ignore */ }
+      resolve(result);
+    };
+
+    const safeReject = (err: Error) => {
+      if (resolved) return;
+      resolved = true;
+      clearTimeout(timeout);
+      clearTimeout(connectTimeout);
+      try { ws.close(); } catch (_) { /* ignore */ }
+      reject(err);
+    };
 
     try {
       ws = new WebSocket("wss://stream.aisstream.io/v0/stream");
@@ -76,19 +122,23 @@ async function fetchFromAISStream(
       return;
     }
 
-    const cleanup = () => {
-      clearTimeout(timeout);
-      try { ws.close(); } catch (_) { /* ignore */ }
-    };
+    // Connection timeout - if WS doesn't open in 5s, fail fast
+    connectTimeout = setTimeout(() => {
+      if (!connected) {
+        console.log('Connection timeout - WebSocket did not open in 5s');
+        safeReject(new Error('AISStream connection timeout. Please try again.'));
+      }
+    }, CONNECT_TIMEOUT);
 
+    // Overall collection timeout
     timeout = setTimeout(() => {
       console.log(`Timeout reached. Collected ${vessels.size} vessels. Connected: ${connected}`);
-      cleanup();
-      resolve(Array.from(vessels.values()));
+      safeResolve(Array.from(vessels.values()));
     }, COLLECT_DURATION);
 
     ws.onopen = () => {
       connected = true;
+      clearTimeout(connectTimeout);
       console.log('AISStream WebSocket connected');
       const subscriptionMessage = {
         APIKey: apiKey,
@@ -117,8 +167,7 @@ async function fetchFromAISStream(
         const msg = JSON.parse(raw);
         if (msg.ERROR || msg.error) {
           console.error('AISStream error:', msg.ERROR || msg.error);
-          cleanup();
-          reject(new Error(`AISStream error: ${msg.ERROR || msg.error}`));
+          safeReject(new Error(`AISStream error: ${msg.ERROR || msg.error}`));
           return;
         }
 
@@ -157,8 +206,7 @@ async function fetchFromAISStream(
 
         if (vessels.size >= 300) {
           console.log('Vessel cap reached (300)');
-          cleanup();
-          resolve(Array.from(vessels.values()));
+          safeResolve(Array.from(vessels.values()));
         }
       } catch (e) {
         console.error('Parse error:', e);
@@ -167,18 +215,16 @@ async function fetchFromAISStream(
 
     ws.onerror = (err) => {
       console.error('WebSocket error:', err);
-      cleanup();
       if (vessels.size > 0) {
-        resolve(Array.from(vessels.values()));
+        safeResolve(Array.from(vessels.values()));
       } else {
-        reject(new Error('AISStream WebSocket connection error'));
+        safeReject(new Error('AISStream WebSocket connection error. Please try again.'));
       }
     };
 
     ws.onclose = (ev) => {
       console.log(`WebSocket closed: code=${ev.code} reason=${ev.reason}`);
-      clearTimeout(timeout);
-      resolve(Array.from(vessels.values()));
+      safeResolve(Array.from(vessels.values()));
     };
   });
 }

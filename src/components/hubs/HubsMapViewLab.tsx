@@ -392,7 +392,6 @@ export const HubsMapViewLab = ({
         aisVesselCount={ais.vessels.length}
         aisTotalCount={ais.allVesselsCount}
         aisLastFetch={ais.lastFetch}
-        aisIsDemo={ais.isDemo}
         aisError={ais.error}
         aisFilters={ais.filters}
         onAISFiltersChange={ais.setFilters}
