@@ -240,7 +240,7 @@ export default function NetworkSearchEngine() {
             {results.map((result) => (
               <div
                 key={result.user_id}
-                onClick={() => navigate(`/profile?id=${result.user_id}`)}
+                onClick={() => navigate(`/dashboard?tab=profile&id=${result.user_id}`)}
                 className="flex items-center gap-3 p-3 rounded-lg hover:bg-accent/50 cursor-pointer transition-colors"
               >
                 <Avatar className="h-10 w-10">
