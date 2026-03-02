@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen } from 'lucide-react';
+import { Send, MessageSquare, X, Minus, Search, Loader2, Plus, Zap, FileText, BarChart3, CalendarPlus, Users, Briefcase, Globe, PenSquare, Brain, Clock, Trash2, BookOpen, FlaskConical, Target, BookText, Pen, Clapperboard, Scale, FileEdit, ClipboardList, Mail, Sparkles, TrendingUp, Megaphone, type LucideIcon } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useResources } from '@/hooks/useResources';
@@ -57,66 +57,62 @@ interface AIMessage {
 interface ToolItem {
   id: string;
   name: string;
-  icon: string;
+  icon: LucideIcon;
   category: 'quick' | 'document' | 'ai-tools' | 'actions';
   systemHint: string;
 }
 
 const ALL_TOOLS: ToolItem[] = [
-  // Quick mode
-  { id: 'quick', name: 'Quick Answer', icon: '⚡', category: 'quick',
+  { id: 'quick', name: 'Quick Answer', icon: Zap, category: 'quick',
     systemHint: 'QUICK' },
 
-  // Document presets (from LightPaper)
-  { id: 'research', name: 'Research Paper', icon: '🔬', category: 'document',
+  { id: 'research', name: 'Research Paper', icon: FlaskConical, category: 'document',
     systemHint: 'Write a formal academic research paper with APA style, citations, and deep analysis.' },
-  { id: 'executive-summary', name: 'Executive Summary', icon: '📊', category: 'document',
+  { id: 'executive-summary', name: 'Executive Summary', icon: BarChart3, category: 'document',
     systemHint: 'Write a concise, high-impact executive summary with key findings, metrics, and recommendations.' },
-  { id: 'pitch', name: 'Pitch Deck Script', icon: '🎯', category: 'document',
+  { id: 'pitch', name: 'Pitch Deck Script', icon: Target, category: 'document',
     systemHint: 'Write a compelling startup pitch narrative, investor-ready with data points and market statistics.' },
-  { id: 'business-plan', name: 'Business Plan', icon: '💼', category: 'document',
+  { id: 'business-plan', name: 'Business Plan', icon: Briefcase, category: 'document',
     systemHint: 'Write a comprehensive, investor-ready business plan with market analysis and financial projections.' },
-  { id: 'book', name: 'Book / Chapter', icon: '📖', category: 'document',
+  { id: 'book', name: 'Book / Chapter', icon: BookText, category: 'document',
     systemHint: 'Write a book chapter with engaging narrative, proper structure, and 3000-5000 words per chapter.' },
-  { id: 'novel', name: 'Novel / Fiction', icon: '✍️', category: 'document',
+  { id: 'novel', name: 'Novel / Fiction', icon: Pen, category: 'document',
     systemHint: 'Write creative fiction with rich characters, vivid scenes, natural dialogue, and compelling plot.' },
-  { id: 'movie-script', name: 'Movie Script', icon: '🎬', category: 'document',
+  { id: 'movie-script', name: 'Movie Script', icon: Clapperboard, category: 'document',
     systemHint: 'Write in proper screenplay format with scene headings, action lines, and industry-standard formatting.' },
-  { id: 'legal', name: 'Legal Document', icon: '⚖️', category: 'document',
+  { id: 'legal', name: 'Legal Document', icon: Scale, category: 'document',
     systemHint: 'Write formal legal documents with proper terminology, numbered clauses, and standard provisions.' },
-  { id: 'blog', name: 'Blog / Article', icon: '📝', category: 'document',
+  { id: 'blog', name: 'Blog / Article', icon: FileEdit, category: 'document',
     systemHint: 'Write an engaging blog post with compelling headline, SEO-friendly structure, and call-to-action.' },
-  { id: 'report', name: 'Technical Report', icon: '📋', category: 'document',
+  { id: 'report', name: 'Technical Report', icon: ClipboardList, category: 'document',
     systemHint: 'Write a detailed technical report with data tables, findings, and actionable recommendations.' },
-  { id: 'letter', name: 'Formal Letter', icon: '✉️', category: 'document',
+  { id: 'letter', name: 'Formal Letter', icon: Mail, category: 'document',
     systemHint: 'Write a formal letter with proper letterhead, salutation, body paragraphs, and signature block.' },
-  { id: 'free', name: 'Free Writing', icon: '🌟', category: 'document',
+  { id: 'free', name: 'Free Writing', icon: Sparkles, category: 'document',
     systemHint: 'Write freely based on the user request. Adapt tone, style, and format to match needs.' },
 
-  // AI Tools
-  { id: 'analytics', name: 'My Analytics', icon: '📈', category: 'ai-tools',
+  { id: 'analytics', name: 'My Analytics', icon: TrendingUp, category: 'ai-tools',
     systemHint: 'ANALYTICS: You have access to the user analytics data. Explain metrics, trends, and provide insights.' },
-  { id: 'intelligence', name: 'Market Intelligence', icon: '🧠', category: 'ai-tools',
+  { id: 'intelligence', name: 'Market Intelligence', icon: Brain, category: 'ai-tools',
     systemHint: 'INTELLIGENCE: Provide market analysis, trending companies, industry insights, and competitive analysis.' },
 
-  // Actions
-  { id: 'create-post', name: 'Create Post', icon: '📢', category: 'actions',
+  { id: 'create-post', name: 'Create Post', icon: Megaphone, category: 'actions',
     systemHint: 'ACTION: Help user draft a social feed post. Ask what they want to post about, then generate the content.' },
-  { id: 'create-meeting', name: 'Book Meeting', icon: '📅', category: 'actions',
+  { id: 'create-meeting', name: 'Book Meeting', icon: CalendarPlus, category: 'actions',
     systemHint: 'ACTION: Help user create a meeting link or book a meeting. Ask for details: who, when, topic.' },
-  { id: 'contacts', name: 'My Contacts', icon: '👥', category: 'actions',
+  { id: 'contacts', name: 'My Contacts', icon: Users, category: 'actions',
     systemHint: 'ACTION: Help user find or manage contacts from their connections and network.' },
-  { id: 'jobs', name: 'Jobs & Opportunities', icon: '💼', category: 'actions',
+  { id: 'jobs', name: 'Jobs & Opportunities', icon: Briefcase, category: 'actions',
     systemHint: 'ACTION: Summarize current job opportunities, internships, and open positions available on the platform.' },
-  { id: 'resources', name: 'Resources & Map', icon: '🌍', category: 'actions',
+  { id: 'resources', name: 'Resources & Map', icon: Globe, category: 'actions',
     systemHint: 'ACTION: Guide user to resources available on the platform. Provide direct links to the 3D resource map.' },
 ];
 
-const CATEGORY_LABELS: Record<string, string> = {
-  'quick': '⚡ Quick',
-  'document': '📄 Documents',
-  'ai-tools': '🧠 AI Tools',
-  'actions': '🚀 Actions',
+const CATEGORY_META: Record<string, { label: string; icon: LucideIcon }> = {
+  'quick': { label: 'Quick', icon: Zap },
+  'document': { label: 'Documents', icon: FileText },
+  'ai-tools': { label: 'AI Tools', icon: Brain },
+  'actions': { label: 'Actions', icon: Globe },
 };
 
 export default function FloatingChat() {
@@ -820,8 +816,8 @@ You can help with:
                   <img src={geniusAILogo} alt="Genius AI" className="h-5 w-5 rounded-full object-cover" />
                   <h3 className="font-semibold text-sm">Genius AI</h3>
                   {activeTool && (
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4">
-                      {activeTool.icon} {activeTool.name}
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 gap-1">
+                      <activeTool.icon className="h-3 w-3" /> {activeTool.name}
                     </Badge>
                   )}
                 </>
@@ -1029,7 +1025,7 @@ You can help with:
                   {activeTool && activeTool.id !== 'quick' && (
                     <div className="px-3 pt-1 pb-1 shrink-0">
                       <div className="flex items-center justify-between px-3 py-1.5 rounded-lg bg-primary/10 text-xs">
-                        <span className="font-medium">{activeTool.icon} {activeTool.name}</span>
+                        <span className="font-medium flex items-center gap-1.5"><activeTool.icon className="h-3.5 w-3.5" /> {activeTool.name}</span>
                         <button
                           onClick={() => setActiveTool(null)}
                           className="text-muted-foreground hover:text-foreground transition-colors"
@@ -1182,122 +1178,135 @@ You can help with:
                             <Plus className="h-5 w-5" />
                           </button>
 
-                          {/* Tool Panel Overlay */}
+                          {/* Tool Panel — Full Redesign */}
                           {showToolMenu && (
-                            <div className="absolute bottom-12 left-0 right-0 w-[calc(100%+5.5rem)] rounded-xl bg-popover border border-border shadow-2xl z-50 animate-in slide-in-from-bottom-3 duration-300 overflow-hidden"
-                              style={{ maxHeight: '420px' }}
+                            <div
+                              className="absolute bottom-12 left-0 right-0 w-[calc(100%+5.5rem)] rounded-xl bg-popover border border-border/60 shadow-2xl z-50 animate-in slide-in-from-bottom-3 fade-in-0 duration-200 overflow-hidden flex flex-col"
+                              style={{ maxHeight: 'min(70vh, 440px)' }}
                             >
-                              {/* Tabs Header */}
-                              <div className="flex border-b border-border bg-muted/30">
-                                {(['tools', 'history', 'memory'] as const).map(tab => (
+                              {/* Tab bar */}
+                              <div className="flex shrink-0 border-b border-border/50">
+                                {([
+                                  { key: 'tools', label: 'Tools', Icon: Zap, active: !showChatHistory && !showMemoryPanel },
+                                  { key: 'history', label: `History`, Icon: Clock, active: showChatHistory, count: chatLogs.length },
+                                  { key: 'memory', label: `Memory`, Icon: BookOpen, active: showMemoryPanel, count: memoryItems.length },
+                                ] as const).map(tab => (
                                   <button
-                                    key={tab}
+                                    key={tab.key}
                                     type="button"
                                     onClick={() => {
-                                      if (tab === 'tools') { setShowChatHistory(false); setShowMemoryPanel(false); }
-                                      else if (tab === 'history') { setShowChatHistory(true); setShowMemoryPanel(false); }
-                                      else { setShowMemoryPanel(true); setShowChatHistory(false); }
+                                      setShowChatHistory(tab.key === 'history');
+                                      setShowMemoryPanel(tab.key === 'memory');
                                     }}
-                                    className={`flex-1 py-2.5 text-xs font-semibold tracking-wide transition-all duration-200 ${
-                                      (tab === 'tools' && !showChatHistory && !showMemoryPanel) ||
-                                      (tab === 'history' && showChatHistory) ||
-                                      (tab === 'memory' && showMemoryPanel)
-                                        ? 'text-primary border-b-2 border-primary bg-primary/5'
-                                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                                    className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 text-[11px] font-semibold transition-colors ${
+                                      tab.active
+                                        ? 'text-primary border-b-2 border-primary'
+                                        : 'text-muted-foreground hover:text-foreground'
                                     }`}
                                   >
-                                    {tab === 'tools' && '🛠 Tools'}
-                                    {tab === 'history' && `🕐 History (${chatLogs.length})`}
-                                    {tab === 'memory' && `🧠 Memory (${memoryItems.length})`}
+                                    <tab.Icon className="h-3.5 w-3.5" />
+                                    <span>{tab.label}</span>
+                                    {'count' in tab && tab.count != null && tab.count > 0 && (
+                                      <span className="ml-0.5 text-[9px] bg-muted rounded-full px-1.5 py-px">{tab.count}</span>
+                                    )}
                                   </button>
                                 ))}
                               </div>
 
-                              {/* Tab Content */}
-                              <ScrollArea className="max-h-[360px]">
-                                {/* === TOOLS TAB === */}
+                              {/* Scrollable content */}
+                              <div className="overflow-y-auto flex-1 overscroll-contain">
+                                {/* ── TOOLS ── */}
                                 {!showChatHistory && !showMemoryPanel && (
-                                  <div className="p-3 space-y-4">
-                                    {Object.entries(groupedTools).map(([category, tools]) => (
-                                      <div key={category}>
-                                        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
-                                          {CATEGORY_LABELS[category] || category}
-                                        </p>
-                                        {category === 'quick' ? (
-                                          /* Quick Answer: full-width highlighted button */
-                                          <button
-                                            type="button"
-                                            onClick={() => { setActiveTool(tools[0]); setShowToolMenu(false); }}
-                                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                              activeTool?.id === 'quick'
-                                                ? 'bg-primary text-primary-foreground shadow-md'
-                                                : 'bg-primary/10 text-foreground hover:bg-primary/20 border border-primary/20'
-                                            }`}
-                                          >
-                                            <span className="text-lg">⚡</span>
-                                            <span>Quick Answer</span>
-                                          </button>
-                                        ) : (
-                                          /* 2-column grid */
-                                          <div className="grid grid-cols-2 gap-1.5">
-                                            {tools.map(tool => (
-                                              <button
-                                                key={tool.id}
-                                                type="button"
-                                                onClick={() => { setActiveTool(tool); setShowToolMenu(false); }}
-                                                className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 min-h-[40px] ${
-                                                  activeTool?.id === tool.id
-                                                    ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
-                                                    : 'bg-muted/40 text-foreground hover:bg-accent hover:text-accent-foreground'
-                                                }`}
-                                              >
-                                                <span className="text-base shrink-0">{tool.icon}</span>
-                                                <span className="truncate">{tool.name}</span>
-                                              </button>
-                                            ))}
+                                  <div className="p-2.5 space-y-3">
+                                    {Object.entries(groupedTools).map(([category, tools]) => {
+                                      const meta = CATEGORY_META[category];
+                                      const CatIcon = meta?.icon || Zap;
+                                      return (
+                                        <div key={category}>
+                                          <div className="flex items-center gap-1.5 px-1 mb-1.5">
+                                            <CatIcon className="h-3 w-3 text-muted-foreground" />
+                                            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
+                                              {meta?.label || category}
+                                            </span>
                                           </div>
-                                        )}
-                                      </div>
-                                    ))}
 
-                                    {/* Bottom actions */}
-                                    <div className="border-t border-border/50 pt-3 space-y-1.5">
+                                          {category === 'quick' ? (
+                                            <button
+                                              type="button"
+                                              onClick={() => { setActiveTool(tools[0]); setShowToolMenu(false); }}
+                                              className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 ${
+                                                activeTool?.id === 'quick'
+                                                  ? 'bg-primary text-primary-foreground'
+                                                  : 'bg-primary/10 text-foreground hover:bg-primary/20'
+                                              }`}
+                                            >
+                                              <Zap className="h-4 w-4" />
+                                              Quick Answer
+                                            </button>
+                                          ) : (
+                                            <div className="grid grid-cols-2 gap-1">
+                                              {tools.map(tool => {
+                                                const ToolIcon = tool.icon;
+                                                return (
+                                                  <button
+                                                    key={tool.id}
+                                                    type="button"
+                                                    onClick={() => { setActiveTool(tool); setShowToolMenu(false); }}
+                                                    className={`flex items-center gap-2 px-2.5 py-2 rounded-md text-[11px] font-medium transition-all duration-150 min-h-[36px] ${
+                                                      activeTool?.id === tool.id
+                                                        ? 'bg-primary/15 text-primary ring-1 ring-primary/25'
+                                                        : 'text-foreground hover:bg-accent'
+                                                    }`}
+                                                  >
+                                                    <ToolIcon className="h-3.5 w-3.5 shrink-0 opacity-70" />
+                                                    <span className="truncate">{tool.name}</span>
+                                                  </button>
+                                                );
+                                              })}
+                                            </div>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+
+                                    {/* Actions row */}
+                                    <div className="flex gap-1.5 pt-1 border-t border-border/40">
                                       <button
                                         type="button"
                                         onClick={() => { setAiMessages([]); setCurrentChatLogId(null); setActiveTool(null); setShowToolMenu(false); }}
-                                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium text-primary hover:bg-primary/10 transition-all duration-200"
+                                        className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-[11px] font-medium text-primary hover:bg-primary/10 transition-colors"
                                       >
-                                        <Plus className="h-4 w-4" />
-                                        <span>New conversation</span>
+                                        <Plus className="h-3.5 w-3.5" />
+                                        New chat
                                       </button>
                                       {activeTool && (
                                         <button
                                           type="button"
                                           onClick={() => { setActiveTool(null); setShowToolMenu(false); }}
-                                          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted/60 transition-all duration-200"
+                                          className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-[11px] font-medium text-muted-foreground hover:bg-muted/60 transition-colors"
                                         >
-                                          <X className="h-4 w-4" />
-                                          <span>Clear tool selection</span>
+                                          <X className="h-3.5 w-3.5" />
+                                          Clear tool
                                         </button>
                                       )}
                                     </div>
                                   </div>
                                 )}
 
-                                {/* === HISTORY TAB === */}
+                                {/* ── HISTORY ── */}
                                 {showChatHistory && (
-                                  <div className="p-3">
+                                  <div className="p-2.5">
                                     {chatLogs.length === 0 ? (
-                                      <div className="text-center py-8">
-                                        <Clock className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-                                        <p className="text-xs text-muted-foreground">No conversations yet</p>
+                                      <div className="text-center py-10 text-muted-foreground">
+                                        <Clock className="h-6 w-6 mx-auto mb-2 opacity-40" />
+                                        <p className="text-xs">No conversations yet</p>
                                       </div>
                                     ) : (
-                                      <div className="space-y-1">
+                                      <div className="space-y-0.5">
                                         {chatLogs.slice(0, 20).map(log => (
                                           <div
                                             key={log.id}
-                                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors group cursor-pointer"
+                                            className="flex items-center gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent transition-colors group cursor-pointer"
                                             onClick={() => {
                                               setAiMessages((log as ChatLog).messages || []);
                                               setCurrentChatLogId(log.id);
@@ -1305,9 +1314,9 @@ You can help with:
                                               setShowChatHistory(false);
                                             }}
                                           >
-                                            <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                                            <MessageSquare className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                                             <div className="flex-1 min-w-0">
-                                              <p className="text-xs font-medium text-foreground truncate">{log.title}</p>
+                                              <p className="text-[11px] font-medium text-foreground truncate">{log.title}</p>
                                               <p className="text-[10px] text-muted-foreground">
                                                 {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
                                               </p>
@@ -1315,9 +1324,9 @@ You can help with:
                                             <button
                                               type="button"
                                               onClick={(e) => { e.stopPropagation(); deleteChatLog.mutate(log.id); }}
-                                              className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-all shrink-0"
+                                              className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-all"
                                             >
-                                              <Trash2 className="h-3.5 w-3.5" />
+                                              <Trash2 className="h-3 w-3" />
                                             </button>
                                           </div>
                                         ))}
@@ -1326,32 +1335,32 @@ You can help with:
                                   </div>
                                 )}
 
-                                {/* === MEMORY TAB === */}
+                                {/* ── MEMORY ── */}
                                 {showMemoryPanel && (
-                                  <div className="p-3">
+                                  <div className="p-2.5">
                                     {memoryItems.length === 0 ? (
-                                      <div className="text-center py-8">
-                                        <Brain className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
-                                        <p className="text-xs text-muted-foreground">Say "learn this" to save knowledge</p>
+                                      <div className="text-center py-10 text-muted-foreground">
+                                        <BookOpen className="h-6 w-6 mx-auto mb-2 opacity-40" />
+                                        <p className="text-xs">Say "learn this" to save knowledge</p>
                                       </div>
                                     ) : (
-                                      <div className="space-y-1">
+                                      <div className="space-y-0.5">
                                         {memoryItems.slice(0, 20).map(item => (
                                           <div
                                             key={item.id}
-                                            className="flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors group"
+                                            className="flex items-start gap-2.5 px-2.5 py-2 rounded-md hover:bg-accent transition-colors group"
                                           >
-                                            <Brain className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                                            <BookOpen className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
                                             <div className="flex-1 min-w-0">
-                                              <p className="text-xs font-medium text-foreground truncate">{item.title}</p>
-                                              <p className="text-[10px] text-muted-foreground line-clamp-2">{item.content.slice(0, 120)}</p>
+                                              <p className="text-[11px] font-medium text-foreground truncate">{item.title}</p>
+                                              <p className="text-[10px] text-muted-foreground line-clamp-2">{item.content.slice(0, 100)}</p>
                                             </div>
                                             <button
                                               type="button"
                                               onClick={(e) => { e.stopPropagation(); deleteMemory.mutate(item.id); }}
-                                              className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-all shrink-0"
+                                              className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-all"
                                             >
-                                              <Trash2 className="h-3.5 w-3.5" />
+                                              <Trash2 className="h-3 w-3" />
                                             </button>
                                           </div>
                                         ))}
@@ -1359,7 +1368,7 @@ You can help with:
                                     )}
                                   </div>
                                 )}
-                              </ScrollArea>
+                              </div>
                             </div>
                           )}
                         </div>
