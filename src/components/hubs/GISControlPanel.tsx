@@ -18,11 +18,14 @@ import {
   Plane,
   Box,
   Earth,
-  Lock
+  Lock,
+  Ship
 } from 'lucide-react';
 import { GISLayer } from '@/hooks/useGISLayers';
 import { TrackingProvider } from '@/hooks/useExternalTracking';
 import { EarthLayer } from '@/hooks/useEarthIntelligence';
+import { AISFilters } from '@/hooks/useAISTracking';
+import { AISControlPanel } from './AISControlPanel';
 import { cn } from '@/lib/utils';
 
 export type MapStyleType = 'default' | 'satellite' | 'satelliteStreets';
@@ -39,6 +42,22 @@ interface GISControlPanelProps {
   hasEarthAccess?: boolean;
   onToggleEarthLayer?: (layerId: string) => void;
   onEarthLayerOpacity?: (layerId: string, opacity: number) => void;
+  // AIS props
+  aisEnabled?: boolean;
+  onAISToggle?: () => void;
+  aisRefreshing?: boolean;
+  aisAutoRefresh?: boolean;
+  onAISAutoRefreshChange?: (v: boolean) => void;
+  aisRefreshInterval?: number;
+  onAISRefreshIntervalChange?: (v: number) => void;
+  onAISManualRefresh?: () => void;
+  aisVesselCount?: number;
+  aisTotalCount?: number;
+  aisLastFetch?: Date | null;
+  aisIsDemo?: boolean;
+  aisError?: string | null;
+  aisFilters?: AISFilters;
+  onAISFiltersChange?: (f: AISFilters) => void;
 }
 
 const STYLE_OPTIONS: { value: MapStyleType; label: string; icon: React.ReactNode }[] = [
@@ -65,6 +84,21 @@ export const GISControlPanel = ({
   hasEarthAccess = false,
   onToggleEarthLayer,
   onEarthLayerOpacity,
+  aisEnabled = false,
+  onAISToggle,
+  aisRefreshing = false,
+  aisAutoRefresh = true,
+  onAISAutoRefreshChange,
+  aisRefreshInterval = 60,
+  onAISRefreshIntervalChange,
+  onAISManualRefresh,
+  aisVesselCount = 0,
+  aisTotalCount = 0,
+  aisLastFetch = null,
+  aisIsDemo = false,
+  aisError = null,
+  aisFilters,
+  onAISFiltersChange,
 }: GISControlPanelProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -261,6 +295,31 @@ export const GISControlPanel = ({
                   </p>
                 </div>
               )}
+            </div>
+
+            {/* Logistics */}
+            <div className="space-y-3">
+              <Label className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                <Ship className="w-3.5 h-3.5" />
+                Logistics
+              </Label>
+              <AISControlPanel
+                isEnabled={aisEnabled}
+                onToggle={onAISToggle || (() => {})}
+                isRefreshing={aisRefreshing}
+                autoRefresh={aisAutoRefresh}
+                onAutoRefreshChange={onAISAutoRefreshChange || (() => {})}
+                refreshInterval={aisRefreshInterval}
+                onRefreshIntervalChange={onAISRefreshIntervalChange || (() => {})}
+                onManualRefresh={onAISManualRefresh || (() => {})}
+                vesselCount={aisVesselCount}
+                totalCount={aisTotalCount}
+                lastFetch={aisLastFetch}
+                isDemo={aisIsDemo}
+                error={aisError}
+                filters={aisFilters || { vesselType: 'all', minSpeed: 0, maxSpeed: 50, onlyInAOI: false }}
+                onFiltersChange={onAISFiltersChange || (() => {})}
+              />
             </div>
 
             {/* Info Footer */}
