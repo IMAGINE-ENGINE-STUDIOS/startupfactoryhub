@@ -1,7 +1,8 @@
 import { format } from 'date-fns';
-import { Play, Pause, SkipBack, SkipForward, Layers, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Layers, Calendar, ChevronLeft, ChevronRight, Sun, Moon, CalendarDays, Radio } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
+import { TemporalMode, DayNightMode } from '@/hooks/useEarthIntelligence';
 
 interface EarthViewportToolbarProps {
   // Timeline (precipitation real-time)
@@ -19,8 +20,18 @@ interface EarthViewportToolbarProps {
   selectedMonth: Date;
   onDateChange: (date: Date) => void;
   onMonthChange: (date: Date) => void;
-  hasMonthlyLayer: boolean;
-  hasDailyLayer: boolean;
+  // Temporal controls
+  temporalMode: TemporalMode;
+  onTemporalModeChange: (mode: TemporalMode) => void;
+  dayNightMode: DayNightMode;
+  onDayNightModeChange: (mode: DayNightMode) => void;
+  precipMode: 'realtime' | 'monthly';
+  onPrecipModeChange: (mode: 'realtime' | 'monthly') => void;
+  // Active dataset capabilities
+  activeHasDayNight: boolean;
+  activeHasDaily: boolean;
+  activeHasMonthly: boolean;
+  activeHasTimelineOption: boolean;
   // Common
   onToggleLayers?: () => void;
 }
@@ -39,11 +50,20 @@ export const EarthViewportToolbar = ({
   selectedMonth,
   onDateChange,
   onMonthChange,
-  hasMonthlyLayer,
-  hasDailyLayer,
+  temporalMode,
+  onTemporalModeChange,
+  dayNightMode,
+  onDayNightModeChange,
+  precipMode,
+  onPrecipModeChange,
+  activeHasDayNight,
+  activeHasDaily,
+  activeHasMonthly,
+  activeHasTimelineOption,
   onToggleLayers,
 }: EarthViewportToolbarProps) => {
-  if (!isTimelineVisible && !isDatePickerVisible) return null;
+  const hasAnyActive = isTimelineVisible || isDatePickerVisible || activeHasDayNight || (activeHasDaily && activeHasMonthly) || activeHasTimelineOption;
+  if (!hasAnyActive && !onToggleLayers) return null;
 
   const stepDay = (dir: number) => {
     const d = new Date(selectedDate);
@@ -57,12 +77,75 @@ export const EarthViewportToolbar = ({
     onMonthChange(d);
   };
 
+  // Determine which date stepper to show based on temporal mode
+  const showMonthlyStepper = isDatePickerVisible && (temporalMode === 'monthly' || (!activeHasDaily && activeHasMonthly));
+  const showDailyStepper = isDatePickerVisible && temporalMode === 'daily' && activeHasDaily;
+
   return (
     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2">
-      {/* Date picker for GIBS layers */}
-      {isDatePickerVisible && (
+      {/* Mode toggles row */}
+      {(activeHasDayNight || (activeHasDaily && activeHasMonthly) || activeHasTimelineOption) && (
         <div className="flex items-center gap-2">
-          {hasMonthlyLayer && (
+          {/* Day/Night toggle */}
+          {activeHasDayNight && (
+            <div className="flex items-center gap-0.5 px-1 py-1 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
+              <TogglePill
+                active={dayNightMode === 'day'}
+                onClick={() => onDayNightModeChange('day')}
+                icon={<Sun className="w-3.5 h-3.5" />}
+                label="Day"
+              />
+              <TogglePill
+                active={dayNightMode === 'night'}
+                onClick={() => onDayNightModeChange('night')}
+                icon={<Moon className="w-3.5 h-3.5" />}
+                label="Night"
+              />
+            </div>
+          )}
+
+          {/* Daily/Monthly toggle */}
+          {activeHasDaily && activeHasMonthly && (
+            <div className="flex items-center gap-0.5 px-1 py-1 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
+              <TogglePill
+                active={temporalMode === 'daily'}
+                onClick={() => onTemporalModeChange('daily')}
+                icon={<CalendarDays className="w-3.5 h-3.5" />}
+                label="Daily"
+              />
+              <TogglePill
+                active={temporalMode === 'monthly'}
+                onClick={() => onTemporalModeChange('monthly')}
+                icon={<Calendar className="w-3.5 h-3.5" />}
+                label="Monthly"
+              />
+            </div>
+          )}
+
+          {/* Precipitation mode: Realtime / Monthly */}
+          {activeHasTimelineOption && (
+            <div className="flex items-center gap-0.5 px-1 py-1 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
+              <TogglePill
+                active={precipMode === 'realtime'}
+                onClick={() => onPrecipModeChange('realtime')}
+                icon={<Radio className="w-3.5 h-3.5" />}
+                label="Live"
+              />
+              <TogglePill
+                active={precipMode === 'monthly'}
+                onClick={() => onPrecipModeChange('monthly')}
+                icon={<Calendar className="w-3.5 h-3.5" />}
+                label="Monthly"
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Date stepper for GIBS layers */}
+      {(showMonthlyStepper || showDailyStepper) && (
+        <div className="flex items-center gap-2">
+          {showMonthlyStepper && (
             <div className="flex items-center gap-1 px-3 py-2 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
               <ToolbarButton
                 icon={<ChevronLeft className="w-3.5 h-3.5" />}
@@ -84,7 +167,7 @@ export const EarthViewportToolbar = ({
               />
             </div>
           )}
-          {hasDailyLayer && (
+          {showDailyStepper && (
             <div className="flex items-center gap-1 px-3 py-2 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
               <ToolbarButton
                 icon={<ChevronLeft className="w-3.5 h-3.5" />}
@@ -165,6 +248,31 @@ export const EarthViewportToolbar = ({
     </div>
   );
 };
+
+const TogglePill = ({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}) => (
+  <button
+    onClick={onClick}
+    className={cn(
+      "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium transition-all",
+      active
+        ? "bg-white/15 text-white"
+        : "text-white/50 hover:text-white/70"
+    )}
+  >
+    {icon}
+    {label}
+  </button>
+);
 
 const ToolbarButton = ({
   icon,

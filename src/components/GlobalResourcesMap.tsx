@@ -178,10 +178,20 @@ export const GlobalResourcesMap = () => {
 
   // Earth Intelligence layers (admin-only)
   const {
-    earthLayers,
+    datasets: earthDatasets,
     hasAccess: hasEarthAccess,
-    toggleEarthLayer,
-    setEarthLayerOpacity,
+    toggleDataset,
+    setDatasetOpacity,
+    temporalMode,
+    setTemporalMode,
+    dayNightMode,
+    setDayNightMode,
+    precipMode,
+    setPrecipMode,
+    activeHasDayNight,
+    activeHasDaily,
+    activeHasMonthly,
+    activeHasTimelineOption,
     precipFrames,
     currentFrameIndex,
     setCurrentFrameIndex,
@@ -1491,45 +1501,45 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                   <EarthCategorySection
                     icon={<Mountain className="w-3.5 h-3.5 text-emerald-400" />}
                     title="Land Surface"
-                    layers={earthLayers.filter(l => l.category === 'land-surface')}
-                    onToggle={toggleEarthLayer}
-                    onOpacity={setEarthLayerOpacity}
+                    datasets={earthDatasets.filter(d => d.category === 'land-surface')}
+                    onToggle={toggleDataset}
+                    onOpacity={setDatasetOpacity}
                   />
 
                   {/* Precipitation category */}
                   <EarthCategorySection
                     icon={<CloudRain className="w-3.5 h-3.5 text-sky-400" />}
                     title="Precipitation"
-                    layers={earthLayers.filter(l => l.category === 'precipitation')}
-                    onToggle={toggleEarthLayer}
-                    onOpacity={setEarthLayerOpacity}
+                    datasets={earthDatasets.filter(d => d.category === 'precipitation')}
+                    onToggle={toggleDataset}
+                    onOpacity={setDatasetOpacity}
                   />
 
                   {/* Temperature category */}
                   <EarthCategorySection
                     icon={<Thermometer className="w-3.5 h-3.5 text-red-400" />}
                     title="Temperature"
-                    layers={earthLayers.filter(l => l.category === 'temperature')}
-                    onToggle={toggleEarthLayer}
-                    onOpacity={setEarthLayerOpacity}
+                    datasets={earthDatasets.filter(d => d.category === 'temperature')}
+                    onToggle={toggleDataset}
+                    onOpacity={setDatasetOpacity}
                   />
 
                   {/* Ocean (SST) category */}
                   <EarthCategorySection
                     icon={<Waves className="w-3.5 h-3.5 text-cyan-400" />}
                     title="Ocean"
-                    layers={earthLayers.filter(l => l.category === 'ocean')}
-                    onToggle={toggleEarthLayer}
-                    onOpacity={setEarthLayerOpacity}
+                    datasets={earthDatasets.filter(d => d.category === 'ocean')}
+                    onToggle={toggleDataset}
+                    onOpacity={setDatasetOpacity}
                   />
 
                   {/* Radiation category */}
                   <EarthCategorySection
                     icon={<Sun className="w-3.5 h-3.5 text-yellow-400" />}
                     title="Radiation"
-                    layers={earthLayers.filter(l => l.category === 'radiation')}
-                    onToggle={toggleEarthLayer}
-                    onOpacity={setEarthLayerOpacity}
+                    datasets={earthDatasets.filter(d => d.category === 'radiation')}
+                    onToggle={toggleDataset}
+                    onOpacity={setDatasetOpacity}
                   />
                 </div>
               ) : selectedType === 'workplace' ? (
@@ -2327,8 +2337,16 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         selectedMonth={selectedMonth}
         onDateChange={setSelectedDate}
         onMonthChange={setSelectedMonth}
-        hasMonthlyLayer={earthLayers.some(l => l.enabled && l.temporalResolution === 'monthly')}
-        hasDailyLayer={earthLayers.some(l => l.enabled && l.temporalResolution === 'daily')}
+        temporalMode={temporalMode}
+        onTemporalModeChange={setTemporalMode}
+        dayNightMode={dayNightMode}
+        onDayNightModeChange={setDayNightMode}
+        precipMode={precipMode}
+        onPrecipModeChange={setPrecipMode}
+        activeHasDayNight={activeHasDayNight}
+        activeHasDaily={activeHasDaily}
+        activeHasMonthly={activeHasMonthly}
+        activeHasTimelineOption={activeHasTimelineOption}
         onToggleLayers={() => setShowEarthLayers(prev => !prev)}
       />
     </div>

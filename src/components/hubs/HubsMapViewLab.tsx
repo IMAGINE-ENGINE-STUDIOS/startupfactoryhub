@@ -68,9 +68,10 @@ export const HubsMapViewLab = ({
   } = useExternalTracking(DEMO_PROVIDERS);
   const {
     earthLayers,
+    datasets: earthDatasets,
     hasAccess: hasEarthAccess,
-    toggleEarthLayer,
-    setEarthLayerOpacity,
+    toggleDataset,
+    setDatasetOpacity,
   } = useEarthIntelligence(map.current, mapReady);
 
   // Initialize map
@@ -352,8 +353,8 @@ export const HubsMapViewLab = ({
         isPolling={isPolling}
         earthLayers={earthLayers}
         hasEarthAccess={hasEarthAccess}
-        onToggleEarthLayer={toggleEarthLayer}
-        onEarthLayerOpacity={setEarthLayerOpacity}
+        onToggleEarthLayer={(id) => toggleDataset(id)}
+        onEarthLayerOpacity={(id, op) => setDatasetOpacity(id, op)}
       />
       
       {/* Control Buttons */}

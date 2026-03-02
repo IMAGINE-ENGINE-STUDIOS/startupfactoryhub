@@ -6,6 +6,9 @@ export type EarthLayerIconType = 'mountain' | 'sun-dim' | 'cloud-rain' | 'thermo
 
 export type EarthLayerCategory = 'land-surface' | 'precipitation' | 'temperature' | 'ocean' | 'radiation';
 
+export type TemporalMode = 'daily' | 'monthly';
+export type DayNightMode = 'day' | 'night';
+
 export interface EarthLayer {
   id: string;
   name: string;
@@ -18,13 +21,37 @@ export interface EarthLayer {
   supportsTimeline?: boolean;
   supportsDateSelection?: boolean;
   supportsDayNight?: boolean;
-  dayNightMode?: 'day' | 'night';
-  temporalResolution?: 'monthly' | 'daily';
+  dayNightMode?: DayNightMode;
+  temporalResolution?: TemporalMode;
   gibsLayerDay?: string;
   gibsLayerNight?: string;
   gibsFormat?: string;
   gibsTileMatrixSet?: string;
   maxZoom?: number;
+}
+
+export interface EarthDataset {
+  id: string;
+  name: string;
+  description: string;
+  icon: EarthLayerIconType;
+  category: EarthLayerCategory;
+  enabled: boolean;
+  opacity: number;
+  // Available modes
+  hasDayNight: boolean;
+  hasDaily: boolean;
+  hasMonthly: boolean;
+  hasTimeline: boolean; // real-time precipitation
+  // Underlying layer IDs for each combination
+  layerIds: {
+    dayMonthly?: string;
+    nightMonthly?: string;
+    dayDaily?: string;
+    nightDaily?: string;
+    realtime?: string;
+    static?: string; // for layers with no temporal config
+  };
 }
 
 export interface PrecipitationFrame {
@@ -93,7 +120,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'lst-day-monthly',
     name: 'Land Surface Temp (Day/Monthly)',
-    description: 'Monthly LST observed by GCOM-C "SHIKISAI" (~5km). Daytime ~10:30am local time. Clouds cause data gaps.',
+    description: 'Monthly LST observed by GCOM-C "SHIKISAI" (~5km). Daytime ~10:30am local time.',
     tileUrl: '',
     enabled: false,
     opacity: 0.7,
@@ -171,7 +198,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'sst-gcomc-day-monthly',
     name: 'SST GCOM-C (Day/Monthly)',
-    description: 'Sea surface temperature by GCOM-C "SHIKISAI" (~250m coastal). Daytime ~10:30am. Cloud gaps possible.',
+    description: 'Sea surface temperature by GCOM-C "SHIKISAI" (~250m coastal). Daytime ~10:30am.',
     tileUrl: '',
     enabled: false,
     opacity: 0.7,
@@ -243,7 +270,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'sst-gcomw-day-daily',
     name: 'SST GCOM-W (Day/Daily)',
-    description: 'SST by GCOM-W "SHIZUKU". Observes through clouds. 5-day moving average. Daytime ~1:30pm. Missing near coast.',
+    description: 'SST by GCOM-W "SHIZUKU". Observes through clouds. 5-day moving average. Daytime ~1:30pm.',
     tileUrl: '',
     enabled: false,
     opacity: 0.7,
@@ -296,6 +323,130 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
   },
 ];
 
+// Dataset groups that consolidate multiple layers into single cards
+const EARTH_DATASETS: EarthDataset[] = [
+  // Land Surface (static, no temporal)
+  {
+    id: 'ds-elevation',
+    name: 'ALOS Elevation (AW3D30)',
+    description: 'Global ~30m DSM from ALOS "Daichi" satellite series (PRISM sensor)',
+    icon: 'mountain',
+    category: 'land-surface',
+    enabled: false,
+    opacity: 0.6,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'jaxa-aw3d30' },
+  },
+  {
+    id: 'ds-hillshade',
+    name: 'Land Surface Hillshade',
+    description: 'Global terrain relief derived from ALOS/Mapzen ~30m elevation data',
+    icon: 'sun-dim',
+    category: 'land-surface',
+    enabled: false,
+    opacity: 0.5,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: { static: 'jaxa-hillshade' },
+  },
+  // Precipitation
+  {
+    id: 'ds-precipitation',
+    name: 'GSMaP Precipitation',
+    description: 'Global precipitation data. Real-time radar (~10min updates) or monthly accumulated data since March 2000.',
+    icon: 'cloud-rain',
+    category: 'precipitation',
+    enabled: false,
+    opacity: 0.65,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: true,
+    hasTimeline: true,
+    layerIds: {
+      realtime: 'gsmap-precipitation',
+      dayMonthly: 'gsmap-precipitation-monthly',
+    },
+  },
+  // Temperature
+  {
+    id: 'ds-lst',
+    name: 'Land Surface Temperature',
+    description: 'LST observed by GCOM-C "SHIKISAI" (~5km). Clouds cause data gaps. Daytime ~10:30am, nighttime ~10:30pm local time.',
+    icon: 'thermometer',
+    category: 'temperature',
+    enabled: false,
+    opacity: 0.7,
+    hasDayNight: true,
+    hasDaily: true,
+    hasMonthly: true,
+    hasTimeline: false,
+    layerIds: {
+      dayMonthly: 'lst-day-monthly',
+      nightMonthly: 'lst-night-monthly',
+      dayDaily: 'lst-day-daily',
+      nightDaily: 'lst-night-daily',
+    },
+  },
+  // Ocean SST GCOM-C
+  {
+    id: 'ds-sst-gcomc',
+    name: 'SST (GCOM-C)',
+    description: 'Sea surface temperature by GCOM-C "SHIKISAI" (~250m coastal). Cloud gaps possible. Daytime ~10:30am, nighttime ~10:30pm.',
+    icon: 'waves',
+    category: 'ocean',
+    enabled: false,
+    opacity: 0.7,
+    hasDayNight: true,
+    hasDaily: true,
+    hasMonthly: true,
+    hasTimeline: false,
+    layerIds: {
+      dayMonthly: 'sst-gcomc-day-monthly',
+      nightMonthly: 'sst-gcomc-night-monthly',
+      dayDaily: 'sst-gcomc-day-daily',
+      nightDaily: 'sst-gcomc-night-daily',
+    },
+  },
+  // Ocean SST GCOM-W (daily only)
+  {
+    id: 'ds-sst-gcomw',
+    name: 'SST (GCOM-W)',
+    description: 'SST by GCOM-W "SHIZUKU". Observes through clouds. 5-day moving average. Missing near coast. Daytime ~1:30pm, nighttime ~1:30am.',
+    icon: 'waves',
+    category: 'ocean',
+    enabled: false,
+    opacity: 0.7,
+    hasDayNight: true,
+    hasDaily: true,
+    hasMonthly: false,
+    hasTimeline: false,
+    layerIds: {
+      dayDaily: 'sst-gcomw-day-daily',
+      nightDaily: 'sst-gcomw-night-daily',
+    },
+  },
+  // Radiation
+  {
+    id: 'ds-swr',
+    name: 'Shortwave Radiation',
+    description: 'SWR products from Terra MODIS monthly normals, generated by JAXA EORC via JASMES.',
+    icon: 'sun',
+    category: 'radiation',
+    enabled: false,
+    opacity: 0.6,
+    hasDayNight: false,
+    hasDaily: false,
+    hasMonthly: true,
+    hasTimeline: false,
+    layerIds: { dayMonthly: 'swr-modis-monthly' },
+  },
+];
+
 const ALLOWED_EMAIL = 'ceo@imagineengine.space';
 
 // Format date for GIBS URL
@@ -303,13 +454,58 @@ const formatGibsDate = (date: Date): string => {
   return date.toISOString().split('T')[0];
 };
 
+// Resolve which underlying layer ID to use given current temporal/daynight settings
+const resolveLayerId = (
+  dataset: EarthDataset,
+  temporalMode: TemporalMode,
+  dayNightMode: DayNightMode,
+  precipMode: 'realtime' | 'monthly',
+): string | null => {
+  // Static layers (elevation, hillshade)
+  if (dataset.layerIds.static) return dataset.layerIds.static;
+
+  // Precipitation special case
+  if (dataset.hasTimeline) {
+    if (precipMode === 'realtime') return dataset.layerIds.realtime || null;
+    return dataset.layerIds.dayMonthly || null;
+  }
+
+  // Temporal layers
+  const mode = temporalMode;
+  const dn = dayNightMode;
+  if (mode === 'monthly' && dataset.hasMonthly) {
+    return dn === 'night' && dataset.hasDayNight
+      ? dataset.layerIds.nightMonthly || dataset.layerIds.dayMonthly || null
+      : dataset.layerIds.dayMonthly || null;
+  }
+  if (mode === 'daily' && dataset.hasDaily) {
+    return dn === 'night' && dataset.hasDayNight
+      ? dataset.layerIds.nightDaily || dataset.layerIds.dayDaily || null
+      : dataset.layerIds.dayDaily || null;
+  }
+  // Fallback: try daily then monthly
+  if (dataset.hasDaily) {
+    return dn === 'night' ? dataset.layerIds.nightDaily || dataset.layerIds.dayDaily || null : dataset.layerIds.dayDaily || null;
+  }
+  if (dataset.hasMonthly) {
+    return dn === 'night' ? dataset.layerIds.nightMonthly || dataset.layerIds.dayMonthly || null : dataset.layerIds.dayMonthly || null;
+  }
+  return null;
+};
+
 export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean) => {
   const { user } = useAuth();
   const [earthLayers, setEarthLayers] = useState<EarthLayer[]>(STATIC_EARTH_LAYERS);
+  const [datasets, setDatasets] = useState<EarthDataset[]>(EARTH_DATASETS);
   const hasAccess = user?.email === ALLOWED_EMAIL;
 
+  // Global temporal controls
+  const [temporalMode, setTemporalMode] = useState<TemporalMode>('monthly');
+  const [dayNightMode, setDayNightMode] = useState<DayNightMode>('day');
+  const [precipMode, setPrecipMode] = useState<'realtime' | 'monthly'>('realtime');
+
   // Global date selection for date-sensitive layers
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now() - 86400000)); // yesterday
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now() - 86400000));
   const [selectedMonth, setSelectedMonth] = useState<Date>(() => {
     const d = new Date();
     d.setMonth(d.getMonth() - 1);
@@ -474,40 +670,109 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     };
   }, [isPlaying, precipFrames.length]);
 
-  const toggleEarthLayer = useCallback((layerId: string) => {
-    if (!map) return;
-    setEarthLayers(prev =>
-      prev.map(l => {
-        if (l.id !== layerId) return l;
-        const newEnabled = !l.enabled;
-        const mapLayerId = `${l.id}-layer`;
-        if (newEnabled && !map.getSource(l.id)) {
-          addEarthLayerToMap({ ...l, enabled: true });
-        } else if (map.getLayer(mapLayerId)) {
-          map.setLayoutProperty(mapLayerId, 'visibility', newEnabled ? 'visible' : 'none');
-        }
-        if (l.id === 'gsmap-precipitation' && !newEnabled) {
-          setIsPlaying(false);
-        }
-        return { ...l, enabled: newEnabled };
-      })
-    );
-  }, [map, addEarthLayerToMap]);
-
-  const setEarthLayerOpacity = useCallback((layerId: string, opacity: number) => {
+  // Helper: disable a specific underlying layer on the map
+  const disableLayerOnMap = useCallback((layerId: string) => {
     if (!map) return;
     const mapLayerId = `${layerId}-layer`;
     try {
       if (map.getLayer(mapLayerId)) {
-        map.setPaintProperty(mapLayerId, 'raster-opacity', opacity);
+        map.setLayoutProperty(mapLayerId, 'visibility', 'none');
       }
-    } catch (err) {
-      console.error('Error setting earth layer opacity:', err);
-    }
-    setEarthLayers(prev =>
-      prev.map(l => (l.id === layerId ? { ...l, opacity } : l))
-    );
+    } catch {}
+    setEarthLayers(prev => prev.map(l => l.id === layerId ? { ...l, enabled: false } : l));
   }, [map]);
+
+  // Helper: enable a specific underlying layer on the map
+  const enableLayerOnMap = useCallback((layerId: string, opacity: number) => {
+    if (!map) return;
+    const layer = earthLayers.find(l => l.id === layerId);
+    if (!layer) return;
+    const mapLayerId = `${layerId}-layer`;
+    const updatedLayer = { ...layer, enabled: true, opacity };
+    if (!map.getSource(layerId)) {
+      addEarthLayerToMap(updatedLayer);
+    } else if (map.getLayer(mapLayerId)) {
+      map.setLayoutProperty(mapLayerId, 'visibility', 'visible');
+      map.setPaintProperty(mapLayerId, 'raster-opacity', opacity);
+    }
+    setEarthLayers(prev => prev.map(l => l.id === layerId ? { ...l, enabled: true, opacity } : l));
+  }, [map, earthLayers, addEarthLayerToMap]);
+
+  // Get all underlying layer IDs for a dataset
+  const getAllLayerIdsForDataset = useCallback((dataset: EarthDataset): string[] => {
+    const ids: string[] = [];
+    const li = dataset.layerIds;
+    if (li.static) ids.push(li.static);
+    if (li.realtime) ids.push(li.realtime);
+    if (li.dayMonthly) ids.push(li.dayMonthly);
+    if (li.nightMonthly) ids.push(li.nightMonthly);
+    if (li.dayDaily) ids.push(li.dayDaily);
+    if (li.nightDaily) ids.push(li.nightDaily);
+    return ids;
+  }, []);
+
+  // Toggle a dataset on/off
+  const toggleDataset = useCallback((datasetId: string) => {
+    setDatasets(prev => {
+      const ds = prev.find(d => d.id === datasetId);
+      if (!ds) return prev;
+      const newEnabled = !ds.enabled;
+
+      if (newEnabled) {
+        // Enable the correct underlying layer
+        const layerId = resolveLayerId(ds, temporalMode, dayNightMode, precipMode);
+        if (layerId) {
+          enableLayerOnMap(layerId, ds.opacity);
+        }
+        // For precipitation realtime, start timeline
+        if (ds.hasTimeline && precipMode === 'realtime') {
+          // already handled via enableLayerOnMap
+        }
+      } else {
+        // Disable all underlying layers for this dataset
+        getAllLayerIdsForDataset(ds).forEach(id => disableLayerOnMap(id));
+        if (ds.hasTimeline) setIsPlaying(false);
+      }
+
+      return prev.map(d => d.id === datasetId ? { ...d, enabled: newEnabled } : d);
+    });
+  }, [temporalMode, dayNightMode, precipMode, enableLayerOnMap, disableLayerOnMap, getAllLayerIdsForDataset]);
+
+  // Set dataset opacity
+  const setDatasetOpacity = useCallback((datasetId: string, opacity: number) => {
+    setDatasets(prev => prev.map(d => {
+      if (d.id !== datasetId) return d;
+      // Update active layer opacity on map
+      if (d.enabled) {
+        const layerId = resolveLayerId(d, temporalMode, dayNightMode, precipMode);
+        if (layerId && map) {
+          const mapLayerId = `${layerId}-layer`;
+          try {
+            if (map.getLayer(mapLayerId)) {
+              map.setPaintProperty(mapLayerId, 'raster-opacity', opacity);
+            }
+          } catch {}
+          setEarthLayers(prev2 => prev2.map(l => l.id === layerId ? { ...l, opacity } : l));
+        }
+      }
+      return { ...d, opacity };
+    }));
+  }, [map, temporalMode, dayNightMode, precipMode]);
+
+  // When temporal mode or day/night changes, swap active layers for enabled datasets
+  useEffect(() => {
+    if (!map || !mapReady) return;
+    datasets.forEach(ds => {
+      if (!ds.enabled) return;
+      // Disable all underlying layers first
+      getAllLayerIdsForDataset(ds).forEach(id => disableLayerOnMap(id));
+      // Enable the correct one
+      const layerId = resolveLayerId(ds, temporalMode, dayNightMode, precipMode);
+      if (layerId) {
+        enableLayerOnMap(layerId, ds.opacity);
+      }
+    });
+  }, [temporalMode, dayNightMode, precipMode, mapReady]);
 
   // Re-add layers after style change
   useEffect(() => {
@@ -543,15 +808,33 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     ? new Date(precipFrames[currentFrameIndex].time * 1000)
     : null;
 
-  // Check if any date-sensitive layer is active
-  const hasActiveDateLayer = earthLayers.some(l => l.enabled && l.supportsDateSelection);
-  const hasActiveTimeline = earthLayers.some(l => l.id === 'gsmap-precipitation' && l.enabled);
+  // Derived: which features the active datasets need
+  const activeDatasets = datasets.filter(d => d.enabled);
+  const hasActiveTimeline = activeDatasets.some(d => d.hasTimeline && precipMode === 'realtime');
+  const hasActiveDateLayer = activeDatasets.some(d => d.hasMonthly || d.hasDaily);
+  const activeHasDayNight = activeDatasets.some(d => d.hasDayNight);
+  const activeHasDaily = activeDatasets.some(d => d.hasDaily);
+  const activeHasMonthly = activeDatasets.some(d => d.hasMonthly);
+  const activeHasTimelineOption = activeDatasets.some(d => d.hasTimeline);
 
   return {
     earthLayers,
+    datasets,
     hasAccess,
-    toggleEarthLayer,
-    setEarthLayerOpacity,
+    toggleDataset,
+    setDatasetOpacity,
+    // Temporal controls
+    temporalMode,
+    setTemporalMode,
+    dayNightMode,
+    setDayNightMode,
+    precipMode,
+    setPrecipMode,
+    // Derived
+    activeHasDayNight,
+    activeHasDaily,
+    activeHasMonthly,
+    activeHasTimelineOption,
     // Precipitation timeline
     precipFrames,
     currentFrameIndex,
