@@ -77,6 +77,8 @@ import { HubsDetailPanel } from '@/components/hubs/HubsDetailPanel';
 import { RegusBookingModal } from '@/components/hubs/RegusBookingModal';
 import { Workspace, WorkspaceType } from '@/hooks/useHubsSearch';
 import { useEarthIntelligence } from '@/hooks/useEarthIntelligence';
+import { EarthViewportToolbar } from '@/components/earth/EarthViewportToolbar';
+import { EarthLayerCard } from '@/components/earth/EarthLayerCard';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
@@ -171,6 +173,13 @@ export const GlobalResourcesMap = () => {
     hasAccess: hasEarthAccess,
     toggleEarthLayer,
     setEarthLayerOpacity,
+    precipFrames,
+    currentFrameIndex,
+    setCurrentFrameIndex,
+    currentFrameTime,
+    isPlaying,
+    togglePlayback,
+    stepFrame,
   } = useEarthIntelligence(map.current, mapReady);
   
   // Regus locations (only fetch when workplace selected AND subscribed)
@@ -1442,53 +1451,40 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
 
               {/* Earth Intelligence Panel */}
               {showEarthLayers && hasEarthAccess ? (
-                <div className="mt-4 pt-4 border-t border-white/20">
-                  <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                    <Earth className="w-3.5 h-3.5 text-emerald-400" />
-                    Land Surface
-                  </h3>
-                  <div className="space-y-3">
-                    {earthLayers.map((layer) => (
-                      <div
-                        key={layer.id}
-                        className={cn(
-                          "p-3 rounded-xl transition-colors space-y-2",
-                          layer.enabled
-                            ? "bg-emerald-500/10 border border-emerald-500/30"
-                            : "bg-white/5"
-                        )}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-base">{layer.icon}</span>
-                            <div>
-                              <span className="text-sm font-medium">{layer.name}</span>
-                              <p className="text-xs text-muted-foreground">{layer.description}</p>
-                            </div>
-                          </div>
-                          <Switch
-                            checked={layer.enabled}
-                            onCheckedChange={() => toggleEarthLayer(layer.id)}
-                          />
-                        </div>
-                        {layer.enabled && (
-                          <div className="flex items-center gap-3 pt-1">
-                            <span className="text-xs text-muted-foreground w-14">Opacity</span>
-                            <Slider
-                              value={[layer.opacity]}
-                              min={0}
-                              max={1}
-                              step={0.05}
-                              onValueChange={([val]) => setEarthLayerOpacity(layer.id, val)}
-                              className="flex-1"
-                            />
-                            <span className="text-xs text-muted-foreground w-8 text-right">
-                              {Math.round(layer.opacity * 100)}%
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                <div className="mt-4 pt-4 border-t border-white/20 space-y-5">
+                  {/* Land Surface category */}
+                  <div>
+                    <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                      <Earth className="w-3.5 h-3.5 text-emerald-400" />
+                      Land Surface
+                    </h3>
+                    <div className="space-y-3">
+                      {earthLayers.filter(l => l.category === 'land-surface').map((layer) => (
+                        <EarthLayerCard
+                          key={layer.id}
+                          layer={layer}
+                          onToggle={toggleEarthLayer}
+                          onOpacity={setEarthLayerOpacity}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Precipitation category */}
+                  <div>
+                    <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                      🌧️ <span className="text-xs">Precipitation</span>
+                    </h3>
+                    <div className="space-y-3">
+                      {earthLayers.filter(l => l.category === 'precipitation').map((layer) => (
+                        <EarthLayerCard
+                          key={layer.id}
+                          layer={layer}
+                          onToggle={toggleEarthLayer}
+                          onOpacity={setEarthLayerOpacity}
+                        />
+                      ))}
+                    </div>
                   </div>
                 </div>
               ) : selectedType === 'workplace' ? (
@@ -2269,6 +2265,19 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         workspace={bookingWorkspace}
         open={showBookingModal}
         onOpenChange={setShowBookingModal}
+      />
+
+      {/* Earth Intelligence Viewport Toolbar */}
+      <EarthViewportToolbar
+        isVisible={hasEarthAccess && earthLayers.some(l => l.id === 'gsmap-precipitation' && l.enabled)}
+        isPlaying={isPlaying}
+        onTogglePlayback={togglePlayback}
+        onStepFrame={stepFrame}
+        currentFrameTime={currentFrameTime}
+        frameCount={precipFrames.length}
+        currentFrameIndex={currentFrameIndex}
+        onFrameChange={setCurrentFrameIndex}
+        onToggleLayers={() => setShowEarthLayers(prev => !prev)}
       />
     </div>
   );
