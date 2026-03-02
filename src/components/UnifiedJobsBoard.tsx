@@ -104,6 +104,19 @@ const [searchQuery, setSearchQuery] = useState('');
   const [useProfileResume, setUseProfileResume] = useState(true);
   const [uploadingNewResume, setUploadingNewResume] = useState(false);
 
+  // Listen for Genius AI job navigation events
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { search?: string };
+      if (detail.search) {
+        setSearchQuery(detail.search);
+        setDisplayCount(6);
+      }
+    };
+    window.addEventListener('genius-job-navigate', handler);
+    return () => window.removeEventListener('genius-job-navigate', handler);
+  }, []);
+
   // Filter and deduplicate jobs for the opportunities view (excluding user's own jobs)
   const filteredJobs = useMemo(() => {
     // Deduplicate by ID

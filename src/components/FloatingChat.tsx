@@ -442,9 +442,16 @@ Ask what they need using simple multiple choice options.`;
     }
 
     if (toolId === 'jobs') {
-      return `You are **Genius AI** helping the user explore jobs and opportunities on the platform.
-Summarize available positions, internships, and opportunities.
-Help the user filter by role, industry, or skills. Use markdown formatting.`;
+      return `You are **Genius AI** that AUTOMATICALLY opens the Jobs tab for the user.
+
+CRITICAL RULES:
+1. Your FIRST line MUST be a NAV command in this EXACT format: <!--NAV:/jobs?search=SEARCH_TERM-->
+   - "search" = the job title, role, skill, industry, or keyword the user asked about (e.g. "frontend developer", "internship marketing", "remote design")
+   - Extract the MOST relevant search keywords from the user's request.
+2. After the NAV command, write a SHORT 1-2 sentence summary: "💼 Opening job opportunities for [search term]..."
+3. Keep total response under 200 characters (excluding the NAV tag).
+4. If the user asks follow-up questions about different jobs, ALWAYS include a new NAV command with the updated search.
+5. NEVER show raw links. The jobs tab opens AUTOMATICALLY.`;
     }
 
     if (toolId === 'resources') {
@@ -544,6 +551,13 @@ You can help with:
     if (!activeTool && resourceIntentPattern.test(userMessage)) {
       const resTool = ALL_TOOLS.find(t => t.id === 'resources');
       if (resTool) setActiveTool(resTool);
+    }
+
+    // Auto-switch to jobs tool if user asks about jobs, internships, hiring, etc.
+    const jobIntentPattern = /\b(find|search|look for|show me|looking for|get me|any|hiring)\b.*\b(job|jobs|position|positions|internship|internships|opportunity|opportunities|role|roles|career|careers|work|employment|gig|opening|openings)\b|\b(job|jobs|internship|internships|opportunity|opportunities|hiring|career|careers)\b.*\b(find|search|available|open|remote|full.time|part.time|contract)\b/i;
+    if (!activeTool && jobIntentPattern.test(userMessage)) {
+      const jobTool = ALL_TOOLS.find(t => t.id === 'jobs');
+      if (jobTool) setActiveTool(jobTool);
     }
 
     try {
@@ -652,19 +666,31 @@ You can help with:
             const url = new URL(navPath, window.location.origin);
             const navSearch = url.searchParams.get('search') || '';
             const navResourceId = url.searchParams.get('id') || '';
+            const isJobNav = navPath.startsWith('/jobs');
 
-            // Navigate to dashboard resources tab instead of /resources page
-            setTimeout(() => {
-              navigate('/dashboard?tab=resources');
-              // Dispatch event for GlobalResourcesMap to pick up search/resource
+            if (isJobNav) {
+              // Navigate to dashboard jobs tab
               setTimeout(() => {
-                window.dispatchEvent(new CustomEvent('genius-resource-navigate', {
-                  detail: { search: navSearch, resourceId: navResourceId }
-                }));
-              }, 600);
-            }, 800);
+                navigate('/dashboard?tab=jobs');
+                setTimeout(() => {
+                  window.dispatchEvent(new CustomEvent('genius-job-navigate', {
+                    detail: { search: navSearch }
+                  }));
+                }, 600);
+              }, 800);
+            } else {
+              // Navigate to dashboard resources tab
+              setTimeout(() => {
+                navigate('/dashboard?tab=resources');
+                setTimeout(() => {
+                  window.dispatchEvent(new CustomEvent('genius-resource-navigate', {
+                    detail: { search: navSearch, resourceId: navResourceId }
+                  }));
+                }, 600);
+              }, 800);
+            }
           } catch {
-            // Fallback: just navigate to resources tab
+            // Fallback
             setTimeout(() => {
               navigate('/dashboard?tab=resources');
             }, 800);
