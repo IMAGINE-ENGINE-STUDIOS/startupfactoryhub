@@ -214,7 +214,7 @@ export default function WalletPasses({ className }: { className?: string }) {
       icon: <Satellite className="h-5 w-5" />,
       tier: tier.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
       active: true,
-      details: 'Access global satellite datasets: land surface temperature, sea surface temperature, precipitation radar, elevation, and shortwave radiation from JAXA & NASA.',
+      details: 'Access global satellite datasets: land surface temperature, sea surface temperature, precipitation radar, elevation, and shortwave radiation.',
       gradient: 'from-blue-600 to-cyan-500',
       image: earthIntelPassImg,
     });
