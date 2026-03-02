@@ -61,6 +61,7 @@ import {
   Thermometer,
   Waves,
   Sun,
+  Ship,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -89,6 +90,10 @@ import { EarthLayerCard } from '@/components/earth/EarthLayerCard';
 import { EarthCategorySection } from '@/components/earth/EarthCategorySection';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
+import { useAISTracking } from '@/hooks/useAISTracking';
+import { AISVesselLayer } from '@/components/hubs/AISVesselLayer';
+import { AISVesselDetailCard } from '@/components/hubs/AISVesselDetailCard';
+import { AISControlPanel } from '@/components/hubs/AISControlPanel';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 type MapStyleType = 'default' | 'satellite' | 'satelliteStreets';
@@ -206,6 +211,10 @@ export const GlobalResourcesMap = () => {
     hasActiveDateLayer,
     hasActiveTimeline,
   } = useEarthIntelligence(map.current, mapReady);
+
+  // AIS vessel tracking
+  const ais = useAISTracking(map.current, mapReady);
+  
   
   // Regus locations (only fetch when workplace selected AND subscribed)
   const regusFilters: RegusFilters = {
@@ -1544,6 +1553,31 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     onToggle={toggleDataset}
                     onOpacity={setDatasetOpacity}
                   />
+
+                  {/* Logistics category */}
+                  <div>
+                    <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                      <Ship className="w-3.5 h-3.5 text-blue-400" />
+                      Logistics
+                    </h3>
+                    <AISControlPanel
+                      isEnabled={ais.isEnabled}
+                      onToggle={ais.toggle}
+                      isRefreshing={ais.isRefreshing}
+                      autoRefresh={ais.autoRefresh}
+                      onAutoRefreshChange={ais.setAutoRefresh}
+                      refreshInterval={ais.refreshInterval}
+                      onRefreshIntervalChange={ais.setRefreshInterval}
+                      onManualRefresh={ais.fetchVessels}
+                      vesselCount={ais.vessels.length}
+                      totalCount={ais.allVesselsCount}
+                      lastFetch={ais.lastFetch}
+                      isDemo={ais.isDemo}
+                      error={ais.error}
+                      filters={ais.filters}
+                      onFiltersChange={ais.setFilters}
+                    />
+                  </div>
                 </div>
               ) : selectedType === 'workplace' ? (
                 <div className="mt-4 pt-4 border-t border-white/20">
@@ -2324,6 +2358,26 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         open={showBookingModal}
         onOpenChange={setShowBookingModal}
       />
+
+      {/* AIS Vessel Layer */}
+      {ais.isEnabled && (
+        <AISVesselLayer
+          map={map.current}
+          vessels={ais.vessels}
+          mapReady={mapReady}
+          onVesselClick={ais.setSelectedVessel}
+        />
+      )}
+
+      {/* AIS Vessel Detail Card */}
+      {ais.selectedVessel && (
+        <AISVesselDetailCard
+          vessel={ais.selectedVessel}
+          trackHistory={ais.getTrackHistory(ais.selectedVessel.mmsi)}
+          onClose={() => ais.setSelectedVessel(null)}
+          map={map.current}
+        />
+      )}
 
       {/* Earth Intelligence Viewport Toolbar */}
       <EarthViewportToolbar
