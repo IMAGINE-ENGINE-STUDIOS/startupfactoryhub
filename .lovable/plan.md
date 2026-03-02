@@ -1,63 +1,46 @@
 
 
-## Analysis of the Problem
+## Plan: Replace TradingView Embeds with SFH Proprietary Widgets
 
-Looking at the edge function logs, I can identify **three critical issues** causing the AIS tracking to fail or return inconsistent data:
+### What We're Replacing
+The current `TradingViewCharts.tsx` embeds three third-party TradingView widgets (Market Overview, US Stocks Hotlists, Economic Calendar) via injected `<script>` tags. These will be fully replaced with custom-built, SFH-branded widgets using real-time data from free public APIs (CoinGecko) and deterministic economic calendar generation -- ported and adapted from the [Gold Arrow](/projects/b134be66-1c67-4b17-bdd9-e3f2dea9bef0) project.
 
-### Issue 1: Invalid Bounding Boxes
-The logs show longitude values like `-191.04` and `-156.37`, which are **outside the valid range** (-180 to 180). AISStream silently rejects these, returning 0 vessels. This happens because Mapbox's `getBounds()` can return longitudes outside [-180, 180] when the map is zoomed out or wrapped.
+### New Files to Create
 
-### Issue 2: Excessively Large Bounding Boxes
-Requests like `bbox: -9, -156 to 58, -0.1` span nearly the entire globe. AISStream's WebSocket delivers data one vessel at a time, and with only a 6-second collection window, it cannot stream enough vessels for such a massive area. When it does connect successfully (e.g., the Gulf of Mexico bbox), it collected 20 vessels -- but for huge areas it times out with 0.
+1. **`src/hooks/useCryptoData.ts`** -- Ported from Gold Arrow. Uses CoinGecko's free public API (`/coins/markets`, `/global`, `/search/trending`) with 30s auto-refresh. Includes hardcoded fallback data when rate-limited. No API key needed.
 
-### Issue 3: WebSocket Connection Instability
-Many requests show `Connected: false` at timeout -- the WebSocket never even opened. Edge functions have a short execution window and concurrent invocations can race each other. The function also lacks retry logic.
+2. **`src/hooks/useInView.ts`** -- Lightweight IntersectionObserver hook for animated entry (from Gold Arrow).
 
----
+3. **`src/components/intelligence/widgets/AnimatedNumber.tsx`** -- Smooth count-up number animation component (from Gold Arrow).
 
-## Plan
+4. **`src/components/intelligence/widgets/LivePulse.tsx`** -- Pulsing green dot "LIVE" indicator (from Gold Arrow).
 
-### 1. Fix bounding box normalization (Edge Function)
-- Clamp longitude values to [-180, 180] and latitude to [-90, 90] before sending to AISStream
-- If the viewport is too large (e.g., > 30 degrees span), subdivide or cap it to a reasonable area centered on the viewport center to get denser results
+5. **`src/components/intelligence/widgets/SFHMarketOverview.tsx`** -- Replaces TradingView Market Overview. Shows: global market cap, 24h volume, BTC dominance, active coins as stat cards, plus top gainers/losers tables with real prices.
 
-### 2. Increase collection duration and add connection timeout
-- Increase `COLLECT_DURATION` from 6s to 15s for more vessel data
-- Add a separate connection timeout (5s) -- if the WebSocket doesn't open within 5s, reject early with a clear error instead of waiting the full duration with 0 vessels
+6. **`src/components/intelligence/widgets/SFHTopMovers.tsx`** -- Replaces TradingView Hotlists. Tabbed view: Trending / Volume / Market Cap with ranked coin lists, prices, and 24h change.
 
-### 3. Add viewport size guard on the frontend
-- In `useAISTracking.ts`, before calling the edge function, check if the map zoom level is too low (e.g., < 4). If so, show a message like "Zoom in to see vessel data" instead of making a request that will return sparse/no results
-- Clamp bounds to valid ranges on the client side as well
+7. **`src/components/intelligence/widgets/SFHEconomicCalendar.tsx`** -- Replaces TradingView Economic Calendar. Deterministic per-day event generation for 14-day lookahead across US/EU/UK/JP/CN/AU/CA/CH with impact filtering. No API key needed.
 
-### 4. Clean up remaining `isDemo` references
-- Remove the `isDemo` state from `useAISTracking.ts` entirely (it's hardcoded to `false` now)
-- Remove all `isDemo` props and UI badges from `AISControlPanel.tsx`, `GISControlPanel.tsx`, `HubsMapViewLab.tsx`, and `GlobalResourcesMap.tsx`
+8. **`src/components/intelligence/widgets/SFHMarketQuotes.tsx`** -- New addition (no TradingView equivalent). Full quotes table with asset name, price, 24h/7d change, volume, and inline 7-day sparkline mini-charts using Recharts.
 
-### 5. Improve error UX
-- When the edge function returns 0 vessels with no error, show a contextual message: "No vessels found in this area. Try zooming into a port or shipping lane."
-- Display the actual error message from the edge function in the control panel instead of a generic failure
+### File to Modify
 
-### Technical Details
+- **`src/components/intelligence/TradingViewCharts.tsx`** -- Gut the entire file. Replace the three TradingView embed components with the four new SFH widgets in a 2-column grid layout. Remove all TradingView script injection code. Keep the same export signature so `IntelligenceHub.tsx` needs no changes.
 
-**Bounding box clamping (edge function):**
-```text
-latmin = clamp(latmin, -90, 90)
-latmax = clamp(latmax, -90, 90)
-lonmin = clamp(lonmin, -180, 180)
-lonmax = clamp(lonmax, -180, 180)
-```
+### Styling Adaptation
+Gold Arrow uses a navy/gold luxury theme. All widgets will be restyled to use SFH's existing design system:
+- `tech-card border-0` card wrappers
+- `text-foreground`, `text-muted-foreground` color tokens
+- `bg-muted/20`, `bg-background` backgrounds
+- Emerald/red for gain/loss indicators (already matching)
+- Standard `Badge` component for Live indicators
 
-**Viewport guard (frontend):**
-```text
-if zoom < 4 → show "zoom in" message, skip fetch
-if zoom < 7 → cap bbox to ~10° around center
-```
+### Data Flow
+- CoinGecko free tier (no key): markets, global stats, trending -- 30s refresh with fallback
+- Economic Calendar: deterministic generation from date seed (same approach as Gold Arrow)
+- Metal prices: excluded (Gold Arrow fetches from its own Supabase `price_feeds` table which doesn't exist here)
 
-**Files to modify:**
-- `supabase/functions/ais-proxy/index.ts` -- bbox clamping, longer timeout, connection guard
-- `src/hooks/useAISTracking.ts` -- zoom guard, remove `isDemo`, better error messages
-- `src/components/hubs/AISControlPanel.tsx` -- remove `isDemo` prop/UI, add "zoom in" state
-- `src/components/hubs/GISControlPanel.tsx` -- remove `isDemo` passthrough
-- `src/components/hubs/HubsMapViewLab.tsx` -- remove `isDemo` passthrough
-- `src/components/GlobalResourcesMap.tsx` -- remove `isDemo` passthrough
+### No Changes To
+- `IntelligenceHub.tsx` -- the import and usage of `TradingViewCharts` remains identical
+- Any other existing components or UI
 
