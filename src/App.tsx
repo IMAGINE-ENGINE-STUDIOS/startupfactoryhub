@@ -49,6 +49,7 @@ const ReferralProgram = lazy(() => import("./pages/ReferralProgram"));
 const ReferralRedirect = lazy(() => import("./pages/ReferralRedirect"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
+const InstallApp = lazy(() => import("./pages/InstallApp"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -120,6 +121,7 @@ const App = () => (
                     <Route path="/district/:districtId" element={<DistrictDashboard />} />
                     <Route path="/referral" element={<ReferralProgram />} />
                     <Route path="/ref/:code" element={<ReferralRedirect />} />
+                    <Route path="/install" element={<InstallApp />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
