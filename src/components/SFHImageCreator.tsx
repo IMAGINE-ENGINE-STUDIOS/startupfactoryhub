@@ -220,7 +220,7 @@ const SFHImageCreator = () => {
       {/* Top bar */}
       <div className="flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
-          <img src={geniusAiLogo} alt="Imaginaly" className="h-5 w-5 object-contain" />
+          
           <span className="text-sm font-medium text-muted-foreground">Usage</span>
         </div>
         <div className="flex items-center gap-2">
