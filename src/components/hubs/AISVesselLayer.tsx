@@ -9,16 +9,94 @@ interface AISVesselLayerProps {
   onVesselClick: (vessel: AISVessel) => void;
 }
 
-const SOURCE_ID = 'ais-vessels-source';
 const CLUSTER_SOURCE_ID = 'ais-clusters-source';
 const LAYER_UNCLUSTERED = 'ais-vessels-unclustered';
 const LAYER_CLUSTERS = 'ais-vessels-clusters';
 const LAYER_CLUSTER_COUNT = 'ais-vessels-cluster-count';
-const LAYER_HEADING = 'ais-vessels-heading';
+const SHIP_IMAGE_ID = 'ais-ship-icon';
+
+// Create a ship icon as a canvas image for Mapbox
+function createShipImage(size: number): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = size * ratio;
+  canvas.height = size * ratio;
+  const ctx = canvas.getContext('2d')!;
+  ctx.scale(ratio, ratio);
+
+  const cx = size / 2;
+  const cy = size / 2;
+  const s = size * 0.4; // scale factor
+
+  // Ship hull shape pointing UP (north = 0°)
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - s);           // bow (top)
+  ctx.lineTo(cx + s * 0.45, cy + s * 0.3);  // starboard
+  ctx.lineTo(cx + s * 0.3, cy + s * 0.85);  // starboard stern
+  ctx.lineTo(cx - s * 0.3, cy + s * 0.85);  // port stern
+  ctx.lineTo(cx - s * 0.45, cy + s * 0.3);  // port
+  ctx.closePath();
+
+  // White fill with slight transparency
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  return canvas;
+}
+
+// Create colored ship images per vessel category
+const VESSEL_COLORS: Record<string, string> = {
+  cargo: '#3b82f6',
+  tanker: '#ef4444',
+  passenger: '#8b5cf6',
+  fishing: '#10b981',
+  tug: '#f59e0b',
+  other: '#6b7280',
+};
+
+function createColoredShipImage(size: number, fillColor: string, strokeColor: string): HTMLCanvasElement {
+  const canvas = document.createElement('canvas');
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = size * ratio;
+  canvas.height = size * ratio;
+  const ctx = canvas.getContext('2d')!;
+  ctx.scale(ratio, ratio);
+
+  const cx = size / 2;
+  const cy = size / 2;
+  const s = size * 0.4;
+
+  // Ship hull shape pointing UP (north = 0°)
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - s);
+  ctx.lineTo(cx + s * 0.45, cy + s * 0.3);
+  ctx.lineTo(cx + s * 0.3, cy + s * 0.85);
+  ctx.lineTo(cx - s * 0.3, cy + s * 0.85);
+  ctx.lineTo(cx - s * 0.45, cy + s * 0.3);
+  ctx.closePath();
+
+  ctx.fillStyle = fillColor;
+  ctx.fill();
+  ctx.strokeStyle = strokeColor;
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Small bridge/superstructure detail
+  ctx.beginPath();
+  ctx.arc(cx, cy + s * 0.15, s * 0.12, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.fill();
+
+  return canvas;
+}
 
 export const AISVesselLayer = ({ map, vessels, mapReady, onVesselClick }: AISVesselLayerProps) => {
   const popupRef = useRef<mapboxgl.Popup | null>(null);
   const addedRef = useRef(false);
+  const imagesAddedRef = useRef(false);
 
   const buildGeoJSON = useCallback((): GeoJSON.FeatureCollection => ({
     type: 'FeatureCollection',
@@ -32,12 +110,29 @@ export const AISVesselLayer = ({ map, vessels, mapReady, onVesselClick }: AISVes
         typeLabel: getVesselTypeLabel(v.type),
         sog: v.sog / 10,
         cog: v.cog,
-        heading: v.heading === 511 ? v.cog : v.heading, // 511 = not available
+        heading: v.heading === 511 ? v.cog : v.heading,
         color: getVesselColor(v.type),
         navstat: v.navstat,
+        iconImage: `ship-${getVesselColorKey(v.type)}`,
       },
     })),
   }), [vessels]);
+
+  // Add ship images to map
+  const addShipImages = useCallback(() => {
+    if (!map || imagesAddedRef.current) return;
+
+    const size = 28;
+    Object.entries(VESSEL_COLORS).forEach(([key, color]) => {
+      const imageId = `ship-${key}`;
+      if (!map.hasImage(imageId)) {
+        const canvas = createColoredShipImage(size, color, 'rgba(255,255,255,0.9)');
+        map.addImage(imageId, canvas as any, { pixelRatio: window.devicePixelRatio || 1 });
+      }
+    });
+
+    imagesAddedRef.current = true;
+  }, [map]);
 
   // Add source & layers
   useEffect(() => {
@@ -45,6 +140,8 @@ export const AISVesselLayer = ({ map, vessels, mapReady, onVesselClick }: AISVes
 
     const setup = () => {
       if (addedRef.current) return;
+
+      addShipImages();
 
       // Clustered source
       if (!map.getSource(CLUSTER_SOURCE_ID)) {
@@ -95,18 +192,20 @@ export const AISVesselLayer = ({ map, vessels, mapReady, onVesselClick }: AISVes
         });
       }
 
-      // Unclustered vessel points
+      // Unclustered vessel icons (ship shape, rotated by heading)
       if (!map.getLayer(LAYER_UNCLUSTERED)) {
         map.addLayer({
           id: LAYER_UNCLUSTERED,
-          type: 'circle',
+          type: 'symbol',
           source: CLUSTER_SOURCE_ID,
           filter: ['!', ['has', 'point_count']],
-          paint: {
-            'circle-color': ['get', 'color'],
-            'circle-radius': 6,
-            'circle-stroke-width': 2,
-            'circle-stroke-color': 'rgba(255,255,255,0.8)',
+          layout: {
+            'icon-image': ['get', 'iconImage'],
+            'icon-size': 1,
+            'icon-rotate': ['get', 'heading'],
+            'icon-rotation-alignment': 'map',
+            'icon-allow-overlap': true,
+            'icon-ignore-placement': true,
           },
         });
       }
@@ -188,16 +287,32 @@ export const AISVesselLayer = ({ map, vessels, mapReady, onVesselClick }: AISVes
     return () => {
       if (!map) return;
       try {
-        [LAYER_HEADING, LAYER_CLUSTER_COUNT, LAYER_CLUSTERS, LAYER_UNCLUSTERED].forEach(id => {
+        [LAYER_CLUSTER_COUNT, LAYER_CLUSTERS, LAYER_UNCLUSTERED].forEach(id => {
           if (map.getLayer(id)) map.removeLayer(id);
         });
-        [CLUSTER_SOURCE_ID, SOURCE_ID].forEach(id => {
+        [CLUSTER_SOURCE_ID].forEach(id => {
           if (map.getSource(id)) map.removeSource(id);
+        });
+        // Remove ship images
+        Object.keys(VESSEL_COLORS).forEach(key => {
+          const imageId = `ship-${key}`;
+          if (map.hasImage(imageId)) map.removeImage(imageId);
         });
       } catch (e) { /* map may already be destroyed */ }
       addedRef.current = false;
+      imagesAddedRef.current = false;
     };
   }, [map]);
 
   return null;
 };
+
+// Helper to get the color key for a vessel type
+function getVesselColorKey(type: number): string {
+  if ([70,71,72,73,74,75,76,77,78,79].includes(type)) return 'cargo';
+  if ([80,81,82,83,84,85,86,87,88,89].includes(type)) return 'tanker';
+  if ([60,61,62,63,64,65,66,67,68,69].includes(type)) return 'passenger';
+  if (type === 30) return 'fishing';
+  if ([31,32,52].includes(type)) return 'tug';
+  return 'other';
+}
