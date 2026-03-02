@@ -14,9 +14,11 @@ import { StartupPerksButton } from "@/components/StartupPerksButton";
 import { GlobalClock } from "@/components/GlobalClock";
 import WalletPasses from "@/components/WalletPasses";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [recommendationCount, setRecommendationCount] = useState(0);
   const [hasNewRecommendations, setHasNewRecommendations] = useState(false);
 
@@ -38,7 +40,7 @@ export function DashboardHeader() {
           size="icon"
           onClick={() => navigate("/")}
           className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
-          title="Home"
+          title={t('nav.home')}
         >
           <Home className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
@@ -48,7 +50,7 @@ export function DashboardHeader() {
           size="icon"
           onClick={() => navigate("/dashboard?tab=profile")}
           className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10"
-          title="Profile"
+          title={t('nav.profile')}
         >
           <User className="h-4 w-4 sm:h-5 sm:w-5" />
         </Button>
@@ -63,7 +65,7 @@ export function DashboardHeader() {
               variant="ghost" 
               size="icon" 
               className="neon-glow hover:scale-110 transition-transform duration-300 relative h-9 w-9 sm:h-10 sm:w-10"
-              title="AI Recommendations"
+              title={t('header.recommendations')}
             >
               <Brain className={`h-4 w-4 sm:h-5 sm:w-5 ${hasNewRecommendations ? 'animate-pulse' : ''}`} />
               {recommendationCount > 0 && (
@@ -77,10 +79,10 @@ export function DashboardHeader() {
             <div className="p-3 sm:p-4 border-b">
               <div className="flex items-center gap-2">
                 <Brain className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
-                <h3 className="font-semibold text-sm sm:text-base">AI Recommendations</h3>
+                <h3 className="font-semibold text-sm sm:text-base">{t('header.recommendations')}</h3>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
-                Personalized suggestions based on your activity
+                {t('header.recommendations.desc')}
               </p>
             </div>
             <RecommendationPopup onRecommendationsLoad={handleRecommendationsLoad} />
