@@ -97,6 +97,7 @@ export function getVesselColor(type: number): string {
 
 const TRACK_BUFFER_SIZE = 20; // last N positions per vessel
 const MIN_FETCH_INTERVAL = 60_000; // 60 seconds (AISHub rate limit)
+const MIN_ZOOM_FOR_AIS = 4; // Minimum zoom level to fetch AIS data
 
 export const useAISTracking = (map: mapboxgl.Map | null, mapReady: boolean) => {
   const [vessels, setVessels] = useState<AISVessel[]>([]);
@@ -105,7 +106,6 @@ export const useAISTracking = (map: mapboxgl.Map | null, mapReady: boolean) => {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(60); // seconds
   const [lastFetch, setLastFetch] = useState<Date | null>(null);
-  const [isDemo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedVessel, setSelectedVessel] = useState<AISVessel | null>(null);
   const [filters, setFilters] = useState<AISFilters>({
@@ -123,6 +123,14 @@ export const useAISTracking = (map: mapboxgl.Map | null, mapReady: boolean) => {
   const fetchVessels = useCallback(async () => {
     if (!map || !isEnabled) return;
 
+    // Zoom guard - don't fetch at low zoom levels
+    const zoom = map.getZoom();
+    if (zoom < MIN_ZOOM_FOR_AIS) {
+      setError('Zoom in to see vessel data. Current area is too large for AIS tracking.');
+      setVessels([]);
+      return;
+    }
+
     const bounds = map.getBounds();
     if (!bounds) return;
 
@@ -130,13 +138,14 @@ export const useAISTracking = (map: mapboxgl.Map | null, mapReady: boolean) => {
     setError(null);
 
     try {
+      // Clamp bounds on client side too
+      const latmin = Math.max(-90, Math.min(90, bounds.getSouth()));
+      const latmax = Math.max(-90, Math.min(90, bounds.getNorth()));
+      const lonmin = Math.max(-180, Math.min(180, bounds.getWest()));
+      const lonmax = Math.max(-180, Math.min(180, bounds.getEast()));
+
       const { data, error: fnError } = await supabase.functions.invoke('ais-proxy', {
-        body: {
-          latmin: bounds.getSouth(),
-          latmax: bounds.getNorth(),
-          lonmin: bounds.getWest(),
-          lonmax: bounds.getEast(),
-        },
+        body: { latmin, latmax, lonmin, lonmax },
       });
 
       if (fnError) throw new Error(fnError.message);
@@ -148,6 +157,10 @@ export const useAISTracking = (map: mapboxgl.Map | null, mapReady: boolean) => {
 
       const newVessels: AISVessel[] = data?.vessels || [];
 
+      if (newVessels.length === 0) {
+        setError('No vessels found in this area. Try zooming into a port or shipping lane.');
+      }
+
       // Update track buffers
       newVessels.forEach(v => {
         const existing = trackBuffer.current.get(v.mmsi) || [];
@@ -158,7 +171,6 @@ export const useAISTracking = (map: mapboxgl.Map | null, mapReady: boolean) => {
           sog: v.sog,
           cog: v.cog,
         });
-        // Keep only last N
         if (existing.length > TRACK_BUFFER_SIZE) {
           existing.splice(0, existing.length - TRACK_BUFFER_SIZE);
         }
@@ -241,7 +253,6 @@ export const useAISTracking = (map: mapboxgl.Map | null, mapReady: boolean) => {
     autoRefresh,
     refreshInterval,
     lastFetch,
-    isDemo,
     error,
     selectedVessel,
     filters,

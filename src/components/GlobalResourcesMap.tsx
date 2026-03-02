@@ -1572,7 +1572,6 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                       vesselCount={ais.vessels.length}
                       totalCount={ais.allVesselsCount}
                       lastFetch={ais.lastFetch}
-                      isDemo={ais.isDemo}
                       error={ais.error}
                       filters={ais.filters}
                       onFiltersChange={ais.setFilters}

@@ -21,7 +21,6 @@ interface AISControlPanelProps {
   vesselCount: number;
   totalCount: number;
   lastFetch: Date | null;
-  isDemo: boolean;
   error: string | null;
   filters: AISFilters;
   onFiltersChange: (f: AISFilters) => void;
@@ -39,7 +38,6 @@ export const AISControlPanel = ({
   vesselCount,
   totalCount,
   lastFetch,
-  isDemo,
   error,
   filters,
   onFiltersChange,
@@ -65,11 +63,6 @@ export const AISControlPanel = ({
                   <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-blue-500/20 border-blue-500/50 text-blue-400">
                     {vesselCount}{totalCount !== vesselCount ? `/${totalCount}` : ''} vessels
                   </Badge>
-                  {isDemo && (
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-amber-500/50 text-amber-400">
-                      Demo
-                    </Badge>
-                  )}
                   {isRefreshing && (
                     <RefreshCw className="w-3 h-3 text-blue-400 animate-spin" />
                   )}
@@ -80,11 +73,11 @@ export const AISControlPanel = ({
           <Switch checked={isEnabled} onCheckedChange={onToggle} />
         </div>
 
-        {/* Error */}
+        {/* Error / Info */}
         {isEnabled && error && (
-          <div className="mt-2 p-2 rounded-lg bg-red-500/10 border border-red-500/30 flex items-start gap-2">
-            <AlertTriangle className="w-3.5 h-3.5 text-red-400 mt-0.5 shrink-0" />
-            <p className="text-[11px] text-red-300">{error}</p>
+          <div className="mt-2 p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-start gap-2">
+            <AlertTriangle className="w-3.5 h-3.5 text-amber-400 mt-0.5 shrink-0" />
+            <p className="text-[11px] text-amber-300">{error}</p>
           </div>
         )}
       </div>
