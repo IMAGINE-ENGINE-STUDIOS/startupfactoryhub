@@ -24,7 +24,7 @@ import LinkedInShareDialog from '@/components/LinkedInShareDialog';
 import ImageLightbox from '@/components/ImageLightbox';
 import { Linkedin } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import geniusAiLogo from "@/assets/genius-ai-logo.png";
+import geniusAiLogo from "@/assets/imaginaly-logo.png";
 interface FeedPost {
   id: string;
   content: string;

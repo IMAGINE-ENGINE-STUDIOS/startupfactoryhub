@@ -14,7 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useResources } from '@/hooks/useResources';
 import ReactMarkdown from 'react-markdown';
-import geniusAILogo from '@/assets/genius-ai-logo.png';
+import geniusAILogo from '@/assets/imaginaly-logo.png';
 import { useGeniusMemory, useSaveMemory, useDeleteMemory, useGeniusChatLogs, useSaveChatLog, useDeleteChatLog, isLearnIntent, extractMemoryFromContext } from '@/hooks/useGeniusMemory';
 import type { ChatLog } from '@/hooks/useGeniusMemory';
 

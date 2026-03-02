@@ -2,7 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Send, X, Loader2, ChevronDown, Plus, Save, Trash2, BookOpen, CheckCircle2, Square, Play } from "lucide-react";
 import { addLightPaperMessage } from "./MessageCenter";
 import { addGeniusTask, updateGeniusTask } from "./GeniusTaskRegistry";
-import geniusAILogo from "@/assets/genius-ai-logo.png";
+import geniusAILogo from "@/assets/imaginaly-logo.png";
 
 type Phase = "idle" | "greeting" | "input" | "conversation" | "loading" | "outline-review" | "generating-chapters" | "stopped" | "done";
 

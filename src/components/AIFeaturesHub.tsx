@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import geniusAiLogo from "@/assets/genius-ai-logo.png";
+import geniusAiLogo from "@/assets/imaginaly-logo.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
