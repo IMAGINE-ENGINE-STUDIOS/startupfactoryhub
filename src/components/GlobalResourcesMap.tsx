@@ -88,6 +88,7 @@ import { useEarthIntelligence } from '@/hooks/useEarthIntelligence';
 import { EarthViewportToolbar } from '@/components/earth/EarthViewportToolbar';
 import { EarthLayerCard } from '@/components/earth/EarthLayerCard';
 import { EarthCategorySection } from '@/components/earth/EarthCategorySection';
+import { EarthLegendWidget } from '@/components/earth/EarthLegendWidget';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 import { useAISTracking } from '@/hooks/useAISTracking';
@@ -2376,6 +2377,11 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           onClose={() => ais.setSelectedVessel(null)}
           map={map.current}
         />
+      )}
+
+      {/* Earth Intelligence Legend Widget */}
+      {hasEarthAccess && (
+        <EarthLegendWidget activeDatasets={earthDatasets.filter(d => d.enabled)} />
       )}
 
       {/* Earth Intelligence Viewport Toolbar */}
