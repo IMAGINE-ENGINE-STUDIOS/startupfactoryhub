@@ -26,7 +26,7 @@ const EARTH_LAYERS: EarthLayer[] = [
     id: 'jaxa-hillshade',
     name: 'Land Surface Hillshade',
     description: 'Global terrain relief derived from ALOS/Mapzen ~30m elevation data',
-    tileUrl: 'https://tiles.openstreetmap.us/raster/hillshade/{z}/{x}/{y}.webp',
+    tileUrl: 'https://tiles.openstreetmap.us/raster/hillshade/{z}/{x}/{y}.jpg',
     enabled: false,
     opacity: 0.5,
     icon: '🌄',
