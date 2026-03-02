@@ -74,6 +74,7 @@ export default function MatchingSystem() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [roleLoading, setRoleLoading] = useState(true);
   const [userCompany, setUserCompany] = useState<Company | null>(null);
+  const [activeTab, setActiveTab] = useState('mentors');
   const [userAcceleratorProfile, setUserAcceleratorProfile] = useState<AcceleratorProfile | null>(null);
   const { user } = useAuth();
   const { toast } = useToast();
@@ -1128,7 +1129,7 @@ export default function MatchingSystem() {
 
   return (
     <div className="space-y-6">
-      <Tabs defaultValue="mentors" className="space-y-6">
+      <Tabs defaultValue="mentors" className="space-y-6" onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-5 max-w-xl">
           <TabsTrigger value="mentors">Mentors</TabsTrigger>
           <TabsTrigger value="investors">Investors</TabsTrigger>
@@ -1137,8 +1138,8 @@ export default function MatchingSystem() {
           <TabsTrigger value="mynetwork">Network</TabsTrigger>
         </TabsList>
 
-        {/* Network Search Engine - integrated below tabs */}
-        <NetworkSearchEngine />
+        {/* Network Search Engine - hidden on startups tab */}
+        {activeTab !== 'startups' && <NetworkSearchEngine />}
 
         <TabsContent value="mentors" className="space-y-4">
           <Card className="tech-card border-0">
@@ -1249,15 +1250,19 @@ export default function MatchingSystem() {
         </TabsContent>
 
         <TabsContent value="startups" className="space-y-6">
-          <Card className="tech-card border-0">
-            <CardHeader>
-              <CardTitle className="flex items-center space-x-2">
-                <Building className="h-5 w-5 text-primary" />
-                <span>Recommended Startups</span>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {startupMatches.length > 0 ? (
+          {/* Browse All Startups */}
+          <StartupBrowser />
+
+          {/* Recommended Startups - only shown when there are matches */}
+          {startupMatches.length > 0 && (
+            <Card className="tech-card border-0">
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <Building className="h-5 w-5 text-primary" />
+                  <span>Recommended Startups</span>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {startupMatches.map((startup) => (
                     <MatchCard
@@ -1273,18 +1278,9 @@ export default function MatchingSystem() {
                     />
                   ))}
                 </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Building className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No startup matches yet</h3>
-                  <p className="text-muted-foreground">Update your investment preferences to see matches</p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-          
-          {/* Browse All Startups */}
-          <StartupBrowser />
+              </CardContent>
+            </Card>
+          )}
         </TabsContent>
 
         {/* My Network Tab */}
