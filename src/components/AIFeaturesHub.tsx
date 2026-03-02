@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import geniusAiLogo from "@/assets/genius-ai-logo.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -586,7 +587,7 @@ function ImageCreatorDialog({ open, onOpenChange }: { open: boolean; onOpenChang
       <DialogContent className="tech-card border-0 !transition-none max-w-[95vw] w-full h-[90vh] flex flex-col">
         <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
-            <Wand2 className="h-5 w-5 text-emerald-500" />
+            <img src={geniusAiLogo} alt="Imaginaly" className="h-5 w-5 object-contain" />
             Imaginaly
           </DialogTitle>
           <DialogDescription>
