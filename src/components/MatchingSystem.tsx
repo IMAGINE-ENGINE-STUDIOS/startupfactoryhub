@@ -76,6 +76,9 @@ export default function MatchingSystem() {
   const [userCompany, setUserCompany] = useState<Company | null>(null);
   const [activeTab, setActiveTab] = useState('mentors');
   const [userAcceleratorProfile, setUserAcceleratorProfile] = useState<AcceleratorProfile | null>(null);
+  const [potentialMentors, setPotentialMentors] = useState<Match[]>([]);
+  const [potentialInvestors, setPotentialInvestors] = useState<Match[]>([]);
+  const [potentialAccelerators, setPotentialAccelerators] = useState<Match[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
   const { notifyConnection, createNotification } = useNotifications();
@@ -115,6 +118,69 @@ export default function MatchingSystem() {
       fetchMatches();
     }
   }, [user, userRole, userCompany]);
+
+  // Fetch potential connections by role when no matches exist
+  useEffect(() => {
+    if (!user) return;
+    if (mentorMatches.length === 0) fetchPotentialByRole('mentor', setPotentialMentors);
+    if (investorMatches.length === 0) fetchPotentialByRole('investor', setPotentialInvestors);
+    if (acceleratorMatches.length === 0) fetchPotentialAccelerators();
+  }, [user, mentorMatches.length, investorMatches.length, acceleratorMatches.length]);
+
+  const fetchPotentialByRole = async (role: string, setter: (m: Match[]) => void) => {
+    if (!user) return;
+    const { data: roleUsers } = await supabase
+      .from('user_roles')
+      .select('user_id')
+      .eq('role', role as any)
+      .neq('user_id', user.id)
+      .limit(6);
+    if (!roleUsers || roleUsers.length === 0) return;
+    const userIds = roleUsers.map(r => r.user_id);
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, full_name, avatar_url, bio')
+      .in('user_id', userIds);
+    if (!profiles) return;
+    const { data: companies } = await supabase
+      .from('companies')
+      .select('user_id, name, industry')
+      .in('user_id', userIds);
+    const companyMap = new Map((companies || []).map(c => [c.user_id, c]));
+    setter(profiles.map(p => {
+      const company = companyMap.get(p.user_id);
+      return {
+        id: p.user_id,
+        name: p.full_name || 'Unknown',
+        role,
+        description: p.bio || '',
+        industry: company?.industry || '',
+        compatibility_score: 0,
+        match_reasons: [],
+        avatar: p.avatar_url || '',
+      };
+    }));
+  };
+
+  const fetchPotentialAccelerators = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('accelerator_profiles')
+      .select('id, user_id, organization_name, description, logo_url, industries_focus, location')
+      .limit(6);
+    if (!data) return;
+    setPotentialAccelerators(data.map(a => ({
+      id: a.user_id,
+      name: a.organization_name,
+      role: 'accelerator',
+      description: a.description || '',
+      industry: (a.industries_focus || []).join(', '),
+      compatibility_score: 0,
+      match_reasons: [],
+      avatar: a.logo_url || '',
+      location: a.location || undefined,
+    })));
+  };
 
   const fetchUserRole = async () => {
     if (!user) {
@@ -1166,10 +1232,28 @@ export default function MatchingSystem() {
                     />
                   ))}
                 </div>
+              ) : potentialMentors.length > 0 ? (
+                <>
+                  <p className="text-sm text-muted-foreground mb-4">People you may want to connect with</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {potentialMentors.map((mentor) => (
+                      <MatchCard
+                        key={mentor.id}
+                        match={mentor}
+                        onConnect={() => sendConnectionRequest(mentor.id, mentor.name, () => {
+                          setPotentialMentors(potentialMentors.filter(m => m.id !== mentor.id));
+                        })}
+                        onPass={() => {
+                          setPotentialMentors(potentialMentors.filter(m => m.id !== mentor.id));
+                        }}
+                      />
+                    ))}
+                  </div>
+                </>
               ) : (
                 <div className="text-center py-12">
                   <Users className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No mentor matches yet</h3>
+                  <h3 className="text-lg font-semibold mb-2">No mentors found yet</h3>
                   <p className="text-muted-foreground">Complete your profile to get better matches</p>
                 </div>
               )}
@@ -1202,10 +1286,28 @@ export default function MatchingSystem() {
                     />
                   ))}
                 </div>
+              ) : potentialInvestors.length > 0 ? (
+                <>
+                  <p className="text-sm text-muted-foreground mb-4">People you may want to connect with</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {potentialInvestors.map((investor) => (
+                      <MatchCard
+                        key={investor.id}
+                        match={investor}
+                        onConnect={() => sendConnectionRequest(investor.id, investor.name, () => {
+                          setPotentialInvestors(potentialInvestors.filter(i => i.id !== investor.id));
+                        })}
+                        onPass={() => {
+                          setPotentialInvestors(potentialInvestors.filter(i => i.id !== investor.id));
+                        }}
+                      />
+                    ))}
+                  </div>
+                </>
               ) : (
                 <div className="text-center py-12">
                   <TrendingUp className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No investor matches yet</h3>
+                  <h3 className="text-lg font-semibold mb-2">No investors found yet</h3>
                   <p className="text-muted-foreground">Complete your startup profile to attract investors</p>
                 </div>
               )}
@@ -1238,10 +1340,28 @@ export default function MatchingSystem() {
                     />
                   ))}
                 </div>
+              ) : potentialAccelerators.length > 0 ? (
+                <>
+                  <p className="text-sm text-muted-foreground mb-4">Programs you may want to explore</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {potentialAccelerators.map((acc) => (
+                      <MatchCard
+                        key={acc.id}
+                        match={acc}
+                        onConnect={() => sendConnectionRequest(acc.id, acc.name, () => {
+                          setPotentialAccelerators(potentialAccelerators.filter(a => a.id !== acc.id));
+                        }, 'Accelerator')}
+                        onPass={() => {
+                          setPotentialAccelerators(potentialAccelerators.filter(a => a.id !== acc.id));
+                        }}
+                      />
+                    ))}
+                  </div>
+                </>
               ) : (
                 <div className="text-center py-12">
                   <Rocket className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No accelerator matches yet</h3>
+                  <h3 className="text-lg font-semibold mb-2">No accelerators found yet</h3>
                   <p className="text-muted-foreground">Complete your startup profile to find the best programs</p>
                 </div>
               )}
