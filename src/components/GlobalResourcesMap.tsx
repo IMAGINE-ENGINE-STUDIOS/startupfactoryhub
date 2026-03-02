@@ -316,6 +316,40 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     resourcesRef.current = resources;
   }, [resources]);
 
+  // Listen for Genius AI resource navigation events
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { search?: string; resourceId?: string };
+      
+      // Set search query
+      if (detail.search) {
+        setSearch(detail.search);
+      }
+      
+      // Open left panel so user sees search results
+      setIsLeftPanelOpen(true);
+      
+      // If a specific resource ID was provided, find and select it
+      if (detail.resourceId && resources) {
+        const match = resources.find(r => r.id === detail.resourceId);
+        if (match) {
+          setSelectedResource(match);
+          // Fly to the resource on the map
+          if (map.current && match.latitude && match.longitude) {
+            map.current.flyTo({
+              center: [match.longitude, match.latitude],
+              zoom: 14,
+              duration: 2000,
+            });
+          }
+        }
+      }
+    };
+
+    window.addEventListener('genius-resource-navigate', handler);
+    return () => window.removeEventListener('genius-resource-navigate', handler);
+  }, [resources]);
+
   // Fetch events for map
   const { data: mapEvents, isLoading: isLoadingEvents, refetch: refetchEvents } = useEventsForMap();
 
