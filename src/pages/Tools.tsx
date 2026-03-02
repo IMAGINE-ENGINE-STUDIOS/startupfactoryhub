@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bot, FileText, TrendingUp, Languages, Image, Workflow, Sparkles, Kanban, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
+import { Bot, FileText, TrendingUp, Languages, Image, Workflow, Sparkles, Kanban, ChevronDown, ChevronUp, ArrowRight, Wand2 } from "lucide-react";
 import CRMBoard from "@/components/CRMBoard";
 import AIAssistant from "@/components/AIAssistant";
 import AISummaryCard from "@/components/AISummaryCard";
@@ -12,6 +12,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import TaskAutomation from "@/components/TaskAutomation";
+import SFHImageCreator from "@/components/SFHImageCreator";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import GuestPrompt from "@/components/GuestPrompt";
@@ -210,6 +211,14 @@ const Tools = () => {
       icon: Image,
       color: "from-rose-500/20 to-red-500/20",
       iconColor: "text-rose-500",
+    },
+    {
+      id: "image-creator",
+      title: "SFH Image Creator",
+      description: "Generate stunning AI images from text prompts",
+      icon: Wand2,
+      color: "from-emerald-500/20 to-teal-500/20",
+      iconColor: "text-emerald-500",
     },
     {
       id: "automation",
@@ -559,6 +568,24 @@ const Tools = () => {
                 </CardContent>
               </Card>
             )}
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Image Creator Dialog */}
+      <Dialog open={openDialog === "image-creator"} onOpenChange={(open) => !open && setOpenDialog(null)}>
+        <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Wand2 className="h-5 w-5 text-emerald-500" />
+              SFH Image Creator
+            </DialogTitle>
+            <DialogDescription>
+              Generate stunning AI images from text prompts
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4">
+            <SFHImageCreator />
           </div>
         </DialogContent>
       </Dialog>

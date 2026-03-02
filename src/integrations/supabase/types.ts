@@ -2661,6 +2661,33 @@ export type Database = {
         }
         Relationships: []
       }
+      image_generation_usage: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          prompt: string
+          style_preset: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          prompt: string
+          style_preset?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          prompt?: string
+          style_preset?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       internship_applications: {
         Row: {
           cover_letter: string | null
