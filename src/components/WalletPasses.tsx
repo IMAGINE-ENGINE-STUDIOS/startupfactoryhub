@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Plane, Building, Globe, Eye, EyeOff, ExternalLink, Landmark, Mail } from 'lucide-react';
+import { Wallet, Plane, Building, Globe, Eye, EyeOff, ExternalLink, Landmark, Mail, Satellite } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -15,6 +15,7 @@ import frontierPassImg from '@/assets/frontier-pass.webp';
 import sfhPassImg from '@/assets/sfh-pass.png';
 import softLandingPassImg from '@/assets/soft-landing-pass.webp';
 import hsbcPassImg from '@/assets/hsbc-pass.jpg';
+import earthIntelPassImg from '@/assets/earth-intelligence-pass.jpg';
 import SoftLandingRequestDialog from '@/components/SoftLandingRequestDialog';
 
 const FRONTIER_BOOKING_URL = 'https://booking.flyfrontier.com/FrontierMiles/GoWildSignup?_ga=2.125927374.2135620265.1772270212-2039149194.1772270211&_gac=1.183458260.1772273523.Cj0KCQiAwYrNBhDcARIsAGo3u32mNyqqe-uI2l0iOVAa0s9X_nKB4dKSpaXoj604XXI-F7W_a3L0Qx4aAu6UEALw_wcB';
@@ -200,6 +201,22 @@ export default function WalletPasses({ className }: { className?: string }) {
           {hsbcSent ? 'Introduction Sent ✓' : hsbcSending ? 'Sending...' : 'Request Account Introduction'}
         </Button>
       ),
+    });
+  }
+
+  // Earth Intelligence Pass — $550+ tiers only
+  const earthAccessTiers = ['self_paced_office', 'global_access', 'corporate'];
+  if (isSubscribed && earthAccessTiers.includes(tier)) {
+    passes.push({
+      id: 'earth-intelligence',
+      title: 'Earth Intelligence',
+      subtitle: 'Satellite Data & Analytics',
+      icon: <Satellite className="h-5 w-5" />,
+      tier: tier.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      active: true,
+      details: 'Access global satellite datasets: land surface temperature, sea surface temperature, precipitation radar, elevation, and shortwave radiation from JAXA & NASA.',
+      gradient: 'from-blue-600 to-cyan-500',
+      image: earthIntelPassImg,
     });
   }
 
