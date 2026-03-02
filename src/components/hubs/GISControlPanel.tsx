@@ -257,7 +257,7 @@ export const GISControlPanel = ({
               ) : (
                 <div className="p-3 rounded-xl bg-white/5 text-center">
                   <p className="text-xs text-muted-foreground">
-                    JAXA satellite layers are available for premium users.
+                    ALOS Land Surface layers are available for premium users.
                   </p>
                 </div>
               )}
