@@ -12,6 +12,9 @@ import { useExternalTracking, DEMO_PROVIDERS } from '@/hooks/useExternalTracking
 import { ExternalTrackingMarkers } from './ExternalTrackingMarkers';
 import { GISControlPanel, MapStyleType } from './GISControlPanel';
 import { useEarthIntelligence } from '@/hooks/useEarthIntelligence';
+import { useAISTracking } from '@/hooks/useAISTracking';
+import { AISVesselLayer } from './AISVesselLayer';
+import { AISVesselDetailCard } from './AISVesselDetailCard';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
@@ -73,6 +76,9 @@ export const HubsMapViewLab = ({
     toggleDataset,
     setDatasetOpacity,
   } = useEarthIntelligence(map.current, mapReady);
+
+  // AIS Tracking
+  const ais = useAISTracking(map.current, mapReady);
 
   // Initialize map
   useEffect(() => {
@@ -342,6 +348,26 @@ export const HubsMapViewLab = ({
         onEntityClick={handleEntityClick}
       />
 
+      {/* AIS Vessel Layer */}
+      {ais.isEnabled && (
+        <AISVesselLayer
+          map={map.current}
+          vessels={ais.vessels}
+          mapReady={mapReady}
+          onVesselClick={(v) => ais.setSelectedVessel(v)}
+        />
+      )}
+
+      {/* AIS Vessel Detail Card */}
+      {ais.selectedVessel && (
+        <AISVesselDetailCard
+          vessel={ais.selectedVessel}
+          trackHistory={ais.getTrackHistory(ais.selectedVessel.mmsi)}
+          map={map.current}
+          onClose={() => ais.setSelectedVessel(null)}
+        />
+      )}
+
       {/* GIS Control Panel */}
       <GISControlPanel
         layers={layers}
@@ -355,6 +381,21 @@ export const HubsMapViewLab = ({
         hasEarthAccess={hasEarthAccess}
         onToggleEarthLayer={(id) => toggleDataset(id)}
         onEarthLayerOpacity={(id, op) => setDatasetOpacity(id, op)}
+        aisEnabled={ais.isEnabled}
+        onAISToggle={ais.toggle}
+        aisRefreshing={ais.isRefreshing}
+        aisAutoRefresh={ais.autoRefresh}
+        onAISAutoRefreshChange={ais.setAutoRefresh}
+        aisRefreshInterval={ais.refreshInterval}
+        onAISRefreshIntervalChange={ais.setRefreshInterval}
+        onAISManualRefresh={ais.fetchVessels}
+        aisVesselCount={ais.vessels.length}
+        aisTotalCount={ais.allVesselsCount}
+        aisLastFetch={ais.lastFetch}
+        aisIsDemo={ais.isDemo}
+        aisError={ais.error}
+        aisFilters={ais.filters}
+        onAISFiltersChange={ais.setFilters}
       />
       
       {/* Control Buttons */}
