@@ -1,30 +1,20 @@
 
 
-## Plan: Set Up Capacitor for Native Android & iOS Apps
+## Plan: Set Up PWA (Progressive Web App) for Installable Mobile Experience
 
-Since you want real native apps for both Android and Apple, we'll use **Capacitor** — it wraps your existing web app into a native shell that can be published to the App Store and Google Play.
+The app is now configured as a PWA so users can install it directly from the website on both Android and iOS devices.
 
-### What will be done
+### What was done
 
-1. **Install Capacitor dependencies**: `@capacitor/core`, `@capacitor/cli`, `@capacitor/ios`, `@capacitor/android`
+1. **Removed Capacitor** dependencies and config
+2. **Installed `vite-plugin-pwa`** and configured in `vite.config.ts` with manifest, service worker, and caching
+3. **Added mobile meta tags** to `index.html` (apple-mobile-web-app-capable, touch icon, etc.)
+4. **Generated PWA icons** (192x192 and 512x512) in `/public`
+5. **Created `/install` page** with platform-specific instructions for iOS, Android, and Desktop
+6. **Added route** `/install` to the app router
 
-2. **Create `capacitor.config.ts`** in the project root with:
-   - `appId`: `app.lovable.ea8832c05f304d47a6119a3021cb2360`
-   - `appName`: `startupfactoryhub`
-   - `webDir`: `dist`
-   - Hot-reload server pointing to your preview URL for development
+### How users install the app
 
-### What you'll need to do on your end (after I set it up)
-
-1. Export the project to GitHub via "Export to GitHub" button, then clone it locally
-2. Run `npm install`
-3. Run `npx cap add ios` and/or `npx cap add android`
-4. Run `npx cap update ios` / `npx cap update android`
-5. Run `npm run build`
-6. Run `npx cap sync`
-7. Run `npx cap run android` (requires Android Studio) or `npx cap run ios` (requires Mac + Xcode)
-
-After any future code changes, just `git pull` → `npm run build` → `npx cap sync` → run again.
-
-For more details, check out the [Lovable mobile development guide](https://docs.lovable.dev).
-
+- **Android (Chrome)**: Visit the site → browser shows "Install" banner, or visit `/install`
+- **iOS (Safari)**: Visit `/install` → follow "Share → Add to Home Screen" instructions
+- **Desktop (Chrome/Edge)**: Click install icon in address bar
