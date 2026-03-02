@@ -20,8 +20,7 @@ const Footer = () => {
               </span>
             </div>
             <p className="text-sm sm:text-base text-muted-foreground max-w-md">
-              The ultimate AI-powered social accelerator platform connecting startups, 
-              mentors, investors, and students worldwide.
+              {t('footer.description')}
             </p>
           </div>
 
@@ -30,63 +29,42 @@ const Footer = () => {
             <h3 className="font-semibold text-foreground mb-4">{t('footer.quickLinks')}</h3>
             <ul className="space-y-3">
               <li>
-                <Link 
-                  to="/#about" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
+                <Link to="/#about" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   {t('nav.about')}
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/#features" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
+                <Link to="/#features" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   {t('nav.features')}
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/blog" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors"
-                >
+                <Link to="/blog" className="text-sm text-muted-foreground hover:text-primary transition-colors">
                   {t('nav.blog')}
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/guidelines" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
-                >
+                <Link to="/guidelines" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
                   <BookOpen className="h-3 w-3" />
                   {t('nav.guidelines')}
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/sponsorship" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
-                >
+                <Link to="/sponsorship" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
                   <Rocket className="h-3 w-3" />
                   {t('nav.sponsorship')}
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/partners" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
-                >
+                <Link to="/partners" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
                   <Handshake className="h-3 w-3" />
-                  Partners
+                  {t('nav.partners')}
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/referral" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
-                >
+                <Link to="/referral" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
                   <Gift className="h-3 w-3" />
-                  Referral Program
+                  {t('nav.referral')}
                 </Link>
               </li>
             </ul>
@@ -97,28 +75,19 @@ const Footer = () => {
             <h3 className="font-semibold text-foreground mb-4">{t('footer.resources')}</h3>
             <ul className="space-y-3">
               <li>
-                <Link 
-                  to="/guidelines" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
-                >
+                <Link to="/guidelines" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
                   <FileText className="h-3 w-3" />
                   {t('footer.helpCenter')}
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/guidelines" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
-                >
+                <Link to="/guidelines" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
                   <BookOpen className="h-3 w-3" />
                   {t('footer.documentation')}
                 </Link>
               </li>
               <li>
-                <a 
-                  href="mailto:support@startupfactoryhub.com" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
-                >
+                <a href="mailto:support@startupfactoryhub.com" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
                   <Mail className="h-3 w-3" />
                   {t('footer.contactSupport')}
                 </a>
@@ -131,28 +100,19 @@ const Footer = () => {
             <h3 className="font-semibold text-foreground mb-4">{t('footer.legal')}</h3>
             <ul className="space-y-3">
               <li>
-                <Link 
-                  to="/privacy-policy" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
-                >
+                <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
                   <Shield className="h-3 w-3" />
                   {t('footer.privacyPolicy')}
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/terms-of-service" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
-                >
+                <Link to="/terms-of-service" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
                   <FileText className="h-3 w-3" />
                   {t('footer.termsOfService')}
                 </Link>
               </li>
               <li>
-                <Link 
-                  to="/cookie-policy" 
-                  className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2"
-                >
+                <Link to="/cookie-policy" className="text-sm text-muted-foreground hover:text-primary transition-colors inline-flex items-center gap-2">
                   <Cookie className="h-3 w-3" />
                   {t('footer.cookiePolicy')}
                 </Link>

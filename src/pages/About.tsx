@@ -2,14 +2,16 @@ import { Link } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Users, Target, Rocket, TrendingUp } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const About = () => {
+  const { t } = useLanguage();
+
   return (
     <div className="min-h-screen">
       <Navigation />
       
       <section className="py-20 sm:py-32 relative overflow-hidden">
-        {/* Background gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-background via-ocean-dark/20 to-background" />
         
         <div className="container mx-auto px-4 sm:px-6 relative z-10">
@@ -17,12 +19,11 @@ const About = () => {
           <div className="text-center mb-16 animate-fade-in">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6 tracking-wide">
               <span className="bg-gradient-primary bg-clip-text text-transparent">
-                ABOUT STARTUP FACTORY HUB
+                {t('about.title')}
               </span>
             </h1>
             <p className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto">
-              The world's first AI-powered social accelerator platform that connects 
-              the entire startup ecosystem in one collaborative space.
+              {t('about.subtitle')}
             </p>
           </div>
 
@@ -32,11 +33,9 @@ const About = () => {
               <div className="w-12 h-12 rounded-lg bg-gradient-primary/20 flex items-center justify-center mb-4">
                 <Target className="h-6 w-6 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold mb-4 text-foreground">Our Mission</h2>
+              <h2 className="text-2xl font-bold mb-4 text-foreground">{t('about.ourMission')}</h2>
               <p className="text-muted-foreground leading-relaxed">
-                To democratize access to startup resources, mentorship, and funding by creating 
-                a unified platform where innovation thrives. We believe every great idea deserves 
-                the support it needs to succeed.
+                {t('about.missionDesc')}
               </p>
             </div>
 
@@ -44,11 +43,9 @@ const About = () => {
               <div className="w-12 h-12 rounded-lg bg-gradient-primary/20 flex items-center justify-center mb-4">
                 <Rocket className="h-6 w-6 text-primary" />
               </div>
-              <h2 className="text-2xl font-bold mb-4 text-foreground">Our Vision</h2>
+              <h2 className="text-2xl font-bold mb-4 text-foreground">{t('about.ourVision')}</h2>
               <p className="text-muted-foreground leading-relaxed">
-                To become the global standard for startup acceleration, fostering a community 
-                where entrepreneurs, mentors, investors, and students collaborate seamlessly 
-                to build the future of innovation.
+                {t('about.visionDesc')}
               </p>
             </div>
           </div>
@@ -56,50 +53,32 @@ const About = () => {
           {/* What We Offer */}
           <div className="glass-card p-8 sm:p-12 rounded-xl border border-ocean-border">
             <h2 className="text-2xl sm:text-3xl font-bold mb-8 text-center text-foreground">
-              What Makes Us Different
+              {t('about.whatMakesDifferent')}
             </h2>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">🤖 AI-Powered Matching</h3>
-                <p className="text-sm text-muted-foreground">
-                  Our intelligent algorithms connect you with the perfect mentors, investors, 
-                  and opportunities based on your unique profile and goals.
-                </p>
+                <h3 className="font-semibold text-foreground">🤖 {t('about.aiMatching')}</h3>
+                <p className="text-sm text-muted-foreground">{t('about.aiMatchingDesc')}</p>
               </div>
               <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">🌐 Global Community</h3>
-                <p className="text-sm text-muted-foreground">
-                  Join a worldwide network of entrepreneurs, mentors, investors, and students 
-                  all working together to build the next generation of startups.
-                </p>
+                <h3 className="font-semibold text-foreground">🌐 {t('about.globalCommunity')}</h3>
+                <p className="text-sm text-muted-foreground">{t('about.globalCommunityDesc')}</p>
               </div>
               <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">📚 Educational Resources</h3>
-                <p className="text-sm text-muted-foreground">
-                  Access comprehensive courses, workshops, and materials designed to accelerate 
-                  your learning and growth at every stage.
-                </p>
+                <h3 className="font-semibold text-foreground">📚 {t('about.eduResources')}</h3>
+                <p className="text-sm text-muted-foreground">{t('about.eduResourcesDesc')}</p>
               </div>
               <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">💼 Job & Internship Board</h3>
-                <p className="text-sm text-muted-foreground">
-                  Discover opportunities at innovative startups or find talented individuals 
-                  to join your team through our integrated job platform.
-                </p>
+                <h3 className="font-semibold text-foreground">💼 {t('about.jobBoard')}</h3>
+                <p className="text-sm text-muted-foreground">{t('about.jobBoardDesc')}</p>
               </div>
               <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">💰 Funding Opportunities</h3>
-                <p className="text-sm text-muted-foreground">
-                  Connect directly with investors actively looking for startups in your industry, 
-                  stage, and vision.
-                </p>
+                <h3 className="font-semibold text-foreground">💰 {t('about.funding')}</h3>
+                <p className="text-sm text-muted-foreground">{t('about.fundingDesc')}</p>
               </div>
               <div className="space-y-2">
-                <h3 className="font-semibold text-foreground">🎯 Mentorship Programs</h3>
-                <p className="text-sm text-muted-foreground">
-                  Get personalized guidance from experienced mentors and advisors who have 
-                  been where you are and know what it takes to succeed.
-                </p>
+                <h3 className="font-semibold text-foreground">🎯 {t('about.mentorship')}</h3>
+                <p className="text-sm text-muted-foreground">{t('about.mentorshipDesc')}</p>
               </div>
             </div>
           </div>
@@ -111,7 +90,7 @@ const About = () => {
               className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-primary text-white rounded-lg font-semibold hover:opacity-90 transition-opacity"
             >
               <Rocket className="h-5 w-5" />
-              Join Our Community Today
+              {t('about.joinCommunityToday')}
             </Link>
           </div>
         </div>

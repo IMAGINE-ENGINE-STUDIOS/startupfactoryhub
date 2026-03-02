@@ -47,6 +47,7 @@ import { useRoadmapProgress } from '@/hooks/useRoadmapProgress';
 import { useEvents } from '@/hooks/useEvents';
 import { useEventPaymentVerification } from '@/hooks/useEventPaymentVerification';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { format, parseISO } from 'date-fns';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -59,6 +60,7 @@ const Dashboard = () => {
   } = useAuth();
   const { toast } = useToast();
   const { role, loading: roleLoading } = useUserRole();
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
   const [activeTab, setActiveTab] = useState(urlTab || "social");
@@ -354,47 +356,47 @@ const Dashboard = () => {
             <TabsList className="flex w-full whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
               <TabsTrigger value="social" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Social</span>
+                <span className="hidden md:inline text-sm">{t('nav.social')}</span>
               </TabsTrigger>
               <TabsTrigger value="resources" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Resources</span>
+                <span className="hidden md:inline text-sm">{t('nav.resources')}</span>
               </TabsTrigger>
               <TabsTrigger value="tools" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Wrench className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Tools</span>
+                <span className="hidden md:inline text-sm">{t('nav.tools')}</span>
               </TabsTrigger>
               <TabsTrigger value="network" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Network className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Network</span>
+                <span className="hidden md:inline text-sm">{t('nav.network')}</span>
               </TabsTrigger>
               <TabsTrigger value="learn" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <GraduationCap className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Learn</span>
+                <span className="hidden md:inline text-sm">{t('nav.learn')}</span>
               </TabsTrigger>
               <TabsTrigger value="meetings" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Presentation className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Meetings</span>
+                <span className="hidden md:inline text-sm">{t('nav.meetings')}</span>
               </TabsTrigger>
               <TabsTrigger value="calendar" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <CalendarIcon className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Calendar</span>
+                <span className="hidden md:inline text-sm">{t('nav.calendar')}</span>
               </TabsTrigger>
               <TabsTrigger value="intelligence" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Brain className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Intelligence</span>
+                <span className="hidden md:inline text-sm">{t('nav.intelligence')}</span>
               </TabsTrigger>
               <TabsTrigger value="jobs" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Briefcase className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Jobs</span>
+                <span className="hidden md:inline text-sm">{t('nav.jobs')}</span>
               </TabsTrigger>
               <TabsTrigger value="journey" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <MapIcon className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Journey</span>
+                <span className="hidden md:inline text-sm">{t('nav.journey')}</span>
               </TabsTrigger>
               <TabsTrigger value="analytics" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <BarChart className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Analytics</span>
+                <span className="hidden md:inline text-sm">{t('nav.analytics')}</span>
               </TabsTrigger>
             </TabsList>
           </div>

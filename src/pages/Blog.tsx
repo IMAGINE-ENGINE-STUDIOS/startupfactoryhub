@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import BlogPostCard from "@/components/blog/BlogPostCard";
@@ -26,6 +27,7 @@ interface BlogPost {
 
 const Blog = () => {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const queryClient = useQueryClient();
   const [showCreatePost, setShowCreatePost] = useState(false);
 
@@ -39,7 +41,6 @@ const Blog = () => {
 
       if (error) throw error;
 
-      // Fetch profiles for user posts
       const userIds = data
         .filter((p) => p.user_id)
         .map((p) => p.user_id as string);
@@ -96,10 +97,10 @@ const Blog = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h1 className="text-3xl font-bold text-foreground mb-2">
-                Community Blog
+                {t('blog.communityBlog')}
               </h1>
               <p className="text-muted-foreground">
-                Share your thoughts, ideas, and experiences with the community
+                {t('blog.shareThoughts')}
               </p>
             </div>
             <button
@@ -107,11 +108,10 @@ const Blog = () => {
               className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
             >
               <PenSquare className="h-4 w-4" />
-              Write Post
+              {t('blog.writePost')}
             </button>
           </div>
 
-          {/* Create Post Form */}
           {showCreatePost && (
             <BlogCreatePost
               user={user}
@@ -138,16 +138,16 @@ const Blog = () => {
             <div className="text-center py-12 bg-card rounded-lg border border-border">
               <PenSquare className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium text-foreground mb-2">
-                No posts yet
+                {t('blog.noPosts')}
               </h3>
               <p className="text-muted-foreground mb-4">
-                Be the first to share something with the community!
+                {t('blog.beFirst')}
               </p>
               <button
                 onClick={() => setShowCreatePost(true)}
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors"
               >
-                Create First Post
+                {t('blog.createFirstPost')}
               </button>
             </div>
           )}
