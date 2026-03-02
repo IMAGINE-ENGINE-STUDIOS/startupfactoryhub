@@ -1328,10 +1328,16 @@ You can help with:
                           onChange={(e) => setAiInput(e.target.value)}
                           placeholder={
                             activeTool?.id === 'quick'
-                              ? '⚡ Ask a quick question...'
+                              ? 'Ask a quick question...'
+                              : activeTool?.id === 'resources'
+                              ? 'Search offices, coworking, labs...'
+                              : activeTool?.id === 'jobs'
+                              ? 'Search jobs, internships, roles...'
+                              : activeTool?.id === 'contacts'
+                              ? 'Find contacts, connections...'
                               : activeTool
-                              ? `✨ ${activeTool.name}...`
-                              : '✨ Ask Genius AI...'
+                              ? `${activeTool.name}...`
+                              : 'Ask Genius AI anything...'
                           }
                           disabled={isAiLoading}
                           className="text-sm rounded-full border-2 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 transition-all duration-300 bg-background/50 backdrop-blur-sm px-4"
