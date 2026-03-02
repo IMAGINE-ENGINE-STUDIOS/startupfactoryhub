@@ -53,7 +53,11 @@ import {
   Layers,
   Lock,
   Star,
-  Earth
+  Earth,
+  Mountain,
+  CloudRain,
+  EyeOff,
+  Eye,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -152,6 +156,7 @@ export const GlobalResourcesMap = () => {
   const [isPerksExpanded, setIsPerksExpanded] = useState(true);
   const [isOnlineResourcesExpanded, setIsOnlineResourcesExpanded] = useState(false);
   const [showEarthLayers, setShowEarthLayers] = useState(false);
+  const [showResourceMarkers, setShowResourceMarkers] = useState(true);
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
   const regusMarkers = useRef<mapboxgl.Marker[]>([]);
   const [userEventStatus, setUserEventStatus] = useState<string | null>(null);
@@ -1382,7 +1387,27 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
 
           {/* Categories */}
           <div className="flex-1 flex flex-col overflow-hidden p-4 backdrop-blur">
-            <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex-shrink-0">Categories</h3>
+            <div className="flex items-center justify-between mb-3 flex-shrink-0">
+              <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">Categories</h3>
+              <button
+                onClick={() => {
+                  const newVal = !showResourceMarkers;
+                  setShowResourceMarkers(newVal);
+                  if (map.current?.getLayer('resource-markers')) {
+                    map.current.setLayoutProperty('resource-markers', 'visibility', newVal ? 'visible' : 'none');
+                  }
+                }}
+                title={showResourceMarkers ? 'Hide resource markers' : 'Show resource markers'}
+                className={cn(
+                  "p-1.5 rounded-lg transition-colors",
+                  showResourceMarkers
+                    ? "text-muted-foreground hover:bg-white/10"
+                    : "text-amber-400 bg-amber-500/10"
+                )}
+              >
+                {showResourceMarkers ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+              </button>
+            </div>
             <ScrollArea className="flex-1 overflow-hidden">
               <div className="space-y-1 pr-2">
                 <Button
@@ -1455,7 +1480,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                   {/* Land Surface category */}
                   <div>
                     <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                      <Earth className="w-3.5 h-3.5 text-emerald-400" />
+                      <Mountain className="w-3.5 h-3.5 text-emerald-400" />
                       Land Surface
                     </h3>
                     <div className="space-y-3">
@@ -1473,7 +1498,8 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                   {/* Precipitation category */}
                   <div>
                     <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                      🌧️ <span className="text-xs">Precipitation</span>
+                      <CloudRain className="w-3.5 h-3.5 text-sky-400" />
+                      Precipitation
                     </h3>
                     <div className="space-y-3">
                       {earthLayers.filter(l => l.category === 'precipitation').map((layer) => (

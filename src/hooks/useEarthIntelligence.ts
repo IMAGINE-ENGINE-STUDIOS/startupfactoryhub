@@ -2,6 +2,8 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { useAuth } from '@/contexts/AuthContext';
 
+export type EarthLayerIconType = 'mountain' | 'sun-dim' | 'cloud-rain';
+
 export interface EarthLayer {
   id: string;
   name: string;
@@ -9,7 +11,7 @@ export interface EarthLayer {
   tileUrl: string;
   enabled: boolean;
   opacity: number;
-  icon: string;
+  icon: EarthLayerIconType;
   category: 'land-surface' | 'precipitation';
   supportsTimeline?: boolean;
 }
@@ -27,7 +29,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     tileUrl: 'https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png',
     enabled: false,
     opacity: 0.6,
-    icon: '🏔️',
+    icon: 'mountain',
     category: 'land-surface',
   },
   {
@@ -37,17 +39,17 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     tileUrl: 'https://tiles.openstreetmap.us/raster/hillshade/{z}/{x}/{y}.jpg',
     enabled: false,
     opacity: 0.5,
-    icon: '🌄',
+    icon: 'sun-dim',
     category: 'land-surface',
   },
   {
     id: 'gsmap-precipitation',
     name: 'GSMaP Precipitation',
-    description: 'Global satellite precipitation (GPM/ALOS constellation, ~10min updates)',
+    description: 'Real-time global radar precipitation (~10min updates). Historical GSMaP data from 2000+ available via JAXA G-Portal.',
     tileUrl: '', // Dynamic — set from RainViewer API
     enabled: false,
     opacity: 0.65,
-    icon: '🌧️',
+    icon: 'cloud-rain',
     category: 'precipitation',
     supportsTimeline: true,
   },
