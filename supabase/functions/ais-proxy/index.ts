@@ -33,6 +33,18 @@ serve(async (req) => {
 
     console.log(`Collected ${vessels.length} vessels from AISStream`);
 
+    // If live API returned no vessels, fall back to demo data
+    if (vessels.length === 0) {
+      console.log('No live vessels received, falling back to demo data');
+      return new Response(JSON.stringify({
+        demo: true,
+        message: 'AISStream returned no vessels for this area. Showing demo data.',
+        vessels: generateDemoVessels(latmin, latmax, lonmin, lonmax),
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response(JSON.stringify({
       demo: false,
       vessels,
