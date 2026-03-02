@@ -76,7 +76,7 @@ export const AISVesselLayer = ({ map, vessels, mapReady, onVesselClick }: AISVes
         typeLabel: getVesselTypeLabel(v.type),
         sog: v.sog / 10,
         cog: v.cog,
-        heading: v.heading === 511 ? v.cog : v.heading,
+        heading: v.heading === 511 ? (v.cog / 10) : v.heading,
         color: getVesselColor(v.type),
         navstat: v.navstat,
         iconImage: `ship-${getVesselColorKey(v.type)}`,

@@ -327,7 +327,7 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level5',
     maxZoom: 5,
-    useWms: false,
+    useWms: true,
   },
 ];
 
