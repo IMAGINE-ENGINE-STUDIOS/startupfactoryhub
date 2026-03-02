@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, Bookmark, Repeat2, Send, Calendar, Image as ImageIcon, Video, Sparkles, X, Trash2, Hash, Trophy } from 'lucide-react';
+import { Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, Bookmark, Repeat2, Send, Calendar, Image as ImageIcon, Video, Sparkles, X, Trash2, Hash, Trophy, ZoomIn } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
@@ -21,6 +21,7 @@ import { CohortPostCard } from '@/components/CohortPostCard';
 import LiveRoomPostCard from '@/components/LiveRoomPostCard';
 import { EventPostCard } from '@/components/EventPostCard';
 import LinkedInShareDialog from '@/components/LinkedInShareDialog';
+import ImageLightbox from '@/components/ImageLightbox';
 import { Linkedin } from 'lucide-react';
 interface FeedPost {
   id: string;
@@ -102,6 +103,15 @@ export default function UnifiedCommunityFeed({
   const [linkedInShareOpen, setLinkedInShareOpen] = useState(false);
   const [linkedInShareContent, setLinkedInShareContent] = useState('');
   const [linkedInShareImage, setLinkedInShareImage] = useState<string | undefined>();
+  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+
+  const openLightbox = (images: string[], index: number) => {
+    setLightboxImages(images);
+    setLightboxIndex(index);
+    setLightboxOpen(true);
+  };
   const {
     user
   } = useAuth();
@@ -1027,12 +1037,32 @@ export default function UnifiedCommunityFeed({
                       <p className="text-sm sm:text-base text-foreground leading-relaxed whitespace-pre-wrap break-words">{post.content}</p>
                       
                       {/* Media Display */}
-                      {post.media_urls && post.media_urls.length > 0 && <div className={`grid gap-2 mt-3 ${post.media_urls.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
-                          {post.media_urls.filter(url => url).map((url, idx) => {
-                      const isVideo = url?.includes('.mp4') || url?.includes('.webm') || url?.includes('.mov') || url?.includes('video');
-                      return isVideo ? <video key={idx} src={url} controls className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover" /> : <img key={idx} src={url} alt={`Media ${idx + 1}`} className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover" />;
-                    })}
-                        </div>}
+                      {post.media_urls && post.media_urls.length > 0 && (() => {
+                        const imageUrls = post.media_urls!.filter(url => url && !url?.includes('.mp4') && !url?.includes('.webm') && !url?.includes('.mov') && !url?.includes('video'));
+                        const videoUrls = post.media_urls!.filter(url => url?.includes('.mp4') || url?.includes('.webm') || url?.includes('.mov') || url?.includes('video'));
+                        return (
+                          <div className={`grid gap-2 mt-3 ${post.media_urls!.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+                            {videoUrls.map((url, idx) => (
+                              <video key={`v-${idx}`} src={url} controls className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover" />
+                            ))}
+                            {imageUrls.map((url, idx) => (
+                              <div key={`i-${idx}`} className="relative cursor-pointer group" onClick={() => openLightbox(imageUrls, idx)}>
+                                <img src={url} alt={`Media ${idx + 1}`} className="w-full rounded-lg max-h-64 sm:max-h-96 object-cover transition-transform group-hover:brightness-90" />
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <div className="bg-black/50 rounded-full p-2">
+                                    <ZoomIn className="h-5 w-5 text-white" />
+                                  </div>
+                                </div>
+                                {imageUrls.length > 1 && idx === 0 && (
+                                  <Badge className="absolute top-2 right-2 bg-black/60 text-white border-none text-xs">
+                                    1/{imageUrls.length}
+                                  </Badge>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })()}
                       
                       <div className="flex items-center flex-wrap gap-3 sm:gap-6 pt-3 border-t border-border">
                         <Button variant="ghost" size="sm" className={`text-muted-foreground hover:text-primary px-2 ${likedPosts.has(post.id) ? 'text-red-500' : ''}`} onClick={() => toggleLike(post.id)}>
@@ -1324,6 +1354,14 @@ export default function UnifiedCommunityFeed({
         onOpenChange={setLinkedInShareOpen}
         postContent={linkedInShareContent}
         postImageUrl={linkedInShareImage}
+      />
+
+      {/* Image Lightbox */}
+      <ImageLightbox
+        images={lightboxImages}
+        initialIndex={lightboxIndex}
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
       />
     </div>;
 }
