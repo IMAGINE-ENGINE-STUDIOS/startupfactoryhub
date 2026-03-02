@@ -58,6 +58,9 @@ import {
   CloudRain,
   EyeOff,
   Eye,
+  Thermometer,
+  Waves,
+  Sun,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -83,6 +86,7 @@ import { Workspace, WorkspaceType } from '@/hooks/useHubsSearch';
 import { useEarthIntelligence } from '@/hooks/useEarthIntelligence';
 import { EarthViewportToolbar } from '@/components/earth/EarthViewportToolbar';
 import { EarthLayerCard } from '@/components/earth/EarthLayerCard';
+import { EarthCategorySection } from '@/components/earth/EarthCategorySection';
 import { Slider } from '@/components/ui/slider';
 import { Switch } from '@/components/ui/switch';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
@@ -185,6 +189,12 @@ export const GlobalResourcesMap = () => {
     isPlaying,
     togglePlayback,
     stepFrame,
+    selectedDate,
+    setSelectedDate,
+    selectedMonth,
+    setSelectedMonth,
+    hasActiveDateLayer,
+    hasActiveTimeline,
   } = useEarthIntelligence(map.current, mapReady);
   
   // Regus locations (only fetch when workplace selected AND subscribed)
@@ -1478,40 +1488,49 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
               {showEarthLayers && hasEarthAccess ? (
                 <div className="mt-4 pt-4 border-t border-white/20 space-y-5">
                   {/* Land Surface category */}
-                  <div>
-                    <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                      <Mountain className="w-3.5 h-3.5 text-emerald-400" />
-                      Land Surface
-                    </h3>
-                    <div className="space-y-3">
-                      {earthLayers.filter(l => l.category === 'land-surface').map((layer) => (
-                        <EarthLayerCard
-                          key={layer.id}
-                          layer={layer}
-                          onToggle={toggleEarthLayer}
-                          onOpacity={setEarthLayerOpacity}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                  <EarthCategorySection
+                    icon={<Mountain className="w-3.5 h-3.5 text-emerald-400" />}
+                    title="Land Surface"
+                    layers={earthLayers.filter(l => l.category === 'land-surface')}
+                    onToggle={toggleEarthLayer}
+                    onOpacity={setEarthLayerOpacity}
+                  />
 
                   {/* Precipitation category */}
-                  <div>
-                    <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-                      <CloudRain className="w-3.5 h-3.5 text-sky-400" />
-                      Precipitation
-                    </h3>
-                    <div className="space-y-3">
-                      {earthLayers.filter(l => l.category === 'precipitation').map((layer) => (
-                        <EarthLayerCard
-                          key={layer.id}
-                          layer={layer}
-                          onToggle={toggleEarthLayer}
-                          onOpacity={setEarthLayerOpacity}
-                        />
-                      ))}
-                    </div>
-                  </div>
+                  <EarthCategorySection
+                    icon={<CloudRain className="w-3.5 h-3.5 text-sky-400" />}
+                    title="Precipitation"
+                    layers={earthLayers.filter(l => l.category === 'precipitation')}
+                    onToggle={toggleEarthLayer}
+                    onOpacity={setEarthLayerOpacity}
+                  />
+
+                  {/* Temperature category */}
+                  <EarthCategorySection
+                    icon={<Thermometer className="w-3.5 h-3.5 text-red-400" />}
+                    title="Temperature"
+                    layers={earthLayers.filter(l => l.category === 'temperature')}
+                    onToggle={toggleEarthLayer}
+                    onOpacity={setEarthLayerOpacity}
+                  />
+
+                  {/* Ocean (SST) category */}
+                  <EarthCategorySection
+                    icon={<Waves className="w-3.5 h-3.5 text-cyan-400" />}
+                    title="Ocean"
+                    layers={earthLayers.filter(l => l.category === 'ocean')}
+                    onToggle={toggleEarthLayer}
+                    onOpacity={setEarthLayerOpacity}
+                  />
+
+                  {/* Radiation category */}
+                  <EarthCategorySection
+                    icon={<Sun className="w-3.5 h-3.5 text-yellow-400" />}
+                    title="Radiation"
+                    layers={earthLayers.filter(l => l.category === 'radiation')}
+                    onToggle={toggleEarthLayer}
+                    onOpacity={setEarthLayerOpacity}
+                  />
                 </div>
               ) : selectedType === 'workplace' ? (
                 <div className="mt-4 pt-4 border-t border-white/20">
@@ -2295,7 +2314,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
 
       {/* Earth Intelligence Viewport Toolbar */}
       <EarthViewportToolbar
-        isVisible={hasEarthAccess && earthLayers.some(l => l.id === 'gsmap-precipitation' && l.enabled)}
+        isTimelineVisible={hasEarthAccess && hasActiveTimeline}
         isPlaying={isPlaying}
         onTogglePlayback={togglePlayback}
         onStepFrame={stepFrame}
@@ -2303,6 +2322,13 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         frameCount={precipFrames.length}
         currentFrameIndex={currentFrameIndex}
         onFrameChange={setCurrentFrameIndex}
+        isDatePickerVisible={hasEarthAccess && hasActiveDateLayer}
+        selectedDate={selectedDate}
+        selectedMonth={selectedMonth}
+        onDateChange={setSelectedDate}
+        onMonthChange={setSelectedMonth}
+        hasMonthlyLayer={earthLayers.some(l => l.enabled && l.temporalResolution === 'monthly')}
+        hasDailyLayer={earthLayers.some(l => l.enabled && l.temporalResolution === 'daily')}
         onToggleLayers={() => setShowEarthLayers(prev => !prev)}
       />
     </div>

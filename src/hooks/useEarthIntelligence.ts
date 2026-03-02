@@ -2,7 +2,9 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { useAuth } from '@/contexts/AuthContext';
 
-export type EarthLayerIconType = 'mountain' | 'sun-dim' | 'cloud-rain';
+export type EarthLayerIconType = 'mountain' | 'sun-dim' | 'cloud-rain' | 'thermometer' | 'waves' | 'sun';
+
+export type EarthLayerCategory = 'land-surface' | 'precipitation' | 'temperature' | 'ocean' | 'radiation';
 
 export interface EarthLayer {
   id: string;
@@ -12,8 +14,17 @@ export interface EarthLayer {
   enabled: boolean;
   opacity: number;
   icon: EarthLayerIconType;
-  category: 'land-surface' | 'precipitation';
+  category: EarthLayerCategory;
   supportsTimeline?: boolean;
+  supportsDateSelection?: boolean;
+  supportsDayNight?: boolean;
+  dayNightMode?: 'day' | 'night';
+  temporalResolution?: 'monthly' | 'daily';
+  gibsLayerDay?: string;
+  gibsLayerNight?: string;
+  gibsFormat?: string;
+  gibsTileMatrixSet?: string;
+  maxZoom?: number;
 }
 
 export interface PrecipitationFrame {
@@ -21,7 +32,13 @@ export interface PrecipitationFrame {
   path: string;
 }
 
+// GIBS tile URL builder
+const buildGibsUrl = (layer: string, date: string, tileMatrixSet = 'GoogleMapsCompatible_Level6', format = 'png') => {
+  return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${layer}/default/${date}/${tileMatrixSet}/{z}/{y}/{x}.${format}`;
+};
+
 const STATIC_EARTH_LAYERS: EarthLayer[] = [
+  // ── Land Surface ──
   {
     id: 'jaxa-aw3d30',
     name: 'ALOS Elevation (AW3D30)',
@@ -42,25 +59,262 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     icon: 'sun-dim',
     category: 'land-surface',
   },
+
+  // ── Precipitation ──
   {
     id: 'gsmap-precipitation',
-    name: 'GSMaP Precipitation',
-    description: 'Real-time global radar precipitation (~10min updates). Historical GSMaP data from 2000+ available via JAXA G-Portal.',
-    tileUrl: '', // Dynamic — set from RainViewer API
+    name: 'GSMaP Precipitation (Real-time)',
+    description: 'Real-time global radar precipitation (~10min updates)',
+    tileUrl: '',
     enabled: false,
     opacity: 0.65,
     icon: 'cloud-rain',
     category: 'precipitation',
     supportsTimeline: true,
   },
+  {
+    id: 'gsmap-precipitation-monthly',
+    name: 'GSMaP Precipitation (Monthly)',
+    description: 'Monthly accumulated precipitation from GPM/GSMaP. Data available since March 2000.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.65,
+    icon: 'cloud-rain',
+    category: 'precipitation',
+    supportsDateSelection: true,
+    temporalResolution: 'monthly',
+    gibsLayerDay: 'IMERG_Precipitation_Rate',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level6',
+    maxZoom: 6,
+  },
+
+  // ── Temperature (Land) ──
+  {
+    id: 'lst-day-monthly',
+    name: 'Land Surface Temp (Day/Monthly)',
+    description: 'Monthly LST observed by GCOM-C "SHIKISAI" (~5km). Daytime ~10:30am local time. Clouds cause data gaps.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'thermometer',
+    category: 'temperature',
+    supportsDateSelection: true,
+    temporalResolution: 'monthly',
+    supportsDayNight: true,
+    dayNightMode: 'day',
+    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day_TileMatrixSet',
+    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night_TileMatrixSet',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    maxZoom: 7,
+  },
+  {
+    id: 'lst-day-daily',
+    name: 'Land Surface Temp (Day/Daily)',
+    description: 'Daily LST observed by GCOM-C "SHIKISAI" (~5km). Daytime ~10:30am local time.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'thermometer',
+    category: 'temperature',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    supportsDayNight: true,
+    dayNightMode: 'day',
+    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day_TileMatrixSet',
+    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night_TileMatrixSet',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    maxZoom: 7,
+  },
+  {
+    id: 'lst-night-monthly',
+    name: 'Land Surface Temp (Night/Monthly)',
+    description: 'Monthly nighttime LST observed by GCOM-C "SHIKISAI" (~5km). Nighttime ~10:30pm local time.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'thermometer',
+    category: 'temperature',
+    supportsDateSelection: true,
+    temporalResolution: 'monthly',
+    supportsDayNight: true,
+    dayNightMode: 'night',
+    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day_TileMatrixSet',
+    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night_TileMatrixSet',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    maxZoom: 7,
+  },
+  {
+    id: 'lst-night-daily',
+    name: 'Land Surface Temp (Night/Daily)',
+    description: 'Daily nighttime LST observed by GCOM-C "SHIKISAI" (~5km). Nighttime ~10:30pm local time.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'thermometer',
+    category: 'temperature',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    supportsDayNight: true,
+    dayNightMode: 'night',
+    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day_TileMatrixSet',
+    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night_TileMatrixSet',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    maxZoom: 7,
+  },
+
+  // ── Ocean (SST) ──
+  {
+    id: 'sst-gcomc-day-monthly',
+    name: 'SST GCOM-C (Day/Monthly)',
+    description: 'Sea surface temperature by GCOM-C "SHIKISAI" (~250m coastal). Daytime ~10:30am. Cloud gaps possible.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'waves',
+    category: 'ocean',
+    supportsDateSelection: true,
+    temporalResolution: 'monthly',
+    supportsDayNight: true,
+    dayNightMode: 'day',
+    gibsLayerDay: 'GHRSST_L4_MUR_Sea_Surface_Temperature',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    maxZoom: 7,
+  },
+  {
+    id: 'sst-gcomc-night-monthly',
+    name: 'SST GCOM-C (Night/Monthly)',
+    description: 'Sea surface temperature by GCOM-C "SHIKISAI" (~250m coastal). Nighttime ~10:30pm.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'waves',
+    category: 'ocean',
+    supportsDateSelection: true,
+    temporalResolution: 'monthly',
+    supportsDayNight: true,
+    dayNightMode: 'night',
+    gibsLayerDay: 'GHRSST_L4_MUR_Sea_Surface_Temperature',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    maxZoom: 7,
+  },
+  {
+    id: 'sst-gcomc-day-daily',
+    name: 'SST GCOM-C (Day/Daily)',
+    description: 'Daily SST by GCOM-C "SHIKISAI" (~250m coastal). Daytime ~10:30am.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'waves',
+    category: 'ocean',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    supportsDayNight: true,
+    dayNightMode: 'day',
+    gibsLayerDay: 'GHRSST_L4_MUR_Sea_Surface_Temperature',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    maxZoom: 7,
+  },
+  {
+    id: 'sst-gcomc-night-daily',
+    name: 'SST GCOM-C (Night/Daily)',
+    description: 'Daily SST by GCOM-C "SHIKISAI" (~250m coastal). Nighttime ~10:30pm.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'waves',
+    category: 'ocean',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    supportsDayNight: true,
+    dayNightMode: 'night',
+    gibsLayerDay: 'GHRSST_L4_MUR_Sea_Surface_Temperature',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    maxZoom: 7,
+  },
+  {
+    id: 'sst-gcomw-day-daily',
+    name: 'SST GCOM-W (Day/Daily)',
+    description: 'SST by GCOM-W "SHIZUKU". Observes through clouds. 5-day moving average. Daytime ~1:30pm. Missing near coast.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'waves',
+    category: 'ocean',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    supportsDayNight: true,
+    dayNightMode: 'day',
+    gibsLayerDay: 'GHRSST_L4_MUR_Sea_Surface_Temperature',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    maxZoom: 7,
+  },
+  {
+    id: 'sst-gcomw-night-daily',
+    name: 'SST GCOM-W (Night/Daily)',
+    description: 'SST by GCOM-W "SHIZUKU". Observes through clouds. 5-day moving average. Nighttime ~1:30am.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.7,
+    icon: 'waves',
+    category: 'ocean',
+    supportsDateSelection: true,
+    temporalResolution: 'daily',
+    supportsDayNight: true,
+    dayNightMode: 'night',
+    gibsLayerDay: 'GHRSST_L4_MUR_Sea_Surface_Temperature',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
+    maxZoom: 7,
+  },
+
+  // ── Radiation ──
+  {
+    id: 'swr-modis-monthly',
+    name: 'Shortwave Radiation (Monthly)',
+    description: 'SWR products from Terra MODIS monthly normals, generated by JAXA EORC via JASMES.',
+    tileUrl: '',
+    enabled: false,
+    opacity: 0.6,
+    icon: 'sun',
+    category: 'radiation',
+    supportsDateSelection: true,
+    temporalResolution: 'monthly',
+    gibsLayerDay: 'CERES_EBAF_Surface_Shortwave_Down_All_Monthly',
+    gibsFormat: 'png',
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level3',
+    maxZoom: 3,
+  },
 ];
 
 const ALLOWED_EMAIL = 'ceo@imagineengine.space';
+
+// Format date for GIBS URL
+const formatGibsDate = (date: Date): string => {
+  return date.toISOString().split('T')[0];
+};
 
 export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean) => {
   const { user } = useAuth();
   const [earthLayers, setEarthLayers] = useState<EarthLayer[]>(STATIC_EARTH_LAYERS);
   const hasAccess = user?.email === ALLOWED_EMAIL;
+
+  // Global date selection for date-sensitive layers
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now() - 86400000)); // yesterday
+  const [selectedMonth, setSelectedMonth] = useState<Date>(() => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - 1);
+    return d;
+  });
 
   // Precipitation timeline state
   const [precipFrames, setPrecipFrames] = useState<PrecipitationFrame[]>([]);
@@ -82,7 +336,6 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         ];
         setPrecipFrames(frames);
         if (frames.length > 0) {
-          // Start on the latest past frame
           const pastCount = data.radar?.past?.length || frames.length;
           setCurrentFrameIndex(Math.max(0, pastCount - 1));
         }
@@ -91,7 +344,6 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
       }
     };
     fetchFrames();
-    // Refresh every 5 minutes
     const interval = setInterval(fetchFrames, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, []);
@@ -104,9 +356,28 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     return `${rainviewerHost.current}${frame.path}/256/{z}/{x}/{y}/6/1_1.png`;
   }, [precipFrames, currentFrameIndex]);
 
+  // Build tile URL for a date-sensitive GIBS layer
+  const getGibsTileUrl = useCallback((layer: EarthLayer) => {
+    if (!layer.gibsLayerDay) return '';
+    const date = layer.temporalResolution === 'monthly'
+      ? formatGibsDate(selectedMonth)
+      : formatGibsDate(selectedDate);
+    const gibsLayer = layer.dayNightMode === 'night' && layer.gibsLayerNight
+      ? layer.gibsLayerNight
+      : layer.gibsLayerDay;
+    return buildGibsUrl(gibsLayer, date, layer.gibsTileMatrixSet, layer.gibsFormat);
+  }, [selectedDate, selectedMonth]);
+
   const addEarthLayerToMap = useCallback((layer: EarthLayer) => {
     if (!map) return;
-    const tileUrl = layer.id === 'gsmap-precipitation' ? getPrecipTileUrl() : layer.tileUrl;
+    let tileUrl: string;
+    if (layer.id === 'gsmap-precipitation') {
+      tileUrl = getPrecipTileUrl();
+    } else if (layer.supportsDateSelection && layer.gibsLayerDay) {
+      tileUrl = getGibsTileUrl(layer);
+    } else {
+      tileUrl = layer.tileUrl;
+    }
     if (!tileUrl) return;
     try {
       if (!map.getSource(layer.id)) {
@@ -114,6 +385,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           type: 'raster',
           tiles: [tileUrl],
           tileSize: 256,
+          maxzoom: layer.maxZoom || 18,
         });
       }
       const layerId = `${layer.id}-layer`;
@@ -122,40 +394,59 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
           id: layerId,
           type: 'raster',
           source: layer.id,
-          paint: {
-            'raster-opacity': layer.opacity,
-          },
-          layout: {
-            visibility: layer.enabled ? 'visible' : 'none',
-          },
+          paint: { 'raster-opacity': layer.opacity },
+          layout: { visibility: layer.enabled ? 'visible' : 'none' },
         });
       }
     } catch (err) {
       console.error('Error adding earth layer:', err);
     }
-  }, [map, getPrecipTileUrl]);
+  }, [map, getPrecipTileUrl, getGibsTileUrl]);
+
+  // Update GIBS layers when date changes
+  useEffect(() => {
+    if (!map || !mapReady) return;
+    earthLayers.forEach(layer => {
+      if (!layer.enabled || !layer.supportsDateSelection || !layer.gibsLayerDay) return;
+      const tileUrl = getGibsTileUrl(layer);
+      if (!tileUrl) return;
+      const sourceId = layer.id;
+      const layerId = `${layer.id}-layer`;
+      try {
+        if (map.getLayer(layerId)) map.removeLayer(layerId);
+        if (map.getSource(sourceId)) map.removeSource(sourceId);
+        map.addSource(sourceId, {
+          type: 'raster',
+          tiles: [tileUrl],
+          tileSize: 256,
+          maxzoom: layer.maxZoom || 18,
+        });
+        map.addLayer({
+          id: layerId,
+          type: 'raster',
+          source: sourceId,
+          paint: { 'raster-opacity': layer.opacity },
+          layout: { visibility: 'visible' },
+        });
+      } catch (err) {
+        console.error('Error updating GIBS layer:', err);
+      }
+    });
+  }, [selectedDate, selectedMonth, mapReady]);
 
   // Update precipitation tiles when frame changes
   useEffect(() => {
     if (!map || !mapReady) return;
     const precipLayer = earthLayers.find(l => l.id === 'gsmap-precipitation');
     if (!precipLayer?.enabled || precipFrames.length === 0) return;
-
     const tileUrl = getPrecipTileUrl();
     if (!tileUrl) return;
-
     const sourceId = 'gsmap-precipitation';
     const layerId = 'gsmap-precipitation-layer';
-
     try {
       if (map.getLayer(layerId)) map.removeLayer(layerId);
       if (map.getSource(sourceId)) map.removeSource(sourceId);
-
-      map.addSource(sourceId, {
-        type: 'raster',
-        tiles: [tileUrl],
-        tileSize: 256,
-      });
+      map.addSource(sourceId, { type: 'raster', tiles: [tileUrl], tileSize: 256 });
       map.addLayer({
         id: layerId,
         type: 'raster',
@@ -190,18 +481,14 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
         if (l.id !== layerId) return l;
         const newEnabled = !l.enabled;
         const mapLayerId = `${l.id}-layer`;
-
         if (newEnabled && !map.getSource(l.id)) {
           addEarthLayerToMap({ ...l, enabled: true });
         } else if (map.getLayer(mapLayerId)) {
           map.setLayoutProperty(mapLayerId, 'visibility', newEnabled ? 'visible' : 'none');
         }
-
-        // Stop playback if disabling precipitation
         if (l.id === 'gsmap-precipitation' && !newEnabled) {
           setIsPlaying(false);
         }
-
         return { ...l, enabled: newEnabled };
       })
     );
@@ -256,6 +543,10 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     ? new Date(precipFrames[currentFrameIndex].time * 1000)
     : null;
 
+  // Check if any date-sensitive layer is active
+  const hasActiveDateLayer = earthLayers.some(l => l.enabled && l.supportsDateSelection);
+  const hasActiveTimeline = earthLayers.some(l => l.id === 'gsmap-precipitation' && l.enabled);
+
   return {
     earthLayers,
     hasAccess,
@@ -269,5 +560,12 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
     isPlaying,
     togglePlayback,
     stepFrame,
+    // Date selection
+    selectedDate,
+    setSelectedDate,
+    selectedMonth,
+    setSelectedMonth,
+    hasActiveDateLayer,
+    hasActiveTimeline,
   };
 };
