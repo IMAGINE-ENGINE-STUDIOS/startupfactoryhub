@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { 
   Users, FileText, Briefcase, Calendar as CalendarIcon, Globe, MessageCircle, 
   Building2, Plus, Clock, MapPin, Network, BarChart, Presentation, 
-  ChevronDown, Check, X, Brain
+  ChevronDown, Check, X, Brain, Wrench
 } from 'lucide-react';
 import { useAcceleratorProfile } from '@/hooks/useAcceleratorProfile';
 import { useProfileWithRole } from '@/hooks/useProfileWithRole';
@@ -46,6 +46,7 @@ import { IntelligenceHub } from '@/components/intelligence/IntelligenceHub';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
 import { EventDetailsDialog } from '@/components/EventDetailsDialog';
 import AcceleratorProfileView from '@/components/AcceleratorProfileView';
+import AIFeaturesHub from '@/components/AIFeaturesHub';
 
 const AcceleratorDashboard = () => {
   const { user } = useAuth();
@@ -383,6 +384,10 @@ const AcceleratorDashboard = () => {
               <TabsTrigger value="intelligence" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Brain className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Intelligence</span>
+              </TabsTrigger>
+              <TabsTrigger value="tools" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Wrench className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Tools</span>
               </TabsTrigger>
               <TabsTrigger value="resources" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -912,6 +917,12 @@ const AcceleratorDashboard = () => {
           {/* Intelligence Tab */}
           <TabsContent value="intelligence" className="space-y-4">
             <IntelligenceHub />
+          </TabsContent>
+
+
+          {/* Tools Tab */}
+          <TabsContent value="tools" className="space-y-4">
+            <AIFeaturesHub />
           </TabsContent>
 
           {/* Resources Tab */}
