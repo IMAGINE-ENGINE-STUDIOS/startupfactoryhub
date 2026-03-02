@@ -646,10 +646,30 @@ You can help with:
             updated[updated.length - 1] = { role: 'assistant', content: cleanText };
             return updated;
           });
-          // Navigate after a short delay so user sees the message
-          setTimeout(() => {
-            navigate(navPath);
-          }, 800);
+
+          // Extract search and id params from the NAV path
+          try {
+            const url = new URL(navPath, window.location.origin);
+            const navSearch = url.searchParams.get('search') || '';
+            const navResourceId = url.searchParams.get('id') || '';
+
+            // Navigate to dashboard resources tab instead of /resources page
+            setTimeout(() => {
+              navigate('/dashboard?tab=resources');
+              // Dispatch event for GlobalResourcesMap to pick up search/resource
+              setTimeout(() => {
+                window.dispatchEvent(new CustomEvent('genius-resource-navigate', {
+                  detail: { search: navSearch, resourceId: navResourceId }
+                }));
+              }, 600);
+            }, 800);
+          } catch {
+            // Fallback: just navigate to resources tab
+            setTimeout(() => {
+              navigate('/dashboard?tab=resources');
+            }, 800);
+          }
+
           fullText = cleanText;
         }
 
