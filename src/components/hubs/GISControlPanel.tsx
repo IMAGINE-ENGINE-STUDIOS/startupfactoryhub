@@ -4,6 +4,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Slider } from '@/components/ui/slider';
 import { 
   Layers, 
   ChevronDown, 
@@ -15,10 +16,13 @@ import {
   Car,
   Package,
   Plane,
-  Box
+  Box,
+  Earth,
+  Lock
 } from 'lucide-react';
 import { GISLayer } from '@/hooks/useGISLayers';
 import { TrackingProvider } from '@/hooks/useExternalTracking';
+import { EarthLayer } from '@/hooks/useEarthIntelligence';
 import { cn } from '@/lib/utils';
 
 export type MapStyleType = 'default' | 'satellite' | 'satelliteStreets';
@@ -31,6 +35,10 @@ interface GISControlPanelProps {
   onStyleChange: (style: MapStyleType) => void;
   currentStyle: MapStyleType;
   isPolling?: boolean;
+  earthLayers?: EarthLayer[];
+  hasEarthAccess?: boolean;
+  onToggleEarthLayer?: (layerId: string) => void;
+  onEarthLayerOpacity?: (layerId: string, opacity: number) => void;
 }
 
 const STYLE_OPTIONS: { value: MapStyleType; label: string; icon: React.ReactNode }[] = [
@@ -53,6 +61,10 @@ export const GISControlPanel = ({
   onStyleChange,
   currentStyle,
   isPolling = false,
+  earthLayers = [],
+  hasEarthAccess = false,
+  onToggleEarthLayer,
+  onEarthLayerOpacity,
 }: GISControlPanelProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
 
@@ -181,6 +193,74 @@ export const GISControlPanel = ({
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Earth Intelligence */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label className="text-xs text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                  <Earth className="w-3.5 h-3.5" />
+                  Earth Intelligence
+                </Label>
+                {!hasEarthAccess && (
+                  <Badge variant="outline" className="text-xs border-amber-500/50 text-amber-400">
+                    <Lock className="w-3 h-3 mr-1" />
+                    Premium
+                  </Badge>
+                )}
+              </div>
+
+              {hasEarthAccess ? (
+                <div className="space-y-3">
+                  {earthLayers.map((layer) => (
+                    <div
+                      key={layer.id}
+                      className={cn(
+                        "p-3 rounded-xl transition-colors space-y-2",
+                        layer.enabled
+                          ? "bg-emerald-500/10 border border-emerald-500/30"
+                          : "bg-white/5"
+                      )}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">{layer.icon}</span>
+                          <div>
+                            <span className="text-sm font-medium">{layer.name}</span>
+                            <p className="text-xs text-muted-foreground">{layer.description}</p>
+                          </div>
+                        </div>
+                        <Switch
+                          checked={layer.enabled}
+                          onCheckedChange={() => onToggleEarthLayer?.(layer.id)}
+                        />
+                      </div>
+                      {layer.enabled && (
+                        <div className="flex items-center gap-3 pt-1">
+                          <span className="text-xs text-muted-foreground w-14">Opacity</span>
+                          <Slider
+                            value={[layer.opacity]}
+                            min={0}
+                            max={1}
+                            step={0.05}
+                            onValueChange={([val]) => onEarthLayerOpacity?.(layer.id, val)}
+                            className="flex-1"
+                          />
+                          <span className="text-xs text-muted-foreground w-8 text-right">
+                            {Math.round(layer.opacity * 100)}%
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-3 rounded-xl bg-white/5 text-center">
+                  <p className="text-xs text-muted-foreground">
+                    JAXA satellite layers are available for premium users.
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Info Footer */}
