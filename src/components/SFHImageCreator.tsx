@@ -8,9 +8,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useMembershipStatus } from "@/hooks/useMembershipStatus";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, Download, Sparkles, Wand2, Crown, Upload, Pencil, X } from "lucide-react";
+import { Loader2, Download, Wand2, Crown, Upload, Pencil, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import geniusAiLogo from "@/assets/genius-ai-logo.png";
 
 const FREE_LIMIT = 10;
 
@@ -219,7 +220,7 @@ const SFHImageCreator = () => {
       {/* Top bar */}
       <div className="flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
+          <img src={geniusAiLogo} alt="Imaginaly" className="h-5 w-5 object-contain" />
           <span className="text-sm font-medium text-muted-foreground">Usage</span>
         </div>
         <div className="flex items-center gap-2">
