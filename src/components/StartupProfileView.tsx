@@ -137,7 +137,7 @@ export default function StartupProfileView({ company }: StartupProfileViewProps)
       </div>
 
       {/* Details */}
-      <Tabs defaultValue="about" className="space-y-6">
+      <Tabs defaultValue={new URLSearchParams(window.location.search).get('subtab') || "about"} className="space-y-6">
         <TabsList className="flex w-full max-w-3xl overflow-x-auto scrollbar-hide whitespace-nowrap">
           <TabsTrigger value="about" className="flex-1">About</TabsTrigger>
           <TabsTrigger value="details" className="flex-1">Company Details</TabsTrigger>

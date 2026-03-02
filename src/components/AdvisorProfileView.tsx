@@ -199,7 +199,7 @@ export default function AdvisorProfileView() {
       </div>;
   }
   return <div className="space-y-6">
-      <Tabs defaultValue="profile" className="space-y-6">
+      <Tabs defaultValue={new URLSearchParams(window.location.search).get('subtab') || "profile"} className="space-y-6">
         <TabsList className="flex w-full max-w-2xl overflow-x-auto scrollbar-hide whitespace-nowrap">
           <TabsTrigger value="profile" className="flex-1">Profile</TabsTrigger>
           <TabsTrigger value="posts" className="flex-1">Your Posts</TabsTrigger>

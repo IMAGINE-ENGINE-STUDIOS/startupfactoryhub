@@ -1595,8 +1595,8 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                         size="sm"
                         className="w-full gap-2 rounded-xl"
                         onClick={() => {
-                          // Navigate to subscription page
-                          window.location.href = '/dashboard';
+                          // Navigate to profile subscription tab
+                          window.location.href = '/dashboard?tab=profile&subtab=subscription';
                         }}
                       >
                         <Star className="w-4 h-4" />
