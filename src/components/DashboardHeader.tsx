@@ -13,6 +13,7 @@ import RecommendationPopup from "@/components/RecommendationPopup";
 import { StartupPerksButton } from "@/components/StartupPerksButton";
 import { GlobalClock } from "@/components/GlobalClock";
 import WalletPasses from "@/components/WalletPasses";
+import { LanguageSwitcher } from "@/components/LanguageSwitcher";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
@@ -87,6 +88,8 @@ export function DashboardHeader() {
         </Popover>
         
         <StartupPerksButton />
+
+        <LanguageSwitcher />
         
         <div className="h-9 w-9 sm:h-10 sm:w-10 flex items-center justify-center">
           <ThemeToggle />
