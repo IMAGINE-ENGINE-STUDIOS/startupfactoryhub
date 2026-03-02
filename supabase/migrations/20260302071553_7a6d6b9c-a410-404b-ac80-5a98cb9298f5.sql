@@ -1,0 +1,1 @@
+UPDATE public.profiles SET full_name = 'Ricardo Font' WHERE user_id = '7e814ec7-ce1c-47fa-b958-e75f4cc50212';
