@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, Bookmark, Repeat2, Send, Calendar, Image as ImageIcon, Video, Sparkles, X, Trash2, Hash, Trophy, ZoomIn } from 'lucide-react';
+import { Heart, MessageCircle, Share, Plus, Zap, TrendingUp, Users, Bookmark, Repeat2, Send, Calendar, Image as ImageIcon, Video, Sparkles, X, Trash2, Hash, Trophy, ZoomIn, Wand2, Loader2 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,8 @@ import { EventPostCard } from '@/components/EventPostCard';
 import LinkedInShareDialog from '@/components/LinkedInShareDialog';
 import ImageLightbox from '@/components/ImageLightbox';
 import { Linkedin } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import geniusAiLogo from "@/assets/genius-ai-logo.png";
 interface FeedPost {
   id: string;
   content: string;
@@ -107,6 +109,9 @@ export default function UnifiedCommunityFeed({
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showImaginalyDialog, setShowImaginalyDialog] = useState(false);
+  const [imaginalyPrompt, setImaginalyPrompt] = useState('');
+  const [imaginalyGenerating, setImaginalyGenerating] = useState(false);
 
   const openLightbox = (images: string[], index: number) => {
     setLightboxImages(images);
@@ -902,7 +907,10 @@ export default function UnifiedCommunityFeed({
                   <Video className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Video</span>
                 </Button>
-                
+                <Button variant="ghost" size="sm" onClick={() => setShowImaginalyDialog(true)}>
+                  <img src={geniusAiLogo} alt="Imaginaly" className="h-4 w-4 object-contain sm:mr-2" />
+                  <span className="hidden sm:inline">Imaginaly</span>
+                </Button>
               </div>
               <Button onClick={createPost} disabled={loading || !newPost.trim()} className="pulse-primary">
                 <Plus className="h-4 w-4 mr-2" />
@@ -1380,5 +1388,67 @@ export default function UnifiedCommunityFeed({
         open={lightboxOpen}
         onOpenChange={setLightboxOpen}
       />
+
+      {/* Imaginaly Quick Generator */}
+      <Dialog open={showImaginalyDialog} onOpenChange={setShowImaginalyDialog}>
+        <DialogContent className="tech-card border-0 max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <img src={geniusAiLogo} alt="Imaginaly" className="h-5 w-5 object-contain" />
+              Imaginaly
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Textarea
+              placeholder="Describe the image you want to generate..."
+              value={imaginalyPrompt}
+              onChange={(e) => setImaginalyPrompt(e.target.value)}
+              rows={3}
+              className="resize-none text-sm"
+              disabled={imaginalyGenerating}
+            />
+            <Button
+              onClick={async () => {
+                if (!imaginalyPrompt.trim()) return;
+                setImaginalyGenerating(true);
+                try {
+                  const { data, error } = await supabase.functions.invoke("generate-sfh-image", {
+                    body: { prompt: imaginalyPrompt.trim(), stylePreset: "none" },
+                  });
+                  if (error) throw new Error(String(error.message || error));
+                  if (data?.error) throw new Error(data.error);
+                  // Fetch the generated image as a File and add to media
+                  const resp = await fetch(data.imageUrl);
+                  const blob = await resp.blob();
+                  const file = new File([blob], `imaginaly-${Date.now()}.png`, { type: "image/png" });
+                  setMediaFiles(prev => [...prev, file]);
+                  setMediaPreview(prev => [...prev, data.imageUrl]);
+                  setImaginalyPrompt('');
+                  setShowImaginalyDialog(false);
+                  toast({ title: "Image generated!", description: "Added to your post" });
+                } catch (err: any) {
+                  toast({ title: "Generation failed", description: err.message || "Try again", variant: "destructive" });
+                } finally {
+                  setImaginalyGenerating(false);
+                }
+              }}
+              disabled={imaginalyGenerating || !imaginalyPrompt.trim()}
+              className="w-full"
+            >
+              {imaginalyGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Wand2 className="mr-2 h-4 w-4" />
+                  Generate & Attach
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>;
 }
