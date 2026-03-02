@@ -118,85 +118,78 @@ export default function MarketIntelligenceWidget() {
 
   return (
     <div className="space-y-6">
-      {/* Modern Search Section */}
-      <Card className="tech-card border-0 p-4 sm:p-6 bg-gradient-to-br from-primary/5 via-background to-background">
-        <div className="space-y-4 sm:space-y-6">
-          <div className="text-center space-y-2">
-            <h2 className="text-xl sm:text-2xl font-bold">Market Intelligence</h2>
-            <p className="text-sm sm:text-base text-muted-foreground">AI-powered insights on startups, industries, and investors</p>
-          </div>
-          
-          <div className="flex flex-col sm:flex-row gap-2">
-            <Input
-              placeholder="Search startups, industries, or investors..."
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-              className="flex-1 h-12"
-            />
-            <Button 
-              onClick={handleSearch} 
-              disabled={loading} 
-              className="w-full sm:w-auto sm:px-6 h-12"
-            >
-              <Search className="h-4 w-4 mr-2" />
-              Analyze
-            </Button>
-          </div>
+      {/* Search Section */}
+      <div className="space-y-4 sm:space-y-5">
+        <div className="flex flex-col sm:flex-row gap-2">
+          <Input
+            placeholder="Search startups, industries, or investors..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+            className="flex-1 h-12"
+          />
+          <Button 
+            onClick={handleSearch} 
+            disabled={loading} 
+            className="w-full sm:w-auto sm:px-6 h-12"
+          >
+            <Search className="h-4 w-4 mr-2" />
+            Analyze
+          </Button>
+        </div>
 
-          <div className="flex gap-2 justify-center flex-wrap">
-            <Badge
-              variant={searchType === 'startup' ? 'default' : 'outline'}
-              onClick={() => setSearchType('startup')}
-              className="cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
-            >
-              <Building2 className="h-3 w-3 mr-1" />
-              Startups
-            </Badge>
-            <Badge
-              variant={searchType === 'industry' ? 'default' : 'outline'}
-              onClick={() => setSearchType('industry')}
-              className="cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
-            >
-              <Globe className="h-3 w-3 mr-1" />
-              Industries
-            </Badge>
-            <Badge
-              variant={searchType === 'investor' ? 'default' : 'outline'}
-              onClick={() => setSearchType('investor')}
-              className="cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
-            >
-              <Briefcase className="h-3 w-3 mr-1" />
-              Investors
-            </Badge>
-          </div>
+        <div className="flex gap-2 justify-center flex-wrap">
+          <Badge
+            variant={searchType === 'startup' ? 'default' : 'outline'}
+            onClick={() => setSearchType('startup')}
+            className="cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
+          >
+            <Building2 className="h-3 w-3 mr-1" />
+            Startups
+          </Badge>
+          <Badge
+            variant={searchType === 'industry' ? 'default' : 'outline'}
+            onClick={() => setSearchType('industry')}
+            className="cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
+          >
+            <Globe className="h-3 w-3 mr-1" />
+            Industries
+          </Badge>
+          <Badge
+            variant={searchType === 'investor' ? 'default' : 'outline'}
+            onClick={() => setSearchType('investor')}
+            className="cursor-pointer px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm"
+          >
+            <Briefcase className="h-3 w-3 mr-1" />
+            Investors
+          </Badge>
+        </div>
 
-          {/* Trending Topics */}
-          <div className="space-y-2 sm:space-y-3">
-            <p className="text-xs sm:text-sm text-muted-foreground">Trending searches:</p>
-            <div className="flex gap-2 flex-wrap">
-              {trendingTopics.map((topic, idx) => {
-                const Icon = topic.icon;
-                return (
-                  <Button
-                    key={idx}
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => {
-                      setSearchType(topic.type as any);
-                      setQuery(topic.name);
-                    }}
-                    className="text-xs h-8"
-                  >
-                    <Icon className="h-3 w-3 mr-1" />
-                    {topic.name}
-                  </Button>
-                );
-              })}
-            </div>
+        {/* Trending Topics */}
+        <div className="space-y-2 sm:space-y-3">
+          <p className="text-xs sm:text-sm text-muted-foreground">Trending searches:</p>
+          <div className="flex gap-2 flex-wrap">
+            {trendingTopics.map((topic, idx) => {
+              const Icon = topic.icon;
+              return (
+                <Button
+                  key={idx}
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setSearchType(topic.type as any);
+                    setQuery(topic.name);
+                  }}
+                  className="text-xs h-8"
+                >
+                  <Icon className="h-3 w-3 mr-1" />
+                  {topic.name}
+                </Button>
+              );
+            })}
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Loading State */}
       {loading && (
