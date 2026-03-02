@@ -105,7 +105,7 @@ export const useAISTracking = (map: mapboxgl.Map | null, mapReady: boolean) => {
   const [autoRefresh, setAutoRefresh] = useState(true);
   const [refreshInterval, setRefreshInterval] = useState(60); // seconds
   const [lastFetch, setLastFetch] = useState<Date | null>(null);
-  const [isDemo, setIsDemo] = useState(false);
+  const [isDemo] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedVessel, setSelectedVessel] = useState<AISVessel | null>(null);
   const [filters, setFilters] = useState<AISFilters>({
@@ -146,7 +146,6 @@ export const useAISTracking = (map: mapboxgl.Map | null, mapReady: boolean) => {
         return;
       }
 
-      setIsDemo(data?.demo || false);
       const newVessels: AISVessel[] = data?.vessels || [];
 
       // Update track buffers

@@ -16,10 +16,11 @@ serve(async (req) => {
     const AISSTREAM_API_KEY = Deno.env.get('AISSTREAM_API_KEY');
     if (!AISSTREAM_API_KEY) {
       return new Response(JSON.stringify({
-        demo: true,
-        message: 'AISStream API key not configured. Showing demo vessels.',
-        vessels: generateDemoVessels(latmin, latmax, lonmin, lonmax),
+        error: true,
+        message: 'AISStream API key not configured. Please add the AISSTREAM_API_KEY secret.',
+        vessels: [],
       }), {
+        status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -32,18 +33,6 @@ serve(async (req) => {
     );
 
     console.log(`Collected ${vessels.length} vessels from AISStream`);
-
-    // If live API returned no vessels, fall back to demo data
-    if (vessels.length === 0) {
-      console.log('No live vessels received, falling back to demo data');
-      return new Response(JSON.stringify({
-        demo: true,
-        message: 'AISStream returned no vessels for this area. Showing demo data.',
-        vessels: generateDemoVessels(latmin, latmax, lonmin, lonmax),
-      }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
 
     return new Response(JSON.stringify({
       demo: false,
@@ -101,8 +90,6 @@ async function fetchFromAISStream(
     ws.onopen = () => {
       connected = true;
       console.log('AISStream WebSocket connected');
-      // aisstream.io expects BoundingBoxes as array of [[min_lat, min_lon], [max_lat, max_lon]]
-      // and the key field as "APIKey" (capital K)
       const subscriptionMessage = {
         APIKey: apiKey,
         BoundingBoxes: [[[latmin, lonmin], [latmax, lonmax]]],
@@ -128,7 +115,6 @@ async function fetchFromAISStream(
         if (!raw || raw.length === 0) return;
         
         const msg = JSON.parse(raw);
-        // Check for error responses
         if (msg.ERROR || msg.error) {
           console.error('AISStream error:', msg.ERROR || msg.error);
           cleanup();
@@ -169,7 +155,6 @@ async function fetchFromAISStream(
           });
         }
 
-        // Cap at 300 vessels
         if (vessels.size >= 300) {
           console.log('Vessel cap reached (300)');
           cleanup();
@@ -196,46 +181,4 @@ async function fetchFromAISStream(
       resolve(Array.from(vessels.values()));
     };
   });
-}
-
-// Demo vessels fallback
-function generateDemoVessels(latmin: number, latmax: number, lonmin: number, lonmax: number) {
-  const vesselNames = [
-    'EVER GIVEN', 'MAERSK SEALAND', 'MSC OSCAR', 'COSCO SHIPPING VIRGO',
-    'CMA CGM MARCO POLO', 'ATLANTIC STAR', 'PACIFIC VOYAGER', 'NORDIC SPIRIT',
-    'OCEAN HARMONY', 'SEA EXPLORER', 'HARBOR MASTER', 'WIND DANCER',
-    'DEEP BLUE', 'CORAL PRINCESS', 'IRON WOLF', 'GOLDEN HORIZON'
-  ];
-  const types = [70, 71, 72, 73, 80, 30, 31, 36, 37, 52, 60];
-  const count = Math.min(50, Math.floor(Math.random() * 30) + 10);
-  const vessels = [];
-
-  for (let i = 0; i < count; i++) {
-    const lat = latmin + Math.random() * (latmax - latmin);
-    const lon = lonmin + Math.random() * (lonmax - lonmin);
-    vessels.push({
-      mmsi: 200000000 + Math.floor(Math.random() * 99999999),
-      name: vesselNames[Math.floor(Math.random() * vesselNames.length)],
-      type: types[Math.floor(Math.random() * types.length)],
-      latitude: Math.round(lat * 100000) / 100000,
-      longitude: Math.round(lon * 100000) / 100000,
-      cog: Math.round(Math.random() * 3600) / 10,
-      sog: Math.round(Math.random() * 200) / 10,
-      heading: Math.floor(Math.random() * 360),
-      navstat: Math.floor(Math.random() * 8),
-      imo: 9000000 + Math.floor(Math.random() * 999999),
-      callsign: String.fromCharCode(65 + Math.floor(Math.random() * 26)) +
-                String.fromCharCode(65 + Math.floor(Math.random() * 26)) +
-                Math.floor(Math.random() * 9999),
-      dest: ['ROTTERDAM', 'SINGAPORE', 'SHANGHAI', 'HOUSTON', 'DUBAI', 'YOKOHAMA'][Math.floor(Math.random() * 6)],
-      eta: null,
-      draught: Math.round(Math.random() * 150) / 10,
-      a: 100 + Math.floor(Math.random() * 200),
-      b: 30 + Math.floor(Math.random() * 50),
-      c: 10 + Math.floor(Math.random() * 20),
-      d: 10 + Math.floor(Math.random() * 20),
-      time: new Date().toISOString(),
-    });
-  }
-  return vessels;
 }
