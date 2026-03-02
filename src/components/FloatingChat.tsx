@@ -1182,135 +1182,184 @@ You can help with:
                             <Plus className="h-5 w-5" />
                           </button>
 
-                          {/* Tool Dropdown Menu */}
+                          {/* Tool Panel Overlay */}
                           {showToolMenu && (
-                            <div className="absolute bottom-12 left-0 w-64 rounded-xl bg-popover border border-border shadow-xl max-h-[380px] overflow-auto z-50 animate-in slide-in-from-bottom-2 duration-200">
-                              {/* Chat History section */}
-                              <div>
-                                <button
-                                  type="button"
-                                  onClick={() => { setShowChatHistory(!showChatHistory); }}
-                                  className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-popover/95 backdrop-blur-sm border-b border-border/50 hover:bg-accent/50 transition-colors"
-                                >
-                                  <span>🕐 Chat History ({chatLogs.length})</span>
-                                  <Clock className="h-3 w-3" />
-                                </button>
-                                {showChatHistory && (
-                                  <div className="max-h-[120px] overflow-auto">
-                                    {chatLogs.length === 0 ? (
-                                      <p className="px-3 py-2 text-[10px] text-muted-foreground">No conversations yet</p>
-                                    ) : (
-                                      chatLogs.slice(0, 10).map(log => (
-                                        <div key={log.id} className="flex items-center gap-2 px-3 py-1.5 hover:bg-accent transition-colors group">
+                            <div className="absolute bottom-12 left-0 right-0 w-[calc(100%+5.5rem)] rounded-xl bg-popover border border-border shadow-2xl z-50 animate-in slide-in-from-bottom-3 duration-300 overflow-hidden"
+                              style={{ maxHeight: '420px' }}
+                            >
+                              {/* Tabs Header */}
+                              <div className="flex border-b border-border bg-muted/30">
+                                {(['tools', 'history', 'memory'] as const).map(tab => (
+                                  <button
+                                    key={tab}
+                                    type="button"
+                                    onClick={() => {
+                                      if (tab === 'tools') { setShowChatHistory(false); setShowMemoryPanel(false); }
+                                      else if (tab === 'history') { setShowChatHistory(true); setShowMemoryPanel(false); }
+                                      else { setShowMemoryPanel(true); setShowChatHistory(false); }
+                                    }}
+                                    className={`flex-1 py-2.5 text-xs font-semibold tracking-wide transition-all duration-200 ${
+                                      (tab === 'tools' && !showChatHistory && !showMemoryPanel) ||
+                                      (tab === 'history' && showChatHistory) ||
+                                      (tab === 'memory' && showMemoryPanel)
+                                        ? 'text-primary border-b-2 border-primary bg-primary/5'
+                                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                                    }`}
+                                  >
+                                    {tab === 'tools' && '🛠 Tools'}
+                                    {tab === 'history' && `🕐 History (${chatLogs.length})`}
+                                    {tab === 'memory' && `🧠 Memory (${memoryItems.length})`}
+                                  </button>
+                                ))}
+                              </div>
+
+                              {/* Tab Content */}
+                              <ScrollArea className="max-h-[360px]">
+                                {/* === TOOLS TAB === */}
+                                {!showChatHistory && !showMemoryPanel && (
+                                  <div className="p-3 space-y-4">
+                                    {Object.entries(groupedTools).map(([category, tools]) => (
+                                      <div key={category}>
+                                        <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider mb-2">
+                                          {CATEGORY_LABELS[category] || category}
+                                        </p>
+                                        {category === 'quick' ? (
+                                          /* Quick Answer: full-width highlighted button */
                                           <button
                                             type="button"
+                                            onClick={() => { setActiveTool(tools[0]); setShowToolMenu(false); }}
+                                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                              activeTool?.id === 'quick'
+                                                ? 'bg-primary text-primary-foreground shadow-md'
+                                                : 'bg-primary/10 text-foreground hover:bg-primary/20 border border-primary/20'
+                                            }`}
+                                          >
+                                            <span className="text-lg">⚡</span>
+                                            <span>Quick Answer</span>
+                                          </button>
+                                        ) : (
+                                          /* 2-column grid */
+                                          <div className="grid grid-cols-2 gap-1.5">
+                                            {tools.map(tool => (
+                                              <button
+                                                key={tool.id}
+                                                type="button"
+                                                onClick={() => { setActiveTool(tool); setShowToolMenu(false); }}
+                                                className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 min-h-[40px] ${
+                                                  activeTool?.id === tool.id
+                                                    ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
+                                                    : 'bg-muted/40 text-foreground hover:bg-accent hover:text-accent-foreground'
+                                                }`}
+                                              >
+                                                <span className="text-base shrink-0">{tool.icon}</span>
+                                                <span className="truncate">{tool.name}</span>
+                                              </button>
+                                            ))}
+                                          </div>
+                                        )}
+                                      </div>
+                                    ))}
+
+                                    {/* Bottom actions */}
+                                    <div className="border-t border-border/50 pt-3 space-y-1.5">
+                                      <button
+                                        type="button"
+                                        onClick={() => { setAiMessages([]); setCurrentChatLogId(null); setActiveTool(null); setShowToolMenu(false); }}
+                                        className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium text-primary hover:bg-primary/10 transition-all duration-200"
+                                      >
+                                        <Plus className="h-4 w-4" />
+                                        <span>New conversation</span>
+                                      </button>
+                                      {activeTool && (
+                                        <button
+                                          type="button"
+                                          onClick={() => { setActiveTool(null); setShowToolMenu(false); }}
+                                          className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-medium text-muted-foreground hover:bg-muted/60 transition-all duration-200"
+                                        >
+                                          <X className="h-4 w-4" />
+                                          <span>Clear tool selection</span>
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* === HISTORY TAB === */}
+                                {showChatHistory && (
+                                  <div className="p-3">
+                                    {chatLogs.length === 0 ? (
+                                      <div className="text-center py-8">
+                                        <Clock className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                                        <p className="text-xs text-muted-foreground">No conversations yet</p>
+                                      </div>
+                                    ) : (
+                                      <div className="space-y-1">
+                                        {chatLogs.slice(0, 20).map(log => (
+                                          <div
+                                            key={log.id}
+                                            className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors group cursor-pointer"
                                             onClick={() => {
                                               setAiMessages((log as ChatLog).messages || []);
                                               setCurrentChatLogId(log.id);
                                               setShowToolMenu(false);
                                               setShowChatHistory(false);
                                             }}
-                                            className="flex-1 text-left text-xs text-foreground truncate"
                                           >
-                                            {log.title}
-                                          </button>
-                                          <span className="text-[9px] text-muted-foreground shrink-0">
-                                            {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
-                                          </span>
-                                          <button
-                                            type="button"
-                                            onClick={(e) => { e.stopPropagation(); deleteChatLog.mutate(log.id); }}
-                                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all shrink-0"
-                                          >
-                                            <Trash2 className="h-3 w-3" />
-                                          </button>
-                                        </div>
-                                      ))
-                                    )}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Memory section */}
-                              <div>
-                                <button
-                                  type="button"
-                                  onClick={() => setShowMemoryPanel(!showMemoryPanel)}
-                                  className="w-full flex items-center justify-between px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-popover/95 backdrop-blur-sm border-b border-border/50 hover:bg-accent/50 transition-colors"
-                                >
-                                  <span>📚 Memory ({memoryItems.length})</span>
-                                  <BookOpen className="h-3 w-3" />
-                                </button>
-                                {showMemoryPanel && (
-                                  <div className="max-h-[120px] overflow-auto">
-                                    {memoryItems.length === 0 ? (
-                                      <p className="px-3 py-2 text-[10px] text-muted-foreground">Say "learn this" to save knowledge</p>
-                                    ) : (
-                                      memoryItems.slice(0, 10).map(item => (
-                                        <div key={item.id} className="flex items-center gap-2 px-3 py-1.5 hover:bg-accent transition-colors group">
-                                          <div className="flex-1 min-w-0">
-                                            <p className="text-xs text-foreground truncate">{item.title}</p>
-                                            <p className="text-[9px] text-muted-foreground truncate">{item.content.slice(0, 60)}</p>
+                                            <Clock className="h-4 w-4 text-muted-foreground shrink-0" />
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-xs font-medium text-foreground truncate">{log.title}</p>
+                                              <p className="text-[10px] text-muted-foreground">
+                                                {formatDistanceToNow(new Date(log.created_at), { addSuffix: true })}
+                                              </p>
+                                            </div>
+                                            <button
+                                              type="button"
+                                              onClick={(e) => { e.stopPropagation(); deleteChatLog.mutate(log.id); }}
+                                              className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-all shrink-0"
+                                            >
+                                              <Trash2 className="h-3.5 w-3.5" />
+                                            </button>
                                           </div>
-                                          <button
-                                            type="button"
-                                            onClick={(e) => { e.stopPropagation(); deleteMemory.mutate(item.id); }}
-                                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all shrink-0"
-                                          >
-                                            <Trash2 className="h-3 w-3" />
-                                          </button>
-                                        </div>
-                                      ))
+                                        ))}
+                                      </div>
                                     )}
                                   </div>
                                 )}
-                              </div>
 
-                              {/* Tool categories */}
-                              {Object.entries(groupedTools).map(([category, tools]) => (
-                                <div key={category}>
-                                  <div className="px-3 py-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-wider sticky top-0 bg-popover/95 backdrop-blur-sm border-b border-border/50">
-                                    {CATEGORY_LABELS[category] || category}
+                                {/* === MEMORY TAB === */}
+                                {showMemoryPanel && (
+                                  <div className="p-3">
+                                    {memoryItems.length === 0 ? (
+                                      <div className="text-center py-8">
+                                        <Brain className="h-8 w-8 text-muted-foreground/40 mx-auto mb-2" />
+                                        <p className="text-xs text-muted-foreground">Say "learn this" to save knowledge</p>
+                                      </div>
+                                    ) : (
+                                      <div className="space-y-1">
+                                        {memoryItems.slice(0, 20).map(item => (
+                                          <div
+                                            key={item.id}
+                                            className="flex items-start gap-3 px-3 py-2.5 rounded-lg hover:bg-accent transition-colors group"
+                                          >
+                                            <Brain className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-xs font-medium text-foreground truncate">{item.title}</p>
+                                              <p className="text-[10px] text-muted-foreground line-clamp-2">{item.content.slice(0, 120)}</p>
+                                            </div>
+                                            <button
+                                              type="button"
+                                              onClick={(e) => { e.stopPropagation(); deleteMemory.mutate(item.id); }}
+                                              className="opacity-0 group-hover:opacity-100 p-1 rounded text-muted-foreground hover:text-destructive transition-all shrink-0"
+                                            >
+                                              <Trash2 className="h-3.5 w-3.5" />
+                                            </button>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
                                   </div>
-                                  {tools.map(tool => (
-                                    <button
-                                      key={tool.id}
-                                      type="button"
-                                      onClick={() => {
-                                        setActiveTool(tool);
-                                        setShowToolMenu(false);
-                                      }}
-                                      className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs text-foreground hover:bg-accent transition-colors cursor-pointer ${
-                                        activeTool?.id === tool.id ? 'bg-accent' : ''
-                                      }`}
-                                    >
-                                      <span className="text-sm">{tool.icon}</span>
-                                      <span>{tool.name}</span>
-                                    </button>
-                                  ))}
-                                </div>
-                              ))}
-                              {/* New chat + Clear */}
-                              <div className="border-t border-border/50">
-                                <button
-                                  type="button"
-                                  onClick={() => { setAiMessages([]); setCurrentChatLogId(null); setActiveTool(null); setShowToolMenu(false); }}
-                                  className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-primary hover:bg-accent transition-colors"
-                                >
-                                  <Plus className="h-3.5 w-3.5" />
-                                  <span>New conversation</span>
-                                </button>
-                                {activeTool && (
-                                  <button
-                                    type="button"
-                                    onClick={() => { setActiveTool(null); setShowToolMenu(false); }}
-                                    className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-muted-foreground hover:bg-accent transition-colors"
-                                  >
-                                    <X className="h-3.5 w-3.5" />
-                                    <span>Clear tool selection</span>
-                                  </button>
                                 )}
-                              </div>
+                              </ScrollArea>
                             </div>
                           )}
                         </div>
