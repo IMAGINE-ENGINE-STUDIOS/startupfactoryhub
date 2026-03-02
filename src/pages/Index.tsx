@@ -8,10 +8,12 @@ import AboutHero from "@/components/AboutHero";
 import TeamSection from "@/components/TeamSection";
 import PartnersCarousel from "@/components/PartnersCarousel";
 import Footer from "@/components/Footer";
+import PWAInstallBanner from "@/components/PWAInstallBanner";
 
 const Index = () => {
   return (
     <div className="min-h-screen">
+      <PWAInstallBanner />
       <Navigation />
       <HeroSection />
       <AboutHero />
