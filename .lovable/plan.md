@@ -1,54 +1,62 @@
 
 
-## Plan: Add SFH Image Creator Tool (Powered by Imaginaly AI)
+## Redesign: AI Tool Menu in FloatingChat
 
-### What We're Building
-A self-contained **SFH Image Creator** tool in the Tools page that lets users generate AI images from text prompts, styled with SFH branding. It uses the Lovable AI gateway's `google/gemini-2.5-flash-image` model for image generation -- the same underlying AI tech as [Imaginaly](/projects/9aced1bd-5f0f-4eae-9b2c-183bfea54443), repackaged as an SFH-native tool.
+The current `+` dropdown menu (lines 1186-1314) is a cramped, hard-to-scan popup with tiny text, nested collapsible sections, and too many items packed into a small area. Here's the plan to make it clean and usable while preserving every tool.
 
-### Why Not Direct Port
-Imaginaly's core relies on 16+ edge functions tied to its own Supabase backend (edit-image, generate-video, scene-chat, etc.) with specialized hooks (useSceneEditor, usePipelineExecutor, useProductCatalog). Porting all of this would break due to missing database tables, storage buckets, and API keys (Runway, FAL AI). Instead, we build a clean SFH-native implementation using the Lovable AI image generation gateway that's already available.
+### Problems
+- Everything crammed into one scrollable 264px-wide dropdown
+- Chat history and memory mixed in with tools
+- 10px font sizes, hard to read
+- No visual hierarchy between categories
+- Collapsible sections within a dropdown = confusing
 
-### Free Tier & Gating
-- **10 free images** for all users (tracked in a new `image_generation_usage` database table)
-- After 10 free images, requires **basic paid subscription** ($350+ Community tier)
-- Usage counter displayed in the UI
+### New Design: Full-panel overlay with tabs
 
-### New Files
+Replace the dropdown with a **full-width panel** that slides up from the bottom of the chat window (inside the existing chat container), using 3 horizontal tabs:
 
-1. **`supabase/functions/generate-sfh-image/index.ts`** -- Edge function that:
-   - Authenticates the user
-   - Checks usage count from `image_generation_usage` table
-   - If count >= 10, checks membership status via `check-membership` function
-   - Calls Lovable AI gateway with `google/gemini-2.5-flash-image` model
-   - Extracts the base64 image from response, uploads to Supabase storage
-   - Returns the public URL
-   - Logs to `api_usage_logs`
-
-2. **`src/components/SFHImageCreator.tsx`** -- Full image creation UI with:
-   - Text prompt input with placeholder suggestions
-   - Style presets (Photorealistic, Digital Art, Watercolor, etc.)
-   - Generated image display with download button
-   - Generation history (session-local)
-   - Usage counter badge ("3/10 free" or "Unlimited" for subscribers)
-   - SFH branding: tech-card styling, emerald accents, "Powered by SFH Intelligence" footer
-   - Membership gate modal when free limit reached
-
-### Database Migration
-- Create `image_generation_usage` table: `id`, `user_id`, `prompt`, `image_url`, `created_at`
-- RLS: users can only read/insert their own rows
-
-### Files to Modify
-
-- **`src/pages/Tools.tsx`** -- Add "SFH Image Creator" to the `aiTools` array with `Sparkles` icon and a new dialog that renders `SFHImageCreator`. Add the `openDialog === "image-creator"` dialog block.
-
-### Technical Flow
 ```text
-User types prompt → Frontend calls generate-sfh-image edge function
-  → Edge function checks auth + usage count
-  → If over limit, checks membership via check-membership
-  → Calls Lovable AI gateway (gemini-2.5-flash-image)
-  → Uploads base64 result to Supabase storage
-  → Returns public URL + inserts usage row
-  → Frontend displays image with download option
+┌─────────────────────────────────┐
+│  [Tools]  [History]  [Memory]   │  ← 3 tabs
+├─────────────────────────────────┤
+│  ⚡ Quick                       │
+│                                 │
+│  📄 DOCUMENTS                   │
+│  ┌────────┐ ┌────────┐         │
+│  │🔬Research│ │📊Summary│ ...    │  ← 2-col grid, bigger touch targets
+│  └────────┘ └────────┘         │
+│                                 │
+│  🧠 AI TOOLS                    │
+│  ┌────────┐ ┌────────┐         │
+│  │📈Analytics│ │🧠Market│        │
+│  └────────┘ └────────┘         │
+│                                 │
+│  🚀 ACTIONS                     │
+│  ┌────────┐ ┌────────┐         │
+│  │📢 Post │ │📅Meeting│ ...     │
+│  └────────┘ └────────┘         │
+│                                 │
+│  [+ New Chat]                   │
+└─────────────────────────────────┘
 ```
+
+### Key Changes
+
+1. **Replace dropdown with overlay panel** — Uses full width of the chat window (~384px), overlays the message area, not a tiny popover
+2. **3 tabs at top**: Tools | History (count) | Memory (count) — separates concerns
+3. **Tools tab**: 2-column grid with larger buttons (icon + label), grouped by category with clear section headers. Quick Answer gets a highlighted full-width button at top
+4. **History tab**: Clean list of past conversations with timestamps and delete buttons, proper spacing
+5. **Memory tab**: Clean list of saved items with content preview and delete
+6. **"New conversation" button** at bottom of Tools tab
+7. **Larger font sizes** (12px body, 11px labels instead of 9-10px)
+8. **Better touch targets** — minimum 40px height per item
+
+### Implementation
+
+Single file change: `src/components/FloatingChat.tsx`
+- Replace the tool menu div (lines 1186-1314) with the new panel component
+- Keep all state variables and handlers unchanged
+- Keep `showToolMenu` toggle but render a panel instead of dropdown
+- Remove `showChatHistory` and `showMemoryPanel` states, replace with a local `menuTab` state (`'tools' | 'history' | 'memory'`)
+- All tool IDs, categories, click handlers remain identical
 
