@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bot, FileText, TrendingUp, Languages, Image, Sparkles, Kanban, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
+import { FileText, TrendingUp, Languages, Image, Sparkles, Kanban, ChevronDown, ChevronUp, ArrowRight } from "lucide-react";
+import sfhLogo from '@/assets/sfh-logo-sphere.png';
 import CRMBoard from "@/components/CRMBoard";
 import AIAssistant from "@/components/AIAssistant";
 import AISummaryCard from "@/components/AISummaryCard";
@@ -174,7 +175,8 @@ const Tools = () => {
       id: "assistant",
       title: "AI Assistant",
       description: "Get instant help with business advice, mentorship, and learning",
-      icon: Bot,
+      icon: null,
+      iconImg: sfhLogo,
       color: "from-blue-500/20 to-cyan-500/20",
       iconColor: "text-blue-500",
     },
@@ -277,7 +279,7 @@ const Tools = () => {
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20">
-              <Bot className="h-5 w-5 text-primary" />
+              <img src={sfhLogo} alt="SFH" className="h-5 w-5 object-contain" />
             </div>
             <h2 className="text-xl sm:text-2xl font-bold">AI Tools</h2>
           </div>
@@ -291,7 +293,11 @@ const Tools = () => {
               >
                 <CardContent className="p-6 flex flex-col h-full min-h-[180px]">
                   <div className={`p-3 rounded-xl bg-gradient-to-br ${tool.color} w-fit mb-4`}>
-                    <tool.icon className={`h-8 w-8 sm:h-10 sm:w-10 ${tool.iconColor}`} />
+                    {tool.iconImg ? (
+                      <img src={tool.iconImg} alt={tool.title} className="h-8 w-8 sm:h-10 sm:w-10 object-contain" />
+                    ) : tool.icon ? (
+                      <tool.icon className={`h-8 w-8 sm:h-10 sm:w-10 ${tool.iconColor}`} />
+                    ) : null}
                   </div>
                   <h3 className="text-lg sm:text-xl font-semibold mb-2">{tool.title}</h3>
                   <p className="text-muted-foreground text-sm flex-1">{tool.description}</p>

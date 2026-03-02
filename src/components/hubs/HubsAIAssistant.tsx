@@ -8,7 +8,6 @@ import { Badge } from '@/components/ui/badge';
 import { 
   X, 
   Send, 
-  Bot, 
   User, 
   Sparkles, 
   MapPin,
@@ -17,6 +16,7 @@ import {
   Star
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import sfhLogo from '@/assets/sfh-logo-sphere.png';
 
 interface HubsAIAssistantProps {
   onClose: () => void;
@@ -239,7 +239,7 @@ export const HubsAIAssistant = ({ onClose, onSearch, workspaces }: HubsAIAssista
                     : "bg-muted"
                 )}>
                   {message.role === 'assistant' ? (
-                    <Bot className="h-4 w-4 text-white" />
+                    <img src={sfhLogo} alt="SFH" className="h-4 w-4 object-contain" />
                   ) : (
                     <User className="h-4 w-4" />
                   )}
@@ -308,7 +308,7 @@ export const HubsAIAssistant = ({ onClose, onSearch, workspaces }: HubsAIAssista
             <div className="flex gap-3">
               <Avatar className="h-8 w-8 shrink-0">
                 <AvatarFallback className="bg-gradient-to-br from-primary to-purple-500">
-                  <Bot className="h-4 w-4 text-white" />
+                  <img src={sfhLogo} alt="SFH" className="h-4 w-4 object-contain" />
                 </AvatarFallback>
               </Avatar>
               <div className="bg-muted/50 border border-border/50 rounded-2xl px-4 py-2.5">

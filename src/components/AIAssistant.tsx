@@ -6,7 +6,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserRole } from "@/hooks/useUserRole";
-import { Bot, Send, Loader2, X, Sparkles } from "lucide-react";
+import { Send, Loader2, X, Sparkles } from "lucide-react";
+import sfhLogo from '@/assets/sfh-logo-sphere.png';
 import { useToast } from "@/hooks/use-toast";
 
 interface Message {
@@ -120,7 +121,7 @@ export default function AIAssistant({ isOpen, onClose }: AIAssistantProps) {
         <ScrollArea className="flex-1 p-4">
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full text-center text-muted-foreground">
-              <Bot className="h-12 w-12 mb-4 opacity-50" />
+              <img src={sfhLogo} alt="SFH" className="h-12 w-12 mb-4 opacity-50 object-contain" />
               <p className="text-sm">How can I help you today?</p>
               <p className="text-xs mt-2">Ask me about your startup, funding, mentorship, or learning!</p>
             </div>

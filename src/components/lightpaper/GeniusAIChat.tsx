@@ -4,8 +4,8 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import sfhLogo from "@/assets/sfh-logo-sphere.png";
 import {
-  Bot,
   Send,
   Loader2,
   X,
@@ -219,7 +219,7 @@ export default function GeniusAIChat({ isOpen, onClose, onInsertText }: GeniusAI
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center py-8">
             <div className="h-16 w-16 rounded-full bg-gradient-to-br from-emerald-500/20 to-cyan-500/20 flex items-center justify-center mb-4">
-              <Bot className="h-8 w-8 text-emerald-500/70" />
+              <img src={sfhLogo} alt="SFH" className="h-8 w-8 object-contain" />
             </div>
             <p className="text-sm font-medium text-foreground mb-1">How can I help?</p>
             <p className="text-xs text-muted-foreground mb-4 max-w-[250px]">
