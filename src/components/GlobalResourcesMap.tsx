@@ -1432,7 +1432,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     )}
                   >
                     <Earth className="w-4 h-4 text-emerald-400" />
-                    Land Surface
+                    Earth Intelligence
                     <Badge variant="outline" className="ml-auto text-[10px] border-emerald-500/50 text-emerald-400 px-1.5 py-0">
                       Premium
                     </Badge>
@@ -1445,7 +1445,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                 <div className="mt-4 pt-4 border-t border-white/20">
                   <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
                     <Earth className="w-3.5 h-3.5 text-emerald-400" />
-                    Land Surface Layers
+                    Land Surface
                   </h3>
                   <div className="space-y-3">
                     {earthLayers.map((layer) => (
