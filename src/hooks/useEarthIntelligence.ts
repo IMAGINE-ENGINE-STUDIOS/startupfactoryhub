@@ -131,8 +131,8 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'monthly',
     supportsDayNight: true,
     dayNightMode: 'day',
-    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day_TileMatrixSet',
-    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night_TileMatrixSet',
+    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day',
+    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
     maxZoom: 7,
@@ -150,8 +150,8 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'daily',
     supportsDayNight: true,
     dayNightMode: 'day',
-    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day_TileMatrixSet',
-    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night_TileMatrixSet',
+    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day',
+    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
     maxZoom: 7,
@@ -169,8 +169,8 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'monthly',
     supportsDayNight: true,
     dayNightMode: 'night',
-    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day_TileMatrixSet',
-    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night_TileMatrixSet',
+    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day',
+    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
     maxZoom: 7,
@@ -188,8 +188,8 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     temporalResolution: 'daily',
     supportsDayNight: true,
     dayNightMode: 'night',
-    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day_TileMatrixSet',
-    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night_TileMatrixSet',
+    gibsLayerDay: 'MODIS_Terra_Land_Surface_Temp_Day',
+    gibsLayerNight: 'MODIS_Terra_Land_Surface_Temp_Night',
     gibsFormat: 'png',
     gibsTileMatrixSet: 'GoogleMapsCompatible_Level7',
     maxZoom: 7,
@@ -317,10 +317,10 @@ const STATIC_EARTH_LAYERS: EarthLayer[] = [
     category: 'radiation',
     supportsDateSelection: true,
     temporalResolution: 'monthly',
-    gibsLayerDay: 'CERES_EBAF_Surface_Shortwave_Down_All_Monthly',
+    gibsLayerDay: 'CERES_Combined_Surface_Shortwave_Flux_Down_All_Sky_Monthly',
     gibsFormat: 'png',
-    gibsTileMatrixSet: 'GoogleMapsCompatible_Level3',
-    maxZoom: 3,
+    gibsTileMatrixSet: 'GoogleMapsCompatible_Level5',
+    maxZoom: 5,
   },
 ];
 
@@ -508,10 +508,12 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   const [precipMode, setPrecipMode] = useState<'realtime' | 'monthly'>('realtime');
 
   // Global date selection for date-sensitive layers
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now() - 86400000));
+  // Use 5 days ago for daily (GIBS data has ~2-3 day lag)
+  const [selectedDate, setSelectedDate] = useState<Date>(new Date(Date.now() - 5 * 86400000));
   const [selectedMonth, setSelectedMonth] = useState<Date>(() => {
     const d = new Date();
-    d.setMonth(d.getMonth() - 1);
+    d.setMonth(d.getMonth() - 2);
+    d.setDate(1); // GIBS monthly layers require 1st of month
     return d;
   });
 

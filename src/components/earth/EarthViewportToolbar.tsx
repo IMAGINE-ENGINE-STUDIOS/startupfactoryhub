@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-import { Play, Pause, SkipBack, SkipForward, Layers, Calendar, ChevronLeft, ChevronRight, Sun, Moon, CalendarDays, Radio } from 'lucide-react';
+import { Play, Pause, SkipBack, SkipForward, Calendar, ChevronLeft, ChevronRight, Sun, Moon, CalendarDays, Radio } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Slider } from '@/components/ui/slider';
 import { TemporalMode, DayNightMode } from '@/hooks/useEarthIntelligence';
@@ -32,8 +32,6 @@ interface EarthViewportToolbarProps {
   activeHasDaily: boolean;
   activeHasMonthly: boolean;
   activeHasTimelineOption: boolean;
-  // Common
-  onToggleLayers?: () => void;
 }
 
 export const EarthViewportToolbar = ({
@@ -60,10 +58,9 @@ export const EarthViewportToolbar = ({
   activeHasDaily,
   activeHasMonthly,
   activeHasTimelineOption,
-  onToggleLayers,
 }: EarthViewportToolbarProps) => {
   const hasAnyActive = isTimelineVisible || isDatePickerVisible || activeHasDayNight || (activeHasDaily && activeHasMonthly) || activeHasTimelineOption;
-  if (!hasAnyActive && !onToggleLayers) return null;
+  if (!hasAnyActive) return null;
 
   const stepDay = (dir: number) => {
     const d = new Date(selectedDate);
@@ -74,6 +71,7 @@ export const EarthViewportToolbar = ({
   const stepMonth = (dir: number) => {
     const d = new Date(selectedMonth);
     d.setMonth(d.getMonth() + dir);
+    d.setDate(1); // GIBS monthly layers require 1st of month
     onMonthChange(d);
   };
 
@@ -82,169 +80,147 @@ export const EarthViewportToolbar = ({
   const showDailyStepper = isDatePickerVisible && temporalMode === 'daily' && activeHasDaily;
 
   return (
-    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-2">
-      {/* Mode toggles row */}
-      {(activeHasDayNight || (activeHasDaily && activeHasMonthly) || activeHasTimelineOption) && (
-        <div className="flex items-center gap-2">
-          {/* Day/Night toggle */}
-          {activeHasDayNight && (
-            <div className="flex items-center gap-0.5 px-1 py-1 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
-              <TogglePill
-                active={dayNightMode === 'day'}
-                onClick={() => onDayNightModeChange('day')}
-                icon={<Sun className="w-3.5 h-3.5" />}
-                label="Day"
-              />
-              <TogglePill
-                active={dayNightMode === 'night'}
-                onClick={() => onDayNightModeChange('night')}
-                icon={<Moon className="w-3.5 h-3.5" />}
-                label="Night"
-              />
-            </div>
-          )}
-
-          {/* Daily/Monthly toggle */}
-          {activeHasDaily && activeHasMonthly && (
-            <div className="flex items-center gap-0.5 px-1 py-1 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
-              <TogglePill
-                active={temporalMode === 'daily'}
-                onClick={() => onTemporalModeChange('daily')}
-                icon={<CalendarDays className="w-3.5 h-3.5" />}
-                label="Daily"
-              />
-              <TogglePill
-                active={temporalMode === 'monthly'}
-                onClick={() => onTemporalModeChange('monthly')}
-                icon={<Calendar className="w-3.5 h-3.5" />}
-                label="Monthly"
-              />
-            </div>
-          )}
-
-          {/* Precipitation mode: Realtime / Monthly */}
-          {activeHasTimelineOption && (
-            <div className="flex items-center gap-0.5 px-1 py-1 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
-              <TogglePill
-                active={precipMode === 'realtime'}
-                onClick={() => onPrecipModeChange('realtime')}
-                icon={<Radio className="w-3.5 h-3.5" />}
-                label="Live"
-              />
-              <TogglePill
-                active={precipMode === 'monthly'}
-                onClick={() => onPrecipModeChange('monthly')}
-                icon={<Calendar className="w-3.5 h-3.5" />}
-                label="Monthly"
-              />
-            </div>
-          )}
+    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 flex-wrap justify-center max-w-[95vw]">
+      {/* Mode toggles */}
+      {activeHasDayNight && (
+        <div className="flex items-center gap-0.5 px-1 py-1 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
+          <TogglePill
+            active={dayNightMode === 'day'}
+            onClick={() => onDayNightModeChange('day')}
+            icon={<Sun className="w-3.5 h-3.5" />}
+            label="Day"
+          />
+          <TogglePill
+            active={dayNightMode === 'night'}
+            onClick={() => onDayNightModeChange('night')}
+            icon={<Moon className="w-3.5 h-3.5" />}
+            label="Night"
+          />
         </div>
       )}
 
-      {/* Date stepper for GIBS layers */}
-      {(showMonthlyStepper || showDailyStepper) && (
-        <div className="flex items-center gap-2">
-          {showMonthlyStepper && (
-            <div className="flex items-center gap-1 px-3 py-2 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
-              <ToolbarButton
-                icon={<ChevronLeft className="w-3.5 h-3.5" />}
-                onClick={() => stepMonth(-1)}
-                label="Previous month"
-                small
-              />
-              <div className="flex items-center gap-1.5 px-2">
-                <Calendar className="w-3.5 h-3.5 text-white/60" />
-                <span className="text-xs text-white/80 font-mono min-w-[80px] text-center">
-                  {format(selectedMonth, 'MMM yyyy')}
-                </span>
-              </div>
-              <ToolbarButton
-                icon={<ChevronRight className="w-3.5 h-3.5" />}
-                onClick={() => stepMonth(1)}
-                label="Next month"
-                small
-              />
-            </div>
-          )}
-          {showDailyStepper && (
-            <div className="flex items-center gap-1 px-3 py-2 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
-              <ToolbarButton
-                icon={<ChevronLeft className="w-3.5 h-3.5" />}
-                onClick={() => stepDay(-1)}
-                label="Previous day"
-                small
-              />
-              <div className="flex items-center gap-1.5 px-2">
-                <Calendar className="w-3.5 h-3.5 text-white/60" />
-                <span className="text-xs text-white/80 font-mono min-w-[90px] text-center">
-                  {format(selectedDate, 'yyyy-MM-dd')}
-                </span>
-              </div>
-              <ToolbarButton
-                icon={<ChevronRight className="w-3.5 h-3.5" />}
-                onClick={() => stepDay(1)}
-                label="Next day"
-                small
-              />
-            </div>
-          )}
+      {activeHasDaily && activeHasMonthly && (
+        <div className="flex items-center gap-0.5 px-1 py-1 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
+          <TogglePill
+            active={temporalMode === 'daily'}
+            onClick={() => onTemporalModeChange('daily')}
+            icon={<CalendarDays className="w-3.5 h-3.5" />}
+            label="Daily"
+          />
+          <TogglePill
+            active={temporalMode === 'monthly'}
+            onClick={() => onTemporalModeChange('monthly')}
+            icon={<Calendar className="w-3.5 h-3.5" />}
+            label="Monthly"
+          />
         </div>
       )}
 
-      {/* Timeline for real-time precipitation */}
+      {activeHasTimelineOption && (
+        <div className="flex items-center gap-0.5 px-1 py-1 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
+          <TogglePill
+            active={precipMode === 'realtime'}
+            onClick={() => onPrecipModeChange('realtime')}
+            icon={<Radio className="w-3.5 h-3.5" />}
+            label="Live"
+          />
+          <TogglePill
+            active={precipMode === 'monthly'}
+            onClick={() => onPrecipModeChange('monthly')}
+            icon={<Calendar className="w-3.5 h-3.5" />}
+            label="Monthly"
+          />
+        </div>
+      )}
+
+      {/* Date stepper */}
+      {showMonthlyStepper && (
+        <div className="flex items-center gap-1 px-2 py-1.5 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
+          <ToolbarButton
+            icon={<ChevronLeft className="w-3.5 h-3.5" />}
+            onClick={() => stepMonth(-1)}
+            label="Previous month"
+            small
+          />
+          <div className="flex items-center gap-1 px-1">
+            <Calendar className="w-3 h-3 text-white/60" />
+            <span className="text-xs text-white/80 font-mono min-w-[70px] text-center">
+              {format(selectedMonth, 'MMM yyyy')}
+            </span>
+          </div>
+          <ToolbarButton
+            icon={<ChevronRight className="w-3.5 h-3.5" />}
+            onClick={() => stepMonth(1)}
+            label="Next month"
+            small
+          />
+        </div>
+      )}
+      {showDailyStepper && (
+        <div className="flex items-center gap-1 px-2 py-1.5 rounded-2xl backdrop-blur-3xl bg-black/40 border border-white/10">
+          <ToolbarButton
+            icon={<ChevronLeft className="w-3.5 h-3.5" />}
+            onClick={() => stepDay(-1)}
+            label="Previous day"
+            small
+          />
+          <div className="flex items-center gap-1 px-1">
+            <Calendar className="w-3 h-3 text-white/60" />
+            <span className="text-xs text-white/80 font-mono min-w-[80px] text-center">
+              {format(selectedDate, 'yyyy-MM-dd')}
+            </span>
+          </div>
+          <ToolbarButton
+            icon={<ChevronRight className="w-3.5 h-3.5" />}
+            onClick={() => stepDay(1)}
+            label="Next day"
+            small
+          />
+        </div>
+      )}
+
+      {/* Timeline timestamp */}
+      {isTimelineVisible && currentFrameTime && (
+        <div className="px-2 py-1.5 rounded-xl backdrop-blur-3xl bg-black/40 border border-white/10 text-xs text-white/80 font-mono">
+          {format(currentFrameTime, 'MM-dd HH:mm')} UTC
+        </div>
+      )}
+
+      {/* Timeline slider */}
+      {isTimelineVisible && frameCount > 1 && (
+        <div className="w-40 px-3 py-1.5 rounded-xl backdrop-blur-3xl bg-black/40 border border-white/10">
+          <Slider
+            value={[currentFrameIndex]}
+            min={0}
+            max={frameCount - 1}
+            step={1}
+            onValueChange={([val]) => onFrameChange(val)}
+            className="w-full"
+          />
+        </div>
+      )}
+
+      {/* Playback controls */}
       {isTimelineVisible && (
         <>
-          {currentFrameTime && (
-            <div className="px-3 py-1.5 rounded-xl backdrop-blur-3xl bg-black/40 border border-white/10 text-xs text-white/80 font-mono">
-              {format(currentFrameTime, 'yyyy-MM-dd HH:mm')} UTC
-            </div>
-          )}
-          {frameCount > 1 && (
-            <div className="w-64 px-4 py-2 rounded-xl backdrop-blur-3xl bg-black/40 border border-white/10">
-              <Slider
-                value={[currentFrameIndex]}
-                min={0}
-                max={frameCount - 1}
-                step={1}
-                onValueChange={([val]) => onFrameChange(val)}
-                className="w-full"
-              />
-            </div>
-          )}
+          <ToolbarButton
+            icon={<SkipBack className="w-4 h-4" />}
+            onClick={() => onStepFrame(-1)}
+            label="Previous frame"
+          />
+          <ToolbarButton
+            icon={isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+            onClick={onTogglePlayback}
+            label={isPlaying ? 'Pause' : 'Play'}
+            active={isPlaying}
+          />
+          <ToolbarButton
+            icon={<SkipForward className="w-4 h-4" />}
+            onClick={() => onStepFrame(1)}
+            label="Next frame"
+          />
         </>
       )}
-
-      {/* Button row */}
-      <div className="flex items-center gap-2">
-        {isTimelineVisible && (
-          <>
-            <ToolbarButton
-              icon={<SkipBack className="w-4 h-4" />}
-              onClick={() => onStepFrame(-1)}
-              label="Previous frame"
-            />
-            <ToolbarButton
-              icon={isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
-              onClick={onTogglePlayback}
-              label={isPlaying ? 'Pause' : 'Play'}
-              active={isPlaying}
-            />
-            <ToolbarButton
-              icon={<SkipForward className="w-4 h-4" />}
-              onClick={() => onStepFrame(1)}
-              label="Next frame"
-            />
-          </>
-        )}
-        {onToggleLayers && (
-          <ToolbarButton
-            icon={<Layers className="w-4 h-4" />}
-            onClick={onToggleLayers}
-            label="Layers"
-          />
-        )}
-      </div>
     </div>
   );
 };

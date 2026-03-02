@@ -2350,7 +2350,6 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         activeHasDaily={activeHasDaily}
         activeHasMonthly={activeHasMonthly}
         activeHasTimelineOption={activeHasTimelineOption}
-        onToggleLayers={() => setShowEarthLayers(prev => !prev)}
       />
     </div>
   );
