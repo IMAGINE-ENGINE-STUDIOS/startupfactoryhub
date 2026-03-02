@@ -106,6 +106,7 @@ export default function UnifiedCommunityFeed({
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const openLightbox = (images: string[], index: number) => {
     setLightboxImages(images);
@@ -139,6 +140,10 @@ export default function UnifiedCommunityFeed({
     if (user) {
       fetchUserLikes();
       fetchUserBookmarks();
+      // Check if current user is admin
+      supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle().then(({ data }) => {
+        setIsAdmin(!!data);
+      });
     }
 
     // Set up real-time subscription
@@ -574,14 +579,22 @@ export default function UnifiedCommunityFeed({
   const deletePost = async (postId: string) => {
     if (!user) return;
     try {
-      const {
-        error
-      } = await supabase.from('feed_posts').delete().eq('id', postId).eq('user_id', user.id);
-      if (error) throw error;
+      if (isAdmin) {
+        // Admin: use edge function for permanent deletion (bypasses RLS)
+        const { data, error } = await supabase.functions.invoke('admin-delete-feed-post', {
+          body: { postId }
+        });
+        if (error) throw error;
+        if (data?.error) throw new Error(data.error);
+      } else {
+        // Regular user: can only delete own posts
+        const { error } = await supabase.from('feed_posts').delete().eq('id', postId).eq('user_id', user.id);
+        if (error) throw error;
+      }
       setPosts(posts.filter(p => p.id !== postId));
       toast({
         title: 'Post deleted',
-        description: 'Your post has been deleted successfully'
+        description: isAdmin ? 'Post has been permanently deleted' : 'Your post has been deleted successfully'
       });
     } catch (error) {
       console.error('Error deleting post:', error);
@@ -1087,7 +1100,7 @@ export default function UnifiedCommunityFeed({
                         <Button variant="ghost" size="sm" className={`text-muted-foreground hover:text-primary px-2 ml-auto ${bookmarkedPosts.has(post.id) ? 'text-primary' : ''}`} onClick={() => toggleBookmark(post.id)}>
                           <Bookmark className={`h-4 w-4 ${bookmarkedPosts.has(post.id) ? 'fill-current' : ''}`} />
                         </Button>
-                        {post.user_id === user?.id && <AlertDialog>
+                        {(post.user_id === user?.id || isAdmin) && <AlertDialog>
                             <AlertDialogTrigger asChild>
                               <Button variant="ghost" size="sm" className="text-muted-foreground hover:text-destructive px-2">
                                 <Trash2 className="h-4 w-4" />
@@ -1097,7 +1110,9 @@ export default function UnifiedCommunityFeed({
                               <AlertDialogHeader>
                                 <AlertDialogTitle>Delete Post</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                  Are you sure you want to delete this post? This action cannot be undone.
+                                  {isAdmin && post.user_id !== user?.id 
+                                    ? 'You are deleting this post as an admin. This will permanently remove the post and all associated media.'
+                                    : 'Are you sure you want to delete this post? This action cannot be undone.'}
                                 </AlertDialogDescription>
                               </AlertDialogHeader>
                               <AlertDialogFooter>
@@ -1232,7 +1247,7 @@ export default function UnifiedCommunityFeed({
                       <Bookmark className={`h-4 w-4 ${bookmarkedPosts.has(post.id) ? 'fill-current' : ''}`} />
                     </Button>
                     
-                    {user?.id === post.user_id && <AlertDialog>
+                    {(user?.id === post.user_id || isAdmin) && <AlertDialog>
                         <AlertDialogTrigger asChild>
                           <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive px-2">
                             <Trash2 className="h-4 w-4" />
@@ -1242,7 +1257,9 @@ export default function UnifiedCommunityFeed({
                           <AlertDialogHeader>
                             <AlertDialogTitle>Delete post?</AlertDialogTitle>
                             <AlertDialogDescription>
-                              This action cannot be undone. This will permanently delete your post.
+                              {isAdmin && post.user_id !== user?.id
+                                ? 'You are deleting this post as an admin. This will permanently remove the post and all associated media.'
+                                : 'This action cannot be undone. This will permanently delete your post.'}
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
