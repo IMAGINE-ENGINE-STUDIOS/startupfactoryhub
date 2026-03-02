@@ -52,7 +52,8 @@ import {
   Map,
   Layers,
   Lock,
-  Star
+  Star,
+  Earth
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -75,7 +76,9 @@ import { HubsWorkspaceCard } from '@/components/hubs/HubsWorkspaceCard';
 import { HubsDetailPanel } from '@/components/hubs/HubsDetailPanel';
 import { RegusBookingModal } from '@/components/hubs/RegusBookingModal';
 import { Workspace, WorkspaceType } from '@/hooks/useHubsSearch';
-
+import { useEarthIntelligence } from '@/hooks/useEarthIntelligence';
+import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 type MapStyleType = 'default' | 'satellite' | 'satelliteStreets';
@@ -143,8 +146,10 @@ export const GlobalResourcesMap = () => {
   const [isRotating, setIsRotating] = useState(false);
   const isRotatingRef = useRef(false);
   const [mapStyle, setMapStyle] = useState<MapStyleType>('satelliteStreets');
+  const [mapReady, setMapReady] = useState(false);
   const [isPerksExpanded, setIsPerksExpanded] = useState(true);
   const [isOnlineResourcesExpanded, setIsOnlineResourcesExpanded] = useState(false);
+  const [showEarthLayers, setShowEarthLayers] = useState(false);
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
   const regusMarkers = useRef<mapboxgl.Marker[]>([]);
   const [userEventStatus, setUserEventStatus] = useState<string | null>(null);
@@ -159,6 +164,14 @@ export const GlobalResourcesMap = () => {
   
   // Membership status for subscription gating
   const { isSubscribed, tier, loading: membershipLoading } = useMembershipStatus();
+
+  // Earth Intelligence layers (admin-only)
+  const {
+    earthLayers,
+    hasAccess: hasEarthAccess,
+    toggleEarthLayer,
+    setEarthLayerOpacity,
+  } = useEarthIntelligence(map.current, mapReady);
   
   // Regus locations (only fetch when workplace selected AND subscribed)
   const regusFilters: RegusFilters = {
@@ -622,6 +635,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       
       // Ensure the map is visible
       map.current.resize();
+      setMapReady(true);
     });
 
     // Auto-rotate globe
@@ -658,6 +672,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   const handleStyleChange = useCallback((style: MapStyleType) => {
     if (!map.current) return;
     setMapStyle(style);
+    setMapReady(false);
     map.current.setStyle(MAP_STYLES[style].url);
     
     // Re-apply fog and sources after style loads
@@ -707,6 +722,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       // Clear added image keys so they get re-added
       addedImageKeys.current.clear();
       loadingImageKeys.current.clear();
+      setMapReady(true);
     });
     
     toast({
@@ -1401,10 +1417,81 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                     </Button>
                   );
                 })}
+
+                {/* Earth Intelligence Category */}
+                {hasEarthAccess && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => { setShowEarthLayers(!showEarthLayers); }}
+                    className={cn(
+                      "w-full justify-start gap-2 rounded-xl backdrop-blur-xl mt-2",
+                      showEarthLayers
+                        ? "bg-emerald-500/20 border-l-4 border-emerald-500"
+                        : "bg-white/5 dark:bg-black/10 hover:bg-white/10 dark:hover:bg-black/20"
+                    )}
+                  >
+                    <Earth className="w-4 h-4 text-emerald-400" />
+                    Earth Intelligence
+                    <Badge variant="outline" className="ml-auto text-[10px] border-emerald-500/50 text-emerald-400 px-1.5 py-0">
+                      Premium
+                    </Badge>
+                  </Button>
+                )}
               </div>
-              
-              {/* Workplace Panel - replaces Journey Stage when workplace selected */}
-              {selectedType === 'workplace' ? (
+
+              {/* Earth Intelligence Panel */}
+              {showEarthLayers && hasEarthAccess ? (
+                <div className="mt-4 pt-4 border-t border-white/20">
+                  <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                    <Earth className="w-3.5 h-3.5 text-emerald-400" />
+                    JAXA Earth Layers
+                  </h3>
+                  <div className="space-y-3">
+                    {earthLayers.map((layer) => (
+                      <div
+                        key={layer.id}
+                        className={cn(
+                          "p-3 rounded-xl transition-colors space-y-2",
+                          layer.enabled
+                            ? "bg-emerald-500/10 border border-emerald-500/30"
+                            : "bg-white/5"
+                        )}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base">{layer.icon}</span>
+                            <div>
+                              <span className="text-sm font-medium">{layer.name}</span>
+                              <p className="text-xs text-muted-foreground">{layer.description}</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={layer.enabled}
+                            onCheckedChange={() => toggleEarthLayer(layer.id)}
+                          />
+                        </div>
+                        {layer.enabled && (
+                          <div className="flex items-center gap-3 pt-1">
+                            <span className="text-xs text-muted-foreground w-14">Opacity</span>
+                            <Slider
+                              value={[layer.opacity]}
+                              min={0}
+                              max={1}
+                              step={0.05}
+                              onValueChange={([val]) => setEarthLayerOpacity(layer.id, val)}
+                              className="flex-1"
+                            />
+                            <span className="text-xs text-muted-foreground w-8 text-right">
+                              {Math.round(layer.opacity * 100)}%
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : selectedType === 'workplace' ? (
                 <div className="mt-4 pt-4 border-t border-white/20">
                   {!isSubscribed ? (
                     /* Lock overlay for non-subscribers */
