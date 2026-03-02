@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, CheckCircle2, Loader2, AlertCircle, Download, Trash2, Clock } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import geniusAILogo from "@/assets/genius-ai-logo.png";
+import geniusAILogo from "@/assets/imaginaly-logo.png";
 
 export interface GeniusTask {
   id: string;

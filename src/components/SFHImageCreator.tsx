@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Loader2, Download, Wand2, Crown, Upload, Pencil, X } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import geniusAiLogo from "@/assets/genius-ai-logo.png";
+import geniusAiLogo from "@/assets/imaginaly-logo.png";
 
 const FREE_LIMIT = 10;
 
