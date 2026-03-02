@@ -213,11 +213,11 @@ export default function DistrictRooms() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-6">
+      <div className="flex gap-3 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory -mx-1 px-1">
         {rooms.map(room => (
           <Card
             key={room.id}
-            className="tech-card border-0 relative overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5"
+            className="tech-card border-0 relative overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:-translate-y-0.5 min-w-[280px] max-w-[320px] flex-shrink-0 snap-start"
             onClick={() => setDetailRoom(room)}
           >
             {/* Gradient top accent */}

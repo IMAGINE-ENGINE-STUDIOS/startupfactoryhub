@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMembershipStatus } from '@/hooks/useMembershipStatus';
 
 export type EarthLayerIconType = 'mountain' | 'sun-dim' | 'cloud-rain' | 'thermometer' | 'waves' | 'sun';
 
@@ -448,6 +449,7 @@ const EARTH_DATASETS: EarthDataset[] = [
 ];
 
 const ALLOWED_EMAIL = 'ceo@imagineengine.space';
+const EARTH_ACCESS_TIERS = ['self_paced_office', 'global_access', 'corporate'];
 
 // Format date for GIBS URL
 const formatGibsDate = (date: Date): string => {
@@ -495,9 +497,10 @@ const resolveLayerId = (
 
 export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean) => {
   const { user } = useAuth();
+  const { tier } = useMembershipStatus();
   const [earthLayers, setEarthLayers] = useState<EarthLayer[]>(STATIC_EARTH_LAYERS);
   const [datasets, setDatasets] = useState<EarthDataset[]>(EARTH_DATASETS);
-  const hasAccess = user?.email === ALLOWED_EMAIL;
+  const hasAccess = user?.email === ALLOWED_EMAIL || EARTH_ACCESS_TIERS.includes(tier);
 
   // Global temporal controls
   const [temporalMode, setTemporalMode] = useState<TemporalMode>('monthly');

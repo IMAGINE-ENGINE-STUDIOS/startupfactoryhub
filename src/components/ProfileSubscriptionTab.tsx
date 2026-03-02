@@ -31,15 +31,15 @@ const TIER_CONFIG: Record<string, { icon: typeof Zap; gradient: string; glow: st
     glow: 'shadow-primary/20',
     description: 'Adds local Startup Factory HUB Desk coworking access all locations to the community plan.',
     bestFor: 'Founders needing flexible workspace + virtual resources',
-    features: ['All community features', 'Local Startup Factory HUB Desk coworking access all locations', 'Mentor + event access', 'Eligible for Accelerated Tier'],
+    features: ['All community features', 'Local Startup Factory HUB Desk coworking access all locations', 'Earth Intelligence satellite data access', 'Eligible for Accelerated Tier'],
   },
   global_access: {
     icon: Crown,
     gradient: 'from-purple-500 to-pink-500',
     glow: 'shadow-purple-500/20',
-    description: 'All platform features + unlimited office global access across Startup Factory Hub network (130+ countries, 5,600+ sites).',
+    description: 'All platform features + unlimited Global office access across Startup Factory Hub network (130+ countries, 5,600+ sites).',
     bestFor: 'Globally distributed teams, traveling founders',
-    features: ['All features + global private office access across Startup Factory Hub network', 'Eligible for Accelerated Tier'],
+    features: ['All features + Global office access across Startup Factory Hub network', 'Mentor + event access', 'Earth Intelligence satellite data access', 'Eligible for Accelerated Tier'],
   },
   corporate: {
     icon: Users,
@@ -47,7 +47,7 @@ const TIER_CONFIG: Record<string, { icon: typeof Zap; gradient: string; glow: st
     glow: 'shadow-orange-500/20',
     description: 'Designed for corporate innovation teams and growth-stage startups with teams across regions.',
     bestFor: 'Scale-ups or corporate venture units',
-    features: ['All features + team dashboard', 'Unlimited travel to 11 countries (only pay ticket taxes, travel with Frontier)', 'Global coworking access', 'Soft Landing discount ($5,000) — expand to Japan, USA, Europe, Chile or Venezuela', 'Accelerated Tier if eligible'],
+    features: ['All features + team dashboard', 'Unlimited travel to 11 countries (only pay ticket taxes, travel with Frontier)', 'Global coworking access', 'Soft Landing discount ($5,000) — expand to Japan, USA, Europe, Chile or Venezuela', 'Mentor + event access', 'Earth Intelligence satellite data access', 'Accelerated Tier if eligible'],
   },
 };
 
