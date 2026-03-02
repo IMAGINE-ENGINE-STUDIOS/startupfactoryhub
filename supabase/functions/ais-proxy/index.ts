@@ -104,7 +104,7 @@ async function fetchFromAISStream(
       // aisstream.io expects BoundingBoxes as array of [[min_lat, min_lon], [max_lat, max_lon]]
       // and the key field as "APIKey" (capital K)
       const subscriptionMessage = {
-        Apikey: apiKey,
+        APIKey: apiKey,
         BoundingBoxes: [[[latmin, lonmin], [latmax, lonmax]]],
         FilterMessageTypes: ["PositionReport"],
       };
@@ -112,15 +112,27 @@ async function fetchFromAISStream(
       ws.send(JSON.stringify(subscriptionMessage));
     };
 
-    ws.onmessage = (event) => {
+    ws.onmessage = async (event) => {
       try {
-        const msg = JSON.parse(typeof event.data === 'string' ? event.data : '{}');
+        let raw: string;
+        if (typeof event.data === 'string') {
+          raw = event.data;
+        } else if (event.data instanceof Blob) {
+          raw = await event.data.text();
+        } else if (event.data instanceof ArrayBuffer) {
+          raw = new TextDecoder().decode(event.data);
+        } else {
+          raw = String(event.data);
+        }
         
+        if (!raw || raw.length === 0) return;
+        
+        const msg = JSON.parse(raw);
         // Check for error responses
-        if (msg.ERROR) {
-          console.error('AISStream error:', msg.ERROR);
+        if (msg.ERROR || msg.error) {
+          console.error('AISStream error:', msg.ERROR || msg.error);
           cleanup();
-          reject(new Error(`AISStream error: ${msg.ERROR}`));
+          reject(new Error(`AISStream error: ${msg.ERROR || msg.error}`));
           return;
         }
 
