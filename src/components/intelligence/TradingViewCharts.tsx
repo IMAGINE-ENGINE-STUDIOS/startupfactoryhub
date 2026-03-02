@@ -10,21 +10,21 @@ export const TradingViewCharts = () => {
       <Card className="tech-card border-0 p-5 overflow-hidden">
         <SFHMarketOverview />
         <p className="text-[10px] text-muted-foreground/50 mt-3 text-center">
-          Data by CoinGecko · Auto-refreshes every 30s
+          Data by Gold Arrow · Auto-refreshes every 30s
         </p>
       </Card>
 
       <Card className="tech-card border-0 p-5 overflow-hidden">
         <SFHTopMovers />
         <p className="text-[10px] text-muted-foreground/50 mt-3 text-center">
-          Data by CoinGecko · Auto-refreshes every 30s
+          Data by Gold Arrow · Auto-refreshes every 30s
         </p>
       </Card>
 
       <Card className="tech-card border-0 p-5 overflow-hidden lg:col-span-2">
         <SFHMarketQuotes />
         <p className="text-[10px] text-muted-foreground/50 mt-3 text-center">
-          Data by CoinGecko · Auto-refreshes every 30s
+          Data by Gold Arrow · Auto-refreshes every 30s
         </p>
       </Card>
 
