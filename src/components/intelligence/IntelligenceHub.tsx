@@ -7,10 +7,16 @@ import {
   Sparkles,
   ChevronRight,
   LineChart,
-  Landmark
+  Landmark,
+  Search,
+  Building2,
+  Globe,
+  Briefcase
 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import MarketIntelligenceWidget from '@/components/MarketIntelligenceWidget';
 import TrendingCompanies from '@/components/TrendingCompanies';
 import { TradingViewCharts } from './TradingViewCharts';
@@ -114,53 +120,50 @@ export const IntelligenceHub = () => {
         </div>
       </div>
 
-      {/* Source Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {intelligenceCards.map((card) => (
-          <Card
-            key={card.id}
-            className={`tech-card border-0 p-4 cursor-pointer group ${
-              activeSection === card.id 
-                ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' 
-                : ''
-            }`}
-            onClick={() => setActiveSection(card.id)}
-          >
-            <div className="flex items-start justify-between mb-3">
-              <div className={`p-2.5 rounded-xl bg-gradient-to-br ${card.color} text-white`}>
-                {card.icon}
-              </div>
-              {card.badge && (
-                <Badge variant="secondary" className="text-[10px]">
-                  {card.badge}
-                </Badge>
-              )}
-            </div>
-            
-            <h3 className="font-semibold mb-1 flex items-center gap-2">
-              {card.title}
-              <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-            </h3>
-            <p className="text-xs text-muted-foreground">
-              {card.description}
-            </p>
-            
-            {activeSection === card.id && (
-              <div className="mt-3 pt-3 border-t border-border/50">
-                <Badge variant="outline" className="text-[10px] text-emerald-500 border-emerald-500/30">
-                  <Sparkles className="w-3 h-3 mr-1" />
-                  Active
-                </Badge>
-              </div>
-            )}
-          </Card>
-        ))}
-      </div>
+      {/* Unified Container: Source Cards + Content */}
+      <Card className="tech-card border-0 overflow-hidden">
+        {/* Source Cards - Horizontal scrollable strip */}
+        <div className="border-b border-border/50 p-4 bg-muted/20">
+          <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-none">
+            {intelligenceCards.map((card) => (
+              <button
+                key={card.id}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl min-w-[200px] transition-all ${
+                  activeSection === card.id 
+                    ? 'bg-background shadow-md ring-1 ring-primary/30' 
+                    : 'bg-background/50 hover:bg-background/80'
+                }`}
+                onClick={() => setActiveSection(card.id)}
+              >
+                <div className={`p-2 rounded-lg bg-gradient-to-br ${card.color} text-white flex-shrink-0`}>
+                  {card.icon}
+                </div>
+                <div className="text-left min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-sm truncate">{card.title}</span>
+                    {card.badge && (
+                      <Badge variant="secondary" className="text-[10px] flex-shrink-0">
+                        {card.badge}
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {card.description}
+                  </p>
+                </div>
+                {activeSection === card.id && (
+                  <Sparkles className="w-4 h-4 text-primary flex-shrink-0 ml-auto" />
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
 
-      {/* Active Section Content */}
-      <div className="min-h-[400px]">
-        {renderSection()}
-      </div>
+        {/* Active Section Content */}
+        <div className="p-4 sm:p-6 min-h-[400px]">
+          {renderSection()}
+        </div>
+      </Card>
     </div>
   );
 };
