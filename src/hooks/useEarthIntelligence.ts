@@ -16,7 +16,7 @@ const EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'jaxa-aw3d30',
     name: 'JAXA AW3D30 Elevation',
-    description: 'Global 30m digital elevation model',
+    description: 'Global ~30m DEM from ALOS "Daichi" (ALOS/ALOS-2 satellites)',
     tileUrl: 'https://cyberjapandata.gsi.go.jp/xyz/dem_png/{z}/{x}/{y}.png',
     enabled: false,
     opacity: 0.6,
@@ -25,7 +25,7 @@ const EARTH_LAYERS: EarthLayer[] = [
   {
     id: 'jaxa-hillshade',
     name: 'Hillshade Relief',
-    description: 'Terrain hillshade visualization',
+    description: 'Terrain hillshade from ALOS "Daichi-2" ~30m spatial resolution',
     tileUrl: 'https://cyberjapandata.gsi.go.jp/xyz/hillshademap/{z}/{x}/{y}.png',
     enabled: false,
     opacity: 0.5,
