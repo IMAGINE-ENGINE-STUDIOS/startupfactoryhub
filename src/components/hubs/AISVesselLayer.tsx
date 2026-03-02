@@ -15,39 +15,7 @@ const LAYER_CLUSTERS = 'ais-vessels-clusters';
 const LAYER_CLUSTER_COUNT = 'ais-vessels-cluster-count';
 const SHIP_IMAGE_ID = 'ais-ship-icon';
 
-// Create a ship icon as a canvas image for Mapbox
-function createShipImage(size: number): HTMLCanvasElement {
-  const canvas = document.createElement('canvas');
-  const ratio = window.devicePixelRatio || 1;
-  canvas.width = size * ratio;
-  canvas.height = size * ratio;
-  const ctx = canvas.getContext('2d')!;
-  ctx.scale(ratio, ratio);
-
-  const cx = size / 2;
-  const cy = size / 2;
-  const s = size * 0.4; // scale factor
-
-  // Ship hull shape pointing UP (north = 0°)
-  ctx.beginPath();
-  ctx.moveTo(cx, cy - s);           // bow (top)
-  ctx.lineTo(cx + s * 0.45, cy + s * 0.3);  // starboard
-  ctx.lineTo(cx + s * 0.3, cy + s * 0.85);  // starboard stern
-  ctx.lineTo(cx - s * 0.3, cy + s * 0.85);  // port stern
-  ctx.lineTo(cx - s * 0.45, cy + s * 0.3);  // port
-  ctx.closePath();
-
-  // White fill with slight transparency
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
-  ctx.fill();
-  ctx.strokeStyle = 'rgba(0, 0, 0, 0.4)';
-  ctx.lineWidth = 1;
-  ctx.stroke();
-
-  return canvas;
-}
-
-// Create colored ship images per vessel category
+// Vessel category colors
 const VESSEL_COLORS: Record<string, string> = {
   cargo: '#3b82f6',
   tanker: '#ef4444',
@@ -57,13 +25,11 @@ const VESSEL_COLORS: Record<string, string> = {
   other: '#6b7280',
 };
 
-function createColoredShipImage(size: number, fillColor: string, strokeColor: string): HTMLCanvasElement {
+function createColoredShipImage(size: number, fillColor: string, strokeColor: string): ImageData {
   const canvas = document.createElement('canvas');
-  const ratio = window.devicePixelRatio || 1;
-  canvas.width = size * ratio;
-  canvas.height = size * ratio;
+  canvas.width = size;
+  canvas.height = size;
   const ctx = canvas.getContext('2d')!;
-  ctx.scale(ratio, ratio);
 
   const cx = size / 2;
   const cy = size / 2;
@@ -84,13 +50,13 @@ function createColoredShipImage(size: number, fillColor: string, strokeColor: st
   ctx.lineWidth = 1.5;
   ctx.stroke();
 
-  // Small bridge/superstructure detail
+  // Small bridge detail
   ctx.beginPath();
   ctx.arc(cx, cy + s * 0.15, s * 0.12, 0, Math.PI * 2);
   ctx.fillStyle = 'rgba(255,255,255,0.7)';
   ctx.fill();
 
-  return canvas;
+  return ctx.getImageData(0, 0, size, size);
 }
 
 export const AISVesselLayer = ({ map, vessels, mapReady, onVesselClick }: AISVesselLayerProps) => {
@@ -122,12 +88,12 @@ export const AISVesselLayer = ({ map, vessels, mapReady, onVesselClick }: AISVes
   const addShipImages = useCallback(() => {
     if (!map || imagesAddedRef.current) return;
 
-    const size = 28;
+    const size = 32;
     Object.entries(VESSEL_COLORS).forEach(([key, color]) => {
       const imageId = `ship-${key}`;
       if (!map.hasImage(imageId)) {
-        const canvas = createColoredShipImage(size, color, 'rgba(255,255,255,0.9)');
-        map.addImage(imageId, canvas as any, { pixelRatio: window.devicePixelRatio || 1 });
+        const imageData = createColoredShipImage(size, color, 'rgba(255,255,255,0.9)');
+        map.addImage(imageId, { width: size, height: size, data: new Uint8Array(imageData.data.buffer) });
       }
     });
 
