@@ -8,6 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import AISummaryCard from "./AISummaryCard";
 import AITranslator from "./AITranslator";
 import TaskAutomation from "./TaskAutomation";
+import SFHImageCreator from "./SFHImageCreator";
 import SentimentAnalyzer from "./SentimentAnalyzer";
 import DocumentAnalyzer from "./DocumentAnalyzer";
 import { LightPaperDocument } from "./lightpaper/LightPaperDocument";
@@ -22,6 +23,7 @@ import {
   Languages, 
   Image, 
   Workflow,
+  Wand2,
   Sparkles,
   Table,
   Presentation,
@@ -65,7 +67,8 @@ export default function AIFeaturesHub() {
     sentiment: false,
     translate: false,
     document: false,
-    automation: false
+    automation: false,
+    'image-creator': false
   });
   const [lightPaperTab, setLightPaperTab] = useState("document");
   const [selectedProject, setSelectedProject] = useState<LightPaperProject | null>(null);
@@ -128,6 +131,13 @@ export default function AIFeaturesHub() {
       description: 'Automate repetitive workflows',
       icon: Workflow,
       gradient: 'from-cyan-500 to-blue-600'
+    },
+    {
+      id: 'image-creator',
+      title: 'SFH Image Creator',
+      description: 'Generate stunning AI images from text prompts',
+      icon: Wand2,
+      gradient: 'from-emerald-500 to-teal-600'
     }
   ];
 
@@ -429,6 +439,10 @@ export default function AIFeaturesHub() {
         open={openDialogs.automation} 
         onOpenChange={(open) => !open && closeDialog('automation')} 
       />
+      <ImageCreatorDialog 
+        open={openDialogs['image-creator']} 
+        onOpenChange={(open) => !open && closeDialog('image-creator')} 
+      />
     </div>
   );
 }
@@ -561,6 +575,27 @@ function AutomationDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
           </DialogDescription>
         </DialogHeader>
         <TaskAutomation />
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function ImageCreatorDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Wand2 className="h-5 w-5 text-emerald-500" />
+            SFH Image Creator
+          </DialogTitle>
+          <DialogDescription>
+            Generate stunning AI images from text prompts
+          </DialogDescription>
+        </DialogHeader>
+        <div className="mt-4">
+          <SFHImageCreator />
+        </div>
       </DialogContent>
     </Dialog>
   );
