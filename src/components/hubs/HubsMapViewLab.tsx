@@ -11,6 +11,7 @@ import { useGISLayers } from '@/hooks/useGISLayers';
 import { useExternalTracking, DEMO_PROVIDERS } from '@/hooks/useExternalTracking';
 import { ExternalTrackingMarkers } from './ExternalTrackingMarkers';
 import { GISControlPanel, MapStyleType } from './GISControlPanel';
+import { useEarthIntelligence } from '@/hooks/useEarthIntelligence';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
@@ -65,6 +66,12 @@ export const HubsMapViewLab = ({
     isPolling, 
     toggleProvider 
   } = useExternalTracking(DEMO_PROVIDERS);
+  const {
+    earthLayers,
+    hasAccess: hasEarthAccess,
+    toggleEarthLayer,
+    setEarthLayerOpacity,
+  } = useEarthIntelligence(map.current, mapReady);
 
   // Initialize map
   useEffect(() => {
@@ -343,6 +350,10 @@ export const HubsMapViewLab = ({
         onStyleChange={handleStyleChange}
         currentStyle={mapStyle}
         isPolling={isPolling}
+        earthLayers={earthLayers}
+        hasEarthAccess={hasEarthAccess}
+        onToggleEarthLayer={toggleEarthLayer}
+        onEarthLayerOpacity={setEarthLayerOpacity}
       />
       
       {/* Control Buttons */}
