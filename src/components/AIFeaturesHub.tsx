@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import geniusAiLogo from "@/assets/imaginaly-logo.png";
+import sfhLogo from "@/assets/sfh-logo-sphere.png";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -31,7 +32,6 @@ import {
   ChevronDown,
   ChevronUp,
   Kanban,
-  Bot,
   Maximize2,
   X
 } from "lucide-react";
@@ -289,7 +289,7 @@ export default function AIFeaturesHub() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                    <Bot className="h-5 w-5 text-primary" />
+                    <img src={sfhLogo} alt="SFH" className="h-6 w-6 object-contain" />
                   </div>
                   <div>
                     <CardTitle className="text-lg sm:text-xl">AI Tools</CardTitle>
