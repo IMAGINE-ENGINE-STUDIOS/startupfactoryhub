@@ -124,10 +124,10 @@ const GlobalSearch = memo(function GlobalSearch() {
     // Navigate based on type
     switch (result.type) {
       case 'user':
-        navigate(`/profile?id=${result.id}`);
+        navigate(`/dashboard?tab=profile&id=${result.id}`);
         break;
       case 'startup':
-        navigate(`/profile?company=${result.id}`);
+        navigate(`/dashboard?tab=profile&company=${result.id}`);
         break;
       case 'event':
         navigate(`/calendar?id=${result.id}`);
