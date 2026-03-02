@@ -852,14 +852,6 @@ You can help with:
                 variant="ghost"
                 size="icon"
                 className="h-7 w-7"
-                onClick={() => setIsMinimized(!isMinimized)}
-              >
-                <Minus className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
                 onClick={() => { setIsOpen(false); setDocReadyBadge(false); }}
               >
                 <X className="h-3.5 w-3.5" />
