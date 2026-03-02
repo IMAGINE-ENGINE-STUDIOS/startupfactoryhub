@@ -134,8 +134,8 @@ export default function AIFeaturesHub() {
     },
     {
       id: 'image-creator',
-      title: 'SFH Image Creator',
-      description: 'Generate stunning AI images from text prompts',
+      title: 'Imaginaly',
+      description: 'Generate & edit stunning AI images from text prompts',
       icon: Wand2,
       gradient: 'from-emerald-500 to-teal-600'
     }
@@ -583,17 +583,17 @@ function AutomationDialog({ open, onOpenChange }: { open: boolean; onOpenChange:
 function ImageCreatorDialog({ open, onOpenChange }: { open: boolean; onOpenChange: (open: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="tech-card border-0 !transition-none max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="tech-card border-0 !transition-none max-w-[95vw] w-full h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <Wand2 className="h-5 w-5 text-emerald-500" />
-            SFH Image Creator
+            Imaginaly
           </DialogTitle>
           <DialogDescription>
-            Generate stunning AI images from text prompts
+            Generate & edit stunning AI images from text prompts
           </DialogDescription>
         </DialogHeader>
-        <div className="mt-4">
+        <div className="flex-1 min-h-0 overflow-hidden">
           <SFHImageCreator />
         </div>
       </DialogContent>
