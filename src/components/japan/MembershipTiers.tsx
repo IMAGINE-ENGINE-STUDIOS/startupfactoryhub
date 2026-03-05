@@ -7,11 +7,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useState } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Switch } from "@/components/ui/switch";
 
 const tiers = [
   {
     name: "Free",
-    price: "$0",
+    monthlyPrice: "$0",
+    yearlyPrice: "$0",
     period: "forever",
     icon: Star,
     target: "Entry-level founders",
@@ -24,11 +26,14 @@ const tiers = [
     ],
     color: "from-gray-500 to-gray-600",
     popular: false,
+    tierKey: null as string | null,
   },
   {
     name: "Community",
-    price: "$350",
+    monthlyPrice: "$350",
+    yearlyPrice: "$315",
     period: "/month",
+    yearlyPeriod: "/month",
     icon: Zap,
     target: "Early MVP-stage founders",
     description: "Digital access for growing startups",
@@ -42,11 +47,14 @@ const tiers = [
     ],
     color: "from-blue-500 to-cyan-500",
     popular: false,
+    tierKey: "community",
   },
   {
     name: "Self-Paced + Office",
-    price: "$550",
+    monthlyPrice: "$550",
+    yearlyPrice: "$495",
     period: "/month",
+    yearlyPeriod: "/month",
     icon: Building,
     target: "Founders needing flexible workspace + virtual resources",
     description: "Adds local Startup Factory HUB coworking space access (1 country) to the community plan",
@@ -58,11 +66,14 @@ const tiers = [
     ],
     color: "from-primary to-teal-400",
     popular: true,
+    tierKey: "self_paced_office",
   },
   {
     name: "Global Access",
-    price: "$950",
+    monthlyPrice: "$950",
+    yearlyPrice: "$855",
     period: "/month",
+    yearlyPeriod: "/month",
     icon: Crown,
     target: "Globally distributed teams, traveling founders",
     description: "All platform features + unlimited Global office access across Startup Factory Hub network (130+ countries, 5,600+ sites)",
@@ -76,11 +87,14 @@ const tiers = [
     ],
     color: "from-purple-500 to-pink-500",
     popular: false,
+    tierKey: "global_access",
   },
   {
     name: "Corporate",
-    price: "$1,500",
+    monthlyPrice: "$1,500",
+    yearlyPrice: "$1,350",
     period: "/month",
+    yearlyPeriod: "/month",
     icon: Users,
     target: "Scale-ups or corporate venture units",
     description: "Designed for corporate innovation teams and growth-stage startups with teams across regions",
@@ -94,10 +108,12 @@ const tiers = [
     ],
     color: "from-orange-500 to-red-500",
     popular: false,
+    tierKey: "corporate",
   },
   {
     name: "In-Person Cohort",
-    price: "No Fee",
+    monthlyPrice: "No Fee",
+    yearlyPrice: "No Fee",
     period: "selected startups",
     icon: Rocket,
     target: "Selected deep-tech startups",
@@ -112,6 +128,7 @@ const tiers = [
     ],
     color: "from-green-500 to-emerald-500",
     popular: false,
+    tierKey: null,
   },
 ];
 
@@ -119,6 +136,7 @@ const MembershipTiers = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loadingTier, setLoadingTier] = useState<string | null>(null);
+  const [isYearly, setIsYearly] = useState(false);
 
   const handleSubscribe = async (tier: typeof tiers[number]) => {
     if (tier.name === "Free" || tier.name === "In-Person Cohort") return;
@@ -129,21 +147,19 @@ const MembershipTiers = () => {
       return;
     }
 
-    const tierKey = tier.name === "Community" ? "community"
-      : tier.name === "Self-Paced + Office" ? "self_paced_office"
-      : tier.name === "Global Access" ? "global_access"
-      : tier.name === "Corporate" ? "corporate"
-      : null;
-
+    const tierKey = tier.tierKey;
     if (!tierKey) return;
 
-    const membershipTier = MEMBERSHIP_TIERS[tierKey];
-    if (!membershipTier?.price_id) return;
+    const membershipTier = MEMBERSHIP_TIERS[tierKey as keyof typeof MEMBERSHIP_TIERS];
+    if (!membershipTier) return;
+
+    const priceId = isYearly ? membershipTier.yearly_price_id : membershipTier.price_id;
+    if (!priceId) return;
 
     setLoadingTier(tier.name);
     try {
       const { data, error } = await supabase.functions.invoke('create-membership-checkout', {
-        body: { priceId: membershipTier.price_id },
+        body: { priceId },
       });
 
       if (error) throw error;
@@ -176,9 +192,29 @@ const MembershipTiers = () => {
           <h2 className="text-4xl md:text-6xl font-bold mb-4">
             Membership <span className="text-primary">Tiers</span>
           </h2>
-          <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+          <p className="text-lg text-muted-foreground max-w-3xl mx-auto mb-8">
             Flexible plans designed for startups at every stage of their journey
           </p>
+
+          {/* Billing Toggle */}
+          <div className="inline-flex items-center gap-3 px-5 py-3 rounded-full bg-card/80 backdrop-blur border border-border">
+            <span className={`text-sm font-medium transition-colors ${!isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+              Monthly
+            </span>
+            <Switch
+              checked={isYearly}
+              onCheckedChange={setIsYearly}
+              className="data-[state=checked]:bg-primary"
+            />
+            <span className={`text-sm font-medium transition-colors ${isYearly ? 'text-foreground' : 'text-muted-foreground'}`}>
+              Yearly
+            </span>
+            {isYearly && (
+              <span className="ml-1 px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-xs font-bold">
+                Save 10%
+              </span>
+            )}
+          </div>
         </motion.div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
@@ -216,10 +252,20 @@ const MembershipTiers = () => {
                 <p className="text-xs text-primary font-medium mb-2">{tier.target}</p>
                 
                 {/* Price */}
-                <div className="flex items-baseline gap-1 mb-2">
-                  <span className="text-3xl font-bold text-foreground">{tier.price}</span>
-                  <span className="text-sm text-muted-foreground">{tier.period}</span>
+                <div className="flex items-baseline gap-1 mb-1">
+                  <span className="text-3xl font-bold text-foreground">
+                    {isYearly ? tier.yearlyPrice : tier.monthlyPrice}
+                  </span>
+                  <span className="text-sm text-muted-foreground">
+                    {tier.tierKey && isYearly ? tier.yearlyPeriod || tier.period : tier.period}
+                  </span>
                 </div>
+                {isYearly && tier.tierKey && (
+                  <p className="text-xs text-green-400 font-medium mb-2">
+                    Billed yearly · Save 10%
+                  </p>
+                )}
+                {(!isYearly || !tier.tierKey) && <div className="mb-2" />}
                 <p className="text-sm text-muted-foreground mb-6">{tier.description}</p>
 
                 {/* Features */}
