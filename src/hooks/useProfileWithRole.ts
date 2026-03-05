@@ -14,6 +14,7 @@ interface ProfileWithRole {
   avatar_url: string | null;
   linkedin_url: string | null;
   resume_url: string | null;
+  is_official_mentor?: boolean;
   created_at: string;
   updated_at: string;
   role: AppRole | null;
