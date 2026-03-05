@@ -197,18 +197,6 @@ const MentorDashboard = () => {
 
           <TabsContent value="profile" className="space-y-6">
             <AdvisorProfileView />
-            
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <MessageCircle className="h-5 w-5" />
-                  Your Posts
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
