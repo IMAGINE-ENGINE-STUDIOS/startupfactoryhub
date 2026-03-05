@@ -11,9 +11,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useUserRole } from '@/hooks/useUserRole';
 import { useRealtime } from '@/hooks/useRealtime';
-import { Calendar as CalendarIcon, Users, TrendingUp, Star, Clock, Plus, MapPin, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Globe, Video, ExternalLink, XCircle, CheckCircle } from 'lucide-react';
+import { Calendar as CalendarIcon, Users, TrendingUp, Star, Clock, Plus, MapPin, Bell, MessageCircle, Network, FileText, BarChart, Brain, Wrench, Briefcase, Globe, Video, ExternalLink, XCircle, CheckCircle } from 'lucide-react';
 import UnifiedCommunityFeed from '@/components/UnifiedCommunityFeed';
 import DistrictRooms from '@/components/DistrictRooms';
+import NotificationsPanel from '@/components/NotificationsPanel';
 import LiveRooms from '@/components/LiveRooms';
 import FloatingChat from '@/components/FloatingChat';
 import AnalyticsDashboard from '@/components/AnalyticsDashboard';
@@ -56,7 +57,7 @@ export default function AdvisorDashboard() {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(urlTab || "social");
+  const [activeTab, setActiveTab] = useState(urlTab || "notifications");
   const [activeVideoSession, setActiveVideoSession] = useState<any>(null);
   const {
     user
@@ -271,9 +272,9 @@ export default function AdvisorDashboard() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin px-2 sm:mx-0 sm:px-0 mx-0">
             <TabsList className="flex w-full whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
-              <TabsTrigger value="social" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Social</span>
+              <TabsTrigger value="notifications" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Bell className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Notifications</span>
               </TabsTrigger>
               <TabsTrigger value="meetings" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Video className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -310,9 +311,11 @@ export default function AdvisorDashboard() {
             </TabsList>
           </div>
 
-          <TabsContent value="social" className="space-y-4">
-            <OfficialMentorChecklist />
-            <UnifiedCommunityFeed interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
+          <TabsContent value="notifications" className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <OfficialMentorChecklist />
+              <NotificationsPanel />
+            </div>
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
