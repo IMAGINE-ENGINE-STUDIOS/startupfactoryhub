@@ -25,9 +25,7 @@ interface PlatformMentor {
 export default function OfficialProgramManagement() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
-  const [sending, setSending] = useState(false);
   const [invitations, setInvitations] = useState<any[]>([]);
   const [statuses, setStatuses] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -36,6 +34,8 @@ export default function OfficialProgramManagement() {
   const [mentorSearch, setMentorSearch] = useState('');
   const [loadingMentors, setLoadingMentors] = useState(false);
   const [bulkSending, setBulkSending] = useState(false);
+  const [externalEmails, setExternalEmails] = useState<string[]>([]);
+  const [externalInput, setExternalInput] = useState('');
 
   useEffect(() => {
     fetchData();
@@ -104,30 +104,15 @@ export default function OfficialProgramManagement() {
     setLoading(false);
   };
 
-  const sendInvitation = async () => {
-    if (!email.trim()) return;
-    setSending(true);
-    try {
-      const { error } = await supabase.functions.invoke('send-official-mentor-invite', {
-        body: { email: email.trim(), message: message.trim() || undefined },
-      });
-      if (error) throw error;
-      toast({ title: 'Invitation Sent', description: `Invitation sent to ${email}` });
-      setEmail('');
-      setMessage('');
-      fetchData();
-    } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
-    }
-    setSending(false);
-  };
 
   const sendBulkInvitations = async () => {
-    if (selectedMentors.size === 0) return;
+    const totalCount = selectedMentors.size + externalEmails.length;
+    if (totalCount === 0) return;
     setBulkSending(true);
     let successCount = 0;
     let failCount = 0;
 
+    // Send to selected platform mentors
     for (const odId of selectedMentors) {
       const mentor = mentors.find(m => m.user_id === odId);
       if (!mentor?.email) { failCount++; continue; }
@@ -142,15 +127,44 @@ export default function OfficialProgramManagement() {
       }
     }
 
+    // Send to external emails
+    for (const extEmail of externalEmails) {
+      try {
+        const { error } = await supabase.functions.invoke('send-official-mentor-invite', {
+          body: { email: extEmail, message: message.trim() || undefined },
+        });
+        if (error) throw error;
+        successCount++;
+      } catch {
+        failCount++;
+      }
+    }
+
     toast({
-      title: 'Bulk Invitations Complete',
+      title: 'Invitations Complete',
       description: `${successCount} sent, ${failCount} failed`,
       variant: failCount > 0 ? 'destructive' : 'default',
     });
     setSelectedMentors(new Set());
+    setExternalEmails([]);
     setMessage('');
     fetchData();
     setBulkSending(false);
+  };
+
+  const addExternalEmail = () => {
+    const trimmed = externalInput.trim().toLowerCase();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      toast({ title: 'Invalid email', description: 'Please enter a valid email address', variant: 'destructive' });
+      return;
+    }
+    if (externalEmails.includes(trimmed)) return;
+    setExternalEmails(prev => [...prev, trimmed]);
+    setExternalInput('');
+  };
+
+  const removeExternalEmail = (emailToRemove: string) => {
+    setExternalEmails(prev => prev.filter(e => e !== emailToRemove));
   };
 
   // Filter mentors by search & exclude already invited emails
@@ -260,40 +274,50 @@ export default function OfficialProgramManagement() {
             </ScrollArea>
           )}
 
+          {/* External Emails Section */}
+          <div className="space-y-3 border-t border-border pt-4">
+            <Label className="text-sm font-medium">Add External Members (not on platform)</Label>
+            <div className="flex gap-2">
+              <Input
+                value={externalInput}
+                onChange={(e) => setExternalInput(e.target.value)}
+                placeholder="external@example.com"
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), addExternalEmail())}
+                className="flex-1"
+              />
+              <Button variant="outline" size="sm" onClick={addExternalEmail} type="button">
+                <UserPlus className="h-4 w-4 mr-1" /> Add
+              </Button>
+            </div>
+            {externalEmails.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {externalEmails.map((ext) => (
+                  <Badge key={ext} variant="secondary" className="flex items-center gap-1 py-1 px-2">
+                    {ext}
+                    <button onClick={() => removeExternalEmail(ext)} className="ml-1 hover:text-destructive">
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="space-y-2">
             <Label>Personal Message (optional)</Label>
             <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="We'd love to have you as an official mentor..." rows={2} />
           </div>
 
-          <Button onClick={sendBulkInvitations} disabled={bulkSending || selectedMentors.size === 0}>
-            {bulkSending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
-            Send {selectedMentors.size > 0 ? `${selectedMentors.size} Invitation${selectedMentors.size > 1 ? 's' : ''}` : 'Invitations'}
-          </Button>
-        </CardContent>
-      </Card>
+          {(selectedMentors.size > 0 || externalEmails.length > 0) && (
+            <p className="text-sm text-muted-foreground">
+              Total: {selectedMentors.size + externalEmails.length} recipient{selectedMentors.size + externalEmails.length > 1 ? 's' : ''} 
+              ({selectedMentors.size} platform, {externalEmails.length} external)
+            </p>
+          )}
 
-      {/* Manual Email Invitation */}
-      <Card className="tech-card">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-amber-400" />
-            Manual Email Invitation
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <Label>Email Address</Label>
-              <Input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="mentor@example.com" />
-            </div>
-            <div className="space-y-2">
-              <Label>Personal Message (optional)</Label>
-              <Textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder="We'd love to have you..." rows={1} />
-            </div>
-          </div>
-          <Button onClick={sendInvitation} disabled={sending || !email.trim()}>
-            {sending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
-            Send Invitation
+          <Button onClick={sendBulkInvitations} disabled={bulkSending || (selectedMentors.size === 0 && externalEmails.length === 0)}>
+            {bulkSending ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Send className="h-4 w-4 mr-2" />}
+            Send {selectedMentors.size + externalEmails.length > 0 ? `${selectedMentors.size + externalEmails.length} Invitation${selectedMentors.size + externalEmails.length > 1 ? 's' : ''}` : 'Invitations'}
           </Button>
         </CardContent>
       </Card>
