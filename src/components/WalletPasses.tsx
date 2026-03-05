@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Wallet, Plane, Building, Globe, Eye, EyeOff, ExternalLink, Landmark, Mail, Satellite } from 'lucide-react';
+import { Wallet, Plane, Building, Globe, Eye, EyeOff, ExternalLink, Landmark, Mail, Satellite, Rocket } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -16,6 +16,7 @@ import sfhPassImg from '@/assets/sfh-pass.png';
 import softLandingPassImg from '@/assets/soft-landing-pass.webp';
 import hsbcPassImg from '@/assets/hsbc-pass.jpg';
 import earthIntelPassImg from '@/assets/earth-intelligence-pass.jpg';
+import vcIntroPassImg from '@/assets/vc-intro-pass.jpg';
 import SoftLandingRequestDialog from '@/components/SoftLandingRequestDialog';
 
 const FRONTIER_BOOKING_URL = 'https://booking.flyfrontier.com/FrontierMiles/GoWildSignup?_ga=2.125927374.2135620265.1772270212-2039149194.1772270211&_gac=1.183458260.1772273523.Cj0KCQiAwYrNBhDcARIsAGo3u32mNyqqe-uI2l0iOVAa0s9X_nKB4dKSpaXoj604XXI-F7W_a3L0Qx4aAu6UEALw_wcB';
@@ -46,11 +47,14 @@ export default function WalletPasses({ className }: { className?: string }) {
   const [softLandingDialogOpen, setSoftLandingDialogOpen] = useState(false);
   const [hsbcSending, setHsbcSending] = useState(false);
   const [hsbcSent, setHsbcSent] = useState(false);
+  const [isOfficialMentor, setIsOfficialMentor] = useState(false);
+  const [vcRequests, setVcRequests] = useState<any[]>([]);
+  const [vcRequesting, setVcRequesting] = useState(false);
 
   useEffect(() => {
-    if (!user || !isSubscribed) return;
+    if (!user) return;
     const checkStatuses = async () => {
-      if (tier === 'corporate') {
+      if (isSubscribed && tier === 'corporate') {
         const { data } = await supabase
           .from('flight_pass_requests')
           .select('status, frontier_username, frontier_password')
@@ -64,14 +68,32 @@ export default function WalletPasses({ className }: { className?: string }) {
           }
         }
       }
-      // Fetch all soft landing requests for this user
-      const { data: slData } = await supabase
-        .from('soft_landing_requests')
-        .select('*')
+      if (isSubscribed) {
+        // Fetch all soft landing requests for this user
+        const { data: slData } = await supabase
+          .from('soft_landing_requests')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (slData) {
+          setSoftLandingRequests(slData);
+        }
+      }
+      // Check official mentor status
+      const { data: officialData } = await supabase
+        .from('official_mentor_status')
+        .select('is_official')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-      if (slData) {
-        setSoftLandingRequests(slData);
+        .maybeSingle();
+      if (officialData?.is_official) {
+        setIsOfficialMentor(true);
+        // Fetch VC introduction requests
+        const { data: vcData } = await supabase
+          .from('vc_introduction_requests')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false });
+        if (vcData) setVcRequests(vcData);
       }
     };
     checkStatuses();
@@ -256,6 +278,113 @@ export default function WalletPasses({ className }: { className?: string }) {
             onClick={(e) => { e.stopPropagation(); setSoftLandingDialogOpen(true); }}
           >
             Request for Another Country
+          </Button>
+        </div>
+      ),
+    });
+  }
+
+  // Official Mentor: HSBC Banking Pass (when not a subscriber)
+  if (isOfficialMentor && !isSubscribed) {
+    passes.push({
+      id: 'official-hsbc-banking',
+      title: 'HSBC Innovation Banking',
+      subtitle: 'Free Business Account',
+      icon: <Landmark className="h-5 w-5" />,
+      tier: 'Official Member',
+      active: true,
+      details: 'Free HSBC Innovation Banking account — exclusive to Official Members.',
+      gradient: 'from-red-600 to-red-500',
+      image: hsbcPassImg,
+      action: (
+        <Button
+          size="sm"
+          variant="outline"
+          className="w-full h-7 text-[11px] mt-1 border-red-500/30 text-red-600"
+          disabled={hsbcSending || hsbcSent}
+          onClick={async (e) => {
+            e.stopPropagation();
+            setHsbcSending(true);
+            try {
+              const { error } = await supabase.functions.invoke('send-hsbc-intro');
+              if (error) throw error;
+              setHsbcSent(true);
+            } catch (err) {
+              console.error('HSBC intro error:', err);
+            } finally {
+              setHsbcSending(false);
+            }
+          }}
+        >
+          <Mail className="h-3 w-3 mr-1" />
+          {hsbcSent ? 'Introduction Sent ✓' : hsbcSending ? 'Sending...' : 'Request Account Introduction'}
+        </Button>
+      ),
+    });
+  }
+
+  // Official Mentor: VC Direct Introduction Pass
+  if (isOfficialMentor) {
+    const activeVcRequests = vcRequests.filter(r => ['pending', 'approved'].includes(r.status));
+    const completedVcRequests = vcRequests.filter(r => r.status === 'completed');
+    passes.push({
+      id: 'vc-direct-intro',
+      title: 'VC Direct Introduction',
+      subtitle: 'Priority Venture Fund Access',
+      icon: <Rocket className="h-5 w-5" />,
+      tier: 'Official Member',
+      active: true,
+      details: 'Direct introductions to top VC firms. Eligible: Space, Deep Tech & Quantum industries with $1M+ ARR.',
+      gradient: 'from-indigo-600 to-blue-500',
+      image: vcIntroPassImg,
+      action: (
+        <div className="w-full space-y-1.5">
+          {activeVcRequests.map(r => (
+            <Badge key={r.id} variant="outline" className="text-[10px] border-blue-500/50 text-blue-600 mr-1">
+              {r.status === 'pending' ? 'Pending Review' : 'Approved'}{r.vc_firm_name ? ` — ${r.vc_firm_name}` : ''}
+            </Badge>
+          ))}
+          {completedVcRequests.map(r => (
+            <Badge key={r.id} variant="outline" className="text-[10px] border-green-500/50 text-green-600 mr-1">
+              Introduced — {r.vc_firm_name || 'VC Firm'}
+            </Badge>
+          ))}
+          <Button
+            size="sm"
+            variant="outline"
+            className="w-full text-[10px] h-6 px-2"
+            disabled={vcRequesting}
+            onClick={async (e) => {
+              e.stopPropagation();
+              if (!user) return;
+              setVcRequesting(true);
+              try {
+                const { data: company } = await supabase
+                  .from('companies')
+                  .select('name, industry, funding_amount')
+                  .eq('user_id', user.id)
+                  .maybeSingle();
+                const { data, error } = await supabase
+                  .from('vc_introduction_requests')
+                  .insert({
+                    user_id: user.id,
+                    company_name: company?.name || null,
+                    industry: company?.industry || null,
+                    arr_amount: company?.funding_amount || null,
+                  })
+                  .select()
+                  .single();
+                if (error) throw error;
+                if (data) setVcRequests(prev => [data, ...prev]);
+              } catch (err: any) {
+                console.error('VC request error:', err);
+              } finally {
+                setVcRequesting(false);
+              }
+            }}
+          >
+            <Rocket className="h-3 w-3 mr-1" />
+            {vcRequesting ? 'Requesting...' : 'Request VC Introduction'}
           </Button>
         </div>
       ),

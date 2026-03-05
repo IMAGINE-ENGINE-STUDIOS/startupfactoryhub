@@ -5737,6 +5737,48 @@ export type Database = {
         }
         Relationships: []
       }
+      vc_introduction_requests: {
+        Row: {
+          admin_notes: string | null
+          arr_amount: number | null
+          company_name: string | null
+          created_at: string | null
+          id: string
+          industry: string | null
+          introduction_date: string | null
+          status: string
+          updated_at: string | null
+          user_id: string
+          vc_firm_name: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          arr_amount?: number | null
+          company_name?: string | null
+          created_at?: string | null
+          id?: string
+          industry?: string | null
+          introduction_date?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id: string
+          vc_firm_name?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          arr_amount?: number | null
+          company_name?: string | null
+          created_at?: string | null
+          id?: string
+          industry?: string | null
+          introduction_date?: string | null
+          status?: string
+          updated_at?: string | null
+          user_id?: string
+          vc_firm_name?: string | null
+        }
+        Relationships: []
+      }
       village_elections: {
         Row: {
           concluded_at: string | null
