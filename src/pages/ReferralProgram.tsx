@@ -243,6 +243,9 @@ export default function ReferralProgram() {
                   <TrendingUp className="h-5 w-5 text-primary" />
                   Commission Structure
                 </CardTitle>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Members can subscribe monthly or yearly (saving 10%). Your commission is 20% of the first payment regardless of billing cycle.
+                </p>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -250,24 +253,34 @@ export default function ReferralProgram() {
                     <TableRow>
                       <TableHead>Plan</TableHead>
                       <TableHead className="text-right">Monthly Price</TableHead>
-                      <TableHead className="text-right">One-Time Commission (20%)</TableHead>
+                      <TableHead className="text-right">Yearly Price <span className="text-xs text-green-400">(Save 10%)</span></TableHead>
+                      <TableHead className="text-right">Commission (Monthly)</TableHead>
+                      <TableHead className="text-right">Commission (Yearly)</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {[
-                      { plan: MEMBERSHIP_TIERS.community.name, price: MEMBERSHIP_TIERS.community.price * 100 },
-                      { plan: MEMBERSHIP_TIERS.self_paced_office.name, price: MEMBERSHIP_TIERS.self_paced_office.price * 100 },
-                      { plan: MEMBERSHIP_TIERS.global_access.name, price: MEMBERSHIP_TIERS.global_access.price * 100 },
-                      { plan: MEMBERSHIP_TIERS.corporate.name, price: MEMBERSHIP_TIERS.corporate.price * 100 },
+                      { plan: MEMBERSHIP_TIERS.community.name, price: MEMBERSHIP_TIERS.community.price * 100, yearlyPrice: MEMBERSHIP_TIERS.community.yearly_price * 100 },
+                      { plan: MEMBERSHIP_TIERS.self_paced_office.name, price: MEMBERSHIP_TIERS.self_paced_office.price * 100, yearlyPrice: MEMBERSHIP_TIERS.self_paced_office.yearly_price * 100 },
+                      { plan: MEMBERSHIP_TIERS.global_access.name, price: MEMBERSHIP_TIERS.global_access.price * 100, yearlyPrice: MEMBERSHIP_TIERS.global_access.yearly_price * 100 },
+                      { plan: MEMBERSHIP_TIERS.corporate.name, price: MEMBERSHIP_TIERS.corporate.price * 100, yearlyPrice: MEMBERSHIP_TIERS.corporate.yearly_price * 100 },
                     ].map((tier) => (
                       <TableRow key={tier.plan}>
                         <TableCell className="font-medium">{tier.plan}</TableCell>
                         <TableCell className="text-right">{formatCents(tier.price)}</TableCell>
+                        <TableCell className="text-right">
+                          {formatCents(tier.yearlyPrice)}
+                          <span className="text-xs text-muted-foreground">/yr</span>
+                        </TableCell>
                         <TableCell className="text-right text-primary font-semibold">{formatCents(tier.price * 0.2)}</TableCell>
+                        <TableCell className="text-right text-primary font-semibold">{formatCents(tier.yearlyPrice * 0.2)}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
                 </Table>
+                <p className="text-xs text-muted-foreground mt-4">
+                  💡 <strong>Tip:</strong> Referred users who choose yearly billing save 10% — and you earn a higher one-time commission based on the full annual payment.
+                </p>
               </CardContent>
             </Card>
           </div>
