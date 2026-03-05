@@ -19,7 +19,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Briefcase, GraduationCap, Award, MapPin, Globe, Linkedin, Edit, Save, Plus, X, Star, Users, Calendar, TrendingUp, Settings as SettingsIcon, ChevronDown, FileText } from 'lucide-react';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ResumeUpload from '@/components/ResumeUpload';
-import ProfilePostsMosaic from '@/components/ProfilePostsMosaic';
+
 import ProfilePayoutsTab from './ProfilePayoutsTab';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -202,7 +202,6 @@ export default function AdvisorProfileView() {
       <Tabs defaultValue={new URLSearchParams(window.location.search).get('subtab') || "profile"} className="space-y-6">
         <TabsList className="flex w-full max-w-2xl overflow-x-auto scrollbar-hide whitespace-nowrap">
           <TabsTrigger value="profile" className="flex-1">Profile</TabsTrigger>
-          <TabsTrigger value="posts" className="flex-1">Your Posts</TabsTrigger>
           {isSubscribed && <TabsTrigger value="bookings" className="flex-1">My Bookings</TabsTrigger>}
           <TabsTrigger value="subscription" className="flex-1">Subscription</TabsTrigger>
           <TabsTrigger value="payouts" className="flex-1">Payouts</TabsTrigger>
@@ -586,16 +585,6 @@ export default function AdvisorProfileView() {
         </Card>}
         </TabsContent>
 
-        <TabsContent value="posts" className="space-y-4">
-          <Card className="tech-card border-0">
-            <CardHeader>
-              <CardTitle>Your Posts</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ProfilePostsMosaic userId={profile?.user_id || ''} isOwnProfile={true} />
-            </CardContent>
-          </Card>
-        </TabsContent>
 
         {isSubscribed && (
           <TabsContent value="bookings" className="space-y-4">
