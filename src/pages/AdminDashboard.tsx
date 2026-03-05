@@ -54,6 +54,7 @@ import WorkspaceBookingsManagement from '@/components/admin/WorkspaceBookingsMan
 import FlightsManagement from '@/components/admin/FlightsManagement';
 import SoftLandingManagement from '@/components/admin/SoftLandingManagement';
 import OfficialProgramManagement from '@/components/admin/OfficialProgramManagement';
+import VCIntroductionsManagement from '@/components/admin/VCIntroductionsManagement';
 
 
 const AdminDashboard = () => {
@@ -225,6 +226,10 @@ const AdminDashboard = () => {
               <Award className="h-4 w-4" />
               <span className="hidden lg:inline">Official</span>
             </TabsTrigger>
+            <TabsTrigger value="vc-intros" className="flex items-center gap-1 py-2 px-2 text-xs">
+              <Rocket className="h-4 w-4" />
+              <span className="hidden lg:inline">VC Intros</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview"><AdminOverview /></TabsContent>
@@ -250,6 +255,7 @@ const AdminDashboard = () => {
           <TabsContent value="flights"><FlightsManagement /></TabsContent>
           <TabsContent value="soft-landing"><SoftLandingManagement /></TabsContent>
           <TabsContent value="official-program"><OfficialProgramManagement /></TabsContent>
+          <TabsContent value="vc-intros"><VCIntroductionsManagement /></TabsContent>
         </Tabs>
       </main>
     </div>
