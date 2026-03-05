@@ -281,6 +281,11 @@ export default function ReferralProgram() {
                 <p className="text-xs text-muted-foreground mt-4">
                   💡 <strong>Tip:</strong> Referred users who choose yearly billing save 10% — and you earn a higher one-time commission based on the full annual payment.
                 </p>
+                <div className="mt-3 p-3 rounded-lg border border-amber-400/20 bg-amber-400/5">
+                  <p className="text-xs text-amber-400 font-medium flex items-center gap-1.5">
+                    ⭐ <strong>Official Mentors & Advisors</strong> earn <strong>25% commission</strong> instead of 20% on all referrals. <a href="/official-mentor-invite" className="underline hover:text-amber-300">Learn more</a>
+                  </p>
+                </div>
               </CardContent>
             </Card>
           </div>

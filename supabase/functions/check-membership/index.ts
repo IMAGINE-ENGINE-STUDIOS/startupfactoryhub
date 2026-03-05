@@ -113,9 +113,19 @@ serve(async (req) => {
             .maybeSingle();
 
           if (referrerAccount) {
+            // Check if referrer is an official mentor (25% commission)
+            const { data: officialStatus } = await supabaseClient
+              .from("official_mentor_status")
+              .select("is_official, referral_commission_rate")
+              .eq("user_id", referrerAccount.user_id)
+              .eq("is_official", true)
+              .maybeSingle();
+
+            const commissionRate = officialStatus ? (officialStatus.referral_commission_rate || 0.25) : 0.2;
+            
             // Calculate subscription amount from price
             const priceAmount = sub.items.data[0].price.unit_amount || 0;
-            const commissionCents = Math.floor(priceAmount * 0.2); // 20% commission
+            const commissionCents = Math.floor(priceAmount * commissionRate); // Dynamic commission rate
 
             // Create conversion record
             await supabaseClient.from("referral_conversions").insert({
