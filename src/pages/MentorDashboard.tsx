@@ -40,6 +40,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import VideoConferencing from '@/components/VideoConferencing';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
+import OfficialMentorChecklist from '@/components/OfficialMentorChecklist';
 const MentorDashboard = () => {
   const {
     user
@@ -155,6 +156,7 @@ const MentorDashboard = () => {
           </div>
 
           <TabsContent value="social" className="space-y-4">
+            <OfficialMentorChecklist />
             <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
           </TabsContent>
 

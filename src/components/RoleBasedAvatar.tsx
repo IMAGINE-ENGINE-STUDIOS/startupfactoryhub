@@ -6,6 +6,7 @@ import studentBadge from '@/assets/student-badge.png';
 import mentorBadge from '@/assets/mentor-badge.png';
 import acceleratorBadge from '@/assets/sfh-logo-sphere.png';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
+import OfficialBadge from './OfficialBadge';
 
 interface RoleBasedAvatarProps {
   avatarUrl?: string | null;
@@ -14,6 +15,7 @@ interface RoleBasedAvatarProps {
   className?: string;
   userId?: string;
   showOnlineStatus?: boolean;
+  isOfficialMentor?: boolean;
 }
 
 export default function RoleBasedAvatar({ 
@@ -22,7 +24,8 @@ export default function RoleBasedAvatar({
   fallbackText = 'U',
   className,
   userId,
-  showOnlineStatus = false
+  showOnlineStatus = false,
+  isOfficialMentor = false
 }: RoleBasedAvatarProps) {
   // Determine the default badge based on role
   const getDefaultBadge = () => {
@@ -56,6 +59,11 @@ export default function RoleBasedAvatar({
           {fallbackText.charAt(0).toUpperCase()}
         </AvatarFallback>
       </Avatar>
+      {isOfficialMentor && (
+        <div className="absolute -top-1 -right-1 z-10">
+          <OfficialBadge size="sm" role={role || undefined} />
+        </div>
+      )}
       {showOnlineStatus && userId && (
         <OnlineStatusIndicator 
           userId={userId} 

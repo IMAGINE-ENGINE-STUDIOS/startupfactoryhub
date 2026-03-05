@@ -42,6 +42,7 @@ import VideoConferencing from '@/components/VideoConferencing';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import { GlobalResourcesMap } from '@/components/GlobalResourcesMap';
 import MentorOffersBoard from '@/components/MentorOffersBoard';
+import OfficialMentorChecklist from '@/components/OfficialMentorChecklist';
 
 export default function AdvisorDashboard() {
   
@@ -310,6 +311,7 @@ export default function AdvisorDashboard() {
           </div>
 
           <TabsContent value="social" className="space-y-4">
+            <OfficialMentorChecklist />
             <UnifiedCommunityFeed interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
           </TabsContent>
 
