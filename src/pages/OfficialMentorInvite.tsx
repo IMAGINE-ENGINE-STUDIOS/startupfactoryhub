@@ -48,6 +48,17 @@ export default function OfficialMentorInvite() {
 
   const acceptInvitation = async () => {
     if (!user || !invitation) return;
+    
+    // Validate that the logged-in user's email matches the invitation email
+    if (user.email?.toLowerCase() !== invitation.email?.toLowerCase()) {
+      toast({ 
+        title: 'Wrong Account', 
+        description: `This invitation was sent to ${invitation.email}. Please sign in with that email to accept it.`, 
+        variant: 'destructive' 
+      });
+      return;
+    }
+    
     setAccepting(true);
 
     try {
