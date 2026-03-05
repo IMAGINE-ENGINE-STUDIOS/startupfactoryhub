@@ -326,7 +326,11 @@ export default function UnifiedCommunityFeed({
       };
     });
     if (loadMore) {
-      setPosts(prev => [...prev, ...formattedPosts]);
+      setPosts(prev => {
+        const existingIds = new Set(prev.map(p => p.id));
+        const uniqueNew = formattedPosts.filter(p => !existingIds.has(p.id));
+        return [...prev, ...uniqueNew];
+      });
       setOffset(currentOffset + limit);
     } else {
       setPosts(formattedPosts);
