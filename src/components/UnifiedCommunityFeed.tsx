@@ -16,6 +16,7 @@ import ShortsCarousel from '@/components/ShortsCarousel';
 import ShortsCreator from '@/components/ShortsCreator';
 import GuestPrompt from '@/components/GuestPrompt';
 import { OnlineStatusIndicator } from './OnlineStatusIndicator';
+import OfficialBadge from './OfficialBadge';
 import UserProfileDialog from '@/components/UserProfileDialog';
 import { CohortPostCard } from '@/components/CohortPostCard';
 import LiveRoomPostCard from '@/components/LiveRoomPostCard';
@@ -53,6 +54,7 @@ interface FeedPost {
   profiles?: {
     full_name: string;
     avatar_url?: string;
+    is_official_mentor?: boolean;
   } | null;
   user_role?: string | null;
   company_name?: string | null;
@@ -240,7 +242,7 @@ export default function UnifiedCommunityFeed({
     const allUserIds = [...new Set([...userIds, ...commentUserIds])];
     const {
       data: profilesData
-    } = await supabase.from('profiles').select('user_id, full_name, avatar_url').in('user_id', allUserIds);
+    } = await supabase.from('profiles').select('user_id, full_name, avatar_url, is_official_mentor').in('user_id', allUserIds);
 
     // Fetch user roles
     const {
@@ -1047,6 +1049,7 @@ export default function UnifiedCommunityFeed({
                           <h3 className="font-semibold text-sm sm:text-base text-foreground truncate cursor-pointer hover:text-primary transition-colors" onClick={() => handleUserClick(post.user_id)}>
                             {post.profiles?.full_name || 'Anonymous User'}
                           </h3>
+                          {post.profiles?.is_official_mentor && <OfficialBadge size="sm" role={post.user_role || undefined} />}
                           {post.user_role && <Badge variant="outline" className={`text-xs ${getRoleBadgeColor(post.user_role)}`}>
                               {getRoleLabel(post.user_role)}
                             </Badge>}
@@ -1208,6 +1211,7 @@ export default function UnifiedCommunityFeed({
                         <h3 className="font-semibold text-sm sm:text-base text-foreground truncate cursor-pointer hover:text-primary transition-colors" onClick={() => handleUserClick(post.user_id)}>
                           {post.profiles?.full_name || 'Anonymous User'}
                         </h3>
+                        {post.profiles?.is_official_mentor && <OfficialBadge size="sm" role={post.user_role || undefined} />}
                         {post.company_name && (
                           <span className="text-xs sm:text-sm text-muted-foreground">
                             @ {post.company_name}

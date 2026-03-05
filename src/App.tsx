@@ -50,6 +50,7 @@ const ReferralRedirect = lazy(() => import("./pages/ReferralRedirect"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
 const VerifyEmail = lazy(() => import("./pages/VerifyEmail"));
 const InstallApp = lazy(() => import("./pages/InstallApp"));
+const OfficialMentorInvite = lazy(() => import("./pages/OfficialMentorInvite"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -122,6 +123,7 @@ const App = () => (
                     <Route path="/referral" element={<ReferralProgram />} />
                     <Route path="/ref/:code" element={<ReferralRedirect />} />
                     <Route path="/install" element={<InstallApp />} />
+                    <Route path="/official-mentor-invite" element={<OfficialMentorInvite />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>

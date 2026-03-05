@@ -3816,6 +3816,89 @@ export type Database = {
         }
         Relationships: []
       }
+      official_mentor_invitations: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          invitation_token: string
+          invited_by: string | null
+          status: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          invitation_token: string
+          invited_by?: string | null
+          status?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          invitation_token?: string
+          invited_by?: string | null
+          status?: string
+        }
+        Relationships: []
+      }
+      official_mentor_status: {
+        Row: {
+          connection_invited: boolean
+          created_at: string
+          email_verified: boolean
+          granted_at: string | null
+          id: string
+          invitation_id: string | null
+          is_official: boolean
+          profile_completed: boolean
+          referral_commission_rate: number
+          user_id: string
+        }
+        Insert: {
+          connection_invited?: boolean
+          created_at?: string
+          email_verified?: boolean
+          granted_at?: string | null
+          id?: string
+          invitation_id?: string | null
+          is_official?: boolean
+          profile_completed?: boolean
+          referral_commission_rate?: number
+          user_id: string
+        }
+        Update: {
+          connection_invited?: boolean
+          created_at?: string
+          email_verified?: boolean
+          granted_at?: string | null
+          id?: string
+          invitation_id?: string | null
+          is_official?: boolean
+          profile_completed?: boolean
+          referral_commission_rate?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "official_mentor_status_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: false
+            referencedRelation: "official_mentor_invitations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payout_accounts: {
         Row: {
           account_status: string
@@ -4195,6 +4278,7 @@ export type Database = {
           full_name: string | null
           id: string
           industry: string | null
+          is_official_mentor: boolean
           is_online: boolean | null
           last_profile_update: string | null
           last_seen: string | null
@@ -4217,6 +4301,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           industry?: string | null
+          is_official_mentor?: boolean
           is_online?: boolean | null
           last_profile_update?: string | null
           last_seen?: string | null
@@ -4239,6 +4324,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           industry?: string | null
+          is_official_mentor?: boolean
           is_online?: boolean | null
           last_profile_update?: string | null
           last_seen?: string | null
@@ -5946,6 +6032,10 @@ export type Database = {
           _user_email: string
         }
         Returns: undefined
+      }
+      check_and_grant_official_status: {
+        Args: { p_user_id: string }
+        Returns: Json
       }
       cleanup_old_cursors: { Args: never; Returns: undefined }
       cleanup_stale_online_status: { Args: never; Returns: undefined }
