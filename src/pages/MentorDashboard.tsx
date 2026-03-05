@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import UnifiedCommunityFeed from "@/components/UnifiedCommunityFeed";
 import DistrictRooms from '@/components/DistrictRooms';
+import NotificationsPanel from '@/components/NotificationsPanel';
 import LiveRooms from '@/components/LiveRooms';
 import AIFeaturesHub from "@/components/AIFeaturesHub";
 import MentorshipRequests from "@/components/MentorshipRequests";
@@ -29,7 +30,7 @@ import MenteeSessions from "@/components/MenteeSessions";
 import MentorSessionHistory from "@/components/MentorSessionHistory";
 import ActiveMenteesCards from "@/components/ActiveMenteesCards";
 import { DashboardHeader } from "@/components/DashboardHeader";
-import { Users, Calendar as CalendarIcon, Plus, Clock, MapPin, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video } from "lucide-react";
+import { Users, Calendar as CalendarIcon, Plus, Clock, MapPin, Bell, MessageCircle, Network, BarChart, Brain, Wrench, Briefcase, Globe, Video } from "lucide-react";
 import UnifiedCalendar from '@/components/UnifiedCalendar';
 import CreateAdvisorSessionDialog from '@/components/CreateAdvisorSessionDialog';
 import { CreateEventDialog } from '@/components/CreateEventDialog';
@@ -64,7 +65,7 @@ const MentorDashboard = () => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(urlTab || "social");
+  const [activeTab, setActiveTab] = useState(urlTab || "notifications");
   const [activeVideoSession, setActiveVideoSession] = useState<any>(null);
   const {
     upcomingEvents
@@ -116,9 +117,9 @@ const MentorDashboard = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="flex w-full whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
-              <TabsTrigger value="social" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Social</span>
+              <TabsTrigger value="notifications" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <Bell className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Notifications</span>
               </TabsTrigger>
               <TabsTrigger value="meetings" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Video className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -155,9 +156,11 @@ const MentorDashboard = () => {
             </TabsList>
           </div>
 
-          <TabsContent value="social" className="space-y-4">
-            <OfficialMentorChecklist />
-            <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
+          <TabsContent value="notifications" className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <OfficialMentorChecklist />
+              <NotificationsPanel />
+            </div>
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
