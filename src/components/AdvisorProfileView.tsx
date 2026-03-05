@@ -17,6 +17,7 @@ import AvailabilityManager from '@/components/AvailabilityManager';
 import AvatarUpload from '@/components/AvatarUpload';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Briefcase, GraduationCap, Award, MapPin, Globe, Linkedin, Edit, Save, Plus, X, Star, Users, Calendar, TrendingUp, Settings as SettingsIcon, ChevronDown, FileText } from 'lucide-react';
+import OfficialBadge from './OfficialBadge';
 import ProfileSubscriptionTab from './ProfileSubscriptionTab';
 import ResumeUpload from '@/components/ResumeUpload';
 
@@ -224,7 +225,10 @@ export default function AdvisorProfileView() {
                   {isEditing ? (
                     <Input value={editedFullName} onChange={e => setEditedFullName(e.target.value)} placeholder="Your full name" className="text-2xl font-bold mb-2 h-12 max-w-md" />
                   ) : (
-                    <h1 className="text-3xl font-bold text-foreground mb-2">{profile?.full_name || 'Advisor'}</h1>
+                    <div className="flex items-center gap-2">
+                      <h1 className="text-3xl font-bold text-foreground mb-2">{profile?.full_name || 'Advisor'}</h1>
+                      {profile?.is_official_mentor && <OfficialBadge size="md" />}
+                    </div>
                   )}
                   {isEditing ? <Textarea value={editedBio} onChange={e => setEditedBio(e.target.value)} placeholder="Tell us about yourself..." className="mb-4 max-w-2xl" rows={3} /> : <p className="text-muted-foreground mb-4 max-w-2xl">{profile?.bio || 'Professional Advisor & Mentor'}</p>}
                 </div>

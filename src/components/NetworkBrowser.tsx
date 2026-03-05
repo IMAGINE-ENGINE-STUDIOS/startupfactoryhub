@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Search, Users, MessageSquare, UserPlus, Eye, UserCheck, UserX, Bell } from 'lucide-react';
 import UserProfileDialog from '@/components/UserProfileDialog';
+import OfficialBadge from './OfficialBadge';
 import { useNotifications } from '@/hooks/useNotifications';
 
 interface Connection {
@@ -18,6 +19,7 @@ interface Connection {
   bio: string | null;
   role: string | null;
   location: string | null;
+  is_official_mentor?: boolean;
   status?: 'accepted' | 'pending';
 }
 
@@ -117,7 +119,7 @@ export default function NetworkBrowser() {
       // Fetch profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, bio, location')
+        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor')
         .in('user_id', connectedUserIds);
 
       if (profiles) {
@@ -175,7 +177,7 @@ export default function NetworkBrowser() {
       // Fetch profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, bio, location')
+        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor')
         .in('user_id', requesterIds);
 
       if (profiles) {
@@ -218,7 +220,7 @@ export default function NetworkBrowser() {
       // Search profiles
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, bio, location')
+        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor')
         .neq('user_id', user.id)
         .ilike('full_name', `%${searchQuery}%`)
         .limit(10);
@@ -388,7 +390,7 @@ export default function NetworkBrowser() {
       // Fetch random users not already connected
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, bio, location')
+        .select('user_id, full_name, avatar_url, bio, location, is_official_mentor')
         .neq('user_id', user.id)
         .not('user_id', 'in', connectedIds.length > 0 ? `(${connectedIds.join(',')})` : '(00000000-0000-0000-0000-000000000000)')
         .limit(9);
@@ -457,7 +459,10 @@ export default function NetworkBrowser() {
           </Avatar>
           
           <div className="flex-1 min-w-0">
-            <h4 className="font-semibold text-foreground truncate">{connection.full_name || 'User'}</h4>
+            <div className="flex items-center gap-1.5">
+              <h4 className="font-semibold text-foreground truncate">{connection.full_name || 'User'}</h4>
+              {connection.is_official_mentor && <OfficialBadge size="sm" role={connection.role || undefined} />}
+            </div>
             <Badge variant="secondary" className={`text-xs ${getRoleBadgeColor(connection.role)}`}>
               {getRoleLabel(connection.role)}
             </Badge>
