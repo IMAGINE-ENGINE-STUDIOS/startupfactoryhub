@@ -441,18 +441,6 @@ export default function AdvisorDashboard() {
 
           <TabsContent value="profile" className="space-y-4">
             <AdvisorProfileView />
-            
-            <Card className="tech-card border-0">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5" />
-                  Your Posts
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ProfilePostsMosaic userId={user?.id || ''} isOwnProfile={true} />
-              </CardContent>
-            </Card>
           </TabsContent>
 
           <TabsContent value="network" className="space-y-4">
