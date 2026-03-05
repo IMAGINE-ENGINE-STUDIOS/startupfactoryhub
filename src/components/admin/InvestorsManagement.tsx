@@ -26,6 +26,7 @@ interface InvestorProfile {
     full_name: string | null;
     avatar_url: string | null;
     location: string | null;
+    email: string | null;
   } | null;
 }
 
@@ -137,10 +138,10 @@ export function InvestorsManagement() {
       const userIds = investorData?.map(i => i.user_id) || [];
       const { data: profilesData } = await supabase
         .from('profiles')
-        .select('id, full_name, avatar_url, location')
-        .in('id', userIds);
+        .select('user_id, full_name, avatar_url, location, email')
+        .in('user_id', userIds);
 
-      const profilesMap = new Map(profilesData?.map(p => [p.id, p]) || []);
+      const profilesMap = new Map(profilesData?.map(p => [p.user_id, p]) || []);
       
       const investorsWithProfiles = investorData?.map(inv => ({
         ...inv,
@@ -567,6 +568,9 @@ export function InvestorsManagement() {
                       <div>
                         <p className="font-medium">{investor.profile?.full_name || 'Unknown Investor'}</p>
                         <p className="text-sm text-muted-foreground">
+                          {investor.profile?.email || 'No email'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
                           {investor.profile?.location || 'Location not set'}
                         </p>
                       </div>
@@ -697,6 +701,9 @@ export function InvestorsManagement() {
               <div>
                 <p className="text-xl">{selectedInvestor?.profile?.full_name || 'Investor Profile'}</p>
                 <p className="text-sm font-normal text-muted-foreground">
+                  {selectedInvestor?.profile?.email || 'No email'}
+                </p>
+                <p className="text-xs font-normal text-muted-foreground">
                   {selectedInvestor?.profile?.location || 'Location not set'}
                 </p>
               </div>
