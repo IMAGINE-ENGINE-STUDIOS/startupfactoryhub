@@ -78,9 +78,9 @@ export default function OfficialMentorChecklist() {
   }
 
   const steps = [
-    { key: 'profile_completed', label: 'Complete your profile', description: 'Name, bio, avatar, and LinkedIn URL' },
     { key: 'email_verified', label: 'Verify your email', description: 'Confirm your email address' },
     { key: 'connection_invited', label: 'Make a connection', description: 'Connect with at least 1 member' },
+    { key: 'profile_completed', label: 'Upload your avatar', description: 'Add a profile picture' },
   ];
 
   return (
