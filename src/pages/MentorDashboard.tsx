@@ -65,7 +65,7 @@ const MentorDashboard = () => {
   const [selectedEvent, setSelectedEvent] = useState<any>(null);
   const [searchParams, setSearchParams] = useSearchParams();
   const urlTab = searchParams.get('tab');
-  const [activeTab, setActiveTab] = useState(urlTab || "notifications");
+  const [activeTab, setActiveTab] = useState(urlTab || "social");
   const [activeVideoSession, setActiveVideoSession] = useState<any>(null);
   const {
     upcomingEvents
@@ -117,9 +117,9 @@ const MentorDashboard = () => {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <div className="overflow-x-auto scrollbar-thin -mx-2 px-2 sm:mx-0 sm:px-0">
             <TabsList className="flex w-full whitespace-nowrap tech-card border-0 p-1.5 sm:p-1 gap-1 h-auto">
-              <TabsTrigger value="notifications" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <Bell className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Notifications</span>
+              <TabsTrigger value="social" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
+                <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
+                <span className="hidden md:inline text-sm">Social</span>
               </TabsTrigger>
               <TabsTrigger value="meetings" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Video className="h-5 w-5 sm:h-4 sm:w-4" />
@@ -149,10 +149,6 @@ const MentorDashboard = () => {
                 <Wrench className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Tools</span>
               </TabsTrigger>
-              <TabsTrigger value="social" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
-                <MessageCircle className="h-5 w-5 sm:h-4 sm:w-4" />
-                <span className="hidden md:inline text-sm">Social</span>
-              </TabsTrigger>
               <TabsTrigger value="resources" className="flex-1 gap-1.5 sm:gap-2 px-3 py-3 sm:py-2 rounded-lg data-[state=active]:tech-card data-[state=active]:shadow-[var(--pulse-glow)]">
                 <Globe className="h-5 w-5 sm:h-4 sm:w-4" />
                 <span className="hidden md:inline text-sm">Resources</span>
@@ -160,11 +156,9 @@ const MentorDashboard = () => {
             </TabsList>
           </div>
 
-          <TabsContent value="notifications" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <OfficialMentorChecklist />
-              <NotificationsPanel />
-            </div>
+          <TabsContent value="social" className="space-y-6">
+            <OfficialMentorChecklist />
+            <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
           </TabsContent>
 
           <TabsContent value="meetings" className="space-y-4">
@@ -298,9 +292,6 @@ const MentorDashboard = () => {
             <AIFeaturesHub />
           </TabsContent>
 
-          <TabsContent value="social" className="space-y-6">
-            <UnifiedCommunityFeed showCreatePost={true} interstitialContent={<DistrictRooms />} interstitialAfterIndex={3} />
-          </TabsContent>
 
           <TabsContent value="resources" className="mt-0 relative overflow-hidden" style={{
           height: 'calc(100vh - 12rem)',
