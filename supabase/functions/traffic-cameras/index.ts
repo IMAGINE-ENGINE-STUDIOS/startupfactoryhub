@@ -376,7 +376,7 @@ async function fetchFloridaWindyCameras(bounds: Bounds): Promise<CameraResult[]>
     citiesInBounds.map(async (city) => {
       try {
         const resp = await fetch(
-          `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=50&offset=0&nearby=${city.lat},${city.lng},50`,
+          `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=50&offset=0&include=images,location&nearby=${city.lat},${city.lng},50`,
           {
             headers: { 'x-windy-api-key': 'PGbLONaQtxGGGTZ0NXPEr4BbPtTOqo5f' },
             signal: AbortSignal.timeout(8000),
