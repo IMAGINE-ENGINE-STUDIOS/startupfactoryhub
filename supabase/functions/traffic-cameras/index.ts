@@ -600,7 +600,6 @@ async function fetchDCCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = f.attributes?.LONGITUDE || f.geometry?.x || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((f: any) => {
         const a = f.attributes || {};
         return {
