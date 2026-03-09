@@ -570,6 +570,7 @@ async function fetchAUCameras(bounds: Bounds): Promise<CameraResult[]> {
         lng: f.geometry.coordinates[0],
         imageUrl: f.properties?.href || f.properties?.imageUrl || '',
         source: 'NSW LiveTraffic',
+        refreshRate: 20,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
