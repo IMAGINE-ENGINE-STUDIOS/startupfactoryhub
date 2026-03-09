@@ -1270,33 +1270,31 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   }, [showTraffic, mapReady]);
 
   // Stable camera marker map - only add/remove what changed, never flyTo
-  const cameraMarkerMap = useRef(new Map<string, mapboxgl.Marker>());
+  const cameraMarkerMap = useRef<Record<string, mapboxgl.Marker>>({});
   
   useEffect(() => {
     if (!map.current || !mapReady) return;
     
     if (!showCCTV || !trafficCameras || trafficCameras.length === 0) {
-      // Remove all
-      cameraMarkerMap.current.forEach(m => m.remove());
-      cameraMarkerMap.current.clear();
+      Object.values(cameraMarkerMap.current).forEach(m => m.remove());
+      cameraMarkerMap.current = {};
       cameraMarkers.current = [];
       return;
     }
     
     const currentIds = new Set(trafficCameras.map(c => c.id));
-    const existingIds = new Set(cameraMarkerMap.current.keys());
     
     // Remove markers no longer in dataset
-    existingIds.forEach(id => {
+    for (const id of Object.keys(cameraMarkerMap.current)) {
       if (!currentIds.has(id)) {
-        cameraMarkerMap.current.get(id)?.remove();
-        cameraMarkerMap.current.delete(id);
+        cameraMarkerMap.current[id].remove();
+        delete cameraMarkerMap.current[id];
       }
-    });
+    }
     
     // Add only new markers
     trafficCameras.forEach((cam) => {
-      if (cameraMarkerMap.current.has(cam.id)) return; // Already exists, skip
+      if (cameraMarkerMap.current[cam.id]) return; // Already exists, skip
       
       const el = document.createElement('div');
       el.className = 'cctv-marker';
@@ -1326,21 +1324,20 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         e.stopPropagation();
         e.preventDefault();
         setSelectedCamera(cam);
-        // NO flyTo - this was causing the "flying away" bug by triggering moveend -> refetch -> marker recreation
       });
       
       const marker = new mapboxgl.Marker({ element: el, anchor: 'center', pitchAlignment: 'map' })
         .setLngLat([cam.lng, cam.lat])
         .addTo(map.current!);
       
-      cameraMarkerMap.current.set(cam.id, marker);
+      cameraMarkerMap.current[cam.id] = marker;
     });
     
-    cameraMarkers.current = Array.from(cameraMarkerMap.current.values());
+    cameraMarkers.current = Object.values(cameraMarkerMap.current);
     
     return () => {
-      cameraMarkerMap.current.forEach(m => m.remove());
-      cameraMarkerMap.current.clear();
+      Object.values(cameraMarkerMap.current).forEach(m => m.remove());
+      cameraMarkerMap.current = {};
       cameraMarkers.current = [];
     };
   }, [trafficCameras, showCCTV, mapReady, setSelectedCamera]);
