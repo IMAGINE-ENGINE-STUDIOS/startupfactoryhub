@@ -1361,7 +1361,12 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         source: sourceId,
         paint: {
           'circle-radius': 8,
-          'circle-color': '#dc2626',
+          'circle-color': [
+            'case',
+            ['==', ['get', 'isStream'], 1],
+            '#22c55e', // green for live streaming cameras
+            '#dc2626', // red for snapshot cameras
+          ],
           'circle-stroke-width': 2,
           'circle-stroke-color': '#ffffff',
           'circle-opacity': 1,
