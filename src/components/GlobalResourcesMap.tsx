@@ -2747,6 +2747,14 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         activeHasMonthly={activeHasMonthly}
         activeHasTimelineOption={activeHasTimelineOption}
       />
+
+      {/* CCTV Camera Popup */}
+      {selectedCamera && (
+        <TrafficCameraPopup
+          camera={selectedCamera}
+          onClose={() => setSelectedCamera(null)}
+        />
+      )}
     </div>
   );
 };
