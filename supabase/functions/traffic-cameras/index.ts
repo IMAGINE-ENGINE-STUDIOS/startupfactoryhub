@@ -913,10 +913,10 @@ serve(async (req) => {
 
     cache.set(key, { data: deduped, time: Date.now() });
 
-    console.log(`Returning ${final.length} cameras for bounds: ${JSON.stringify(bounds)}`);
+    console.log(`Returning ${deduped.length} cameras for bounds: ${JSON.stringify(bounds)}`);
 
     return new Response(
-      JSON.stringify({ cameras: final }),
+      JSON.stringify({ cameras: deduped }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err) {
