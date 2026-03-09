@@ -229,6 +229,14 @@ export const GlobalResourcesMap = () => {
   // AIS vessel tracking
   const ais = useAISTracking(map.current, mapReady);
   
+  // Traffic cameras (real-time CCTV)
+  const {
+    cameras: trafficCameras,
+    isLoading: camerasLoading,
+    selectedCamera,
+    setSelectedCamera,
+  } = useTrafficCameras(map.current, mapReady, showCCTV);
+  
   
   // Regus locations (only fetch when workplace selected AND subscribed)
   const regusFilters: RegusFilters = {
