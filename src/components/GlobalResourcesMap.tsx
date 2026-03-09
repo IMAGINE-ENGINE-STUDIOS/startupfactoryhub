@@ -65,6 +65,8 @@ import {
   Car,
   Camera,
   Building,
+  Bus,
+  Train,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -100,6 +102,7 @@ import { AISVesselDetailCard } from '@/components/hubs/AISVesselDetailCard';
 import { AISControlPanel } from '@/components/hubs/AISControlPanel';
 import { useTrafficCameras, TrafficCamera } from '@/hooks/useTrafficCameras';
 import { TrafficCameraPopup } from '@/components/earth/TrafficCameraPopup';
+import { useRealtimeVehicles, TransitVehicle } from '@/hooks/useRealtimeVehicles';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 type MapStyleType = 'default' | 'satellite' | 'satelliteStreets';
@@ -175,6 +178,7 @@ export const GlobalResourcesMap = () => {
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
   const regusMarkers = useRef<mapboxgl.Marker[]>([]);
   const cameraMarkers = useRef<mapboxgl.Marker[]>([]);
+  const vehicleMarkers = useRef<mapboxgl.Marker[]>([]);
   const [userEventStatus, setUserEventStatus] = useState<string | null>(null);
   const [isUpdatingRsvp, setIsUpdatingRsvp] = useState(false);
   
@@ -182,6 +186,7 @@ export const GlobalResourcesMap = () => {
   const [show3DBuildings, setShow3DBuildings] = useState(true);
   const [showTraffic, setShowTraffic] = useState(true);
   const [showCCTV, setShowCCTV] = useState(true);
+  const [showTransitVehicles, setShowTransitVehicles] = useState(true);
   
   // Workplace (Regus) state
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
@@ -236,6 +241,12 @@ export const GlobalResourcesMap = () => {
     selectedCamera,
     setSelectedCamera,
   } = useTrafficCameras(map.current, mapReady, showCCTV);
+
+  // Real-time transit vehicles (GTFS-RT)
+  const {
+    vehicles: transitVehicles,
+    isLoading: vehiclesLoading,
+  } = useRealtimeVehicles(map.current, mapReady, showTransitVehicles);
   
   
   // Regus locations (only fetch when workplace selected AND subscribed)
@@ -683,20 +694,21 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           'source-layer': 'building',
           filter: ['==', 'extrude', 'true'],
           type: 'fill-extrusion',
-          minzoom: 14,
+          minzoom: 13,
           paint: {
             'fill-extrusion-color': [
               'interpolate',
               ['linear'],
               ['get', 'height'],
-              0, '#64748b',
-              50, '#475569',
-              100, '#334155',
-              200, '#1e293b'
+              0, '#334155',
+              20, '#475569',
+              50, '#64748b',
+              100, '#94a3b8',
+              200, '#cbd5e1'
             ],
             'fill-extrusion-height': ['get', 'height'],
             'fill-extrusion-base': ['get', 'min_height'],
-            'fill-extrusion-opacity': 0.7,
+            'fill-extrusion-opacity': 0.8,
           },
         });
       }
@@ -894,20 +906,21 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           'source-layer': 'building',
           filter: ['==', 'extrude', 'true'],
           type: 'fill-extrusion',
-          minzoom: 14,
+          minzoom: 13,
           paint: {
             'fill-extrusion-color': [
               'interpolate',
               ['linear'],
               ['get', 'height'],
-              0, '#64748b',
-              50, '#475569',
-              100, '#334155',
-              200, '#1e293b'
+              0, '#334155',
+              20, '#475569',
+              50, '#64748b',
+              100, '#94a3b8',
+              200, '#cbd5e1'
             ],
             'fill-extrusion-height': ['get', 'height'],
             'fill-extrusion-base': ['get', 'min_height'],
-            'fill-extrusion-opacity': 0.7,
+            'fill-extrusion-opacity': 0.8,
           },
         });
       }
@@ -1273,13 +1286,16 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         border: 2px solid white;
         border-radius: 50%;
         box-shadow: 0 2px 8px rgba(220, 38, 38, 0.5);
-        transition: transform 0.2s;
+        transition: transform 0.2s ease;
+        transform-origin: center center;
+        will-change: transform;
       `;
       el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`;
       
       el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.2)'; });
       el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
-      el.addEventListener('click', () => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
         setSelectedCamera(cam);
         map.current?.flyTo({
           center: [cam.lng, cam.lat],
@@ -1300,6 +1316,97 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       cameraMarkers.current = [];
     };
   }, [trafficCameras, showCCTV, mapReady, setSelectedCamera]);
+
+  // Camera projection on map (pulsing circle when camera selected)
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    
+    const sourceId = 'camera-projection';
+    const layerId = 'camera-projection-pulse';
+    
+    if (selectedCamera) {
+      const geojson: GeoJSON.FeatureCollection = {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [selectedCamera.lng, selectedCamera.lat] },
+          properties: {}
+        }]
+      };
+      
+      if (map.current.getSource(sourceId)) {
+        (map.current.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(geojson);
+      } else {
+        map.current.addSource(sourceId, { type: 'geojson', data: geojson });
+        map.current.addLayer({
+          id: layerId,
+          type: 'circle',
+          source: sourceId,
+          paint: {
+            'circle-radius': 30,
+            'circle-color': '#dc2626',
+            'circle-opacity': 0.2,
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#dc2626',
+            'circle-stroke-opacity': 0.6,
+          },
+        });
+      }
+    } else {
+      if (map.current.getLayer(layerId)) map.current.removeLayer(layerId);
+      if (map.current.getSource(sourceId)) map.current.removeSource(sourceId);
+    }
+  }, [selectedCamera, mapReady]);
+
+  // Add transit vehicle markers
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    
+    vehicleMarkers.current.forEach(m => m.remove());
+    vehicleMarkers.current = [];
+    
+    if (!showTransitVehicles || !transitVehicles || transitVehicles.length === 0) return;
+    
+    transitVehicles.forEach((v) => {
+      const el = document.createElement('div');
+      const isTrain = v.vehicleType === 'train';
+      const isTram = v.vehicleType === 'tram';
+      const color = isTrain ? '#f97316' : isTram ? '#8b5cf6' : '#3b82f6';
+      
+      el.style.cssText = `
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: ${color};
+        border: 1.5px solid white;
+        border-radius: ${isTrain ? '4px' : '50%'};
+        box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+        transform-origin: center center;
+        will-change: transform;
+        transform: rotate(${v.heading || 0}deg);
+        transition: transform 0.5s ease;
+      `;
+      
+      // Direction arrow
+      el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="12,2 22,22 12,17 2,22"/></svg>`;
+      
+      el.title = `${v.agency} - ${v.route} (${v.vehicleType})`;
+      
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([v.lng, v.lat])
+        .addTo(map.current!);
+      
+      vehicleMarkers.current.push(marker);
+    });
+    
+    return () => {
+      vehicleMarkers.current.forEach(m => m.remove());
+      vehicleMarkers.current = [];
+    };
+  }, [transitVehicles, showTransitVehicles, mapReady]);
 
 
   // Add event markers to map
@@ -1911,6 +2018,47 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                           <Badge variant="outline" className="text-xs bg-red-500/20 border-red-500/50 text-red-400">
                             {trafficCameras.length} cameras in view
                           </Badge>
+                        )}
+                      </div>
+
+                      {/* Transit Vehicles toggle */}
+                      <div className="p-3 rounded-xl bg-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                              <Bus className="w-4 h-4 text-blue-400" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium truncate block">Transit Vehicles</span>
+                              <p className="text-xs text-muted-foreground">Real-time GTFS buses & trains (zoom 10+)</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={showTransitVehicles}
+                            onCheckedChange={setShowTransitVehicles}
+                            className="flex-shrink-0 ml-2"
+                          />
+                        </div>
+                        {showTransitVehicles && vehiclesLoading && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            Loading vehicles...
+                          </div>
+                        )}
+                        {showTransitVehicles && transitVehicles.length > 0 && (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="text-xs bg-blue-500/20 border-blue-500/50 text-blue-400">
+                              {transitVehicles.filter(v => v.vehicleType === 'bus').length} buses
+                            </Badge>
+                            <Badge variant="outline" className="text-xs bg-orange-500/20 border-orange-500/50 text-orange-400">
+                              {transitVehicles.filter(v => v.vehicleType === 'train').length} trains
+                            </Badge>
+                            {transitVehicles.filter(v => v.vehicleType === 'tram').length > 0 && (
+                              <Badge variant="outline" className="text-xs bg-purple-500/20 border-purple-500/50 text-purple-400">
+                                {transitVehicles.filter(v => v.vehicleType === 'tram').length} trams
+                              </Badge>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>

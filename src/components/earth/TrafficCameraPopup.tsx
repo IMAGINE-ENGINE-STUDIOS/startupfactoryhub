@@ -1,8 +1,10 @@
-import { X, RefreshCw, Camera, ExternalLink } from 'lucide-react';
+import { X, RefreshCw, Camera, ExternalLink, MapPin, Clock, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrafficCamera } from '@/hooks/useTrafficCameras';
 import { useState, useEffect } from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 interface TrafficCameraPopupProps {
   camera: TrafficCamera;
@@ -12,38 +14,55 @@ interface TrafficCameraPopupProps {
 export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps) => {
   const [imageKey, setImageKey] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState(new Date());
 
-  // Auto-refresh every 30s
+  // Auto-refresh every 5s
   useEffect(() => {
     const interval = setInterval(() => {
       setImageKey(k => k + 1);
-    }, 30000);
+      setLastRefreshTime(new Date());
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
     setImageKey(k => k + 1);
+    setLastRefreshTime(new Date());
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
   const imageUrl = camera.imageUrl.includes('?')
-    ? `${camera.imageUrl}&_t=${imageKey}`
-    : `${camera.imageUrl}?_t=${imageKey}`;
+    ? `${camera.imageUrl}&_t=${Date.now()}_${imageKey}`
+    : `${camera.imageUrl}?_t=${Date.now()}_${imageKey}`;
 
   return (
-    <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-30 w-[360px] max-w-[90vw]">
-      <div className="backdrop-blur-3xl bg-black/60 border border-white/20 rounded-2xl overflow-hidden shadow-2xl">
+    <div className={cn(
+      "absolute right-2 top-2 bottom-2 z-30 transition-all duration-300 translate-x-0 opacity-100",
+      isFullscreen ? "left-2 w-auto" : "w-[420px] max-w-[90vw]"
+    )}>
+      <div className="h-full backdrop-blur-3xl bg-black/70 border border-white/20 rounded-2xl overflow-hidden shadow-2xl flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-3 border-b border-white/10">
+        <div className="flex items-center justify-between p-3 border-b border-white/10 flex-shrink-0">
           <div className="flex items-center gap-2 min-w-0">
-            <Camera className="w-4 h-4 text-red-400 flex-shrink-0" />
-            <span className="text-sm font-medium text-white truncate">{camera.name}</span>
+            <div className="w-8 h-8 rounded-lg bg-red-500/20 flex items-center justify-center flex-shrink-0">
+              <Camera className="w-4 h-4 text-red-400" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-sm font-medium text-white truncate block">{camera.name}</span>
+              <span className="text-[10px] text-white/50">{camera.source}</span>
+            </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
-            <Badge variant="outline" className="text-[10px] border-white/20 text-white/60">
-              {camera.source}
-            </Badge>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsFullscreen(!isFullscreen)}
+              className="h-7 w-7 text-white/60 hover:text-white hover:bg-white/10 rounded-lg"
+            >
+              {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -63,39 +82,78 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
           </div>
         </div>
 
-        {/* Live Image */}
-        <div className="relative aspect-video bg-black">
+        {/* Live Image - takes most space */}
+        <div className="relative flex-1 min-h-0 bg-black">
           <img
             key={imageKey}
             src={imageUrl}
             alt={camera.name}
             className="w-full h-full object-contain"
             onError={(e) => {
-              (e.target as HTMLImageElement).src = '';
               (e.target as HTMLImageElement).alt = 'Camera feed unavailable';
             }}
           />
           {/* Live indicator */}
-          <div className="absolute top-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-500/80 backdrop-blur">
-            <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
-            <span className="text-[10px] text-white font-semibold">LIVE</span>
+          <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-600/90 backdrop-blur">
+            <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+            <span className="text-[11px] text-white font-bold tracking-wider">LIVE</span>
+          </div>
+          {/* Refresh countdown */}
+          <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-black/60 backdrop-blur">
+            <span className="text-[10px] text-white/70 font-mono">5s refresh</span>
           </div>
         </div>
 
-        {/* Footer */}
-        <div className="p-2 flex items-center justify-between text-[10px] text-white/40">
-          <span>Auto-refreshes every 30s</span>
-          {camera.imageUrl && (
-            <a
-              href={camera.imageUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 text-white/50 hover:text-white/80 transition"
-            >
-              <ExternalLink className="w-3 h-3" />
-              Open feed
-            </a>
-          )}
+        {/* Metadata Panel */}
+        <div className="flex-shrink-0 border-t border-white/10">
+          <ScrollArea className="max-h-[200px]">
+            <div className="p-3 space-y-3">
+              {/* Coordinates */}
+              <div className="flex items-start gap-2 text-xs">
+                <MapPin className="w-3.5 h-3.5 text-red-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-white/80 font-medium">Location</p>
+                  <p className="text-white/50 font-mono text-[11px]">
+                    {camera.lat.toFixed(6)}, {camera.lng.toFixed(6)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Last Updated */}
+              <div className="flex items-start gap-2 text-xs">
+                <Clock className="w-3.5 h-3.5 text-blue-400 mt-0.5 flex-shrink-0" />
+                <div>
+                  <p className="text-white/80 font-medium">Last Refresh</p>
+                  <p className="text-white/50 text-[11px]">
+                    {lastRefreshTime.toLocaleTimeString()}
+                  </p>
+                </div>
+              </div>
+
+              {/* Source Badge */}
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="outline" className="text-[10px] border-white/20 text-white/60 bg-white/5">
+                  Source: {camera.source}
+                </Badge>
+                <Badge variant="outline" className="text-[10px] border-red-500/30 text-red-400 bg-red-500/10">
+                  Auto-refreshing
+                </Badge>
+              </div>
+
+              {/* Open Feed Link */}
+              {camera.imageUrl && (
+                <a
+                  href={camera.imageUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-xs text-white/50 hover:text-white/80 transition w-fit"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  Open original feed
+                </a>
+              )}
+            </div>
+          </ScrollArea>
         </div>
       </div>
     </div>
