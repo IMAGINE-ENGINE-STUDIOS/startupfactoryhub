@@ -178,6 +178,7 @@ async function fetchWSDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.CameraLocation.Longitude,
         imageUrl: c.ImageURL || c.ImageUrl || '',
         source: 'WSDOT',
+        refreshRate: 5,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
