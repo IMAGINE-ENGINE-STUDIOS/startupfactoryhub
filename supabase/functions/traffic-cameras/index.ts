@@ -552,7 +552,7 @@ async function fetchMOCameras(bounds: Bounds): Promise<CameraResult[]> {
 }
 
 async function fetchINDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('IN', 'https://indot.carsprogram.org', bounds, { south: 37.7, north: 41.8, west: -88.1, east: -84.7 }, 10, 200);
+  return fetch511Cameras('IN', 'https://indot.carsprogram.org', bounds, { south: 37.7, north: 41.8, west: -88.1, east: -84.7 }, 10);
 }
 
 async function fetchTNCameras(bounds: Bounds): Promise<CameraResult[]> {
