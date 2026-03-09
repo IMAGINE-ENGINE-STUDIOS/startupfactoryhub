@@ -1415,6 +1415,54 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     };
   }, [transitVehicles, showTransitVehicles, mapReady]);
 
+  // Add traffic sensor markers as colored dots on roads
+  const sensorMarkers = useRef<mapboxgl.Marker[]>([]);
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    
+    sensorMarkers.current.forEach(m => m.remove());
+    sensorMarkers.current = [];
+    
+    if (!showTrafficSensors || !trafficSensors || trafficSensors.length === 0) return;
+    
+    const congestionColors: Record<string, string> = {
+      free: '#22c55e',
+      light: '#84cc16',
+      moderate: '#eab308',
+      heavy: '#f97316',
+      severe: '#ef4444',
+    };
+    
+    trafficSensors.forEach((sensor) => {
+      const el = document.createElement('div');
+      const color = congestionColors[sensor.congestion] || '#64748b';
+      
+      el.style.cssText = `
+        width: 14px;
+        height: 14px;
+        background: ${color};
+        border: 1.5px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 6px ${color}80;
+        cursor: pointer;
+        transform-origin: center center;
+        will-change: transform;
+      `;
+      el.title = `${sensor.roadName} - ${sensor.speed}mph, ${sensor.congestion}`;
+      
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([sensor.lng, sensor.lat])
+        .addTo(map.current!);
+      
+      sensorMarkers.current.push(marker);
+    });
+    
+    return () => {
+      sensorMarkers.current.forEach(m => m.remove());
+      sensorMarkers.current = [];
+    };
+  }, [trafficSensors, showTrafficSensors, mapReady]);
+
 
   // Add event markers to map
   useEffect(() => {
