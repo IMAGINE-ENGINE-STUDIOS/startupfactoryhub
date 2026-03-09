@@ -14,9 +14,9 @@ interface LanguageSelectorProps {
 }
 
 const languages: { code: Language; name: string; flag: string }[] = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' },
+  { code: 'en', name: 'English', flag: 'EN' },
+  { code: 'es', name: 'Español', flag: 'ES' },
+  { code: 'ja', name: '日本語', flag: 'JA' },
 ];
 
 export function LanguageSelector({ variant = 'icon', className }: LanguageSelectorProps) {

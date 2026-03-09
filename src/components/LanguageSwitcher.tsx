@@ -20,7 +20,7 @@ export function LanguageSwitcher() {
           className="neon-glow hover:scale-110 transition-transform duration-300 h-9 w-9 sm:h-10 sm:w-10 relative"
           title={t('header.language')}
         >
-          <span className="text-base leading-none">{currentLang?.flag || '🇺🇸'}</span>
+          <span className="text-xs font-semibold leading-none">{currentLang?.flag || 'EN'}</span>
         </Button>
       </PopoverTrigger>
       <PopoverContent
