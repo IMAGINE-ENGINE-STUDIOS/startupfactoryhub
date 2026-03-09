@@ -65,7 +65,6 @@ async function fetch511Cameras(
         const lng = parseFloat(c.Longitude || c.longitude || 0);
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, limit)
       .map((c: any) => {
         const rawUrl = c.Url || c.url || '';
         const videoUrl = c.VideoUrl || c.videoUrl || '';
