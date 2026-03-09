@@ -50,8 +50,7 @@ async function fetch511Cameras(
   baseUrl: string,
   bounds: Bounds,
   boundsCheck: { south: number; north: number; west: number; east: number },
-  refreshRate = 5,
-  limit = 200
+  refreshRate = 5
 ): Promise<CameraResult[]> {
   if (bounds.south > boundsCheck.north || bounds.north < boundsCheck.south ||
       bounds.west > boundsCheck.east || bounds.east < boundsCheck.west) return [];
@@ -66,7 +65,6 @@ async function fetch511Cameras(
         const lng = parseFloat(c.Longitude || c.longitude || 0);
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, limit)
       .map((c: any) => {
         const rawUrl = c.Url || c.url || '';
         const videoUrl = c.VideoUrl || c.videoUrl || '';
@@ -98,7 +96,7 @@ async function fetch511Cameras(
 // ====== NYC / NEW YORK ======
 
 async function fetchNYCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('NY', 'https://511ny.org', bounds, { south: 40, north: 45.5, west: -80, east: -71 }, 3, 300);
+  return fetch511Cameras('NY', 'https://511ny.org', bounds, { south: 40, north: 45.5, west: -80, east: -71 }, 3);
 }
 
 // NYC DOT / NYCTMC cameras
@@ -119,7 +117,6 @@ async function fetchNYCDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = c.longitude || c.lng || c.location?.longitude || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 300)
       .map((c: any) => ({
         id: `nycdot-${c.id || c.cameraID || c.camera_id || Math.random().toString(36).slice(2)}`,
         name: c.name || c.title || c.description || 'NYC Camera',
@@ -139,7 +136,7 @@ async function fetchNYCDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
 async function fetchCaltransCameras(bounds: Bounds): Promise<CameraResult[]> {
   if (bounds.east < -130 || bounds.west > -114 || bounds.south > 42 || bounds.north < 32) return [];
   try {
-    const url = `https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/CCTV/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=currentImageURL,streamingVideoURL,locationName,latitude,longitude,district,inService&f=json&resultRecordCount=500`;
+    const url = `https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/CCTV/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=currentImageURL,streamingVideoURL,locationName,latitude,longitude,district,inService&f=json&resultRecordCount=5000`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(12000) });
     if (!resp.ok) return [];
     const data = await resp.json();
@@ -186,7 +183,6 @@ async function fetchWSDOT(bounds: Bounds): Promise<CameraResult[]> {
     if (!Array.isArray(data)) return [];
     return data
       .filter((c: any) => inBounds(c.CameraLocation?.Latitude || 0, c.CameraLocation?.Longitude || 0, bounds))
-      .slice(0, 200)
       .map((c: any) => ({
         id: `wa-${c.CameraID}`,
         name: c.Title || c.Description || 'WA Camera',
@@ -214,7 +210,6 @@ async function fetchODOT(bounds: Bounds): Promise<CameraResult[]> {
     if (!Array.isArray(data)) return [];
     return data
       .filter((c: any) => inBounds(c.lat || c.latitude || 0, c.lon || c.lng || c.longitude || 0, bounds))
-      .slice(0, 100)
       .map((c: any, i: number) => ({
         id: `or-${c.id || i}`,
         name: c.title || c.name || 'OR Camera',
@@ -243,7 +238,6 @@ async function fetchCDOT(bounds: Bounds): Promise<CameraResult[]> {
         const coords = c.geometry?.coordinates || [];
         return coords.length >= 2 && inBounds(coords[1], coords[0], bounds);
       })
-      .slice(0, 100)
       .map((c: any) => ({
         id: `co-${c.properties?.id || c.id || Math.random().toString(36).slice(2)}`,
         name: c.properties?.camera_label || c.properties?.name || 'CO Camera',
@@ -271,7 +265,6 @@ async function fetch511VA(bounds: Bounds): Promise<CameraResult[]> {
         const [lng, lat] = f.geometry?.coordinates || [0, 0];
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((f: any) => ({
         id: `va-${f.properties?.id || Math.random().toString(36).slice(2)}`,
         name: f.properties?.name || f.properties?.description || 'VA Camera',
@@ -290,7 +283,7 @@ async function fetch511VA(bounds: Bounds): Promise<CameraResult[]> {
 async function fetchFLDOT(bounds: Bounds): Promise<CameraResult[]> {
   if (bounds.south > 31.5 || bounds.north < 24.3 || bounds.west > -79.5 || bounds.east < -88) return [];
   try {
-    const url = `https://services.arcgis.com/3wFbqsFPLeKqOlIK/arcgis/rest/services/FL511_Traffic_Cameras/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=*&f=json&resultRecordCount=500`;
+    const url = `https://services.arcgis.com/3wFbqsFPLeKqOlIK/arcgis/rest/services/FL511_Traffic_Cameras/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=*&f=json&resultRecordCount=5000`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(12000) });
     if (!resp.ok) return [];
     const data = await resp.json();
@@ -335,7 +328,6 @@ async function fetch511GA(bounds: Bounds): Promise<CameraResult[]> {
     if (!Array.isArray(data)) return [];
     return data
       .filter((c: any) => inBounds(c.latitude || 0, c.longitude || 0, bounds))
-      .slice(0, 200)
       .map((c: any) => ({
         id: `ga-${c.id}`,
         name: c.name || c.location || 'GA Camera',
@@ -354,7 +346,7 @@ async function fetch511GA(bounds: Bounds): Promise<CameraResult[]> {
 async function fetchAustinCameras(bounds: Bounds): Promise<CameraResult[]> {
   if (bounds.south > 31 || bounds.north < 29.5 || bounds.west > -97 || bounds.east < -98.5) return [];
   try {
-    const url = `https://data.austintexas.gov/resource/b4k4-adkb.json?$where=within_box(location,${bounds.south},${bounds.west},${bounds.north},${bounds.east})&$limit=300&camera_status=TURNED_ON`;
+    const url = `https://data.austintexas.gov/resource/b4k4-adkb.json?$where=within_box(location,${bounds.south},${bounds.west},${bounds.north},${bounds.east})&$limit=50000&camera_status=TURNED_ON`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!resp.ok) return [];
     const data = await resp.json();
@@ -395,7 +387,6 @@ async function fetchHoustonCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = c.geometry?.coordinates?.[0] || c.longitude || c.lng || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((c: any) => {
         const props = c.properties || c;
         const lat = c.geometry?.coordinates?.[1] || c.latitude || c.lat;
@@ -418,7 +409,7 @@ async function fetchHoustonCameras(bounds: Bounds): Promise<CameraResult[]> {
 async function fetchTxDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
   if (bounds.south > 36.5 || bounds.north < 25.5 || bounds.west > -93 || bounds.east < -107) return [];
   try {
-    const url = `https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_CCTV_Cameras/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=*&f=json&resultRecordCount=500`;
+    const url = `https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_CCTV_Cameras/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=*&f=json&resultRecordCount=5000`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(12000) });
     if (!resp.ok) return [];
     const data = await resp.json();
@@ -462,7 +453,6 @@ async function fetchILDOT(bounds: Bounds): Promise<CameraResult[]> {
         const lng = c.longitude || c.lng || c.geometry?.coordinates?.[0] || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((c: any, i: number) => ({
         id: `il-${c.id || i}`,
         name: c.name || c.description || c.title || 'IL Camera',
@@ -479,23 +469,23 @@ async function fetchILDOT(bounds: Bounds): Promise<CameraResult[]> {
 // ====== 511 STATES (using generic fetcher) ======
 
 async function fetchNJCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('NJ', 'https://511nj.org', bounds, { south: 38.8, north: 41.5, west: -75.6, east: -73.8 }, 5, 200);
+  return fetch511Cameras('NJ', 'https://511nj.org', bounds, { south: 38.8, north: 41.5, west: -75.6, east: -73.8 }, 5);
 }
 
 async function fetchPACameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('PA', 'https://511pa.com', bounds, { south: 39.5, north: 42.5, west: -80.6, east: -74.5 }, 5, 200);
+  return fetch511Cameras('PA', 'https://511pa.com', bounds, { south: 39.5, north: 42.5, west: -80.6, east: -74.5 }, 5);
 }
 
 async function fetchNCCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('NC', 'https://www.ncdot.gov/travel-maps', bounds, { south: 33.5, north: 36.6, west: -84.5, east: -75.3 }, 10, 200);
+  return fetch511Cameras('NC', 'https://www.ncdot.gov/travel-maps', bounds, { south: 33.5, north: 36.6, west: -84.5, east: -75.3 }, 10);
 }
 
 async function fetchSCCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('SC', 'https://www.511sc.org', bounds, { south: 32, north: 35.3, west: -83.5, east: -78.4 }, 10, 200);
+  return fetch511Cameras('SC', 'https://www.511sc.org', bounds, { south: 32, north: 35.3, west: -83.5, east: -78.4 }, 10);
 }
 
 async function fetchLACameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('LA', 'https://www.511la.org', bounds, { south: 28.9, north: 33.1, west: -94.1, east: -88.7 }, 10, 200);
+  return fetch511Cameras('LA', 'https://www.511la.org', bounds, { south: 28.9, north: 33.1, west: -94.1, east: -88.7 }, 10);
 }
 
 async function fetchOHCameras(bounds: Bounds): Promise<CameraResult[]> {
@@ -516,7 +506,6 @@ async function fetchOHCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = c.longitude || c.cameraLocation?.longitude || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((c: any) => ({
         id: `oh-${c.id || c.cameraId || Math.random().toString(36).slice(2)}`,
         name: c.description || c.name || c.location || 'OH Camera',
@@ -531,39 +520,39 @@ async function fetchOHCameras(bounds: Bounds): Promise<CameraResult[]> {
 }
 
 async function fetchMNCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('MN', 'https://511mn.org', bounds, { south: 43.4, north: 49.4, west: -97.3, east: -89.4 }, 10, 200);
+  return fetch511Cameras('MN', 'https://511mn.org', bounds, { south: 43.4, north: 49.4, west: -97.3, east: -89.4 }, 10);
 }
 
 async function fetchWICameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('WI', 'https://511wi.gov', bounds, { south: 42.4, north: 47.1, west: -93, east: -86.7 }, 10, 200);
+  return fetch511Cameras('WI', 'https://511wi.gov', bounds, { south: 42.4, north: 47.1, west: -93, east: -86.7 }, 10);
 }
 
 async function fetchKYCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('KY', 'https://511.ky.gov', bounds, { south: 36.4, north: 39.2, west: -89.6, east: -81.9 }, 10, 200);
+  return fetch511Cameras('KY', 'https://511.ky.gov', bounds, { south: 36.4, north: 39.2, west: -89.6, east: -81.9 }, 10);
 }
 
 async function fetchAZCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('AZ', 'https://az511.gov', bounds, { south: 31.3, north: 37, west: -114.9, east: -109 }, 10, 200);
+  return fetch511Cameras('AZ', 'https://az511.gov', bounds, { south: 31.3, north: 37, west: -114.9, east: -109 }, 10);
 }
 
 async function fetchNVCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('NV', 'https://nvroads.com', bounds, { south: 35, north: 42, west: -120, east: -114 }, 10, 200);
+  return fetch511Cameras('NV', 'https://nvroads.com', bounds, { south: 35, north: 42, west: -120, east: -114 }, 10);
 }
 
 async function fetchIACameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('IA', 'https://www.511ia.org', bounds, { south: 40.3, north: 43.6, west: -96.7, east: -90 }, 10, 200);
+  return fetch511Cameras('IA', 'https://www.511ia.org', bounds, { south: 40.3, north: 43.6, west: -96.7, east: -90 }, 10);
 }
 
 async function fetchNECameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('NE', 'https://511.nebraska.gov', bounds, { south: 39.9, north: 43.1, west: -104.1, east: -95.3 }, 10, 200);
+  return fetch511Cameras('NE', 'https://511.nebraska.gov', bounds, { south: 39.9, north: 43.1, west: -104.1, east: -95.3 }, 10);
 }
 
 async function fetchMOCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('MO', 'https://www.modot.org', bounds, { south: 35.9, north: 40.7, west: -95.8, east: -89 }, 10, 200);
+  return fetch511Cameras('MO', 'https://www.modot.org', bounds, { south: 35.9, north: 40.7, west: -95.8, east: -89 }, 10);
 }
 
 async function fetchINDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('IN', 'https://indot.carsprogram.org', bounds, { south: 37.7, north: 41.8, west: -88.1, east: -84.7 }, 10, 200);
+  return fetch511Cameras('IN', 'https://indot.carsprogram.org', bounds, { south: 37.7, north: 41.8, west: -88.1, east: -84.7 }, 10);
 }
 
 async function fetchTNCameras(bounds: Bounds): Promise<CameraResult[]> {
@@ -581,7 +570,6 @@ async function fetchTNCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = c.longitude || c.lng || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((c: any) => ({
         id: `tn-${c.id || c.cameraId || Math.random().toString(36).slice(2)}`,
         name: c.description || c.name || c.title || 'TN Camera',
@@ -600,8 +588,8 @@ async function fetchTNCameras(bounds: Bounds): Promise<CameraResult[]> {
 async function fetchDCCameras(bounds: Bounds): Promise<CameraResult[]> {
   if (bounds.south > 39.1 || bounds.north < 38.7 || bounds.west > -76.8 || bounds.east < -77.2) return [];
   try {
-    const url = `https://opendata.dc.gov/api/3/action/datastore_search?resource_id=traffic-cameras&limit=200`;
-    const resp = await fetch('https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/98/query?where=1%3D1&outFields=*&f=json&resultRecordCount=200', { signal: AbortSignal.timeout(10000) });
+    const url = `https://opendata.dc.gov/api/3/action/datastore_search?resource_id=traffic-cameras&limit=50000`;
+    const resp = await fetch('https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/98/query?where=1%3D1&outFields=*&f=json&resultRecordCount=5000', { signal: AbortSignal.timeout(10000) });
     if (!resp.ok) return [];
     const data = await resp.json();
     const features = data?.features || [];
@@ -612,7 +600,6 @@ async function fetchDCCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = f.attributes?.LONGITUDE || f.geometry?.x || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((f: any) => {
         const a = f.attributes || {};
         return {
@@ -645,7 +632,6 @@ async function fetchMDDOT(bounds: Bounds): Promise<CameraResult[]> {
         const lng = parseFloat(c.lon || c.lng || c.longitude || 0);
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((c: any) => ({
         id: `md-${c.id || c.cameraId || Math.random().toString(36).slice(2)}`,
         name: c.description || c.name || c.title || 'MD Camera',
@@ -662,19 +648,19 @@ async function fetchMDDOT(bounds: Bounds): Promise<CameraResult[]> {
 // ====== ALABAMA ======
 
 async function fetchALCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('AL', 'https://www.algotraffic.com', bounds, { south: 30, north: 35.1, west: -88.5, east: -84.8 }, 10, 200);
+  return fetch511Cameras('AL', 'https://www.algotraffic.com', bounds, { south: 30, north: 35.1, west: -88.5, east: -84.8 }, 10);
 }
 
 // ====== MASSACHUSETTS ======
 
 async function fetchMACameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('MA', 'https://mass511.com', bounds, { south: 41, north: 42.9, west: -73.6, east: -69.8 }, 10, 200);
+  return fetch511Cameras('MA', 'https://mass511.com', bounds, { south: 41, north: 42.9, west: -73.6, east: -69.8 }, 10);
 }
 
 // ====== CONNECTICUT ======
 
 async function fetchCTCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('CT', 'https://www.ct.gov/dot/511', bounds, { south: 40.9, north: 42.1, west: -73.8, east: -71.7 }, 10, 200);
+  return fetch511Cameras('CT', 'https://www.ct.gov/dot/511', bounds, { south: 40.9, north: 42.1, west: -73.8, east: -71.7 }, 10);
 }
 
 // ====== UTAH ======
@@ -688,7 +674,6 @@ async function fetchUTCameras(bounds: Bounds): Promise<CameraResult[]> {
     if (!Array.isArray(data)) return [];
     return data
       .filter((c: any) => inBounds(c.latitude || 0, c.longitude || 0, bounds))
-      .slice(0, 200)
       .map((c: any) => ({
         id: `ut-${c.id || Math.random().toString(36).slice(2)}`,
         name: c.name || c.description || 'UT Camera',
@@ -705,7 +690,7 @@ async function fetchUTCameras(bounds: Bounds): Promise<CameraResult[]> {
 // ====== MICHIGAN ======
 
 async function fetchMICameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('MI', 'https://mdotjboss.state.mi.us', bounds, { south: 41.6, north: 48.3, west: -90.5, east: -82.1 }, 10, 200);
+  return fetch511Cameras('MI', 'https://mdotjboss.state.mi.us', bounds, { south: 41.6, north: 48.3, west: -90.5, east: -82.1 }, 10);
 }
 
 // ====== UK ======
@@ -724,7 +709,6 @@ async function fetchUKCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = c.longitude || c.lng || c.geometry?.coordinates?.[0] || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 60)
       .map((c: any, i: number) => ({
         id: `uk-${c.id || i}`,
         name: c.description || c.name || c.title || 'UK Highway Camera',
@@ -753,7 +737,6 @@ async function fetchNLCameras(bounds: Bounds): Promise<CameraResult[]> {
         const coords = f.geometry?.coordinates || [];
         return coords.length >= 2 && inBounds(coords[1], coords[0], bounds);
       })
-      .slice(0, 40)
       .map((f: any) => ({
         id: `nl-${f.properties?.id || Math.random().toString(36).slice(2)}`,
         name: f.properties?.name || f.properties?.description || 'NL Camera',
@@ -781,7 +764,6 @@ async function fetchAUCameras(bounds: Bounds): Promise<CameraResult[]> {
         const [lng, lat] = f.geometry?.coordinates || [0, 0];
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 60)
       .map((f: any) => ({
         id: `au-${f.properties?.id || Math.random().toString(36).slice(2)}`,
         name: f.properties?.title || f.properties?.name || 'AU Camera',
@@ -806,7 +788,7 @@ async function fetchWindyCameras(bounds: Bounds): Promise<CameraResult[]> {
     )));
 
     const resp = await fetch(
-      `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=300&offset=0&include=images,location&nearby=${centerLat},${centerLng},${radius}`,
+      `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=500&offset=0&include=images,location&nearby=${centerLat},${centerLng},${radius}`,
       {
         headers: { 'x-windy-api-key': 'PGbLONaQtxGGGTZ0NXPEr4BbPtTOqo5f' },
         signal: AbortSignal.timeout(10000),
@@ -822,7 +804,6 @@ async function fetchWindyCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = w.location?.longitude || w.position?.longitude || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 300)
       .map((w: any) => ({
         id: `windy-${w.webcamId || w.id}`,
         name: w.title || 'Webcam',
@@ -930,13 +911,12 @@ serve(async (req) => {
       if (!isDupe) deduped.push(cam);
     }
 
-    const final = deduped.slice(0, 1500);
-    cache.set(key, { data: final, time: Date.now() });
+    cache.set(key, { data: deduped, time: Date.now() });
 
-    console.log(`Returning ${final.length} cameras for bounds: ${JSON.stringify(bounds)}`);
+    console.log(`Returning ${deduped.length} cameras for bounds: ${JSON.stringify(bounds)}`);
 
     return new Response(
-      JSON.stringify({ cameras: final }),
+      JSON.stringify({ cameras: deduped }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   } catch (err) {
