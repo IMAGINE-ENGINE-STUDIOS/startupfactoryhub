@@ -144,6 +144,6 @@ export const useTrafficCameras = (
     isLoading,
     error,
     selectedCamera,
-    setSelectedCamera,
+    setSelectedCamera: handleSetSelectedCamera,
   };
 };
