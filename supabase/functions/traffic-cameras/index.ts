@@ -115,48 +115,46 @@ async function fetchNYCDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== CALIFORNIA ======
+// ====== CALIFORNIA (Caltrans ArcGIS FeatureServer) ======
 
-async function fetchCaltransDistrict(dist: string, bounds: Bounds): Promise<CameraResult[]> {
+async function fetchCaltransCameras(bounds: Bounds): Promise<CameraResult[]> {
+  if (bounds.east < -130 || bounds.west > -114 || bounds.south > 42 || bounds.north < 32) return [];
   try {
-    const label = dist.charAt(0).toUpperCase() + dist.slice(1);
-    const resp = await fetch(`https://cwwp2.dot.ca.gov/data/${dist}/cctv/cctvStatus${label}.json`, { signal: AbortSignal.timeout(8000) });
+    const url = `https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/CCTV/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=currentImageURL,streamingVideoURL,locationName,latitude,longitude,district,inService&f=json&resultRecordCount=500`;
+    const resp = await fetch(url, { signal: AbortSignal.timeout(12000) });
     if (!resp.ok) return [];
     const data = await resp.json();
-    const cameras = data?.data || data;
-    if (!Array.isArray(cameras)) return [];
-    const results: CameraResult[] = [];
-    for (const cam of cameras) {
-      const loc = cam.location || cam.cctv || cam;
-      const lat = parseFloat(loc.latitude || loc.lat || 0);
-      const lng = parseFloat(loc.longitude || loc.lng || loc.lon || 0);
-      if (inBounds(lat, lng, bounds)) {
-        const imgUrl = loc.imageUrl || loc.image?.url || loc.currentImageURL || '';
-        if (imgUrl) {
-          results.push({
-            id: `ca-${dist}-${loc.id || results.length}`,
-            name: loc.name || loc.description || `CA ${dist.toUpperCase()} Camera`,
-            lat, lng, imageUrl: imgUrl,
-            source: `Caltrans ${dist.toUpperCase()}`,
-            refreshRate: 5,
-          });
-        }
-      }
-      if (results.length >= 50) break;
-    }
-    return results;
-  } catch { return []; }
-}
+    const features = data?.features || [];
+    if (!Array.isArray(features)) return [];
 
-async function fetchAllCaltrans(bounds: Bounds): Promise<CameraResult[]> {
-  if (bounds.east < -130 || bounds.west > -114 || bounds.south > 42 || bounds.north < 32) return [];
-  const districts = ['d1','d2','d3','d4','d5','d6','d7','d8','d9','d10','d11','d12'];
-  const results: CameraResult[] = [];
-  const settled = await Promise.allSettled(districts.map(d => fetchCaltransDistrict(d, bounds)));
-  for (const r of settled) {
-    if (r.status === 'fulfilled') results.push(...r.value);
+    return features
+      .filter((f: any) => {
+        const a = f.attributes || {};
+        const lat = a.latitude || f.geometry?.y;
+        const lng = a.longitude || f.geometry?.x;
+        const inService = a.inService;
+        return lat && lng && inBounds(lat, lng, bounds) && inService !== 'FALSE';
+      })
+      .map((f: any) => {
+        const a = f.attributes;
+        const imgUrl = a.currentImageURL || '';
+        const streamUrl = a.streamingVideoURL || '';
+        return {
+          id: `ca-${a.district || 'x'}-${imgUrl.split('/').pop() || Math.random().toString(36).slice(2)}`,
+          name: a.locationName || `CA D${a.district} Camera`,
+          lat: a.latitude || f.geometry?.y,
+          lng: a.longitude || f.geometry?.x,
+          imageUrl: imgUrl,
+          source: `Caltrans D${a.district || '?'}`,
+          refreshRate: 5,
+          streamUrl: streamUrl && /\.(m3u8|mjpg|mjpeg|mp4)(\?|$)/i.test(streamUrl) ? streamUrl : undefined,
+        };
+      })
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch (e) {
+    console.error('Caltrans cameras error:', e);
+    return [];
   }
-  return results.slice(0, 300);
 }
 
 // ====== WASHINGTON ======
