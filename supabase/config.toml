@@ -146,3 +146,6 @@ verify_jwt = false
 
 [functions.send-official-mentor-invite]
 verify_jwt = false
+
+[functions.traffic-cameras]
+verify_jwt = false
