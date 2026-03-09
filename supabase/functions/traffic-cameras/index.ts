@@ -506,7 +506,6 @@ async function fetchOHCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = c.longitude || c.cameraLocation?.longitude || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((c: any) => ({
         id: `oh-${c.id || c.cameraId || Math.random().toString(36).slice(2)}`,
         name: c.description || c.name || c.location || 'OH Camera',
