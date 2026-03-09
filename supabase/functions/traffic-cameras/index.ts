@@ -365,6 +365,7 @@ async function fetchTXDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: parseFloat(c.longitude || c.lng),
         imageUrl: c.url || c.image_url || c.imageUrl || '',
         source: 'TxDOT',
+        refreshRate: 15,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
