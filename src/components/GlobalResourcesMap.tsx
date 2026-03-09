@@ -178,6 +178,7 @@ export const GlobalResourcesMap = () => {
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
   const regusMarkers = useRef<mapboxgl.Marker[]>([]);
   const cameraMarkers = useRef<mapboxgl.Marker[]>([]);
+  const vehicleMarkers = useRef<mapboxgl.Marker[]>([]);
   const [userEventStatus, setUserEventStatus] = useState<string | null>(null);
   const [isUpdatingRsvp, setIsUpdatingRsvp] = useState(false);
   
