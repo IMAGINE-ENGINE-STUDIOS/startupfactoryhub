@@ -1270,7 +1270,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
   }, [showTraffic, mapReady]);
 
   // Stable camera marker map - only add/remove what changed, never flyTo
-  const cameraMarkerMap = useRef<Map<string, mapboxgl.Marker>>(new Map());
+  const cameraMarkerMap = useRef(new Map<string, mapboxgl.Marker>());
   
   useEffect(() => {
     if (!map.current || !mapReady) return;
