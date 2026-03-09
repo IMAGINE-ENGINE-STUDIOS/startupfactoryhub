@@ -524,7 +524,7 @@ async function fetchMNCameras(bounds: Bounds): Promise<CameraResult[]> {
 }
 
 async function fetchWICameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('WI', 'https://511wi.gov', bounds, { south: 42.4, north: 47.1, west: -93, east: -86.7 }, 10, 200);
+  return fetch511Cameras('WI', 'https://511wi.gov', bounds, { south: 42.4, north: 47.1, west: -93, east: -86.7 }, 10);
 }
 
 async function fetchKYCameras(bounds: Bounds): Promise<CameraResult[]> {
