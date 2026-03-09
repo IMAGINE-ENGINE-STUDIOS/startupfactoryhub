@@ -513,6 +513,7 @@ async function fetchUKCameras(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.longitude || c.lng || c.geometry?.coordinates?.[0],
         imageUrl: c.image || c.imageUrl || c.url || '',
         source: 'Highways England',
+        refreshRate: 20,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
