@@ -241,6 +241,12 @@ export const GlobalResourcesMap = () => {
     selectedCamera,
     setSelectedCamera,
   } = useTrafficCameras(map.current, mapReady, showCCTV);
+
+  // Real-time transit vehicles (GTFS-RT)
+  const {
+    vehicles: transitVehicles,
+    isLoading: vehiclesLoading,
+  } = useRealtimeVehicles(map.current, mapReady, showTransitVehicles);
   
   
   // Regus locations (only fetch when workplace selected AND subscribed)
