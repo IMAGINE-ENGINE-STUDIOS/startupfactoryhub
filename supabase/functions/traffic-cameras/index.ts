@@ -648,7 +648,7 @@ async function fetchMDDOT(bounds: Bounds): Promise<CameraResult[]> {
 // ====== ALABAMA ======
 
 async function fetchALCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('AL', 'https://www.algotraffic.com', bounds, { south: 30, north: 35.1, west: -88.5, east: -84.8 }, 10, 200);
+  return fetch511Cameras('AL', 'https://www.algotraffic.com', bounds, { south: 30, north: 35.1, west: -88.5, east: -84.8 }, 10);
 }
 
 // ====== MASSACHUSETTS ======
