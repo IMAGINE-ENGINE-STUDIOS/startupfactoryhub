@@ -5,46 +5,12 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-// Allowed camera image domain patterns (matched via endsWith)
-const ALLOWED_DOMAINS = [
-  'images-dim.divas.cloud',
-  'cwwp2.dot.ca.gov',
-  'www.511virginia.org',
-  '511ny.org',
-  // Florida DOT domains
-  'fl511.com',
-  'fl-cameras.com',
-  'fdot.gov',
-  'arcgis.com',
-  'arcgisonline.com',
-  'services.arcgis.com',
-  // Windy webcam domains
-  'images-webcams.windy.com',
-  'webcams.windy.com',
-  'windy.com',
-  // Other DOTs
-  'data.wsdot.wa.gov',
-  'wsdot.wa.gov',
-  'tripcheck.com',
-  'www.cotrip.org',
-  'cotrip.org',
-  'livetraffic.com',
-  'data.highwaysengland.co.uk',
-  'highwaysengland.co.uk',
-  '511ga.org',
-  // Common camera CDNs
-  'amazonaws.com',
-  'cloudfront.net',
-  'akamaized.net',
-];
-
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Support both GET (img src) and POST
     let imageUrl: string | null = null;
     
     if (req.method === 'GET') {
@@ -62,19 +28,39 @@ serve(async (req) => {
       });
     }
 
-    const urlObj = new URL(imageUrl);
-    if (!ALLOWED_DOMAINS.some(d => urlObj.hostname.endsWith(d))) {
-      return new Response(JSON.stringify({ error: 'Domain not allowed' }), {
+    // Basic URL validation - must be http(s)
+    let urlObj: URL;
+    try {
+      urlObj = new URL(imageUrl);
+    } catch {
+      return new Response(JSON.stringify({ error: 'Invalid URL' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    if (!['http:', 'https:'].includes(urlObj.protocol)) {
+      return new Response(JSON.stringify({ error: 'Only HTTP(S) allowed' }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // Block private/internal IPs
+    const hostname = urlObj.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('10.') || hostname.startsWith('192.168.') || hostname.startsWith('172.')) {
+      return new Response(JSON.stringify({ error: 'Internal addresses not allowed' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const imgResp = await fetch(imageUrl, {
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(12000),
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; TrafficCameraViewer/1.0)',
-        'Accept': 'image/*',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+        'Referer': urlObj.origin + '/',
       },
     });
 
@@ -92,7 +78,7 @@ serve(async (req) => {
       headers: {
         ...corsHeaders,
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=10',
+        'Cache-Control': 'public, max-age=5',
       },
     });
   } catch (err) {
