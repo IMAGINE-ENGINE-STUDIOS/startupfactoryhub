@@ -387,7 +387,6 @@ async function fetchHoustonCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = c.geometry?.coordinates?.[0] || c.longitude || c.lng || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((c: any) => {
         const props = c.properties || c;
         const lat = c.geometry?.coordinates?.[1] || c.latitude || c.lat;
