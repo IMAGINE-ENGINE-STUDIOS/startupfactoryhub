@@ -1286,13 +1286,16 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         border: 2px solid white;
         border-radius: 50%;
         box-shadow: 0 2px 8px rgba(220, 38, 38, 0.5);
-        transition: transform 0.2s;
+        transition: transform 0.2s ease;
+        transform-origin: center center;
+        will-change: transform;
       `;
       el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`;
       
       el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.2)'; });
       el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
-      el.addEventListener('click', () => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
         setSelectedCamera(cam);
         map.current?.flyTo({
           center: [cam.lng, cam.lat],
@@ -1313,6 +1316,97 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       cameraMarkers.current = [];
     };
   }, [trafficCameras, showCCTV, mapReady, setSelectedCamera]);
+
+  // Camera projection on map (pulsing circle when camera selected)
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    
+    const sourceId = 'camera-projection';
+    const layerId = 'camera-projection-pulse';
+    
+    if (selectedCamera) {
+      const geojson: GeoJSON.FeatureCollection = {
+        type: 'FeatureCollection',
+        features: [{
+          type: 'Feature',
+          geometry: { type: 'Point', coordinates: [selectedCamera.lng, selectedCamera.lat] },
+          properties: {}
+        }]
+      };
+      
+      if (map.current.getSource(sourceId)) {
+        (map.current.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(geojson);
+      } else {
+        map.current.addSource(sourceId, { type: 'geojson', data: geojson });
+        map.current.addLayer({
+          id: layerId,
+          type: 'circle',
+          source: sourceId,
+          paint: {
+            'circle-radius': 30,
+            'circle-color': '#dc2626',
+            'circle-opacity': 0.2,
+            'circle-stroke-width': 2,
+            'circle-stroke-color': '#dc2626',
+            'circle-stroke-opacity': 0.6,
+          },
+        });
+      }
+    } else {
+      if (map.current.getLayer(layerId)) map.current.removeLayer(layerId);
+      if (map.current.getSource(sourceId)) map.current.removeSource(sourceId);
+    }
+  }, [selectedCamera, mapReady]);
+
+  // Add transit vehicle markers
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    
+    vehicleMarkers.current.forEach(m => m.remove());
+    vehicleMarkers.current = [];
+    
+    if (!showTransitVehicles || !transitVehicles || transitVehicles.length === 0) return;
+    
+    transitVehicles.forEach((v) => {
+      const el = document.createElement('div');
+      const isTrain = v.vehicleType === 'train';
+      const isTram = v.vehicleType === 'tram';
+      const color = isTrain ? '#f97316' : isTram ? '#8b5cf6' : '#3b82f6';
+      
+      el.style.cssText = `
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: ${color};
+        border: 1.5px solid white;
+        border-radius: ${isTrain ? '4px' : '50%'};
+        box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+        transform-origin: center center;
+        will-change: transform;
+        transform: rotate(${v.heading || 0}deg);
+        transition: transform 0.5s ease;
+      `;
+      
+      // Direction arrow
+      el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="white" stroke="none"><polygon points="12,2 22,22 12,17 2,22"/></svg>`;
+      
+      el.title = `${v.agency} - ${v.route} (${v.vehicleType})`;
+      
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([v.lng, v.lat])
+        .addTo(map.current!);
+      
+      vehicleMarkers.current.push(marker);
+    });
+    
+    return () => {
+      vehicleMarkers.current.forEach(m => m.remove());
+      vehicleMarkers.current = [];
+    };
+  }, [transitVehicles, showTransitVehicles, mapReady]);
 
 
   // Add event markers to map
