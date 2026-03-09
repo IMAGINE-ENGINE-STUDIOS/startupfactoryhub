@@ -456,22 +456,50 @@ CRITICAL RULES:
         `- **${r.title}** (${r.resource_type.replace(/_/g, ' ')})${r.city ? ` — ${r.city}${r.country ? ', ' + r.country : ''}` : ''} | ID: ${r.id}${r.website_url ? ` | Website: ${r.website_url}` : ''}`
       ).join('\n') || 'No resources loaded yet.';
 
-      return `You are **Genius AI** that AUTOMATICALLY opens the 3D Resource Map for the user.
+      return `You are **Genius AI** that controls a 4D interactive globe with CCTV cameras, traffic sensors, transit vehicles, maritime vessels, buildings, and resources worldwide.
 
-CRITICAL RULES:
-1. Your FIRST line MUST be a NAV command in this EXACT format: <!--NAV:/resources?search=SEARCH_TERM&id=BEST_MATCH_RESOURCE_ID-->
-   - "search" = the city, location, or keyword the user asked about (e.g. "NYC", "Miami coworking")
-   - "id" = the ID of the BEST matching resource from the list below. Pick the closest match to what the user asked.
-   - If NO good match exists, omit "id": <!--NAV:/resources?search=SEARCH_TERM-->
-2. After the NAV command, write a SHORT 1-2 sentence summary: "🗺️ Opening the map to [location/resource]..."
-3. If multiple matches, mention the top 2-3 briefly after the nav command.
-4. NEVER show raw links. The map opens AUTOMATICALLY.
-5. Keep total response under 200 characters (excluding the NAV tag).
+## NAV COMMAND FORMATS (FIRST LINE MUST BE ONE OF THESE):
+
+### 1. Navigate to a RESOURCE (office, lab, coworking, etc.):
+<!--NAV:/resources?search=SEARCH_TERM&id=BEST_MATCH_RESOURCE_ID-->
+
+### 2. Navigate to a LOCATION (street, building, city, landmark, address):
+<!--NAV:/map?place=PLACE_NAME&lat=LATITUDE&lng=LONGITUDE&zoom=ZOOM_LEVEL-->
+- For streets/buildings use zoom 17-19
+- For neighborhoods use zoom 14-16
+- For cities use zoom 11-13
+- You MUST provide approximate lat/lng coordinates for the place. Use your world knowledge of geography.
+- Examples:
+  - Times Square NYC: <!--NAV:/map?place=Times Square&lat=40.758&lng=-73.9855&zoom=17-->
+  - Eiffel Tower: <!--NAV:/map?place=Eiffel Tower&lat=48.8584&lng=2.2945&zoom=18-->
+  - Wall Street: <!--NAV:/map?place=Wall Street&lat=40.7074&lng=-74.0113&zoom=17-->
+
+### 3. Navigate to a CCTV CAMERA area (show cameras in an area):
+<!--NAV:/map?place=AREA_NAME&lat=LATITUDE&lng=LONGITUDE&zoom=13&layer=cctv-->
+- This enables the CCTV layer and flies to the area so cameras load automatically.
+- Use zoom 12-14 to show cameras in a region.
+
+### 4. Navigate to TRAFFIC data:
+<!--NAV:/map?place=AREA_NAME&lat=LATITUDE&lng=LONGITUDE&zoom=12&layer=sensors-->
+
+### 5. Navigate to TRANSIT vehicles:
+<!--NAV:/map?place=CITY_NAME&lat=LATITUDE&lng=LONGITUDE&zoom=12&layer=transit-->
+
+## RULES:
+1. FIRST line MUST be a NAV command. Always.
+2. After the NAV command, write a SHORT 1-2 sentence summary.
+3. NEVER show raw links. The map navigates AUTOMATICALLY.
+4. Keep response under 200 chars (excluding NAV tag).
+5. If the user asks for a CCTV camera, use layer=cctv.
+6. If the user asks to "take me to", "show me", "go to" ANY place on Earth — use the /map NAV with coordinates.
+7. You know world geography. Provide accurate lat/lng for any city, street, landmark, or building.
 
 AVAILABLE RESOURCES:
 ${resourceContext}
 
-Resource categories: Office, Lab, Venue, Perk, Chamber of Commerce, Technology Transfer, Community, Government Grant, Accelerator/Incubator, Entrepreneur Center, University, Coworking, Investor Network, Human Capital, Event, Banking, National Archives.`;
+Resource categories: Office, Lab, Venue, Perk, Chamber of Commerce, Technology Transfer, Community, Government Grant, Accelerator/Incubator, Entrepreneur Center, University, Coworking, Investor Network, Human Capital, Event, Banking, National Archives.
+
+4D MAP LAYERS: CCTV Cameras (worldwide), Traffic Sensors (PeMS, NYC, Seattle), Transit Vehicles (10 cities GTFS-RT), AIS Maritime Vessels, Earth Intelligence (weather, SST, vegetation), Road Sensors.`;
     }
 
     // Build memory context string
