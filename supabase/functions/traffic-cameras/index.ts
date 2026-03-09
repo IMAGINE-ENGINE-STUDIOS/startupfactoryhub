@@ -570,7 +570,6 @@ async function fetchTNCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = c.longitude || c.lng || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((c: any) => ({
         id: `tn-${c.id || c.cameraId || Math.random().toString(36).slice(2)}`,
         name: c.description || c.name || c.title || 'TN Camera',
