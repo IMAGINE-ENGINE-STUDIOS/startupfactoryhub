@@ -1167,6 +1167,74 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     };
   }, [regusLocations, selectedType, isSubscribed]);
 
+  // Toggle 3D buildings layer visibility
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    if (map.current.getLayer('3d-buildings')) {
+      map.current.setLayoutProperty('3d-buildings', 'visibility', show3DBuildings ? 'visible' : 'none');
+    }
+  }, [show3DBuildings, mapReady]);
+
+  // Toggle traffic layer visibility
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    if (map.current.getLayer('traffic-flow')) {
+      map.current.setLayoutProperty('traffic-flow', 'visibility', showTraffic ? 'visible' : 'none');
+    }
+  }, [showTraffic, mapReady]);
+
+  // Add traffic camera markers
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    
+    // Clear existing camera markers
+    cameraMarkers.current.forEach(m => m.remove());
+    cameraMarkers.current = [];
+    
+    if (!showCCTV || !trafficCameras || trafficCameras.length === 0) return;
+    
+    trafficCameras.forEach((cam) => {
+      const el = document.createElement('div');
+      el.className = 'cctv-marker';
+      el.style.cssText = `
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        border: 2px solid white;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.5);
+        transition: transform 0.2s;
+      `;
+      el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`;
+      
+      el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.2)'; });
+      el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
+      el.addEventListener('click', () => {
+        setSelectedCamera(cam);
+        map.current?.flyTo({
+          center: [cam.lng, cam.lat],
+          zoom: Math.max(map.current.getZoom(), 14),
+          duration: 1000,
+        });
+      });
+      
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([cam.lng, cam.lat])
+        .addTo(map.current!);
+      
+      cameraMarkers.current.push(marker);
+    });
+    
+    return () => {
+      cameraMarkers.current.forEach(m => m.remove());
+      cameraMarkers.current = [];
+    };
+  }, [trafficCameras, showCCTV, mapReady, setSelectedCamera]);
+
 
   // Add event markers to map
   useEffect(() => {
