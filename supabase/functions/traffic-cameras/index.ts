@@ -136,7 +136,7 @@ async function fetchNYCDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
 async function fetchCaltransCameras(bounds: Bounds): Promise<CameraResult[]> {
   if (bounds.east < -130 || bounds.west > -114 || bounds.south > 42 || bounds.north < 32) return [];
   try {
-    const url = `https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/CCTV/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=currentImageURL,streamingVideoURL,locationName,latitude,longitude,district,inService&f=json&resultRecordCount=500`;
+    const url = `https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/CCTV/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=currentImageURL,streamingVideoURL,locationName,latitude,longitude,district,inService&f=json&resultRecordCount=5000`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(12000) });
     if (!resp.ok) return [];
     const data = await resp.json();
