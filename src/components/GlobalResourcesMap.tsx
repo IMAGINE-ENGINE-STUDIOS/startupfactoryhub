@@ -1335,6 +1335,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           source: cam.source,
           lat: cam.lat,
           lng: cam.lng,
+          streamUrl: cam.streamUrl || '',
+          refreshRate: cam.refreshRate || 10,
+          isStream: cam.streamUrl ? 1 : 0,
         },
       })),
     };
