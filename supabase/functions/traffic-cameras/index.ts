@@ -477,7 +477,7 @@ async function fetchPACameras(bounds: Bounds): Promise<CameraResult[]> {
 }
 
 async function fetchNCCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('NC', 'https://www.ncdot.gov/travel-maps', bounds, { south: 33.5, north: 36.6, west: -84.5, east: -75.3 }, 10, 200);
+  return fetch511Cameras('NC', 'https://www.ncdot.gov/travel-maps', bounds, { south: 33.5, north: 36.6, west: -84.5, east: -75.3 }, 10);
 }
 
 async function fetchSCCameras(bounds: Bounds): Promise<CameraResult[]> {
