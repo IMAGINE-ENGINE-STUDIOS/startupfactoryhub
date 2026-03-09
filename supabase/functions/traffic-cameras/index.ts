@@ -588,8 +588,8 @@ async function fetchTNCameras(bounds: Bounds): Promise<CameraResult[]> {
 async function fetchDCCameras(bounds: Bounds): Promise<CameraResult[]> {
   if (bounds.south > 39.1 || bounds.north < 38.7 || bounds.west > -76.8 || bounds.east < -77.2) return [];
   try {
-    const url = `https://opendata.dc.gov/api/3/action/datastore_search?resource_id=traffic-cameras&limit=200`;
-    const resp = await fetch('https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/98/query?where=1%3D1&outFields=*&f=json&resultRecordCount=200', { signal: AbortSignal.timeout(10000) });
+    const url = `https://opendata.dc.gov/api/3/action/datastore_search?resource_id=traffic-cameras&limit=50000`;
+    const resp = await fetch('https://maps2.dcgis.dc.gov/dcgis/rest/services/DCGIS_DATA/Transportation_WebMercator/MapServer/98/query?where=1%3D1&outFields=*&f=json&resultRecordCount=5000', { signal: AbortSignal.timeout(10000) });
     if (!resp.ok) return [];
     const data = await resp.json();
     const features = data?.features || [];
