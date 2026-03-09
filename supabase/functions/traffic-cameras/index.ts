@@ -402,11 +402,79 @@ async function fetchAUCameras(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
+// ====== FLORIDA CITY-SPECIFIC WINDY CAMERAS (Weather + CCTV) ======
+async function fetchFloridaWindyCameras(bounds: Bounds): Promise<CameraResult[]> {
+  // Only run if bounds overlap Florida
+  if (bounds.south > 31.5 || bounds.north < 24.3 || bounds.west > -79.5 || bounds.east < -88) return [];
+  
+  const floridaCities = [
+    { name: 'Orlando', lat: 28.5383, lng: -81.3792 },
+    { name: 'Miami', lat: 25.7617, lng: -80.1918 },
+    { name: 'Tampa', lat: 27.9506, lng: -82.4572 },
+    { name: 'Naples', lat: 26.1420, lng: -81.7948 },
+    { name: 'Cape Coral', lat: 26.5629, lng: -81.9495 },
+    { name: 'Fort Lauderdale', lat: 26.1224, lng: -80.1373 },
+    { name: 'Jacksonville', lat: 30.3322, lng: -81.6557 },
+    { name: 'West Palm Beach', lat: 26.7153, lng: -80.0534 },
+    { name: 'Fort Myers', lat: 26.6406, lng: -81.8723 },
+    { name: 'Daytona Beach', lat: 29.2108, lng: -81.0228 },
+    { name: 'Tallahassee', lat: 30.4383, lng: -84.2807 },
+    { name: 'Gainesville', lat: 29.6516, lng: -82.3248 },
+    { name: 'Sarasota', lat: 27.3364, lng: -82.5307 },
+    { name: 'Lakeland', lat: 28.0395, lng: -81.9498 },
+    { name: 'Kissimmee', lat: 28.2920, lng: -81.4076 },
+    { name: 'St Petersburg', lat: 27.7676, lng: -82.6403 },
+    { name: 'Hollywood FL', lat: 26.0112, lng: -80.1495 },
+    { name: 'Pompano Beach', lat: 26.2379, lng: -80.1248 },
+    { name: 'Key West', lat: 24.5551, lng: -81.7800 },
+  ];
+  
+  // Filter cities within bounds
+  const citiesInBounds = floridaCities.filter(c => inBounds(c.lat, c.lng, bounds));
+  if (citiesInBounds.length === 0) return [];
+  
+  const allCams: CameraResult[] = [];
+  const settled = await Promise.allSettled(
+    citiesInBounds.map(async (city) => {
+      try {
+        const resp = await fetch(
+          `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=50&offset=0&nearby=${city.lat},${city.lng},50`,
+          {
+            headers: { 'x-windy-api-key': 'PGbLONaQtxGGGTZ0NXPEr4BbPtTOqo5f' },
+            signal: AbortSignal.timeout(8000),
+          }
+        );
+        if (!resp.ok) return [];
+        const data = await resp.json();
+        const webcams = data?.webcams || [];
+        return webcams
+          .filter((w: any) => {
+            const lat = w.location?.latitude || w.position?.latitude || 0;
+            const lng = w.location?.longitude || w.position?.longitude || 0;
+            return inBounds(lat, lng, bounds);
+          })
+          .map((w: any) => ({
+            id: `windy-fl-${w.webcamId || w.id}`,
+            name: w.title || `${city.name} Webcam`,
+            lat: w.location?.latitude || w.position?.latitude,
+            lng: w.location?.longitude || w.position?.longitude,
+            imageUrl: w.images?.current?.preview || w.image?.current?.preview || w.images?.daylight?.preview || `https://images-webcams.windy.com/webcams/${w.webcamId || w.id}/current/preview/${w.webcamId || w.id}.jpg`,
+            source: `Windy (${city.name}, FL)`,
+          }))
+          .filter((c: CameraResult) => c.imageUrl);
+      } catch { return []; }
+    })
+  );
+  
+  for (const r of settled) {
+    if (r.status === 'fulfilled') allCams.push(...r.value);
+  }
+  return allCams.slice(0, 500);
+}
+
 // ====== WINDY.COM WEBCAMS - WORLDWIDE ======
-// This is the key global source - covers 70,000+ webcams worldwide
 async function fetchWindyCameras(bounds: Bounds): Promise<CameraResult[]> {
   try {
-    // Windy public API for nearby webcams
     const centerLat = (bounds.north + bounds.south) / 2;
     const centerLng = (bounds.east + bounds.west) / 2;
     const radius = Math.min(250, Math.max(10, Math.round(
