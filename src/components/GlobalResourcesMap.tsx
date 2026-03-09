@@ -62,6 +62,9 @@ import {
   Waves,
   Sun,
   Ship,
+  Car,
+  Camera,
+  Building,
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -95,6 +98,8 @@ import { useAISTracking } from '@/hooks/useAISTracking';
 import { AISVesselLayer } from '@/components/hubs/AISVesselLayer';
 import { AISVesselDetailCard } from '@/components/hubs/AISVesselDetailCard';
 import { AISControlPanel } from '@/components/hubs/AISControlPanel';
+import { useTrafficCameras, TrafficCamera } from '@/hooks/useTrafficCameras';
+import { TrafficCameraPopup } from '@/components/earth/TrafficCameraPopup';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 type MapStyleType = 'default' | 'satellite' | 'satelliteStreets';
@@ -169,8 +174,14 @@ export const GlobalResourcesMap = () => {
   const [showResourceMarkers, setShowResourceMarkers] = useState(true);
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
   const regusMarkers = useRef<mapboxgl.Marker[]>([]);
+  const cameraMarkers = useRef<mapboxgl.Marker[]>([]);
   const [userEventStatus, setUserEventStatus] = useState<string | null>(null);
   const [isUpdatingRsvp, setIsUpdatingRsvp] = useState(false);
+  
+  // 3D Buildings, Traffic, and CCTV toggles
+  const [show3DBuildings, setShow3DBuildings] = useState(true);
+  const [showTraffic, setShowTraffic] = useState(true);
+  const [showCCTV, setShowCCTV] = useState(true);
   
   // Workplace (Regus) state
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
@@ -217,6 +228,14 @@ export const GlobalResourcesMap = () => {
 
   // AIS vessel tracking
   const ais = useAISTracking(map.current, mapReady);
+  
+  // Traffic cameras (real-time CCTV)
+  const {
+    cameras: trafficCameras,
+    isLoading: camerasLoading,
+    selectedCamera,
+    setSelectedCamera,
+  } = useTrafficCameras(map.current, mapReady, showCCTV);
   
   
   // Regus locations (only fetch when workplace selected AND subscribed)
@@ -655,6 +674,74 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         'star-intensity': 0.15
       });
       
+      // ── 3D Buildings Layer ──
+      // Uses Mapbox composite source 'building' layer with fill-extrusion
+      if (!map.current.getLayer('3d-buildings')) {
+        map.current.addLayer({
+          id: '3d-buildings',
+          source: 'composite',
+          'source-layer': 'building',
+          filter: ['==', 'extrude', 'true'],
+          type: 'fill-extrusion',
+          minzoom: 14,
+          paint: {
+            'fill-extrusion-color': [
+              'interpolate',
+              ['linear'],
+              ['get', 'height'],
+              0, '#64748b',
+              50, '#475569',
+              100, '#334155',
+              200, '#1e293b'
+            ],
+            'fill-extrusion-height': ['get', 'height'],
+            'fill-extrusion-base': ['get', 'min_height'],
+            'fill-extrusion-opacity': 0.7,
+          },
+        });
+      }
+      
+      // ── Real-Time Traffic Layer ──
+      // Uses Mapbox Traffic v1 vector tiles
+      if (!map.current.getSource('mapbox-traffic')) {
+        map.current.addSource('mapbox-traffic', {
+          type: 'vector',
+          url: 'mapbox://mapbox.mapbox-traffic-v1',
+        });
+        
+        map.current.addLayer({
+          id: 'traffic-flow',
+          type: 'line',
+          source: 'mapbox-traffic',
+          'source-layer': 'traffic',
+          minzoom: 6,
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round',
+          },
+          paint: {
+            'line-color': [
+              'match',
+              ['get', 'congestion'],
+              'low', '#22c55e',
+              'moderate', '#eab308',
+              'heavy', '#f97316',
+              'severe', '#ef4444',
+              '#64748b'
+            ],
+            'line-width': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              6, 1,
+              12, 3,
+              18, 6
+            ],
+            'line-opacity': 0.75,
+          },
+        });
+      }
+      
       // Add GeoJSON source for resource markers
       map.current.addSource('resources', {
         type: 'geojson',
@@ -796,6 +883,72 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
             'icon-allow-overlap': true,
             'icon-ignore-placement': true
           }
+        });
+      }
+      
+      // Re-add 3D buildings layer
+      if (!map.current.getLayer('3d-buildings')) {
+        map.current.addLayer({
+          id: '3d-buildings',
+          source: 'composite',
+          'source-layer': 'building',
+          filter: ['==', 'extrude', 'true'],
+          type: 'fill-extrusion',
+          minzoom: 14,
+          paint: {
+            'fill-extrusion-color': [
+              'interpolate',
+              ['linear'],
+              ['get', 'height'],
+              0, '#64748b',
+              50, '#475569',
+              100, '#334155',
+              200, '#1e293b'
+            ],
+            'fill-extrusion-height': ['get', 'height'],
+            'fill-extrusion-base': ['get', 'min_height'],
+            'fill-extrusion-opacity': 0.7,
+          },
+        });
+      }
+      
+      // Re-add traffic layer
+      if (!map.current.getSource('mapbox-traffic')) {
+        map.current.addSource('mapbox-traffic', {
+          type: 'vector',
+          url: 'mapbox://mapbox.mapbox-traffic-v1',
+        });
+        
+        map.current.addLayer({
+          id: 'traffic-flow',
+          type: 'line',
+          source: 'mapbox-traffic',
+          'source-layer': 'traffic',
+          minzoom: 6,
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round',
+          },
+          paint: {
+            'line-color': [
+              'match',
+              ['get', 'congestion'],
+              'low', '#22c55e',
+              'moderate', '#eab308',
+              'heavy', '#f97316',
+              'severe', '#ef4444',
+              '#64748b'
+            ],
+            'line-width': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              6, 1,
+              12, 3,
+              18, 6
+            ],
+            'line-opacity': 0.75,
+          },
         });
       }
       
@@ -1079,6 +1232,74 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       regusMarkers.current = [];
     };
   }, [regusLocations, selectedType, isSubscribed]);
+
+  // Toggle 3D buildings layer visibility
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    if (map.current.getLayer('3d-buildings')) {
+      map.current.setLayoutProperty('3d-buildings', 'visibility', show3DBuildings ? 'visible' : 'none');
+    }
+  }, [show3DBuildings, mapReady]);
+
+  // Toggle traffic layer visibility
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    if (map.current.getLayer('traffic-flow')) {
+      map.current.setLayoutProperty('traffic-flow', 'visibility', showTraffic ? 'visible' : 'none');
+    }
+  }, [showTraffic, mapReady]);
+
+  // Add traffic camera markers
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    
+    // Clear existing camera markers
+    cameraMarkers.current.forEach(m => m.remove());
+    cameraMarkers.current = [];
+    
+    if (!showCCTV || !trafficCameras || trafficCameras.length === 0) return;
+    
+    trafficCameras.forEach((cam) => {
+      const el = document.createElement('div');
+      el.className = 'cctv-marker';
+      el.style.cssText = `
+        width: 28px;
+        height: 28px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #dc2626, #b91c1c);
+        border: 2px solid white;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.5);
+        transition: transform 0.2s;
+      `;
+      el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`;
+      
+      el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.2)'; });
+      el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
+      el.addEventListener('click', () => {
+        setSelectedCamera(cam);
+        map.current?.flyTo({
+          center: [cam.lng, cam.lat],
+          zoom: Math.max(map.current.getZoom(), 14),
+          duration: 1000,
+        });
+      });
+      
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([cam.lng, cam.lat])
+        .addTo(map.current!);
+      
+      cameraMarkers.current.push(marker);
+    });
+    
+    return () => {
+      cameraMarkers.current.forEach(m => m.remove());
+      cameraMarkers.current = [];
+    };
+  }, [trafficCameras, showCCTV, mapReady, setSelectedCamera]);
 
 
   // Add event markers to map
@@ -1613,6 +1834,86 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                       filters={ais.filters}
                       onFiltersChange={ais.setFilters}
                     />
+                  </div>
+
+                  {/* Urban Infrastructure category */}
+                  <div>
+                    <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                      <Building className="w-3.5 h-3.5 text-slate-400" />
+                      Urban Infrastructure
+                    </h3>
+                    <div className="space-y-3">
+                      {/* 3D Buildings toggle */}
+                      <div className="p-3 rounded-xl bg-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                              <Building className="w-4 h-4 text-slate-400" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium truncate block">3D Buildings</span>
+                              <p className="text-xs text-muted-foreground">OpenStreetMap extruded buildings (zoom 14+)</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={show3DBuildings}
+                            onCheckedChange={setShow3DBuildings}
+                            className="flex-shrink-0 ml-2"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Live Traffic toggle */}
+                      <div className="p-3 rounded-xl bg-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                              <Car className="w-4 h-4 text-amber-400" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium truncate block">Live Traffic</span>
+                              <p className="text-xs text-muted-foreground">Mapbox real-time congestion data</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={showTraffic}
+                            onCheckedChange={setShowTraffic}
+                            className="flex-shrink-0 ml-2"
+                          />
+                        </div>
+                      </div>
+
+                      {/* CCTV Cameras toggle */}
+                      <div className="p-3 rounded-xl bg-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                              <Camera className="w-4 h-4 text-red-400" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium truncate block">CCTV Cameras</span>
+                              <p className="text-xs text-muted-foreground">Public DOT traffic cameras (zoom 10+)</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={showCCTV}
+                            onCheckedChange={setShowCCTV}
+                            className="flex-shrink-0 ml-2"
+                          />
+                        </div>
+                        {showCCTV && camerasLoading && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            Loading cameras...
+                          </div>
+                        )}
+                        {showCCTV && trafficCameras.length > 0 && (
+                          <Badge variant="outline" className="text-xs bg-red-500/20 border-red-500/50 text-red-400">
+                            {trafficCameras.length} cameras in view
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               ) : selectedType === 'workplace' ? (
@@ -2446,6 +2747,14 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         activeHasMonthly={activeHasMonthly}
         activeHasTimelineOption={activeHasTimelineOption}
       />
+
+      {/* CCTV Camera Popup */}
+      {selectedCamera && (
+        <TrafficCameraPopup
+          camera={selectedCamera}
+          onClose={() => setSelectedCamera(null)}
+        />
+      )}
     </div>
   );
 };

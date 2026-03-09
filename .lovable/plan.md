@@ -1,90 +1,132 @@
 
 
-# 4D Map Enhancement Plan: Real-Time CCTV, 3D Buildings, Traffic
+## Premium Mentor/Advisor Program — "Official Mentor" Invite-Only Program
 
-## Overview
+### Overview
 
-Add three real-data layers to the existing Mapbox globe: 3D extruded buildings, real-time traffic flow, and live public CCTV camera feeds. All using production APIs with no simulated data.
+Create an invite-only premium program for Mentors and Advisors that grants "Official" status on the platform. Admin sends email invitations; invitees must complete a multi-step onboarding checklist before earning the official badge (star + insignia) visible on their profile and social feed posts.
 
----
-
-## 1. 3D Buildings Layer
-
-**Approach**: Mapbox's `mapbox-streets-v8` composite source already includes a `building` layer with height data. We add a `fill-extrusion` layer on `style.load`.
-
-- Add a `fill-extrusion` layer sourcing from the `building` source layer in the composite tileset
-- Extrude buildings using `height` and `min-height` properties from the vector tiles
-- Add a toggle in the Earth Intelligence panel to show/hide 3D buildings
-- No API key needed -- this is built into Mapbox's default tilesets
-
-**Performance**: Only rendered at zoom >= 14, uses Mapbox's native GPU-accelerated extrusions.
+### Benefits for Official Members
+- Access to all platform perks
+- Free bank account (HSBC introduction)
+- Unique 25% referral commission (instead of standard 20%)
+- Direct startup introductions through the venture fund
 
 ---
 
-## 2. Real-Time Traffic Layer
+### Database Changes (Migration)
 
-**Approach**: Use Mapbox Traffic plugin via the `mapbox-traffic-v1` source. This is a real-time vector tile layer provided by Mapbox showing live traffic congestion on roads worldwide.
+**1. New table: `official_mentor_invitations`**
+- `id` (uuid, PK)
+- `email` (text, not null)
+- `invited_by` (uuid, FK to auth.users — the admin)
+- `invitation_token` (text, unique, not null)
+- `status` (text: `pending`, `accepted`, `expired`, default `pending`)
+- `expires_at` (timestamptz)
+- `accepted_at` (timestamptz, nullable)
+- `accepted_by` (uuid, FK to auth.users, nullable)
+- `created_at` (timestamptz, default now())
+- RLS: admin can insert/select; invited user can select/update their own row by token
 
-- Add `mapbox://mapbox.mapbox-traffic-v1` as a vector source
-- Render traffic flow lines color-coded by congestion level (low/moderate/heavy/severe)
-- Add toggle in the toolbar/panel
-- No additional API key -- included with the existing Mapbox access token
+**2. New table: `official_mentor_status`**
+- `id` (uuid, PK)
+- `user_id` (uuid, FK to auth.users, unique, not null)
+- `invitation_id` (uuid, FK to official_mentor_invitations)
+- `profile_completed` (boolean, default false)
+- `email_verified` (boolean, default false)
+- `connection_invited` (boolean, default false)
+- `is_official` (boolean, default false) — set to true when all 3 checks pass
+- `referral_commission_rate` (numeric, default 0.25) — 25%
+- `granted_at` (timestamptz, nullable)
+- `created_at` (timestamptz, default now())
+- RLS: user can read own row; admin can read/update all
 
-**Performance**: Vector tiles, rendered natively by Mapbox GL.
+**3. Add column to `profiles` table:**
+- `is_official_mentor` (boolean, default false) — quick-access flag for display in feed posts and profile cards
 
----
-
-## 3. Real-Time CCTV Cameras
-
-**Approach**: Use free public DOT (Department of Transportation) camera APIs that provide real camera feeds.
-
-**Data Sources** (all free, no API key required):
-- **511 Traffic APIs** (multiple US states) -- provide camera locations + live image/stream URLs
-- **Windy.com webcams API** -- global public webcams with thumbnails and streams (free tier: 1000 req/day, requires API key)
-
-**Implementation**:
-1. Create a Supabase Edge Function `traffic-cameras` that:
-   - Accepts bounding box coordinates
-   - Fetches from public 511/DOT feeds for the visible area
-   - Returns camera locations, names, and live image URLs
-   - Caches results for 60 seconds to respect rate limits
-
-2. Add camera markers on the map as a new layer:
-   - Camera icon markers at each location
-   - Click to open a popup/card showing the live camera image (auto-refreshing)
-   - Only fetch when zoom >= 10 to avoid overloading
-
-3. Add a toggle in the toolbar panel
-
-**API Key Needed**: A Windy Webcams API key for global coverage (free tier). Alternatively, we can start with US DOT feeds only (no key needed).
-
----
-
-## 4. UI Integration
-
-All three features get toggles added to the existing Earth Intelligence / toolbar panel:
-- "3D Buildings" toggle (on by default at high zoom)
-- "Live Traffic" toggle
-- "CCTV Cameras" toggle
-
-Each toggle controls layer visibility without re-fetching data unnecessarily.
+**4. DB function: `check_and_grant_official_status(p_user_id uuid)`**
+- Checks if profile is complete (full_name, bio, avatar_url, linkedin_url all non-null)
+- Checks if email is verified (auth.users.email_confirmed_at is not null — use security definer)
+- Checks if user has at least 1 accepted connection
+- If all pass, sets `is_official = true`, `granted_at = now()`, and updates `profiles.is_official_mentor = true`
 
 ---
 
-## Files to Create/Modify
+### Edge Function: `send-official-mentor-invite`
 
-| File | Action |
-|------|--------|
-| `src/components/GlobalResourcesMap.tsx` | Add 3D buildings layer + traffic layer on style.load, add state/toggles for all 3 features, integrate camera markers |
-| `src/hooks/useTrafficCameras.ts` | New hook: fetch cameras from edge function by bounds, manage markers |
-| `supabase/functions/traffic-cameras/index.ts` | New edge function: proxy public DOT camera APIs |
-| `src/components/earth/TrafficCameraPopup.tsx` | New component: camera detail card with live image |
+- Admin-only (verify service role or admin check)
+- Accepts email + optional message
+- Generates unique invitation token
+- Inserts row into `official_mentor_invitations`
+- Sends branded email via Resend with invitation link pointing to `/official-mentor-invite?token=...`
 
 ---
 
-## Important Notes
+### Frontend Changes
 
-- **No fake data**: 3D buildings come from OpenStreetMap via Mapbox. Traffic is Mapbox's real-time feed. Cameras are from public DOT APIs.
-- **Performance**: All layers use native Mapbox vector rendering. Camera markers only load at zoom >= 10. Building extrusions only at zoom >= 14.
-- **Global vs US**: Traffic and buildings are global. CCTV cameras will initially cover US DOT feeds; can expand with Windy API key later.
+**1. New page: `/official-mentor-invite` (OfficialMentorInvite.tsx)**
+- Public route for accepting the invitation
+- Verifies token against `official_mentor_invitations`
+- If user is already registered (mentor/advisor role), links invitation to their account
+- If not registered, redirects to signup with pre-filled email and role
+- Creates `official_mentor_status` row upon acceptance
+
+**2. New component: `OfficialMentorChecklist`**
+- Displayed on Mentor/Advisor dashboard for invited users who haven't completed all steps
+- Shows 3 checklist items with status: Complete Profile, Verify Email, Invite a Connection
+- Each item shows green check or pending icon
+- "Check Status" button calls `check_and_grant_official_status` RPC
+- On completion, shows congratulations with the official badge
+
+**3. Official Badge/Insignia in UI**
+- Update `RoleBasedAvatar` component: if `is_official_mentor` is true, overlay a gold star/shield insignia
+- Update `UnifiedCommunityFeed` post rendering: show official badge next to name for official mentors/advisors
+- Update `UserProfileDialog` / profile views: show "Official Mentor" or "Official Advisor" badge
+
+**4. Admin Dashboard — new section in existing management**
+- Add "Official Program" sub-tab or section under Users/Partners management
+- Form to invite by email
+- List of invitations with status tracking
+- View checklist progress for each invitee
+
+**5. Referral override for official members**
+- When creating referral accounts for official mentors, set commission rate to 25% instead of 20%
+- Update referral earnings calculation to use the per-user commission rate
+
+---
+
+### Technical Flow
+
+```text
+Admin sends invite email
+        ↓
+Mentor/Advisor clicks link → /official-mentor-invite?token=xxx
+        ↓
+Token verified → Account linked → official_mentor_status row created
+        ↓
+Dashboard shows checklist:
+  ☐ Complete profile (name, bio, avatar, linkedin)
+  ☐ Verify email
+  ☐ Invite 1 connection
+        ↓
+All 3 complete → RPC grants official status
+        ↓
+Profile badge + feed insignia activated
+25% referral rate applied
+```
+
+### Files to Create
+- `src/pages/OfficialMentorInvite.tsx`
+- `src/components/OfficialMentorChecklist.tsx`
+- `src/components/OfficialBadge.tsx`
+- `supabase/functions/send-official-mentor-invite/index.ts`
+
+### Files to Modify
+- `src/App.tsx` — add route
+- `src/components/RoleBasedAvatar.tsx` — add official insignia overlay
+- `src/components/UnifiedCommunityFeed.tsx` — show badge next to official users
+- `src/pages/MentorDashboard.tsx` — add checklist component
+- `src/pages/AdvisorDashboard.tsx` — add checklist component
+- `src/components/admin/` — add invitation management UI
+- Migration SQL for new tables/columns/functions
 
