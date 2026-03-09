@@ -346,7 +346,7 @@ async function fetch511GA(bounds: Bounds): Promise<CameraResult[]> {
 async function fetchAustinCameras(bounds: Bounds): Promise<CameraResult[]> {
   if (bounds.south > 31 || bounds.north < 29.5 || bounds.west > -97 || bounds.east < -98.5) return [];
   try {
-    const url = `https://data.austintexas.gov/resource/b4k4-adkb.json?$where=within_box(location,${bounds.south},${bounds.west},${bounds.north},${bounds.east})&$limit=300&camera_status=TURNED_ON`;
+    const url = `https://data.austintexas.gov/resource/b4k4-adkb.json?$where=within_box(location,${bounds.south},${bounds.west},${bounds.north},${bounds.east})&$limit=50000&camera_status=TURNED_ON`;
     const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!resp.ok) return [];
     const data = await resp.json();
