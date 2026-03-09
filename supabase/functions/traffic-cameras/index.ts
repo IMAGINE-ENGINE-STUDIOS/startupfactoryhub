@@ -690,7 +690,7 @@ async function fetchUTCameras(bounds: Bounds): Promise<CameraResult[]> {
 // ====== MICHIGAN ======
 
 async function fetchMICameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('MI', 'https://mdotjboss.state.mi.us', bounds, { south: 41.6, north: 48.3, west: -90.5, east: -82.1 }, 10, 200);
+  return fetch511Cameras('MI', 'https://mdotjboss.state.mi.us', bounds, { south: 41.6, north: 48.3, west: -90.5, east: -82.1 }, 10);
 }
 
 // ====== UK ======
