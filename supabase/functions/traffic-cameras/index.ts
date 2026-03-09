@@ -542,6 +542,7 @@ async function fetchNLCameras(bounds: Bounds): Promise<CameraResult[]> {
         lng: f.geometry.coordinates[0],
         imageUrl: f.properties?.imageUrl || f.properties?.url || '',
         source: 'NDW Netherlands',
+        refreshRate: 20,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
