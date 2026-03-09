@@ -709,7 +709,6 @@ async function fetchUKCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = c.longitude || c.lng || c.geometry?.coordinates?.[0] || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 60)
       .map((c: any, i: number) => ({
         id: `uk-${c.id || i}`,
         name: c.description || c.name || c.title || 'UK Highway Camera',
