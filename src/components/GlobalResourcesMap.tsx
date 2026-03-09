@@ -1341,21 +1341,15 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         border: 2px solid white;
         border-radius: 50%;
         box-shadow: 0 2px 8px rgba(220, 38, 38, 0.5);
-        transition: transform 0.15s ease;
-        transform-origin: center center;
-        will-change: transform;
         pointer-events: auto;
         position: relative;
         z-index: 1;
       `;
       el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`;
       
-      el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.3)'; el.style.zIndex = '10'; });
-      el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; el.style.zIndex = '1'; });
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         e.preventDefault();
-        // Prevent map from moving when clicking a marker
         if (map.current) {
           map.current.stop();
         }
