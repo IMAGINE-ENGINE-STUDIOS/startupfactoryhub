@@ -395,7 +395,7 @@ async function fetchILDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.longitude || c.lng || c.geometry?.coordinates?.[0],
         imageUrl: c.imageUrl || c.image_url || c.url || '',
         source: 'ILDOT',
-        refreshRate: 15,
+        refreshRate: 10,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
