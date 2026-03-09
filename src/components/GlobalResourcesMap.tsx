@@ -1355,6 +1355,10 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         e.preventDefault();
+        // Prevent map from moving when clicking a marker
+        if (map.current) {
+          map.current.stop();
+        }
         setSelectedCamera(cam);
       });
       

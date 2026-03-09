@@ -95,6 +95,9 @@ export const useTrafficCameras = (
     }
 
     const handleMoveEnd = () => {
+      // Don't re-fetch if a camera is selected (user is viewing a camera, not browsing)
+      if (selectedCameraRef.current) return;
+      
       const zoom = map.getZoom();
       if (zoom < 9) {
         if (currentCamerasRef.current.length > 0) {
