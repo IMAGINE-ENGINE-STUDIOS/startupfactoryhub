@@ -96,7 +96,7 @@ async function fetch511Cameras(
 // ====== NYC / NEW YORK ======
 
 async function fetchNYCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('NY', 'https://511ny.org', bounds, { south: 40, north: 45.5, west: -80, east: -71 }, 3, 300);
+  return fetch511Cameras('NY', 'https://511ny.org', bounds, { south: 40, north: 45.5, west: -80, east: -71 }, 3);
 }
 
 // NYC DOT / NYCTMC cameras
