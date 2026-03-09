@@ -489,7 +489,6 @@ serve(async (req) => {
       fetch511VA(bounds),
       fetch511GA(bounds),
       fetchFLDOT(bounds),
-      fetchFLSunGuide(bounds),
       fetchFloridaWindyCameras(bounds),
       fetchUKCameras(bounds),
       fetchNLCameras(bounds),
