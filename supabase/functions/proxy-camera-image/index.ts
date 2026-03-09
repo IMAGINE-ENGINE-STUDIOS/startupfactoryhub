@@ -5,45 +5,55 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
+// Allowed camera image domains
+const ALLOWED_DOMAINS = [
+  'images-dim.divas.cloud',
+  'cwwp2.dot.ca.gov',
+  'www.511virginia.org',
+  '511ny.org',
+  'fl511.com',
+  'images-webcams.windy.com',
+  'data.wsdot.wa.gov',
+  'tripcheck.com',
+  'www.cotrip.org',
+  'livetraffic.com',
+  'data.highwaysengland.co.uk',
+  '511ga.org',
+];
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { url } = await req.json();
+    // Support both GET (img src) and POST
+    let imageUrl: string | null = null;
     
-    if (!url || typeof url !== 'string') {
+    if (req.method === 'GET') {
+      const params = new URL(req.url).searchParams;
+      imageUrl = params.get('url');
+    } else {
+      const body = await req.json();
+      imageUrl = body.url;
+    }
+    
+    if (!imageUrl || typeof imageUrl !== 'string') {
       return new Response(JSON.stringify({ error: 'Missing url parameter' }), {
         status: 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    // Only allow known camera image domains
-    const allowed = [
-      'images-dim.divas.cloud',
-      'cwwp2.dot.ca.gov',
-      'www.511virginia.org',
-      '511ny.org',
-      'fl511.com',
-      'images-webcams.windy.com',
-      'data.wsdot.wa.gov',
-      'tripcheck.com',
-      'www.cotrip.org',
-      'livetraffic.com',
-      'data.highwaysengland.co.uk',
-    ];
-    
-    const urlObj = new URL(url);
-    if (!allowed.some(d => urlObj.hostname.endsWith(d))) {
+    const urlObj = new URL(imageUrl);
+    if (!ALLOWED_DOMAINS.some(d => urlObj.hostname.endsWith(d))) {
       return new Response(JSON.stringify({ error: 'Domain not allowed' }), {
         status: 403,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const imgResp = await fetch(url, {
+    const imgResp = await fetch(imageUrl, {
       signal: AbortSignal.timeout(10000),
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; TrafficCameraViewer/1.0)',
@@ -52,7 +62,7 @@ serve(async (req) => {
     });
 
     if (!imgResp.ok) {
-      return new Response(JSON.stringify({ error: `Upstream returned ${imgResp.status}` }), {
+      return new Response(JSON.stringify({ error: `Upstream ${imgResp.status}` }), {
         status: 502,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
