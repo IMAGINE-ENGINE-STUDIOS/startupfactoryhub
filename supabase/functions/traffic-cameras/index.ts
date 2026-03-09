@@ -183,7 +183,6 @@ async function fetchWSDOT(bounds: Bounds): Promise<CameraResult[]> {
     if (!Array.isArray(data)) return [];
     return data
       .filter((c: any) => inBounds(c.CameraLocation?.Latitude || 0, c.CameraLocation?.Longitude || 0, bounds))
-      .slice(0, 200)
       .map((c: any) => ({
         id: `wa-${c.CameraID}`,
         name: c.Title || c.Description || 'WA Camera',
