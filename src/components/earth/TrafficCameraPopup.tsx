@@ -98,15 +98,25 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
 
         {/* Live Image - takes most space */}
         <div className="relative flex-1 min-h-0 bg-black">
-          <img
-            key={imageKey}
-            src={imageUrl}
-            alt={camera.name}
-            className="w-full h-full object-contain"
-            onError={(e) => {
-              (e.target as HTMLImageElement).alt = 'Camera feed unavailable';
-            }}
-          />
+          {imageError ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <div className="text-center">
+                <Camera className="w-10 h-10 text-white/30 mx-auto mb-2" />
+                <p className="text-white/50 text-sm">Camera feed unavailable</p>
+                <Button variant="ghost" size="sm" onClick={handleRefresh} className="mt-2 text-white/60">
+                  <RefreshCw className="w-3 h-3 mr-1" /> Retry
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <img
+              key={imageKey}
+              src={imageUrl}
+              alt={camera.name}
+              className="w-full h-full object-contain"
+              onError={() => setImageError(true)}
+            />
+          )}
           {/* Live indicator */}
           <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-600/90 backdrop-blur">
             <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
