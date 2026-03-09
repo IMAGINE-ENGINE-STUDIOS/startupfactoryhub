@@ -14,8 +14,6 @@ import {
   MapPin,
   Radio,
   Car,
-  Package,
-  Plane,
   Box,
   Earth,
   Lock,
