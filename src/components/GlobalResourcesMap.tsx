@@ -1269,17 +1269,35 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     }
   }, [showTraffic, mapReady]);
 
-  // Add traffic camera markers
+  // Stable camera marker map - only add/remove what changed, never flyTo
+  const cameraMarkerMap = useRef<Map<string, mapboxgl.Marker>>(new Map());
+  
   useEffect(() => {
     if (!map.current || !mapReady) return;
     
-    // Clear existing camera markers
-    cameraMarkers.current.forEach(m => m.remove());
-    cameraMarkers.current = [];
+    if (!showCCTV || !trafficCameras || trafficCameras.length === 0) {
+      // Remove all
+      cameraMarkerMap.current.forEach(m => m.remove());
+      cameraMarkerMap.current.clear();
+      cameraMarkers.current = [];
+      return;
+    }
     
-    if (!showCCTV || !trafficCameras || trafficCameras.length === 0) return;
+    const currentIds = new Set(trafficCameras.map(c => c.id));
+    const existingIds = new Set(cameraMarkerMap.current.keys());
     
+    // Remove markers no longer in dataset
+    existingIds.forEach(id => {
+      if (!currentIds.has(id)) {
+        cameraMarkerMap.current.get(id)?.remove();
+        cameraMarkerMap.current.delete(id);
+      }
+    });
+    
+    // Add only new markers
     trafficCameras.forEach((cam) => {
+      if (cameraMarkerMap.current.has(cam.id)) return; // Already exists, skip
+      
       const el = document.createElement('div');
       el.className = 'cctv-marker';
       el.style.cssText = `
@@ -1293,33 +1311,36 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         border: 2px solid white;
         border-radius: 50%;
         box-shadow: 0 2px 8px rgba(220, 38, 38, 0.5);
-        transition: transform 0.2s ease;
+        transition: transform 0.15s ease;
         transform-origin: center center;
         will-change: transform;
+        pointer-events: auto;
+        position: relative;
+        z-index: 1;
       `;
       el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`;
       
-      el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.2)'; });
-      el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; });
+      el.addEventListener('mouseenter', () => { el.style.transform = 'scale(1.3)'; el.style.zIndex = '10'; });
+      el.addEventListener('mouseleave', () => { el.style.transform = 'scale(1)'; el.style.zIndex = '1'; });
       el.addEventListener('click', (e) => {
         e.stopPropagation();
+        e.preventDefault();
         setSelectedCamera(cam);
-        map.current?.flyTo({
-          center: [cam.lng, cam.lat],
-          zoom: Math.max(map.current.getZoom(), 14),
-          duration: 1000,
-        });
+        // NO flyTo - this was causing the "flying away" bug by triggering moveend -> refetch -> marker recreation
       });
       
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center', pitchAlignment: 'map' })
         .setLngLat([cam.lng, cam.lat])
         .addTo(map.current!);
       
-      cameraMarkers.current.push(marker);
+      cameraMarkerMap.current.set(cam.id, marker);
     });
     
+    cameraMarkers.current = Array.from(cameraMarkerMap.current.values());
+    
     return () => {
-      cameraMarkers.current.forEach(m => m.remove());
+      cameraMarkerMap.current.forEach(m => m.remove());
+      cameraMarkerMap.current.clear();
       cameraMarkers.current = [];
     };
   }, [trafficCameras, showCCTV, mapReady, setSelectedCamera]);
