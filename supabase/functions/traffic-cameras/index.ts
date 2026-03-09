@@ -238,7 +238,6 @@ async function fetchCDOT(bounds: Bounds): Promise<CameraResult[]> {
         const coords = c.geometry?.coordinates || [];
         return coords.length >= 2 && inBounds(coords[1], coords[0], bounds);
       })
-      .slice(0, 100)
       .map((c: any) => ({
         id: `co-${c.properties?.id || c.id || Math.random().toString(36).slice(2)}`,
         name: c.properties?.camera_label || c.properties?.name || 'CO Camera',
