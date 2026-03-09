@@ -335,7 +335,7 @@ async function fetch511GA(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.longitude,
         imageUrl: c.image_url || c.url || '',
         source: '511GA',
-        refreshRate: 15,
+        refreshRate: 10,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
