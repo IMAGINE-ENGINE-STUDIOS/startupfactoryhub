@@ -764,7 +764,6 @@ async function fetchAUCameras(bounds: Bounds): Promise<CameraResult[]> {
         const [lng, lat] = f.geometry?.coordinates || [0, 0];
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 60)
       .map((f: any) => ({
         id: `au-${f.properties?.id || Math.random().toString(36).slice(2)}`,
         name: f.properties?.title || f.properties?.name || 'AU Camera',
