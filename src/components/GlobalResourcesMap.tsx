@@ -1358,7 +1358,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         setSelectedCamera(cam);
       });
       
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'center', pitchAlignment: 'map' })
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
         .setLngLat([cam.lng, cam.lat])
         .addTo(map.current!);
       
