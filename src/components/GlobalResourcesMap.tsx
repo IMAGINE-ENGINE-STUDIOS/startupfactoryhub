@@ -174,8 +174,14 @@ export const GlobalResourcesMap = () => {
   const [showResourceMarkers, setShowResourceMarkers] = useState(true);
   const eventMarkers = useRef<mapboxgl.Marker[]>([]);
   const regusMarkers = useRef<mapboxgl.Marker[]>([]);
+  const cameraMarkers = useRef<mapboxgl.Marker[]>([]);
   const [userEventStatus, setUserEventStatus] = useState<string | null>(null);
   const [isUpdatingRsvp, setIsUpdatingRsvp] = useState(false);
+  
+  // 3D Buildings, Traffic, and CCTV toggles
+  const [show3DBuildings, setShow3DBuildings] = useState(true);
+  const [showTraffic, setShowTraffic] = useState(true);
+  const [showCCTV, setShowCCTV] = useState(true);
   
   // Workplace (Regus) state
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
