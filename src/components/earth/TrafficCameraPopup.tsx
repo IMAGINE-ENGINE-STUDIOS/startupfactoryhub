@@ -1,14 +1,24 @@
-import { X, RefreshCw, Camera, ExternalLink, MapPin, Clock, Maximize2, Minimize2 } from 'lucide-react';
+import { X, RefreshCw, Camera, ExternalLink, MapPin, Clock, Maximize2, Minimize2, Radio } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrafficCamera } from '@/hooks/useTrafficCameras';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
 interface TrafficCameraPopupProps {
   camera: TrafficCamera;
   onClose: () => void;
+}
+
+function isStreamUrl(url?: string): boolean {
+  if (!url) return false;
+  return /\.(mjpg|mjpeg|mp4)(\?|$)/i.test(url) || /mjpeg|mjpg|stream/i.test(url);
+}
+
+function isMjpegStream(url?: string): boolean {
+  if (!url) return false;
+  return /\.(mjpg|mjpeg)(\?|$)/i.test(url) || /mjpeg|mjpg/i.test(url);
 }
 
 export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps) => {
@@ -18,6 +28,11 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   const [lastRefreshTime, setLastRefreshTime] = useState(new Date());
   const [proxyUrl, setProxyUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const hasStream = isStreamUrl(camera.streamUrl);
+  const isMjpeg = isMjpegStream(camera.streamUrl);
+  const refreshRate = camera.refreshRate || 10;
 
   // Build proxied image URL
   useEffect(() => {
@@ -28,28 +43,87 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     setImageKey(0);
   }, [camera.id]);
 
-  // Auto-refresh every 5s
+  // Adaptive auto-refresh (only for non-stream cameras)
   useEffect(() => {
+    if (hasStream) return; // No refresh needed for streams
     const interval = setInterval(() => {
       setImageKey(k => k + 1);
       setLastRefreshTime(new Date());
       setImageError(false);
-    }, 5000);
+    }, refreshRate * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [refreshRate, hasStream]);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
     setImageKey(k => k + 1);
     setLastRefreshTime(new Date());
     setImageError(false);
+    if (videoRef.current) {
+      videoRef.current.load();
+    }
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
-  // Use proxy URL to fetch camera image
+  // Use proxy URL to fetch camera image (not for streams)
   const imageUrl = proxyUrl
     ? `${proxyUrl}?url=${encodeURIComponent(camera.imageUrl)}&_t=${Date.now()}_${imageKey}`
     : camera.imageUrl;
+
+  const renderFeed = () => {
+    if (imageError) {
+      return (
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="text-center">
+            <Camera className="w-10 h-10 text-white/30 mx-auto mb-2" />
+            <p className="text-white/50 text-sm">Camera feed unavailable</p>
+            <Button variant="ghost" size="sm" onClick={handleRefresh} className="mt-2 text-white/60">
+              <RefreshCw className="w-3 h-3 mr-1" /> Retry
+            </Button>
+          </div>
+        </div>
+      );
+    }
+
+    // MJPEG streams render natively in <img> tags as continuous video
+    if (hasStream && isMjpeg && camera.streamUrl) {
+      return (
+        <img
+          src={camera.streamUrl}
+          alt={camera.name}
+          className="w-full h-full object-contain"
+          onError={() => setImageError(true)}
+        />
+      );
+    }
+
+    // MP4 / video streams
+    if (hasStream && camera.streamUrl) {
+      return (
+        <video
+          ref={videoRef}
+          src={camera.streamUrl}
+          autoPlay
+          muted
+          loop
+          playsInline
+          className="w-full h-full object-contain"
+          onError={() => setImageError(true)}
+        />
+      );
+    }
+
+    // Default: snapshot image with adaptive refresh
+    return (
+      <img
+        key={imageKey}
+        src={imageUrl}
+        alt={camera.name}
+        className="w-full h-full object-contain"
+        onError={() => setImageError(true)}
+      />
+    );
+  };
 
   return (
     <div className={cn(
@@ -96,36 +170,30 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
           </div>
         </div>
 
-        {/* Live Image - takes most space */}
+        {/* Live Image / Stream */}
         <div className="relative flex-1 min-h-0 bg-black">
-          {imageError ? (
-            <div className="w-full h-full flex items-center justify-center">
-              <div className="text-center">
-                <Camera className="w-10 h-10 text-white/30 mx-auto mb-2" />
-                <p className="text-white/50 text-sm">Camera feed unavailable</p>
-                <Button variant="ghost" size="sm" onClick={handleRefresh} className="mt-2 text-white/60">
-                  <RefreshCw className="w-3 h-3 mr-1" /> Retry
-                </Button>
-              </div>
+          {renderFeed()}
+          {/* Live / Streaming indicator */}
+          <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full backdrop-blur"
+            style={{ backgroundColor: hasStream ? 'rgba(34,197,94,0.9)' : 'rgba(220,38,38,0.9)' }}>
+            {hasStream ? (
+              <>
+                <Radio className="w-3 h-3 text-white animate-pulse" />
+                <span className="text-[11px] text-white font-bold tracking-wider">STREAMING</span>
+              </>
+            ) : (
+              <>
+                <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
+                <span className="text-[11px] text-white font-bold tracking-wider">LIVE</span>
+              </>
+            )}
+          </div>
+          {/* Refresh rate indicator (only for snapshot cameras) */}
+          {!hasStream && (
+            <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-black/60 backdrop-blur">
+              <span className="text-[10px] text-white/70 font-mono">{refreshRate}s refresh</span>
             </div>
-          ) : (
-            <img
-              key={imageKey}
-              src={imageUrl}
-              alt={camera.name}
-              className="w-full h-full object-contain"
-              onError={() => setImageError(true)}
-            />
           )}
-          {/* Live indicator */}
-          <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-600/90 backdrop-blur">
-            <div className="w-2 h-2 rounded-full bg-white animate-pulse" />
-            <span className="text-[11px] text-white font-bold tracking-wider">LIVE</span>
-          </div>
-          {/* Refresh countdown */}
-          <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-black/60 backdrop-blur">
-            <span className="text-[10px] text-white/70 font-mono">5s refresh</span>
-          </div>
         </div>
 
         {/* Metadata Panel */}
@@ -159,9 +227,15 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
                 <Badge variant="outline" className="text-[10px] border-white/20 text-white/60 bg-white/5">
                   Source: {camera.source}
                 </Badge>
-                <Badge variant="outline" className="text-[10px] border-red-500/30 text-red-400 bg-red-500/10">
-                  Auto-refreshing
-                </Badge>
+                {hasStream ? (
+                  <Badge variant="outline" className="text-[10px] border-green-500/30 text-green-400 bg-green-500/10">
+                    Live stream
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="text-[10px] border-red-500/30 text-red-400 bg-red-500/10">
+                    {refreshRate}s auto-refresh
+                  </Badge>
+                )}
               </div>
 
               {/* Open Feed Link */}

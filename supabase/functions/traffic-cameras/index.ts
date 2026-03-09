@@ -19,6 +19,8 @@ interface CameraResult {
   lng: number;
   imageUrl: string;
   source: string;
+  streamUrl?: string;
+  refreshRate?: number;
 }
 
 const cache = new Map<string, { data: CameraResult[]; time: number }>();

@@ -9,6 +9,8 @@ export interface TrafficCamera {
   imageUrl: string;
   source: string;
   lastUpdated?: string;
+  streamUrl?: string;
+  refreshRate?: number;
 }
 
 interface UseBounds {
