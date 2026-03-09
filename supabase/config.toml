@@ -152,3 +152,6 @@ verify_jwt = false
 
 [functions.realtime-vehicles]
 verify_jwt = false
+
+[functions.traffic-sensors]
+verify_jwt = false
