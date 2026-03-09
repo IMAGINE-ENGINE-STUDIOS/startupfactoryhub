@@ -911,8 +911,7 @@ serve(async (req) => {
       if (!isDupe) deduped.push(cam);
     }
 
-    const final = deduped.slice(0, 1500);
-    cache.set(key, { data: final, time: Date.now() });
+    cache.set(key, { data: deduped, time: Date.now() });
 
     console.log(`Returning ${final.length} cameras for bounds: ${JSON.stringify(bounds)}`);
 
