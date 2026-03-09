@@ -485,7 +485,7 @@ async function fetchSCCameras(bounds: Bounds): Promise<CameraResult[]> {
 }
 
 async function fetchLACameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('LA', 'https://www.511la.org', bounds, { south: 28.9, north: 33.1, west: -94.1, east: -88.7 }, 10, 200);
+  return fetch511Cameras('LA', 'https://www.511la.org', bounds, { south: 28.9, north: 33.1, west: -94.1, east: -88.7 }, 10);
 }
 
 async function fetchOHCameras(bounds: Bounds): Promise<CameraResult[]> {
