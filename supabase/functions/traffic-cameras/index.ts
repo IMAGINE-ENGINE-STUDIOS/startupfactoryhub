@@ -544,7 +544,7 @@ async function fetchIACameras(bounds: Bounds): Promise<CameraResult[]> {
 }
 
 async function fetchNECameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('NE', 'https://511.nebraska.gov', bounds, { south: 39.9, north: 43.1, west: -104.1, east: -95.3 }, 10, 200);
+  return fetch511Cameras('NE', 'https://511.nebraska.gov', bounds, { south: 39.9, north: 43.1, west: -104.1, east: -95.3 }, 10);
 }
 
 async function fetchMOCameras(bounds: Bounds): Promise<CameraResult[]> {
