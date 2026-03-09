@@ -276,19 +276,16 @@ async function fetchFLDOT(bounds: Bounds): Promise<CameraResult[]> {
       })
       .map((f: any) => {
         const a = f.attributes;
-        // Try multiple image URL fields - FL511 uses different field names
-        let imgUrl = a.IMAGE || a.image || a.Image || a.IMAGEURL || a.imageUrl || a.ImageUrl || a.SNAPSHOTURL || a.SnapshotUrl || '';
+        const cameraId = a.ID || a.OBJECTID;
         
-        // If URL doesn't look valid, try to construct from ID
-        if (!imgUrl && a.ID) {
-          imgUrl = `https://fl511.com/map/Cctv/${a.ID}`;
-        }
+        // ALWAYS use fl511.com/map/Cctv/ID - the divas.cloud URLs are broken/404
+        const imgUrl = cameraId ? `https://fl511.com/map/Cctv/${cameraId}` : '';
         
         const lat = a.LATITUDE || a.latitude || f.geometry?.y;
         const lng = a.LONGITUDE || a.longitude || f.geometry?.x;
         
         return {
-          id: `fl-${a.ID || a.OBJECTID || Math.random().toString(36).slice(2)}`,
+          id: `fl-${cameraId || Math.random().toString(36).slice(2)}`,
           name: a.DESCRIPT || a.Description || (a.COUNTY && a.HIGHWAY ? `${a.COUNTY} - ${a.HIGHWAY}` : 'FL Camera'),
           lat,
           lng,
