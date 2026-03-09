@@ -674,7 +674,6 @@ async function fetchUTCameras(bounds: Bounds): Promise<CameraResult[]> {
     if (!Array.isArray(data)) return [];
     return data
       .filter((c: any) => inBounds(c.latitude || 0, c.longitude || 0, bounds))
-      .slice(0, 200)
       .map((c: any) => ({
         id: `ut-${c.id || Math.random().toString(36).slice(2)}`,
         name: c.name || c.description || 'UT Camera',
