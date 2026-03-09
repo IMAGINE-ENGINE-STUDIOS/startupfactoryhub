@@ -632,7 +632,6 @@ async function fetchMDDOT(bounds: Bounds): Promise<CameraResult[]> {
         const lng = parseFloat(c.lon || c.lng || c.longitude || 0);
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((c: any) => ({
         id: `md-${c.id || c.cameraId || Math.random().toString(36).slice(2)}`,
         name: c.description || c.name || c.title || 'MD Camera',
