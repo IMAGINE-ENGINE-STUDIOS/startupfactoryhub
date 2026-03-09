@@ -306,7 +306,7 @@ async function fetchFLDOT(bounds: Bounds): Promise<CameraResult[]> {
           lng,
           imageUrl: imgUrl,
           source: 'FL511',
-          refreshRate: 15,
+          refreshRate: 10,
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
