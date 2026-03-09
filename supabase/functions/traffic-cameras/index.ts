@@ -804,7 +804,6 @@ async function fetchWindyCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = w.location?.longitude || w.position?.longitude || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 300)
       .map((w: any) => ({
         id: `windy-${w.webcamId || w.id}`,
         name: w.title || 'Webcam',
