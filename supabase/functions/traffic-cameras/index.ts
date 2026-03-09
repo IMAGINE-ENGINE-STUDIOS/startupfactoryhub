@@ -206,6 +206,7 @@ async function fetchODOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.lon || c.lng || c.longitude,
         imageUrl: c.imageUrl || c.url || '',
         source: 'ODOT',
+        refreshRate: 15,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
