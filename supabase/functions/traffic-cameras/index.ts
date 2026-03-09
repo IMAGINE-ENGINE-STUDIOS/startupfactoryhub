@@ -469,7 +469,7 @@ async function fetchILDOT(bounds: Bounds): Promise<CameraResult[]> {
 // ====== 511 STATES (using generic fetcher) ======
 
 async function fetchNJCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('NJ', 'https://511nj.org', bounds, { south: 38.8, north: 41.5, west: -75.6, east: -73.8 }, 5, 200);
+  return fetch511Cameras('NJ', 'https://511nj.org', bounds, { south: 38.8, north: 41.5, west: -75.6, east: -73.8 }, 5);
 }
 
 async function fetchPACameras(bounds: Bounds): Promise<CameraResult[]> {
