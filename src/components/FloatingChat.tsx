@@ -525,7 +525,8 @@ You can help with:
 - 📅 Booking meetings and managing calendar
 - 👥 Finding contacts and connections
 - 💼 Exploring jobs and opportunities
-- 🌍 Navigating platform resources and the 3D map
+- 🌍 Navigating the 4D map — fly to ANY street, building, landmark, or CCTV camera worldwide
+- 📹 CCTV cameras, traffic sensors, transit vehicles, maritime vessels on the live map
 - 🧠 Market intelligence and startup insights
 - 💾 Memory — say "learn this" to save knowledge for future reference${memoryContext}`;
   };
