@@ -453,7 +453,6 @@ async function fetchILDOT(bounds: Bounds): Promise<CameraResult[]> {
         const lng = c.longitude || c.lng || c.geometry?.coordinates?.[0] || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((c: any, i: number) => ({
         id: `il-${c.id || i}`,
         name: c.name || c.description || c.title || 'IL Camera',
