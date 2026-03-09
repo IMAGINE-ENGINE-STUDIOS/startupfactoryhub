@@ -68,7 +68,7 @@ export const HubsMapViewLab = ({
     allEntities, 
     isPolling, 
     toggleProvider 
-  } = useExternalTracking(DEMO_PROVIDERS);
+  } = useExternalTracking();
   const {
     earthLayers,
     datasets: earthDatasets,
