@@ -138,6 +138,7 @@ async function fetchCaltransDistrict(dist: string, bounds: Bounds): Promise<Came
             name: loc.name || loc.description || `CA ${dist.toUpperCase()} Camera`,
             lat, lng, imageUrl: imgUrl,
             source: `Caltrans ${dist.toUpperCase()}`,
+            refreshRate: 10,
           });
         }
       }
