@@ -507,7 +507,7 @@ export const useEarthIntelligence = (map: mapboxgl.Map | null, mapReady: boolean
   const { tier } = useMembershipStatus();
   const [earthLayers, setEarthLayers] = useState<EarthLayer[]>(STATIC_EARTH_LAYERS);
   const [datasets, setDatasets] = useState<EarthDataset[]>(EARTH_DATASETS);
-  const hasAccess = user?.email === ALLOWED_EMAIL || EARTH_ACCESS_TIERS.includes(tier);
+  const hasAccess = true; // All features unlocked
 
   // Global temporal controls
   const [temporalMode, setTemporalMode] = useState<TemporalMode>('monthly');

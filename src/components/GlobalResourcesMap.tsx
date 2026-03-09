@@ -179,8 +179,10 @@ export const GlobalResourcesMap = () => {
   const [regusSearch, setRegusSearch] = useState('');
   const [regusOfficeType, setRegusOfficeType] = useState<string | null>(null);
   
-  // Membership status for subscription gating
-  const { isSubscribed, tier, loading: membershipLoading } = useMembershipStatus();
+  // Membership status - all features unlocked
+  const { loading: membershipLoading } = useMembershipStatus();
+  const isSubscribed = true;
+  const tier = 'corporate';
 
   // Earth Intelligence layers (admin-only)
   const {
