@@ -536,7 +536,7 @@ async function fetchAZCameras(bounds: Bounds): Promise<CameraResult[]> {
 }
 
 async function fetchNVCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('NV', 'https://nvroads.com', bounds, { south: 35, north: 42, west: -120, east: -114 }, 10, 200);
+  return fetch511Cameras('NV', 'https://nvroads.com', bounds, { south: 35, north: 42, west: -120, east: -114 }, 10);
 }
 
 async function fetchIACameras(bounds: Bounds): Promise<CameraResult[]> {
