@@ -389,6 +389,38 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     return () => window.removeEventListener('genius-resource-navigate', handler);
   }, [resources]);
 
+  // Listen for Genius AI map coordinate navigation (cameras, streets, buildings)
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (!detail || !map.current) return;
+
+      const { lat, lng, zoom, layer } = detail;
+
+      // Enable the requested layer
+      if (layer === 'cctv') {
+        setShowCCTV(true);
+      } else if (layer === 'sensors') {
+        setShowTrafficSensors(true);
+      } else if (layer === 'transit') {
+        setShowTransitVehicles(true);
+      }
+
+      // Fly to the coordinates
+      if (lat && lng) {
+        map.current.flyTo({
+          center: [lng, lat],
+          zoom: zoom || 14,
+          duration: 2500,
+          essential: true,
+        });
+      }
+    };
+
+    window.addEventListener('genius-map-navigate', handler);
+    return () => window.removeEventListener('genius-map-navigate', handler);
+  }, []);
+
   // Fetch events for map
   const { data: mapEvents, isLoading: isLoadingEvents, refetch: refetchEvents } = useEventsForMap();
 

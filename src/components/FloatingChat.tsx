@@ -456,22 +456,50 @@ CRITICAL RULES:
         `- **${r.title}** (${r.resource_type.replace(/_/g, ' ')})${r.city ? ` — ${r.city}${r.country ? ', ' + r.country : ''}` : ''} | ID: ${r.id}${r.website_url ? ` | Website: ${r.website_url}` : ''}`
       ).join('\n') || 'No resources loaded yet.';
 
-      return `You are **Genius AI** that AUTOMATICALLY opens the 3D Resource Map for the user.
+      return `You are **Genius AI** that controls a 4D interactive globe with CCTV cameras, traffic sensors, transit vehicles, maritime vessels, buildings, and resources worldwide.
 
-CRITICAL RULES:
-1. Your FIRST line MUST be a NAV command in this EXACT format: <!--NAV:/resources?search=SEARCH_TERM&id=BEST_MATCH_RESOURCE_ID-->
-   - "search" = the city, location, or keyword the user asked about (e.g. "NYC", "Miami coworking")
-   - "id" = the ID of the BEST matching resource from the list below. Pick the closest match to what the user asked.
-   - If NO good match exists, omit "id": <!--NAV:/resources?search=SEARCH_TERM-->
-2. After the NAV command, write a SHORT 1-2 sentence summary: "🗺️ Opening the map to [location/resource]..."
-3. If multiple matches, mention the top 2-3 briefly after the nav command.
-4. NEVER show raw links. The map opens AUTOMATICALLY.
-5. Keep total response under 200 characters (excluding the NAV tag).
+## NAV COMMAND FORMATS (FIRST LINE MUST BE ONE OF THESE):
+
+### 1. Navigate to a RESOURCE (office, lab, coworking, etc.):
+<!--NAV:/resources?search=SEARCH_TERM&id=BEST_MATCH_RESOURCE_ID-->
+
+### 2. Navigate to a LOCATION (street, building, city, landmark, address):
+<!--NAV:/map?place=PLACE_NAME&lat=LATITUDE&lng=LONGITUDE&zoom=ZOOM_LEVEL-->
+- For streets/buildings use zoom 17-19
+- For neighborhoods use zoom 14-16
+- For cities use zoom 11-13
+- You MUST provide approximate lat/lng coordinates for the place. Use your world knowledge of geography.
+- Examples:
+  - Times Square NYC: <!--NAV:/map?place=Times Square&lat=40.758&lng=-73.9855&zoom=17-->
+  - Eiffel Tower: <!--NAV:/map?place=Eiffel Tower&lat=48.8584&lng=2.2945&zoom=18-->
+  - Wall Street: <!--NAV:/map?place=Wall Street&lat=40.7074&lng=-74.0113&zoom=17-->
+
+### 3. Navigate to a CCTV CAMERA area (show cameras in an area):
+<!--NAV:/map?place=AREA_NAME&lat=LATITUDE&lng=LONGITUDE&zoom=13&layer=cctv-->
+- This enables the CCTV layer and flies to the area so cameras load automatically.
+- Use zoom 12-14 to show cameras in a region.
+
+### 4. Navigate to TRAFFIC data:
+<!--NAV:/map?place=AREA_NAME&lat=LATITUDE&lng=LONGITUDE&zoom=12&layer=sensors-->
+
+### 5. Navigate to TRANSIT vehicles:
+<!--NAV:/map?place=CITY_NAME&lat=LATITUDE&lng=LONGITUDE&zoom=12&layer=transit-->
+
+## RULES:
+1. FIRST line MUST be a NAV command. Always.
+2. After the NAV command, write a SHORT 1-2 sentence summary.
+3. NEVER show raw links. The map navigates AUTOMATICALLY.
+4. Keep response under 200 chars (excluding NAV tag).
+5. If the user asks for a CCTV camera, use layer=cctv.
+6. If the user asks to "take me to", "show me", "go to" ANY place on Earth — use the /map NAV with coordinates.
+7. You know world geography. Provide accurate lat/lng for any city, street, landmark, or building.
 
 AVAILABLE RESOURCES:
 ${resourceContext}
 
-Resource categories: Office, Lab, Venue, Perk, Chamber of Commerce, Technology Transfer, Community, Government Grant, Accelerator/Incubator, Entrepreneur Center, University, Coworking, Investor Network, Human Capital, Event, Banking, National Archives.`;
+Resource categories: Office, Lab, Venue, Perk, Chamber of Commerce, Technology Transfer, Community, Government Grant, Accelerator/Incubator, Entrepreneur Center, University, Coworking, Investor Network, Human Capital, Event, Banking, National Archives.
+
+4D MAP LAYERS: CCTV Cameras (worldwide), Traffic Sensors (PeMS, NYC, Seattle), Transit Vehicles (10 cities GTFS-RT), AIS Maritime Vessels, Earth Intelligence (weather, SST, vegetation), Road Sensors.`;
     }
 
     // Build memory context string
@@ -497,7 +525,8 @@ You can help with:
 - 📅 Booking meetings and managing calendar
 - 👥 Finding contacts and connections
 - 💼 Exploring jobs and opportunities
-- 🌍 Navigating platform resources and the 3D map
+- 🌍 Navigating the 4D map — fly to ANY street, building, landmark, or CCTV camera worldwide
+- 📹 CCTV cameras, traffic sensors, transit vehicles, maritime vessels on the live map
 - 🧠 Market intelligence and startup insights
 - 💾 Memory — say "learn this" to save knowledge for future reference${memoryContext}`;
   };
@@ -542,8 +571,8 @@ You can help with:
     setAiMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsAiLoading(true);
 
-    // Auto-switch to resources tool if user asks about finding offices, coworking, map, etc.
-    const resourceIntentPattern = /\b(find|search|look for|where|show me|office|coworking|lab|workspace|hub|resource|map|venue|accelerator|incubator)\b.*\b(in|at|near|around|nyc|new york|miami|london|tokyo|paris|berlin|sf|san francisco|la|los angeles|chicago|boston|dubai|singapore|city|country|location)\b|\b(in|at|near|around|nyc|new york|miami|london|tokyo|paris|berlin|sf|san francisco|la|los angeles|chicago|boston|dubai|singapore)\b.*\b(office|coworking|lab|workspace|hub|resource|venue|accelerator|incubator)\b|\b(find me|show me|search for|look for|get me)\b.*\b(office|coworking|lab|workspace|hub|resource|venue|accelerator|incubator)\b/i;
+    // Auto-switch to resources tool if user asks about finding offices, coworking, map, cameras, streets, buildings, etc.
+    const resourceIntentPattern = /\b(find|search|look for|where|show me|take me|go to|fly to|navigate|office|coworking|lab|workspace|hub|resource|map|venue|accelerator|incubator|camera|cctv|street|building|landmark|tower|bridge|monument|stadium|airport)\b.*\b(in|at|near|around|nyc|new york|miami|london|tokyo|paris|berlin|sf|san francisco|la|los angeles|chicago|boston|dubai|singapore|city|country|location)\b|\b(in|at|near|around|nyc|new york|miami|london|tokyo|paris|berlin|sf|san francisco|la|los angeles|chicago|boston|dubai|singapore)\b.*\b(office|coworking|lab|workspace|hub|resource|venue|accelerator|incubator|camera|cctv|street|building)\b|\b(find me|show me|take me to|go to|fly to|navigate to|search for|look for|get me)\b.*\b(office|coworking|lab|workspace|hub|resource|venue|accelerator|incubator|camera|cctv|street|building|place|city|area|location|landmark|tower|bridge)\b|\b(show|find|take me to|go to)\b.*\b(cctv|camera|cameras|traffic|sensors|transit)\b/i;
     if (!activeTool && resourceIntentPattern.test(userMessage)) {
       const resTool = ALL_TOOLS.find(t => t.id === 'resources');
       if (resTool) setActiveTool(resTool);
@@ -663,6 +692,7 @@ You can help with:
             const navSearch = url.searchParams.get('search') || '';
             const navResourceId = url.searchParams.get('id') || '';
             const isJobNav = navPath.startsWith('/jobs');
+            const isMapNav = navPath.startsWith('/map');
 
             if (isJobNav) {
               // Navigate to dashboard jobs tab
@@ -671,6 +701,22 @@ You can help with:
                 setTimeout(() => {
                   window.dispatchEvent(new CustomEvent('genius-job-navigate', {
                     detail: { search: navSearch }
+                  }));
+                }, 600);
+              }, 800);
+            } else if (isMapNav) {
+              // Navigate to map with coordinates - for cameras, streets, buildings
+              const lat = parseFloat(url.searchParams.get('lat') || '0');
+              const lng = parseFloat(url.searchParams.get('lng') || '0');
+              const zoom = parseFloat(url.searchParams.get('zoom') || '14');
+              const place = url.searchParams.get('place') || '';
+              const layer = url.searchParams.get('layer') || '';
+
+              setTimeout(() => {
+                navigate('/dashboard?tab=resources');
+                setTimeout(() => {
+                  window.dispatchEvent(new CustomEvent('genius-map-navigate', {
+                    detail: { lat, lng, zoom, place, layer }
                   }));
                 }, 600);
               }, 800);
