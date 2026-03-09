@@ -886,6 +886,72 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         });
       }
       
+      // Re-add 3D buildings layer
+      if (!map.current.getLayer('3d-buildings')) {
+        map.current.addLayer({
+          id: '3d-buildings',
+          source: 'composite',
+          'source-layer': 'building',
+          filter: ['==', 'extrude', 'true'],
+          type: 'fill-extrusion',
+          minzoom: 14,
+          paint: {
+            'fill-extrusion-color': [
+              'interpolate',
+              ['linear'],
+              ['get', 'height'],
+              0, '#64748b',
+              50, '#475569',
+              100, '#334155',
+              200, '#1e293b'
+            ],
+            'fill-extrusion-height': ['get', 'height'],
+            'fill-extrusion-base': ['get', 'min_height'],
+            'fill-extrusion-opacity': 0.7,
+          },
+        });
+      }
+      
+      // Re-add traffic layer
+      if (!map.current.getSource('mapbox-traffic')) {
+        map.current.addSource('mapbox-traffic', {
+          type: 'vector',
+          url: 'mapbox://mapbox.mapbox-traffic-v1',
+        });
+        
+        map.current.addLayer({
+          id: 'traffic-flow',
+          type: 'line',
+          source: 'mapbox-traffic',
+          'source-layer': 'traffic',
+          minzoom: 6,
+          layout: {
+            'line-join': 'round',
+            'line-cap': 'round',
+          },
+          paint: {
+            'line-color': [
+              'match',
+              ['get', 'congestion'],
+              'low', '#22c55e',
+              'moderate', '#eab308',
+              'heavy', '#f97316',
+              'severe', '#ef4444',
+              '#64748b'
+            ],
+            'line-width': [
+              'interpolate',
+              ['linear'],
+              ['zoom'],
+              6, 1,
+              12, 3,
+              18, 6
+            ],
+            'line-opacity': 0.75,
+          },
+        });
+      }
+      
       // Clear added image keys so they get re-added
       addedImageKeys.current.clear();
       loadingImageKeys.current.clear();
