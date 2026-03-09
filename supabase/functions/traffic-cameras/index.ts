@@ -420,7 +420,7 @@ async function fetchWindyCameras(bounds: Bounds): Promise<CameraResult[]> {
     )));
     
     const resp = await fetch(
-      `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=100&offset=0&nearby=${centerLat},${centerLng},${radius}`,
+      `https://api.windy.com/webcams/api/v3/webcams?lang=en&limit=100&offset=0&include=images,location&nearby=${centerLat},${centerLng},${radius}`,
       {
         headers: {
           'x-windy-api-key': 'PGbLONaQtxGGGTZ0NXPEr4BbPtTOqo5f',
