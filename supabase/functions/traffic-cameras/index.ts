@@ -70,8 +70,8 @@ async function fetchNYCameras(bounds: Bounds): Promise<CameraResult[]> {
           lng: parseFloat(c.Longitude || c.longitude),
           imageUrl: imgUrl,
           source: '511NY',
-          refreshRate: 5,
-          streamUrl: videoUrl && /\.(mjpg|mjpeg|mp4)(\?|$)/i.test(videoUrl) ? videoUrl : undefined,
+          refreshRate: 3,
+          streamUrl: videoUrl && /\.(mjpg|mjpeg|mp4|m3u8)(\?|$)|mjpeg|mjpg|stream|video/i.test(videoUrl) ? videoUrl : undefined,
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
@@ -107,8 +107,8 @@ async function fetchNYCDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
           lng: c.longitude || c.lng || c.location?.longitude,
           imageUrl: c.imageUrl || c.image_url || c.url || c.stillImageUrl || c.snapshotUrl || '',
           source: 'NYCDOT',
-          refreshRate: 5,
-          streamUrl: streamCandidate && /\.(mjpg|mjpeg|mp4)(\?|$)|mjpeg|stream/i.test(streamCandidate) ? streamCandidate : undefined,
+          refreshRate: 2,
+          streamUrl: streamCandidate && /\.(mjpg|mjpeg|mp4|m3u8)(\?|$)|mjpeg|mjpg|stream|video/i.test(streamCandidate) ? streamCandidate : undefined,
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
@@ -138,7 +138,7 @@ async function fetchCaltransDistrict(dist: string, bounds: Bounds): Promise<Came
             name: loc.name || loc.description || `CA ${dist.toUpperCase()} Camera`,
             lat, lng, imageUrl: imgUrl,
             source: `Caltrans ${dist.toUpperCase()}`,
-            refreshRate: 10,
+            refreshRate: 5,
           });
         }
       }
@@ -178,7 +178,7 @@ async function fetchWSDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.CameraLocation.Longitude,
         imageUrl: c.ImageURL || c.ImageUrl || '',
         source: 'WSDOT',
-        refreshRate: 5,
+        refreshRate: 3,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -206,7 +206,7 @@ async function fetchODOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.lon || c.lng || c.longitude,
         imageUrl: c.imageUrl || c.url || '',
         source: 'ODOT',
-        refreshRate: 15,
+        refreshRate: 10,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -235,7 +235,7 @@ async function fetchCDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.geometry.coordinates[0],
         imageUrl: c.properties?.https_url || c.properties?.camera_url || '',
         source: 'CDOT',
-        refreshRate: 15,
+        refreshRate: 10,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -263,7 +263,7 @@ async function fetch511VA(bounds: Bounds): Promise<CameraResult[]> {
         lng: f.geometry.coordinates[0],
         imageUrl: f.properties?.image_url || f.properties?.url || '',
         source: '511VA',
-        refreshRate: 15,
+        refreshRate: 10,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -306,7 +306,7 @@ async function fetchFLDOT(bounds: Bounds): Promise<CameraResult[]> {
           lng,
           imageUrl: imgUrl,
           source: 'FL511',
-          refreshRate: 15,
+          refreshRate: 10,
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
@@ -335,7 +335,7 @@ async function fetch511GA(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.longitude,
         imageUrl: c.image_url || c.url || '',
         source: '511GA',
-        refreshRate: 15,
+        refreshRate: 10,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -365,7 +365,7 @@ async function fetchTXDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: parseFloat(c.longitude || c.lng),
         imageUrl: c.url || c.image_url || c.imageUrl || '',
         source: 'TxDOT',
-        refreshRate: 15,
+        refreshRate: 10,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -395,7 +395,7 @@ async function fetchILDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.longitude || c.lng || c.geometry?.coordinates?.[0],
         imageUrl: c.imageUrl || c.image_url || c.url || '',
         source: 'ILDOT',
-        refreshRate: 15,
+        refreshRate: 10,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -424,7 +424,7 @@ async function fetchNJDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: parseFloat(c.Longitude || c.longitude),
         imageUrl: c.Url || c.url || c.VideoUrl || '',
         source: '511NJ',
-        refreshRate: 10,
+        refreshRate: 5,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -453,7 +453,7 @@ async function fetchPADOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: parseFloat(c.Longitude || c.longitude),
         imageUrl: c.Url || c.url || c.VideoUrl || '',
         source: '511PA',
-        refreshRate: 10,
+        refreshRate: 5,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -483,7 +483,7 @@ async function fetchMDDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: parseFloat(c.lon || c.lng || c.longitude),
         imageUrl: c.imageUrl || c.url || c.image || '',
         source: 'MDSHA',
-        refreshRate: 15,
+        refreshRate: 10,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }

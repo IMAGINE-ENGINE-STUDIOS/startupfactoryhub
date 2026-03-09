@@ -1335,6 +1335,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           source: cam.source,
           lat: cam.lat,
           lng: cam.lng,
+          streamUrl: cam.streamUrl || '',
+          refreshRate: cam.refreshRate || 10,
+          isStream: cam.streamUrl ? 1 : 0,
         },
       })),
     };
@@ -1358,7 +1361,12 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         source: sourceId,
         paint: {
           'circle-radius': 8,
-          'circle-color': '#dc2626',
+          'circle-color': [
+            'case',
+            ['==', ['get', 'isStream'], 1],
+            '#22c55e', // green for live streaming cameras
+            '#dc2626', // red for snapshot cameras
+          ],
           'circle-stroke-width': 2,
           'circle-stroke-color': '#ffffff',
           'circle-opacity': 1,
@@ -1380,6 +1388,8 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           lng: props.lng,
           imageUrl: props.imageUrl,
           source: props.source,
+          streamUrl: props.streamUrl || undefined,
+          refreshRate: props.refreshRate || 10,
         };
         setSelectedCamera(cam);
       });
