@@ -654,7 +654,7 @@ async function fetchALCameras(bounds: Bounds): Promise<CameraResult[]> {
 // ====== MASSACHUSETTS ======
 
 async function fetchMACameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('MA', 'https://mass511.com', bounds, { south: 41, north: 42.9, west: -73.6, east: -69.8 }, 10, 200);
+  return fetch511Cameras('MA', 'https://mass511.com', bounds, { south: 41, north: 42.9, west: -73.6, east: -69.8 }, 10);
 }
 
 // ====== CONNECTICUT ======
