@@ -186,6 +186,7 @@ export const GlobalResourcesMap = () => {
   const [show3DBuildings, setShow3DBuildings] = useState(true);
   const [showTraffic, setShowTraffic] = useState(true);
   const [showCCTV, setShowCCTV] = useState(true);
+  const [showTransitVehicles, setShowTransitVehicles] = useState(true);
   
   // Workplace (Regus) state
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
