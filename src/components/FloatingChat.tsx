@@ -570,8 +570,8 @@ You can help with:
     setAiMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsAiLoading(true);
 
-    // Auto-switch to resources tool if user asks about finding offices, coworking, map, etc.
-    const resourceIntentPattern = /\b(find|search|look for|where|show me|office|coworking|lab|workspace|hub|resource|map|venue|accelerator|incubator)\b.*\b(in|at|near|around|nyc|new york|miami|london|tokyo|paris|berlin|sf|san francisco|la|los angeles|chicago|boston|dubai|singapore|city|country|location)\b|\b(in|at|near|around|nyc|new york|miami|london|tokyo|paris|berlin|sf|san francisco|la|los angeles|chicago|boston|dubai|singapore)\b.*\b(office|coworking|lab|workspace|hub|resource|venue|accelerator|incubator)\b|\b(find me|show me|search for|look for|get me)\b.*\b(office|coworking|lab|workspace|hub|resource|venue|accelerator|incubator)\b/i;
+    // Auto-switch to resources tool if user asks about finding offices, coworking, map, cameras, streets, buildings, etc.
+    const resourceIntentPattern = /\b(find|search|look for|where|show me|take me|go to|fly to|navigate|office|coworking|lab|workspace|hub|resource|map|venue|accelerator|incubator|camera|cctv|street|building|landmark|tower|bridge|monument|stadium|airport)\b.*\b(in|at|near|around|nyc|new york|miami|london|tokyo|paris|berlin|sf|san francisco|la|los angeles|chicago|boston|dubai|singapore|city|country|location)\b|\b(in|at|near|around|nyc|new york|miami|london|tokyo|paris|berlin|sf|san francisco|la|los angeles|chicago|boston|dubai|singapore)\b.*\b(office|coworking|lab|workspace|hub|resource|venue|accelerator|incubator|camera|cctv|street|building)\b|\b(find me|show me|take me to|go to|fly to|navigate to|search for|look for|get me)\b.*\b(office|coworking|lab|workspace|hub|resource|venue|accelerator|incubator|camera|cctv|street|building|place|city|area|location|landmark|tower|bridge)\b|\b(show|find|take me to|go to)\b.*\b(cctv|camera|cameras|traffic|sensors|transit)\b/i;
     if (!activeTool && resourceIntentPattern.test(userMessage)) {
       const resTool = ALL_TOOLS.find(t => t.id === 'resources');
       if (resTool) setActiveTool(resTool);
