@@ -1301,32 +1301,25 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     }
   }, [showTraffic, mapReady]);
 
-  // Stable camera marker map - only add/remove what changed, never flyTo
+  // Camera markers - PINNED permanently, never removed once placed
   const cameraMarkerMap = useRef<Record<string, mapboxgl.Marker>>({});
   
   useEffect(() => {
     if (!map.current || !mapReady) return;
     
-    if (!showCCTV || !trafficCameras || trafficCameras.length === 0) {
+    // Only clear ALL markers when CCTV is turned off
+    if (!showCCTV) {
       Object.values(cameraMarkerMap.current).forEach(m => m.remove());
       cameraMarkerMap.current = {};
       cameraMarkers.current = [];
       return;
     }
     
-    const currentIds = new Set(trafficCameras.map(c => c.id));
+    if (!trafficCameras || trafficCameras.length === 0) return;
     
-    // Remove markers no longer in dataset
-    for (const id of Object.keys(cameraMarkerMap.current)) {
-      if (!currentIds.has(id)) {
-        cameraMarkerMap.current[id].remove();
-        delete cameraMarkerMap.current[id];
-      }
-    }
-    
-    // Add only new markers
+    // Only ADD new markers - NEVER remove existing ones
     trafficCameras.forEach((cam) => {
-      if (cameraMarkerMap.current[cam.id]) return; // Already exists, skip
+      if (cameraMarkerMap.current[cam.id]) return; // Already pinned, skip
       
       const el = document.createElement('div');
       el.className = 'cctv-marker';
