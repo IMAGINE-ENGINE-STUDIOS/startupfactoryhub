@@ -737,7 +737,6 @@ async function fetchNLCameras(bounds: Bounds): Promise<CameraResult[]> {
         const coords = f.geometry?.coordinates || [];
         return coords.length >= 2 && inBounds(coords[1], coords[0], bounds);
       })
-      .slice(0, 40)
       .map((f: any) => ({
         id: `nl-${f.properties?.id || Math.random().toString(36).slice(2)}`,
         name: f.properties?.name || f.properties?.description || 'NL Camera',
