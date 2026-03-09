@@ -265,7 +265,6 @@ async function fetch511VA(bounds: Bounds): Promise<CameraResult[]> {
         const [lng, lat] = f.geometry?.coordinates || [0, 0];
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 200)
       .map((f: any) => ({
         id: `va-${f.properties?.id || Math.random().toString(36).slice(2)}`,
         name: f.properties?.name || f.properties?.description || 'VA Camera',
