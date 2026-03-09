@@ -1,56 +1,132 @@
 
 
-## Plan: Fix California and Texas Camera Sources
+## Premium Mentor/Advisor Program — "Official Mentor" Invite-Only Program
 
-### Problem
-Both California (Caltrans) and Texas (TxDOT) camera fetchers exist but return zero cameras because:
-- **California**: Uses per-district JSON URLs (`cwwp2.dot.ca.gov/data/d{N}/cctv/cctvStatus{Label}.json`) that don't exist — the actual data is in `.txt` tab-delimited format, not JSON. The response parsing also doesn't match the real nested structure.
-- **Texas**: Uses a non-existent endpoint (`its.txdot.gov/data/cctv_images.json`). TxDOT has no public JSON API for camera lists.
+### Overview
 
-### Solution
+Create an invite-only premium program for Mentors and Advisors that grants "Official" status on the platform. Admin sends email invitations; invitees must complete a multi-step onboarding checklist before earning the official badge (star + insignia) visible on their profile and social feed posts.
 
-#### 1. Replace California fetcher with Caltrans ArcGIS FeatureServer
-Replace the broken per-district JSON approach (`fetchCaltransDistrict` + `fetchAllCaltrans`) with a single ArcGIS query to `caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/CCTV/FeatureServer/0/query`.
+### Benefits for Official Members
+- Access to all platform perks
+- Free bank account (HSBC introduction)
+- Unique 25% referral commission (instead of standard 20%)
+- Direct startup introductions through the venture fund
 
-- Confirmed working: returns `currentImageURL`, `streamingVideoURL`, `locationName`, `latitude`, `longitude`, `district`
-- MaxRecordCount: 2000 (enough for viewport-bounded queries)
-- Use spatial envelope filter with bounds, just like FL511
-- `streamingVideoURL` provides HLS `.m3u8` streams for many cameras (live video support)
-- Image URLs like `https://cwwp2.dot.ca.gov/data/d7/cctv/image/.../...jpg` — confirmed working
-- refreshRate: 5s (images update every 2-60s per camera)
+---
 
-#### 2. Replace Texas fetcher with multiple working sources
-- **Austin City Cameras**: Use `https://data.austintexas.gov/resource/b4k4-adkb.json` (Socrata API, ~500+ cameras with `https://cctv.austinmobility.io/image/{id}.jpg`)
-- **Houston TranStar**: Scrape camera list from `traffic.houstontranstar.org` — they serve snapshot images at predictable URLs
-- **Fallback**: The existing Windy API already covers Texas metros as a worldwide fallback, but we'll add explicit sources for better coverage
+### Database Changes (Migration)
 
-#### 3. File changes
-**`supabase/functions/traffic-cameras/index.ts`**:
-- Replace `fetchCaltransDistrict` and `fetchAllCaltrans` with a single `fetchCaltransCameras(bounds)` using ArcGIS FeatureServer
-- Replace `fetchTXDOT` with `fetchAustinCameras(bounds)` + `fetchHoustonCameras(bounds)` using real working endpoints
-- Stream URLs from Caltrans (`streamingVideoURL` field) will enable green dot markers on the map
+**1. New table: `official_mentor_invitations`**
+- `id` (uuid, PK)
+- `email` (text, not null)
+- `invited_by` (uuid, FK to auth.users — the admin)
+- `invitation_token` (text, unique, not null)
+- `status` (text: `pending`, `accepted`, `expired`, default `pending`)
+- `expires_at` (timestamptz)
+- `accepted_at` (timestamptz, nullable)
+- `accepted_by` (uuid, FK to auth.users, nullable)
+- `created_at` (timestamptz, default now())
+- RLS: admin can insert/select; invited user can select/update their own row by token
 
-### Technical Details
+**2. New table: `official_mentor_status`**
+- `id` (uuid, PK)
+- `user_id` (uuid, FK to auth.users, unique, not null)
+- `invitation_id` (uuid, FK to official_mentor_invitations)
+- `profile_completed` (boolean, default false)
+- `email_verified` (boolean, default false)
+- `connection_invited` (boolean, default false)
+- `is_official` (boolean, default false) — set to true when all 3 checks pass
+- `referral_commission_rate` (numeric, default 0.25) — 25%
+- `granted_at` (timestamptz, nullable)
+- `created_at` (timestamptz, default now())
+- RLS: user can read own row; admin can read/update all
 
-**Caltrans ArcGIS query URL:**
+**3. Add column to `profiles` table:**
+- `is_official_mentor` (boolean, default false) — quick-access flag for display in feed posts and profile cards
+
+**4. DB function: `check_and_grant_official_status(p_user_id uuid)`**
+- Checks if profile is complete (full_name, bio, avatar_url, linkedin_url all non-null)
+- Checks if email is verified (auth.users.email_confirmed_at is not null — use security definer)
+- Checks if user has at least 1 accepted connection
+- If all pass, sets `is_official = true`, `granted_at = now()`, and updates `profiles.is_official_mentor = true`
+
+---
+
+### Edge Function: `send-official-mentor-invite`
+
+- Admin-only (verify service role or admin check)
+- Accepts email + optional message
+- Generates unique invitation token
+- Inserts row into `official_mentor_invitations`
+- Sends branded email via Resend with invitation link pointing to `/official-mentor-invite?token=...`
+
+---
+
+### Frontend Changes
+
+**1. New page: `/official-mentor-invite` (OfficialMentorInvite.tsx)**
+- Public route for accepting the invitation
+- Verifies token against `official_mentor_invitations`
+- If user is already registered (mentor/advisor role), links invitation to their account
+- If not registered, redirects to signup with pre-filled email and role
+- Creates `official_mentor_status` row upon acceptance
+
+**2. New component: `OfficialMentorChecklist`**
+- Displayed on Mentor/Advisor dashboard for invited users who haven't completed all steps
+- Shows 3 checklist items with status: Complete Profile, Verify Email, Invite a Connection
+- Each item shows green check or pending icon
+- "Check Status" button calls `check_and_grant_official_status` RPC
+- On completion, shows congratulations with the official badge
+
+**3. Official Badge/Insignia in UI**
+- Update `RoleBasedAvatar` component: if `is_official_mentor` is true, overlay a gold star/shield insignia
+- Update `UnifiedCommunityFeed` post rendering: show official badge next to name for official mentors/advisors
+- Update `UserProfileDialog` / profile views: show "Official Mentor" or "Official Advisor" badge
+
+**4. Admin Dashboard — new section in existing management**
+- Add "Official Program" sub-tab or section under Users/Partners management
+- Form to invite by email
+- List of invitations with status tracking
+- View checklist progress for each invitee
+
+**5. Referral override for official members**
+- When creating referral accounts for official mentors, set commission rate to 25% instead of 20%
+- Update referral earnings calculation to use the per-user commission rate
+
+---
+
+### Technical Flow
+
+```text
+Admin sends invite email
+        ↓
+Mentor/Advisor clicks link → /official-mentor-invite?token=xxx
+        ↓
+Token verified → Account linked → official_mentor_status row created
+        ↓
+Dashboard shows checklist:
+  ☐ Complete profile (name, bio, avatar, linkedin)
+  ☐ Verify email
+  ☐ Invite 1 connection
+        ↓
+All 3 complete → RPC grants official status
+        ↓
+Profile badge + feed insignia activated
+25% referral rate applied
 ```
-https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/CCTV/FeatureServer/0/query
-?where=1=1
-&geometry={west},{south},{east},{north}
-&geometryType=esriGeometryEnvelope
-&spatialRel=esriSpatialRelIntersects
-&outFields=currentImageURL,streamingVideoURL,locationName,latitude,longitude,district,inService
-&f=json
-&resultRecordCount=500
-```
 
-**Austin cameras Socrata API:**
-```
-https://data.austintexas.gov/resource/b4k4-adkb.json
-?$where=within_box(location, {south}, {west}, {north}, {east})
-&$limit=200
-&camera_status=TURNED_ON
-```
+### Files to Create
+- `src/pages/OfficialMentorInvite.tsx`
+- `src/components/OfficialMentorChecklist.tsx`
+- `src/components/OfficialBadge.tsx`
+- `supabase/functions/send-official-mentor-invite/index.ts`
 
-Redeploy edge function after changes.
+### Files to Modify
+- `src/App.tsx` — add route
+- `src/components/RoleBasedAvatar.tsx` — add official insignia overlay
+- `src/components/UnifiedCommunityFeed.tsx` — show badge next to official users
+- `src/pages/MentorDashboard.tsx` — add checklist component
+- `src/pages/AdvisorDashboard.tsx` — add checklist component
+- `src/components/admin/` — add invitation management UI
+- Migration SQL for new tables/columns/functions
 

@@ -115,48 +115,46 @@ async function fetchNYCDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== CALIFORNIA ======
+// ====== CALIFORNIA (Caltrans ArcGIS FeatureServer) ======
 
-async function fetchCaltransDistrict(dist: string, bounds: Bounds): Promise<CameraResult[]> {
+async function fetchCaltransCameras(bounds: Bounds): Promise<CameraResult[]> {
+  if (bounds.east < -130 || bounds.west > -114 || bounds.south > 42 || bounds.north < 32) return [];
   try {
-    const label = dist.charAt(0).toUpperCase() + dist.slice(1);
-    const resp = await fetch(`https://cwwp2.dot.ca.gov/data/${dist}/cctv/cctvStatus${label}.json`, { signal: AbortSignal.timeout(8000) });
+    const url = `https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/CCTV/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=currentImageURL,streamingVideoURL,locationName,latitude,longitude,district,inService&f=json&resultRecordCount=500`;
+    const resp = await fetch(url, { signal: AbortSignal.timeout(12000) });
     if (!resp.ok) return [];
     const data = await resp.json();
-    const cameras = data?.data || data;
-    if (!Array.isArray(cameras)) return [];
-    const results: CameraResult[] = [];
-    for (const cam of cameras) {
-      const loc = cam.location || cam.cctv || cam;
-      const lat = parseFloat(loc.latitude || loc.lat || 0);
-      const lng = parseFloat(loc.longitude || loc.lng || loc.lon || 0);
-      if (inBounds(lat, lng, bounds)) {
-        const imgUrl = loc.imageUrl || loc.image?.url || loc.currentImageURL || '';
-        if (imgUrl) {
-          results.push({
-            id: `ca-${dist}-${loc.id || results.length}`,
-            name: loc.name || loc.description || `CA ${dist.toUpperCase()} Camera`,
-            lat, lng, imageUrl: imgUrl,
-            source: `Caltrans ${dist.toUpperCase()}`,
-            refreshRate: 5,
-          });
-        }
-      }
-      if (results.length >= 50) break;
-    }
-    return results;
-  } catch { return []; }
-}
+    const features = data?.features || [];
+    if (!Array.isArray(features)) return [];
 
-async function fetchAllCaltrans(bounds: Bounds): Promise<CameraResult[]> {
-  if (bounds.east < -130 || bounds.west > -114 || bounds.south > 42 || bounds.north < 32) return [];
-  const districts = ['d1','d2','d3','d4','d5','d6','d7','d8','d9','d10','d11','d12'];
-  const results: CameraResult[] = [];
-  const settled = await Promise.allSettled(districts.map(d => fetchCaltransDistrict(d, bounds)));
-  for (const r of settled) {
-    if (r.status === 'fulfilled') results.push(...r.value);
+    return features
+      .filter((f: any) => {
+        const a = f.attributes || {};
+        const lat = a.latitude || f.geometry?.y;
+        const lng = a.longitude || f.geometry?.x;
+        const inService = a.inService;
+        return lat && lng && inBounds(lat, lng, bounds) && inService !== 'FALSE';
+      })
+      .map((f: any) => {
+        const a = f.attributes;
+        const imgUrl = a.currentImageURL || '';
+        const streamUrl = a.streamingVideoURL || '';
+        return {
+          id: `ca-${a.district || 'x'}-${imgUrl.split('/').pop() || Math.random().toString(36).slice(2)}`,
+          name: a.locationName || `CA D${a.district} Camera`,
+          lat: a.latitude || f.geometry?.y,
+          lng: a.longitude || f.geometry?.x,
+          imageUrl: imgUrl,
+          source: `Caltrans D${a.district || '?'}`,
+          refreshRate: 5,
+          streamUrl: streamUrl && /\.(m3u8|mjpg|mjpeg|mp4)(\?|$)/i.test(streamUrl) ? streamUrl : undefined,
+        };
+      })
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch (e) {
+    console.error('Caltrans cameras error:', e);
+    return [];
   }
-  return results.slice(0, 300);
 }
 
 // ====== WASHINGTON ======
@@ -343,32 +341,116 @@ async function fetch511GA(bounds: Bounds): Promise<CameraResult[]> {
 
 // ====== TEXAS ======
 
-async function fetchTXDOT(bounds: Bounds): Promise<CameraResult[]> {
-  if (bounds.south > 36.5 || bounds.north < 25.5 || bounds.west > -93 || bounds.east < -107) return [];
+// Austin City cameras via Socrata Open Data API
+async function fetchAustinCameras(bounds: Bounds): Promise<CameraResult[]> {
+  if (bounds.south > 31 || bounds.north < 29.5 || bounds.west > -97 || bounds.east < -98.5) return [];
   try {
-    const resp = await fetch('https://its.txdot.gov/data/cctv_images.json', { signal: AbortSignal.timeout(8000) });
+    const url = `https://data.austintexas.gov/resource/b4k4-adkb.json?$where=within_box(location,${bounds.south},${bounds.west},${bounds.north},${bounds.east})&$limit=200&camera_status=TURNED_ON`;
+    const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
     if (!resp.ok) return [];
     const data = await resp.json();
-    const cameras = data?.cctv_images || data?.cameras || data;
+    if (!Array.isArray(data)) return [];
+    return data
+      .filter((c: any) => {
+        const lat = parseFloat(c.location?.latitude || c.location_latitude || 0);
+        const lng = parseFloat(c.location?.longitude || c.location_longitude || 0);
+        return lat && lng && inBounds(lat, lng, bounds);
+      })
+      .map((c: any) => {
+        const camId = c.camera_id || c.atd_device_id || '';
+        const lat = parseFloat(c.location?.latitude || c.location_latitude);
+        const lng = parseFloat(c.location?.longitude || c.location_longitude);
+        return {
+          id: `tx-atx-${camId || Math.random().toString(36).slice(2)}`,
+          name: c.location_name || c.camera_name || c.primary_st_segment_id || 'Austin Camera',
+          lat,
+          lng,
+          imageUrl: camId ? `https://cctv.austinmobility.io/image/${camId}.jpg` : '',
+          source: 'Austin TX',
+          refreshRate: 5,
+        };
+      })
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch (e) {
+    console.error('Austin cameras error:', e);
+    return [];
+  }
+}
+
+// Houston TranStar cameras
+async function fetchHoustonCameras(bounds: Bounds): Promise<CameraResult[]> {
+  if (bounds.south > 30.5 || bounds.north < 29 || bounds.west > -94.5 || bounds.east < -96.5) return [];
+  try {
+    const resp = await fetch('https://traffic.houstontranstar.org/layers/layers_cctv.json', { signal: AbortSignal.timeout(10000) });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const cameras = data?.features || data?.cctv || data;
     if (!Array.isArray(cameras)) return [];
     return cameras
       .filter((c: any) => {
-        const lat = parseFloat(c.latitude || c.lat || 0);
-        const lng = parseFloat(c.longitude || c.lng || 0);
+        const lat = c.geometry?.coordinates?.[1] || c.latitude || c.lat || 0;
+        const lng = c.geometry?.coordinates?.[0] || c.longitude || c.lng || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 100)
-      .map((c: any) => ({
-        id: `tx-${c.id || c.cctv_id || Math.random().toString(36).slice(2)}`,
-        name: c.name || c.location || c.description || 'TX Camera',
-        lat: parseFloat(c.latitude || c.lat),
-        lng: parseFloat(c.longitude || c.lng),
-        imageUrl: c.url || c.image_url || c.imageUrl || '',
-        source: 'TxDOT',
-        refreshRate: 10,
-      }))
+      .slice(0, 150)
+      .map((c: any) => {
+        const props = c.properties || c;
+        const lat = c.geometry?.coordinates?.[1] || c.latitude || c.lat;
+        const lng = c.geometry?.coordinates?.[0] || c.longitude || c.lng;
+        const camId = props.id || props.cctv_id || props.OBJECTID || Math.random().toString(36).slice(2);
+        const imgUrl = props.imageUrl || props.image_url || props.url || 
+          (props.filename ? `https://traffic.houstontranstar.org/cctv/images/${props.filename}` : '');
+        return {
+          id: `tx-hou-${camId}`,
+          name: props.name || props.title || props.description || props.location || 'Houston Camera',
+          lat,
+          lng,
+          imageUrl: imgUrl,
+          source: 'Houston TranStar',
+          refreshRate: 10,
+        };
+      })
       .filter((c: CameraResult) => c.imageUrl);
-  } catch { return []; }
+  } catch (e) {
+    console.error('Houston cameras error:', e);
+    return [];
+  }
+}
+
+// San Antonio / DFW / statewide TxDOT via their ArcGIS
+async function fetchTxDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
+  if (bounds.south > 36.5 || bounds.north < 25.5 || bounds.west > -93 || bounds.east < -107) return [];
+  try {
+    const url = `https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_CCTV_Cameras/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=*&f=json&resultRecordCount=500`;
+    const resp = await fetch(url, { signal: AbortSignal.timeout(12000) });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    const features = data?.features || [];
+    if (!Array.isArray(features)) return [];
+    return features
+      .filter((f: any) => {
+        const lat = f.attributes?.Latitude || f.attributes?.latitude || f.geometry?.y || 0;
+        const lng = f.attributes?.Longitude || f.attributes?.longitude || f.geometry?.x || 0;
+        return inBounds(lat, lng, bounds);
+      })
+      .map((f: any) => {
+        const a = f.attributes || {};
+        const imgUrl = a.ImageURL || a.imageUrl || a.image_url || a.Url || a.url || '';
+        return {
+          id: `tx-dot-${a.OBJECTID || a.Id || Math.random().toString(36).slice(2)}`,
+          name: a.Name || a.name || a.Description || a.Location || 'TX Camera',
+          lat: a.Latitude || a.latitude || f.geometry?.y,
+          lng: a.Longitude || a.longitude || f.geometry?.x,
+          imageUrl: imgUrl,
+          source: 'TxDOT',
+          refreshRate: 10,
+        };
+      })
+      .filter((c: CameraResult) => c.imageUrl);
+  } catch (e) {
+    console.error('TxDOT cameras error:', e);
+    return [];
+  }
 }
 
 // ====== ILLINOIS ======
@@ -651,14 +733,16 @@ serve(async (req) => {
     const results = await Promise.allSettled([
       fetchNYCameras(bounds),
       fetchNYCDOTCameras(bounds),
-      fetchAllCaltrans(bounds),
+      fetchCaltransCameras(bounds),
       fetchWSDOT(bounds),
       fetchODOT(bounds),
       fetchCDOT(bounds),
       fetch511VA(bounds),
       fetch511GA(bounds),
       fetchFLDOT(bounds),
-      fetchTXDOT(bounds),
+      fetchAustinCameras(bounds),
+      fetchHoustonCameras(bounds),
+      fetchTxDOTCameras(bounds),
       fetchILDOT(bounds),
       fetchNJDOT(bounds),
       fetchPADOT(bounds),
