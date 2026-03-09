@@ -32,7 +32,8 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
 
   const hasStream = isStreamUrl(camera.streamUrl);
   const isMjpeg = isMjpegStream(camera.streamUrl);
-  const refreshRate = camera.refreshRate || 10;
+  // Use the source-specific refresh rate, minimum 1s for near-video feel
+  const refreshRate = Math.max(camera.refreshRate || 10, 1);
 
   // Build proxied image URL
   useEffect(() => {
