@@ -18,16 +18,6 @@ interface UseBounds {
   west: number;
 }
 
-// Deep compare camera arrays by id set - only trigger re-render if actual data changed
-function camerasChanged(prev: TrafficCamera[], next: TrafficCamera[]): boolean {
-  if (prev.length !== next.length) return true;
-  const prevIds = new Set(prev.map(c => c.id));
-  for (const cam of next) {
-    if (!prevIds.has(cam.id)) return true;
-  }
-  return false;
-}
-
 export const useTrafficCameras = (
   map: mapboxgl.Map | null,
   mapReady: boolean,
@@ -38,19 +28,19 @@ export const useTrafficCameras = (
   const [error, setError] = useState<string | null>(null);
   const [selectedCamera, setSelectedCamera] = useState<TrafficCamera | null>(null);
   const selectedCameraRef = useRef<TrafficCamera | null>(null);
-  const lastFetchBounds = useRef<UseBounds | null>(null);
   const fetchTimeoutRef = useRef<number | null>(null);
-  const cacheRef = useRef<{ data: TrafficCamera[]; time: number; bounds: UseBounds } | null>(null);
-  const currentCamerasRef = useRef<TrafficCamera[]>([]);
+  const cacheRef = useRef<{ time: number; bounds: UseBounds } | null>(null);
+  
+  // ACCUMULATE cameras across fetches - never lose a camera once seen
+  const accumulatedCamerasRef = useRef<Map<string, TrafficCamera>>(new Map());
 
-  // Keep ref in sync with state
   const handleSetSelectedCamera = useCallback((cam: TrafficCamera | null) => {
     selectedCameraRef.current = cam;
     setSelectedCamera(cam);
   }, []);
 
   const fetchCameras = useCallback(async (bounds: UseBounds) => {
-    // Check cache - skip if bounds barely moved
+    // Skip if bounds barely moved and recently fetched
     if (cacheRef.current && Date.now() - cacheRef.current.time < 30000) {
       const cb = cacheRef.current.bounds;
       if (
@@ -59,7 +49,7 @@ export const useTrafficCameras = (
         Math.abs(cb.east - bounds.east) < 0.5 &&
         Math.abs(cb.west - bounds.west) < 0.5
       ) {
-        return; // Don't even re-set cameras, nothing changed
+        return;
       }
     }
 
@@ -73,16 +63,23 @@ export const useTrafficCameras = (
 
       if (fnError) throw fnError;
 
-      const cams = (data?.cameras || []) as TrafficCamera[];
+      const newCams = (data?.cameras || []) as TrafficCamera[];
       
-      // Only update state if cameras actually changed
-      if (camerasChanged(currentCamerasRef.current, cams)) {
-        currentCamerasRef.current = cams;
-        setCameras(cams);
+      // MERGE new cameras into accumulated map - never remove
+      let added = false;
+      for (const cam of newCams) {
+        if (!accumulatedCamerasRef.current.has(cam.id)) {
+          accumulatedCamerasRef.current.set(cam.id, cam);
+          added = true;
+        }
       }
       
-      cacheRef.current = { data: cams, time: Date.now(), bounds };
-      lastFetchBounds.current = bounds;
+      // Only trigger re-render if we added new cameras
+      if (added) {
+        setCameras(Array.from(accumulatedCamerasRef.current.values()));
+      }
+      
+      cacheRef.current = { time: Date.now(), bounds };
     } catch (err: any) {
       console.error('Traffic cameras fetch error:', err);
       setError(err.message || 'Failed to fetch cameras');
@@ -91,26 +88,22 @@ export const useTrafficCameras = (
     }
   }, []);
 
-  // Fetch on map move when enabled and zoom >= 9
   useEffect(() => {
     if (!map || !mapReady || !enabled) {
-      if (currentCamerasRef.current.length > 0) {
-        currentCamerasRef.current = [];
+      // When disabled, clear everything
+      if (accumulatedCamerasRef.current.size > 0) {
+        accumulatedCamerasRef.current.clear();
         setCameras([]);
       }
       return;
     }
 
     const handleMoveEnd = () => {
-      // Don't re-fetch if a camera is selected (user is viewing a camera, not browsing)
       if (selectedCameraRef.current) return;
       
       const zoom = map.getZoom();
       if (zoom < 9) {
-        if (currentCamerasRef.current.length > 0) {
-          currentCamerasRef.current = [];
-          setCameras([]);
-        }
+        // Don't clear accumulated cameras at low zoom, just don't fetch more
         return;
       }
 
@@ -124,12 +117,10 @@ export const useTrafficCameras = (
         west: b.getWest(),
       };
 
-      // Debounce with longer delay to prevent rapid re-fetches
       if (fetchTimeoutRef.current) clearTimeout(fetchTimeoutRef.current);
       fetchTimeoutRef.current = window.setTimeout(() => fetchCameras(bounds), 800);
     };
 
-    // Initial fetch
     handleMoveEnd();
 
     map.on('moveend', handleMoveEnd);
