@@ -210,7 +210,6 @@ async function fetchODOT(bounds: Bounds): Promise<CameraResult[]> {
     if (!Array.isArray(data)) return [];
     return data
       .filter((c: any) => inBounds(c.lat || c.latitude || 0, c.lon || c.lng || c.longitude || 0, bounds))
-      .slice(0, 100)
       .map((c: any, i: number) => ({
         id: `or-${c.id || i}`,
         name: c.title || c.name || 'OR Camera',
