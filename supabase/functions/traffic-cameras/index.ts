@@ -50,8 +50,7 @@ async function fetch511Cameras(
   baseUrl: string,
   bounds: Bounds,
   boundsCheck: { south: number; north: number; west: number; east: number },
-  refreshRate = 5,
-  limit = 200
+  refreshRate = 5
 ): Promise<CameraResult[]> {
   if (bounds.south > boundsCheck.north || bounds.north < boundsCheck.south ||
       bounds.west > boundsCheck.east || bounds.east < boundsCheck.west) return [];
