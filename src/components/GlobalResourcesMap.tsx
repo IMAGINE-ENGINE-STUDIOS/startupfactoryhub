@@ -65,6 +65,8 @@ import {
   Car,
   Camera,
   Building,
+  Bus,
+  Train,
 } from 'lucide-react';
 import {
   DropdownMenu,
