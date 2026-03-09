@@ -540,7 +540,7 @@ async function fetchNVCameras(bounds: Bounds): Promise<CameraResult[]> {
 }
 
 async function fetchIACameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('IA', 'https://www.511ia.org', bounds, { south: 40.3, north: 43.6, west: -96.7, east: -90 }, 10, 200);
+  return fetch511Cameras('IA', 'https://www.511ia.org', bounds, { south: 40.3, north: 43.6, west: -96.7, east: -90 }, 10);
 }
 
 async function fetchNECameras(bounds: Bounds): Promise<CameraResult[]> {
