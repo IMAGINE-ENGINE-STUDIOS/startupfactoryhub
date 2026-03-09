@@ -504,7 +504,7 @@ serve(async (req) => {
       if (!isDupe) deduped.push(cam);
     }
 
-    const final = deduped.slice(0, 200);
+    const final = deduped.slice(0, 300);
     cache.set(key, { data: final, time: Date.now() });
 
     return new Response(
