@@ -98,14 +98,19 @@ async function fetchNYCDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
         return inBounds(lat, lng, bounds);
       })
       .slice(0, 200)
-      .map((c: any) => ({
-        id: `nycdot-${c.id || c.cameraID || c.camera_id || Math.random().toString(36).slice(2)}`,
-        name: c.name || c.title || c.description || 'NYC Camera',
-        lat: c.latitude || c.lat || c.location?.latitude,
-        lng: c.longitude || c.lng || c.location?.longitude,
-        imageUrl: c.imageUrl || c.image_url || c.url || c.stillImageUrl || c.snapshotUrl || '',
-        source: 'NYCDOT',
-      }))
+      .map((c: any) => {
+        const streamCandidate = c.streamUrl || c.videoUrl || c.mjpegUrl || c.liveStreamUrl || '';
+        return {
+          id: `nycdot-${c.id || c.cameraID || c.camera_id || Math.random().toString(36).slice(2)}`,
+          name: c.name || c.title || c.description || 'NYC Camera',
+          lat: c.latitude || c.lat || c.location?.latitude,
+          lng: c.longitude || c.lng || c.location?.longitude,
+          imageUrl: c.imageUrl || c.image_url || c.url || c.stillImageUrl || c.snapshotUrl || '',
+          source: 'NYCDOT',
+          refreshRate: 5,
+          streamUrl: streamCandidate && /\.(mjpg|mjpeg|mp4)(\?|$)|mjpeg|stream/i.test(streamCandidate) ? streamCandidate : undefined,
+        };
+      })
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
 }
