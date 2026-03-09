@@ -613,6 +613,7 @@ async function fetchWindyCameras(bounds: Bounds): Promise<CameraResult[]> {
         lng: w.location?.longitude || w.position?.longitude,
         imageUrl: w.images?.current?.preview || w.image?.current?.preview || w.images?.daylight?.preview || `https://images-webcams.windy.com/webcams/${w.webcamId || w.id}/current/preview/${w.webcamId || w.id}.jpg`,
         source: `Windy`,
+        refreshRate: 30,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch (e) {
