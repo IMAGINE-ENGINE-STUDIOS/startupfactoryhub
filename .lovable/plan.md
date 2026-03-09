@@ -1,132 +1,73 @@
 
 
-## Premium Mentor/Advisor Program — "Official Mentor" Invite-Only Program
+## Plan: Fix Build, Expand US Camera Coverage, Fix Live Feeds
 
-### Overview
+### 1. Fix Build Error (Blocking)
+The PWA plugin fails because the main JS bundle is 14MB, exceeding the 10MB `maximumFileSizeToCacheInBytes` limit in `vite.config.ts`. Increase it to 20MB on line 51.
 
-Create an invite-only premium program for Mentors and Advisors that grants "Official" status on the platform. Admin sends email invitations; invitees must complete a multi-step onboarding checklist before earning the official badge (star + insignia) visible on their profile and social feed posts.
+### 2. Fix Green Icons With No Live Feed
+The current code marks cameras as "streaming" (green) when `streamUrl` is set, but most sources don't actually provide working MJPEG/video stream URLs. The `streamUrl` field is populated from API response fields that contain HTML page links or broken URLs, not actual video streams.
 
-### Benefits for Official Members
-- Access to all platform perks
-- Free bank account (HSBC introduction)
-- Unique 25% referral commission (instead of standard 20%)
-- Direct startup introductions through the venture fund
+**Root cause**: Only a few sources have real stream URLs:
+- Caltrans `streamingVideoURL` may contain `.m3u8` HLS links (can't play natively without hls.js)
+- NYCDOT `streamUrl` fields are speculative — the API structure isn't confirmed
+- 511NY `VideoUrl` often contains page URLs, not stream URLs
 
----
+**Fix**: Remove `streamUrl` assignment for sources that don't provide actual playable video streams. Only mark as streaming if the URL is a confirmed MJPEG endpoint (the only format that works natively in `<img>` tags). HLS `.m3u8` won't work without a library, so treat those as snapshot cameras with fast refresh instead.
 
-### Database Changes (Migration)
+### 3. Add Remaining US State Cameras
+Add fetchers for states using the **511 API pattern** (`511[state].org/api/getcameras`) and **ArcGIS FeatureServer** endpoints. Many states use the same 511 platform:
 
-**1. New table: `official_mentor_invitations`**
-- `id` (uuid, PK)
-- `email` (text, not null)
-- `invited_by` (uuid, FK to auth.users — the admin)
-- `invitation_token` (text, unique, not null)
-- `status` (text: `pending`, `accepted`, `expired`, default `pending`)
-- `expires_at` (timestamptz)
-- `accepted_at` (timestamptz, nullable)
-- `accepted_by` (uuid, FK to auth.users, nullable)
-- `created_at` (timestamptz, default now())
-- RLS: admin can insert/select; invited user can select/update their own row by token
+| State | Source | API Pattern |
+|-------|--------|-------------|
+| NC | NCDOT | `https://tims.ncdot.gov/tims/api/traffic/cameras` or 511 |
+| SC | SCDOT | `https://www.511sc.org/api/getcameras` |
+| LA | LaDOTD | `https://www.511la.org/api/getcameras` |
+| DC | DDOT | `https://opendata.dc.gov` Socrata API |
+| OH | ODOT | `https://publicapi.ohgo.com/api/v1/Cameras` |
+| MI | MDOT | `https://mdotjboss.state.mi.us/MiDrive/camera` |
+| MN | MnDOT | `https://511mn.org/api/getcameras` |
+| IN | INDOT | ArcGIS or 511 |
+| WI | WisDOT | `https://511wi.gov/api/getcameras` |
+| MO | MoDOT | `https://traveler.modot.org` |
+| TN | TDOT | `https://smartway.tn.gov/traffic/api/cameras` |
+| KY | KYTC | `https://511.ky.gov/api/getcameras` |
+| AL | ALDOT | ArcGIS |
+| MA | MassDOT | `https://511ma.com/api/getcameras` |
+| CT | CTDOT | `https://www.ct.gov/dot` |
+| AZ | ADOT | `https://az511.gov/api/getcameras` |
+| NV | NDOT | `https://nvroads.com/api/getcameras` |
+| UT | UDOT | `https://udottraffic.utah.gov` |
 
-**2. New table: `official_mentor_status`**
-- `id` (uuid, PK)
-- `user_id` (uuid, FK to auth.users, unique, not null)
-- `invitation_id` (uuid, FK to official_mentor_invitations)
-- `profile_completed` (boolean, default false)
-- `email_verified` (boolean, default false)
-- `connection_invited` (boolean, default false)
-- `is_official` (boolean, default false) — set to true when all 3 checks pass
-- `referral_commission_rate` (numeric, default 0.25) — 25%
-- `granted_at` (timestamptz, nullable)
-- `created_at` (timestamptz, default now())
-- RLS: user can read own row; admin can read/update all
+Many of these share the **511 platform** format (`/api/getcameras?format=json&key=public`), so I'll create a generic `fetch511Cameras(stateCode, baseUrl, bounds, boundsFilter)` helper to avoid repeating code for each state.
 
-**3. Add column to `profiles` table:**
-- `is_official_mentor` (boolean, default false) — quick-access flag for display in feed posts and profile cards
+### 4. Street Cameras (Not Just Highways)
+Most DOT cameras are highway-only. To add street-level cameras:
+- **Windy.com webcams** already include street/city cameras — increase their limit and priority
+- **Austin TX** Socrata data includes intersection cameras (already implemented)
+- **DC OpenData** includes traffic signal cameras at intersections
+- For NYC, the NYCDOT API includes local road cameras, not just highways
 
-**4. DB function: `check_and_grant_official_status(p_user_id uuid)`**
-- Checks if profile is complete (full_name, bio, avatar_url, linkedin_url all non-null)
-- Checks if email is verified (auth.users.email_confirmed_at is not null — use security definer)
-- Checks if user has at least 1 accepted connection
-- If all pass, sets `is_official = true`, `granted_at = now()`, and updates `profiles.is_official_mentor = true`
-
----
-
-### Edge Function: `send-official-mentor-invite`
-
-- Admin-only (verify service role or admin check)
-- Accepts email + optional message
-- Generates unique invitation token
-- Inserts row into `official_mentor_invitations`
-- Sends branded email via Resend with invitation link pointing to `/official-mentor-invite?token=...`
-
----
-
-### Frontend Changes
-
-**1. New page: `/official-mentor-invite` (OfficialMentorInvite.tsx)**
-- Public route for accepting the invitation
-- Verifies token against `official_mentor_invitations`
-- If user is already registered (mentor/advisor role), links invitation to their account
-- If not registered, redirects to signup with pre-filled email and role
-- Creates `official_mentor_status` row upon acceptance
-
-**2. New component: `OfficialMentorChecklist`**
-- Displayed on Mentor/Advisor dashboard for invited users who haven't completed all steps
-- Shows 3 checklist items with status: Complete Profile, Verify Email, Invite a Connection
-- Each item shows green check or pending icon
-- "Check Status" button calls `check_and_grant_official_status` RPC
-- On completion, shows congratulations with the official badge
-
-**3. Official Badge/Insignia in UI**
-- Update `RoleBasedAvatar` component: if `is_official_mentor` is true, overlay a gold star/shield insignia
-- Update `UnifiedCommunityFeed` post rendering: show official badge next to name for official mentors/advisors
-- Update `UserProfileDialog` / profile views: show "Official Mentor" or "Official Advisor" badge
-
-**4. Admin Dashboard — new section in existing management**
-- Add "Official Program" sub-tab or section under Users/Partners management
-- Form to invite by email
-- List of invitations with status tracking
-- View checklist progress for each invitee
-
-**5. Referral override for official members**
-- When creating referral accounts for official mentors, set commission rate to 25% instead of 20%
-- Update referral earnings calculation to use the per-user commission rate
-
----
-
-### Technical Flow
-
-```text
-Admin sends invite email
-        ↓
-Mentor/Advisor clicks link → /official-mentor-invite?token=xxx
-        ↓
-Token verified → Account linked → official_mentor_status row created
-        ↓
-Dashboard shows checklist:
-  ☐ Complete profile (name, bio, avatar, linkedin)
-  ☐ Verify email
-  ☐ Invite 1 connection
-        ↓
-All 3 complete → RPC grants official status
-        ↓
-Profile badge + feed insignia activated
-25% referral rate applied
-```
-
-### Files to Create
-- `src/pages/OfficialMentorInvite.tsx`
-- `src/components/OfficialMentorChecklist.tsx`
-- `src/components/OfficialBadge.tsx`
-- `supabase/functions/send-official-mentor-invite/index.ts`
+### 5. Increase Camera Limits
+- Raise the per-source slice limits from 80-100 to 200-300
+- Raise the global dedup limit from 800 to 1500
+- Increase Windy limit to 300 (it's the main source for non-highway cameras)
 
 ### Files to Modify
-- `src/App.tsx` — add route
-- `src/components/RoleBasedAvatar.tsx` — add official insignia overlay
-- `src/components/UnifiedCommunityFeed.tsx` — show badge next to official users
-- `src/pages/MentorDashboard.tsx` — add checklist component
-- `src/pages/AdvisorDashboard.tsx` — add checklist component
-- `src/components/admin/` — add invitation management UI
-- Migration SQL for new tables/columns/functions
+- **`vite.config.ts`** — increase PWA cache limit to 20MB (fixes build)
+- **`supabase/functions/traffic-cameras/index.ts`** — add ~15 new state fetchers using generic 511 helper, fix streamUrl logic, increase limits
+
+### Technical Approach
+Create a reusable function:
+```typescript
+async function fetch511StateCameras(
+  stateCode: string, 
+  baseUrl: string, 
+  bounds: Bounds, 
+  boundsCheck: (b: Bounds) => boolean,
+  refreshRate: number
+): Promise<CameraResult[]>
+```
+
+This reduces ~500 lines of repetitive code to ~30 lines per state (just the bounds check and URL).
 
