@@ -573,7 +573,7 @@ serve(async (req) => {
       if (!isDupe) deduped.push(cam);
     }
 
-    const final = deduped.slice(0, 300);
+    const final = deduped.slice(0, 500);
     cache.set(key, { data: final, time: Date.now() });
 
     return new Response(
