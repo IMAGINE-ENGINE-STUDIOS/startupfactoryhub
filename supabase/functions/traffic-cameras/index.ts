@@ -453,7 +453,7 @@ async function fetchPADOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: parseFloat(c.Longitude || c.longitude),
         imageUrl: c.Url || c.url || c.VideoUrl || '',
         source: '511PA',
-        refreshRate: 10,
+        refreshRate: 5,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
