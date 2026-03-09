@@ -1301,62 +1301,97 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     }
   }, [showTraffic, mapReady]);
 
-  // Camera markers - PINNED permanently, never removed once placed
-  const cameraMarkerMap = useRef<Record<string, mapboxgl.Marker>>({});
+  // Camera markers using native Mapbox GeoJSON layer - mathematically pinned to coordinates
+  // These are rendered by WebGL, not DOM, so they CANNOT drift during zoom/pan
+  const cameraLayerAdded = useRef(false);
   
   useEffect(() => {
     if (!map.current || !mapReady) return;
     
-    // Only clear ALL markers when CCTV is turned off
-    if (!showCCTV) {
-      Object.values(cameraMarkerMap.current).forEach(m => m.remove());
-      cameraMarkerMap.current = {};
-      cameraMarkers.current = [];
+    const sourceId = 'cctv-cameras-source';
+    const layerId = 'cctv-cameras-layer';
+    
+    if (!showCCTV || !trafficCameras || trafficCameras.length === 0) {
+      // Hide layer if exists
+      if (map.current.getLayer(layerId)) {
+        map.current.setLayoutProperty(layerId, 'visibility', 'none');
+      }
       return;
     }
     
-    if (!trafficCameras || trafficCameras.length === 0) return;
+    // Build GeoJSON from camera data
+    const geojson: GeoJSON.FeatureCollection = {
+      type: 'FeatureCollection',
+      features: trafficCameras.map((cam) => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [cam.lng, cam.lat],
+        },
+        properties: {
+          id: cam.id,
+          name: cam.name,
+          imageUrl: cam.imageUrl,
+          source: cam.source,
+          lat: cam.lat,
+          lng: cam.lng,
+        },
+      })),
+    };
     
-    // Only ADD new markers - NEVER remove existing ones
-    trafficCameras.forEach((cam) => {
-      if (cameraMarkerMap.current[cam.id]) return; // Already pinned, skip
+    if (map.current.getSource(sourceId)) {
+      // Update existing source
+      (map.current.getSource(sourceId) as mapboxgl.GeoJSONSource).setData(geojson);
+      if (map.current.getLayer(layerId)) {
+        map.current.setLayoutProperty(layerId, 'visibility', 'visible');
+      }
+    } else {
+      // Create source and layer
+      map.current.addSource(sourceId, {
+        type: 'geojson',
+        data: geojson,
+      });
       
-      const el = document.createElement('div');
-      el.className = 'cctv-marker';
-      el.style.cssText = `
-        width: 28px;
-        height: 28px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: linear-gradient(135deg, #dc2626, #b91c1c);
-        border: 2px solid white;
-        border-radius: 50%;
-        box-shadow: 0 2px 8px rgba(220, 38, 38, 0.5);
-        pointer-events: auto;
-        position: relative;
-        z-index: 1;
-      `;
-      el.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>`;
+      map.current.addLayer({
+        id: layerId,
+        type: 'circle',
+        source: sourceId,
+        paint: {
+          'circle-radius': 8,
+          'circle-color': '#dc2626',
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#ffffff',
+          'circle-opacity': 1,
+        },
+      });
       
-      el.addEventListener('click', (e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        if (map.current) {
-          map.current.stop();
-        }
+      cameraLayerAdded.current = true;
+      
+      // Click handler
+      map.current.on('click', layerId, (e) => {
+        if (!e.features || e.features.length === 0) return;
+        const props = e.features[0].properties;
+        if (!props) return;
+        
+        const cam: TrafficCamera = {
+          id: props.id,
+          name: props.name,
+          lat: props.lat,
+          lng: props.lng,
+          imageUrl: props.imageUrl,
+          source: props.source,
+        };
         setSelectedCamera(cam);
       });
       
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-        .setLngLat([cam.lng, cam.lat])
-        .addTo(map.current!);
-      
-      cameraMarkerMap.current[cam.id] = marker;
-    });
-    
-    cameraMarkers.current = Object.values(cameraMarkerMap.current);
+      // Cursor style on hover
+      map.current.on('mouseenter', layerId, () => {
+        if (map.current) map.current.getCanvas().style.cursor = 'pointer';
+      });
+      map.current.on('mouseleave', layerId, () => {
+        if (map.current) map.current.getCanvas().style.cursor = '';
+      });
+    }
     
   }, [trafficCameras, showCCTV, mapReady]);
 
