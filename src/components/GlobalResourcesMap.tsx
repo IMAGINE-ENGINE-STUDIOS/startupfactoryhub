@@ -1388,6 +1388,8 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           lng: props.lng,
           imageUrl: props.imageUrl,
           source: props.source,
+          streamUrl: props.streamUrl || undefined,
+          refreshRate: props.refreshRate || 10,
         };
         setSelectedCamera(cam);
       });
