@@ -107,8 +107,8 @@ async function fetchNYCDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
           lng: c.longitude || c.lng || c.location?.longitude,
           imageUrl: c.imageUrl || c.image_url || c.url || c.stillImageUrl || c.snapshotUrl || '',
           source: 'NYCDOT',
-          refreshRate: 5,
-          streamUrl: streamCandidate && /\.(mjpg|mjpeg|mp4)(\?|$)|mjpeg|stream/i.test(streamCandidate) ? streamCandidate : undefined,
+          refreshRate: 2,
+          streamUrl: streamCandidate && /\.(mjpg|mjpeg|mp4|m3u8)(\?|$)|mjpeg|mjpg|stream|video/i.test(streamCandidate) ? streamCandidate : undefined,
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
