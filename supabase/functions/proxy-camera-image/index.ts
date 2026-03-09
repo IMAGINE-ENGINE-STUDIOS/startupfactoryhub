@@ -5,20 +5,37 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-// Allowed camera image domains
+// Allowed camera image domain patterns (matched via endsWith)
 const ALLOWED_DOMAINS = [
   'images-dim.divas.cloud',
   'cwwp2.dot.ca.gov',
   'www.511virginia.org',
   '511ny.org',
+  // Florida DOT domains
   'fl511.com',
+  'fl-cameras.com',
+  'fdot.gov',
+  'arcgis.com',
+  'arcgisonline.com',
+  'services.arcgis.com',
+  // Windy webcam domains
   'images-webcams.windy.com',
+  'webcams.windy.com',
+  'windy.com',
+  // Other DOTs
   'data.wsdot.wa.gov',
+  'wsdot.wa.gov',
   'tripcheck.com',
   'www.cotrip.org',
+  'cotrip.org',
   'livetraffic.com',
   'data.highwaysengland.co.uk',
+  'highwaysengland.co.uk',
   '511ga.org',
+  // Common camera CDNs
+  'amazonaws.com',
+  'cloudfront.net',
+  'akamaized.net',
 ];
 
 serve(async (req) => {
