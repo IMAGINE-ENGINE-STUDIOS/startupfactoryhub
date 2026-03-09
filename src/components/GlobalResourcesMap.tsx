@@ -906,20 +906,21 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
           'source-layer': 'building',
           filter: ['==', 'extrude', 'true'],
           type: 'fill-extrusion',
-          minzoom: 14,
+          minzoom: 13,
           paint: {
             'fill-extrusion-color': [
               'interpolate',
               ['linear'],
               ['get', 'height'],
-              0, '#64748b',
-              50, '#475569',
-              100, '#334155',
-              200, '#1e293b'
+              0, '#334155',
+              20, '#475569',
+              50, '#64748b',
+              100, '#94a3b8',
+              200, '#cbd5e1'
             ],
             'fill-extrusion-height': ['get', 'height'],
             'fill-extrusion-base': ['get', 'min_height'],
-            'fill-extrusion-opacity': 0.7,
+            'fill-extrusion-opacity': 0.8,
           },
         });
       }
