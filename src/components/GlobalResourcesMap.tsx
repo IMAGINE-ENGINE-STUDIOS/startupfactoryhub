@@ -1358,7 +1358,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         setSelectedCamera(cam);
       });
       
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'center', pitchAlignment: 'map' })
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
         .setLngLat([cam.lng, cam.lat])
         .addTo(map.current!);
       
@@ -1367,12 +1367,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     
     cameraMarkers.current = Object.values(cameraMarkerMap.current);
     
-    return () => {
-      Object.values(cameraMarkerMap.current).forEach(m => m.remove());
-      cameraMarkerMap.current = {};
-      cameraMarkers.current = [];
-    };
-  }, [trafficCameras, showCCTV, mapReady, setSelectedCamera]);
+  }, [trafficCameras, showCCTV, mapReady]);
 
   // Camera projection on map (pulsing circle when camera selected)
   useEffect(() => {
