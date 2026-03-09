@@ -660,7 +660,7 @@ async function fetchMACameras(bounds: Bounds): Promise<CameraResult[]> {
 // ====== CONNECTICUT ======
 
 async function fetchCTCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('CT', 'https://www.ct.gov/dot/511', bounds, { south: 40.9, north: 42.1, west: -73.8, east: -71.7 }, 10, 200);
+  return fetch511Cameras('CT', 'https://www.ct.gov/dot/511', bounds, { south: 40.9, north: 42.1, west: -73.8, east: -71.7 }, 10);
 }
 
 // ====== UTAH ======
