@@ -691,6 +691,7 @@ You can help with:
             const navSearch = url.searchParams.get('search') || '';
             const navResourceId = url.searchParams.get('id') || '';
             const isJobNav = navPath.startsWith('/jobs');
+            const isMapNav = navPath.startsWith('/map');
 
             if (isJobNav) {
               // Navigate to dashboard jobs tab
@@ -699,6 +700,22 @@ You can help with:
                 setTimeout(() => {
                   window.dispatchEvent(new CustomEvent('genius-job-navigate', {
                     detail: { search: navSearch }
+                  }));
+                }, 600);
+              }, 800);
+            } else if (isMapNav) {
+              // Navigate to map with coordinates - for cameras, streets, buildings
+              const lat = parseFloat(url.searchParams.get('lat') || '0');
+              const lng = parseFloat(url.searchParams.get('lng') || '0');
+              const zoom = parseFloat(url.searchParams.get('zoom') || '14');
+              const place = url.searchParams.get('place') || '';
+              const layer = url.searchParams.get('layer') || '';
+
+              setTimeout(() => {
+                navigate('/dashboard?tab=resources');
+                setTimeout(() => {
+                  window.dispatchEvent(new CustomEvent('genius-map-navigate', {
+                    detail: { lat, lng, zoom, place, layer }
                   }));
                 }, 600);
               }, 800);
