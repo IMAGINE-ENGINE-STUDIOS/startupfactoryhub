@@ -200,98 +200,36 @@ async function fetch511VA(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// Florida DOT - FL511
+// Florida DOT - FL511 via ArcGIS FeatureServer (real endpoint with 1,500+ cameras)
 async function fetchFLDOT(bounds: Bounds): Promise<CameraResult[]> {
   if (bounds.south > 31.5 || bounds.north < 24.3 || bounds.west > -79.5 || bounds.east < -88) return [];
   try {
-    // FL511 Open Data GeoJSON endpoint
-    const resp = await fetch('https://fl511.com/List/GetData/Cameras', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({}),
-      signal: AbortSignal.timeout(10000),
-    });
-    if (!resp.ok) {
-      // Fallback: try the map data endpoint
-      const resp2 = await fetch('https://fl511.com/map/mapIcons/Cameras', { signal: AbortSignal.timeout(10000) });
-      if (!resp2.ok) return [];
-      const data2 = await resp2.json();
-      const items = Array.isArray(data2) ? data2 : (data2?.features || data2?.items || []);
-      return items
-        .filter((c: any) => {
-          const lat = c.latitude || c.lat || c.geometry?.coordinates?.[1] || 0;
-          const lng = c.longitude || c.lng || c.lon || c.geometry?.coordinates?.[0] || 0;
-          return inBounds(lat, lng, bounds);
-        })
-        .slice(0, 200)
-        .map((c: any, i: number) => ({
-          id: `fl-${c.id || c.cameraId || i}`,
-          name: c.name || c.description || c.roadway || c.title || 'FL Camera',
-          lat: c.latitude || c.lat || c.geometry?.coordinates?.[1],
-          lng: c.longitude || c.lng || c.lon || c.geometry?.coordinates?.[0],
-          imageUrl: c.imageUrl || c.url || c.views?.[0]?.url || '',
-          source: 'FL511',
-        }))
-        .filter((c: CameraResult) => c.imageUrl);
-    }
+    const url = `https://services.arcgis.com/3wFbqsFPLeKqOlIK/arcgis/rest/services/FL511_Traffic_Cameras/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=ID,DESCRIPT,COUNTY,HIGHWAY,LATITUDE,LONGITUDE,IMAGE&f=json&resultRecordCount=500`;
+    const resp = await fetch(url, { signal: AbortSignal.timeout(12000) });
+    if (!resp.ok) return [];
     const data = await resp.json();
-    const items = Array.isArray(data) ? data : (data?.features || data?.items || data?.cameras || []);
-    return items
-      .filter((c: any) => {
-        const lat = parseFloat(c.latitude || c.lat || c.Latitude || 0);
-        const lng = parseFloat(c.longitude || c.lng || c.lon || c.Longitude || 0);
-        return inBounds(lat, lng, bounds);
+    const features = data?.features || [];
+    if (!Array.isArray(features)) return [];
+    return features
+      .filter((f: any) => {
+        const a = f.attributes || {};
+        return a.IMAGE && a.LATITUDE && a.LONGITUDE && inBounds(a.LATITUDE, a.LONGITUDE, bounds);
       })
-      .slice(0, 200)
-      .map((c: any, i: number) => ({
-        id: `fl-${c.id || c.cameraId || c.ID || i}`,
-        name: c.name || c.description || c.roadway || c.Name || c.LocationDescription || 'FL Camera',
-        lat: parseFloat(c.latitude || c.lat || c.Latitude),
-        lng: parseFloat(c.longitude || c.lng || c.lon || c.Longitude),
-        imageUrl: c.imageUrl || c.url || c.Url || c.views?.[0]?.url || c.VideoUrl || '',
-        source: 'FL511',
-      }))
-      .filter((c: CameraResult) => c.imageUrl);
+      .map((f: any) => {
+        const a = f.attributes;
+        return {
+          id: `fl-${a.ID || a.OBJECTID || Math.random().toString(36).slice(2)}`,
+          name: a.DESCRIPT || (a.COUNTY && a.HIGHWAY ? `${a.COUNTY} - ${a.HIGHWAY}` : 'FL Camera'),
+          lat: a.LATITUDE,
+          lng: a.LONGITUDE,
+          imageUrl: a.IMAGE,
+          source: 'FL511',
+        };
+      });
   } catch (e) {
-    console.error('FL DOT cameras error:', e);
+    console.error('FL DOT ArcGIS cameras error:', e);
     return [];
   }
-}
-
-// Florida Turnpike / SunGuide cameras (additional FDOT districts)
-async function fetchFLSunGuide(bounds: Bounds): Promise<CameraResult[]> {
-  if (bounds.south > 31.5 || bounds.north < 24.3 || bounds.west > -79.5 || bounds.east < -88) return [];
-  try {
-    // SunGuide District 4 (SE FL - Miami, Fort Lauderdale, Palm Beach)
-    const districts = [
-      { url: 'https://fl511.com/api/v2/cameras?format=json', label: 'FL511 API' },
-    ];
-    const allCams: CameraResult[] = [];
-    
-    for (const d of districts) {
-      try {
-        const resp = await fetch(d.url, { signal: AbortSignal.timeout(8000) });
-        if (!resp.ok) continue;
-        const data = await resp.json();
-        const cams = Array.isArray(data) ? data : (data?.cameras || data?.features || data?.results || []);
-        for (const c of cams) {
-          const lat = parseFloat(c.latitude || c.lat || c.Latitude || c.geometry?.coordinates?.[1] || 0);
-          const lng = parseFloat(c.longitude || c.lng || c.Longitude || c.geometry?.coordinates?.[0] || 0);
-          if (!inBounds(lat, lng, bounds)) continue;
-          const imgUrl = c.imageUrl || c.url || c.Url || c.views?.[0]?.url || c.VideoUrl || '';
-          if (!imgUrl) continue;
-          allCams.push({
-            id: `fl-sg-${c.id || c.cameraId || allCams.length}`,
-            name: c.name || c.description || c.Name || 'FL SunGuide Camera',
-            lat, lng, imageUrl: imgUrl,
-            source: d.label,
-          });
-          if (allCams.length >= 100) break;
-        }
-      } catch { continue; }
-    }
-    return allCams;
-  } catch { return []; }
 }
 
 
