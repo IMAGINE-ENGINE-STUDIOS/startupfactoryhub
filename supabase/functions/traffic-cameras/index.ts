@@ -548,7 +548,7 @@ async function fetchNECameras(bounds: Bounds): Promise<CameraResult[]> {
 }
 
 async function fetchMOCameras(bounds: Bounds): Promise<CameraResult[]> {
-  return fetch511Cameras('MO', 'https://www.modot.org', bounds, { south: 35.9, north: 40.7, west: -95.8, east: -89 }, 10, 200);
+  return fetch511Cameras('MO', 'https://www.modot.org', bounds, { south: 35.9, north: 40.7, west: -95.8, east: -89 }, 10);
 }
 
 async function fetchINDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
