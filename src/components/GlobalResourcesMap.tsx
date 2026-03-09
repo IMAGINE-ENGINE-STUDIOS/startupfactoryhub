@@ -249,7 +249,12 @@ export const GlobalResourcesMap = () => {
     vehicles: transitVehicles,
     isLoading: vehiclesLoading,
   } = useRealtimeVehicles(map.current, mapReady, showTransitVehicles);
-  
+
+  // Traffic sensors (PeMS, NYC DOT, Seattle)
+  const {
+    sensors: trafficSensors,
+    isLoading: sensorsLoading,
+  } = useTrafficSensors(map.current, mapReady, showTrafficSensors);
   
   // Regus locations (only fetch when workplace selected AND subscribed)
   const regusFilters: RegusFilters = {
