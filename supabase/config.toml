@@ -155,3 +155,6 @@ verify_jwt = false
 
 [functions.traffic-sensors]
 verify_jwt = false
+
+[functions.proxy-camera-image]
+verify_jwt = false
