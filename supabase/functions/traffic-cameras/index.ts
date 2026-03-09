@@ -117,7 +117,6 @@ async function fetchNYCDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
         const lng = c.longitude || c.lng || c.location?.longitude || 0;
         return inBounds(lat, lng, bounds);
       })
-      .slice(0, 300)
       .map((c: any) => ({
         id: `nycdot-${c.id || c.cameraID || c.camera_id || Math.random().toString(36).slice(2)}`,
         name: c.name || c.title || c.description || 'NYC Camera',
