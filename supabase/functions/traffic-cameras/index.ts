@@ -19,6 +19,8 @@ interface CameraResult {
   lng: number;
   imageUrl: string;
   source: string;
+  streamUrl?: string;
+  refreshRate?: number;
 }
 
 const cache = new Map<string, { data: CameraResult[]; time: number }>();
@@ -60,6 +62,7 @@ async function fetchNYCameras(bounds: Bounds): Promise<CameraResult[]> {
           // Use 511ny snapshot endpoint
           imgUrl = `https://511ny.org/map/Cctv/${c.ID || c.id}`;
         }
+        const videoUrl = c.VideoUrl || c.videoUrl || '';
         return {
           id: `ny-${c.ID || c.id}`,
           name: c.Name || c.name || c.RoadwayName || 'NY Camera',
@@ -67,6 +70,8 @@ async function fetchNYCameras(bounds: Bounds): Promise<CameraResult[]> {
           lng: parseFloat(c.Longitude || c.longitude),
           imageUrl: imgUrl,
           source: '511NY',
+          refreshRate: 5,
+          streamUrl: videoUrl && /\.(mjpg|mjpeg|mp4)(\?|$)/i.test(videoUrl) ? videoUrl : undefined,
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
@@ -93,14 +98,19 @@ async function fetchNYCDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
         return inBounds(lat, lng, bounds);
       })
       .slice(0, 200)
-      .map((c: any) => ({
-        id: `nycdot-${c.id || c.cameraID || c.camera_id || Math.random().toString(36).slice(2)}`,
-        name: c.name || c.title || c.description || 'NYC Camera',
-        lat: c.latitude || c.lat || c.location?.latitude,
-        lng: c.longitude || c.lng || c.location?.longitude,
-        imageUrl: c.imageUrl || c.image_url || c.url || c.stillImageUrl || c.snapshotUrl || '',
-        source: 'NYCDOT',
-      }))
+      .map((c: any) => {
+        const streamCandidate = c.streamUrl || c.videoUrl || c.mjpegUrl || c.liveStreamUrl || '';
+        return {
+          id: `nycdot-${c.id || c.cameraID || c.camera_id || Math.random().toString(36).slice(2)}`,
+          name: c.name || c.title || c.description || 'NYC Camera',
+          lat: c.latitude || c.lat || c.location?.latitude,
+          lng: c.longitude || c.lng || c.location?.longitude,
+          imageUrl: c.imageUrl || c.image_url || c.url || c.stillImageUrl || c.snapshotUrl || '',
+          source: 'NYCDOT',
+          refreshRate: 5,
+          streamUrl: streamCandidate && /\.(mjpg|mjpeg|mp4)(\?|$)|mjpeg|stream/i.test(streamCandidate) ? streamCandidate : undefined,
+        };
+      })
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
 }
@@ -128,6 +138,7 @@ async function fetchCaltransDistrict(dist: string, bounds: Bounds): Promise<Came
             name: loc.name || loc.description || `CA ${dist.toUpperCase()} Camera`,
             lat, lng, imageUrl: imgUrl,
             source: `Caltrans ${dist.toUpperCase()}`,
+            refreshRate: 10,
           });
         }
       }
@@ -167,6 +178,7 @@ async function fetchWSDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.CameraLocation.Longitude,
         imageUrl: c.ImageURL || c.ImageUrl || '',
         source: 'WSDOT',
+        refreshRate: 5,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -194,6 +206,7 @@ async function fetchODOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.lon || c.lng || c.longitude,
         imageUrl: c.imageUrl || c.url || '',
         source: 'ODOT',
+        refreshRate: 15,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -222,6 +235,7 @@ async function fetchCDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.geometry.coordinates[0],
         imageUrl: c.properties?.https_url || c.properties?.camera_url || '',
         source: 'CDOT',
+        refreshRate: 15,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -249,6 +263,7 @@ async function fetch511VA(bounds: Bounds): Promise<CameraResult[]> {
         lng: f.geometry.coordinates[0],
         imageUrl: f.properties?.image_url || f.properties?.url || '',
         source: '511VA',
+        refreshRate: 15,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -291,6 +306,7 @@ async function fetchFLDOT(bounds: Bounds): Promise<CameraResult[]> {
           lng,
           imageUrl: imgUrl,
           source: 'FL511',
+          refreshRate: 15,
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
@@ -319,6 +335,7 @@ async function fetch511GA(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.longitude,
         imageUrl: c.image_url || c.url || '',
         source: '511GA',
+        refreshRate: 15,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -348,6 +365,7 @@ async function fetchTXDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: parseFloat(c.longitude || c.lng),
         imageUrl: c.url || c.image_url || c.imageUrl || '',
         source: 'TxDOT',
+        refreshRate: 15,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -377,6 +395,7 @@ async function fetchILDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.longitude || c.lng || c.geometry?.coordinates?.[0],
         imageUrl: c.imageUrl || c.image_url || c.url || '',
         source: 'ILDOT',
+        refreshRate: 15,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -405,6 +424,7 @@ async function fetchNJDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: parseFloat(c.Longitude || c.longitude),
         imageUrl: c.Url || c.url || c.VideoUrl || '',
         source: '511NJ',
+        refreshRate: 10,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -433,6 +453,7 @@ async function fetchPADOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: parseFloat(c.Longitude || c.longitude),
         imageUrl: c.Url || c.url || c.VideoUrl || '',
         source: '511PA',
+        refreshRate: 10,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -462,6 +483,7 @@ async function fetchMDDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: parseFloat(c.lon || c.lng || c.longitude),
         imageUrl: c.imageUrl || c.url || c.image || '',
         source: 'MDSHA',
+        refreshRate: 15,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -491,6 +513,7 @@ async function fetchUKCameras(bounds: Bounds): Promise<CameraResult[]> {
         lng: c.longitude || c.lng || c.geometry?.coordinates?.[0],
         imageUrl: c.image || c.imageUrl || c.url || '',
         source: 'Highways England',
+        refreshRate: 20,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -519,6 +542,7 @@ async function fetchNLCameras(bounds: Bounds): Promise<CameraResult[]> {
         lng: f.geometry.coordinates[0],
         imageUrl: f.properties?.imageUrl || f.properties?.url || '',
         source: 'NDW Netherlands',
+        refreshRate: 20,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -546,6 +570,7 @@ async function fetchAUCameras(bounds: Bounds): Promise<CameraResult[]> {
         lng: f.geometry.coordinates[0],
         imageUrl: f.properties?.href || f.properties?.imageUrl || '',
         source: 'NSW LiveTraffic',
+        refreshRate: 20,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
@@ -588,6 +613,7 @@ async function fetchWindyCameras(bounds: Bounds): Promise<CameraResult[]> {
         lng: w.location?.longitude || w.position?.longitude,
         imageUrl: w.images?.current?.preview || w.image?.current?.preview || w.images?.daylight?.preview || `https://images-webcams.windy.com/webcams/${w.webcamId || w.id}/current/preview/${w.webcamId || w.id}.jpg`,
         source: `Windy`,
+        refreshRate: 30,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch (e) {
