@@ -552,10 +552,11 @@ serve(async (req) => {
       fetch511GA(bounds),
       fetchFLDOT(bounds),
       fetchFLSunGuide(bounds),
+      fetchFloridaWindyCameras(bounds),
       fetchUKCameras(bounds),
       fetchNLCameras(bounds),
       fetchAUCameras(bounds),
-      fetchWindyCameras(bounds), // Worldwide fallback
+      fetchWindyCameras(bounds),
     ]);
 
     const allCameras: CameraResult[] = [];
