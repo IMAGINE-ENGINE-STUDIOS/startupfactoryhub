@@ -37,10 +37,17 @@ export const useTrafficCameras = (
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedCamera, setSelectedCamera] = useState<TrafficCamera | null>(null);
+  const selectedCameraRef = useRef<TrafficCamera | null>(null);
   const lastFetchBounds = useRef<UseBounds | null>(null);
   const fetchTimeoutRef = useRef<number | null>(null);
   const cacheRef = useRef<{ data: TrafficCamera[]; time: number; bounds: UseBounds } | null>(null);
   const currentCamerasRef = useRef<TrafficCamera[]>([]);
+
+  // Keep ref in sync with state
+  const handleSetSelectedCamera = useCallback((cam: TrafficCamera | null) => {
+    selectedCameraRef.current = cam;
+    setSelectedCamera(cam);
+  }, []);
 
   const fetchCameras = useCallback(async (bounds: UseBounds) => {
     // Check cache - skip if bounds barely moved
@@ -95,6 +102,9 @@ export const useTrafficCameras = (
     }
 
     const handleMoveEnd = () => {
+      // Don't re-fetch if a camera is selected (user is viewing a camera, not browsing)
+      if (selectedCameraRef.current) return;
+      
       const zoom = map.getZoom();
       if (zoom < 9) {
         if (currentCamerasRef.current.length > 0) {
@@ -134,6 +144,6 @@ export const useTrafficCameras = (
     isLoading,
     error,
     selectedCamera,
-    setSelectedCamera,
+    setSelectedCamera: handleSetSelectedCamera,
   };
 };
