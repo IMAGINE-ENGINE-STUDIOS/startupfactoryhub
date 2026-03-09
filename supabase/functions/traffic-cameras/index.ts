@@ -483,7 +483,7 @@ async function fetchMDDOT(bounds: Bounds): Promise<CameraResult[]> {
         lng: parseFloat(c.lon || c.lng || c.longitude),
         imageUrl: c.imageUrl || c.url || c.image || '',
         source: 'MDSHA',
-        refreshRate: 15,
+        refreshRate: 10,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
