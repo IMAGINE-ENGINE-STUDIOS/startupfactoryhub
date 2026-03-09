@@ -18,6 +18,16 @@ interface UseBounds {
   west: number;
 }
 
+// Deep compare camera arrays by id set - only trigger re-render if actual data changed
+function camerasChanged(prev: TrafficCamera[], next: TrafficCamera[]): boolean {
+  if (prev.length !== next.length) return true;
+  const prevIds = new Set(prev.map(c => c.id));
+  for (const cam of next) {
+    if (!prevIds.has(cam.id)) return true;
+  }
+  return false;
+}
+
 export const useTrafficCameras = (
   map: mapboxgl.Map | null,
   mapReady: boolean,
@@ -30,19 +40,19 @@ export const useTrafficCameras = (
   const lastFetchBounds = useRef<UseBounds | null>(null);
   const fetchTimeoutRef = useRef<number | null>(null);
   const cacheRef = useRef<{ data: TrafficCamera[]; time: number; bounds: UseBounds } | null>(null);
+  const currentCamerasRef = useRef<TrafficCamera[]>([]);
 
   const fetchCameras = useCallback(async (bounds: UseBounds) => {
-    // Check cache (60s)
-    if (cacheRef.current && Date.now() - cacheRef.current.time < 15000) {
+    // Check cache - skip if bounds barely moved
+    if (cacheRef.current && Date.now() - cacheRef.current.time < 30000) {
       const cb = cacheRef.current.bounds;
       if (
-        Math.abs(cb.north - bounds.north) < 1 &&
-        Math.abs(cb.south - bounds.south) < 1 &&
-        Math.abs(cb.east - bounds.east) < 1 &&
-        Math.abs(cb.west - bounds.west) < 1
+        Math.abs(cb.north - bounds.north) < 0.5 &&
+        Math.abs(cb.south - bounds.south) < 0.5 &&
+        Math.abs(cb.east - bounds.east) < 0.5 &&
+        Math.abs(cb.west - bounds.west) < 0.5
       ) {
-        setCameras(cacheRef.current.data);
-        return;
+        return; // Don't even re-set cameras, nothing changed
       }
     }
 
@@ -57,7 +67,13 @@ export const useTrafficCameras = (
       if (fnError) throw fnError;
 
       const cams = (data?.cameras || []) as TrafficCamera[];
-      setCameras(cams);
+      
+      // Only update state if cameras actually changed
+      if (camerasChanged(currentCamerasRef.current, cams)) {
+        currentCamerasRef.current = cams;
+        setCameras(cams);
+      }
+      
       cacheRef.current = { data: cams, time: Date.now(), bounds };
       lastFetchBounds.current = bounds;
     } catch (err: any) {
@@ -68,17 +84,23 @@ export const useTrafficCameras = (
     }
   }, []);
 
-  // Fetch on map move when enabled and zoom >= 10
+  // Fetch on map move when enabled and zoom >= 9
   useEffect(() => {
     if (!map || !mapReady || !enabled) {
-      setCameras([]);
+      if (currentCamerasRef.current.length > 0) {
+        currentCamerasRef.current = [];
+        setCameras([]);
+      }
       return;
     }
 
     const handleMoveEnd = () => {
       const zoom = map.getZoom();
-      if (zoom < 10) {
-        setCameras([]);
+      if (zoom < 9) {
+        if (currentCamerasRef.current.length > 0) {
+          currentCamerasRef.current = [];
+          setCameras([]);
+        }
         return;
       }
 
@@ -92,9 +114,9 @@ export const useTrafficCameras = (
         west: b.getWest(),
       };
 
-      // Debounce
+      // Debounce with longer delay to prevent rapid re-fetches
       if (fetchTimeoutRef.current) clearTimeout(fetchTimeoutRef.current);
-      fetchTimeoutRef.current = window.setTimeout(() => fetchCameras(bounds), 500);
+      fetchTimeoutRef.current = window.setTimeout(() => fetchCameras(bounds), 800);
     };
 
     // Initial fetch
