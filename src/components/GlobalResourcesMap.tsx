@@ -1835,6 +1835,86 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                       onFiltersChange={ais.setFilters}
                     />
                   </div>
+
+                  {/* Urban Infrastructure category */}
+                  <div>
+                    <h3 className="text-sm font-medium mb-3 text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
+                      <Building className="w-3.5 h-3.5 text-slate-400" />
+                      Urban Infrastructure
+                    </h3>
+                    <div className="space-y-3">
+                      {/* 3D Buildings toggle */}
+                      <div className="p-3 rounded-xl bg-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                              <Building className="w-4 h-4 text-slate-400" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium truncate block">3D Buildings</span>
+                              <p className="text-xs text-muted-foreground">OpenStreetMap extruded buildings (zoom 14+)</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={show3DBuildings}
+                            onCheckedChange={setShow3DBuildings}
+                            className="flex-shrink-0 ml-2"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Live Traffic toggle */}
+                      <div className="p-3 rounded-xl bg-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                              <Car className="w-4 h-4 text-amber-400" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium truncate block">Live Traffic</span>
+                              <p className="text-xs text-muted-foreground">Mapbox real-time congestion data</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={showTraffic}
+                            onCheckedChange={setShowTraffic}
+                            className="flex-shrink-0 ml-2"
+                          />
+                        </div>
+                      </div>
+
+                      {/* CCTV Cameras toggle */}
+                      <div className="p-3 rounded-xl bg-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                              <Camera className="w-4 h-4 text-red-400" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium truncate block">CCTV Cameras</span>
+                              <p className="text-xs text-muted-foreground">Public DOT traffic cameras (zoom 10+)</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={showCCTV}
+                            onCheckedChange={setShowCCTV}
+                            className="flex-shrink-0 ml-2"
+                          />
+                        </div>
+                        {showCCTV && camerasLoading && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            Loading cameras...
+                          </div>
+                        )}
+                        {showCCTV && trafficCameras.length > 0 && (
+                          <Badge variant="outline" className="text-xs bg-red-500/20 border-red-500/50 text-red-400">
+                            {trafficCameras.length} cameras in view
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : selectedType === 'workplace' ? (
                 <div className="mt-4 pt-4 border-t border-white/20">
