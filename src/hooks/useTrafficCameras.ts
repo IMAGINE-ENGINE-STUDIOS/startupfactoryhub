@@ -33,7 +33,7 @@ export const useTrafficCameras = (
 
   const fetchCameras = useCallback(async (bounds: UseBounds) => {
     // Check cache (60s)
-    if (cacheRef.current && Date.now() - cacheRef.current.time < 60000) {
+    if (cacheRef.current && Date.now() - cacheRef.current.time < 15000) {
       const cb = cacheRef.current.bounds;
       if (
         Math.abs(cb.north - bounds.north) < 1 &&
