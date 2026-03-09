@@ -70,8 +70,8 @@ async function fetchNYCameras(bounds: Bounds): Promise<CameraResult[]> {
           lng: parseFloat(c.Longitude || c.longitude),
           imageUrl: imgUrl,
           source: '511NY',
-          refreshRate: 5,
-          streamUrl: videoUrl && /\.(mjpg|mjpeg|mp4)(\?|$)/i.test(videoUrl) ? videoUrl : undefined,
+          refreshRate: 3,
+          streamUrl: videoUrl && /\.(mjpg|mjpeg|mp4|m3u8)(\?|$)|mjpeg|mjpg|stream|video/i.test(videoUrl) ? videoUrl : undefined,
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
