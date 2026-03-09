@@ -16,12 +16,24 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState(new Date());
+  const [proxyUrl, setProxyUrl] = useState<string | null>(null);
+  const [imageError, setImageError] = useState(false);
+
+  // Build proxied image URL
+  useEffect(() => {
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'zqiihhmdsdgwdcwmryym';
+    const fnUrl = `https://${projectId}.supabase.co/functions/v1/proxy-camera-image`;
+    setProxyUrl(fnUrl);
+    setImageError(false);
+    setImageKey(0);
+  }, [camera.id]);
 
   // Auto-refresh every 5s
   useEffect(() => {
     const interval = setInterval(() => {
       setImageKey(k => k + 1);
       setLastRefreshTime(new Date());
+      setImageError(false);
     }, 5000);
     return () => clearInterval(interval);
   }, []);
@@ -30,12 +42,14 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     setIsRefreshing(true);
     setImageKey(k => k + 1);
     setLastRefreshTime(new Date());
+    setImageError(false);
     setTimeout(() => setIsRefreshing(false), 1000);
   };
 
-  const imageUrl = camera.imageUrl.includes('?')
-    ? `${camera.imageUrl}&_t=${Date.now()}_${imageKey}`
-    : `${camera.imageUrl}?_t=${Date.now()}_${imageKey}`;
+  // Use proxy URL to fetch camera image
+  const imageUrl = proxyUrl
+    ? `${proxyUrl}?url=${encodeURIComponent(camera.imageUrl)}&_t=${Date.now()}_${imageKey}`
+    : camera.imageUrl;
 
   return (
     <div className={cn(
