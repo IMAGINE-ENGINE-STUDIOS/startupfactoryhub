@@ -125,6 +125,7 @@ const App = () => (
                     <Route path="/ref/:code" element={<ReferralRedirect />} />
                     <Route path="/install" element={<InstallApp />} />
                     <Route path="/official-mentor-invite" element={<OfficialMentorInvite />} />
+                    <Route path="/4d-map" element={<FourDMap />} />
                     <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
