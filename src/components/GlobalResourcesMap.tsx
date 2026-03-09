@@ -102,6 +102,7 @@ import { AISVesselDetailCard } from '@/components/hubs/AISVesselDetailCard';
 import { AISControlPanel } from '@/components/hubs/AISControlPanel';
 import { useTrafficCameras, TrafficCamera } from '@/hooks/useTrafficCameras';
 import { TrafficCameraPopup } from '@/components/earth/TrafficCameraPopup';
+import { useRealtimeVehicles, TransitVehicle } from '@/hooks/useRealtimeVehicles';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 type MapStyleType = 'default' | 'satellite' | 'satelliteStreets';
