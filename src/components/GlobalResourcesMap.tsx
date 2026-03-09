@@ -2020,6 +2020,47 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                           </Badge>
                         )}
                       </div>
+
+                      {/* Transit Vehicles toggle */}
+                      <div className="p-3 rounded-xl bg-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                              <Bus className="w-4 h-4 text-blue-400" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium truncate block">Transit Vehicles</span>
+                              <p className="text-xs text-muted-foreground">Real-time GTFS buses & trains (zoom 10+)</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={showTransitVehicles}
+                            onCheckedChange={setShowTransitVehicles}
+                            className="flex-shrink-0 ml-2"
+                          />
+                        </div>
+                        {showTransitVehicles && vehiclesLoading && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            Loading vehicles...
+                          </div>
+                        )}
+                        {showTransitVehicles && transitVehicles.length > 0 && (
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge variant="outline" className="text-xs bg-blue-500/20 border-blue-500/50 text-blue-400">
+                              {transitVehicles.filter(v => v.vehicleType === 'bus').length} buses
+                            </Badge>
+                            <Badge variant="outline" className="text-xs bg-orange-500/20 border-orange-500/50 text-orange-400">
+                              {transitVehicles.filter(v => v.vehicleType === 'train').length} trains
+                            </Badge>
+                            {transitVehicles.filter(v => v.vehicleType === 'tram').length > 0 && (
+                              <Badge variant="outline" className="text-xs bg-purple-500/20 border-purple-500/50 text-purple-400">
+                                {transitVehicles.filter(v => v.vehicleType === 'tram').length} trams
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
