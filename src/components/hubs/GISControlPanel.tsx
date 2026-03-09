@@ -14,8 +14,6 @@ import {
   MapPin,
   Radio,
   Car,
-  Package,
-  Plane,
   Box,
   Earth,
   Lock,
@@ -66,9 +64,7 @@ const STYLE_OPTIONS: { value: MapStyleType; label: string; icon: React.ReactNode
 ];
 
 const PROVIDER_ICONS: Record<string, React.ReactNode> = {
-  'demo-vehicles': <Car className="w-4 h-4" />,
-  'demo-deliveries': <Package className="w-4 h-4" />,
-  'demo-drones': <Plane className="w-4 h-4" />,
+  'vehicles': <Car className="w-4 h-4" />,
 };
 
 export const GISControlPanel = ({

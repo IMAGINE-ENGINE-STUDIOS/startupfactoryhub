@@ -8,7 +8,7 @@ import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useGISLayers } from '@/hooks/useGISLayers';
-import { useExternalTracking, DEMO_PROVIDERS } from '@/hooks/useExternalTracking';
+import { useExternalTracking } from '@/hooks/useExternalTracking';
 import { ExternalTrackingMarkers } from './ExternalTrackingMarkers';
 import { GISControlPanel, MapStyleType } from './GISControlPanel';
 import { useEarthIntelligence } from '@/hooks/useEarthIntelligence';
@@ -68,7 +68,7 @@ export const HubsMapViewLab = ({
     allEntities, 
     isPolling, 
     toggleProvider 
-  } = useExternalTracking(DEMO_PROVIDERS);
+  } = useExternalTracking();
   const {
     earthLayers,
     datasets: earthDatasets,

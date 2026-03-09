@@ -18,85 +18,38 @@ export interface TrackingProvider {
   name: string;
   description?: string;
   icon?: string;
-  pollInterval: number; // milliseconds
+  pollInterval: number;
   enabled: boolean;
+  fetchUrl?: string;
 }
 
-// Demo tracking providers for testing
-export const DEMO_PROVIDERS: TrackingProvider[] = [
-  {
-    id: 'demo-vehicles',
-    name: 'Demo Vehicles',
-    description: 'Simulated vehicle tracking',
-    pollInterval: 3000,
-    enabled: false,
-  },
-  {
-    id: 'demo-deliveries',
-    name: 'Demo Deliveries',
-    description: 'Simulated delivery tracking',
-    pollInterval: 5000,
-    enabled: false,
-  },
-  {
-    id: 'demo-drones',
-    name: 'Demo Drones',
-    description: 'Simulated drone tracking',
-    pollInterval: 2000,
-    enabled: false,
-  },
-];
-
-// Generate demo entities for testing
-const generateDemoEntities = (providerId: string): TrackedEntity[] => {
-  const now = new Date().toISOString();
-  
-  if (providerId === 'demo-vehicles') {
-    return [
-      { id: 'v1', type: 'vehicle', name: 'Vehicle Alpha', latitude: 28.5383 + (Math.random() - 0.5) * 0.01, longitude: -81.3792 + (Math.random() - 0.5) * 0.01, heading: Math.random() * 360, speed: 35, lastUpdated: now },
-      { id: 'v2', type: 'vehicle', name: 'Vehicle Beta', latitude: 40.7128 + (Math.random() - 0.5) * 0.01, longitude: -74.0060 + (Math.random() - 0.5) * 0.01, heading: Math.random() * 360, speed: 45, lastUpdated: now },
-      { id: 'v3', type: 'vehicle', name: 'Vehicle Gamma', latitude: 35.6762 + (Math.random() - 0.5) * 0.01, longitude: 139.6503 + (Math.random() - 0.5) * 0.01, heading: Math.random() * 360, speed: 28, lastUpdated: now },
-    ];
-  }
-  
-  if (providerId === 'demo-deliveries') {
-    return [
-      { id: 'd1', type: 'delivery', name: 'Package #1234', latitude: 37.7749 + (Math.random() - 0.5) * 0.02, longitude: -122.4194 + (Math.random() - 0.5) * 0.02, lastUpdated: now, metadata: { status: 'in_transit' } },
-      { id: 'd2', type: 'delivery', name: 'Package #5678', latitude: 51.5074 + (Math.random() - 0.5) * 0.02, longitude: -0.1278 + (Math.random() - 0.5) * 0.02, lastUpdated: now, metadata: { status: 'delivering' } },
-    ];
-  }
-  
-  if (providerId === 'demo-drones') {
-    return [
-      { id: 'dr1', type: 'drone', name: 'Drone Alpha-1', latitude: -33.8688 + (Math.random() - 0.5) * 0.005, longitude: 151.2093 + (Math.random() - 0.5) * 0.005, heading: Math.random() * 360, speed: 60, lastUpdated: now },
-      { id: 'dr2', type: 'drone', name: 'Drone Beta-2', latitude: 48.8566 + (Math.random() - 0.5) * 0.005, longitude: 2.3522 + (Math.random() - 0.5) * 0.005, heading: Math.random() * 360, speed: 55, lastUpdated: now },
-    ];
-  }
-  
-  return [];
-};
-
-export const useExternalTracking = (initialProviders: TrackingProvider[] = DEMO_PROVIDERS) => {
+export const useExternalTracking = (initialProviders: TrackingProvider[] = []) => {
   const [providers, setProviders] = useState<TrackingProvider[]>(initialProviders);
   const [entities, setEntities] = useState<Map<string, TrackedEntity[]>>(new Map());
   const [isPolling, setIsPolling] = useState(false);
 
-  // Poll enabled providers
   useEffect(() => {
     const intervals: NodeJS.Timeout[] = [];
-    const enabledProviders = providers.filter(p => p.enabled);
+    const enabledProviders = providers.filter(p => p.enabled && p.fetchUrl);
     
     setIsPolling(enabledProviders.length > 0);
 
     enabledProviders.forEach(provider => {
-      const fetchData = () => {
-        // For demo, generate random entities
-        // In production, this would call an Edge Function
-        const newEntities = generateDemoEntities(provider.id);
-        setEntities(prev => new Map(prev).set(provider.id, newEntities));
+      const fetchData = async () => {
+        if (!provider.fetchUrl) return;
+        try {
+          const resp = await fetch(provider.fetchUrl);
+          if (!resp.ok) return;
+          const data = await resp.json();
+          if (Array.isArray(data)) {
+            setEntities(prev => new Map(prev).set(provider.id, data));
+          }
+        } catch {
+          // Silently fail for individual provider fetches
+        }
       };
 
-      fetchData(); // Initial fetch
+      fetchData();
       const interval = setInterval(fetchData, provider.pollInterval);
       intervals.push(interval);
     });
@@ -132,7 +85,6 @@ export const useExternalTracking = (initialProviders: TrackingProvider[] = DEMO_
     }
   }, [providers, enableProvider, disableProvider]);
 
-  // Get all entities as a flat array
   const allEntities = Array.from(entities.values()).flat();
 
   return { 
