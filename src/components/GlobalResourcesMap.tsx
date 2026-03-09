@@ -103,6 +103,7 @@ import { AISControlPanel } from '@/components/hubs/AISControlPanel';
 import { useTrafficCameras, TrafficCamera } from '@/hooks/useTrafficCameras';
 import { TrafficCameraPopup } from '@/components/earth/TrafficCameraPopup';
 import { useRealtimeVehicles, TransitVehicle } from '@/hooks/useRealtimeVehicles';
+import { useTrafficSensors, TrafficSensor } from '@/hooks/useTrafficSensors';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 type MapStyleType = 'default' | 'satellite' | 'satelliteStreets';
@@ -187,6 +188,7 @@ export const GlobalResourcesMap = () => {
   const [showTraffic, setShowTraffic] = useState(true);
   const [showCCTV, setShowCCTV] = useState(true);
   const [showTransitVehicles, setShowTransitVehicles] = useState(true);
+  const [showTrafficSensors, setShowTrafficSensors] = useState(false);
   
   // Workplace (Regus) state
   const [selectedWorkspace, setSelectedWorkspace] = useState<Workspace | null>(null);
@@ -247,7 +249,12 @@ export const GlobalResourcesMap = () => {
     vehicles: transitVehicles,
     isLoading: vehiclesLoading,
   } = useRealtimeVehicles(map.current, mapReady, showTransitVehicles);
-  
+
+  // Traffic sensors (PeMS, NYC DOT, Seattle)
+  const {
+    sensors: trafficSensors,
+    isLoading: sensorsLoading,
+  } = useTrafficSensors(map.current, mapReady, showTrafficSensors);
   
   // Regus locations (only fetch when workplace selected AND subscribed)
   const regusFilters: RegusFilters = {
@@ -1408,6 +1415,54 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     };
   }, [transitVehicles, showTransitVehicles, mapReady]);
 
+  // Add traffic sensor markers as colored dots on roads
+  const sensorMarkers = useRef<mapboxgl.Marker[]>([]);
+  useEffect(() => {
+    if (!map.current || !mapReady) return;
+    
+    sensorMarkers.current.forEach(m => m.remove());
+    sensorMarkers.current = [];
+    
+    if (!showTrafficSensors || !trafficSensors || trafficSensors.length === 0) return;
+    
+    const congestionColors: Record<string, string> = {
+      free: '#22c55e',
+      light: '#84cc16',
+      moderate: '#eab308',
+      heavy: '#f97316',
+      severe: '#ef4444',
+    };
+    
+    trafficSensors.forEach((sensor) => {
+      const el = document.createElement('div');
+      const color = congestionColors[sensor.congestion] || '#64748b';
+      
+      el.style.cssText = `
+        width: 14px;
+        height: 14px;
+        background: ${color};
+        border: 1.5px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 6px ${color}80;
+        cursor: pointer;
+        transform-origin: center center;
+        will-change: transform;
+      `;
+      el.title = `${sensor.roadName} - ${sensor.speed}mph, ${sensor.congestion}`;
+      
+      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([sensor.lng, sensor.lat])
+        .addTo(map.current!);
+      
+      sensorMarkers.current.push(marker);
+    });
+    
+    return () => {
+      sensorMarkers.current.forEach(m => m.remove());
+      sensorMarkers.current = [];
+    };
+  }, [trafficSensors, showTrafficSensors, mapReady]);
+
 
   // Add event markers to map
   useEffect(() => {
@@ -2059,6 +2114,37 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
                               </Badge>
                             )}
                           </div>
+                        )}
+                      </div>
+
+                      {/* Traffic Sensors toggle */}
+                      <div className="p-3 rounded-xl bg-white/5 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0">
+                              <Thermometer className="w-4 h-4 text-green-400" />
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-sm font-medium truncate block">Road Sensors</span>
+                              <p className="text-xs text-muted-foreground">PeMS, NYC DOT, Seattle traffic detectors</p>
+                            </div>
+                          </div>
+                          <Switch
+                            checked={showTrafficSensors}
+                            onCheckedChange={setShowTrafficSensors}
+                            className="flex-shrink-0 ml-2"
+                          />
+                        </div>
+                        {showTrafficSensors && sensorsLoading && (
+                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                            Loading sensors...
+                          </div>
+                        )}
+                        {showTrafficSensors && trafficSensors.length > 0 && (
+                          <Badge variant="outline" className="text-xs bg-green-500/20 border-green-500/50 text-green-400">
+                            {trafficSensors.length} sensors active
+                          </Badge>
                         )}
                       </div>
                     </div>
