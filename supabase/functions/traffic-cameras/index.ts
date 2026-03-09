@@ -263,6 +263,7 @@ async function fetch511VA(bounds: Bounds): Promise<CameraResult[]> {
         lng: f.geometry.coordinates[0],
         imageUrl: f.properties?.image_url || f.properties?.url || '',
         source: '511VA',
+        refreshRate: 15,
       }))
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
