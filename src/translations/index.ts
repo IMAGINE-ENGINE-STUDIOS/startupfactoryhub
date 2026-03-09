@@ -1,15 +1,15 @@
 export const LANGUAGES = [
-  { code: 'en', name: 'English', flag: '🇺🇸' },
-  { code: 'es', name: 'Español', flag: '🇪🇸' },
-  { code: 'ar', name: 'العربية', flag: '🇸🇦' },
-  { code: 'ja', name: '日本語', flag: '🇯🇵' },
-  { code: 'zh', name: '中文', flag: '🇨🇳' },
-  { code: 'fr', name: 'Français', flag: '🇫🇷' },
-  { code: 'it', name: 'Italiano', flag: '🇮🇹' },
-  { code: 'pt', name: 'Português', flag: '🇧🇷' },
-  { code: 'hi', name: 'हिन्दी', flag: '🇮🇳' },
-  { code: 'th', name: 'ไทย', flag: '🇹🇭' },
-  { code: 'nl', name: 'Nederlands', flag: '🇳🇱' },
+  { code: 'en', name: 'English', flag: 'EN' },
+  { code: 'es', name: 'Español', flag: 'ES' },
+  { code: 'ar', name: 'العربية', flag: 'AR' },
+  { code: 'ja', name: '日本語', flag: 'JA' },
+  { code: 'zh', name: '中文', flag: 'ZH' },
+  { code: 'fr', name: 'Français', flag: 'FR' },
+  { code: 'it', name: 'Italiano', flag: 'IT' },
+  { code: 'pt', name: 'Português', flag: 'PT' },
+  { code: 'hi', name: 'हिन्दी', flag: 'HI' },
+  { code: 'th', name: 'ไทย', flag: 'TH' },
+  { code: 'nl', name: 'Nederlands', flag: 'NL' },
 ] as const;
 
 export type LanguageCode = typeof LANGUAGES[number]['code'];
