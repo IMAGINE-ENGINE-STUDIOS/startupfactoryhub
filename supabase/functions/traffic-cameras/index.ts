@@ -328,7 +328,6 @@ async function fetch511GA(bounds: Bounds): Promise<CameraResult[]> {
     if (!Array.isArray(data)) return [];
     return data
       .filter((c: any) => inBounds(c.latitude || 0, c.longitude || 0, bounds))
-      .slice(0, 200)
       .map((c: any) => ({
         id: `ga-${c.id}`,
         name: c.name || c.location || 'GA Camera',
