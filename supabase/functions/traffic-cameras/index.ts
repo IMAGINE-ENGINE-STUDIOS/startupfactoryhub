@@ -62,6 +62,7 @@ async function fetchNYCameras(bounds: Bounds): Promise<CameraResult[]> {
           // Use 511ny snapshot endpoint
           imgUrl = `https://511ny.org/map/Cctv/${c.ID || c.id}`;
         }
+        const videoUrl = c.VideoUrl || c.videoUrl || '';
         return {
           id: `ny-${c.ID || c.id}`,
           name: c.Name || c.name || c.RoadwayName || 'NY Camera',
@@ -69,6 +70,8 @@ async function fetchNYCameras(bounds: Bounds): Promise<CameraResult[]> {
           lng: parseFloat(c.Longitude || c.longitude),
           imageUrl: imgUrl,
           source: '511NY',
+          refreshRate: 5,
+          streamUrl: videoUrl && /\.(mjpg|mjpeg|mp4)(\?|$)/i.test(videoUrl) ? videoUrl : undefined,
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
