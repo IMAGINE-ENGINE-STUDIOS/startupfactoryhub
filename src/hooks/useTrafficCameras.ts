@@ -11,7 +11,8 @@ export interface TrafficCamera {
   lastUpdated?: string;
   streamUrl?: string;
   refreshRate?: number;
-  feedVerified?: boolean;
+  feedVerified?: boolean;   // true = confirmed working
+  feedDead?: boolean;       // true = confirmed broken
 }
 
 interface UseBounds {
@@ -22,14 +23,12 @@ interface UseBounds {
 }
 
 /**
- * Viewport-only camera loading with feed validation queue.
+ * Shows ALL cameras immediately, then validates feeds in the background.
  * 
- * Algorithm:
- * 1. Analyze viewport → fetch camera metadata (coordinates + URLs)
- * 2. Queue feed validation: try loading each camera's image
- * 3. If feed loads within 90s → mark verified, show icon
- * 4. If no feed after 90s → ignore camera
- * 5. When viewport moves → clear old cameras, fetch new ones
+ * - Cameras appear on the map as soon as metadata arrives (amber/unverified).
+ * - A background queue probes each feed via proxy; on success → green (verified),
+ *   on failure → gray (dead). Both remain visible.
+ * - When viewport moves, cameras swap atomically (no flash-clear).
  */
 export const useTrafficCameras = (
   map: mapboxgl.Map | null,
@@ -44,16 +43,17 @@ export const useTrafficCameras = (
   const fetchTimeoutRef = useRef<number | null>(null);
   const cacheRef = useRef<{ time: number; bounds: UseBounds } | null>(null);
   const validationAbortRef = useRef<AbortController | null>(null);
+  const camerasRef = useRef<TrafficCamera[]>([]);
 
   const handleSetSelectedCamera = useCallback((cam: TrafficCamera | null) => {
     selectedCameraRef.current = cam;
     setSelectedCamera(cam);
   }, []);
 
-  // Validate a single camera feed - resolve true if image loads within 90s
-  const validateFeed = useCallback((camera: TrafficCamera, signal: AbortSignal): Promise<TrafficCamera | null> => {
+  // Validate a single camera feed
+  const validateFeed = useCallback((camera: TrafficCamera, signal: AbortSignal): Promise<{ id: string; ok: boolean }> => {
     return new Promise((resolve) => {
-      if (signal.aborted) { resolve(null); return; }
+      if (signal.aborted) { resolve({ id: camera.id, ok: false }); return; }
 
       const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'zqiihhmdsdgwdcwmryym';
       const proxyUrl = `https://${projectId}.supabase.co/functions/v1/proxy-camera-image`;
@@ -62,25 +62,25 @@ export const useTrafficCameras = (
       const img = new Image();
       const timer = setTimeout(() => {
         img.src = '';
-        resolve(null); // 90s timeout - ignore this camera
-      }, 90000);
+        resolve({ id: camera.id, ok: false });
+      }, 30000); // 30s timeout per feed
 
       const onAbort = () => {
         clearTimeout(timer);
         img.src = '';
-        resolve(null);
+        resolve({ id: camera.id, ok: false });
       };
       signal.addEventListener('abort', onAbort, { once: true });
 
       img.onload = () => {
         clearTimeout(timer);
         signal.removeEventListener('abort', onAbort);
-        resolve({ ...camera, feedVerified: true });
+        resolve({ id: camera.id, ok: true });
       };
       img.onerror = () => {
         clearTimeout(timer);
         signal.removeEventListener('abort', onAbort);
-        resolve(null); // Feed failed - ignore
+        resolve({ id: camera.id, ok: false });
       };
       img.src = testUrl;
     });
@@ -109,8 +109,6 @@ export const useTrafficCameras = (
 
     setIsLoading(true);
     setError(null);
-    // Clear old cameras immediately when viewport changes
-    setCameras([]);
 
     try {
       const { data, error: fnError } = await supabase.functions.invoke('traffic-cameras', {
@@ -124,42 +122,52 @@ export const useTrafficCameras = (
       cacheRef.current = { time: Date.now(), bounds };
 
       if (rawCams.length === 0) {
+        setCameras([]);
+        camerasRef.current = [];
         setIsLoading(false);
         return;
       }
 
-      // Queue: validate feeds in batches of 8
-      const BATCH_SIZE = 8;
-      const verified: TrafficCamera[] = [];
+      // Show ALL cameras immediately (unverified state)
+      const allCams = rawCams.map(c => ({ ...c, feedVerified: undefined, feedDead: undefined }));
+      camerasRef.current = allCams;
+      setCameras([...allCams]);
+      setIsLoading(false);
 
-      for (let i = 0; i < rawCams.length; i += BATCH_SIZE) {
+      // Background validation queue — batches of 12
+      const BATCH_SIZE = 12;
+      for (let i = 0; i < allCams.length; i += BATCH_SIZE) {
         if (abortController.signal.aborted) break;
 
-        const batch = rawCams.slice(i, i + BATCH_SIZE);
+        const batch = allCams.slice(i, i + BATCH_SIZE);
         const results = await Promise.all(
           batch.map(cam => validateFeed(cam, abortController.signal))
         );
 
-        for (const cam of results) {
-          if (cam) verified.push(cam);
+        if (abortController.signal.aborted) break;
+
+        // Update verification status in-place
+        const resultMap = new Map(results.map(r => [r.id, r.ok]));
+        let changed = false;
+        for (const cam of camerasRef.current) {
+          if (resultMap.has(cam.id)) {
+            const ok = resultMap.get(cam.id)!;
+            if (cam.feedVerified !== ok || cam.feedDead !== !ok) {
+              cam.feedVerified = ok;
+              cam.feedDead = !ok;
+              changed = true;
+            }
+          }
         }
 
-        // Progressively show verified cameras
-        if (!abortController.signal.aborted && verified.length > 0) {
-          setCameras([...verified]);
+        if (changed && !abortController.signal.aborted) {
+          setCameras([...camerasRef.current]);
         }
-      }
-
-      if (!abortController.signal.aborted) {
-        setCameras([...verified]);
       }
     } catch (err: any) {
       if (!abortController.signal.aborted) {
         console.error('Traffic cameras fetch error:', err);
         setError(err.message || 'Failed to fetch cameras');
-      }
-    } finally {
-      if (!abortController.signal.aborted) {
         setIsLoading(false);
       }
     }
@@ -168,6 +176,7 @@ export const useTrafficCameras = (
   useEffect(() => {
     if (!map || !mapReady || !enabled) {
       setCameras([]);
+      camerasRef.current = [];
       return;
     }
 
@@ -177,6 +186,7 @@ export const useTrafficCameras = (
       const zoom = map.getZoom();
       if (zoom < 9) {
         setCameras([]);
+        camerasRef.current = [];
         return;
       }
 

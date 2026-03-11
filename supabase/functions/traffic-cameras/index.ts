@@ -112,7 +112,7 @@ async function fetch511Cameras(
     .filter((c: CameraResult) => c.imageUrl);
 }
 
-// ====== GENERIC ArcGIS FeatureServer FETCHER ======
+// ====== GENERIC ArcGIS FeatureServer FETCHER (with pagination) ======
 async function fetchArcGISCameras(
   stateCode: string,
   featureServerUrl: string,
@@ -126,14 +126,28 @@ async function fetchArcGISCameras(
 ): Promise<CameraResult[]> {
   if (!boundsOverlap(bounds, region)) return [];
   try {
-    const url = `${featureServerUrl}/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=*&f=json&resultRecordCount=5000`;
-    const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
-    if (!resp.ok) { await resp.text().catch(() => {}); return []; }
-    const data = await resp.json();
-    const features = data?.features || [];
-    if (!Array.isArray(features)) return [];
+    const allFeatures: any[] = [];
+    let offset = 0;
+    const PAGE_SIZE = 2000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const url = `${featureServerUrl}/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=*&f=json&resultRecordCount=${PAGE_SIZE}&resultOffset=${offset}`;
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) { await resp.text().catch(() => {}); break; }
+      const data = await resp.json();
+      const features = data?.features || [];
+      if (!Array.isArray(features) || features.length === 0) break;
+      allFeatures.push(...features);
+      hasMore = data.exceededTransferLimit === true;
+      offset += PAGE_SIZE;
+      // Safety cap
+      if (offset > 20000) break;
+    }
+
+    if (allFeatures.length === 0) return [];
     
-    return features
+    return allFeatures
       .filter((f: any) => {
         const a = f.attributes || {};
         const lat = a[fieldMapping.lat || 'latitude'] || a.LATITUDE || a.Latitude || a.latitude || a.LAT || f.geometry?.y;
@@ -158,17 +172,29 @@ async function fetchArcGISCameras(
 // STATE-SPECIFIC FETCHERS
 // ===========================
 
-// ====== CALIFORNIA (Caltrans ArcGIS) ======
+// ====== CALIFORNIA (Caltrans ArcGIS — with pagination) ======
 async function fetchCaltransCameras(bounds: Bounds): Promise<CameraResult[]> {
   if (!boundsOverlap(bounds, { south: 32, north: 42, west: -130, east: -114 })) return [];
   try {
-    const url = `https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/CCTV/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=currentImageURL,streamingVideoURL,locationName,latitude,longitude,district,inService&f=json&resultRecordCount=5000`;
-    const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
-    if (!resp.ok) { await resp.text().catch(() => {}); return []; }
-    const data = await resp.json();
-    const features = data?.features || [];
-    if (!Array.isArray(features)) return [];
-    return features
+    const allFeatures: any[] = [];
+    let offset = 0;
+    const PAGE_SIZE = 2000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const url = `https://caltrans-gis.dot.ca.gov/arcgis/rest/services/CHhighway/CCTV/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=currentImageURL,streamingVideoURL,locationName,latitude,longitude,district,inService&f=json&resultRecordCount=${PAGE_SIZE}&resultOffset=${offset}`;
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) { await resp.text().catch(() => {}); break; }
+      const data = await resp.json();
+      const features = data?.features || [];
+      if (!Array.isArray(features) || features.length === 0) break;
+      allFeatures.push(...features);
+      hasMore = data.exceededTransferLimit === true;
+      offset += PAGE_SIZE;
+      if (offset > 20000) break;
+    }
+
+    return allFeatures
       .filter((f: any) => {
         const a = f.attributes || {};
         const lat = a.latitude || f.geometry?.y;
@@ -178,7 +204,7 @@ async function fetchCaltransCameras(bounds: Bounds): Promise<CameraResult[]> {
       .map((f: any) => {
         const a = f.attributes;
         return {
-          id: `ca-${a.district || 'x'}-${(a.currentImageURL || '').split('/').pop() || Math.random().toString(36).slice(2)}`,
+          id: `ca-${a.district || 'x'}-${a.OBJECTID || (a.currentImageURL || '').split('/').pop() || Math.random().toString(36).slice(2)}`,
           name: a.locationName || `CA D${a.district} Camera`,
           lat: a.latitude || f.geometry?.y,
           lng: a.longitude || f.geometry?.x,
@@ -192,14 +218,65 @@ async function fetchCaltransCameras(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== FLORIDA (ArcGIS) ======
+// ====== FLORIDA (ArcGIS) — returns cameras even without working image URLs ======
 async function fetchFLDOT(bounds: Bounds): Promise<CameraResult[]> {
-  return fetchArcGISCameras('FL', 
-    'https://services.arcgis.com/3wFbqsFPLeKqOlIK/arcgis/rest/services/FL511_Traffic_Cameras/FeatureServer/0',
-    bounds, { south: 24, north: 31.5, west: -88, east: -79.5 },
-    { lat: 'LATITUDE', lng: 'LONGITUDE', name: 'DESCRIPT', imageUrl: 'IMAGE', id: 'OBJECTID_1' },
-    'FL511', 10
-  );
+  if (!boundsOverlap(bounds, { south: 24, north: 31.5, west: -88, east: -79.5 })) return [];
+  try {
+    const allFeatures: any[] = [];
+    let offset = 0;
+    const PAGE_SIZE = 2000;
+    let hasMore = true;
+
+    while (hasMore) {
+      const url = `https://services.arcgis.com/3wFbqsFPLeKqOlIK/arcgis/rest/services/FL511_Traffic_Cameras/FeatureServer/0/query?where=1%3D1&geometry=${bounds.west},${bounds.south},${bounds.east},${bounds.north}&geometryType=esriGeometryEnvelope&spatialRel=esriSpatialRelIntersects&outFields=*&f=json&resultRecordCount=${PAGE_SIZE}&resultOffset=${offset}`;
+      const resp = await fetch(url, { signal: AbortSignal.timeout(15000) });
+      if (!resp.ok) { await resp.text().catch(() => {}); break; }
+      const data = await resp.json();
+      const features = data?.features || [];
+      if (!Array.isArray(features) || features.length === 0) break;
+      allFeatures.push(...features);
+      hasMore = data.exceededTransferLimit === true;
+      offset += PAGE_SIZE;
+      if (offset > 20000) break;
+    }
+
+    return allFeatures
+      .filter((f: any) => {
+        const a = f.attributes || {};
+        const lat = a.LATITUDE || a.Latitude || a.latitude || f.geometry?.y;
+        const lng = a.LONGITUDE || a.Longitude || a.longitude || f.geometry?.x;
+        return lat && lng && inBounds(lat, lng, bounds);
+      })
+      .map((f: any) => {
+        const a = f.attributes || {};
+        const lat = a.LATITUDE || a.Latitude || a.latitude || f.geometry?.y;
+        const lng = a.LONGITUDE || a.Longitude || a.longitude || f.geometry?.x;
+        const camId = a.OBJECTID_1 || a.OBJECTID || a.Id || a.ID || Math.random().toString(36).slice(2);
+        const name = a.DESCRIPT || a.Name || a.NAME || a.Description || a.LOCATION || 'FL Camera';
+        
+        // Try multiple image URL fields — FL data often has stale URLs
+        let imgUrl = a.IMAGE || a.ImageURL || a.imageUrl || a.IMAGE_URL || a.Url || a.url || '';
+        
+        // FL fallback: construct image URL from camera ID patterns
+        if (!imgUrl && a.CAMID) {
+          imgUrl = `https://fl511.com/map/Ede/GetImage?cameraId=${a.CAMID}`;
+        }
+        
+        // Even if no image URL, still return the camera with a placeholder so it shows on map
+        if (!imgUrl) {
+          imgUrl = `https://fl511.com/map/Cameras/GetImage?cameraId=${camId}`;
+        }
+
+        return {
+          id: `fl-${camId}`,
+          name,
+          lat, lng,
+          imageUrl: imgUrl,
+          source: 'FL511',
+          refreshRate: 10,
+        };
+      });
+  } catch { return []; }
 }
 
 // ====== WASHINGTON STATE (WSDOT ArcGIS) ======
@@ -252,7 +329,7 @@ async function fetchAustinCameras(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== MARYLAND (ArcGIS - verified endpoint) ======
+// ====== MARYLAND (ArcGIS) ======
 async function fetchMDDOT(bounds: Bounds): Promise<CameraResult[]> {
   return fetchArcGISCameras('MD',
     'https://mdgeodata.md.gov/imap/rest/services/Transportation/MD_TrafficCameras/FeatureServer/0',
@@ -615,7 +692,7 @@ async function fetchWindyCameras(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== VERIFIED 511 PLATFORM STATES (confirmed working) ======
+// ====== VERIFIED 511 PLATFORM STATES ======
 function fetchAKCameras(b: Bounds) { return fetch511Cameras('AK', 'https://511.alaska.gov', b, { south: 51, north: 72, west: -180, east: -129 }, 30); }
 function fetchAZCameras(b: Bounds) { return fetch511Cameras('AZ', 'https://az511.gov', b, { south: 31.3, north: 37, west: -114.9, east: -109 }, 10); }
 function fetchIACameras(b: Bounds) { return fetch511Cameras('IA', 'https://www.511ia.org', b, { south: 40.3, north: 43.6, west: -96.7, east: -90 }, 10); }
@@ -640,9 +717,6 @@ function fetchNDCameras(b: Bounds) { return fetch511Cameras('ND', 'https://trave
 function fetchWVCameras(b: Bounds) { return fetch511Cameras('WV', 'https://wv511.org', b, { south: 37.1, north: 40.7, west: -82.7, east: -77.7 }, 10); }
 function fetchNMCameras(b: Bounds) { return fetch511Cameras('NM', 'https://nmroads.com', b, { south: 31.3, north: 37.1, west: -109.1, east: -103 }, 10); }
 
-// NOTE: Removed broken fetchers for MI, IN, AL, OK, KS, AR, MS, DE, RI, HI, MO, NH, VT, ME
-// These used wrong URLs that silently fail. Windy webcams provides coverage for these states.
-
 // ====== NAMED SOURCE TRACKING ======
 interface NamedFetcher {
   name: string;
@@ -650,19 +724,16 @@ interface NamedFetcher {
 }
 
 const allFetchers: NamedFetcher[] = [
-  // Northeast
   { name: 'NY-511', fn: fetchNYCameras },
   { name: 'NYC-DOT', fn: fetchNYCDOTCameras },
   { name: 'NJ-511', fn: fetchNJCameras },
   { name: 'PA-511', fn: fetchPACameras },
   { name: 'MA-511', fn: fetchMACameras },
   { name: 'CT-511', fn: fetchCTCameras },
-  // Mid-Atlantic
   { name: 'MD-ArcGIS', fn: fetchMDDOT },
   { name: 'VA-GeoJSON', fn: fetch511VA },
   { name: 'DC-ArcGIS', fn: fetchDCCameras },
   { name: 'WV-511', fn: fetchWVCameras },
-  // Southeast
   { name: 'NC-ArcGIS', fn: fetchNCCameras },
   { name: 'SC-511', fn: fetchSCCameras },
   { name: 'GA-511', fn: fetch511GA },
@@ -670,14 +741,11 @@ const allFetchers: NamedFetcher[] = [
   { name: 'TN-SmartWay', fn: fetchTNCameras },
   { name: 'KY-511', fn: fetchKYCameras },
   { name: 'LA-511', fn: fetchLACameras },
-  // Texas
   { name: 'TX-ArcGIS', fn: fetchTxDOTCameras },
   { name: 'TX-Austin', fn: fetchAustinCameras },
-  // West Coast
   { name: 'CA-Caltrans', fn: fetchCaltransCameras },
   { name: 'WA-ArcGIS', fn: fetchWSDOT },
   { name: 'OR-TripCheck', fn: fetchODOT },
-  // Mountain/Southwest
   { name: 'CO-COTrip', fn: fetchCDOT },
   { name: 'AZ-511', fn: fetchAZCameras },
   { name: 'NV-511', fn: fetchNVCameras },
@@ -686,7 +754,6 @@ const allFetchers: NamedFetcher[] = [
   { name: 'ID-511', fn: fetchIDCameras },
   { name: 'MT-511', fn: fetchMTCameras },
   { name: 'WY-511', fn: fetchWYCameras },
-  // Midwest
   { name: 'IL-ArcGIS', fn: fetchILDOT },
   { name: 'OH-OHGO', fn: fetchOHCameras },
   { name: 'MN-511', fn: fetchMNCameras },
@@ -695,13 +762,10 @@ const allFetchers: NamedFetcher[] = [
   { name: 'NE-511', fn: fetchNECameras },
   { name: 'ND-511', fn: fetchNDCameras },
   { name: 'SD-511', fn: fetchSDCameras },
-  // Non-contiguous
   { name: 'AK-511', fn: fetchAKCameras },
-  // International
   { name: 'UK-Highways', fn: fetchUKCameras },
   { name: 'NL-NDW', fn: fetchNLCameras },
   { name: 'AU-NSW', fn: fetchAUCameras },
-  // Worldwide
   { name: 'Windy', fn: fetchWindyCameras },
 ];
 
@@ -729,7 +793,6 @@ serve(async (req) => {
       );
     }
 
-    // Fetch from ALL sources concurrently with per-source logging
     const results = await Promise.allSettled(
       allFetchers.map(async (f) => {
         try {
@@ -750,13 +813,14 @@ serve(async (req) => {
       if (r.status === 'fulfilled') allCameras.push(...r.value.cameras);
     }
 
-    // Deduplicate by proximity (0.0005 degrees ≈ 50m)
+    // Deduplicate by source+id (stable key), not by proximity
+    const seen = new Set<string>();
     const deduped: CameraResult[] = [];
     for (const cam of allCameras) {
-      const isDupe = deduped.some(
-        d => Math.abs(d.lat - cam.lat) < 0.0005 && Math.abs(d.lng - cam.lng) < 0.0005
-      );
-      if (!isDupe) deduped.push(cam);
+      const key = cam.id; // already prefixed with source code
+      if (seen.has(key)) continue;
+      seen.add(key);
+      deduped.push(cam);
     }
 
     cache.set(key, { data: deduped, time: Date.now() });
