@@ -114,6 +114,17 @@ export const MapCommandCenter = ({
     }
   }, [user?.id, loadDbSessions]);
 
+  // Escape key to close fullscreen viewer
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && expandedSession) {
+        setExpandedSession(null);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [expandedSession]);
+
   const activeSessions = sessions.filter(s => !s.stoppedAt);
   const closedSessions = sessions.filter(s => s.stoppedAt !== null);
 
