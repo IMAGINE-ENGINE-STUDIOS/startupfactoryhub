@@ -160,7 +160,7 @@ async function fetchArcGISCameras(
         const a = f.attributes || {};
         const lat = a[fieldMapping.lat || 'latitude'] || a.LATITUDE || a.Latitude || a.latitude || a.LAT || f.geometry?.y;
         const lng = a[fieldMapping.lng || 'longitude'] || a.LONGITUDE || a.Longitude || a.longitude || a.LON || a.LONG || f.geometry?.x;
-        const imgUrl = a[fieldMapping.imageUrl || 'imageUrl'] || a.ImageURL || a.imageUrl || a.IMAGE_URL || a.Url || a.url || a.currentImageURL || '';
+        const imgUrl = a[fieldMapping.imageUrl || 'imageUrl'] || a.ImageURL || a.imageUrl || a.IMAGE_URL || a.IMAGE || a.Image || a.Url || a.url || a.currentImageURL || '';
         const camId = a[fieldMapping.id || 'OBJECTID'] || a.OBJECTID || a.Id || a.ID || a.id || Math.random().toString(36).slice(2);
         const name = a[fieldMapping.name || 'Name'] || a.Name || a.NAME || a.name || a.DESCRIPT || a.Description || a.locationName || a.Location || `${stateCode} Camera`;
         
@@ -213,7 +213,7 @@ async function fetchFLDOT(bounds: Bounds): Promise<CameraResult[]> {
   return fetchArcGISCameras('FL', 
     'https://services.arcgis.com/3wFbqsFPLeKqOlIK/arcgis/rest/services/FL511_Traffic_Cameras/FeatureServer/0',
     bounds, { south: 24, north: 31.5, west: -88, east: -79.5 },
-    { lat: 'LATITUDE', lng: 'LONGITUDE', name: 'DESCRIPT', id: 'OBJECTID' },
+    { lat: 'LATITUDE', lng: 'LONGITUDE', name: 'DESCRIPT', imageUrl: 'IMAGE', id: 'OBJECTID_1' },
     'FL511', 10
   );
 }
