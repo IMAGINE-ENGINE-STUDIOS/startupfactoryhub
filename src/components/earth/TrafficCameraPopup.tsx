@@ -28,6 +28,7 @@ function isMjpegStream(url?: string): boolean {
 
 // Camera popup with consolidated controls
 export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps) => {
+  const { user } = useAuth();
   const [imageKey, setImageKey] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
