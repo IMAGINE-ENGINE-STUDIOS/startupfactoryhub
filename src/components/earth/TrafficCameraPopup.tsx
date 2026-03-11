@@ -271,10 +271,19 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
                   <span className="text-[10px] text-white/70 font-mono">{refreshRate}s refresh</span>
                 </div>
               )}
-              {/* Snapshot counter */}
+              {/* Snapshot counter + session indicator */}
               {!hasStream && (
-                <div className="absolute bottom-3 right-3 px-2 py-1 rounded-full bg-black/60 backdrop-blur">
-                  <span className="text-[10px] text-white/50 font-mono">{timeline.snapshotCount} frames</span>
+                <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+                  {isSessionRecording && (
+                    <div className="px-2 py-1 rounded-full bg-red-500/80 backdrop-blur flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      <span className="text-[10px] text-white font-bold">REC</span>
+                      <span className="text-[9px] text-white/70 font-mono">{activeSession?.snapshots.length || 0}</span>
+                    </div>
+                  )}
+                  <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur">
+                    <span className="text-[10px] text-white/50 font-mono">{timeline.snapshotCount} frames</span>
+                  </div>
                 </div>
               )}
             </div>
