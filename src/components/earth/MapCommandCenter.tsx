@@ -746,24 +746,24 @@ const StudioSessionRow = ({ session, isActive, onStop, onPlay, onRemove, onExpan
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
           <Camera className="w-3 h-3 text-white/40 flex-shrink-0" />
-          <span className="text-[11px] text-white/80 font-medium truncate">{session.cameraName}</span>
+          <span className="text-xs text-white/80 font-medium truncate">{session.cameraName}</span>
         </div>
         <div className="flex items-center gap-2 mt-0.5">
-          <span className="text-[9px] text-white/40 font-mono">
+          <span className="text-[10px] text-white/50 font-mono">
             {formatTime(session.startedAt)}
           </span>
-          <span className="text-[9px] text-white/30">·</span>
-          <span className="text-[9px] text-white/40 font-mono">
+          <span className="text-[10px] text-white/30">·</span>
+          <span className="text-[10px] text-white/50 font-mono">
             {formatDuration(session.startedAt, session.stoppedAt)}
           </span>
-          <span className="text-[9px] text-white/30">·</span>
-          <span className="text-[9px] text-blue-400/70 font-mono">
+          <span className="text-[10px] text-white/30">·</span>
+          <span className="text-[10px] text-blue-400/80 font-mono">
             {session.snapshotCount || session.snapshots.length} frames
           </span>
           {sizeDisplay && (
             <>
-              <span className="text-[9px] text-white/30">·</span>
-              <span className="text-[9px] text-purple-400/70 font-mono">{sizeDisplay}</span>
+              <span className="text-[10px] text-white/30">·</span>
+              <span className="text-[10px] text-purple-400/80 font-mono">{sizeDisplay}</span>
             </>
           )}
         </div>
