@@ -107,6 +107,7 @@ import { SessionPlaybackPanel } from '@/components/earth/SessionPlaybackPanel';
 import { useRecordingSessions, RecordingSession } from '@/stores/useRecordingSessions';
 import { useRealtimeVehicles, TransitVehicle } from '@/hooks/useRealtimeVehicles';
 import { useTrafficSensors, TrafficSensor } from '@/hooks/useTrafficSensors';
+import { useDigitalTwinBuildings } from '@/hooks/useDigitalTwinBuildings';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
 type MapStyleType = 'default' | 'satellite' | 'satelliteStreets' | 'standard';
