@@ -9,6 +9,7 @@ import { useCameraTimeline } from '@/hooks/useCameraTimeline';
 import { CameraTimelineScrubber } from './CameraTimelineScrubber';
 import { CameraVideoPlayer } from './CameraVideoPlayer';
 import { useRecordingSessions } from '@/stores/useRecordingSessions';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface TrafficCameraPopupProps {
   camera: TrafficCamera;
