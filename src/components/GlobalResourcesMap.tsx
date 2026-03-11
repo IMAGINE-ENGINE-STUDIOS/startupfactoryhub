@@ -1547,6 +1547,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
     };
   }, [trafficSensors, showTrafficSensors, mapReady]);
 
+  // Recording sessions for cameras
+  const [playbackSession, setPlaybackSession] = useState<RecordingSession | null>(null);
+
 
   // Add event markers to map
   useEffect(() => {
