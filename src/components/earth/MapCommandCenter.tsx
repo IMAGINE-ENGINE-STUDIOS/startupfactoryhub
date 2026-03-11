@@ -456,27 +456,27 @@ export const MapCommandCenter = ({
         {isExpanded && (
           <div className="border-t border-white/10">
             <Tabs defaultValue="studio" className="w-full">
-              <TabsList className="w-full bg-transparent border-b border-white/10 rounded-none h-9 mt-0 p-0">
+              <TabsList className="w-full bg-black/40 border-b border-white/10 rounded-none h-10 mt-0 p-0">
                 <TabsTrigger
                   value="studio"
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-red-400 data-[state=active]:bg-transparent data-[state=active]:text-red-400 text-white/50 text-xs h-9"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-red-400 data-[state=active]:bg-transparent data-[state=active]:text-red-400 text-white/60 text-sm font-medium h-10"
                 >
-                  <Film className="w-3.5 h-3.5 mr-1.5" />
+                  <Film className="w-4 h-4 mr-1.5" />
                   Studio
                   {sessions.length > 0 && (
-                    <Badge className="ml-1.5 text-[9px] bg-white/10 border-white/20 text-white/60 px-1.5 py-0">
+                    <Badge className="ml-1.5 text-[10px] bg-white/10 border-white/20 text-white/70 px-1.5 py-0">
                       {sessions.length}
                     </Badge>
                   )}
                 </TabsTrigger>
                 <TabsTrigger
                   value="perks"
-                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-green-400 data-[state=active]:bg-transparent data-[state=active]:text-green-400 text-white/50 text-xs h-9"
+                  className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-green-400 data-[state=active]:bg-transparent data-[state=active]:text-green-400 text-white/60 text-sm font-medium h-10"
                 >
-                  <Gift className="w-3.5 h-3.5 mr-1.5" />
+                  <Gift className="w-4 h-4 mr-1.5" />
                   Perks
                   {perks.length > 0 && (
-                    <Badge className="ml-1.5 text-[9px] bg-white/10 border-white/20 text-white/60 px-1.5 py-0">
+                    <Badge className="ml-1.5 text-[10px] bg-white/10 border-white/20 text-white/70 px-1.5 py-0">
                       {perks.length}
                     </Badge>
                   )}
