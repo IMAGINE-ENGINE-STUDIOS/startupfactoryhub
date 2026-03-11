@@ -507,15 +507,15 @@ export const MapCommandCenter = ({
                           )}
                         />
                         <div className="flex items-center justify-between">
-                          <span className="text-[9px] text-white/30 capitalize">{usage.storagePlan} Plan</span>
+                          <span className="text-[10px] text-white/40 capitalize">{usage.storagePlan} Plan</span>
                           {usage.isOverLimit && (
-                            <span className="text-[9px] text-red-400 font-medium">
+                            <span className="text-[10px] text-red-400 font-medium">
                               +{usage.overageGb} GB overage • ${(usage.overageGb * 2.5).toFixed(2)}
                             </span>
                           )}
                           {usage.percentUsed > 80 && !usage.isOverLimit && (
-                            <button className="flex items-center gap-0.5 text-[9px] text-blue-400 hover:text-blue-300 transition-colors">
-                              <ArrowUpCircle className="w-3 h-3" />
+                            <button className="flex items-center gap-0.5 text-[10px] text-blue-400 hover:text-blue-300 transition-colors">
+                              <ArrowUpCircle className="w-3.5 h-3.5" />
                               Upgrade
                             </button>
                           )}
