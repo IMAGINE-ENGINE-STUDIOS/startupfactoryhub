@@ -927,6 +927,7 @@ export type Database = {
           file_size: number | null
           id: string
           storage_path: string
+          user_id: string | null
         }
         Insert: {
           camera_id: string
@@ -935,6 +936,7 @@ export type Database = {
           file_size?: number | null
           id?: string
           storage_path: string
+          user_id?: string | null
         }
         Update: {
           camera_id?: string
@@ -943,6 +945,7 @@ export type Database = {
           file_size?: number | null
           id?: string
           storage_path?: string
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -4557,6 +4560,51 @@ export type Database = {
           },
         ]
       }
+      recording_sessions: {
+        Row: {
+          camera_id: string
+          camera_name: string
+          created_at: string | null
+          id: string
+          snapshot_count: number | null
+          started_at: string
+          status: string | null
+          stopped_at: string | null
+          storage_path: string | null
+          thumbnail_path: string | null
+          total_size_bytes: number | null
+          user_id: string
+        }
+        Insert: {
+          camera_id: string
+          camera_name: string
+          created_at?: string | null
+          id?: string
+          snapshot_count?: number | null
+          started_at?: string
+          status?: string | null
+          stopped_at?: string | null
+          storage_path?: string | null
+          thumbnail_path?: string | null
+          total_size_bytes?: number | null
+          user_id: string
+        }
+        Update: {
+          camera_id?: string
+          camera_name?: string
+          created_at?: string | null
+          id?: string
+          snapshot_count?: number | null
+          started_at?: string
+          status?: string | null
+          stopped_at?: string | null
+          storage_path?: string | null
+          thumbnail_path?: string | null
+          total_size_bytes?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       referral_accounts: {
         Row: {
           admin_notes: string | null
@@ -5368,6 +5416,33 @@ export type Database = {
           },
         ]
       }
+      storage_overages: {
+        Row: {
+          amount_cents: number
+          created_at: string | null
+          gb_charged: number
+          id: string
+          stripe_invoice_id: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string | null
+          gb_charged: number
+          id?: string
+          stripe_invoice_id?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string | null
+          gb_charged?: number
+          id?: string
+          stripe_invoice_id?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       student_internship_tasks: {
         Row: {
           application_id: string
@@ -5711,6 +5786,39 @@ export type Database = {
           created_at?: string | null
           id?: string
           role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_storage_usage: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_calculated_at: string | null
+          plan_limit_bytes: number | null
+          storage_plan: string | null
+          total_bytes_used: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_calculated_at?: string | null
+          plan_limit_bytes?: number | null
+          storage_plan?: string | null
+          total_bytes_used?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_calculated_at?: string | null
+          plan_limit_bytes?: number | null
+          storage_plan?: string | null
+          total_bytes_used?: number | null
           updated_at?: string | null
           user_id?: string
         }
@@ -6126,6 +6234,14 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_session_stats: {
+        Args: { p_session_id: string; p_size_bytes: number }
+        Returns: undefined
+      }
+      increment_storage_usage: {
+        Args: { p_bytes: number; p_user_id: string }
+        Returns: undefined
       }
       search_lightpaper_projects: {
         Args: { search_query: string; user_id_param: string }

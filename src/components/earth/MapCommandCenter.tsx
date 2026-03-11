@@ -1,12 +1,16 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, ChevronUp, ChevronDown, Camera, Square, Play, Trash2, Gift, Film, X, MapPin, Building, Globe2, Sparkles, Send, Loader2 } from 'lucide-react';
+import { Search, ChevronUp, ChevronDown, Camera, Square, Play, Trash2, Gift, Film, X, MapPin, Building, Globe2, Sparkles, Send, Loader2, HardDrive, ArrowUpCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import { useRecordingSessions, RecordingSession } from '@/stores/useRecordingSessions';
+import { useStorageUsage } from '@/hooks/useStorageUsage';
+import { useAuth } from '@/contexts/AuthContext';
+import { formatBytes } from '@/lib/storage-plans';
 import { Resource } from '@/hooks/useResources';
 import mapboxgl from 'mapbox-gl';
 import geniusAILogo from '@/assets/genius-ai-logo.png';
@@ -77,8 +81,6 @@ function buildMapSystemPrompt(resources?: Resource[]) {
 AVAILABLE RESOURCES:
 ${resourceContext}
 
-Resource categories: Office, Lab, Venue, Perk, Chamber of Commerce, Technology Transfer, Community, Government Grant, Accelerator/Incubator, Entrepreneur Center, University, Coworking, Investor Network, Human Capital, Event, Banking, National Archives.
-
 4D MAP LAYERS: CCTV Cameras (worldwide), Traffic Sensors (PeMS, NYC, Seattle), Transit Vehicles (10 cities GTFS-RT), AIS Maritime Vessels, Earth Intelligence (weather, SST, vegetation), Road Sensors.`;
 }
 
@@ -98,7 +100,16 @@ export const MapCommandCenter = ({
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const inputRef = useRef<HTMLInputElement>(null);
-  const { sessions, stopSession, removeSession } = useRecordingSessions();
+  const { sessions, stopSession, removeSession, loadDbSessions } = useRecordingSessions();
+  const { user } = useAuth();
+  const { usage } = useStorageUsage();
+
+  // Load persisted sessions from DB
+  useEffect(() => {
+    if (user?.id) {
+      loadDbSessions(user.id);
+    }
+  }, [user?.id, loadDbSessions]);
 
   const activeSessions = sessions.filter(s => !s.stoppedAt);
   const closedSessions = sessions.filter(s => s.stoppedAt !== null);
@@ -161,7 +172,6 @@ export const MapCommandCenter = ({
         const zoom = parseFloat(url.searchParams.get('zoom') || '14');
         const layer = url.searchParams.get('layer') || '';
 
-        // Activate layer if specified
         if (layer) {
           window.dispatchEvent(new CustomEvent('genius-map-navigate', {
             detail: { lat, lng, zoom, layer, place: url.searchParams.get('place') || '' }
@@ -191,7 +201,6 @@ export const MapCommandCenter = ({
     setShowSuggestions(false);
     setSuggestions([]);
 
-    // First try Mapbox geocoding for direct place matches
     try {
       const token = mapboxgl.accessToken;
       const resp = await fetch(
@@ -199,7 +208,6 @@ export const MapCommandCenter = ({
       );
       const data = await resp.json();
 
-      // If high-confidence match and query looks like a place name (not a question/command)
       const isQuestion = /\b(show me|find|where|take me|cameras|cctv|sensors|transit|traffic|what|how|which|list|nearby)\b/i.test(query);
       if (!isQuestion && data.features?.length > 0 && data.features[0].relevance > 0.8) {
         handleSelectSuggestion(data.features[0]);
@@ -209,7 +217,6 @@ export const MapCommandCenter = ({
       // proceed to AI
     }
 
-    // Fall back to Genius AI for complex queries
     setIsAiLoading(true);
     setAiResponse(null);
 
@@ -255,7 +262,6 @@ export const MapCommandCenter = ({
             const c = parsed.choices?.[0]?.delta?.content;
             if (c) {
               fullText += c;
-              // Show cleaned response (without NAV tags) in real-time
               const cleanDisplay = fullText.replace(/<!--NAV:[^>]+-->\n?/g, '').trim();
               setAiResponse(cleanDisplay || null);
             }
@@ -280,7 +286,6 @@ export const MapCommandCenter = ({
         } catch { /* ignore */ }
       }
 
-      // Process any NAV command in the response
       if (fullText) {
         processNavCommand(fullText);
         const cleanDisplay = fullText.replace(/<!--NAV:[^>]+-->\n?/g, '').trim();
@@ -479,6 +484,42 @@ export const MapCommandCenter = ({
               <TabsContent value="studio" className="mt-0">
                 <ScrollArea className="max-h-[40vh]">
                   <div className="p-3 space-y-2">
+                    {/* Storage Usage Bar */}
+                    {usage && (
+                      <div className="rounded-xl p-2.5 bg-white/5 border border-white/10 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <HardDrive className="w-3.5 h-3.5 text-blue-400" />
+                            <span className="text-[10px] text-white/60 font-medium">Storage</span>
+                          </div>
+                          <span className="text-[10px] text-white/50">
+                            {formatBytes(usage.totalBytesUsed)} / {formatBytes(usage.planLimitBytes)}
+                          </span>
+                        </div>
+                        <Progress
+                          value={usage.percentUsed}
+                          className={cn(
+                            "h-1.5",
+                            usage.isOverLimit ? "[&>div]:bg-red-500" : usage.percentUsed > 80 ? "[&>div]:bg-amber-500" : "[&>div]:bg-blue-500"
+                          )}
+                        />
+                        <div className="flex items-center justify-between">
+                          <span className="text-[9px] text-white/30 capitalize">{usage.storagePlan} Plan</span>
+                          {usage.isOverLimit && (
+                            <span className="text-[9px] text-red-400 font-medium">
+                              +{usage.overageGb} GB overage • ${(usage.overageGb * 2.5).toFixed(2)}
+                            </span>
+                          )}
+                          {usage.percentUsed > 80 && !usage.isOverLimit && (
+                            <button className="flex items-center gap-0.5 text-[9px] text-blue-400 hover:text-blue-300 transition-colors">
+                              <ArrowUpCircle className="w-3 h-3" />
+                              Upgrade
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+
                     {sessions.length === 0 ? (
                       <div className="text-center py-8">
                         <Camera className="w-8 h-8 text-white/20 mx-auto mb-2" />
@@ -585,6 +626,7 @@ interface StudioSessionRowProps {
 
 const StudioSessionRow = ({ session, isActive, onStop, onPlay, onRemove, formatDuration, formatTime }: StudioSessionRowProps) => {
   const latestSnap = session.snapshots[session.snapshots.length - 1];
+  const sizeDisplay = session.totalSizeBytes ? formatBytes(session.totalSizeBytes) : null;
 
   return (
     <div className={cn(
@@ -624,8 +666,14 @@ const StudioSessionRow = ({ session, isActive, onStop, onPlay, onRemove, formatD
           </span>
           <span className="text-[9px] text-white/30">·</span>
           <span className="text-[9px] text-blue-400/70 font-mono">
-            {session.snapshots.length} frames
+            {session.snapshotCount || session.snapshots.length} frames
           </span>
+          {sizeDisplay && (
+            <>
+              <span className="text-[9px] text-white/30">·</span>
+              <span className="text-[9px] text-purple-400/70 font-mono">{sizeDisplay}</span>
+            </>
+          )}
         </div>
       </div>
 
@@ -657,7 +705,7 @@ const StudioSessionRow = ({ session, isActive, onStop, onPlay, onRemove, formatD
           size="icon"
           onClick={onRemove}
           className="h-7 w-7 text-white/30 hover:text-red-400 hover:bg-red-500/10 rounded-lg"
-          title="Delete session"
+          title="Remove"
         >
           <Trash2 className="w-3 h-3" />
         </Button>
