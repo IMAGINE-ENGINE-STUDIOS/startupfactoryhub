@@ -9,6 +9,7 @@ import { useCameraTimeline } from '@/hooks/useCameraTimeline';
 import { CameraTimelineScrubber } from './CameraTimelineScrubber';
 import { CameraVideoPlayer } from './CameraVideoPlayer';
 import { useRecordingSessions } from '@/stores/useRecordingSessions';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface TrafficCameraPopupProps {
   camera: TrafficCamera;
@@ -27,6 +28,7 @@ function isMjpegStream(url?: string): boolean {
 
 // Camera popup with consolidated controls
 export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps) => {
+  const { user } = useAuth();
   const [imageKey, setImageKey] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -73,13 +75,14 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
       stopSession(activeSession.id);
     } else if (proxyUrl) {
       // Start a new Studio session and seed it with all existing timeline frames
-      const sessionId = startSession({
+      startSession({
         cameraId: camera.id,
         cameraName: camera.name,
         proxyUrl,
         imageUrl: camera.imageUrl,
         refreshRate,
-        existingSnapshots: timeline.snapshots, // pass existing frames
+        userId: user?.id,
+        existingSnapshots: timeline.snapshots,
       });
     }
   };

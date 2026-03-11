@@ -215,21 +215,37 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
           ),
         }));
 
-        // Update DB stats
+        // Persist snapshot to Supabase Storage + DB
         const currentSession = get().sessions.find(s => s.id === id);
-        if (currentSession?.dbId) {
+        if (currentSession?.dbId && userId) {
+          const date = new Date(ts);
+          const dateStr = date.toISOString().split('T')[0];
+          const storagePath = `${cameraId}/${dateStr}/${ts}.jpg`;
+
+          supabase.storage
+            .from('camera-snapshots')
+            .upload(storagePath, blob, { contentType: 'image/jpeg', upsert: true })
+            .then(({ error: uploadErr }) => {
+              if (!uploadErr) {
+                supabase.from('camera_snapshots' as any).insert({
+                  camera_id: cameraId,
+                  user_id: userId,
+                  captured_at: date.toISOString(),
+                  storage_path: storagePath,
+                  file_size: fileSize,
+                } as any).then(() => {});
+              }
+            });
+
           supabase.rpc('increment_session_stats', {
             p_session_id: currentSession.dbId,
             p_size_bytes: fileSize,
           }).then(() => {});
 
-          // Also increment user storage usage
-          if (userId) {
-            supabase.rpc('increment_storage_usage', {
-              p_user_id: userId,
-              p_bytes: fileSize,
-            }).then(() => {});
-          }
+          supabase.rpc('increment_storage_usage', {
+            p_user_id: userId,
+            p_bytes: fileSize,
+          }).then(() => {});
         }
       } catch {
         // skip failed frame
