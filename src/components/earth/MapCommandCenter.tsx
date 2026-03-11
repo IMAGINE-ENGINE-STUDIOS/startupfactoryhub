@@ -38,7 +38,7 @@ export const MapCommandCenter = ({
   onSelectResource,
   isLeftPanelOpen,
 }: MapCommandCenterProps) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<any[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -125,7 +125,7 @@ export const MapCommandCenter = ({
         isLeftPanelOpen ? "left-[348px] right-4" : "left-4 right-4"
       )}
     >
-      <div className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/80 border border-white/20 rounded-2xl overflow-hidden shadow-2xl">
+      <div className="tech-card border-0 backdrop-blur-3xl bg-white/10 dark:bg-black/80 border border-white/20 rounded-2xl shadow-2xl relative">
         {/* Search Bar - always visible */}
         <div className="p-3 flex items-center gap-2">
           <div className="relative flex-1">
