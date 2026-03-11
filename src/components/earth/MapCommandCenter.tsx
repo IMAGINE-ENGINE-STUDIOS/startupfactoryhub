@@ -618,7 +618,7 @@ export const MapCommandCenter = ({
       {expandedSession && (
         <div className="fixed inset-0 z-[9999] bg-black flex flex-col">
           {/* Top bar */}
-          <div className="flex items-center justify-between px-4 py-3 bg-black/80 border-b border-white/10">
+          <div className="flex items-center justify-between px-4 py-2 bg-black/90 border-b border-white/10 flex-shrink-0">
             <div className="flex items-center gap-3">
               <Camera className="w-4 h-4 text-red-400" />
               <span className="text-sm text-white font-medium">{expandedSession.cameraName}</span>
@@ -634,110 +634,53 @@ export const MapCommandCenter = ({
               {expandedSession.totalSizeBytes ? (
                 <span className="text-xs text-purple-400/70 font-mono">{formatBytes(expandedSession.totalSizeBytes)}</span>
               ) : null}
+              <span className="text-xs text-white/30 font-mono">
+                {expandedSession.snapshots.length} frames
+              </span>
             </div>
-            <button
-              onClick={() => setExpandedSession(null)}
-              className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/60 hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Main image area */}
-          <div className="flex-1 relative flex items-center justify-center overflow-hidden">
-            {expandedSession.snapshots.length > 0 ? (
-              <>
-                <img
-                  src={expandedSession.snapshots[Math.min(expandedSnapIndex, expandedSession.snapshots.length - 1)]?.url}
-                  alt="Recording frame"
-                  className="max-w-full max-h-full object-contain"
-                />
-                {/* Nav arrows */}
-                {expandedSession.snapshots.length > 1 && (
-                  <>
-                    <button
-                      onClick={() => setExpandedSnapIndex(i => Math.max(0, i - 1))}
-                      disabled={expandedSnapIndex <= 0}
-                      className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white/60 hover:text-white disabled:opacity-20 transition-all"
-                    >
-                      <ChevronLeft className="w-6 h-6" />
-                    </button>
-                    <button
-                      onClick={() => setExpandedSnapIndex(i => Math.min(expandedSession.snapshots.length - 1, i + 1))}
-                      disabled={expandedSnapIndex >= expandedSession.snapshots.length - 1}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-black/60 hover:bg-black/80 text-white/60 hover:text-white disabled:opacity-20 transition-all"
-                    >
-                      <ChevronRight className="w-6 h-6" />
-                    </button>
-                  </>
-                )}
-              </>
-            ) : (
-              <div className="text-center">
-                <Camera className="w-16 h-16 text-white/10 mx-auto mb-3" />
-                <p className="text-sm text-white/30">No frames captured yet</p>
-                <p className="text-xs text-white/20 mt-1">{expandedSession.snapshotCount || 0} frames recorded (stored in cloud)</p>
-              </div>
-            )}
-          </div>
-
-          {/* Bottom bar - frame scrubber */}
-          {expandedSession.snapshots.length > 1 && (
-            <div className="px-4 py-3 bg-black/80 border-t border-white/10">
-              <div className="flex items-center gap-3">
-                <span className="text-[10px] text-white/40 font-mono w-16 text-right">
-                  {expandedSnapIndex + 1} / {expandedSession.snapshots.length}
-                </span>
-                <input
-                  type="range"
-                  min={0}
-                  max={expandedSession.snapshots.length - 1}
-                  value={expandedSnapIndex}
-                  onChange={(e) => setExpandedSnapIndex(parseInt(e.target.value))}
-                  className="flex-1 h-1 accent-red-500 cursor-pointer"
-                />
-                <span className="text-[10px] text-white/40 font-mono w-20">
-                  {new Date(expandedSession.snapshots[Math.min(expandedSnapIndex, expandedSession.snapshots.length - 1)]?.timestamp || 0).toLocaleTimeString()}
-                </span>
-              </div>
-            </div>
-          )}
-
-          {/* Action buttons */}
-          <div className="flex items-center justify-center gap-3 px-4 py-3 bg-black/80 border-t border-white/10">
-            {!expandedSession.stoppedAt ? (
+            <div className="flex items-center gap-2">
+              {!expandedSession.stoppedAt ? (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    stopSession(expandedSession.id);
+                    setExpandedSession({ ...expandedSession, stoppedAt: Date.now() });
+                  }}
+                  className="text-red-400 hover:text-red-300 hover:bg-red-500/20 h-8 text-xs"
+                >
+                  <Square className="w-3.5 h-3.5 mr-1.5 fill-current" /> Stop
+                </Button>
+              ) : null}
               <Button
                 variant="ghost"
-                onClick={() => {
-                  stopSession(expandedSession.id);
-                  setExpandedSession({ ...expandedSession, stoppedAt: Date.now() });
-                }}
-                className="text-red-400 hover:text-red-300 hover:bg-red-500/20"
-              >
-                <Square className="w-4 h-4 mr-2 fill-current" /> Stop Recording
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                onClick={() => {
-                  onPlaySession(expandedSession);
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeSession(expandedSession.id);
                   setExpandedSession(null);
                 }}
-                className="text-green-400 hover:text-green-300 hover:bg-green-500/20"
+                className="text-white/30 hover:text-red-400 hover:bg-red-500/10 h-8 text-xs"
               >
-                <Play className="w-4 h-4 mr-2 fill-current" /> Play Session
+                <Trash2 className="w-3.5 h-3.5 mr-1.5" /> Delete
               </Button>
-            )}
-            <Button
-              variant="ghost"
-              onClick={() => {
-                removeSession(expandedSession.id);
-                setExpandedSession(null);
-              }}
-              className="text-white/30 hover:text-red-400 hover:bg-red-500/10"
-            >
-              <Trash2 className="w-4 h-4 mr-2" /> Delete
-            </Button>
+              <button
+                onClick={() => setExpandedSession(null)}
+                className="p-2 rounded-lg hover:bg-white/10 transition-colors text-white/60 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+
+          {/* Full video player with all controls */}
+          <div className="flex-1 min-h-0 flex flex-col">
+            <CameraVideoPlayer
+              snapshots={expandedSession.snapshots}
+              onClose={() => setExpandedSession(null)}
+              fullscreen
+            />
           </div>
         </div>
       )}

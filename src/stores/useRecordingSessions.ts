@@ -253,7 +253,7 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
     set(state => ({
       sessions: state.sessions.map(s =>
         s.id === sessionId
-          ? { ...s, snapshots: [...s.snapshots, snap].slice(-1200) }
+          ? { ...s, snapshots: [...s.snapshots, snap] }
           : s
       ),
     }));
