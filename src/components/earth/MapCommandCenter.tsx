@@ -103,6 +103,8 @@ export const MapCommandCenter = ({
   const { sessions, stopSession, removeSession, loadDbSessions } = useRecordingSessions();
   const { user } = useAuth();
   const { usage } = useStorageUsage();
+  const [expandedSession, setExpandedSession] = useState<RecordingSession | null>(null);
+  const [expandedSnapIndex, setExpandedSnapIndex] = useState(0);
 
   // Load persisted sessions from DB
   useEffect(() => {
