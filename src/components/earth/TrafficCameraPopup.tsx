@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useCameraTimeline } from '@/hooks/useCameraTimeline';
 import { CameraTimelineScrubber } from './CameraTimelineScrubber';
 import { CameraVideoPlayer } from './CameraVideoPlayer';
+import { CameraHistoryControls } from './CameraHistoryControls';
 
 interface TrafficCameraPopupProps {
   camera: TrafficCamera;
