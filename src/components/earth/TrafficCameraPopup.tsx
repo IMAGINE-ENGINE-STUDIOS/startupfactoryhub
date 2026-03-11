@@ -193,6 +193,12 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
               snapshots={timeline.snapshots}
               onClose={() => setMode('live')}
             />
+            <CameraHistoryControls
+              onLoadRange={timeline.loadHistoryRange}
+              getHistoryStats={timeline.getHistoryStats}
+              isLoading={timeline.isLoadingHistory}
+              snapshotCount={timeline.snapshotCount}
+            />
           </ScrollArea>
         ) : (
           <>
