@@ -158,3 +158,6 @@ verify_jwt = false
 
 [functions.proxy-camera-image]
 verify_jwt = false
+
+[functions.charge-storage-overage]
+verify_jwt = false
