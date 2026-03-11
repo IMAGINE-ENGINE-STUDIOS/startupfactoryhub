@@ -42,6 +42,7 @@ interface RecordingSessionsState {
   hasActiveSessionForCamera: (cameraId: string) => boolean;
   getActiveSessionForCamera: (cameraId: string) => RecordingSession | undefined;
   loadDbSessions: (userId: string) => Promise<void>;
+  loadSessionSnapshots: (sessionId: string) => Promise<void>;
 }
 
 export const useRecordingSessions = create<RecordingSessionsState>((set, get) => ({
