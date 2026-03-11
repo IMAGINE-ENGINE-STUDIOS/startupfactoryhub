@@ -125,6 +125,18 @@ export const MapCommandCenter = ({
     return () => window.removeEventListener('keydown', handleEsc);
   }, [expandedSession]);
 
+  // Keep expandedSession in sync with store (e.g. after loadSessionSnapshots or new frames)
+  useEffect(() => {
+    if (!expandedSession) return;
+    const updated = sessions.find(s => s.id === expandedSession.id);
+    if (updated && updated.snapshots.length !== expandedSession.snapshots.length) {
+      setExpandedSession(updated);
+      if (expandedSnapIndex === 0 && updated.snapshots.length > 0) {
+        setExpandedSnapIndex(updated.snapshots.length - 1);
+      }
+    }
+  }, [sessions, expandedSession, expandedSnapIndex]);
+
   const activeSessions = sessions.filter(s => !s.stoppedAt);
   const closedSessions = sessions.filter(s => s.stoppedAt !== null);
 
