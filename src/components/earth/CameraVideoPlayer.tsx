@@ -7,11 +7,12 @@ import { Play, Pause, SkipBack, SkipForward, FastForward, Rewind, Calendar } fro
 interface CameraVideoPlayerProps {
   snapshots: CameraSnapshot[];
   onClose: () => void;
+  fullscreen?: boolean;
 }
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 2, 4, 8, 16];
 
-export const CameraVideoPlayer = ({ snapshots, onClose }: CameraVideoPlayerProps) => {
+export const CameraVideoPlayer = ({ snapshots, onClose, fullscreen = false }: CameraVideoPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
   const [speed, setSpeed] = useState(2); // index into SPEED_OPTIONS → starts at 1x
@@ -90,9 +91,9 @@ export const CameraVideoPlayer = ({ snapshots, onClose }: CameraVideoPlayerProps
   }
 
   return (
-    <div className="flex flex-col">
+    <div className={`flex flex-col ${fullscreen ? 'h-full' : ''}`}>
       {/* Video display */}
-      <div className="relative bg-black aspect-video">
+      <div className={`relative bg-black ${fullscreen ? 'flex-1 min-h-0' : 'aspect-video'}`}>
         {currentSnap && (
           <img
             src={currentSnap.url}
@@ -251,17 +252,19 @@ export const CameraVideoPlayer = ({ snapshots, onClose }: CameraVideoPlayerProps
         </div>
       </div>
 
-      {/* Close button */}
-      <div className="px-3 pb-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          className="w-full h-7 text-[10px] text-white/50 hover:text-white hover:bg-white/10 border border-white/10"
-        >
-          Back to Live Feed
-        </Button>
-      </div>
+      {/* Close button - hide in fullscreen since parent handles it */}
+      {!fullscreen && (
+        <div className="px-3 pb-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="w-full h-7 text-[10px] text-white/50 hover:text-white hover:bg-white/10 border border-white/10"
+          >
+            Back to Live Feed
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

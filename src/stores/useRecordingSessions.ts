@@ -155,7 +155,7 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
             s.id === id
               ? {
                   ...s,
-                  snapshots: [...s.snapshots, snap].slice(-1200),
+                  snapshots: [...s.snapshots, snap],
                   totalSizeBytes: (s.totalSizeBytes || 0) + fileSize,
                   snapshotCount: (s.snapshotCount || 0) + 1,
                 }
@@ -253,7 +253,7 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
     set(state => ({
       sessions: state.sessions.map(s =>
         s.id === sessionId
-          ? { ...s, snapshots: [...s.snapshots, snap].slice(-1200) }
+          ? { ...s, snapshots: [...s.snapshots, snap] }
           : s
       ),
     }));
