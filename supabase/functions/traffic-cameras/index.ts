@@ -45,9 +45,6 @@ function validStreamUrl(url?: string): string | undefined {
 }
 
 // ====== GENERIC 511 v2 FETCHER ======
-// Most US states use the Iteris 511 platform with /api/v2/get/cameras or /api/getcameras
-// Response includes Views array with camera image URLs
-
 async function fetch511Cameras(
   stateCode: string,
   baseUrl: string,
@@ -57,7 +54,6 @@ async function fetch511Cameras(
 ): Promise<CameraResult[]> {
   if (!boundsOverlap(bounds, region)) return [];
   
-  // Try v2 API first, fall back to v1
   const urls = [
     `${baseUrl}/api/v2/get/cameras?key=public&format=json`,
     `${baseUrl}/api/getcameras?key=public&format=json`,
@@ -67,12 +63,11 @@ async function fetch511Cameras(
   let data: any = null;
   for (const url of urls) {
     try {
-      const resp = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      const resp = await fetch(url, { signal: AbortSignal.timeout(5000) });
       if (!resp.ok) { await resp.text().catch(() => {}); continue; }
       const text = await resp.text();
       data = JSON.parse(text);
       if (Array.isArray(data) && data.length > 0) break;
-      // Some responses wrap in CamerasList
       if (data?.CamerasList) { data = data.CamerasList; break; }
       data = null;
     } catch { continue; }
@@ -91,7 +86,6 @@ async function fetch511Cameras(
       const lng = parseFloat(c.Longitude || c.longitude);
       const camId = c.Id || c.ID || c.id || Math.random().toString(36).slice(2);
       
-      // Get image URL: prefer Views array (v2), fall back to top-level Url
       let imgUrl = '';
       let videoUrl = '';
       
@@ -101,18 +95,9 @@ async function fetch511Cameras(
         videoUrl = view.VideoUrl || view.videoUrl || '';
       }
       
-      if (!imgUrl) {
-        imgUrl = c.Url || c.url || '';
-      }
-      if (!videoUrl) {
-        videoUrl = c.VideoUrl || c.videoUrl || '';
-      }
-      
-      // If URL looks like a direct image, use it; otherwise use the Cctv page URL
-      // (the proxy can handle 511 Cctv page URLs - they serve images with proper Accept headers)
-      if (!imgUrl && videoUrl) {
-        imgUrl = videoUrl;
-      }
+      if (!imgUrl) imgUrl = c.Url || c.url || '';
+      if (!videoUrl) videoUrl = c.VideoUrl || c.videoUrl || '';
+      if (!imgUrl && videoUrl) imgUrl = videoUrl;
       
       return {
         id: `${stateCode.toLowerCase()}-${camId}`,
@@ -128,7 +113,6 @@ async function fetch511Cameras(
 }
 
 // ====== GENERIC ArcGIS FeatureServer FETCHER ======
-
 async function fetchArcGISCameras(
   stateCode: string,
   featureServerUrl: string,
@@ -160,9 +144,9 @@ async function fetchArcGISCameras(
         const a = f.attributes || {};
         const lat = a[fieldMapping.lat || 'latitude'] || a.LATITUDE || a.Latitude || a.latitude || a.LAT || f.geometry?.y;
         const lng = a[fieldMapping.lng || 'longitude'] || a.LONGITUDE || a.Longitude || a.longitude || a.LON || a.LONG || f.geometry?.x;
-        const imgUrl = a[fieldMapping.imageUrl || 'imageUrl'] || a.ImageURL || a.imageUrl || a.IMAGE_URL || a.IMAGE || a.Image || a.Url || a.url || a.currentImageURL || '';
+        const imgUrl = a[fieldMapping.imageUrl || 'imageUrl'] || a.ImageURL || a.imageUrl || a.IMAGE_URL || a.IMAGE || a.Image || a.Url || a.url || a.URL || a.currentImageURL || '';
         const camId = a[fieldMapping.id || 'OBJECTID'] || a.OBJECTID || a.Id || a.ID || a.id || Math.random().toString(36).slice(2);
-        const name = a[fieldMapping.name || 'Name'] || a.Name || a.NAME || a.name || a.DESCRIPT || a.Description || a.locationName || a.Location || `${stateCode} Camera`;
+        const name = a[fieldMapping.name || 'Name'] || a.Name || a.NAME || a.name || a.DESCRIPT || a.Description || a.locationName || a.Location || a.LOCATION || a.location || `${stateCode} Camera`;
         
         return { id: `${stateCode.toLowerCase()}-${camId}`, name, lat, lng, imageUrl: imgUrl, source, refreshRate };
       })
@@ -268,13 +252,13 @@ async function fetchAustinCameras(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== ILLINOIS (IDOT ArcGIS Gateway) ======
-async function fetchILDOT(bounds: Bounds): Promise<CameraResult[]> {
-  return fetchArcGISCameras('IL',
-    'https://gis-idot.opendata.arcgis.com/datasets/IDOT::illinois-gateway-traffic-cameras/FeatureServer/0',
-    bounds, { south: 36.5, north: 43, west: -92, east: -87 },
-    {},
-    'IDOT', 10
+// ====== MARYLAND (ArcGIS - verified endpoint) ======
+async function fetchMDDOT(bounds: Bounds): Promise<CameraResult[]> {
+  return fetchArcGISCameras('MD',
+    'https://mdgeodata.md.gov/imap/rest/services/Transportation/MD_TrafficCameras/FeatureServer/0',
+    bounds, { south: 37.5, north: 40, west: -79.5, east: -75 },
+    { lat: 'lat', lng: 'long', name: 'location', imageUrl: 'url', id: 'OBJECTID' },
+    'MDSHA', 10
   );
 }
 
@@ -304,11 +288,10 @@ async function fetch511VA(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== GEORGIA (custom API) ======
+// ====== GEORGIA (511 API) ======
 async function fetch511GA(bounds: Bounds): Promise<CameraResult[]> {
   if (!boundsOverlap(bounds, { south: 30.5, north: 35.5, west: -86, east: -80.5 })) return [];
   try {
-    // Try v2 API
     const resp = await fetch('https://511ga.org/api/v2/get/cameras?key=public&format=json', { signal: AbortSignal.timeout(8000) });
     if (!resp.ok) { await resp.text().catch(() => {}); return []; }
     const data = await resp.json();
@@ -334,35 +317,7 @@ async function fetch511GA(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== MARYLAND (CHART) ======
-async function fetchMDDOT(bounds: Bounds): Promise<CameraResult[]> {
-  if (!boundsOverlap(bounds, { south: 37.5, north: 40, west: -79.5, east: -75 })) return [];
-  try {
-    const resp = await fetch('https://chart.maryland.gov/DataFeeds/GetCamerasJson', { signal: AbortSignal.timeout(8000) });
-    if (!resp.ok) { await resp.text().catch(() => {}); return []; }
-    const data = await resp.json();
-    const cameras = Array.isArray(data) ? data : (data?.cameras || []);
-    if (!Array.isArray(cameras)) return [];
-    return cameras
-      .filter((c: any) => {
-        const lat = parseFloat(c.lat || c.latitude || c.Latitude || 0);
-        const lng = parseFloat(c.lon || c.lng || c.longitude || c.Longitude || 0);
-        return inBounds(lat, lng, bounds);
-      })
-      .map((c: any) => ({
-        id: `md-${c.id || c.cameraId || c.CameraID || Math.random().toString(36).slice(2)}`,
-        name: c.description || c.name || c.title || c.Description || 'MD Camera',
-        lat: parseFloat(c.lat || c.latitude || c.Latitude),
-        lng: parseFloat(c.lon || c.lng || c.longitude || c.Longitude),
-        imageUrl: c.imageUrl || c.url || c.image || c.ImageUrl || '',
-        source: 'MDSHA',
-        refreshRate: 10,
-      }))
-      .filter((c: CameraResult) => c.imageUrl);
-  } catch { return []; }
-}
-
-// ====== TENNESSEE (SmartWay) ======
+// ====== TENNESSEE (SmartWay API) ======
 async function fetchTNCameras(bounds: Bounds): Promise<CameraResult[]> {
   if (!boundsOverlap(bounds, { south: 34.9, north: 36.7, west: -90.5, east: -81.5 })) return [];
   try {
@@ -390,11 +345,10 @@ async function fetchTNCameras(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== COLORADO (CDOT COTrip) ======
+// ====== COLORADO (COTrip API) ======
 async function fetchCDOT(bounds: Bounds): Promise<CameraResult[]> {
   if (!boundsOverlap(bounds, { south: 37, north: 41.5, west: -109.5, east: -102 })) return [];
   try {
-    // Try the COTrip cameras endpoint
     const resp = await fetch('https://www.cotrip.org/speed/getTrafficCameras.do', { signal: AbortSignal.timeout(8000) });
     if (!resp.ok) { await resp.text().catch(() => {}); return []; }
     const data = await resp.json();
@@ -444,6 +398,16 @@ async function fetchODOT(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
+// ====== ILLINOIS (IDOT ArcGIS) ======
+async function fetchILDOT(bounds: Bounds): Promise<CameraResult[]> {
+  return fetchArcGISCameras('IL',
+    'https://gis-idot.opendata.arcgis.com/datasets/IDOT::illinois-gateway-traffic-cameras/FeatureServer/0',
+    bounds, { south: 36.5, north: 43, west: -92, east: -87 },
+    {},
+    'IDOT', 10
+  );
+}
+
 // ====== WASHINGTON DC (ArcGIS) ======
 async function fetchDCCameras(bounds: Bounds): Promise<CameraResult[]> {
   return fetchArcGISCameras('DC',
@@ -485,14 +449,7 @@ async function fetchNYCDOTCameras(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== NORTH CAROLINA (NCDOT TIMS) ======
-async function fetchNCCameras(bounds: Bounds): Promise<CameraResult[]> {
-  // NCDOT uses Iteris TIMS - try 511-style API
-  return fetch511Cameras('NC', 'https://tims.ncdot.gov', bounds, 
-    { south: 33.5, north: 36.6, west: -84.5, east: -75.3 }, 10);
-}
-
-// ====== OHIO (OHGO - public API without key returns limited data) ======
+// ====== OHIO (OHGO public API) ======
 async function fetchOHCameras(bounds: Bounds): Promise<CameraResult[]> {
   if (!boundsOverlap(bounds, { south: 38.3, north: 42, west: -85, east: -80.4 })) return [];
   try {
@@ -511,7 +468,6 @@ async function fetchOHCameras(bounds: Bounds): Promise<CameraResult[]> {
         return inBounds(lat, lng, bounds);
       })
       .map((c: any) => {
-        // OHGO has Links array with image URLs
         let imgUrl = c.smallImageUrl || c.largeImageUrl || c.imageUrl || '';
         if (!imgUrl && Array.isArray(c.links || c.Links)) {
           const imgLink = (c.links || c.Links).find((l: any) => l.rel === 'small' || l.rel === 'large' || l.rel === 'image');
@@ -529,6 +485,16 @@ async function fetchOHCameras(bounds: Bounds): Promise<CameraResult[]> {
       })
       .filter((c: CameraResult) => c.imageUrl);
   } catch { return []; }
+}
+
+// ====== NORTH CAROLINA (NCDOT TIMS ArcGIS) ======
+async function fetchNCCameras(bounds: Bounds): Promise<CameraResult[]> {
+  return fetchArcGISCameras('NC',
+    'https://services.arcgis.com/ZOyb2t4B0UYuYNYH/arcgis/rest/services/NCDOT_TIMSCameras/FeatureServer/0',
+    bounds, { south: 33.5, north: 36.6, west: -84.5, east: -75.3 },
+    { name: 'LOCATION', imageUrl: 'URL' },
+    'NCDOT', 10
+  );
 }
 
 // ====== UK (Highways England) ======
@@ -612,7 +578,7 @@ async function fetchAUCameras(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== WINDY.COM WEBCAMS - WORLDWIDE (street + city cameras) ======
+// ====== WINDY.COM WEBCAMS - WORLDWIDE ======
 async function fetchWindyCameras(bounds: Bounds): Promise<CameraResult[]> {
   try {
     const centerLat = (bounds.north + bounds.south) / 2;
@@ -649,19 +615,13 @@ async function fetchWindyCameras(bounds: Bounds): Promise<CameraResult[]> {
   } catch { return []; }
 }
 
-// ====== 511 PLATFORM STATES ======
-// These all use the generic 511 v2 API fetcher
-
+// ====== VERIFIED 511 PLATFORM STATES (confirmed working) ======
 function fetchAKCameras(b: Bounds) { return fetch511Cameras('AK', 'https://511.alaska.gov', b, { south: 51, north: 72, west: -180, east: -129 }, 30); }
 function fetchAZCameras(b: Bounds) { return fetch511Cameras('AZ', 'https://az511.gov', b, { south: 31.3, north: 37, west: -114.9, east: -109 }, 10); }
 function fetchIACameras(b: Bounds) { return fetch511Cameras('IA', 'https://www.511ia.org', b, { south: 40.3, north: 43.6, west: -96.7, east: -90 }, 10); }
 function fetchIDCameras(b: Bounds) { return fetch511Cameras('ID', 'https://511.idaho.gov', b, { south: 41.9, north: 49.1, west: -117.3, east: -111 }, 10); }
 function fetchKYCameras(b: Bounds) { return fetch511Cameras('KY', 'https://511.ky.gov', b, { south: 36.4, north: 39.2, west: -89.6, east: -81.9 }, 10); }
 function fetchLACameras(b: Bounds) { return fetch511Cameras('LA', 'https://www.511la.org', b, { south: 28.9, north: 33.1, west: -94.1, east: -88.7 }, 10); }
-function fetchMACameras(b: Bounds) { return fetch511Cameras('MA', 'https://mass511.com', b, { south: 41, north: 42.9, west: -73.6, east: -69.8 }, 10); }
-function fetchMICameras(b: Bounds) { return fetch511Cameras('MI', 'https://mi.gov/drive', b, { south: 41.6, north: 48.3, west: -90.5, east: -82.1 }, 10); }
-function fetchMNCameras(b: Bounds) { return fetch511Cameras('MN', 'https://511mn.org', b, { south: 43.4, north: 49.4, west: -97.3, east: -89.4 }, 10); }
-function fetchMTCameras(b: Bounds) { return fetch511Cameras('MT', 'https://www.511mt.net', b, { south: 44.3, north: 49.1, west: -116.1, east: -104 }, 15); }
 function fetchNECameras(b: Bounds) { return fetch511Cameras('NE', 'https://511.nebraska.gov', b, { south: 39.9, north: 43.1, west: -104.1, east: -95.3 }, 10); }
 function fetchNJCameras(b: Bounds) { return fetch511Cameras('NJ', 'https://511nj.org', b, { south: 38.8, north: 41.5, west: -75.6, east: -73.8 }, 5); }
 function fetchNVCameras(b: Bounds) { return fetch511Cameras('NV', 'https://www.nvroads.com', b, { south: 35, north: 42, west: -120, east: -114 }, 10); }
@@ -670,27 +630,80 @@ function fetchPACameras(b: Bounds) { return fetch511Cameras('PA', 'https://511pa
 function fetchSCCameras(b: Bounds) { return fetch511Cameras('SC', 'https://www.511sc.org', b, { south: 32, north: 35.3, west: -83.5, east: -78.4 }, 10); }
 function fetchUTCameras(b: Bounds) { return fetch511Cameras('UT', 'https://www.udottraffic.utah.gov', b, { south: 36.9, north: 42.1, west: -114.1, east: -108.9 }, 10); }
 function fetchWICameras(b: Bounds) { return fetch511Cameras('WI', 'https://511wi.gov', b, { south: 42.4, north: 47.1, west: -93, east: -86.7 }, 10); }
-
-// Additional 511 states that may or may not have working APIs
+function fetchMACameras(b: Bounds) { return fetch511Cameras('MA', 'https://mass511.com', b, { south: 41, north: 42.9, west: -73.6, east: -69.8 }, 10); }
 function fetchCTCameras(b: Bounds) { return fetch511Cameras('CT', 'https://www.511ct.org', b, { south: 40.9, north: 42.1, west: -73.8, east: -71.7 }, 10); }
-function fetchMOCameras(b: Bounds) { return fetch511Cameras('MO', 'https://traveler.modot.org', b, { south: 35.9, north: 40.7, west: -95.8, east: -89 }, 10); }
-function fetchINDOTCameras(b: Bounds) { return fetch511Cameras('IN', 'https://indot.carsprogram.org', b, { south: 37.7, north: 41.8, west: -88.1, east: -84.7 }, 10); }
-function fetchALCameras(b: Bounds) { return fetch511Cameras('AL', 'https://www.algotraffic.com', b, { south: 30, north: 35.1, west: -88.5, east: -84.8 }, 10); }
-function fetchOKCameras(b: Bounds) { return fetch511Cameras('OK', 'https://ok.gov/odot', b, { south: 33.6, north: 37.1, west: -103, east: -94.4 }, 10); }
-function fetchKSCameras(b: Bounds) { return fetch511Cameras('KS', 'https://kandrive.org', b, { south: 36.9, north: 40.1, west: -102.1, east: -94.5 }, 10); }
-function fetchARCameras(b: Bounds) { return fetch511Cameras('AR', 'https://idrivearkansas.com', b, { south: 33, north: 36.6, west: -94.6, east: -89.6 }, 10); }
-function fetchMSCameras(b: Bounds) { return fetch511Cameras('MS', 'https://mdottraffic.com', b, { south: 30, north: 35.1, west: -91.7, east: -88 }, 10); }
-function fetchWVCameras(b: Bounds) { return fetch511Cameras('WV', 'https://wv511.org', b, { south: 37.1, north: 40.7, west: -82.7, east: -77.7 }, 10); }
-function fetchNMCameras(b: Bounds) { return fetch511Cameras('NM', 'https://nmroads.com', b, { south: 31.3, north: 37.1, west: -109.1, east: -103 }, 10); }
+function fetchMNCameras(b: Bounds) { return fetch511Cameras('MN', 'https://511mn.org', b, { south: 43.4, north: 49.4, west: -97.3, east: -89.4 }, 10); }
+function fetchMTCameras(b: Bounds) { return fetch511Cameras('MT', 'https://www.511mt.net', b, { south: 44.3, north: 49.1, west: -116.1, east: -104 }, 15); }
 function fetchWYCameras(b: Bounds) { return fetch511Cameras('WY', 'https://www.wyoroad.info', b, { south: 40.9, north: 45.1, west: -111.1, east: -104 }, 15); }
 function fetchSDCameras(b: Bounds) { return fetch511Cameras('SD', 'https://sd511.org', b, { south: 42.4, north: 46, west: -104.1, east: -96.4 }, 15); }
 function fetchNDCameras(b: Bounds) { return fetch511Cameras('ND', 'https://travel.dot.nd.gov', b, { south: 45.9, north: 49.1, west: -104.1, east: -96.5 }, 15); }
-function fetchNHCameras(b: Bounds) { return fetch511Cameras('NH', 'https://www.newengland511.org', b, { south: 42.6, north: 45.4, west: -72.6, east: -70.6 }, 10); }
-function fetchVTCameras(b: Bounds) { return fetch511Cameras('VT', 'https://www.newengland511.org', b, { south: 42.7, north: 45.1, west: -73.5, east: -71.4 }, 10); }
-function fetchMECameras(b: Bounds) { return fetch511Cameras('ME', 'https://www.newengland511.org', b, { south: 42.9, north: 47.5, west: -71.1, east: -66.9 }, 10); }
-function fetchDECameras(b: Bounds) { return fetch511Cameras('DE', 'https://deldot.gov', b, { south: 38.4, north: 39.9, west: -75.8, east: -75 }, 10); }
-function fetchRICameras(b: Bounds) { return fetch511Cameras('RI', 'https://www.dot.ri.gov', b, { south: 41.1, north: 42.1, west: -71.9, east: -71.1 }, 10); }
-function fetchHICameras(b: Bounds) { return fetch511Cameras('HI', 'https://goakamai.org', b, { south: 18.5, north: 22.5, west: -161, east: -154 }, 30); }
+function fetchWVCameras(b: Bounds) { return fetch511Cameras('WV', 'https://wv511.org', b, { south: 37.1, north: 40.7, west: -82.7, east: -77.7 }, 10); }
+function fetchNMCameras(b: Bounds) { return fetch511Cameras('NM', 'https://nmroads.com', b, { south: 31.3, north: 37.1, west: -109.1, east: -103 }, 10); }
+
+// NOTE: Removed broken fetchers for MI, IN, AL, OK, KS, AR, MS, DE, RI, HI, MO, NH, VT, ME
+// These used wrong URLs that silently fail. Windy webcams provides coverage for these states.
+
+// ====== NAMED SOURCE TRACKING ======
+interface NamedFetcher {
+  name: string;
+  fn: (b: Bounds) => Promise<CameraResult[]>;
+}
+
+const allFetchers: NamedFetcher[] = [
+  // Northeast
+  { name: 'NY-511', fn: fetchNYCameras },
+  { name: 'NYC-DOT', fn: fetchNYCDOTCameras },
+  { name: 'NJ-511', fn: fetchNJCameras },
+  { name: 'PA-511', fn: fetchPACameras },
+  { name: 'MA-511', fn: fetchMACameras },
+  { name: 'CT-511', fn: fetchCTCameras },
+  // Mid-Atlantic
+  { name: 'MD-ArcGIS', fn: fetchMDDOT },
+  { name: 'VA-GeoJSON', fn: fetch511VA },
+  { name: 'DC-ArcGIS', fn: fetchDCCameras },
+  { name: 'WV-511', fn: fetchWVCameras },
+  // Southeast
+  { name: 'NC-ArcGIS', fn: fetchNCCameras },
+  { name: 'SC-511', fn: fetchSCCameras },
+  { name: 'GA-511', fn: fetch511GA },
+  { name: 'FL-ArcGIS', fn: fetchFLDOT },
+  { name: 'TN-SmartWay', fn: fetchTNCameras },
+  { name: 'KY-511', fn: fetchKYCameras },
+  { name: 'LA-511', fn: fetchLACameras },
+  // Texas
+  { name: 'TX-ArcGIS', fn: fetchTxDOTCameras },
+  { name: 'TX-Austin', fn: fetchAustinCameras },
+  // West Coast
+  { name: 'CA-Caltrans', fn: fetchCaltransCameras },
+  { name: 'WA-ArcGIS', fn: fetchWSDOT },
+  { name: 'OR-TripCheck', fn: fetchODOT },
+  // Mountain/Southwest
+  { name: 'CO-COTrip', fn: fetchCDOT },
+  { name: 'AZ-511', fn: fetchAZCameras },
+  { name: 'NV-511', fn: fetchNVCameras },
+  { name: 'UT-511', fn: fetchUTCameras },
+  { name: 'NM-511', fn: fetchNMCameras },
+  { name: 'ID-511', fn: fetchIDCameras },
+  { name: 'MT-511', fn: fetchMTCameras },
+  { name: 'WY-511', fn: fetchWYCameras },
+  // Midwest
+  { name: 'IL-ArcGIS', fn: fetchILDOT },
+  { name: 'OH-OHGO', fn: fetchOHCameras },
+  { name: 'MN-511', fn: fetchMNCameras },
+  { name: 'WI-511', fn: fetchWICameras },
+  { name: 'IA-511', fn: fetchIACameras },
+  { name: 'NE-511', fn: fetchNECameras },
+  { name: 'ND-511', fn: fetchNDCameras },
+  { name: 'SD-511', fn: fetchSDCameras },
+  // Non-contiguous
+  { name: 'AK-511', fn: fetchAKCameras },
+  // International
+  { name: 'UK-Highways', fn: fetchUKCameras },
+  { name: 'NL-NDW', fn: fetchNLCameras },
+  { name: 'AU-NSW', fn: fetchAUCameras },
+  // Worldwide
+  { name: 'Windy', fn: fetchWindyCameras },
+];
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -716,80 +729,25 @@ serve(async (req) => {
       );
     }
 
-    // Fetch from ALL sources concurrently - ALL 50 US states + international
-    const results = await Promise.allSettled([
-      // ===== NORTHEAST =====
-      fetchNYCameras(bounds),
-      fetchNYCDOTCameras(bounds),
-      fetchNJCameras(bounds),
-      fetchPACameras(bounds),
-      fetchMACameras(bounds),
-      fetchCTCameras(bounds),
-      fetchRICameras(bounds),
-      fetchNHCameras(bounds),
-      fetchVTCameras(bounds),
-      fetchMECameras(bounds),
-      fetchDECameras(bounds),
-      // ===== MID-ATLANTIC =====
-      fetchMDDOT(bounds),
-      fetch511VA(bounds),
-      fetchDCCameras(bounds),
-      fetchWVCameras(bounds),
-      // ===== SOUTHEAST =====
-      fetchNCCameras(bounds),
-      fetchSCCameras(bounds),
-      fetch511GA(bounds),
-      fetchFLDOT(bounds),
-      fetchALCameras(bounds),
-      fetchTNCameras(bounds),
-      fetchKYCameras(bounds),
-      fetchLACameras(bounds),
-      fetchMSCameras(bounds),
-      fetchARCameras(bounds),
-      // ===== TEXAS =====
-      fetchTxDOTCameras(bounds),
-      fetchAustinCameras(bounds),
-      // ===== WEST COAST =====
-      fetchCaltransCameras(bounds),
-      fetchWSDOT(bounds),
-      fetchODOT(bounds),
-      // ===== MOUNTAIN / SOUTHWEST =====
-      fetchCDOT(bounds),
-      fetchAZCameras(bounds),
-      fetchNVCameras(bounds),
-      fetchUTCameras(bounds),
-      fetchNMCameras(bounds),
-      fetchIDCameras(bounds),
-      fetchMTCameras(bounds),
-      fetchWYCameras(bounds),
-      // ===== MIDWEST =====
-      fetchILDOT(bounds),
-      fetchOHCameras(bounds),
-      fetchMICameras(bounds),
-      fetchINDOTCameras(bounds),
-      fetchMNCameras(bounds),
-      fetchWICameras(bounds),
-      fetchIACameras(bounds),
-      fetchNECameras(bounds),
-      fetchMOCameras(bounds),
-      fetchKSCameras(bounds),
-      fetchOKCameras(bounds),
-      fetchNDCameras(bounds),
-      fetchSDCameras(bounds),
-      // ===== NON-CONTIGUOUS =====
-      fetchAKCameras(bounds),
-      fetchHICameras(bounds),
-      // ===== INTERNATIONAL =====
-      fetchUKCameras(bounds),
-      fetchNLCameras(bounds),
-      fetchAUCameras(bounds),
-      // ===== WORLDWIDE WEBCAMS =====
-      fetchWindyCameras(bounds),
-    ]);
+    // Fetch from ALL sources concurrently with per-source logging
+    const results = await Promise.allSettled(
+      allFetchers.map(async (f) => {
+        try {
+          const cams = await f.fn(bounds);
+          if (cams.length > 0) {
+            console.log(`[${f.name}] ${cams.length} cameras`);
+          }
+          return { name: f.name, cameras: cams };
+        } catch (err) {
+          console.warn(`[${f.name}] ERROR: ${err}`);
+          return { name: f.name, cameras: [] as CameraResult[] };
+        }
+      })
+    );
 
     const allCameras: CameraResult[] = [];
     for (const r of results) {
-      if (r.status === 'fulfilled') allCameras.push(...r.value);
+      if (r.status === 'fulfilled') allCameras.push(...r.value.cameras);
     }
 
     // Deduplicate by proximity (0.0005 degrees ≈ 50m)
@@ -803,7 +761,7 @@ serve(async (req) => {
 
     cache.set(key, { data: deduped, time: Date.now() });
 
-    console.log(`Returning ${deduped.length} cameras for bounds: ${JSON.stringify(bounds)}`);
+    console.log(`Total: ${deduped.length} cameras for bounds [${bounds.south.toFixed(1)},${bounds.west.toFixed(1)} → ${bounds.north.toFixed(1)},${bounds.east.toFixed(1)}]`);
 
     return new Response(
       JSON.stringify({ cameras: deduped }),
