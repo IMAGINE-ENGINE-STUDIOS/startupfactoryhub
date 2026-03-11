@@ -12,7 +12,7 @@ interface CameraVideoPlayerProps {
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 2, 4, 8, 16];
 
-export const CameraVideoPlayer = ({ snapshots, onClose }: CameraVideoPlayerProps) => {
+export const CameraVideoPlayer = ({ snapshots, onClose, fullscreen = false }: CameraVideoPlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentFrame, setCurrentFrame] = useState(0);
   const [speed, setSpeed] = useState(2); // index into SPEED_OPTIONS → starts at 1x
