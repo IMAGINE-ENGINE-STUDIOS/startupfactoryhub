@@ -181,7 +181,7 @@ export const GlobalResourcesMap = () => {
   const isRotatingRef = useRef(false);
   const [mapStyle, setMapStyle] = useState<MapStyleType>('satelliteStreets');
   const [mapReady, setMapReady] = useState(false);
-  const [isPerksExpanded, setIsPerksExpanded] = useState(true);
+  
   const [isOnlineResourcesExpanded, setIsOnlineResourcesExpanded] = useState(false);
   const [showEarthLayers, setShowEarthLayers] = useState(false);
   const [showResourceMarkers, setShowResourceMarkers] = useState(true);
