@@ -209,6 +209,17 @@ export const useCameraTimeline = ({
     }
   }, [cameraId]);
 
+  // Reset snapshots when camera changes
+  useEffect(() => {
+    snapshotsRef.current.forEach(s => {
+      if (!s.persisted) URL.revokeObjectURL(s.url);
+    });
+    snapshotsRef.current = [];
+    persistQueueRef.current = [];
+    persistCountRef.current = 0;
+    setSnapshots([]);
+  }, [cameraId]);
+
   // Auto-record at refresh rate
   useEffect(() => {
     if (isStream) return;
