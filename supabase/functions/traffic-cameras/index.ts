@@ -94,12 +94,15 @@ async function fetch511Cameras(
       if (Array.isArray(c.Views) && c.Views.length > 0) {
         const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
         imgUrl = view.Url || view.url || '';
-        videoUrl = view.VideoUrl || view.videoUrl || '';
+        videoUrl = view.VideoUrl || view.videoUrl || view.StreamUrl || view.streamUrl || '';
       }
       
       if (!imgUrl) imgUrl = c.Url || c.url || '';
-      if (!videoUrl) videoUrl = c.VideoUrl || c.videoUrl || '';
+      if (!videoUrl) videoUrl = c.VideoUrl || c.videoUrl || c.StreamUrl || c.streamUrl || c.HlsUrl || c.hlsUrl || c.VideoStreamUrl || '';
       if (!imgUrl && videoUrl) imgUrl = videoUrl;
+      
+      // Also check for HLS/streaming endpoints common in 511 APIs
+      const streamEndpoint = videoUrl || c.liveStreamUrl || c.LiveStreamUrl || '';
       
       return {
         id: `${stateCode.toLowerCase()}-${camId}`,
@@ -108,7 +111,7 @@ async function fetch511Cameras(
         imageUrl: imgUrl,
         source: `511${stateCode}`,
         refreshRate,
-        streamUrl: validStreamUrl(videoUrl),
+        streamUrl: validStreamUrl(streamEndpoint) || validStreamUrl(videoUrl),
       };
     })
     .filter((c: CameraResult) => c.imageUrl);
