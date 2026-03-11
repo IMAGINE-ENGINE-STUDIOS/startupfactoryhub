@@ -40,7 +40,9 @@ function boundsOverlap(b: Bounds, r: { south: number; north: number; west: numbe
 
 function validStreamUrl(url?: string): string | undefined {
   if (!url) return undefined;
-  if (/\.(mjpg|mjpeg)(\?|$)/i.test(url) || /mjpeg|mjpg/i.test(url)) return url;
+  // Accept MJPEG, HLS (.m3u8), MP4, and generic stream URLs
+  if (/\.(mjpg|mjpeg|m3u8|mp4)(\?|$)/i.test(url)) return url;
+  if (/mjpeg|mjpg|stream|video|hls|playlist/i.test(url)) return url;
   return undefined;
 }
 
