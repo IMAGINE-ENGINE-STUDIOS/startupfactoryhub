@@ -752,11 +752,12 @@ interface StudioSessionRowProps {
   onStop: () => void;
   onPlay: () => void;
   onRemove: () => void;
+  onExpand: () => void;
   formatDuration: (start: number, end?: number | null) => string;
   formatTime: (ts: number) => string;
 }
 
-const StudioSessionRow = ({ session, isActive, onStop, onPlay, onRemove, formatDuration, formatTime }: StudioSessionRowProps) => {
+const StudioSessionRow = ({ session, isActive, onStop, onPlay, onRemove, onExpand, formatDuration, formatTime }: StudioSessionRowProps) => {
   const latestSnap = session.snapshots[session.snapshots.length - 1];
   const sizeDisplay = session.totalSizeBytes ? formatBytes(session.totalSizeBytes) : null;
 
