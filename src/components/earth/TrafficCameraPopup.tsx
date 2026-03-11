@@ -257,6 +257,12 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
                   onToggleRecording={timeline.toggleRecording}
                   onClearHistory={timeline.clearHistory}
                 />
+                <CameraHistoryControls
+                  onLoadRange={timeline.loadHistoryRange}
+                  getHistoryStats={timeline.getHistoryStats}
+                  isLoading={timeline.isLoadingHistory}
+                  snapshotCount={timeline.snapshotCount}
+                />
               </div>
             )}
           </>
