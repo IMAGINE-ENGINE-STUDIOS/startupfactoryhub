@@ -252,17 +252,19 @@ export const CameraVideoPlayer = ({ snapshots, onClose, fullscreen = false }: Ca
         </div>
       </div>
 
-      {/* Close button */}
-      <div className="px-3 pb-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClose}
-          className="w-full h-7 text-[10px] text-white/50 hover:text-white hover:bg-white/10 border border-white/10"
-        >
-          Back to Live Feed
-        </Button>
-      </div>
+      {/* Close button - hide in fullscreen since parent handles it */}
+      {!fullscreen && (
+        <div className="px-3 pb-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onClose}
+            className="w-full h-7 text-[10px] text-white/50 hover:text-white hover:bg-white/10 border border-white/10"
+          >
+            Back to Live Feed
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
