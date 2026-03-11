@@ -2987,11 +2987,6 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         activeHasTimelineOption={activeHasTimelineOption}
       />
 
-      {/* Recording Sessions Widget */}
-      <RecordingSessionsWidget onPlaySession={(session) => {
-        setSelectedCamera(null);
-        setPlaybackSession(session);
-      }} />
 
       {/* Session Playback Panel */}
       {playbackSession && (
