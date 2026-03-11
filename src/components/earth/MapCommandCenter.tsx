@@ -541,6 +541,7 @@ export const MapCommandCenter = ({
                               onPlaySession(session);
                             }}
                             onRemove={() => removeSession(session.id)}
+                            onExpand={() => { setExpandedSession(session); setExpandedSnapIndex(Math.max(0, session.snapshots.length - 1)); }}
                             formatDuration={formatDuration}
                             formatTime={formatTime}
                           />
