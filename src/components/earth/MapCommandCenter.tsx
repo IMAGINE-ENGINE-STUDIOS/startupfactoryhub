@@ -1,6 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Search, ChevronUp, ChevronDown, Camera, Square, Play, Trash2, Gift, Film, X, MapPin, Building, Globe2, Sparkles } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { Search, ChevronUp, ChevronDown, Camera, Square, Play, Trash2, Gift, Film, X, MapPin, Building, Globe2, Sparkles, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,6 +9,8 @@ import { cn } from '@/lib/utils';
 import { useRecordingSessions, RecordingSession } from '@/stores/useRecordingSessions';
 import { Resource } from '@/hooks/useResources';
 import mapboxgl from 'mapbox-gl';
+import geniusAILogo from '@/assets/genius-ai-logo.png';
+import ReactMarkdown from 'react-markdown';
 
 interface MapCommandCenterProps {
   map: mapboxgl.Map | null;
