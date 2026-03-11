@@ -40,7 +40,9 @@ function boundsOverlap(b: Bounds, r: { south: number; north: number; west: numbe
 
 function validStreamUrl(url?: string): string | undefined {
   if (!url) return undefined;
-  if (/\.(mjpg|mjpeg)(\?|$)/i.test(url) || /mjpeg|mjpg/i.test(url)) return url;
+  // Accept MJPEG, HLS (.m3u8), MP4, and generic stream URLs
+  if (/\.(mjpg|mjpeg|m3u8|mp4)(\?|$)/i.test(url)) return url;
+  if (/mjpeg|mjpg|stream|video|hls|playlist/i.test(url)) return url;
   return undefined;
 }
 
@@ -92,12 +94,15 @@ async function fetch511Cameras(
       if (Array.isArray(c.Views) && c.Views.length > 0) {
         const view = c.Views.find((v: any) => v.Status === 'Enabled') || c.Views[0];
         imgUrl = view.Url || view.url || '';
-        videoUrl = view.VideoUrl || view.videoUrl || '';
+        videoUrl = view.VideoUrl || view.videoUrl || view.StreamUrl || view.streamUrl || '';
       }
       
       if (!imgUrl) imgUrl = c.Url || c.url || '';
-      if (!videoUrl) videoUrl = c.VideoUrl || c.videoUrl || '';
+      if (!videoUrl) videoUrl = c.VideoUrl || c.videoUrl || c.StreamUrl || c.streamUrl || c.HlsUrl || c.hlsUrl || c.VideoStreamUrl || '';
       if (!imgUrl && videoUrl) imgUrl = videoUrl;
+      
+      // Also check for HLS/streaming endpoints common in 511 APIs
+      const streamEndpoint = videoUrl || c.liveStreamUrl || c.LiveStreamUrl || '';
       
       return {
         id: `${stateCode.toLowerCase()}-${camId}`,
@@ -106,7 +111,7 @@ async function fetch511Cameras(
         imageUrl: imgUrl,
         source: `511${stateCode}`,
         refreshRate,
-        streamUrl: validStreamUrl(videoUrl),
+        streamUrl: validStreamUrl(streamEndpoint) || validStreamUrl(videoUrl),
       };
     })
     .filter((c: CameraResult) => c.imageUrl);
@@ -203,6 +208,7 @@ async function fetchCaltransCameras(bounds: Bounds): Promise<CameraResult[]> {
       })
       .map((f: any) => {
         const a = f.attributes;
+        const streamingUrl = a.streamingVideoURL || a.StreamingVideoURL || '';
         return {
           id: `ca-${a.district || 'x'}-${a.OBJECTID || (a.currentImageURL || '').split('/').pop() || Math.random().toString(36).slice(2)}`,
           name: a.locationName || `CA D${a.district} Camera`,
@@ -211,7 +217,7 @@ async function fetchCaltransCameras(bounds: Bounds): Promise<CameraResult[]> {
           imageUrl: a.currentImageURL || '',
           source: `Caltrans D${a.district || '?'}`,
           refreshRate: 5,
-          streamUrl: validStreamUrl(a.streamingVideoURL),
+          streamUrl: validStreamUrl(streamingUrl),
         };
       })
       .filter((c: CameraResult) => c.imageUrl);
