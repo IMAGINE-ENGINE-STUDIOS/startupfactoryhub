@@ -762,10 +762,13 @@ const StudioSessionRow = ({ session, isActive, onStop, onPlay, onRemove, onExpan
   const sizeDisplay = session.totalSizeBytes ? formatBytes(session.totalSizeBytes) : null;
 
   return (
-    <div className={cn(
-      "rounded-xl p-2.5 transition-colors flex items-center gap-3",
-      isActive ? "bg-red-500/10 border border-red-500/20" : "bg-white/5 border border-white/10 hover:bg-white/10"
-    )}>
+    <div
+      className={cn(
+        "rounded-xl p-2.5 transition-colors flex items-center gap-3 cursor-pointer",
+        isActive ? "bg-red-500/10 border border-red-500/20" : "bg-white/5 border border-white/10 hover:bg-white/10"
+      )}
+      onClick={onExpand}
+    >
       {/* Thumbnail */}
       <div className="w-16 h-10 rounded-lg overflow-hidden bg-black/40 flex-shrink-0 relative">
         {latestSnap ? (
