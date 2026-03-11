@@ -2521,6 +2521,7 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       <MapCommandCenter
         map={map.current}
         perks={resources?.filter(r => r.resource_type === 'perk') || []}
+        allResources={resources || []}
         onPlaySession={(session) => {
           setSelectedCamera(null);
           setPlaybackSession(session);
