@@ -18,12 +18,17 @@ interface TrafficCameraPopupProps {
 
 function isStreamUrl(url?: string): boolean {
   if (!url) return false;
-  return /\.(mjpg|mjpeg|mp4)(\?|$)/i.test(url) || /mjpeg|mjpg|stream/i.test(url);
+  return /\.(mjpg|mjpeg|mp4|m3u8)(\?|$)/i.test(url) || /mjpeg|mjpg|stream|video|hls|playlist/i.test(url);
 }
 
 function isMjpegStream(url?: string): boolean {
   if (!url) return false;
   return /\.(mjpg|mjpeg)(\?|$)/i.test(url) || /mjpeg|mjpg/i.test(url);
+}
+
+function isHlsStream(url?: string): boolean {
+  if (!url) return false;
+  return /\.m3u8(\?|$)/i.test(url) || /hls|playlist/i.test(url);
 }
 
 // Camera popup with timeline/video modes
