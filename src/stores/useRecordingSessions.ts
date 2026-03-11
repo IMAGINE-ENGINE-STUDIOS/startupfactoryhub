@@ -102,6 +102,7 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
         .from('camera_snapshots' as any)
         .select('*')
         .eq('camera_id', session.cameraId)
+        .eq('user_id', (await supabase.auth.getUser()).data.user?.id)
         .gte('captured_at', new Date(session.startedAt).toISOString())
         .lte('captured_at', session.stoppedAt ? new Date(session.stoppedAt).toISOString() : new Date().toISOString())
         .order('captured_at', { ascending: true })
