@@ -553,7 +553,7 @@ export const MapCommandCenter = ({
                               onPlaySession(session);
                             }}
                             onRemove={() => removeSession(session.id)}
-                            onExpand={() => { setExpandedSession(session); setExpandedSnapIndex(Math.max(0, session.snapshots.length - 1)); }}
+                            onExpand={() => { setExpandedSession(session); setExpandedSnapIndex(Math.max(0, session.snapshots.length - 1)); if (session.dbId && session.snapshots.length === 0) loadSessionSnapshots(session.id); }}
                             formatDuration={formatDuration}
                             formatTime={formatTime}
                           />
