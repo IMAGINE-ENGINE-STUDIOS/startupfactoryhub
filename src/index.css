@@ -395,3 +395,9 @@ All colors MUST be HSL.
     break-after: page;
   }
 }
+
+/* Hide Mapbox logo and attribution */
+.mapboxgl-ctrl-logo,
+.mapboxgl-ctrl-attrib {
+  display: none !important;
+}
