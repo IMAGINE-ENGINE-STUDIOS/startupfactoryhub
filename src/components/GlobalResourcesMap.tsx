@@ -109,13 +109,18 @@ import { useRealtimeVehicles, TransitVehicle } from '@/hooks/useRealtimeVehicles
 import { useTrafficSensors, TrafficSensor } from '@/hooks/useTrafficSensors';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
 
-type MapStyleType = 'default' | 'satellite' | 'satelliteStreets';
+type MapStyleType = 'default' | 'satellite' | 'satelliteStreets' | 'standard';
 
 const MAP_STYLES: Record<MapStyleType, { url: string; label: string; icon: any }> = {
   default: { 
     url: 'mapbox://styles/imagineengine/cmhfkp1ie001d01qi2hyg82lp', 
     label: 'Globe', 
     icon: Globe2 
+  },
+  standard: {
+    url: 'mapbox://styles/mapbox/standard',
+    label: '3D Landmarks',
+    icon: Building
   },
   satellite: { 
     url: 'mapbox://styles/mapbox/satellite-v9', 
