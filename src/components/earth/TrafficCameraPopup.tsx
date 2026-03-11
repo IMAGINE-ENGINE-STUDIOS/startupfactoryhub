@@ -49,12 +49,13 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     setMode('live');
   }, [camera.id]);
 
-  // Timeline hook - records snapshots
+  // Timeline hook - records snapshots with persistence
   const timeline = useCameraTimeline({
     imageUrl: camera.imageUrl,
     proxyUrl,
     refreshRate,
     isStream: hasStream,
+    cameraId: camera.id,
   });
 
   // Auto-refresh for live view
