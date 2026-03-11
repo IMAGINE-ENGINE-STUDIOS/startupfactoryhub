@@ -15,6 +15,7 @@ import { Resource } from '@/hooks/useResources';
 import mapboxgl from 'mapbox-gl';
 import geniusAILogo from '@/assets/genius-ai-logo.png';
 import ReactMarkdown from 'react-markdown';
+import { CameraVideoPlayer } from './CameraVideoPlayer';
 
 interface MapCommandCenterProps {
   map: mapboxgl.Map | null;

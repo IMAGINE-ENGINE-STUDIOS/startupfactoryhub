@@ -7,6 +7,7 @@ import { Play, Pause, SkipBack, SkipForward, FastForward, Rewind, Calendar } fro
 interface CameraVideoPlayerProps {
   snapshots: CameraSnapshot[];
   onClose: () => void;
+  fullscreen?: boolean;
 }
 
 const SPEED_OPTIONS = [0.25, 0.5, 1, 2, 4, 8, 16];
