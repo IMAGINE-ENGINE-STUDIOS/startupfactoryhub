@@ -102,6 +102,9 @@ import { AISVesselDetailCard } from '@/components/hubs/AISVesselDetailCard';
 import { AISControlPanel } from '@/components/hubs/AISControlPanel';
 import { useTrafficCameras, TrafficCamera } from '@/hooks/useTrafficCameras';
 import { TrafficCameraPopup } from '@/components/earth/TrafficCameraPopup';
+import { RecordingSessionsWidget } from '@/components/earth/RecordingSessionsWidget';
+import { SessionPlaybackPanel } from '@/components/earth/SessionPlaybackPanel';
+import { useRecordingSessions, RecordingSession } from '@/stores/useRecordingSessions';
 import { useRealtimeVehicles, TransitVehicle } from '@/hooks/useRealtimeVehicles';
 import { useTrafficSensors, TrafficSensor } from '@/hooks/useTrafficSensors';
 mapboxgl.accessToken = 'pk.eyJ1IjoiaW1hZ2luZWVuZ2luZSIsImEiOiJjbWhlYWo5bTgwYzkyMmpxMno3ODdoZGt6In0.B66urpifKwsS7bltMqzaBQ';
@@ -1543,6 +1546,9 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
       sensorMarkers.current = [];
     };
   }, [trafficSensors, showTrafficSensors, mapReady]);
+
+  // Recording sessions for cameras
+  const [playbackSession, setPlaybackSession] = useState<RecordingSession | null>(null);
 
 
   // Add event markers to map
@@ -3063,8 +3069,22 @@ const { data: resources, isLoading, refetch: refetchResources } = useResources({
         activeHasTimelineOption={activeHasTimelineOption}
       />
 
+      {/* Recording Sessions Widget */}
+      <RecordingSessionsWidget onPlaySession={(session) => {
+        setSelectedCamera(null);
+        setPlaybackSession(session);
+      }} />
+
+      {/* Session Playback Panel */}
+      {playbackSession && (
+        <SessionPlaybackPanel
+          session={playbackSession}
+          onClose={() => setPlaybackSession(null)}
+        />
+      )}
+
       {/* CCTV Camera Popup */}
-      {selectedCamera && (
+      {selectedCamera && !playbackSession && (
         <TrafficCameraPopup
           camera={selectedCamera}
           onClose={() => setSelectedCamera(null)}

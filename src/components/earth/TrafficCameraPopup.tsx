@@ -1,4 +1,4 @@
-import { X, RefreshCw, Camera, ExternalLink, MapPin, Clock, Maximize2, Minimize2, Radio, Film, History } from 'lucide-react';
+import { X, RefreshCw, Camera, ExternalLink, MapPin, Clock, Maximize2, Minimize2, Radio, Film, History, Circle, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrafficCamera } from '@/hooks/useTrafficCameras';
@@ -9,6 +9,7 @@ import { useCameraTimeline } from '@/hooks/useCameraTimeline';
 import { CameraTimelineScrubber } from './CameraTimelineScrubber';
 import { CameraVideoPlayer } from './CameraVideoPlayer';
 import { CameraHistoryControls } from './CameraHistoryControls';
+import { useRecordingSessions } from '@/stores/useRecordingSessions';
 
 interface TrafficCameraPopupProps {
   camera: TrafficCamera;
@@ -41,6 +42,11 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
   const isMjpeg = isMjpegStream(camera.streamUrl);
   const refreshRate = Math.max(camera.refreshRate || 10, 1);
 
+  // Recording sessions store
+  const { startSession, stopSession, hasActiveSessionForCamera, getActiveSessionForCamera } = useRecordingSessions();
+  const activeSession = getActiveSessionForCamera(camera.id);
+  const isSessionRecording = hasActiveSessionForCamera(camera.id);
+
   // Build proxied image URL
   useEffect(() => {
     const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || 'zqiihhmdsdgwdcwmryym';
@@ -59,6 +65,20 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
     isStream: hasStream,
     cameraId: camera.id,
   });
+
+  const handleToggleSession = () => {
+    if (isSessionRecording && activeSession) {
+      stopSession(activeSession.id);
+    } else if (proxyUrl) {
+      startSession({
+        cameraId: camera.id,
+        cameraName: camera.name,
+        proxyUrl,
+        imageUrl: camera.imageUrl,
+        refreshRate,
+      });
+    }
+  };
 
   // Auto-refresh for live view
   useEffect(() => {
@@ -143,6 +163,21 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
+            {/* Record session toggle */}
+            {!hasStream && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleToggleSession}
+                className={cn(
+                  "h-7 w-7 rounded-lg",
+                  isSessionRecording ? 'text-red-400 bg-red-500/20 hover:bg-red-500/30' : 'text-white/60 hover:text-white hover:bg-white/10'
+                )}
+                title={isSessionRecording ? "Stop recording session" : "Start recording session (continues when you leave)"}
+              >
+                {isSessionRecording ? <Square className="w-3 h-3 fill-current" /> : <Circle className="w-3.5 h-3.5" />}
+              </Button>
+            )}
             {/* Video mode toggle */}
             {!hasStream && (
               <Button
@@ -236,10 +271,19 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
                   <span className="text-[10px] text-white/70 font-mono">{refreshRate}s refresh</span>
                 </div>
               )}
-              {/* Snapshot counter */}
+              {/* Snapshot counter + session indicator */}
               {!hasStream && (
-                <div className="absolute bottom-3 right-3 px-2 py-1 rounded-full bg-black/60 backdrop-blur">
-                  <span className="text-[10px] text-white/50 font-mono">{timeline.snapshotCount} frames</span>
+                <div className="absolute bottom-3 right-3 flex items-center gap-1.5">
+                  {isSessionRecording && (
+                    <div className="px-2 py-1 rounded-full bg-red-500/80 backdrop-blur flex items-center gap-1">
+                      <div className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
+                      <span className="text-[10px] text-white font-bold">REC</span>
+                      <span className="text-[9px] text-white/70 font-mono">{activeSession?.snapshots.length || 0}</span>
+                    </div>
+                  )}
+                  <div className="px-2 py-1 rounded-full bg-black/60 backdrop-blur">
+                    <span className="text-[10px] text-white/50 font-mono">{timeline.snapshotCount} frames</span>
+                  </div>
                 </div>
               )}
             </div>
