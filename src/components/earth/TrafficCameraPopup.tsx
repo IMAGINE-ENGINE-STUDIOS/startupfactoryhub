@@ -163,6 +163,21 @@ export const TrafficCameraPopup = ({ camera, onClose }: TrafficCameraPopupProps)
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
+            {/* Record session toggle */}
+            {!hasStream && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleToggleSession}
+                className={cn(
+                  "h-7 w-7 rounded-lg",
+                  isSessionRecording ? 'text-red-400 bg-red-500/20 hover:bg-red-500/30' : 'text-white/60 hover:text-white hover:bg-white/10'
+                )}
+                title={isSessionRecording ? "Stop recording session" : "Start recording session (continues when you leave)"}
+              >
+                {isSessionRecording ? <Square className="w-3 h-3 fill-current" /> : <Circle className="w-3.5 h-3.5" />}
+              </Button>
+            )}
             {/* Video mode toggle */}
             {!hasStream && (
               <Button
