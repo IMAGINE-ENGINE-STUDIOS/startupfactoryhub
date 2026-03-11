@@ -37,6 +37,10 @@ export const useCameraTimeline = ({
   const persistQueueRef = useRef<CameraSnapshot[]>([]);
   const persistingRef = useRef(false);
   const persistCountRef = useRef(0);
+  const cameraIdRef = useRef(cameraId);
+
+  // Keep cameraIdRef in sync
+  cameraIdRef.current = cameraId;
 
   // Persist a snapshot to Supabase Storage (runs in background)
   const persistSnapshot = useCallback(async (snap: CameraSnapshot) => {
