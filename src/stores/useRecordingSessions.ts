@@ -182,6 +182,32 @@ export const useRecordingSessions = create<RecordingSessionsState>((set, get) =>
                 s.id === id ? { ...s, dbId: (data as any).id, storagePath: (data as any).storage_path } : s
               ),
             }));
+
+            // Persist seed snapshots to Storage in background
+            const dbId = (data as any).id;
+            for (const snap of seedSnapshots) {
+              if (!snap.blob) continue;
+              const date = new Date(snap.timestamp);
+              const dateStr = date.toISOString().split('T')[0];
+              const storagePath = `${cameraId}/${dateStr}/${snap.timestamp}.jpg`;
+              const snapBlob = snap.blob;
+              const snapSize = snapBlob.size;
+
+              supabase.storage
+                .from('camera-snapshots')
+                .upload(storagePath, snapBlob, { contentType: 'image/jpeg', upsert: true })
+                .then(({ error: uploadErr }) => {
+                  if (!uploadErr) {
+                    supabase.from('camera_snapshots' as any).insert({
+                      camera_id: cameraId,
+                      user_id: userId,
+                      captured_at: date.toISOString(),
+                      storage_path: storagePath,
+                      file_size: snapSize,
+                    } as any).then(() => {});
+                  }
+                });
+            }
           }
         });
     }
