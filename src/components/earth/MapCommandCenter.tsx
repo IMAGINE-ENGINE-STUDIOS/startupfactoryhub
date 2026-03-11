@@ -492,10 +492,10 @@ export const MapCommandCenter = ({
                       <div className="rounded-xl p-2.5 bg-white/5 border border-white/10 space-y-1.5">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-1.5">
-                            <HardDrive className="w-3.5 h-3.5 text-blue-400" />
-                            <span className="text-[10px] text-white/60 font-medium">Storage</span>
+                            <HardDrive className="w-4 h-4 text-blue-400" />
+                            <span className="text-xs text-white/70 font-medium">Storage</span>
                           </div>
-                          <span className="text-[10px] text-white/50">
+                          <span className="text-xs text-white/60">
                             {formatBytes(usage.totalBytesUsed)} / {formatBytes(usage.planLimitBytes)}
                           </span>
                         </div>
